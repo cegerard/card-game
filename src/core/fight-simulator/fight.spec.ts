@@ -1,7 +1,6 @@
 import { Fight } from './fight';
 import { FightingCard } from '../cards/fighting-card';
 import { Player } from '../player';
-import exp from 'constants';
 import { DamageReport } from '../card-attack/@types/damage-report';
 import { FightResult } from './@types/fight-result';
 
