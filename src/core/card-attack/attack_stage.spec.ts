@@ -6,14 +6,14 @@ import { AttackResult } from './@types/attack-result';
 describe('AttackStage', () => {
   describe('computeNextAttack', () => {
     describe('without critical hit', () => {
-      const attacker = new FightingCard({
+      const attacker = new FightingCard('Axe', {
         damage: 10,
         defense: 0,
         health: 100,
         speed: 1,
         criticalChance: 0,
       });
-      const defender = new FightingCard({
+      const defender = new FightingCard('Sword', {
         damage: 0,
         defense: 0,
         health: 100,
@@ -34,14 +34,14 @@ describe('AttackStage', () => {
     });
 
     describe('with a critical hit', () => {
-      const attacker = new FightingCard({
+      const attacker = new FightingCard('Axe', {
         damage: 10,
         defense: 0,
         health: 100,
         speed: 1,
         criticalChance: 1,
       });
-      const defender = new FightingCard({
+      const defender = new FightingCard('Sword', {
         damage: 0,
         defense: 0,
         health: 100,
@@ -62,14 +62,14 @@ describe('AttackStage', () => {
     });
 
     describe('when the defender is killed', () => {
-      const attacker = new FightingCard({
+      const attacker = new FightingCard('Axe', {
         damage: 100,
         defense: 0,
         health: 100,
         speed: 1,
         criticalChance: 0,
       });
-      const defender = new FightingCard({
+      const defender = new FightingCard('Sword', {
         damage: 0,
         defense: 0,
         health: 50,

@@ -28,6 +28,7 @@ describe('AppController (e2e)', () => {
       player1: {
         deck: [
           {
+            name: 'Axe',
             damage: 10,
             defense: 15,
             health: 100,
@@ -39,6 +40,7 @@ describe('AppController (e2e)', () => {
       player2: {
         deck: [
           {
+            name: 'Sword',
             damage: 11,
             defense: 14,
             health: 100,

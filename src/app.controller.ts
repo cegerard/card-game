@@ -17,10 +17,10 @@ export class AppController {
   @HttpCode(200)
   startFight(@Body() fightData: FightDataDto): FightResult {
     const player1Deck = fightData.player1.deck.map(
-      (cardData) => new FightingCard(cardData),
+      (cardData) => new FightingCard(cardData.name, cardData),
     );
     const player2Deck = fightData.player2.deck.map(
-      (cardData) => new FightingCard(cardData),
+      (cardData) => new FightingCard(cardData.name, cardData),
     );
     return this.appService.simulateFight(
       { deck: player1Deck },

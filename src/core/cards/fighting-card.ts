@@ -1,17 +1,22 @@
 export class FightingCard {
+  private readonly name: string;
   private damage: number;
   private defense: number;
   private health: number;
   private speed: number;
   private criticalChance: number;
 
-  constructor(stats: {
-    damage: number;
-    defense: number;
-    health: number;
-    speed: number;
-    criticalChance: number;
-  }) {
+  constructor(
+    name: string,
+    stats: {
+      damage: number;
+      defense: number;
+      health: number;
+      speed: number;
+      criticalChance: number;
+    },
+  ) {
+    this.name = name;
     this.damage = stats.damage;
     this.defense = stats.defense;
     this.health = stats.health;
@@ -23,7 +28,10 @@ export class FightingCard {
     return this.health;
   }
 
-  public attack(defender: FightingCard): { damage: number; isCritical: boolean } {
+  public attack(defender: FightingCard): {
+    damage: number;
+    isCritical: boolean;
+  } {
     const isCritical = Math.random() < this.criticalChance;
     const damageMultiplier = isCritical ? 2 : 1;
     const damage = defender.collectsDamages(this.damage * damageMultiplier);
