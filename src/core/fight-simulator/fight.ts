@@ -87,12 +87,12 @@ export class Fight {
   }
 
   private computeWinner(steps: {}): void {
-    let winner: Player | null = null;
+    let winner: string | null = null;
 
     if (this.player1.status() > this.player2.status()) {
-      winner = this.player1;
+      winner = this.player1.name;
     } else if (this.player2.status() > this.player1.status()) {
-      winner = this.player2;
+      winner = this.player2.name;
     }
 
     steps[++this.stepCounter] = { kind: 'fight_end', winner };

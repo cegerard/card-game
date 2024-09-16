@@ -36,7 +36,7 @@ describe('fight', () => {
               isCritical: false,
             },
             2: { kind: 'status_change', card: card2, status: 'dead' },
-            3: { kind: 'fight_end', winner: player1 },
+            3: { kind: 'fight_end', winner: player1.name },
           });
         });
       });
@@ -70,7 +70,7 @@ describe('fight', () => {
               isCritical: false,
             },
             2: { kind: 'status_change', card: card1, status: 'dead' },
-            3: { kind: 'fight_end', winner: player2 },
+            3: { kind: 'fight_end', winner: player2.name },
           });
         });
       });
@@ -412,7 +412,7 @@ describe('fight', () => {
               isCritical: false,
             },
             30: { kind: 'status_change', card: card10, status: 'dead' },
-            31: { kind: 'fight_end', winner: player1 },
+            31: { kind: 'fight_end', winner: player1.name },
           });
         });
       });
