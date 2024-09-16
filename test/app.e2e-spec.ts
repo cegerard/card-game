@@ -26,6 +26,7 @@ describe('AppController (e2e)', () => {
   it('/fight (POST)', () => {
     const fightData = {
       player1: {
+        name: 'Player 1',
         deck: [
           {
             name: 'Axe',
@@ -38,6 +39,7 @@ describe('AppController (e2e)', () => {
         ],
       },
       player2: {
+        name: 'Player 2',
         deck: [
           {
             name: 'Sword',

@@ -35,6 +35,9 @@ class PlayerDto {
   @ValidateNested()
   @Type(() => FightingCardDto)
   deck: FightingCardDto[];
+
+  @IsString()
+  name: string;
 }
 
 export class FightDataDto {

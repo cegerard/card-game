@@ -11,12 +11,12 @@ export class AppService {
   }
 
   simulateFight(
-    player1Data: { deck: FightingCard[] },
-    player2Data: { deck: FightingCard[] },
+    player1Data: { name: string; deck: FightingCard[] },
+    player2Data: { name: string; deck: FightingCard[] },
   ): FightResult {
     // Create Player instances from the provided data
-    const player1 = new Player(player1Data.deck);
-    const player2 = new Player(player2Data.deck);
+    const player1 = new Player(player1Data.name, player1Data.deck);
+    const player2 = new Player(player2Data.name, player2Data.deck);
 
     // Create a new Fight instance
     const fight = new Fight(player1, player2);

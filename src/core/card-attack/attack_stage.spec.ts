@@ -20,8 +20,8 @@ describe('AttackStage', () => {
         speed: 0,
         criticalChance: 0,
       });
-      const player1 = new Player([attacker]);
-      const player2 = new Player([defender]);
+      const player1 = new Player('Player 1', [attacker]);
+      const player2 = new Player('Player 2', [defender]);
       const attackStage = new AttackStage(player1, player2);
 
       it('should return the damage dealt by the attacker', () => {
@@ -48,8 +48,8 @@ describe('AttackStage', () => {
         speed: 0,
         criticalChance: 0,
       });
-      const player1 = new Player([attacker]);
-      const player2 = new Player([defender]);
+      const player1 = new Player('Player 1', [attacker]);
+      const player2 = new Player('Player 2', [defender]);
       const attackStage = new AttackStage(player1, player2);
 
       it('should return the damage dealt by the attacker', () => {
@@ -76,8 +76,8 @@ describe('AttackStage', () => {
         speed: 0,
         criticalChance: 0,
       });
-      const player1 = new Player([attacker]);
-      const player2 = new Player([defender]);
+      const player1 = new Player('Player 1', [attacker]);
+      const player2 = new Player('Player 2', [defender]);
       const attackStage = new AttackStage(player1, player2);
 
       it('should return the damage dealt and the status change', () => {

@@ -22,8 +22,8 @@ describe('fight', () => {
           speed: 1,
           criticalChance: 0,
         });
-        const player1 = new Player([card1]);
-        const player2 = new Player([card2]);
+        const player1 = new Player('Player 1', [card1]); // Pass name
+        const player2 = new Player('Player 2', [card2]); // Pass name
         const fight = new Fight(player1, player2);
 
         it('should return the fight steps', () => {
@@ -56,8 +56,8 @@ describe('fight', () => {
           speed: 60,
           criticalChance: 0,
         });
-        const player1 = new Player([card1]);
-        const player2 = new Player([card2]);
+        const player1 = new Player('Player 1', [card1]); // Pass name
+        const player2 = new Player('Player 2', [card2]); // Pass name
         const fight = new Fight(player1, player2);
 
         it('should return the fight steps', () => {
@@ -91,8 +91,8 @@ describe('fight', () => {
           speed: 50,
           criticalChance: 0,
         });
-        const player1 = new Player([card1]);
-        const player2 = new Player([card2]);
+        const player1 = new Player('Player 1', [card1]); // Pass name
+        const player2 = new Player('Player 2', [card2]); // Pass name
         const fight = new Fight(player1, player2);
 
         it('should return the fight steps', () => {
@@ -134,8 +134,8 @@ describe('fight', () => {
           speed: 25,
           criticalChance: 0,
         });
-        const player1 = new Player([card1]);
-        const player2 = new Player([card2]);
+        const player1 = new Player('Player 1', [card1]); // Pass name
+        const player2 = new Player('Player 2', [card2]); // Pass name
         const fight = new Fight(player1, player2);
         let fightResult: FightResult;
 
@@ -237,8 +237,20 @@ describe('fight', () => {
           speed: 70,
           criticalChance: 0,
         });
-        const player1 = new Player([card1, card2, card3, card4, card5]);
-        const player2 = new Player([card6, card7, card8, card9, card10]);
+        const player1 = new Player('Player 1', [
+          card1,
+          card2,
+          card3,
+          card4,
+          card5,
+        ]); // Pass name
+        const player2 = new Player('Player 2', [
+          card6,
+          card7,
+          card8,
+          card9,
+          card10,
+        ]); // Pass name
         const fight = new Fight(player1, player2);
 
         it('should return the fight steps', () => {

@@ -3,8 +3,10 @@ import { FightingCard } from './cards/fighting-card';
 export class Player {
   private cards: FightingCard[];
   private alreadyPlayed: FightingCard[] = [];
+  public name: string;
 
-  constructor(cards: FightingCard[]) {
+  constructor(name: string, cards: FightingCard[]) {
+    this.name = name;
     this.cards = cards;
   }
 

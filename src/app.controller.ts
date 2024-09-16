@@ -23,8 +23,8 @@ export class AppController {
       (cardData) => new FightingCard(cardData.name, cardData),
     );
     return this.appService.simulateFight(
-      { deck: player1Deck },
-      { deck: player2Deck },
+      { name: fightData.player1.name, deck: player1Deck },
+      { name: fightData.player2.name, deck: player2Deck },
     );
   }
 }
