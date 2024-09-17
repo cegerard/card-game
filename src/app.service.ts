@@ -6,10 +6,6 @@ import { FightingCard } from './core/cards/fighting-card';
 
 @Injectable()
 export class AppService {
-  getHello(): string {
-    return 'Hello World!';
-  }
-
   simulateFight(
     player1Data: { name: string; deck: FightingCard[] },
     player2Data: { name: string; deck: FightingCard[] },

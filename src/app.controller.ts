@@ -8,11 +8,6 @@ import { FightingCard } from './core/cards/fighting-card';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
-  }
-
   @Post('fight')
   @HttpCode(200)
   startFight(@Body() fightData: FightDataDto): FightResult {
