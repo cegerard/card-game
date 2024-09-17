@@ -1,7 +1,6 @@
 import { AttackStage } from './attack_stage';
 import { Player } from '../player';
 import { FightingCard } from '../cards/fighting-card';
-import { AttackResult } from './@types/attack-result';
 
 describe('AttackStage', () => {
   describe('computeNextAttack', () => {
