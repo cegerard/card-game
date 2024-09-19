@@ -1,5 +1,5 @@
 export class FightingCard {
-  private readonly name: string;
+  public readonly name: string;
   private damage: number;
   private defense: number;
   private health: number;
@@ -26,6 +26,10 @@ export class FightingCard {
 
   public get actualHealth(): number {
     return this.health;
+  }
+
+  public get actualSpeed(): number {
+    return this.speed;
   }
 
   public attack(defender: FightingCard): {
