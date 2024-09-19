@@ -1,22 +1,24 @@
 import { FightResult } from './@types/fight-result';
 import { AttackStage } from '../card-attack/attack_stage';
 import { Player } from '../player';
-import { FightingCard } from '../cards/fighting-card';
+import { CardSelector } from './card-selectors/card-selector';
+import { PlayerByPlayerCardSelector } from './card-selectors/player-by-player';
 
 export class Fight {
   private player1: Player;
   private player2: Player;
   private stepCounter = 0;
   private loopCounter = 0;
-  private lastSelectedPlayer: Player | null = null;
 
   private attackManager: AttackStage;
+  private cardSelector: CardSelector;
 
   constructor(player1: Player, player2: Player) {
     this.player1 = player1;
     this.player2 = player2;
 
     this.attackManager = new AttackStage(player1, player2);
+    this.cardSelector = new PlayerByPlayerCardSelector(player1, player2);
   }
 
   public start(): FightResult {
@@ -46,44 +48,7 @@ export class Fight {
   }
 
   private nextIteration() {
-    return this.attackManager.computeNextAttack(this.nextCardToAttack());
-  }
-
-  private nextCardToAttack(): FightingCard[] {
-    if (this.lastSelectedPlayer == this.player1) {
-      const player2NextCard = this.player2.nextCardToPlay();
-      return [this.selectPlayerCard(this.player2, player2NextCard)];
-    }
-
-    if (this.lastSelectedPlayer == this.player2) {
-      const player1NextCard = this.player1.nextCardToPlay();
-      return [this.selectPlayerCard(this.player1, player1NextCard)];
-    }
-
-    const player1NextCard = this.player1.nextCardToPlay();
-    const player2NextCard = this.player2.nextCardToPlay();
-
-    if (player1NextCard.fasterThan(player2NextCard)) {
-      return [this.selectPlayerCard(this.player1, player1NextCard)];
-    }
-
-    if (player2NextCard.fasterThan(player1NextCard)) {
-      return [this.selectPlayerCard(this.player2, player2NextCard)];
-    }
-
-    this.player1.updateAlreadyPlayedCard(player1NextCard);
-    this.player2.updateAlreadyPlayedCard(player2NextCard);
-    return [player1NextCard, player2NextCard];
-  }
-
-  private selectPlayerCard(
-    player: Player,
-    nextCard: FightingCard,
-  ): FightingCard {
-    this.lastSelectedPlayer = player;
-    player.updateAlreadyPlayedCard(nextCard);
-
-    return nextCard;
+    return this.attackManager.computeNextAttack(this.cardSelector.nextCards());
   }
 
   private computeWinner(steps: {}): void {
