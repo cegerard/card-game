@@ -23,8 +23,8 @@ describe('fight', () => {
           speed: 1,
           criticalChance: 0,
         });
-        const player1 = new Player('Player 1', [card1]); // Pass name
-        const player2 = new Player('Player 2', [card2]); // Pass name
+        const player1 = new Player('Player 1', [card1]);
+        const player2 = new Player('Player 2', [card2]);
         const fight = new Fight(
           player1,
           player2,

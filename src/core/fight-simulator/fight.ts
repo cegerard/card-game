@@ -2,7 +2,7 @@ import { FightResult } from './@types/fight-result';
 import { AttackStage } from '../card-attack/attack_stage';
 import { Player } from '../player';
 import { CardSelector } from './card-selectors/card-selector';
-import { PlayerByPlayerCardSelector } from './card-selectors/player-by-player';
+import { CardDeathSubscriber } from './card-death-subscriber';
 
 export class Fight {
   private player1: Player;
@@ -12,12 +12,18 @@ export class Fight {
 
   private attackManager: AttackStage;
   private cardSelector: CardSelector;
+  private eventBroker: {
+    onCardDeath: CardDeathSubscriber[];
+  };
 
   constructor(player1: Player, player2: Player, cardSelector: CardSelector) {
+    this.eventBroker = {
+      onCardDeath: [cardSelector],
+    };
+
     this.player1 = player1;
     this.player2 = player2;
-
-    this.attackManager = new AttackStage(player1, player2);
+    this.attackManager = new AttackStage(player1, player2, this.eventBroker);
     this.cardSelector = cardSelector;
   }
 

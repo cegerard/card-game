@@ -2,7 +2,6 @@ import { FightingCard } from './cards/fighting-card';
 
 export class Player {
   private cards: FightingCard[];
-  private alreadyPlayed: FightingCard[] = [];
   public name: string;
 
   constructor(name: string, cards: FightingCard[]) {
@@ -12,22 +11,6 @@ export class Player {
 
   public get playableCards(): FightingCard[] {
     return this.cards.filter((card) => !card.isDead());
-  }
-
-  public nextCardToPlay(): FightingCard | null {
-    const nextCard = this.cards.reduce((fastestCard, card) => {
-      if (card.isDead() || this.alreadyPlayed.includes(card)) {
-        return fastestCard;
-      }
-
-      if (!fastestCard) {
-        return card;
-      }
-
-      return card.fasterThan(fastestCard) ? card : fastestCard;
-    }, null);
-
-    return nextCard;
   }
 
   public targetedCard(position: number): FightingCard | null {
@@ -58,20 +41,5 @@ export class Player {
 
   public status(): number {
     return this.cards.reduce((status, card) => status + card.actualHealth, 0);
-  }
-
-  public updateAlreadyPlayedCard(card: FightingCard | null): void {
-    if (card) {
-      this.alreadyPlayed.push(card);
-    }
-
-    const aliveCards = this.cards.filter((c) => !c.isDead());
-    if (aliveCards.every((c) => this.alreadyPlayed.includes(c))) {
-      this.alreadyPlayed = [];
-    }
-  }
-
-  public notifyDeath(card: FightingCard): void {
-    this.updateAlreadyPlayedCard(card);
   }
 }

@@ -2,6 +2,7 @@ import { Player } from '../../player';
 import { FightingCard } from '../../cards/fighting-card';
 import { CardSelector } from './card-selector';
 
+// notified on card death
 export class SpeedWeightedCardSelector implements CardSelector {
   private player1: Player;
   private player2: Player;
@@ -19,6 +20,10 @@ export class SpeedWeightedCardSelector implements CardSelector {
       this.refillPool();
     }
     return [this.cardPool.pop()!];
+  }
+
+  public notifyDeath(_player: Player, card: FightingCard): void {
+    this.cardPool = this.cardPool.filter((c) => c !== card);
   }
 
   private refillPool(): void {

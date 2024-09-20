@@ -1,14 +1,25 @@
 import { AttackResult } from './@types/attack-result';
 import { FightingCard } from '../cards/fighting-card';
 import { Player } from '../player';
+import { CardDeathSubscriber } from '../fight-simulator/card-death-subscriber';
 
 export class AttackStage {
   private player1: Player;
   private player2: Player;
+  private eventBroker: {
+    onCardDeath: CardDeathSubscriber[];
+  };
 
-  public constructor(player1: Player, player2: Player) {
+  public constructor(
+    player1: Player,
+    player2: Player,
+    eventBroker: {
+      onCardDeath: CardDeathSubscriber[];
+    },
+  ) {
     this.player1 = player1;
     this.player2 = player2;
+    this.eventBroker = eventBroker;
   }
 
   public computeNextAttack(attackingCards: FightingCard[]): AttackResult[] {
@@ -67,10 +78,10 @@ export class AttackStage {
   }
 
   private notifyDeath(card: FightingCard): void {
-    if (this.player1.ownCard(card)) {
-      this.player1.notifyDeath(card);
-    } else {
-      this.player2.notifyDeath(card);
-    }
+    const player = this.player1.ownCard(card) ? this.player1 : this.player2;
+
+    this.eventBroker.onCardDeath.forEach((subscriber) =>
+      subscriber.notifyDeath(player, card),
+    );
   }
 }
