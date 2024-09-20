@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
-import { FightingCard } from '../src/core/cards/fighting-card';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
@@ -18,6 +17,7 @@ describe('AppController (e2e)', () => {
 
   it('/fight (POST)', () => {
     const fightData = {
+      cardSelectorStrategy: 'player-by-player',
       player1: {
         name: 'Player 1',
         deck: [

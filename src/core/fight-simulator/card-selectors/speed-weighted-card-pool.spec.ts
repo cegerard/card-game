@@ -1,3 +1,4 @@
+import { Player } from '../../player';
 import { FightingCard } from '../../cards/fighting-card';
 import { SpeedWeightedCardSelector } from './speed-weighted-card-pool';
 
@@ -14,7 +15,6 @@ describe('SpeedWeightedCardSelector', () => {
 
   // Helper function to count occurrences of cards
   const countCardOccurrences = (
-    cards: FightingCard[],
     selector: SpeedWeightedCardSelector,
     iterations: number,
   ) => {
@@ -28,14 +28,16 @@ describe('SpeedWeightedCardSelector', () => {
   };
 
   test('Card with higher speed should be more represented in the card pool', () => {
-    const cards = [
+    const player1 = new Player('Player 1', [
       createMockCard('10', 10),
       createMockCard('11', 11),
+    ]);
+    const player2 = new Player('Player 2', [
       createMockCard('12', 12),
       createMockCard('20', 20), // Higher speed card
-    ];
-    const selector = new SpeedWeightedCardSelector(cards);
-    const occurrences = countCardOccurrences(cards, selector, 1000);
+    ]);
+    const selector = new SpeedWeightedCardSelector(player1, player2);
+    const occurrences = countCardOccurrences(selector, 1000);
 
     expect(occurrences['20']).toBeGreaterThanOrEqual(occurrences['10']);
     expect(occurrences['20']).toBeGreaterThan(occurrences['11']);
@@ -43,14 +45,17 @@ describe('SpeedWeightedCardSelector', () => {
   });
 
   test('Card with lower speed should be less represented in the card pool', () => {
-    const cards = [
+    const player1 = new Player('Player 1', [
       createMockCard('10', 10),
       createMockCard('11', 11),
+    ]);
+    const player2 = new Player('Player 2', [
       createMockCard('12', 12),
       createMockCard('5', 5), // Lower speed card
-    ];
-    const selector = new SpeedWeightedCardSelector(cards);
-    const occurrences = countCardOccurrences(cards, selector, 1000);
+    ]);
+
+    const selector = new SpeedWeightedCardSelector(player1, player2);
+    const occurrences = countCardOccurrences(selector, 1000);
 
     expect(occurrences['5']).toBeLessThanOrEqual(occurrences['10']);
     expect(occurrences['5'] * 2).toBeLessThan(occurrences['11']);
@@ -58,14 +63,16 @@ describe('SpeedWeightedCardSelector', () => {
   });
 
   test('Cards with the same speed should be represented equally in the card pool', () => {
-    const cards = [
+    const player1 = new Player('Player 1', [
       createMockCard('1', 10),
       createMockCard('2', 10),
+    ]);
+    const player2 = new Player('Player 2', [
       createMockCard('3', 10),
       createMockCard('4', 10),
-    ];
-    const selector = new SpeedWeightedCardSelector(cards);
-    const occurrences = countCardOccurrences(cards, selector, 1000);
+    ]);
+    const selector = new SpeedWeightedCardSelector(player1, player2);
+    const occurrences = countCardOccurrences(selector, 1000);
 
     expect(occurrences['1']).toBe(occurrences['2']);
     expect(occurrences['2']).toBe(occurrences['3']);

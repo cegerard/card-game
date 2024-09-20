@@ -10,6 +10,10 @@ export class Player {
     this.cards = cards;
   }
 
+  public get playableCards(): FightingCard[] {
+    return this.cards.filter((card) => !card.isDead());
+  }
+
   public nextCardToPlay(): FightingCard | null {
     const nextCard = this.cards.reduce((fastestCard, card) => {
       if (card.isDead() || this.alreadyPlayed.includes(card)) {

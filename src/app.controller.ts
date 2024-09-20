@@ -20,6 +20,7 @@ export class AppController {
     return this.appService.simulateFight(
       { name: fightData.player1.name, deck: player1Deck },
       { name: fightData.player2.name, deck: player2Deck },
+      fightData.cardSelectorStrategy,
     );
   }
 }

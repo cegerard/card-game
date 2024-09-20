@@ -13,12 +13,12 @@ export class Fight {
   private attackManager: AttackStage;
   private cardSelector: CardSelector;
 
-  constructor(player1: Player, player2: Player) {
+  constructor(player1: Player, player2: Player, cardSelector: CardSelector) {
     this.player1 = player1;
     this.player2 = player2;
 
     this.attackManager = new AttackStage(player1, player2);
-    this.cardSelector = new PlayerByPlayerCardSelector(player1, player2);
+    this.cardSelector = cardSelector;
   }
 
   public start(): FightResult {

@@ -3,6 +3,7 @@ import { FightingCard } from '../cards/fighting-card';
 import { Player } from '../player';
 import { DamageReport } from '../card-attack/@types/damage-report';
 import { FightResult } from './@types/fight-result';
+import { PlayerByPlayerCardSelector } from './card-selectors/player-by-player';
 
 describe('fight', () => {
   describe('with a determined process', () => {
@@ -24,7 +25,11 @@ describe('fight', () => {
         });
         const player1 = new Player('Player 1', [card1]); // Pass name
         const player2 = new Player('Player 2', [card2]); // Pass name
-        const fight = new Fight(player1, player2);
+        const fight = new Fight(
+          player1,
+          player2,
+          new PlayerByPlayerCardSelector(player1, player2),
+        );
 
         it('should return the fight steps', () => {
           expect(fight.start()).toEqual({
@@ -58,7 +63,11 @@ describe('fight', () => {
         });
         const player1 = new Player('Player 1', [card1]); // Pass name
         const player2 = new Player('Player 2', [card2]); // Pass name
-        const fight = new Fight(player1, player2);
+        const fight = new Fight(
+          player1,
+          player2,
+          new PlayerByPlayerCardSelector(player1, player2),
+        );
 
         it('should return the fight steps', () => {
           expect(fight.start()).toEqual({
@@ -93,7 +102,11 @@ describe('fight', () => {
         });
         const player1 = new Player('Player 1', [card1]); // Pass name
         const player2 = new Player('Player 2', [card2]); // Pass name
-        const fight = new Fight(player1, player2);
+        const fight = new Fight(
+          player1,
+          player2,
+          new PlayerByPlayerCardSelector(player1, player2),
+        );
 
         it('should return the fight steps', () => {
           expect(fight.start()).toEqual({
@@ -136,7 +149,11 @@ describe('fight', () => {
         });
         const player1 = new Player('Player 1', [card1]); // Pass name
         const player2 = new Player('Player 2', [card2]); // Pass name
-        const fight = new Fight(player1, player2);
+        const fight = new Fight(
+          player1,
+          player2,
+          new PlayerByPlayerCardSelector(player1, player2),
+        );
         let fightResult: FightResult;
 
         beforeAll(() => {
@@ -251,7 +268,11 @@ describe('fight', () => {
           card9,
           card10,
         ]); // Pass name
-        const fight = new Fight(player1, player2);
+        const fight = new Fight(
+          player1,
+          player2,
+          new PlayerByPlayerCardSelector(player1, player2),
+        );
 
         it('should return the fight steps', () => {
           const steps = fight.start();

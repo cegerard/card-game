@@ -48,4 +48,7 @@ export class FightDataDto {
   @ValidateNested()
   @Type(() => PlayerDto)
   player2: PlayerDto;
+
+  @IsString()
+  cardSelectorStrategy: string;
 }

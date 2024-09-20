@@ -1,12 +1,16 @@
-import { FightingCard } from 'src/core/cards/fighting-card';
+import { Player } from '../../player';
+import { FightingCard } from '../../cards/fighting-card';
 import { CardSelector } from './card-selector';
 
 export class SpeedWeightedCardSelector implements CardSelector {
-  private cards: FightingCard[];
+  private player1: Player;
+  private player2: Player;
   private cardPool: FightingCard[] = [];
 
-  constructor(cards: FightingCard[]) {
-    this.cards = cards;
+  constructor(player1: Player, player2: Player) {
+    this.player1 = player1;
+    this.player2 = player2;
+
     this.refillPool();
   }
 
@@ -19,17 +23,21 @@ export class SpeedWeightedCardSelector implements CardSelector {
 
   private refillPool(): void {
     this.cardPool = [];
-    const weights = this.calculateWeights();
-    for (let i = 0; i < this.cards.length; i++) {
+    const cards = [
+      ...this.player1.playableCards,
+      ...this.player2.playableCards,
+    ];
+    const weights = this.calculateWeights(cards);
+    for (let i = 0; i < cards.length; i++) {
       for (let j = 0; j < weights[i]; j++) {
-        this.cardPool.push(this.cards[i]);
+        this.cardPool.push(cards[i]);
       }
     }
     this.shufflePool();
   }
 
-  private calculateWeights(): number[] {
-    const speeds = this.cards.map((card) => card.actualSpeed);
+  private calculateWeights(cards: FightingCard[]): number[] {
+    const speeds = cards.map((card) => card.actualSpeed);
     const minSpeed = Math.min(...speeds);
     return speeds.map((speed) => Math.round((speed / minSpeed) * 10));
   }
