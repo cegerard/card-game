@@ -4,25 +4,38 @@ import { Player } from '../player';
 import { DamageReport } from '../card-attack/@types/damage-report';
 import { FightResult } from './@types/fight-result';
 import { PlayerByPlayerCardSelector } from './card-selectors/player-by-player';
+import { SpecialAttack } from '../cards/skills/special-attack';
 
 describe('fight', () => {
   describe('with a determined process', () => {
     describe('with only one card each', () => {
       describe('when the first player has the strongest card', () => {
-        const card1 = new FightingCard('Axe', {
-          damage: 100,
-          defense: 100,
-          health: 100,
-          speed: 100,
-          criticalChance: 0,
-        });
-        const card2 = new FightingCard('Sword', {
-          damage: 1,
-          defense: 1,
-          health: 1,
-          speed: 1,
-          criticalChance: 0,
-        });
+        const card1 = new FightingCard(
+          'Axe',
+          {
+            damage: 100,
+            defense: 100,
+            health: 100,
+            speed: 100,
+            criticalChance: 0,
+          },
+          {
+            specialAttack: new SpecialAttack(0, 10),
+          },
+        );
+        const card2 = new FightingCard(
+          'Sword',
+          {
+            damage: 1,
+            defense: 1,
+            health: 1,
+            speed: 1,
+            criticalChance: 0,
+          },
+          {
+            specialAttack: new SpecialAttack(0, 10),
+          },
+        );
         const player1 = new Player('Player 1', [card1]);
         const player2 = new Player('Player 2', [card2]);
         const fight = new Fight(
@@ -47,20 +60,32 @@ describe('fight', () => {
       });
 
       describe('when the first player has the weakest card', () => {
-        const card1 = new FightingCard('Axe', {
-          damage: 1,
-          defense: 1,
-          health: 1,
-          speed: 1,
-          criticalChance: 0,
-        });
-        const card2 = new FightingCard('Sword', {
-          damage: 60,
-          defense: 60,
-          health: 60,
-          speed: 60,
-          criticalChance: 0,
-        });
+        const card1 = new FightingCard(
+          'Axe',
+          {
+            damage: 1,
+            defense: 1,
+            health: 1,
+            speed: 1,
+            criticalChance: 0,
+          },
+          {
+            specialAttack: new SpecialAttack(0, 10),
+          },
+        );
+        const card2 = new FightingCard(
+          'Sword',
+          {
+            damage: 60,
+            defense: 60,
+            health: 60,
+            speed: 60,
+            criticalChance: 0,
+          },
+          {
+            specialAttack: new SpecialAttack(0, 10),
+          },
+        );
         const player1 = new Player('Player 1', [card1]); // Pass name
         const player2 = new Player('Player 2', [card2]); // Pass name
         const fight = new Fight(
@@ -86,20 +111,32 @@ describe('fight', () => {
 
       describe('when the cards have the same strength, health and speed', () => {
         const damage = 50;
-        const card1 = new FightingCard('Axe', {
-          damage,
-          defense: 20,
-          health: 1,
-          speed: 50,
-          criticalChance: 0,
-        });
-        const card2 = new FightingCard('Sword', {
-          damage,
-          defense: 25,
-          health: 1,
-          speed: 50,
-          criticalChance: 0,
-        });
+        const card1 = new FightingCard(
+          'Axe',
+          {
+            damage,
+            defense: 20,
+            health: 1,
+            speed: 50,
+            criticalChance: 0,
+          },
+          {
+            specialAttack: new SpecialAttack(0, 10),
+          },
+        );
+        const card2 = new FightingCard(
+          'Sword',
+          {
+            damage,
+            defense: 25,
+            health: 1,
+            speed: 50,
+            criticalChance: 0,
+          },
+          {
+            specialAttack: new SpecialAttack(0, 10),
+          },
+        );
         const player1 = new Player('Player 1', [card1]); // Pass name
         const player2 = new Player('Player 2', [card2]); // Pass name
         const fight = new Fight(
@@ -133,20 +170,32 @@ describe('fight', () => {
 
       describe('when the cards have the same strength and defense', () => {
         const damage = 50;
-        const card1 = new FightingCard('Axe', {
-          damage,
-          defense: damage,
-          health: 1,
-          speed: 50,
-          criticalChance: 0,
-        });
-        const card2 = new FightingCard('Sword', {
-          damage,
-          defense: damage,
-          health: 1,
-          speed: 25,
-          criticalChance: 0,
-        });
+        const card1 = new FightingCard(
+          'Axe',
+          {
+            damage,
+            defense: damage,
+            health: 1,
+            speed: 50,
+            criticalChance: 0,
+          },
+          {
+            specialAttack: new SpecialAttack(0, 1000),
+          },
+        );
+        const card2 = new FightingCard(
+          'Sword',
+          {
+            damage,
+            defense: damage,
+            health: 1,
+            speed: 25,
+            criticalChance: 0,
+          },
+          {
+            specialAttack: new SpecialAttack(0, 1000),
+          },
+        );
         const player1 = new Player('Player 1', [card1]); // Pass name
         const player2 = new Player('Player 2', [card2]); // Pass name
         const fight = new Fight(
@@ -184,76 +233,136 @@ describe('fight', () => {
 
     describe('with five cards each', () => {
       describe('when the first player has the strongest cards', () => {
-        const card1 = new FightingCard('Axe', {
-          damage: 100,
-          defense: 100,
-          health: 100,
-          speed: 100,
-          criticalChance: 0,
-        });
-        const card2 = new FightingCard('Sword', {
-          damage: 1,
-          defense: 1,
-          health: 1,
-          speed: 1,
-          criticalChance: 0,
-        });
-        const card3 = new FightingCard('Elbow', {
-          damage: 5,
-          defense: 5,
-          health: 5,
-          speed: 5,
-          criticalChance: 0,
-        });
-        const card4 = new FightingCard('Arrow', {
-          damage: 10,
-          defense: 10,
-          health: 10,
-          speed: 10,
-          criticalChance: 0,
-        });
-        const card5 = new FightingCard('Pic', {
-          damage: 20,
-          defense: 20,
-          health: 20,
-          speed: 20,
-          criticalChance: 0,
-        });
-        const card6 = new FightingCard('Dragon', {
-          damage: 30,
-          defense: 30,
-          health: 30,
-          speed: 30,
-          criticalChance: 0,
-        });
-        const card7 = new FightingCard('Lizard', {
-          damage: 40,
-          defense: 40,
-          health: 40,
-          speed: 40,
-          criticalChance: 0,
-        });
-        const card8 = new FightingCard('Lion', {
-          damage: 50,
-          defense: 50,
-          health: 50,
-          speed: 50,
-          criticalChance: 0,
-        });
-        const card9 = new FightingCard('Elephant', {
-          damage: 60,
-          defense: 60,
-          health: 60,
-          speed: 60,
-          criticalChance: 0,
-        });
-        const card10 = new FightingCard('Phoenix', {
-          damage: 70,
-          defense: 70,
-          health: 70,
-          speed: 70,
-          criticalChance: 0,
-        });
+        const card1 = new FightingCard(
+          'Axe',
+          {
+            damage: 100,
+            defense: 100,
+            health: 100,
+            speed: 100,
+            criticalChance: 0,
+          },
+          {
+            specialAttack: new SpecialAttack(0, 1000),
+          },
+        );
+        const card2 = new FightingCard(
+          'Sword',
+          {
+            damage: 1,
+            defense: 1,
+            health: 1,
+            speed: 1,
+            criticalChance: 0,
+          },
+          {
+            specialAttack: new SpecialAttack(0, 1000),
+          },
+        );
+        const card3 = new FightingCard(
+          'Elbow',
+          {
+            damage: 5,
+            defense: 5,
+            health: 5,
+            speed: 5,
+            criticalChance: 0,
+          },
+          {
+            specialAttack: new SpecialAttack(0, 1000),
+          },
+        );
+        const card4 = new FightingCard(
+          'Arrow',
+          {
+            damage: 10,
+            defense: 10,
+            health: 10,
+            speed: 10,
+            criticalChance: 0,
+          },
+          {
+            specialAttack: new SpecialAttack(0, 1000),
+          },
+        );
+        const card5 = new FightingCard(
+          'Pic',
+          {
+            damage: 20,
+            defense: 20,
+            health: 20,
+            speed: 20,
+            criticalChance: 0,
+          },
+          {
+            specialAttack: new SpecialAttack(0, 1000),
+          },
+        );
+        const card6 = new FightingCard(
+          'Dragon',
+          {
+            damage: 30,
+            defense: 30,
+            health: 30,
+            speed: 30,
+            criticalChance: 0,
+          },
+          {
+            specialAttack: new SpecialAttack(0, 1000),
+          },
+        );
+        const card7 = new FightingCard(
+          'Lizard',
+          {
+            damage: 40,
+            defense: 40,
+            health: 40,
+            speed: 40,
+            criticalChance: 0,
+          },
+          {
+            specialAttack: new SpecialAttack(0, 1000),
+          },
+        );
+        const card8 = new FightingCard(
+          'Lion',
+          {
+            damage: 50,
+            defense: 50,
+            health: 50,
+            speed: 50,
+            criticalChance: 0,
+          },
+          {
+            specialAttack: new SpecialAttack(0, 1000),
+          },
+        );
+        const card9 = new FightingCard(
+          'Elephant',
+          {
+            damage: 60,
+            defense: 60,
+            health: 60,
+            speed: 60,
+            criticalChance: 0,
+          },
+          {
+            specialAttack: new SpecialAttack(0, 1000),
+          },
+        );
+        const card10 = new FightingCard(
+          'Phoenix',
+          {
+            damage: 70,
+            defense: 70,
+            health: 70,
+            speed: 70,
+            criticalChance: 0,
+          },
+          {
+            specialAttack: new SpecialAttack(0, 1000),
+          },
+        );
         const player1 = new Player('Player 1', [
           card1,
           card2,

@@ -1,3 +1,5 @@
+import { SpecialAttack } from './skills/special-attack';
+
 export class FightingCard {
   public readonly name: string;
   private damage: number;
@@ -5,6 +7,8 @@ export class FightingCard {
   private health: number;
   private speed: number;
   private criticalChance: number;
+  private specialAttack: SpecialAttack;
+  private specialAttackEnergy: number = 0;
 
   constructor(
     name: string,
@@ -15,6 +19,9 @@ export class FightingCard {
       speed: number;
       criticalChance: number;
     },
+    skills: {
+      specialAttack: SpecialAttack;
+    },
   ) {
     this.name = name;
     this.damage = stats.damage;
@@ -22,6 +29,7 @@ export class FightingCard {
     this.health = stats.health;
     this.speed = stats.speed;
     this.criticalChance = stats.criticalChance;
+    this.specialAttack = skills.specialAttack;
   }
 
   public get actualHealth(): number {
@@ -39,6 +47,22 @@ export class FightingCard {
     const isCritical = Math.random() < this.criticalChance;
     const damageMultiplier = isCritical ? 2 : 1;
     const damage = defender.collectsDamages(this.damage * damageMultiplier);
+
+    this.specialAttackEnergy += 10;
+
+    return { damage, isCritical };
+  }
+
+  public launchSpecialAttack(defender: FightingCard): {
+    damage: number;
+    isCritical: boolean;
+  } {
+    const isCritical = Math.random() < this.criticalChance;
+    const computedDamage = this.specialAttack.launch(isCritical);
+    const damage = defender.collectsDamages(computedDamage);
+
+    this.specialAttackEnergy = 0;
+
     return { damage, isCritical };
   }
 
@@ -48,6 +72,10 @@ export class FightingCard {
 
   public isDead(): boolean {
     return this.health <= 0;
+  }
+
+  public isSpecialAttackReady(): boolean {
+    return this.specialAttack.ready(this.specialAttackEnergy);
   }
 
   private collectsDamages(damage: number): number {

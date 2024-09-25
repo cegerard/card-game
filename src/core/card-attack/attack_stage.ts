@@ -24,17 +24,36 @@ export class AttackStage {
 
   public computeNextAttack(attackingCards: FightingCard[]): AttackResult[] {
     const attacksResults = attackingCards.map((card) => {
+      let damage: number;
+      let isCritical: boolean;
+      let result: AttackResult;
       const defensiveCard = this.getTargetedCard(card);
-      const { damage, isCritical } = card.attack(defensiveCard);
 
-      const result: AttackResult = {
-        attack: {
-          attacker: card,
-          defender: defensiveCard,
-          damage: damage,
-          isCritical: isCritical,
-        },
-      };
+      if (card.isSpecialAttackReady()) {
+        const damageDealt = card.launchSpecialAttack(defensiveCard);
+        damage = damageDealt.damage;
+        isCritical = damageDealt.isCritical;
+        result = {
+          specialAttack: {
+            attacker: card,
+            defender: defensiveCard,
+            damage: damage,
+            isCritical: isCritical,
+          },
+        };
+      } else {
+        const damageDealt = card.attack(defensiveCard);
+        damage = damageDealt.damage;
+        isCritical = damageDealt.isCritical;
+        result = {
+          attack: {
+            attacker: card,
+            defender: defensiveCard,
+            damage: damage,
+            isCritical: isCritical,
+          },
+        };
+      }
 
       if (defensiveCard.isDead()) {
         this.notifyDeath(defensiveCard);
@@ -49,10 +68,19 @@ export class AttackStage {
 
     const resultSteps = attacksResults.reduce(
       (acc, result) => {
-        acc.attackSteps.push({
-          kind: 'attack',
-          ...result.attack,
-        });
+        if ('attack' in result) {
+          acc.attackSteps.push({
+            kind: 'attack',
+            ...result.attack,
+          });
+        }
+
+        if ('specialAttack' in result) {
+          acc.attackSteps.push({
+            kind: 'special_attack',
+            ...result.specialAttack,
+          });
+        }
 
         if (result.status_change) {
           acc.statusChangeSteps.push({

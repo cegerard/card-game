@@ -1,17 +1,24 @@
 import { Player } from '../../player';
 import { FightingCard } from '../../cards/fighting-card';
 import { SpeedWeightedCardSelector } from './speed-weighted-card-pool';
+import { SpecialAttack } from '../../cards/skills/special-attack';
 
 describe('SpeedWeightedCardSelector', () => {
   // Helper function to create a mock FightingCard
   const createMockCard = (name: string, speed: number): FightingCard =>
-    new FightingCard(name, {
-      damage: 10,
-      defense: 10,
-      health: 10,
-      speed,
-      criticalChance: 0,
-    });
+    new FightingCard(
+      name,
+      {
+        damage: 10,
+        defense: 10,
+        health: 10,
+        speed,
+        criticalChance: 0,
+      },
+      {
+        specialAttack: new SpecialAttack(0, 10),
+      },
+    );
 
   // Helper function to count occurrences of cards
   const countCardOccurrences = (
