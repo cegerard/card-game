@@ -6,9 +6,28 @@ import {
   IsArray,
   IsNumber,
   IsString,
+  IsNotEmpty,
 } from 'class-validator';
 
-class FightingCardDto {
+class SpecialAttackDto {
+  @IsString()
+  name: string;
+
+  @IsNumber()
+  damage: number;
+
+  @IsNumber()
+  energy: number;
+}
+
+class SkillsDto {
+  @IsNotEmpty()
+  @ValidateNested()
+  @Type(() => SpecialAttackDto)
+  specialAttack: SpecialAttackDto;
+}
+
+export class FightingCardDto {
   @IsString()
   name: string;
 
@@ -26,6 +45,11 @@ class FightingCardDto {
 
   @IsNumber()
   criticalChance: number;
+
+  @IsNotEmpty()
+  @ValidateNested()
+  @Type(() => SkillsDto)
+  skills: SkillsDto;
 }
 
 class PlayerDto {

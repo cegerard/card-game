@@ -28,6 +28,13 @@ describe('AppController (e2e)', () => {
             health: 100,
             speed: 3,
             criticalChance: 0.05,
+            skills: {
+              specialAttack: {
+                name: 'Double Strike',
+                damage: 200,
+                energy: 1000,
+              },
+            },
           },
         ],
       },
@@ -41,6 +48,13 @@ describe('AppController (e2e)', () => {
             health: 100,
             speed: 2,
             criticalChance: 0.04,
+            skills: {
+              specialAttack: {
+                name: 'Double Strike',
+                damage: 200,
+                energy: 1000,
+              },
+            },
           },
         ],
       },
