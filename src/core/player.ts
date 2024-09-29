@@ -1,4 +1,5 @@
 import { FightingCard } from './cards/fighting-card';
+import { TargetingCardStrategy } from './targeting-card-strategies/targeting-card-strategy';
 
 export class Player {
   private cards: FightingCard[];
@@ -13,22 +14,8 @@ export class Player {
     return this.cards.filter((card) => !card.isDead());
   }
 
-  public targetedCard(position: number): FightingCard | null {
-    const card = this.cards[position];
-
-    if (card.isDead()) {
-      // check if there is a card alive after the dead card and go back to the first alive card
-      const nextCard =
-        this.cards.slice(position + 1).find((c) => !c.isDead()) ||
-        this.cards.slice(0, position).find((c) => !c.isDead());
-      if (nextCard) {
-        return nextCard;
-      }
-
-      return null;
-    }
-
-    return card;
+  public targetedCard(strategy: TargetingCardStrategy): FightingCard[] {
+    return strategy.targetedCards(this.cards);
   }
 
   public cardPosition(card: FightingCard): number {
