@@ -3,6 +3,7 @@ import { AttackStage } from '../card-attack/attack_stage';
 import { Player } from '../player';
 import { CardSelector } from './card-selectors/card-selector';
 import { CardDeathSubscriber } from './card-death-subscriber';
+import { Step } from './@types/step';
 
 export class Fight {
   private player1: Player;
@@ -53,7 +54,7 @@ export class Fight {
     return this.loopCounter < 100;
   }
 
-  private nextIteration() {
+  private nextIteration(): Step[] {
     return this.attackManager.computeNextAttack(this.cardSelector.nextCards());
   }
 

@@ -3,6 +3,7 @@ import { FightingCard } from '../cards/fighting-card';
 import { Player } from '../player';
 import { CardDeathSubscriber } from '../fight-simulator/card-death-subscriber';
 import { TargetedFromPosition } from '../targeting-card-strategies/targeted-from-position';
+import { Step } from '../fight-simulator/@types/step';
 
 export class AttackStage {
   private player1: Player;
@@ -23,7 +24,7 @@ export class AttackStage {
     this.eventBroker = eventBroker;
   }
 
-  public computeNextAttack(attackingCards: FightingCard[]): any[] {
+  public computeNextAttack(attackingCards: FightingCard[]): Step[] {
     const attacksResults = attackingCards.map((card) => {
       let damage: number;
       let isCritical: boolean;
@@ -100,16 +101,21 @@ export class AttackStage {
 
   private getTargetedCard(attacker: FightingCard): FightingCard {
     if (this.player1.ownCard(attacker)) {
-      const targetedStrategy = new TargetedFromPosition(
-        this.player1.cardPosition(attacker),
-      );
-      return this.player2.targetedCard(targetedStrategy)[0];
+      return this.targetedCardByPlayer(attacker, this.player1, this.player2);
     }
 
+    return this.targetedCardByPlayer(attacker, this.player2, this.player1);
+  }
+
+  private targetedCardByPlayer(
+    attacker: FightingCard,
+    attackingPlayer: Player,
+    defendingPlayer: Player,
+  ): FightingCard {
     const targetedStrategy = new TargetedFromPosition(
-      this.player2.cardPosition(attacker),
+      attackingPlayer.cardPosition(attacker),
     );
-    return this.player1.targetedCard(targetedStrategy)[0];
+    return defendingPlayer.targetedCard(targetedStrategy)[0];
   }
 
   private notifyDeath(card: FightingCard): void {
