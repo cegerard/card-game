@@ -68,33 +68,34 @@ export class AttackStage {
       return result;
     });
 
-    const resultSteps = attacksResults.reduce(
-      (acc, result) => {
-        if ('attack' in result) {
-          acc.attackSteps.push({
-            kind: 'attack',
-            ...result.attack,
-          });
-        }
+    const resultSteps: { attackSteps: Step[]; statusChangeSteps: Step[] } =
+      attacksResults.reduce(
+        (acc, result) => {
+          if ('attack' in result) {
+            acc.attackSteps.push({
+              kind: 'attack',
+              ...result.attack,
+            });
+          }
 
-        if ('specialAttack' in result) {
-          acc.attackSteps.push({
-            kind: 'special_attack',
-            ...result.specialAttack,
-          });
-        }
+          if ('specialAttack' in result) {
+            acc.attackSteps.push({
+              kind: 'special_attack',
+              ...result.specialAttack,
+            });
+          }
 
-        if (result.status_change) {
-          acc.statusChangeSteps.push({
-            kind: 'status_change',
-            ...result.status_change,
-          });
-        }
+          if (result.status_change) {
+            acc.statusChangeSteps.push({
+              kind: 'status_change',
+              ...result.status_change,
+            });
+          }
 
-        return acc;
-      },
-      { attackSteps: [], statusChangeSteps: [] },
-    );
+          return acc;
+        },
+        { attackSteps: [], statusChangeSteps: [] },
+      );
 
     return [...resultSteps.attackSteps, ...resultSteps.statusChangeSteps];
   }
