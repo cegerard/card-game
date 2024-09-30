@@ -25,79 +25,89 @@ export class AttackStage {
   }
 
   public computeNextAttack(attackingCards: FightingCard[]): Step[] {
-    const attacksResults = attackingCards.map((card) => {
-      let damage: number;
-      let isCritical: boolean;
-      let result: AttackResult;
-      const defensiveCard = this.getTargetedCard(card);
+    const attacksResults = attackingCards.map((card) =>
+      this.launchAttack(card),
+    );
 
-      if (card.isSpecialAttackReady()) {
-        const damageDealt = card.launchSpecialAttack(defensiveCard);
-        damage = damageDealt.damage;
-        isCritical = damageDealt.isCritical;
-        result = {
-          specialAttack: {
-            attacker: card,
-            defender: defensiveCard,
-            damage: damage,
-            isCritical: isCritical,
-          },
-        };
-      } else {
-        const damageDealt = card.attack(defensiveCard);
-        damage = damageDealt.damage;
-        isCritical = damageDealt.isCritical;
-        result = {
-          attack: {
-            attacker: card,
-            defender: defensiveCard,
-            damage: damage,
-            isCritical: isCritical,
-          },
-        };
-      }
-
-      if (defensiveCard.isDead()) {
-        this.notifyDeath(defensiveCard);
-        result.status_change = {
-          card: defensiveCard,
-          status: 'dead',
-        };
-      }
-
-      return result;
-    });
-
-    const resultSteps: { attackSteps: Step[]; statusChangeSteps: Step[] } =
-      attacksResults.reduce(
-        (acc, result) => {
-          if ('attack' in result) {
-            acc.attackSteps.push({
-              kind: 'attack',
-              ...result.attack,
-            });
-          }
-
-          if ('specialAttack' in result) {
-            acc.attackSteps.push({
-              kind: 'special_attack',
-              ...result.specialAttack,
-            });
-          }
-
-          if (result.status_change) {
-            acc.statusChangeSteps.push({
-              kind: 'status_change',
-              ...result.status_change,
-            });
-          }
-
-          return acc;
-        },
-        { attackSteps: [], statusChangeSteps: [] },
-      );
+    const resultSteps = this.convertIntoSteps(attacksResults);
 
     return [...resultSteps.attackSteps, ...resultSteps.statusChangeSteps];
+  }
+
+  private launchAttack(card: FightingCard): AttackResult {
+    let damage: number;
+    let isCritical: boolean;
+    let result: AttackResult;
+    const defensiveCard = this.getTargetedCard(card);
+
+    if (card.isSpecialAttackReady()) {
+      const damageDealt = card.launchSpecialAttack(defensiveCard);
+      damage = damageDealt.damage;
+      isCritical = damageDealt.isCritical;
+      result = {
+        specialAttack: {
+          attacker: card,
+          defender: defensiveCard,
+          damage: damage,
+          isCritical: isCritical,
+        },
+      };
+    } else {
+      const damageDealt = card.attack(defensiveCard);
+      damage = damageDealt.damage;
+      isCritical = damageDealt.isCritical;
+      result = {
+        attack: {
+          attacker: card,
+          defender: defensiveCard,
+          damage: damage,
+          isCritical: isCritical,
+        },
+      };
+    }
+
+    if (defensiveCard.isDead()) {
+      this.notifyDeath(defensiveCard);
+      result.status_change = {
+        card: defensiveCard,
+        status: 'dead',
+      };
+    }
+
+    return result;
+  }
+
+  private convertIntoSteps(attacksResults: AttackResult[]): {
+    attackSteps: Step[];
+    statusChangeSteps: Step[];
+  } {
+    return attacksResults.reduce(
+      (acc, result) => {
+        if ('attack' in result) {
+          acc.attackSteps.push({
+            kind: 'attack',
+            ...result.attack,
+          });
+        }
+
+        if ('specialAttack' in result) {
+          acc.attackSteps.push({
+            kind: 'special_attack',
+            ...result.specialAttack,
+          });
+        }
+
+        if (result.status_change) {
+          acc.statusChangeSteps.push({
+            kind: 'status_change',
+            ...result.status_change,
+          });
+        }
+
+        return acc;
+      },
+      { attackSteps: [], statusChangeSteps: [] },
+    );
   }
 
   private getTargetedCard(attacker: FightingCard): FightingCard {
