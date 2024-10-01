@@ -3,12 +3,12 @@ import { StatusChangeReport } from './status-change-report';
 
 type AttackReport = {
   attack: DamageReport;
-  status_change?: StatusChangeReport;
+  statusChange?: StatusChangeReport;
 };
 
 type SpecialAttackReport = {
   specialAttack: DamageReport;
-  status_change?: StatusChangeReport;
+  statusChange?: StatusChangeReport;
 };
 
 export type AttackResult = AttackReport | SpecialAttackReport;

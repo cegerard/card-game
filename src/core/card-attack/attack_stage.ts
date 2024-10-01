@@ -35,40 +35,34 @@ export class AttackStage {
   }
 
   private launchAttack(card: FightingCard): AttackResult {
-    let damage: number;
-    let isCritical: boolean;
-    let result: AttackResult;
     const defensiveCard = this.getTargetedCard(card);
+    let result: AttackResult;
 
     if (card.isSpecialAttackReady()) {
       const damageDealt = card.launchSpecialAttack(defensiveCard);
-      damage = damageDealt.damage;
-      isCritical = damageDealt.isCritical;
       result = {
         specialAttack: {
           attacker: card,
           defender: defensiveCard,
-          damage: damage,
-          isCritical: isCritical,
+          damage: damageDealt.damage,
+          isCritical: damageDealt.isCritical,
         },
       };
     } else {
       const damageDealt = card.attack(defensiveCard);
-      damage = damageDealt.damage;
-      isCritical = damageDealt.isCritical;
       result = {
         attack: {
           attacker: card,
           defender: defensiveCard,
-          damage: damage,
-          isCritical: isCritical,
+          damage: damageDealt.damage,
+          isCritical: damageDealt.isCritical,
         },
       };
     }
 
     if (defensiveCard.isDead()) {
       this.notifyDeath(defensiveCard);
-      result.status_change = {
+      result.statusChange = {
         card: defensiveCard,
         status: 'dead',
       };
@@ -97,10 +91,10 @@ export class AttackStage {
           });
         }
 
-        if (result.status_change) {
+        if (result.statusChange) {
           acc.statusChangeSteps.push({
             kind: 'status_change',
-            ...result.status_change,
+            ...result.statusChange,
           });
         }
 
