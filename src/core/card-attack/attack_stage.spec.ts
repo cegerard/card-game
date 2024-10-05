@@ -2,6 +2,7 @@ import { AttackStage } from './attack_stage';
 import { Player } from '../player';
 import { FightingCard } from '../cards/fighting-card';
 import { SpecialAttack } from '../cards/skills/special-attack';
+import { TargetedFromPosition } from '../targeting-card-strategies/targeted-from-position';
 
 describe('AttackStage', () => {
   const eventBroker = {
@@ -20,7 +21,7 @@ describe('AttackStage', () => {
           criticalChance: 0,
         },
         {
-          specialAttack: new SpecialAttack(0, 10),
+          specialAttack: new SpecialAttack(0, 10, new TargetedFromPosition(1)),
         },
       );
       const defender = new FightingCard(
@@ -33,7 +34,7 @@ describe('AttackStage', () => {
           criticalChance: 0,
         },
         {
-          specialAttack: new SpecialAttack(0, 10),
+          specialAttack: new SpecialAttack(0, 10, new TargetedFromPosition(1)),
         },
       );
       const player1 = new Player('Player 1', [attacker]);
@@ -60,7 +61,7 @@ describe('AttackStage', () => {
           criticalChance: 1,
         },
         {
-          specialAttack: new SpecialAttack(0, 10),
+          specialAttack: new SpecialAttack(0, 10, new TargetedFromPosition(1)),
         },
       );
       const defender = new FightingCard(
@@ -73,7 +74,7 @@ describe('AttackStage', () => {
           criticalChance: 0,
         },
         {
-          specialAttack: new SpecialAttack(0, 10),
+          specialAttack: new SpecialAttack(0, 10, new TargetedFromPosition(1)),
         },
       );
       const player1 = new Player('Player 1', [attacker]);
@@ -100,7 +101,7 @@ describe('AttackStage', () => {
           criticalChance: 0,
         },
         {
-          specialAttack: new SpecialAttack(0, 10),
+          specialAttack: new SpecialAttack(0, 10, new TargetedFromPosition(1)),
         },
       );
       const defender = new FightingCard(
@@ -113,7 +114,7 @@ describe('AttackStage', () => {
           criticalChance: 0,
         },
         {
-          specialAttack: new SpecialAttack(0, 10),
+          specialAttack: new SpecialAttack(0, 10, new TargetedFromPosition(1)),
         },
       );
       const player1 = new Player('Player 1', [attacker]);
@@ -147,7 +148,7 @@ describe('AttackStage', () => {
           criticalChance: 0,
         },
         {
-          specialAttack: new SpecialAttack(450, 0),
+          specialAttack: new SpecialAttack(450, 0, new TargetedFromPosition(1)),
         },
       );
       const defender = new FightingCard(
@@ -160,7 +161,7 @@ describe('AttackStage', () => {
           criticalChance: 0,
         },
         {
-          specialAttack: new SpecialAttack(0, 10),
+          specialAttack: new SpecialAttack(0, 10, new TargetedFromPosition(1)),
         },
       );
       const player1 = new Player('Player 1', [attacker]);

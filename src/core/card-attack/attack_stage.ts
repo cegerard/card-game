@@ -25,40 +25,55 @@ export class AttackStage {
   }
 
   public computeNextAttack(attackingCards: FightingCard[]): Step[] {
-    const attacksResults = attackingCards.map((card) =>
-      this.launchAttack(card),
-    );
+    const attacksResults = attackingCards.map((card) => {
+      if (card.isSpecialAttackReady()) {
+        return this.specialAttack(card);
+      }
+
+      return this.normalAttack(card);
+    });
 
     const resultSteps = this.convertIntoSteps(attacksResults);
 
     return [...resultSteps.attackSteps, ...resultSteps.statusChangeSteps];
   }
 
-  private launchAttack(card: FightingCard): AttackResult {
+  private normalAttack(card: FightingCard): AttackResult {
     const defensiveCard = this.getTargetedCard(card);
-    let result: AttackResult;
+    const damageDealt = card.attack(defensiveCard);
 
-    if (card.isSpecialAttackReady()) {
-      const damageDealt = card.launchSpecialAttack(defensiveCard);
-      result = {
-        specialAttack: {
-          attacker: card,
-          defender: defensiveCard,
-          damage: damageDealt.damage,
-          isCritical: damageDealt.isCritical,
-        },
-      };
-    } else {
-      const damageDealt = card.attack(defensiveCard);
-      result = {
-        attack: {
-          attacker: card,
-          defender: defensiveCard,
-          damage: damageDealt.damage,
-          isCritical: damageDealt.isCritical,
-        },
+    const result: AttackResult = {
+      attack: {
+        attacker: card,
+        defender: defensiveCard,
+        damage: damageDealt.damage,
+        isCritical: damageDealt.isCritical,
+      },
+    };
+
+    if (defensiveCard.isDead()) {
+      this.notifyDeath(defensiveCard);
+      result.statusChange = {
+        card: defensiveCard,
+        status: 'dead',
       };
     }
+
+    return result;
+  }
+
+  private specialAttack(card: FightingCard): AttackResult {
+    const defensiveCard = this.getTargetedCard(card);
+    const damageDealt = card.launchSpecialAttack(defensiveCard);
+
+    const result: AttackResult = {
+      specialAttack: {
+        attacker: card,
+        defender: defensiveCard,
+        damage: damageDealt.damage,
+        isCritical: damageDealt.isCritical,
+      },
+    };
 
     if (defensiveCard.isDead()) {
       this.notifyDeath(defensiveCard);

@@ -5,6 +5,7 @@ import { DamageReport } from '../card-attack/@types/damage-report';
 import { FightResult } from './@types/fight-result';
 import { PlayerByPlayerCardSelector } from './card-selectors/player-by-player';
 import { SpecialAttack } from '../cards/skills/special-attack';
+import { TargetedFromPosition } from '../targeting-card-strategies/targeted-from-position';
 
 describe('fight', () => {
   describe('with a determined process', () => {
@@ -20,7 +21,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
-            specialAttack: new SpecialAttack(0, 10),
+            specialAttack: new SpecialAttack(
+              0,
+              10,
+              new TargetedFromPosition(1),
+            ),
           },
         );
         const card2 = new FightingCard(
@@ -33,7 +38,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
-            specialAttack: new SpecialAttack(0, 10),
+            specialAttack: new SpecialAttack(
+              0,
+              10,
+              new TargetedFromPosition(1),
+            ),
           },
         );
         const player1 = new Player('Player 1', [card1]);
@@ -70,7 +79,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
-            specialAttack: new SpecialAttack(0, 10),
+            specialAttack: new SpecialAttack(
+              0,
+              10,
+              new TargetedFromPosition(1),
+            ),
           },
         );
         const card2 = new FightingCard(
@@ -83,7 +96,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
-            specialAttack: new SpecialAttack(0, 10),
+            specialAttack: new SpecialAttack(
+              0,
+              10,
+              new TargetedFromPosition(1),
+            ),
           },
         );
         const player1 = new Player('Player 1', [card1]); // Pass name
@@ -121,7 +138,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
-            specialAttack: new SpecialAttack(0, 10),
+            specialAttack: new SpecialAttack(
+              0,
+              10,
+              new TargetedFromPosition(1),
+            ),
           },
         );
         const card2 = new FightingCard(
@@ -134,7 +155,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
-            specialAttack: new SpecialAttack(0, 10),
+            specialAttack: new SpecialAttack(
+              0,
+              10,
+              new TargetedFromPosition(1),
+            ),
           },
         );
         const player1 = new Player('Player 1', [card1]); // Pass name
@@ -180,7 +205,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
-            specialAttack: new SpecialAttack(0, 1000),
+            specialAttack: new SpecialAttack(
+              0,
+              1000,
+              new TargetedFromPosition(1),
+            ),
           },
         );
         const card2 = new FightingCard(
@@ -193,7 +222,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
-            specialAttack: new SpecialAttack(0, 1000),
+            specialAttack: new SpecialAttack(
+              0,
+              1000,
+              new TargetedFromPosition(1),
+            ),
           },
         );
         const player1 = new Player('Player 1', [card1]); // Pass name
@@ -243,7 +276,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
-            specialAttack: new SpecialAttack(0, 1000),
+            specialAttack: new SpecialAttack(
+              0,
+              1000,
+              new TargetedFromPosition(1),
+            ),
           },
         );
         const card2 = new FightingCard(
@@ -256,7 +293,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
-            specialAttack: new SpecialAttack(0, 1000),
+            specialAttack: new SpecialAttack(
+              0,
+              1000,
+              new TargetedFromPosition(1),
+            ),
           },
         );
         const card3 = new FightingCard(
@@ -269,7 +310,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
-            specialAttack: new SpecialAttack(0, 1000),
+            specialAttack: new SpecialAttack(
+              0,
+              1000,
+              new TargetedFromPosition(1),
+            ),
           },
         );
         const card4 = new FightingCard(
@@ -282,7 +327,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
-            specialAttack: new SpecialAttack(0, 1000),
+            specialAttack: new SpecialAttack(
+              0,
+              1000,
+              new TargetedFromPosition(1),
+            ),
           },
         );
         const card5 = new FightingCard(
@@ -295,7 +344,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
-            specialAttack: new SpecialAttack(0, 1000),
+            specialAttack: new SpecialAttack(
+              0,
+              1000,
+              new TargetedFromPosition(1),
+            ),
           },
         );
         const card6 = new FightingCard(
@@ -308,7 +361,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
-            specialAttack: new SpecialAttack(0, 1000),
+            specialAttack: new SpecialAttack(
+              0,
+              1000,
+              new TargetedFromPosition(1),
+            ),
           },
         );
         const card7 = new FightingCard(
@@ -321,7 +378,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
-            specialAttack: new SpecialAttack(0, 1000),
+            specialAttack: new SpecialAttack(
+              0,
+              1000,
+              new TargetedFromPosition(1),
+            ),
           },
         );
         const card8 = new FightingCard(
@@ -334,7 +395,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
-            specialAttack: new SpecialAttack(0, 1000),
+            specialAttack: new SpecialAttack(
+              0,
+              1000,
+              new TargetedFromPosition(1),
+            ),
           },
         );
         const card9 = new FightingCard(
@@ -347,7 +412,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
-            specialAttack: new SpecialAttack(0, 1000),
+            specialAttack: new SpecialAttack(
+              0,
+              1000,
+              new TargetedFromPosition(1),
+            ),
           },
         );
         const card10 = new FightingCard(
@@ -360,7 +429,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
-            specialAttack: new SpecialAttack(0, 1000),
+            specialAttack: new SpecialAttack(
+              0,
+              1000,
+              new TargetedFromPosition(1),
+            ),
           },
         );
         const player1 = new Player('Player 1', [

@@ -2,6 +2,7 @@ import { Player } from '../../player';
 import { FightingCard } from '../../cards/fighting-card';
 import { SpeedWeightedCardSelector } from './speed-weighted-card-pool';
 import { SpecialAttack } from '../../cards/skills/special-attack';
+import { TargetedFromPosition } from '../../../core/targeting-card-strategies/targeted-from-position';
 
 describe('SpeedWeightedCardSelector', () => {
   // Helper function to create a mock FightingCard
@@ -16,7 +17,7 @@ describe('SpeedWeightedCardSelector', () => {
         criticalChance: 0,
       },
       {
-        specialAttack: new SpecialAttack(0, 10),
+        specialAttack: new SpecialAttack(0, 10, new TargetedFromPosition(1)),
       },
     );
 
