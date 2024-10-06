@@ -25,13 +25,18 @@ export class AttackStage {
   }
 
   public computeNextAttack(attackingCards: FightingCard[]): Step[] {
-    const attacksResults = attackingCards.map((card) => {
-      if (card.isSpecialAttackReady()) {
-        return this.specialAttack(card);
-      }
+    const attacksResults = attackingCards.reduce(
+      (acc: AttackResult[], card) => {
+        if (card.isSpecialAttackReady()) {
+          acc.push(...this.specialAttack(card));
+        } else {
+          acc.push(this.normalAttack(card));
+        }
 
-      return this.normalAttack(card);
-    });
+        return acc;
+      },
+      [],
+    );
 
     const resultSteps = this.convertIntoSteps(attacksResults);
 
@@ -39,7 +44,7 @@ export class AttackStage {
   }
 
   private normalAttack(card: FightingCard): AttackResult {
-    const defensiveCard = this.getTargetedCard(card);
+    const defensiveCard = this.getTargetedCards(card)[0];
     const damageDealt = card.attack(defensiveCard);
 
     const result: AttackResult = {
@@ -62,28 +67,31 @@ export class AttackStage {
     return result;
   }
 
-  private specialAttack(card: FightingCard): AttackResult {
-    const defensiveCard = this.getTargetedCard(card);
-    const damageDealt = card.launchSpecialAttack(defensiveCard);
+  private specialAttack(card: FightingCard): AttackResult[] {
+    const defensiveCards = this.getTargetedCards(card);
 
-    const result: AttackResult = {
-      specialAttack: {
-        attacker: card,
-        defender: defensiveCard,
-        damage: damageDealt.damage,
-        isCritical: damageDealt.isCritical,
-      },
-    };
+    return defensiveCards.map((defensiveCard) => {
+      const damageDealt = card.launchSpecialAttack(defensiveCard);
 
-    if (defensiveCard.isDead()) {
-      this.notifyDeath(defensiveCard);
-      result.statusChange = {
-        card: defensiveCard,
-        status: 'dead',
+      const result: AttackResult = {
+        specialAttack: {
+          attacker: card,
+          defender: defensiveCard,
+          damage: damageDealt.damage,
+          isCritical: damageDealt.isCritical,
+        },
       };
-    }
 
-    return result;
+      if (defensiveCard.isDead()) {
+        this.notifyDeath(defensiveCard);
+        result.statusChange = {
+          card: defensiveCard,
+          status: 'dead',
+        };
+      }
+
+      return result;
+    });
   }
 
   private convertIntoSteps(attacksResults: AttackResult[]): {
@@ -119,23 +127,27 @@ export class AttackStage {
     );
   }
 
-  private getTargetedCard(attacker: FightingCard): FightingCard {
+  private getTargetedCards(attacker: FightingCard): FightingCard[] {
     if (this.player1.ownCard(attacker)) {
-      return this.targetedCardByPlayer(attacker, this.player1, this.player2);
+      return this.targetedCardsByPlayer(attacker, this.player1, this.player2);
     }
 
-    return this.targetedCardByPlayer(attacker, this.player2, this.player1);
+    return this.targetedCardsByPlayer(attacker, this.player2, this.player1);
   }
 
-  private targetedCardByPlayer(
+  private targetedCardsByPlayer(
     attacker: FightingCard,
     attackingPlayer: Player,
     defendingPlayer: Player,
-  ): FightingCard {
+  ): FightingCard[] {
+    if (attacker.isSpecialAttackReady()) {
+      return defendingPlayer.targetedCards(attacker.specialAttackTargeting());
+    }
+
     const targetedStrategy = new TargetedFromPosition(
       attackingPlayer.cardPosition(attacker),
     );
-    return defendingPlayer.targetedCard(targetedStrategy)[0];
+    return defendingPlayer.targetedCards(targetedStrategy);
   }
 
   private notifyDeath(card: FightingCard): void {

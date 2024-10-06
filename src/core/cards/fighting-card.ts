@@ -1,3 +1,4 @@
+import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
 import { SpecialAttack } from './skills/special-attack';
 
 export class FightingCard {
@@ -76,6 +77,10 @@ export class FightingCard {
 
   public isSpecialAttackReady(): boolean {
     return this.specialAttack.ready(this.specialAttackEnergy);
+  }
+
+  public specialAttackTargeting(): TargetingCardStrategy {
+    return this.specialAttack.targetingStrategy;
   }
 
   private collectsDamages(damage: number): number {

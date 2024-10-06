@@ -1,9 +1,10 @@
-import { FightingCard } from '../fighting-card';
+import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 
 export class SpecialAttack {
   constructor(
     private readonly damage,
     private readonly energyNeeded: number,
+    public readonly targetingStrategy: TargetingCardStrategy,
   ) {}
 
   public ready(energy: number): boolean {

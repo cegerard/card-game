@@ -14,7 +14,7 @@ export class Player {
     return this.cards.filter((card) => !card.isDead());
   }
 
-  public targetedCard(strategy: TargetingCardStrategy): FightingCard[] {
+  public targetedCards(strategy: TargetingCardStrategy): FightingCard[] {
     return strategy.targetedCards(this.cards);
   }
 
