@@ -1,4 +1,5 @@
 import { FightingCard } from '../cards/fighting-card';
+import { Player } from '../player';
 import { TargetingCardStrategy } from './targeting-card-strategy';
 
 export class TargetedFromPosition implements TargetingCardStrategy {
@@ -8,7 +9,8 @@ export class TargetedFromPosition implements TargetingCardStrategy {
     this.position = position;
   }
 
-  public targetedCards(cards: FightingCard[]): FightingCard[] {
+  public targetedCards(player: Player): FightingCard[] {
+    const cards = player.allCards;
     const card = cards[this.position];
 
     if (card.isDead()) {

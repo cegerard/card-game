@@ -10,12 +10,12 @@ export class Player {
     this.cards = cards;
   }
 
-  public get playableCards(): FightingCard[] {
-    return this.cards.filter((card) => !card.isDead());
+  public get allCards(): FightingCard[] {
+    return this.cards.slice();
   }
 
-  public targetedCards(strategy: TargetingCardStrategy): FightingCard[] {
-    return strategy.targetedCards(this.cards);
+  public get playableCards(): FightingCard[] {
+    return this.cards.filter((card) => !card.isDead());
   }
 
   public cardPosition(card: FightingCard): number {
