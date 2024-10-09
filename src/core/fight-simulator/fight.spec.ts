@@ -7,25 +7,28 @@ import { PlayerByPlayerCardSelector } from './card-selectors/player-by-player';
 import { SpecialAttack } from '../cards/skills/special-attack';
 import { TargetedFromPosition } from '../targeting-card-strategies/targeted-from-position';
 import { SimpleAttack } from '../cards/skills/simple-attack';
+import { createFightingCard } from '../../../test/helpers/fighting-card';
 
 describe('fight', () => {
   describe('with a determined process', () => {
     describe('with only one card each', () => {
       describe('when the first player has the strongest card', () => {
-        const card1 = new FightingCard(
-          'Axe',
-          {
-            damage: 100,
-            defense: 100,
-            health: 100,
-            speed: 100,
-            criticalChance: 0,
+        const card1 = createFightingCard({
+          damage: 100,
+          defense: 100,
+          health: 100,
+          speed: 100,
+          criticalChance: 0,
+          skills: {
+            simpleAttack: {
+              damageRate: 1.0,
+            },
+            specialAttack: {
+              damageRate: 0,
+              energy: 10,
+            },
           },
-          {
-            simpleAttack: new SimpleAttack(1.0, new TargetedFromPosition()),
-            specialAttack: new SpecialAttack(0, 10, new TargetedFromPosition()),
-          },
-        );
+        });
         const card2 = new FightingCard(
           'Sword',
           {

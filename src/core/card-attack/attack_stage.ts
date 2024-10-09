@@ -44,7 +44,7 @@ export class AttackStage {
   }
 
   private normalAttack(card: FightingCard): AttackResult {
-    const defensiveCard = this.getTargetedCards(card)[0];
+    const defensiveCard = this.getTargetedCards(card)[0]; // TODO it should attack multiple cards
     const damageDealt = card.attack(defensiveCard);
 
     const result: AttackResult = {
