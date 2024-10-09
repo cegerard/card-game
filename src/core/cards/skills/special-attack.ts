@@ -2,7 +2,7 @@ import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting
 
 export class SpecialAttack {
   constructor(
-    private readonly damage,
+    private readonly damageRate: number,
     private readonly energyNeeded: number,
     public readonly targetingStrategy: TargetingCardStrategy,
   ) {}
@@ -11,9 +11,9 @@ export class SpecialAttack {
     return energy >= this.energyNeeded;
   }
 
-  public launch(isCritical: boolean): number {
+  public computeDamage(damage: number, isCritical: boolean): number {
     const damageMultiplier = isCritical ? 1.3 : 1;
 
-    return this.damage * damageMultiplier;
+    return damage * this.damageRate * damageMultiplier;
   }
 }

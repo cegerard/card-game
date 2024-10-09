@@ -50,8 +50,11 @@ export class FightingCard {
     isCritical: boolean;
   } {
     const isCritical = Math.random() < this.criticalChance;
-    const damageMultiplier = isCritical ? 2 : 1;
-    const damage = defender.collectsDamages(this.damage * damageMultiplier);
+    const computedDamage = this.simpleAttack.computeDamage(
+      this.damage,
+      isCritical,
+    );
+    const damage = defender.collectsDamages(computedDamage);
 
     this.specialAttackEnergy += 10;
 
@@ -63,7 +66,10 @@ export class FightingCard {
     isCritical: boolean;
   } {
     const isCritical = Math.random() < this.criticalChance;
-    const computedDamage = this.specialAttack.launch(isCritical);
+    const computedDamage = this.specialAttack.computeDamage(
+      this.damage,
+      isCritical,
+    );
     const damage = defender.collectsDamages(computedDamage);
 
     this.specialAttackEnergy = 0;

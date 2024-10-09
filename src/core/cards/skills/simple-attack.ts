@@ -7,7 +7,7 @@ export class SimpleAttack {
   ) {}
 
   public computeDamage(damage: number, isCritical: boolean): number {
-    const damageMultiplier = isCritical ? 1.3 : 1;
+    const damageMultiplier = isCritical ? 2 : 1;
 
     return damage * this.damageRate * damageMultiplier;
   }

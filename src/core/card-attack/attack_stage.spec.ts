@@ -107,7 +107,7 @@ describe('AttackStage', () => {
           criticalChance: 0,
         },
         {
-          simpleAttack: new SimpleAttack(1.0, new TargetedFromPosition()),
+          simpleAttack: new SimpleAttack(1.2, new TargetedFromPosition()),
           specialAttack: new SpecialAttack(0, 10, new TargetedFromPosition()),
         },
       );
@@ -116,7 +116,7 @@ describe('AttackStage', () => {
         {
           damage: 0,
           defense: 0,
-          health: 50,
+          health: 120,
           speed: 0,
           criticalChance: 0,
         },
@@ -137,7 +137,7 @@ describe('AttackStage', () => {
             kind: 'attack',
             attacker,
             defender,
-            damage: 100,
+            damage: 120,
             isCritical: false,
           },
           { kind: 'status_change', card: defender, status: 'dead' },
@@ -149,7 +149,7 @@ describe('AttackStage', () => {
       const attacker = new FightingCard(
         'Axe',
         {
-          damage: 0,
+          damage: 1,
           defense: 0,
           health: 1000,
           speed: 1,
@@ -197,7 +197,7 @@ describe('AttackStage', () => {
       const attacker = new FightingCard(
         'Axe',
         {
-          damage: 0,
+          damage: 1,
           defense: 0,
           health: 1000,
           speed: 1,
