@@ -1,23 +1,25 @@
+import { cp } from 'fs';
 import { FightingCard } from '../cards/fighting-card';
 import { Player } from '../player';
 import { TargetingCardStrategy } from './targeting-card-strategy';
 
 export class TargetedFromPosition implements TargetingCardStrategy {
-  private position: number;
+  public targetedCards(
+    attackingCard: FightingCard,
+    attackingPlayer: Player,
+    defendingPlayer: Player,
+  ): FightingCard[] {
+    const attackingCardPosition = attackingPlayer.cardPosition(attackingCard);
+    const defendingCards = defendingPlayer.allCards;
+    const targetedCard = defendingCards[attackingCardPosition];
 
-  constructor(position: number) {
-    this.position = position;
-  }
-
-  public targetedCards(player: Player): FightingCard[] {
-    const cards = player.allCards;
-    const card = cards[this.position];
-
-    if (card.isDead()) {
+    if (targetedCard.isDead()) {
       // check if there is a card alive after the dead card and go back to the first alive card
       const nextCard =
-        cards.slice(this.position + 1).find((c) => !c.isDead()) ||
-        cards.slice(0, this.position).find((c) => !c.isDead());
+        defendingCards
+          .slice(attackingCardPosition + 1)
+          .find((c) => !c.isDead()) ||
+        defendingCards.slice(0, attackingCardPosition).find((c) => !c.isDead());
 
       if (nextCard) {
         return [nextCard];
@@ -26,6 +28,6 @@ export class TargetedFromPosition implements TargetingCardStrategy {
       return [];
     }
 
-    return [card];
+    return [targetedCard];
   }
 }

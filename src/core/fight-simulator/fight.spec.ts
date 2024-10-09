@@ -6,6 +6,7 @@ import { FightResult } from './@types/fight-result';
 import { PlayerByPlayerCardSelector } from './card-selectors/player-by-player';
 import { SpecialAttack } from '../cards/skills/special-attack';
 import { TargetedFromPosition } from '../targeting-card-strategies/targeted-from-position';
+import { SimpleAttack } from '../cards/skills/simple-attack';
 
 describe('fight', () => {
   describe('with a determined process', () => {
@@ -21,11 +22,8 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
-            specialAttack: new SpecialAttack(
-              0,
-              10,
-              new TargetedFromPosition(1),
-            ),
+            simpleAttack: new SimpleAttack(1.0, new TargetedFromPosition()),
+            specialAttack: new SpecialAttack(0, 10, new TargetedFromPosition()),
           },
         );
         const card2 = new FightingCard(
@@ -38,11 +36,8 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
-            specialAttack: new SpecialAttack(
-              0,
-              10,
-              new TargetedFromPosition(1),
-            ),
+            simpleAttack: new SimpleAttack(1.0, new TargetedFromPosition()),
+            specialAttack: new SpecialAttack(0, 10, new TargetedFromPosition()),
           },
         );
         const player1 = new Player('Player 1', [card1]);
@@ -79,11 +74,8 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
-            specialAttack: new SpecialAttack(
-              0,
-              10,
-              new TargetedFromPosition(1),
-            ),
+            simpleAttack: new SimpleAttack(1.0, new TargetedFromPosition()),
+            specialAttack: new SpecialAttack(0, 10, new TargetedFromPosition()),
           },
         );
         const card2 = new FightingCard(
@@ -96,11 +88,8 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
-            specialAttack: new SpecialAttack(
-              0,
-              10,
-              new TargetedFromPosition(1),
-            ),
+            simpleAttack: new SimpleAttack(1.0, new TargetedFromPosition()),
+            specialAttack: new SpecialAttack(0, 10, new TargetedFromPosition()),
           },
         );
         const player1 = new Player('Player 1', [card1]); // Pass name
@@ -138,11 +127,8 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
-            specialAttack: new SpecialAttack(
-              0,
-              10,
-              new TargetedFromPosition(1),
-            ),
+            simpleAttack: new SimpleAttack(1.0, new TargetedFromPosition()),
+            specialAttack: new SpecialAttack(0, 10, new TargetedFromPosition()),
           },
         );
         const card2 = new FightingCard(
@@ -155,11 +141,8 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
-            specialAttack: new SpecialAttack(
-              0,
-              10,
-              new TargetedFromPosition(1),
-            ),
+            simpleAttack: new SimpleAttack(1.0, new TargetedFromPosition()),
+            specialAttack: new SpecialAttack(0, 10, new TargetedFromPosition()),
           },
         );
         const player1 = new Player('Player 1', [card1]); // Pass name
@@ -205,10 +188,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
+            simpleAttack: new SimpleAttack(1.0, new TargetedFromPosition()),
             specialAttack: new SpecialAttack(
               0,
               1000,
-              new TargetedFromPosition(1),
+              new TargetedFromPosition(),
             ),
           },
         );
@@ -222,10 +206,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
+            simpleAttack: new SimpleAttack(1.0, new TargetedFromPosition()),
             specialAttack: new SpecialAttack(
               0,
               1000,
-              new TargetedFromPosition(1),
+              new TargetedFromPosition(),
             ),
           },
         );
@@ -276,10 +261,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
+            simpleAttack: new SimpleAttack(1.0, new TargetedFromPosition()),
             specialAttack: new SpecialAttack(
               0,
               1000,
-              new TargetedFromPosition(1),
+              new TargetedFromPosition(),
             ),
           },
         );
@@ -293,10 +279,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
+            simpleAttack: new SimpleAttack(1.0, new TargetedFromPosition()),
             specialAttack: new SpecialAttack(
               0,
               1000,
-              new TargetedFromPosition(1),
+              new TargetedFromPosition(),
             ),
           },
         );
@@ -310,10 +297,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
+            simpleAttack: new SimpleAttack(1.0, new TargetedFromPosition()),
             specialAttack: new SpecialAttack(
               0,
               1000,
-              new TargetedFromPosition(1),
+              new TargetedFromPosition(),
             ),
           },
         );
@@ -327,10 +315,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
+            simpleAttack: new SimpleAttack(1.0, new TargetedFromPosition()),
             specialAttack: new SpecialAttack(
               0,
               1000,
-              new TargetedFromPosition(1),
+              new TargetedFromPosition(),
             ),
           },
         );
@@ -344,10 +333,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
+            simpleAttack: new SimpleAttack(1.0, new TargetedFromPosition()),
             specialAttack: new SpecialAttack(
               0,
               1000,
-              new TargetedFromPosition(1),
+              new TargetedFromPosition(),
             ),
           },
         );
@@ -361,10 +351,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
+            simpleAttack: new SimpleAttack(1.0, new TargetedFromPosition()),
             specialAttack: new SpecialAttack(
               0,
               1000,
-              new TargetedFromPosition(1),
+              new TargetedFromPosition(),
             ),
           },
         );
@@ -378,10 +369,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
+            simpleAttack: new SimpleAttack(1.0, new TargetedFromPosition()),
             specialAttack: new SpecialAttack(
               0,
               1000,
-              new TargetedFromPosition(1),
+              new TargetedFromPosition(),
             ),
           },
         );
@@ -395,10 +387,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
+            simpleAttack: new SimpleAttack(1.0, new TargetedFromPosition()),
             specialAttack: new SpecialAttack(
               0,
               1000,
-              new TargetedFromPosition(1),
+              new TargetedFromPosition(),
             ),
           },
         );
@@ -412,10 +405,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
+            simpleAttack: new SimpleAttack(1.0, new TargetedFromPosition()),
             specialAttack: new SpecialAttack(
               0,
               1000,
-              new TargetedFromPosition(1),
+              new TargetedFromPosition(),
             ),
           },
         );
@@ -429,10 +423,11 @@ describe('fight', () => {
             criticalChance: 0,
           },
           {
+            simpleAttack: new SimpleAttack(1.0, new TargetedFromPosition()),
             specialAttack: new SpecialAttack(
               0,
               1000,
-              new TargetedFromPosition(1),
+              new TargetedFromPosition(),
             ),
           },
         );

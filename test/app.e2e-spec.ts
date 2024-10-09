@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
+import { SimpleAttack } from 'src/core/cards/skills/simple-attack';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
@@ -33,6 +34,12 @@ describe('AppController (e2e)', () => {
                 name: 'Double Strike',
                 damage: 200,
                 energy: 1000,
+                targetingStrategy: 'position-based',
+              },
+              simpleAttack: {
+                name: 'Simple Attack',
+                damageRate: 1.0,
+                targetingStrategy: 'position-based',
               },
             },
           },
@@ -53,6 +60,12 @@ describe('AppController (e2e)', () => {
                 name: 'Double Strike',
                 damage: 200,
                 energy: 1000,
+                targetingStrategy: 'position-based',
+              },
+              simpleAttack: {
+                name: 'Simple Attack',
+                damageRate: 1.0,
+                targetingStrategy: 'position-based',
               },
             },
           },

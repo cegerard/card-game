@@ -1,4 +1,5 @@
 import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
+import { SimpleAttack } from './skills/simple-attack';
 import { SpecialAttack } from './skills/special-attack';
 
 export class FightingCard {
@@ -8,6 +9,7 @@ export class FightingCard {
   private health: number;
   private speed: number;
   private criticalChance: number;
+  private simpleAttack: SimpleAttack;
   private specialAttack: SpecialAttack;
   private specialAttackEnergy: number = 0;
 
@@ -21,6 +23,7 @@ export class FightingCard {
       criticalChance: number;
     },
     skills: {
+      simpleAttack: SimpleAttack;
       specialAttack: SpecialAttack;
     },
   ) {
@@ -30,6 +33,7 @@ export class FightingCard {
     this.health = stats.health;
     this.speed = stats.speed;
     this.criticalChance = stats.criticalChance;
+    this.simpleAttack = skills.simpleAttack;
     this.specialAttack = skills.specialAttack;
   }
 
@@ -81,6 +85,10 @@ export class FightingCard {
 
   public specialAttackTargeting(): TargetingCardStrategy {
     return this.specialAttack.targetingStrategy;
+  }
+
+  public simpleAttackTargeting(): TargetingCardStrategy {
+    return this.simpleAttack.targetingStrategy;
   }
 
   private collectsDamages(damage: number): number {

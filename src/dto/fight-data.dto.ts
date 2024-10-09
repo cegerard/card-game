@@ -18,6 +18,20 @@ class SpecialAttackDto {
 
   @IsNumber()
   energy: number;
+
+  @IsString()
+  targetingStrategy: string;
+}
+
+class SimpleAttackDto {
+  @IsString()
+  name: string;
+
+  @IsNumber()
+  damageRate: number;
+
+  @IsString()
+  targetingStrategy: string;
 }
 
 class SkillsDto {
@@ -25,6 +39,11 @@ class SkillsDto {
   @ValidateNested()
   @Type(() => SpecialAttackDto)
   specialAttack: SpecialAttackDto;
+
+  @IsNotEmpty()
+  @ValidateNested()
+  @Type(() => SimpleAttackDto)
+  simpleAttack: SimpleAttackDto;
 }
 
 export class FightingCardDto {

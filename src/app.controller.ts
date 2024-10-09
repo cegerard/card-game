@@ -4,6 +4,8 @@ import { FightResult } from './core/fight-simulator/@types/fight-result';
 import { FightDataDto, FightingCardDto } from './dto/fight-data.dto';
 import { FightingCard } from './core/cards/fighting-card';
 import { SpecialAttack } from './core/cards/skills/special-attack';
+import { SimpleAttack } from './core/cards/skills/simple-attack';
+import { TargetingStrategyFactory } from './targeting-strategy-factory';
 
 @Controller()
 export class AppController {
@@ -26,7 +28,19 @@ export class AppController {
     const specialAttack = new SpecialAttack(
       cardData.skills.specialAttack.damage,
       cardData.skills.specialAttack.energy,
+      TargetingStrategyFactory.create(
+        cardData.skills.specialAttack.targetingStrategy,
+      ),
     );
-    return new FightingCard(cardData.name, cardData, { specialAttack });
+    const simpleAttack = new SimpleAttack(
+      cardData.skills.simpleAttack.damageRate,
+      TargetingStrategyFactory.create(
+        cardData.skills.simpleAttack.targetingStrategy,
+      ),
+    );
+    return new FightingCard(cardData.name, cardData, {
+      specialAttack,
+      simpleAttack,
+    });
   }
 }

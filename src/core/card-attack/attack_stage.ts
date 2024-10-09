@@ -5,6 +5,7 @@ import { CardDeathSubscriber } from '../fight-simulator/card-death-subscriber';
 import { TargetedFromPosition } from '../targeting-card-strategies/targeted-from-position';
 import { Step } from '../fight-simulator/@types/step';
 import { spec } from 'node:test/reporters';
+import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
 
 export class AttackStage {
   private player1: Player;
@@ -141,15 +142,19 @@ export class AttackStage {
     attackingPlayer: Player,
     defendingPlayer: Player,
   ): FightingCard[] {
+    let targetedStrategy: TargetingCardStrategy;
+
     if (attacker.isSpecialAttackReady()) {
-      const specialAttackTargeting = attacker.specialAttackTargeting();
-      return specialAttackTargeting.targetedCards(defendingPlayer);
+      targetedStrategy = attacker.specialAttackTargeting();
+    } else {
+      targetedStrategy = attacker.simpleAttackTargeting();
     }
 
-    const targetedStrategy = new TargetedFromPosition(
-      attackingPlayer.cardPosition(attacker),
+    return targetedStrategy.targetedCards(
+      attacker,
+      attackingPlayer,
+      defendingPlayer,
     );
-    return targetedStrategy.targetedCards(defendingPlayer);
   }
 
   private notifyDeath(card: FightingCard): void {
