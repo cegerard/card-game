@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, HttpCode } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode } from '@nestjs/common';
 import { AppService } from './app.service';
 import { FightResult } from './core/fight-simulator/@types/fight-result';
 import { FightDataDto, FightingCardDto } from './dto/fight-data.dto';

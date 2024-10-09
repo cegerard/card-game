@@ -1,5 +1,3 @@
-import * as prettierConfig from './.prettierrc.js'
-
 module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {

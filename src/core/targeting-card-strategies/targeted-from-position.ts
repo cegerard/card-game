@@ -1,4 +1,3 @@
-import { cp } from 'fs';
 import { FightingCard } from '../cards/fighting-card';
 import { Player } from '../player';
 import { TargetingCardStrategy } from './targeting-card-strategy';

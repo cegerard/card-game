@@ -1,5 +1,4 @@
 import { FightingCard } from './cards/fighting-card';
-import { TargetingCardStrategy } from './targeting-card-strategies/targeting-card-strategy';
 
 export class Player {
   private cards: FightingCard[];

@@ -58,7 +58,7 @@ export class Fight {
     return this.attackManager.computeNextAttack(this.cardSelector.nextCards());
   }
 
-  private computeWinner(steps: {}): void {
+  private computeWinner(steps: Record<number, object>): void {
     let winner: string | null = null;
 
     if (this.player1.status() > this.player2.status()) {

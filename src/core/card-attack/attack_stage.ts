@@ -2,9 +2,7 @@ import { AttackResult } from './@types/attack-result';
 import { FightingCard } from '../cards/fighting-card';
 import { Player } from '../player';
 import { CardDeathSubscriber } from '../fight-simulator/card-death-subscriber';
-import { TargetedFromPosition } from '../targeting-card-strategies/targeted-from-position';
 import { Step } from '../fight-simulator/@types/step';
-import { spec } from 'node:test/reporters';
 import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
 
 export class AttackStage {
