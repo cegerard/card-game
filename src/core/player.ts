@@ -28,4 +28,12 @@ export class Player {
   public status(): number {
     return this.cards.reduce((status, card) => status + card.actualHealth, 0);
   }
+
+  public threeCardsFromCenter(position: number): FightingCard[] {
+    const left = this.cards[position - 1];
+    const center = this.cards[position];
+    const right = this.cards[position + 1];
+
+    return [left, center, right].filter((card) => card);
+  }
 }
