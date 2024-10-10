@@ -5,7 +5,7 @@ import { SimpleAttack } from '../../src/core/cards/skills/simple-attack';
 import { SpecialAttack } from '../../src/core/cards/skills/special-attack';
 import { TargetedFromPosition } from '../../src/core/targeting-card-strategies/targeted-from-position';
 import { TargetingCardStrategy } from '../../src/core/targeting-card-strategies/targeting-card-strategy';
-import { TargetedAll } from 'src/core/targeting-card-strategies/targeted-all';
+import { TargetedAll } from '../../src/core/targeting-card-strategies/targeted-all';
 
 type FightingCardParams = {
   name?: string;
@@ -78,7 +78,9 @@ export function createFightingCard(params: FightingCardParams): FightingCard {
   const health = params.health || faker.number.int({ min: 2000, max: 10000 });
   const speed = params.speed || faker.number.int({ min: 100, max: 500 });
   const criticalChance =
-    params.criticalChance || faker.number.float({ max: 0.9 });
+    params.criticalChance != undefined
+      ? params.criticalChance
+      : faker.number.float({ max: 0.9 });
 
   return new FightingCard(
     cardName,
