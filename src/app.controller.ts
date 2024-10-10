@@ -26,7 +26,7 @@ export class AppController {
 
   private convertCardDtoToCard(cardData: FightingCardDto): FightingCard {
     const specialAttack = new SpecialAttack(
-      cardData.skills.specialAttack.damage,
+      cardData.skills.specialAttack.damageRate,
       cardData.skills.specialAttack.energy,
       TargetingStrategyFactory.create(
         cardData.skills.specialAttack.targetingStrategy,

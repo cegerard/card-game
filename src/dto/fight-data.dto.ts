@@ -14,7 +14,7 @@ class SpecialAttackDto {
   name: string;
 
   @IsNumber()
-  damage: number;
+  damageRate: number;
 
   @IsNumber()
   energy: number;
