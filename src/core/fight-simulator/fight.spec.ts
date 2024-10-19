@@ -55,12 +55,16 @@ describe('fight', () => {
           expect(fight.start()).toEqual({
             1: {
               kind: 'attack',
-              attacker: card1,
-              defender: card2,
+              attacker: card1.displayName,
+              defender: card2.displayName,
               damage: 99,
               isCritical: false,
             },
-            2: { kind: 'status_change', card: card2, status: 'dead' },
+            2: {
+              kind: 'status_change',
+              card: card2.displayName,
+              status: 'dead',
+            },
             3: { kind: 'fight_end', winner: player1.name },
           });
         });
@@ -95,8 +99,8 @@ describe('fight', () => {
             specialAttack: new SpecialAttack(0, 10, new TargetedFromPosition()),
           },
         );
-        const player1 = new Player('Player 1', [card1]); // Pass name
-        const player2 = new Player('Player 2', [card2]); // Pass name
+        const player1 = new Player('Player 1', [card1]);
+        const player2 = new Player('Player 2', [card2]);
         const fight = new Fight(
           player1,
           player2,
@@ -107,12 +111,16 @@ describe('fight', () => {
           expect(fight.start()).toEqual({
             1: {
               kind: 'attack',
-              attacker: card2,
-              defender: card1,
+              attacker: card2.displayName,
+              defender: card1.displayName,
               damage: 59,
               isCritical: false,
             },
-            2: { kind: 'status_change', card: card1, status: 'dead' },
+            2: {
+              kind: 'status_change',
+              card: card1.displayName,
+              status: 'dead',
+            },
             3: { kind: 'fight_end', winner: player2.name },
           });
         });
@@ -148,8 +156,8 @@ describe('fight', () => {
             specialAttack: new SpecialAttack(0, 10, new TargetedFromPosition()),
           },
         );
-        const player1 = new Player('Player 1', [card1]); // Pass name
-        const player2 = new Player('Player 2', [card2]); // Pass name
+        const player1 = new Player('Player 1', [card1]);
+        const player2 = new Player('Player 2', [card2]);
         const fight = new Fight(
           player1,
           player2,
@@ -160,20 +168,28 @@ describe('fight', () => {
           expect(fight.start()).toEqual({
             1: {
               kind: 'attack',
-              attacker: card1,
-              defender: card2,
+              attacker: card1.displayName,
+              defender: card2.displayName,
               damage: 25,
               isCritical: false,
             },
             2: {
               kind: 'attack',
-              attacker: card2,
-              defender: card1,
+              attacker: card2.displayName,
+              defender: card1.displayName,
               damage: 30,
               isCritical: false,
             },
-            3: { kind: 'status_change', card: card2, status: 'dead' },
-            4: { kind: 'status_change', card: card1, status: 'dead' },
+            3: {
+              kind: 'status_change',
+              card: card2.displayName,
+              status: 'dead',
+            },
+            4: {
+              kind: 'status_change',
+              card: card1.displayName,
+              status: 'dead',
+            },
             5: { kind: 'fight_end', winner: null },
           });
         });
@@ -217,8 +233,8 @@ describe('fight', () => {
             ),
           },
         );
-        const player1 = new Player('Player 1', [card1]); // Pass name
-        const player2 = new Player('Player 2', [card2]); // Pass name
+        const player1 = new Player('Player 1', [card1]);
+        const player2 = new Player('Player 2', [card2]);
         const fight = new Fight(
           player1,
           player2,
@@ -240,7 +256,7 @@ describe('fight', () => {
             .filter((step) => step.kind === 'attack')
             .forEach((step) => {
               const attacker = (step as DamageReport).attacker;
-              if (attacker === card1) {
+              if (attacker === card1.displayName) {
                 counter.card1++;
               } else {
                 counter.card2++;
@@ -459,160 +475,196 @@ describe('fight', () => {
           expect(steps).toEqual({
             1: {
               kind: 'attack',
-              attacker: card1,
-              defender: card6,
+              attacker: card1.displayName,
+              defender: card6.displayName,
               damage: 70,
               isCritical: false,
             },
-            2: { kind: 'status_change', card: card6, status: 'dead' },
+            2: {
+              kind: 'status_change',
+              card: card6.displayName,
+              status: 'dead',
+            },
             3: {
               kind: 'attack',
-              attacker: card10,
-              defender: card5,
+              attacker: card10.displayName,
+              defender: card5.displayName,
               damage: 50,
               isCritical: false,
             },
-            4: { kind: 'status_change', card: card5, status: 'dead' },
+            4: {
+              kind: 'status_change',
+              card: card5.displayName,
+              status: 'dead',
+            },
             5: {
               kind: 'attack',
-              attacker: card4,
-              defender: card9,
+              attacker: card4.displayName,
+              defender: card9.displayName,
               damage: 0,
               isCritical: false,
             },
             6: {
               kind: 'attack',
-              attacker: card9,
-              defender: card4,
+              attacker: card9.displayName,
+              defender: card4.displayName,
               damage: 50,
               isCritical: false,
             },
-            7: { kind: 'status_change', card: card4, status: 'dead' },
+            7: {
+              kind: 'status_change',
+              card: card4.displayName,
+              status: 'dead',
+            },
             8: {
               kind: 'attack',
-              attacker: card3,
-              defender: card8,
+              attacker: card3.displayName,
+              defender: card8.displayName,
               damage: 0,
               isCritical: false,
             },
             9: {
               kind: 'attack',
-              attacker: card8,
-              defender: card3,
+              attacker: card8.displayName,
+              defender: card3.displayName,
               damage: 45,
               isCritical: false,
             },
-            10: { kind: 'status_change', card: card3, status: 'dead' },
+            10: {
+              kind: 'status_change',
+              card: card3.displayName,
+              status: 'dead',
+            },
             11: {
               kind: 'attack',
-              attacker: card2,
-              defender: card7,
+              attacker: card2.displayName,
+              defender: card7.displayName,
               damage: 0,
               isCritical: false,
             },
             12: {
               kind: 'attack',
-              attacker: card7,
-              defender: card2,
+              attacker: card7.displayName,
+              defender: card2.displayName,
               damage: 39,
               isCritical: false,
             },
-            13: { kind: 'status_change', card: card2, status: 'dead' },
+            13: {
+              kind: 'status_change',
+              card: card2.displayName,
+              status: 'dead',
+            },
             14: {
               kind: 'attack',
-              attacker: card1,
-              defender: card7,
+              attacker: card1.displayName,
+              defender: card7.displayName,
               damage: 60,
               isCritical: false,
             },
-            15: { kind: 'status_change', card: card7, status: 'dead' },
+            15: {
+              kind: 'status_change',
+              card: card7.displayName,
+              status: 'dead',
+            },
             16: {
               kind: 'attack',
-              attacker: card10,
-              defender: card1,
+              attacker: card10.displayName,
+              defender: card1.displayName,
               damage: 0,
               isCritical: false,
             },
             17: {
               kind: 'attack',
-              attacker: card1,
-              defender: card8,
+              attacker: card1.displayName,
+              defender: card8.displayName,
               damage: 50,
               isCritical: false,
             },
-            18: { kind: 'status_change', card: card8, status: 'dead' },
+            18: {
+              kind: 'status_change',
+              card: card8.displayName,
+              status: 'dead',
+            },
             19: {
               kind: 'attack',
-              attacker: card9,
-              defender: card1,
+              attacker: card9.displayName,
+              defender: card1.displayName,
               damage: 0,
               isCritical: false,
             },
             20: {
               kind: 'attack',
-              attacker: card1,
-              defender: card9,
+              attacker: card1.displayName,
+              defender: card9.displayName,
               damage: 40,
               isCritical: false,
             },
             21: {
               kind: 'attack',
-              attacker: card10,
-              defender: card1,
+              attacker: card10.displayName,
+              defender: card1.displayName,
               damage: 0,
               isCritical: false,
             },
             22: {
               kind: 'attack',
-              attacker: card1,
-              defender: card9,
+              attacker: card1.displayName,
+              defender: card9.displayName,
               damage: 40,
               isCritical: false,
             },
-            23: { kind: 'status_change', card: card9, status: 'dead' },
+            23: {
+              kind: 'status_change',
+              card: card9.displayName,
+              status: 'dead',
+            },
             24: {
               kind: 'attack',
-              attacker: card10,
-              defender: card1,
+              attacker: card10.displayName,
+              defender: card1.displayName,
               damage: 0,
               isCritical: false,
             },
             25: {
               kind: 'attack',
-              attacker: card1,
-              defender: card10,
+              attacker: card1.displayName,
+              defender: card10.displayName,
               damage: 30,
               isCritical: false,
             },
             26: {
               kind: 'attack',
-              attacker: card10,
-              defender: card1,
+              attacker: card10.displayName,
+              defender: card1.displayName,
               damage: 0,
               isCritical: false,
             },
             27: {
               kind: 'attack',
-              attacker: card1,
-              defender: card10,
+              attacker: card1.displayName,
+              defender: card10.displayName,
               damage: 30,
               isCritical: false,
             },
             28: {
               kind: 'attack',
-              attacker: card10,
-              defender: card1,
+              attacker: card10.displayName,
+              defender: card1.displayName,
               damage: 0,
               isCritical: false,
             },
             29: {
               kind: 'attack',
-              attacker: card1,
-              defender: card10,
+              attacker: card1.displayName,
+              defender: card10.displayName,
               damage: 30,
               isCritical: false,
             },
-            30: { kind: 'status_change', card: card10, status: 'dead' },
+            30: {
+              kind: 'status_change',
+              card: card10.displayName,
+              status: 'dead',
+            },
             31: { kind: 'fight_end', winner: player1.name },
           });
         });

@@ -49,7 +49,13 @@ describe('AttackStage', () => {
         const result = attackStage.computeNextAttack([attacker]);
 
         expect(result).toEqual([
-          { kind: 'attack', attacker, defender, damage: 10, isCritical: false },
+          {
+            kind: 'attack',
+            attacker: attacker.displayName,
+            defender: defender.displayName,
+            damage: 10,
+            isCritical: false,
+          },
         ]);
       });
     });
@@ -91,7 +97,13 @@ describe('AttackStage', () => {
         const result = attackStage.computeNextAttack([attacker]);
 
         expect(result).toEqual([
-          { kind: 'attack', attacker, defender, damage: 20, isCritical: true },
+          {
+            kind: 'attack',
+            attacker: attacker.displayName,
+            defender: defender.displayName,
+            damage: 20,
+            isCritical: true,
+          },
         ]);
       });
     });
@@ -135,12 +147,12 @@ describe('AttackStage', () => {
         expect(result).toEqual([
           {
             kind: 'attack',
-            attacker,
-            defender,
+            attacker: attacker.displayName,
+            defender: defender.displayName,
             damage: 120,
             isCritical: false,
           },
-          { kind: 'status_change', card: defender, status: 'dead' },
+          { kind: 'status_change', card: defender.displayName, status: 'dead' },
         ]);
       });
     });
@@ -184,8 +196,8 @@ describe('AttackStage', () => {
         expect(result).toEqual([
           {
             kind: 'special_attack',
-            attacker,
-            defender,
+            attacker: attacker.displayName,
+            defender: defender.displayName,
             damage: 450,
             isCritical: false,
           },
@@ -243,23 +255,26 @@ describe('AttackStage', () => {
 
       it('should return the damage dealt and the status change', () => {
         const result = attackStage.computeNextAttack([attacker]);
-        console.log(JSON.stringify(result, null, 2));
         expect(result).toEqual([
           {
             kind: 'special_attack',
-            attacker,
-            defender: defender1,
+            attacker: attacker.displayName,
+            defender: defender1.displayName,
             damage: 330,
             isCritical: false,
           },
           {
             kind: 'special_attack',
-            attacker,
-            defender: defender2,
+            attacker: attacker.displayName,
+            defender: defender2.displayName,
             damage: 250,
             isCritical: false,
           },
-          { kind: 'status_change', card: defender1, status: 'dead' },
+          {
+            kind: 'status_change',
+            card: defender1.displayName,
+            status: 'dead',
+          },
         ]);
       });
     });

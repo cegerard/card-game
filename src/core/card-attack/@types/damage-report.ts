@@ -1,8 +1,6 @@
-import { FightingCard } from '../../cards/fighting-card';
-
 export type DamageReport = {
-  attacker: FightingCard;
-  defender: FightingCard;
+  attacker: string;
+  defender: string;
   damage: number;
   isCritical: boolean;
 };

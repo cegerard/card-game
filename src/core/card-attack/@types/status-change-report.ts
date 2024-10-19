@@ -1,8 +1,6 @@
-import { FightingCard } from '../../cards/fighting-card';
-
 export type status = 'dead';
 
 export type StatusChangeReport = {
-  card: FightingCard;
+  card: string;
   status: status;
 };

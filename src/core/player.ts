@@ -7,6 +7,7 @@ export class Player {
   constructor(name: string, cards: FightingCard[]) {
     this.name = name;
     this.cards = cards;
+    this.cards.forEach((card) => card.setOwnerName(name));
   }
 
   public get allCards(): FightingCard[] {

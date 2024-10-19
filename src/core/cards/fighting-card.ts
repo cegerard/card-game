@@ -12,6 +12,7 @@ export class FightingCard {
   private simpleAttack: SimpleAttack;
   private specialAttack: SpecialAttack;
   private specialAttackEnergy: number = 0;
+  private ownerName: string = '';
 
   constructor(
     name: string,
@@ -43,6 +44,14 @@ export class FightingCard {
 
   public get actualSpeed(): number {
     return this.speed;
+  }
+
+  public get displayName(): string {
+    return `${this.ownerName} - ${this.name}`;
+  }
+
+  public setOwnerName(ownerName: string) {
+    this.ownerName = ownerName;
   }
 
   public attack(defender: FightingCard): {
