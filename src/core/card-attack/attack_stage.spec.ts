@@ -51,8 +51,8 @@ describe('AttackStage', () => {
         expect(result).toEqual([
           {
             kind: 'attack',
-            attacker: attacker.displayName,
-            defender: defender.displayName,
+            attacker: attacker.identityInfo,
+            defender: defender.identityInfo,
             damage: 10,
             isCritical: false,
           },
@@ -99,8 +99,8 @@ describe('AttackStage', () => {
         expect(result).toEqual([
           {
             kind: 'attack',
-            attacker: attacker.displayName,
-            defender: defender.displayName,
+            attacker: attacker.identityInfo,
+            defender: defender.identityInfo,
             damage: 20,
             isCritical: true,
           },
@@ -147,12 +147,16 @@ describe('AttackStage', () => {
         expect(result).toEqual([
           {
             kind: 'attack',
-            attacker: attacker.displayName,
-            defender: defender.displayName,
+            attacker: attacker.identityInfo,
+            defender: defender.identityInfo,
             damage: 120,
             isCritical: false,
           },
-          { kind: 'status_change', card: defender.displayName, status: 'dead' },
+          {
+            kind: 'status_change',
+            card: defender.identityInfo,
+            status: 'dead',
+          },
         ]);
       });
     });
@@ -196,8 +200,8 @@ describe('AttackStage', () => {
         expect(result).toEqual([
           {
             kind: 'special_attack',
-            attacker: attacker.displayName,
-            defender: defender.displayName,
+            attacker: attacker.identityInfo,
+            defender: defender.identityInfo,
             damage: 450,
             isCritical: false,
           },
@@ -258,21 +262,21 @@ describe('AttackStage', () => {
         expect(result).toEqual([
           {
             kind: 'special_attack',
-            attacker: attacker.displayName,
-            defender: defender1.displayName,
+            attacker: attacker.identityInfo,
+            defender: defender1.identityInfo,
             damage: 330,
             isCritical: false,
           },
           {
             kind: 'special_attack',
-            attacker: attacker.displayName,
-            defender: defender2.displayName,
+            attacker: attacker.identityInfo,
+            defender: defender2.identityInfo,
             damage: 250,
             isCritical: false,
           },
           {
             kind: 'status_change',
-            card: defender1.displayName,
+            card: defender1.identityInfo,
             status: 'dead',
           },
         ]);

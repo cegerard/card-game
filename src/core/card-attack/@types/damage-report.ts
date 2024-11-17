@@ -1,6 +1,8 @@
+import { CardInfo } from '../../cards/@types/card-info';
+
 export type DamageReport = {
-  attacker: string;
-  defender: string;
+  attacker: CardInfo;
+  defender: CardInfo;
   damage: number;
   isCritical: boolean;
 };

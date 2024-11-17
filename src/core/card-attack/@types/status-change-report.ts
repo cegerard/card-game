@@ -1,6 +1,8 @@
+import { CardInfo } from '../../cards/@types/card-info';
+
 export type status = 'dead';
 
 export type StatusChangeReport = {
-  card: string;
+  card: CardInfo;
   status: status;
 };

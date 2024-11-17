@@ -1,4 +1,5 @@
 import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
+import { CardInfo } from './@types/card-info';
 import { SimpleAttack } from './skills/simple-attack';
 import { SpecialAttack } from './skills/special-attack';
 
@@ -12,7 +13,7 @@ export class FightingCard {
   private simpleAttack: SimpleAttack;
   private specialAttack: SpecialAttack;
   private specialAttackEnergy: number = 0;
-  private ownerName: string = '';
+  private cardDeckIdentity: string = '';
 
   constructor(
     name: string,
@@ -46,12 +47,12 @@ export class FightingCard {
     return this.speed;
   }
 
-  public get displayName(): string {
-    return `${this.ownerName} - ${this.name}`;
+  public get identityInfo(): CardInfo {
+    return { name: this.name, deckIdentity: this.cardDeckIdentity };
   }
 
-  public setOwnerName(ownerName: string) {
-    this.ownerName = ownerName;
+  public setOwnerInfo(ownerName: string, cardPositionInDeck: number): void {
+    this.cardDeckIdentity = `${ownerName}-${cardPositionInDeck}`;
   }
 
   public attack(defender: FightingCard): {

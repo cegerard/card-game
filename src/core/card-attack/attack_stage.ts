@@ -49,8 +49,8 @@ export class AttackStage {
 
     const result: AttackResult = {
       attack: {
-        attacker: card.displayName,
-        defender: defensiveCard.displayName,
+        attacker: card.identityInfo,
+        defender: defensiveCard.identityInfo,
         damage: damageDealt.damage,
         isCritical: damageDealt.isCritical,
       },
@@ -59,7 +59,7 @@ export class AttackStage {
     if (defensiveCard.isDead()) {
       this.notifyDeath(defensiveCard);
       result.statusChange = {
-        card: defensiveCard.displayName,
+        card: defensiveCard.identityInfo,
         status: 'dead',
       };
     }
@@ -75,8 +75,8 @@ export class AttackStage {
 
       const result: AttackResult = {
         specialAttack: {
-          attacker: card.displayName,
-          defender: defensiveCard.displayName,
+          attacker: card.identityInfo,
+          defender: defensiveCard.identityInfo,
           damage: damageDealt.damage,
           isCritical: damageDealt.isCritical,
         },
@@ -85,7 +85,7 @@ export class AttackStage {
       if (defensiveCard.isDead()) {
         this.notifyDeath(defensiveCard);
         result.statusChange = {
-          card: defensiveCard.displayName,
+          card: defensiveCard.identityInfo,
           status: 'dead',
         };
       }
