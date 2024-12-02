@@ -9,6 +9,6 @@ export class SimpleAttack {
   public computeDamage(damage: number, isCritical: boolean): number {
     const damageMultiplier = isCritical ? 2 : 1;
 
-    return damage * this.damageRate * damageMultiplier;
+    return Math.round(damage * this.damageRate * damageMultiplier);
   }
 }
