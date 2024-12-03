@@ -14,6 +14,6 @@ export class SpecialAttack {
   public computeDamage(damage: number, isCritical: boolean): number {
     const damageMultiplier = isCritical ? 1.3 : 1;
 
-    return damage * this.damageRate * damageMultiplier;
+    return Math.round(damage * this.damageRate * damageMultiplier);
   }
 }
