@@ -56,9 +56,13 @@ describe('fight', () => {
             1: {
               kind: 'attack',
               attacker: card1.identityInfo,
-              defender: card2.identityInfo,
-              damage: 99,
-              isCritical: false,
+              damages: [
+                {
+                  defender: card2.identityInfo,
+                  damage: 99,
+                  isCritical: false,
+                },
+              ],
             },
             2: {
               kind: 'status_change',
@@ -112,9 +116,13 @@ describe('fight', () => {
             1: {
               kind: 'attack',
               attacker: card2.identityInfo,
-              defender: card1.identityInfo,
-              damage: 59,
-              isCritical: false,
+              damages: [
+                {
+                  defender: card1.identityInfo,
+                  damage: 59,
+                  isCritical: false,
+                },
+              ],
             },
             2: {
               kind: 'status_change',
@@ -169,16 +177,24 @@ describe('fight', () => {
             1: {
               kind: 'attack',
               attacker: card1.identityInfo,
-              defender: card2.identityInfo,
-              damage: 25,
-              isCritical: false,
+              damages: [
+                {
+                  defender: card2.identityInfo,
+                  damage: 25,
+                  isCritical: false,
+                },
+              ],
             },
             2: {
               kind: 'attack',
               attacker: card2.identityInfo,
-              defender: card1.identityInfo,
-              damage: 30,
-              isCritical: false,
+              damages: [
+                {
+                  defender: card1.identityInfo,
+                  damage: 30,
+                  isCritical: false,
+                },
+              ],
             },
             3: {
               kind: 'status_change',
@@ -476,9 +492,13 @@ describe('fight', () => {
             1: {
               kind: 'attack',
               attacker: card1.identityInfo,
-              defender: card6.identityInfo,
-              damage: 70,
-              isCritical: false,
+              damages: [
+                {
+                  defender: card6.identityInfo,
+                  damage: 70,
+                  isCritical: false,
+                },
+              ],
             },
             2: {
               kind: 'status_change',
@@ -488,9 +508,13 @@ describe('fight', () => {
             3: {
               kind: 'attack',
               attacker: card10.identityInfo,
-              defender: card5.identityInfo,
-              damage: 50,
-              isCritical: false,
+              damages: [
+                {
+                  defender: card5.identityInfo,
+                  damage: 50,
+                  isCritical: false,
+                },
+              ],
             },
             4: {
               kind: 'status_change',
@@ -500,16 +524,24 @@ describe('fight', () => {
             5: {
               kind: 'attack',
               attacker: card4.identityInfo,
-              defender: card9.identityInfo,
-              damage: 0,
-              isCritical: false,
+              damages: [
+                {
+                  defender: card9.identityInfo,
+                  damage: 0,
+                  isCritical: false,
+                },
+              ],
             },
             6: {
               kind: 'attack',
               attacker: card9.identityInfo,
-              defender: card4.identityInfo,
-              damage: 50,
-              isCritical: false,
+              damages: [
+                {
+                  defender: card4.identityInfo,
+                  damage: 50,
+                  isCritical: false,
+                },
+              ],
             },
             7: {
               kind: 'status_change',
@@ -519,16 +551,24 @@ describe('fight', () => {
             8: {
               kind: 'attack',
               attacker: card3.identityInfo,
-              defender: card8.identityInfo,
-              damage: 0,
-              isCritical: false,
+              damages: [
+                {
+                  defender: card8.identityInfo,
+                  damage: 0,
+                  isCritical: false,
+                },
+              ],
             },
             9: {
               kind: 'attack',
               attacker: card8.identityInfo,
-              defender: card3.identityInfo,
-              damage: 45,
-              isCritical: false,
+              damages: [
+                {
+                  defender: card3.identityInfo,
+                  damage: 45,
+                  isCritical: false,
+                },
+              ],
             },
             10: {
               kind: 'status_change',
@@ -538,16 +578,24 @@ describe('fight', () => {
             11: {
               kind: 'attack',
               attacker: card2.identityInfo,
-              defender: card7.identityInfo,
-              damage: 0,
-              isCritical: false,
+              damages: [
+                {
+                  defender: card7.identityInfo,
+                  damage: 0,
+                  isCritical: false,
+                },
+              ],
             },
             12: {
               kind: 'attack',
               attacker: card7.identityInfo,
-              defender: card2.identityInfo,
-              damage: 39,
-              isCritical: false,
+              damages: [
+                {
+                  defender: card2.identityInfo,
+                  damage: 39,
+                  isCritical: false,
+                },
+              ],
             },
             13: {
               kind: 'status_change',
@@ -557,9 +605,13 @@ describe('fight', () => {
             14: {
               kind: 'attack',
               attacker: card1.identityInfo,
-              defender: card7.identityInfo,
-              damage: 60,
-              isCritical: false,
+              damages: [
+                {
+                  defender: card7.identityInfo,
+                  damage: 60,
+                  isCritical: false,
+                },
+              ],
             },
             15: {
               kind: 'status_change',
@@ -569,16 +621,24 @@ describe('fight', () => {
             16: {
               kind: 'attack',
               attacker: card10.identityInfo,
-              defender: card1.identityInfo,
-              damage: 0,
-              isCritical: false,
+              damages: [
+                {
+                  defender: card1.identityInfo,
+                  damage: 0,
+                  isCritical: false,
+                },
+              ],
             },
             17: {
               kind: 'attack',
               attacker: card1.identityInfo,
-              defender: card8.identityInfo,
-              damage: 50,
-              isCritical: false,
+              damages: [
+                {
+                  defender: card8.identityInfo,
+                  damage: 50,
+                  isCritical: false,
+                },
+              ],
             },
             18: {
               kind: 'status_change',
@@ -588,30 +648,46 @@ describe('fight', () => {
             19: {
               kind: 'attack',
               attacker: card9.identityInfo,
-              defender: card1.identityInfo,
-              damage: 0,
-              isCritical: false,
+              damages: [
+                {
+                  defender: card1.identityInfo,
+                  damage: 0,
+                  isCritical: false,
+                },
+              ],
             },
             20: {
               kind: 'attack',
               attacker: card1.identityInfo,
-              defender: card9.identityInfo,
-              damage: 40,
-              isCritical: false,
+              damages: [
+                {
+                  defender: card9.identityInfo,
+                  damage: 40,
+                  isCritical: false,
+                },
+              ],
             },
             21: {
               kind: 'attack',
               attacker: card10.identityInfo,
-              defender: card1.identityInfo,
-              damage: 0,
-              isCritical: false,
+              damages: [
+                {
+                  defender: card1.identityInfo,
+                  damage: 0,
+                  isCritical: false,
+                },
+              ],
             },
             22: {
               kind: 'attack',
               attacker: card1.identityInfo,
-              defender: card9.identityInfo,
-              damage: 40,
-              isCritical: false,
+              damages: [
+                {
+                  defender: card9.identityInfo,
+                  damage: 40,
+                  isCritical: false,
+                },
+              ],
             },
             23: {
               kind: 'status_change',
@@ -621,44 +697,64 @@ describe('fight', () => {
             24: {
               kind: 'attack',
               attacker: card10.identityInfo,
-              defender: card1.identityInfo,
-              damage: 0,
-              isCritical: false,
+              damages: [
+                {
+                  defender: card1.identityInfo,
+                  damage: 0,
+                  isCritical: false,
+                },
+              ],
             },
             25: {
               kind: 'attack',
               attacker: card1.identityInfo,
-              defender: card10.identityInfo,
-              damage: 30,
-              isCritical: false,
+              damages: [
+                {
+                  defender: card10.identityInfo,
+                  damage: 30,
+                  isCritical: false,
+                },
+              ],
             },
             26: {
               kind: 'attack',
               attacker: card10.identityInfo,
-              defender: card1.identityInfo,
-              damage: 0,
-              isCritical: false,
+              damages: [
+                {
+                  defender: card1.identityInfo,
+                  damage: 0,
+                  isCritical: false,
+                },
+              ],
             },
             27: {
               kind: 'attack',
               attacker: card1.identityInfo,
-              defender: card10.identityInfo,
-              damage: 30,
-              isCritical: false,
+              damages: [
+                {
+                  defender: card10.identityInfo,
+                  damage: 30,
+                  isCritical: false,
+                },
+              ],
             },
             28: {
               kind: 'attack',
               attacker: card10.identityInfo,
-              defender: card1.identityInfo,
-              damage: 0,
-              isCritical: false,
+              damages: [
+                { defender: card1.identityInfo, damage: 0, isCritical: false },
+              ],
             },
             29: {
               kind: 'attack',
               attacker: card1.identityInfo,
-              defender: card10.identityInfo,
-              damage: 30,
-              isCritical: false,
+              damages: [
+                {
+                  defender: card10.identityInfo,
+                  damage: 30,
+                  isCritical: false,
+                },
+              ],
             },
             30: {
               kind: 'status_change',

@@ -52,9 +52,13 @@ describe('AttackStage', () => {
           {
             kind: 'attack',
             attacker: attacker.identityInfo,
-            defender: defender.identityInfo,
-            damage: 10,
-            isCritical: false,
+            damages: [
+              {
+                defender: defender.identityInfo,
+                damage: 10,
+                isCritical: false,
+              },
+            ],
           },
         ]);
       });
@@ -100,9 +104,13 @@ describe('AttackStage', () => {
           {
             kind: 'attack',
             attacker: attacker.identityInfo,
-            defender: defender.identityInfo,
-            damage: 20,
-            isCritical: true,
+            damages: [
+              {
+                defender: defender.identityInfo,
+                damage: 20,
+                isCritical: true,
+              },
+            ],
           },
         ]);
       });
@@ -148,9 +156,13 @@ describe('AttackStage', () => {
           {
             kind: 'attack',
             attacker: attacker.identityInfo,
-            defender: defender.identityInfo,
-            damage: 120,
-            isCritical: false,
+            damages: [
+              {
+                defender: defender.identityInfo,
+                damage: 120,
+                isCritical: false,
+              },
+            ],
           },
           {
             kind: 'status_change',
@@ -201,9 +213,13 @@ describe('AttackStage', () => {
           {
             kind: 'special_attack',
             attacker: attacker.identityInfo,
-            defender: defender.identityInfo,
-            damage: 450,
-            isCritical: false,
+            damages: [
+              {
+                defender: defender.identityInfo,
+                damage: 450,
+                isCritical: false,
+              },
+            ],
           },
         ]);
       });
@@ -263,16 +279,18 @@ describe('AttackStage', () => {
           {
             kind: 'special_attack',
             attacker: attacker.identityInfo,
-            defender: defender1.identityInfo,
-            damage: 330,
-            isCritical: false,
-          },
-          {
-            kind: 'special_attack',
-            attacker: attacker.identityInfo,
-            defender: defender2.identityInfo,
-            damage: 250,
-            isCritical: false,
+            damages: [
+              {
+                defender: defender1.identityInfo,
+                damage: 330,
+                isCritical: false,
+              },
+              {
+                defender: defender2.identityInfo,
+                damage: 250,
+                isCritical: false,
+              },
+            ],
           },
           {
             kind: 'status_change',

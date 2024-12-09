@@ -28,7 +28,7 @@ export class AttackStage {
     const attacksResults = attackingCards.reduce(
       (acc: AttackResult[], card) => {
         if (card.isSpecialAttackReady()) {
-          acc.push(...this.specialAttack(card));
+          acc.push(this.specialAttack(card));
         } else {
           acc.push(this.normalAttack(card));
         }
@@ -44,54 +44,67 @@ export class AttackStage {
   }
 
   private normalAttack(card: FightingCard): AttackResult {
-    const defensiveCard = this.getTargetedCards(card)[0]; // TODO it should attack multiple cards
-    const damageDealt = card.attack(defensiveCard);
+    const defensiveCards = this.getTargetedCards(card);
 
     const result: AttackResult = {
       attack: {
         attacker: card.identityInfo,
+        damages: [],
+      },
+      statusChanges: [],
+    };
+
+    defensiveCards.forEach((defensiveCard) => {
+      const damageDealt = card.attack(defensiveCard);
+
+      result.attack.damages.push({
         defender: defensiveCard.identityInfo,
         damage: damageDealt.damage,
         isCritical: damageDealt.isCritical,
-      },
-    };
+      });
 
-    if (defensiveCard.isDead()) {
-      this.notifyDeath(defensiveCard);
-      result.statusChange = {
-        card: defensiveCard.identityInfo,
-        status: 'dead',
-      };
-    }
+      if (defensiveCard.isDead()) {
+        this.notifyDeath(defensiveCard);
+        result.statusChanges.push({
+          card: defensiveCard.identityInfo,
+          status: 'dead',
+        });
+      }
+    });
 
     return result;
   }
 
-  private specialAttack(card: FightingCard): AttackResult[] {
+  private specialAttack(card: FightingCard): AttackResult {
     const defensiveCards = this.getTargetedCards(card);
 
-    return defensiveCards.map((defensiveCard) => {
+    const result: AttackResult = {
+      specialAttack: {
+        attacker: card.identityInfo,
+        damages: [],
+      },
+      statusChanges: [],
+    };
+
+    defensiveCards.forEach((defensiveCard) => {
       const damageDealt = card.launchSpecialAttack(defensiveCard);
 
-      const result: AttackResult = {
-        specialAttack: {
-          attacker: card.identityInfo,
-          defender: defensiveCard.identityInfo,
-          damage: damageDealt.damage,
-          isCritical: damageDealt.isCritical,
-        },
-      };
+      result.specialAttack.damages.push({
+        defender: defensiveCard.identityInfo,
+        damage: damageDealt.damage,
+        isCritical: damageDealt.isCritical,
+      });
 
       if (defensiveCard.isDead()) {
         this.notifyDeath(defensiveCard);
-        result.statusChange = {
+        result.statusChanges.push({
           card: defensiveCard.identityInfo,
           status: 'dead',
-        };
+        });
       }
-
-      return result;
     });
+
+    return result;
   }
 
   private convertIntoSteps(attacksResults: AttackResult[]): {
@@ -114,10 +127,12 @@ export class AttackStage {
           });
         }
 
-        if (result.statusChange) {
-          acc.statusChangeSteps.push({
-            kind: 'status_change',
-            ...result.statusChange,
+        if (result.statusChanges.length > 0) {
+          result.statusChanges.forEach((statusChange) => {
+            acc.statusChangeSteps.push({
+              kind: 'status_change',
+              ...statusChange,
+            });
           });
         }
 
