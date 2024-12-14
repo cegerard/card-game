@@ -1,16 +1,16 @@
 [
   {
     "name": "Sword",
-    "damage": 11,
-    "defense": 14,
-    "health": 100,
-    "speed": 2,
+    "damage": 25000,
+    "defense": 6000,
+    "health": 90000,
+    "speed": 28,
     "criticalChance": 0.04,
     "skills": {
       "specialAttack": {
         "name": "Double Strike",
-        "damage": 200,
-        "energy": 1000,
+        "damageRate": 2,
+        "energy": 40,
         "targetingStrategy": "position-based"
       },
       "simpleAttack": {
@@ -18,195 +18,183 @@
         "damageRate": 1,
         "targetingStrategy": "position-based"
       }
-    }
+    },
+    "image": "https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/card-video-game-rm4un2/assets/7ys21codni89/flame_warrior.jpg"
   },
   {
     "name": "Axe",
-    "damage": 15,
-    "defense": 10,
-    "health": 120,
-    "speed": 1,
+    "damage": 16000,
+    "defense": 12000,
+    "health": 112000,
+    "speed": 10,
     "criticalChance": 0.05,
     "skills": {
       "specialAttack": {
         "name": "Whirlwind",
-        "damage": 250,
-        "energy": 1200,
-        "targetingStrategy": "area-based"
+        "damageRate": 1.4,
+        "energy": 50,
+        "targetingStrategy": "line-three"
       },
       "simpleAttack": {
         "name": "Chop",
         "damageRate": 1.2,
         "targetingStrategy": "position-based"
       }
-    }
+    },
+    "image": "https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/card-video-game-rm4un2/assets/gakbwueo10z2/water_shield.jpg"
   },
   {
     "name": "Bow",
-    "damage": 8,
-    "defense": 12,
-    "health": 90,
-    "speed": 3,
-    "criticalChance": 0.07,
+    "damage": 22000,
+    "defense": 8000,
+    "health": 80000,
+    "speed": 40,
+    "criticalChance": 0.06,
     "skills": {
       "specialAttack": {
         "name": "Piercing Arrow",
-        "damage": 180,
-        "energy": 900,
+        "damdamageRateage": 1.9,
+        "energy": 50,
         "targetingStrategy": "position-based"
       },
       "simpleAttack": {
         "name": "Quick Shot",
-        "damageRate": 0.9,
+        "damageRate": 1.0,
         "targetingStrategy": "position-based"
       }
-    }
+    },
+    "image": "https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/card-video-game-rm4un2/assets/j6rkn5xdyyhl/wind_archer.jpg"
   },
   {
     "name": "Dagger",
-    "damage": 10,
-    "defense": 8,
-    "health": 80,
-    "speed": 4,
-    "criticalChance": 0.1,
+    "damage": 20000,
+    "defense": 9000,
+    "health": 90000,
+    "speed": 55,
+    "criticalChance": 0.3,
     "skills": {
       "specialAttack": {
         "name": "Backstab",
-        "damage": 220,
-        "energy": 1100,
+        "damageRate": 2,
+        "energy": 40,
         "targetingStrategy": "position-based"
       },
       "simpleAttack": {
         "name": "Stab",
-        "damageRate": 1.1,
+        "damageRate": 1,
         "targetingStrategy": "position-based"
       }
-    }
+    },
+    "image": "https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/card-video-game-rm4un2/assets/mccjg79l3clb/earth_dagger.jpg"
   },
   {
     "name": "Staff",
-    "damage": 7,
-    "defense": 15,
-    "health": 110,
-    "speed": 2,
+    "damage": 13000,
+    "defense": 7000,
+    "health": 78000,
+    "speed": 20,
     "criticalChance": 0.03,
     "skills": {
       "specialAttack": {
-        "name": "Fireball",
-        "damage": 210,
-        "energy": 1050,
-        "targetingStrategy": "area-based"
+        "name": "Fireball wall",
+        "damageRate": 3,
+        "energy": 60,
+        "targetingStrategy": "line-three"
       },
       "simpleAttack": {
         "name": "Magic Missile",
         "damageRate": 1,
         "targetingStrategy": "position-based"
       }
-    }
+    },
+    "image": "https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/card-video-game-rm4un2/assets/0229zqtodew1/light_staff.jpg"
   },
   {
-    "name": "Spear",
-    "damage": 12,
-    "defense": 13,
-    "health": 95,
-    "speed": 3,
-    "criticalChance": 0.06,
+    "name": "Witch",
+    "damage": 10000,
+    "defense": 7000,
+    "health": 102000,
+    "speed": 25,
+    "criticalChance": 0.07,
     "skills": {
       "specialAttack": {
-        "name": "Impale",
-        "damage": 230,
-        "energy": 1150,
+        "name": "Dark Magic",
+        "damageRate": 3,
+        "energy": 40,
         "targetingStrategy": "position-based"
       },
       "simpleAttack": {
-        "name": "Thrust",
+        "name": "Stone Missile",
         "damageRate": 1,
         "targetingStrategy": "position-based"
       }
-    }
+    },
+    "image": "https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/card-video-game-rm4un2/assets/7kn5sn3p3gtf/earth_witch.jpg"
   },
   {
-    "name": "Mace",
-    "damage": 14,
-    "defense": 16,
-    "health": 130,
-    "speed": 1,
-    "criticalChance": 0.02,
+    "name": "Spears",
+    "damage": 24000,
+    "defense": 9000,
+    "health": 92000,
+    "speed": 35,
+    "criticalChance": 0.04,
     "skills": {
       "specialAttack": {
-        "name": "Crushing Blow",
-        "damage": 240,
-        "energy": 1200,
-        "targetingStrategy": "position-based"
+        "name": "Thunder Strike",
+        "damageRate": 2.0,
+        "energy": 35,
+        "targetingStrategy": "line-three"
       },
       "simpleAttack": {
         "name": "Smash",
-        "damageRate": 1.3,
+        "damageRate": 1,
         "targetingStrategy": "position-based"
       }
-    }
+    },
+    "image": "https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/card-video-game-rm4un2/assets/9rc0fpde2auy/water_spear.jpg"
   },
   {
     "name": "Crossbow",
-    "damage": 9,
-    "defense": 11,
-    "health": 85,
-    "speed": 3,
-    "criticalChance": 0.08,
+    "damage": 26000,
+    "defense": 7000,
+    "health": 69000,
+    "speed": 15,
+    "criticalChance": 0.07,
     "skills": {
       "specialAttack": {
         "name": "Explosive Bolt",
-        "damage": 190,
-        "energy": 950,
-        "targetingStrategy": "area-based"
+        "damageRate": 2,
+        "energy": 25,
+        "targetingStrategy": "line-three"
       },
       "simpleAttack": {
         "name": "Bolt Shot",
-        "damageRate": 0.95,
+        "damageRate": 1,
         "targetingStrategy": "position-based"
       }
-    }
+    },
+    "image": "https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/card-video-game-rm4un2/assets/oraf3olzrns1/wind_crosbow.jpg"
   },
   {
-    "name": "Hammer",
-    "damage": 16,
-    "defense": 17,
-    "health": 140,
-    "speed": 1,
+    "name": "Sabers",
+    "damage": 28000,
+    "defense": 8000,
+    "health": 105000,
+    "speed": 30,
     "criticalChance": 0.03,
     "skills": {
       "specialAttack": {
         "name": "Earthquake",
-        "damage": 260,
-        "energy": 1300,
-        "targetingStrategy": "area-based"
+        "damageRate": 2,
+        "energy": 40000,
+        "targetingStrategy": "line-three"
       },
       "simpleAttack": {
         "name": "Bash",
-        "damageRate": 1.4,
+        "damageRate": 1,
         "targetingStrategy": "position-based"
       }
-    }
-  },
-  {
-    "name": "Scythe",
-    "damage": 13,
-    "defense": 12,
-    "health": 100,
-    "speed": 2,
-    "criticalChance": 0.05,
-    "skills": {
-      "specialAttack": {
-        "name": "Reaper's Slash",
-        "damage": 220,
-        "energy": 1100,
-        "targetingStrategy": "position-based"
-      },
-      "simpleAttack": {
-        "name": "Slash",
-        "damageRate": 1.1,
-        "targetingStrategy": "position-based"
-      }
-    }
+    },
+    "image": "https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/card-video-game-rm4un2/assets/egqisbysg81u/fire_saber.jpg"
   }
 ]

@@ -13,7 +13,7 @@
         "skills": {
           "specialAttack": {
             "name": "Double Strike",
-            "damage": 200,
+            "damageRate": 20,
             "energy": 1000,
             "targetingStrategy": "position-based"
           },
@@ -39,7 +39,7 @@
         "skills": {
           "specialAttack": {
             "name": "Double Strike",
-            "damage": 200,
+            "damageRate": 20,
             "energy": 1000,
             "targetingStrategy": "position-based"
           },
