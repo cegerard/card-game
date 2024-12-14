@@ -1,4 +1,11 @@
-import { Controller, Post, Body, HttpCode } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { AppService } from './app.service';
 import { FightResult } from './core/fight-simulator/@types/fight-result';
 import { FightDataDto, FightingCardDto } from './dto/fight-data.dto';
@@ -8,6 +15,7 @@ import { SimpleAttack } from './core/cards/skills/simple-attack';
 import { TargetingStrategyFactory } from './targeting-strategy-factory';
 
 @Controller()
+@UsePipes(new ValidationPipe({ transform: true }))
 export class AppController {
   constructor(private readonly appService: AppService) {}
 

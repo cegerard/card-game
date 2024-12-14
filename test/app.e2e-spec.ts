@@ -31,7 +31,7 @@ describe('AppController (e2e)', () => {
             skills: {
               specialAttack: {
                 name: 'Double Strike',
-                damage: 200,
+                damageRate: 2.0,
                 energy: 1000,
                 targetingStrategy: 'position-based',
               },
@@ -57,7 +57,7 @@ describe('AppController (e2e)', () => {
             skills: {
               specialAttack: {
                 name: 'Double Strike',
-                damage: 200,
+                damageRate: 2.0,
                 energy: 1000,
                 targetingStrategy: 'position-based',
               },

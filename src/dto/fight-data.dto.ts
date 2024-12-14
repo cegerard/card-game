@@ -75,7 +75,7 @@ class PlayerDto {
   @IsArray()
   @ArrayMinSize(1)
   @ArrayMaxSize(5)
-  @ValidateNested()
+  @ValidateNested({ each: true })
   @Type(() => FightingCardDto)
   deck: FightingCardDto[];
 
