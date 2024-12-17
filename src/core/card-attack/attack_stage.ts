@@ -50,6 +50,7 @@ export class AttackStage {
       attack: {
         attacker: card.identityInfo,
         damages: [],
+        energy: card.actualSpecialAttackEnergy,
       },
       statusChanges: [],
     };
@@ -61,6 +62,7 @@ export class AttackStage {
         defender: defensiveCard.identityInfo,
         damage: damageDealt.damage,
         isCritical: damageDealt.isCritical,
+        remainingHealth: defensiveCard.actualHealth,
       });
 
       if (defensiveCard.isDead()) {
@@ -72,6 +74,7 @@ export class AttackStage {
       }
     });
 
+    result.attack.energy = card.actualSpecialAttackEnergy;
     return result;
   }
 
@@ -82,6 +85,7 @@ export class AttackStage {
       specialAttack: {
         attacker: card.identityInfo,
         damages: [],
+        energy: card.actualSpecialAttackEnergy,
       },
       statusChanges: [],
     };
@@ -93,6 +97,7 @@ export class AttackStage {
         defender: defensiveCard.identityInfo,
         damage: damageDealt.damage,
         isCritical: damageDealt.isCritical,
+        remainingHealth: defensiveCard.actualHealth,
       });
 
       if (defensiveCard.isDead()) {

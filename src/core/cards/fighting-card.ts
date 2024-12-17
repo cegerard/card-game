@@ -43,6 +43,10 @@ export class FightingCard {
     return this.health;
   }
 
+  public get actualSpecialAttackEnergy(): number {
+    return this.specialAttackEnergy;
+  }
+
   public get actualSpeed(): number {
     return this.speed;
   }

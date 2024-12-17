@@ -4,9 +4,11 @@ export type Damage = {
   defender: CardInfo;
   damage: number;
   isCritical: boolean;
+  remainingHealth: number;
 };
 
 export type DamageReport = {
   attacker: CardInfo;
   damages: Damage[];
+  energy: number;
 };

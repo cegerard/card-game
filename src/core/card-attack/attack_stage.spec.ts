@@ -52,11 +52,13 @@ describe('AttackStage', () => {
           {
             kind: 'attack',
             attacker: attacker.identityInfo,
+            energy: 10,
             damages: [
               {
                 defender: defender.identityInfo,
                 damage: 10,
                 isCritical: false,
+                remainingHealth: 90,
               },
             ],
           },
@@ -104,11 +106,13 @@ describe('AttackStage', () => {
           {
             kind: 'attack',
             attacker: attacker.identityInfo,
+            energy: 10,
             damages: [
               {
                 defender: defender.identityInfo,
                 damage: 20,
                 isCritical: true,
+                remainingHealth: 80,
               },
             ],
           },
@@ -156,11 +160,13 @@ describe('AttackStage', () => {
           {
             kind: 'attack',
             attacker: attacker.identityInfo,
+            energy: 10,
             damages: [
               {
                 defender: defender.identityInfo,
                 damage: 120,
                 isCritical: false,
+                remainingHealth: 0,
               },
             ],
           },
@@ -213,11 +219,13 @@ describe('AttackStage', () => {
           {
             kind: 'special_attack',
             attacker: attacker.identityInfo,
+            energy: 0,
             damages: [
               {
                 defender: defender.identityInfo,
                 damage: 450,
                 isCritical: false,
+                remainingHealth: 550,
               },
             ],
           },
@@ -279,16 +287,19 @@ describe('AttackStage', () => {
           {
             kind: 'special_attack',
             attacker: attacker.identityInfo,
+            energy: 0,
             damages: [
               {
                 defender: defender1.identityInfo,
                 damage: 330,
                 isCritical: false,
+                remainingHealth: 0,
               },
               {
                 defender: defender2.identityInfo,
                 damage: 250,
                 isCritical: false,
+                remainingHealth: 750,
               },
             ],
           },
