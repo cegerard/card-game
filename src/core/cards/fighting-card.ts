@@ -43,10 +43,6 @@ export class FightingCard {
     return this.health;
   }
 
-  public get actualSpecialAttackEnergy(): number {
-    return this.specialAttackEnergy;
-  }
-
   public get actualSpeed(): number {
     return this.speed;
   }
@@ -70,10 +66,6 @@ export class FightingCard {
     );
     const damage = defender.collectsDamages(computedDamage);
 
-    this.specialAttackEnergy = this.specialAttack.increaseEnergy(
-      this.specialAttackEnergy,
-    );
-
     return { damage, isCritical };
   }
 
@@ -88,8 +80,6 @@ export class FightingCard {
     );
     const damage = defender.collectsDamages(computedDamage);
 
-    this.specialAttackEnergy = 0;
-
     return { damage, isCritical };
   }
 
@@ -103,6 +93,20 @@ export class FightingCard {
 
   public isSpecialAttackReady(): boolean {
     return this.specialAttack.ready(this.specialAttackEnergy);
+  }
+
+  public increaseSpecialAttackEnergy(): number {
+    this.specialAttackEnergy = this.specialAttack.increaseEnergy(
+      this.specialAttackEnergy,
+    );
+
+    return this.specialAttackEnergy;
+  }
+
+  public resetSpecialAttackEnergy(): number {
+    this.specialAttackEnergy = 0;
+
+    return this.specialAttackEnergy;
   }
 
   public specialAttackTargeting(): TargetingCardStrategy {

@@ -50,7 +50,7 @@ export class AttackStage {
       attack: {
         attacker: card.identityInfo,
         damages: [],
-        energy: card.actualSpecialAttackEnergy,
+        energy: card.increaseSpecialAttackEnergy(),
       },
       statusChanges: [],
     };
@@ -74,7 +74,6 @@ export class AttackStage {
       }
     });
 
-    result.attack.energy = card.actualSpecialAttackEnergy;
     return result;
   }
 
@@ -85,7 +84,7 @@ export class AttackStage {
       specialAttack: {
         attacker: card.identityInfo,
         damages: [],
-        energy: card.actualSpecialAttackEnergy,
+        energy: card.resetSpecialAttackEnergy(),
       },
       statusChanges: [],
     };
