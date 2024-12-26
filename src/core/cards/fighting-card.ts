@@ -70,7 +70,9 @@ export class FightingCard {
     );
     const damage = defender.collectsDamages(computedDamage);
 
-    this.specialAttackEnergy += 10;
+    this.specialAttackEnergy = this.specialAttack.increaseEnergy(
+      this.specialAttackEnergy,
+    );
 
     return { damage, isCritical };
   }
