@@ -27,6 +27,8 @@ describe('AppController (e2e)', () => {
             defense: 15,
             health: 100,
             speed: 3,
+            agility: 25,
+            accuracy: 15,
             criticalChance: 0.05,
             skills: {
               specialAttack: {
@@ -53,6 +55,8 @@ describe('AppController (e2e)', () => {
             defense: 14,
             health: 100,
             speed: 2,
+            agility: 20,
+            accuracy: 18,
             criticalChance: 0.04,
             skills: {
               specialAttack: {

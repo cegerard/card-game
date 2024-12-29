@@ -63,6 +63,12 @@ export class FightingCardDto {
   speed: number;
 
   @IsNumber()
+  agility: number;
+
+  @IsNumber()
+  accuracy: number;
+
+  @IsNumber()
   criticalChance: number;
 
   @IsNotEmpty()
