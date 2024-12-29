@@ -1,5 +1,6 @@
 import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
 import { CardInfo } from './@types/card-info';
+import { DodgeBehavior } from './behaviors/dodge';
 import { SimpleAttack } from './skills/simple-attack';
 import { SpecialAttack } from './skills/special-attack';
 
@@ -16,6 +17,7 @@ export class FightingCard {
   private specialAttack: SpecialAttack;
   private specialAttackEnergy: number = 0;
   private cardDeckIdentity: string = '';
+  private dodgeBehavior: DodgeBehavior;
 
   constructor(
     name: string,
@@ -43,6 +45,7 @@ export class FightingCard {
     this.criticalChance = stats.criticalChance;
     this.simpleAttack = skills.simpleAttack;
     this.specialAttack = skills.specialAttack;
+    this.dodgeBehavior = new DodgeBehavior();
   }
 
   public get actualHealth(): number {
@@ -67,9 +70,7 @@ export class FightingCard {
   } {
     const isCritical = Math.random() < this.criticalChance;
 
-    const isDodge = defender.agility > this.accuracy;
-
-    if (isDodge) {
+    if (defender.dodge(this.accuracy)) {
       return { damage: 0, isCritical };
     }
 
@@ -134,5 +135,9 @@ export class FightingCard {
     const causedDamages = Math.max(0, damage - this.defense);
     this.health = Math.max(0, this.health - causedDamages);
     return causedDamages;
+  }
+
+  private dodge(attackerAccuracy: number): boolean {
+    return this.dodgeBehavior.dodge(this.agility, attackerAccuracy);
   }
 }
