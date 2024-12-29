@@ -9,6 +9,8 @@ export class FightingCard {
   private defense: number;
   private health: number;
   private speed: number;
+  private agility: number;
+  private accuracy: number;
   private criticalChance: number;
   private simpleAttack: SimpleAttack;
   private specialAttack: SpecialAttack;
@@ -22,6 +24,8 @@ export class FightingCard {
       defense: number;
       health: number;
       speed: number;
+      agility: number;
+      accuracy: number;
       criticalChance: number;
     },
     skills: {
@@ -34,6 +38,8 @@ export class FightingCard {
     this.defense = stats.defense;
     this.health = stats.health;
     this.speed = stats.speed;
+    this.agility = stats.agility;
+    this.accuracy = stats.accuracy;
     this.criticalChance = stats.criticalChance;
     this.simpleAttack = skills.simpleAttack;
     this.specialAttack = skills.specialAttack;
@@ -60,6 +66,13 @@ export class FightingCard {
     isCritical: boolean;
   } {
     const isCritical = Math.random() < this.criticalChance;
+
+    const isDodge = defender.agility > this.accuracy;
+
+    if (isDodge) {
+      return { damage: 0, isCritical };
+    }
+
     const computedDamage = this.simpleAttack.computeDamage(
       this.damage,
       isCritical,

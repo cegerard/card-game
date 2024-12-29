@@ -14,6 +14,8 @@ type FightingCardParams = {
   health?: number;
   speed?: number;
   criticalChance?: number;
+  agility?: number;
+  accuracy?: number;
   skills?: {
     simpleAttack?: {
       name?: string;
@@ -45,8 +47,8 @@ function createSimpleAttack(params: {
   targetingStrategy?: string;
 }): SimpleAttack {
   const damageRate =
-    params.damageRate || faker.number.float({ min: 1.0, max: 3.0 });
-  const targetingStrategy = params.targetingStrategy || 'position-based';
+    params.damageRate ?? faker.number.float({ min: 1.0, max: 3.0 });
+  const targetingStrategy = params.targetingStrategy ?? 'position-based';
 
   return new SimpleAttack(
     damageRate,
@@ -60,9 +62,9 @@ function createSpecialAttack(params: {
   targetingStrategy?: string;
 }): SpecialAttack {
   const damageRate =
-    params.damageRate || faker.number.int({ min: 2.5, max: 8.0 });
-  const energy = params.energy || faker.number.int({ min: 30, max: 100 });
-  const targetingStrategy = params.targetingStrategy || 'position-based';
+    params.damageRate ?? faker.number.int({ min: 2.5, max: 8.0 });
+  const energy = params.energy ?? faker.number.int({ min: 30, max: 100 });
+  const targetingStrategy = params.targetingStrategy ?? 'position-based';
 
   return new SpecialAttack(
     damageRate,
@@ -72,15 +74,15 @@ function createSpecialAttack(params: {
 }
 
 export function createFightingCard(params: FightingCardParams): FightingCard {
-  const cardName = params.name || faker.animal.type();
-  const damage = params.damage || faker.number.int({ min: 100, max: 800 });
-  const defense = params.defense || faker.number.int({ min: 100, max: 500 });
-  const health = params.health || faker.number.int({ min: 2000, max: 10000 });
-  const speed = params.speed || faker.number.int({ min: 100, max: 500 });
+  const cardName = params.name ?? faker.animal.type();
+  const damage = params.damage ?? faker.number.int({ min: 100, max: 800 });
+  const defense = params.defense ?? faker.number.int({ min: 100, max: 500 });
+  const health = params.health ?? faker.number.int({ min: 2000, max: 10000 });
+  const speed = params.speed ?? faker.number.int({ min: 100, max: 500 });
+  const agility = params.agility ?? faker.number.int({ min: 10, max: 50 });
+  const accuracy = params.accuracy ?? faker.number.int({ min: 10, max: 50 });
   const criticalChance =
-    params.criticalChance != undefined
-      ? params.criticalChance
-      : faker.number.float({ max: 0.9 });
+    params.criticalChance ?? faker.number.float({ max: 0.9 });
 
   return new FightingCard(
     cardName,
@@ -90,10 +92,12 @@ export function createFightingCard(params: FightingCardParams): FightingCard {
       health,
       speed,
       criticalChance,
+      agility,
+      accuracy,
     },
     {
-      simpleAttack: createSimpleAttack(params.skills?.simpleAttack || {}),
-      specialAttack: createSpecialAttack(params.skills?.specialAttack || {}),
+      simpleAttack: createSimpleAttack(params.skills?.simpleAttack ?? {}),
+      specialAttack: createSpecialAttack(params.skills?.specialAttack ?? {}),
     },
   );
 }

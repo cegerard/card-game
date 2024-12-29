@@ -1,29 +1,8 @@
 import { Player } from '../../player';
-import { FightingCard } from '../../cards/fighting-card';
 import { SpeedWeightedCardSelector } from './speed-weighted-card-pool';
-import { SpecialAttack } from '../../cards/skills/special-attack';
-import { TargetedFromPosition } from '../../../core/targeting-card-strategies/targeted-from-position';
-import { SimpleAttack } from '../../cards/skills/simple-attack';
+import { createFightingCard } from '../../../../test/helpers/fighting-card';
 
 describe('SpeedWeightedCardSelector', () => {
-  // Helper function to create a mock FightingCard
-  const createMockCard = (name: string, speed: number): FightingCard =>
-    new FightingCard(
-      name,
-      {
-        damage: 10,
-        defense: 10,
-        health: 10,
-        speed,
-        criticalChance: 0,
-      },
-      {
-        simpleAttack: new SimpleAttack(1.0, new TargetedFromPosition()),
-        specialAttack: new SpecialAttack(0, 10, new TargetedFromPosition()),
-      },
-    );
-
-  // Helper function to count occurrences of cards
   const countCardOccurrences = (
     selector: SpeedWeightedCardSelector,
     iterations: number,
@@ -39,12 +18,12 @@ describe('SpeedWeightedCardSelector', () => {
 
   test('Card with higher speed should be more represented in the card pool', () => {
     const player1 = new Player('Player 1', [
-      createMockCard('10', 10),
-      createMockCard('11', 11),
+      createFightingCard({ name: '10', speed: 10 }),
+      createFightingCard({ name: '11', speed: 11 }),
     ]);
     const player2 = new Player('Player 2', [
-      createMockCard('12', 12),
-      createMockCard('20', 20), // Higher speed card
+      createFightingCard({ name: '12', speed: 12 }),
+      createFightingCard({ name: '20', speed: 20 }),
     ]);
     const selector = new SpeedWeightedCardSelector(player1, player2);
     const occurrences = countCardOccurrences(selector, 1000);
@@ -56,12 +35,12 @@ describe('SpeedWeightedCardSelector', () => {
 
   test('Card with lower speed should be less represented in the card pool', () => {
     const player1 = new Player('Player 1', [
-      createMockCard('10', 10),
-      createMockCard('11', 11),
+      createFightingCard({ name: '10', speed: 10 }),
+      createFightingCard({ name: '11', speed: 11 }),
     ]);
     const player2 = new Player('Player 2', [
-      createMockCard('12', 12),
-      createMockCard('5', 5), // Lower speed card
+      createFightingCard({ name: '12', speed: 12 }),
+      createFightingCard({ name: '5', speed: 5 }),
     ]);
 
     const selector = new SpeedWeightedCardSelector(player1, player2);
@@ -74,12 +53,12 @@ describe('SpeedWeightedCardSelector', () => {
 
   test('Cards with the same speed should be represented equally in the card pool', () => {
     const player1 = new Player('Player 1', [
-      createMockCard('1', 10),
-      createMockCard('2', 10),
+      createFightingCard({ name: '1', speed: 10 }),
+      createFightingCard({ name: '2', speed: 10 }),
     ]);
     const player2 = new Player('Player 2', [
-      createMockCard('3', 10),
-      createMockCard('4', 10),
+      createFightingCard({ name: '3', speed: 10 }),
+      createFightingCard({ name: '4', speed: 10 }),
     ]);
     const selector = new SpeedWeightedCardSelector(player1, player2);
     const occurrences = countCardOccurrences(selector, 1000);
