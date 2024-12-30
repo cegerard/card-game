@@ -13,6 +13,7 @@ import { FightingCard } from './core/cards/fighting-card';
 import { SpecialAttack } from './core/cards/skills/special-attack';
 import { SimpleAttack } from './core/cards/skills/simple-attack';
 import { TargetingStrategyFactory } from './targeting-strategy-factory';
+import { DodgeStrategyFactory } from './dodge-strategy-factory';
 
 @Controller()
 @UsePipes(new ValidationPipe({ transform: true }))
@@ -46,9 +47,16 @@ export class AppController {
         cardData.skills.simpleAttack.targetingStrategy,
       ),
     );
-    return new FightingCard(cardData.name, cardData, {
-      specialAttack,
-      simpleAttack,
-    });
+    return new FightingCard(
+      cardData.name,
+      cardData,
+      {
+        specialAttack,
+        simpleAttack,
+      },
+      {
+        dodge: DodgeStrategyFactory.create(cardData.behaviors.dodge),
+      },
+    );
   }
 }

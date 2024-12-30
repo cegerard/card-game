@@ -43,6 +43,9 @@ describe('AppController (e2e)', () => {
                 targetingStrategy: 'position-based',
               },
             },
+            behaviors: {
+              dodge: 'simple-dodge',
+            },
           },
         ],
       },
@@ -70,6 +73,9 @@ describe('AppController (e2e)', () => {
                 damageRate: 1.0,
                 targetingStrategy: 'position-based',
               },
+            },
+            behaviors: {
+              dodge: 'simple-dodge',
             },
           },
         ],

@@ -6,6 +6,7 @@ import { SpecialAttack } from '../../src/core/cards/skills/special-attack';
 import { TargetedFromPosition } from '../../src/core/targeting-card-strategies/targeted-from-position';
 import { TargetingCardStrategy } from '../../src/core/targeting-card-strategies/targeting-card-strategy';
 import { TargetedAll } from '../../src/core/targeting-card-strategies/targeted-all';
+import { SimpleDodge } from '../../src/core/cards/behaviors/simple-dodge';
 
 type FightingCardParams = {
   name?: string;
@@ -98,6 +99,9 @@ export function createFightingCard(params: FightingCardParams): FightingCard {
     {
       simpleAttack: createSimpleAttack(params.skills?.simpleAttack ?? {}),
       specialAttack: createSpecialAttack(params.skills?.specialAttack ?? {}),
+    },
+    {
+      dodge: new SimpleDodge(),
     },
   );
 }

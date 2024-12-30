@@ -46,6 +46,11 @@ class SkillsDto {
   simpleAttack: SimpleAttackDto;
 }
 
+class BehaviorsDto {
+  @IsString()
+  dodge: string;
+}
+
 export class FightingCardDto {
   @IsString()
   name: string;
@@ -75,6 +80,11 @@ export class FightingCardDto {
   @ValidateNested()
   @Type(() => SkillsDto)
   skills: SkillsDto;
+
+  @IsNotEmpty()
+  @ValidateNested()
+  @Type(() => BehaviorsDto)
+  behaviors: BehaviorsDto;
 }
 
 class PlayerDto {

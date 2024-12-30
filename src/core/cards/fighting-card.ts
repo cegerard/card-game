@@ -1,12 +1,15 @@
 import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
 import { CardInfo } from './@types/card-info';
-import { RandomDodge } from './behaviors/random-dodge';
 import { DodgeBehavior } from './behaviors/dodge-behaviors';
 import { SimpleAttack } from './skills/simple-attack';
 import { SpecialAttack } from './skills/special-attack';
 
 export class FightingCard {
+  // Info
   public readonly name: string;
+  private cardDeckIdentity: string = '';
+
+  // Stats
   private damage: number;
   private defense: number;
   private health: number;
@@ -14,10 +17,13 @@ export class FightingCard {
   private agility: number;
   private accuracy: number;
   private criticalChance: number;
+  private specialAttackEnergy: number = 0;
+
+  // Skills
   private simpleAttack: SimpleAttack;
   private specialAttack: SpecialAttack;
-  private specialAttackEnergy: number = 0;
-  private cardDeckIdentity: string = '';
+
+  // Behaviors
   private dodgeBehavior: DodgeBehavior;
 
   constructor(
@@ -35,6 +41,9 @@ export class FightingCard {
       simpleAttack: SimpleAttack;
       specialAttack: SpecialAttack;
     },
+    behaviors: {
+      dodge: DodgeBehavior;
+    },
   ) {
     this.name = name;
     this.damage = stats.damage;
@@ -46,7 +55,7 @@ export class FightingCard {
     this.criticalChance = stats.criticalChance;
     this.simpleAttack = skills.simpleAttack;
     this.specialAttack = skills.specialAttack;
-    this.dodgeBehavior = new RandomDodge();
+    this.dodgeBehavior = behaviors.dodge;
   }
 
   public get actualHealth(): number {

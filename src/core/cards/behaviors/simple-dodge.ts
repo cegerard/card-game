@@ -1,7 +1,7 @@
 import { DodgeBehavior } from './dodge-behaviors';
 
-export class RandomDodge implements DodgeBehavior {
+export class SimpleDodge implements DodgeBehavior {
   public dodge(defenderAgility: number, attackerAccuracy: number): boolean {
-    throw new Error('Method not implemented.');
+    return defenderAgility > attackerAccuracy;
   }
 }
