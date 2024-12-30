@@ -75,7 +75,7 @@ describe('AppController (e2e)', () => {
               },
             },
             behaviors: {
-              dodge: 'simple-dodge',
+              dodge: 'random-dodge',
             },
           },
         ],

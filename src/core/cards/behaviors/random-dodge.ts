@@ -12,7 +12,7 @@ export class RandomDodge implements DodgeBehavior {
 
   public dodge(defenderAgility: number, attackerAccuracy: number): boolean {
     const dodgeRate = (defenderAgility / RandomDodge.MAX_AGILITY) * 100;
-    const reducedDodgeRate = Math.max(0, dodgeRate - attackerAccuracy);
+    const reducedDodgeRate = dodgeRate - attackerAccuracy;
     const random = this.randomizer.random_int_between(0, 100);
 
     return random < reducedDodgeRate;
