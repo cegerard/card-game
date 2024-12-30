@@ -1,6 +1,7 @@
 import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
 import { CardInfo } from './@types/card-info';
-import { DodgeBehavior } from './behaviors/dodge';
+import { RandomDodge } from './behaviors/random-dodge';
+import { DodgeBehavior } from './behaviors/dodge-behaviors';
 import { SimpleAttack } from './skills/simple-attack';
 import { SpecialAttack } from './skills/special-attack';
 
@@ -45,7 +46,7 @@ export class FightingCard {
     this.criticalChance = stats.criticalChance;
     this.simpleAttack = skills.simpleAttack;
     this.specialAttack = skills.specialAttack;
-    this.dodgeBehavior = new DodgeBehavior();
+    this.dodgeBehavior = new RandomDodge();
   }
 
   public get actualHealth(): number {
