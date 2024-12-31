@@ -37,4 +37,42 @@ describe('FightingCard', () => {
       });
     });
   });
+
+  describe('when launching a special attack', () => {
+    const attackerAccuracy = 25;
+    const attacker = createFightingCard({
+      damage: 10,
+      criticalChance: 0,
+      accuracy: attackerAccuracy,
+      skills: { specialAttack: { damageRate: 1.0, energy: 0 } },
+    });
+
+    describe('and the attack is not dodge', () => {
+      const defenderWithoutDodge = createFightingCard({
+        defense: 0,
+        agility: attackerAccuracy,
+      });
+
+      it('should compute the damage with the special attack', () => {
+        expect(attacker.launchSpecialAttack(defenderWithoutDodge)).toEqual({
+          damage: 10,
+          isCritical: false,
+        });
+      });
+    });
+
+    describe('and the attack is dodge', () => {
+      const defenderWithDodge = createFightingCard({
+        defense: 0,
+        agility: attackerAccuracy + 1,
+      });
+
+      it('should not deal any damage', () => {
+        expect(attacker.launchSpecialAttack(defenderWithDodge)).toEqual({
+          damage: 0,
+          isCritical: false,
+        });
+      });
+    });
+  });
 });

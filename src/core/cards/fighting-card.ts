@@ -98,6 +98,11 @@ export class FightingCard {
     isCritical: boolean;
   } {
     const isCritical = Math.random() < this.criticalChance;
+
+    if (defender.dodge(this.accuracy)) {
+      return { damage: 0, isCritical };
+    }
+
     const computedDamage = this.specialAttack.computeDamage(
       this.damage,
       isCritical,
