@@ -24,7 +24,7 @@ describe('AppController (e2e)', () => {
           {
             name: 'Axe',
             damage: 10,
-            defense: 15,
+            defense: 6,
             health: 100,
             speed: 3,
             agility: 25,
@@ -34,7 +34,7 @@ describe('AppController (e2e)', () => {
               specialAttack: {
                 name: 'Double Strike',
                 damageRate: 2.0,
-                energy: 1000,
+                energy: 100,
                 targetingStrategy: 'position-based',
               },
               simpleAttack: {
@@ -55,7 +55,7 @@ describe('AppController (e2e)', () => {
           {
             name: 'Sword',
             damage: 11,
-            defense: 14,
+            defense: 5,
             health: 100,
             speed: 2,
             agility: 20,
@@ -65,7 +65,7 @@ describe('AppController (e2e)', () => {
               specialAttack: {
                 name: 'Double Strike',
                 damageRate: 2.0,
-                energy: 1000,
+                energy: 100,
                 targetingStrategy: 'position-based',
               },
               simpleAttack: {

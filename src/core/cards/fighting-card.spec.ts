@@ -20,6 +20,7 @@ describe('FightingCard', () => {
         expect(attacker.attack(defenderWithoutDodge)).toEqual({
           damage: 10,
           isCritical: false,
+          dodge: false,
         });
       });
     });
@@ -33,6 +34,7 @@ describe('FightingCard', () => {
         expect(attacker.attack(defenderWithDodge)).toEqual({
           damage: 0,
           isCritical: false,
+          dodge: true,
         });
       });
     });
@@ -57,6 +59,7 @@ describe('FightingCard', () => {
         expect(attacker.launchSpecialAttack(defenderWithoutDodge)).toEqual({
           damage: 10,
           isCritical: false,
+          dodge: false,
         });
       });
     });
@@ -71,6 +74,7 @@ describe('FightingCard', () => {
         expect(attacker.launchSpecialAttack(defenderWithDodge)).toEqual({
           damage: 0,
           isCritical: false,
+          dodge: true,
         });
       });
     });

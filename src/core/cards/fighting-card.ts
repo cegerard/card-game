@@ -1,4 +1,5 @@
 import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
+import { AttackResult } from './@types/attack-result';
 import { CardInfo } from './@types/card-info';
 import { DodgeBehavior } from './behaviors/dodge-behaviors';
 import { SimpleAttack } from './skills/simple-attack';
@@ -74,14 +75,11 @@ export class FightingCard {
     this.cardDeckIdentity = `${ownerName}-${cardPositionInDeck}`;
   }
 
-  public attack(defender: FightingCard): {
-    damage: number;
-    isCritical: boolean;
-  } {
+  public attack(defender: FightingCard): AttackResult {
     const isCritical = Math.random() < this.criticalChance;
 
     if (defender.dodge(this.accuracy)) {
-      return { damage: 0, isCritical };
+      return { damage: 0, isCritical, dodge: true };
     }
 
     const computedDamage = this.simpleAttack.computeDamage(
@@ -90,17 +88,14 @@ export class FightingCard {
     );
     const damage = defender.collectsDamages(computedDamage);
 
-    return { damage, isCritical };
+    return { damage, isCritical, dodge: false };
   }
 
-  public launchSpecialAttack(defender: FightingCard): {
-    damage: number;
-    isCritical: boolean;
-  } {
+  public launchSpecialAttack(defender: FightingCard): AttackResult {
     const isCritical = Math.random() < this.criticalChance;
 
     if (defender.dodge(this.accuracy)) {
-      return { damage: 0, isCritical };
+      return { damage: 0, isCritical, dodge: true };
     }
 
     const computedDamage = this.specialAttack.computeDamage(
@@ -109,7 +104,7 @@ export class FightingCard {
     );
     const damage = defender.collectsDamages(computedDamage);
 
-    return { damage, isCritical };
+    return { damage, isCritical, dodge: false };
   }
 
   public fasterThan(defender: FightingCard | null): boolean {

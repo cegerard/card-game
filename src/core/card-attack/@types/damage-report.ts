@@ -4,6 +4,7 @@ export type Damage = {
   defender: CardInfo;
   damage: number;
   isCritical: boolean;
+  dodge: boolean;
   remainingHealth: number;
 };
 

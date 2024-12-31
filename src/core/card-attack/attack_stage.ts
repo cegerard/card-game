@@ -62,6 +62,7 @@ export class AttackStage {
         defender: defensiveCard.identityInfo,
         damage: damageDealt.damage,
         isCritical: damageDealt.isCritical,
+        dodge: damageDealt.dodge,
         remainingHealth: defensiveCard.actualHealth,
       });
 
@@ -96,6 +97,7 @@ export class AttackStage {
         defender: defensiveCard.identityInfo,
         damage: damageDealt.damage,
         isCritical: damageDealt.isCritical,
+        dodge: damageDealt.dodge,
         remainingHealth: defensiveCard.actualHealth,
       });
 
