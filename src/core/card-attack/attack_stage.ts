@@ -27,7 +27,7 @@ export class AttackStage {
   public computeNextAttack(attackingCards: FightingCard[]): Step[] {
     const attacksResults = attackingCards.reduce(
       (acc: AttackResult[], card) => {
-        if (card.isSpecialAttackReady()) {
+        if (card.isSpecialReady()) {
           acc.push(this.specialAttack(card));
         } else {
           acc.push(this.normalAttack(card));
@@ -50,7 +50,7 @@ export class AttackStage {
       attack: {
         attacker: card.identityInfo,
         damages: [],
-        energy: card.increaseSpecialAttackEnergy(),
+        energy: card.increaseSpecialEnergy(),
       },
       statusChanges: [],
     };
@@ -85,13 +85,13 @@ export class AttackStage {
       specialAttack: {
         attacker: card.identityInfo,
         damages: [],
-        energy: card.resetSpecialAttackEnergy(),
+        energy: card.resetSpecialEnergy(),
       },
       statusChanges: [],
     };
 
     defensiveCards.forEach((defensiveCard) => {
-      const damageDealt = card.launchSpecialAttack(defensiveCard);
+      const damageDealt = card.launchSpecial(defensiveCard);
 
       result.specialAttack.damages.push({
         defender: defensiveCard.identityInfo,
@@ -163,8 +163,8 @@ export class AttackStage {
   ): FightingCard[] {
     let targetedStrategy: TargetingCardStrategy;
 
-    if (attacker.isSpecialAttackReady()) {
-      targetedStrategy = attacker.specialAttackTargeting();
+    if (attacker.isSpecialReady()) {
+      targetedStrategy = attacker.specialTargeting();
     } else {
       targetedStrategy = attacker.simpleAttackTargeting();
     }

@@ -56,7 +56,7 @@ describe('FightingCard', () => {
       });
 
       it('should compute the damage with the special attack', () => {
-        expect(attacker.launchSpecialAttack(defenderWithoutDodge)).toEqual({
+        expect(attacker.launchSpecial(defenderWithoutDodge)).toEqual({
           damage: 10,
           isCritical: false,
           dodge: false,
@@ -71,7 +71,7 @@ describe('FightingCard', () => {
       });
 
       it('should not deal any damage', () => {
-        expect(attacker.launchSpecialAttack(defenderWithDodge)).toEqual({
+        expect(attacker.launchSpecial(defenderWithDodge)).toEqual({
           damage: 0,
           isCritical: false,
           dodge: true,

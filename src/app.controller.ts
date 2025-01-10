@@ -51,7 +51,7 @@ export class AppController {
       cardData.name,
       cardData,
       {
-        specialAttack,
+        special: specialAttack,
         simpleAttack,
       },
       {

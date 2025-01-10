@@ -22,7 +22,7 @@ export class FightingCard {
 
   // Skills
   private simpleAttack: SimpleAttack;
-  private specialAttack: SpecialAttack;
+  private special: SpecialAttack;
 
   // Behaviors
   private dodgeBehavior: DodgeBehavior;
@@ -40,7 +40,7 @@ export class FightingCard {
     },
     skills: {
       simpleAttack: SimpleAttack;
-      specialAttack: SpecialAttack;
+      special: SpecialAttack;
     },
     behaviors: {
       dodge: DodgeBehavior;
@@ -55,7 +55,7 @@ export class FightingCard {
     this.accuracy = stats.accuracy;
     this.criticalChance = stats.criticalChance;
     this.simpleAttack = skills.simpleAttack;
-    this.specialAttack = skills.specialAttack;
+    this.special = skills.special;
     this.dodgeBehavior = behaviors.dodge;
   }
 
@@ -91,17 +91,14 @@ export class FightingCard {
     return { damage, isCritical, dodge: false };
   }
 
-  public launchSpecialAttack(defender: FightingCard): AttackResult {
+  public launchSpecial(defender: FightingCard): AttackResult {
     const isCritical = Math.random() < this.criticalChance;
 
     if (defender.dodge(this.accuracy)) {
       return { damage: 0, isCritical, dodge: true };
     }
 
-    const computedDamage = this.specialAttack.computeDamage(
-      this.damage,
-      isCritical,
-    );
+    const computedDamage = this.special.computeDamage(this.damage, isCritical);
     const damage = defender.collectsDamages(computedDamage);
 
     return { damage, isCritical, dodge: false };
@@ -115,26 +112,26 @@ export class FightingCard {
     return this.health <= 0;
   }
 
-  public isSpecialAttackReady(): boolean {
-    return this.specialAttack.ready(this.specialAttackEnergy);
+  public isSpecialReady(): boolean {
+    return this.special.ready(this.specialAttackEnergy);
   }
 
-  public increaseSpecialAttackEnergy(): number {
-    this.specialAttackEnergy = this.specialAttack.increaseEnergy(
+  public increaseSpecialEnergy(): number {
+    this.specialAttackEnergy = this.special.increaseEnergy(
       this.specialAttackEnergy,
     );
 
     return this.specialAttackEnergy;
   }
 
-  public resetSpecialAttackEnergy(): number {
+  public resetSpecialEnergy(): number {
     this.specialAttackEnergy = 0;
 
     return this.specialAttackEnergy;
   }
 
-  public specialAttackTargeting(): TargetingCardStrategy {
-    return this.specialAttack.targetingStrategy;
+  public specialTargeting(): TargetingCardStrategy {
+    return this.special.targetingStrategy;
   }
 
   public simpleAttackTargeting(): TargetingCardStrategy {

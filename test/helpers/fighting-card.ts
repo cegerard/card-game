@@ -98,7 +98,7 @@ export function createFightingCard(params: FightingCardParams): FightingCard {
     },
     {
       simpleAttack: createSimpleAttack(params.skills?.simpleAttack ?? {}),
-      specialAttack: createSpecialAttack(params.skills?.specialAttack ?? {}),
+      special: createSpecialAttack(params.skills?.specialAttack ?? {}),
     },
     {
       dodge: new SimpleDodge(),
