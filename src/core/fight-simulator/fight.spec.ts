@@ -1,6 +1,6 @@
 import { Fight } from './fight';
 import { Player } from '../player';
-import { DamageReport } from '../card-attack/@types/damage-report';
+import { DamageReport } from '../card-action/@types/damage-report';
 import { FightResult } from './@types/fight-result';
 import { PlayerByPlayerCardSelector } from './card-selectors/player-by-player';
 import { createFightingCard } from '../../../test/helpers/fighting-card';
