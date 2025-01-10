@@ -30,7 +30,7 @@ describe('AttackStage', () => {
       const attackStage = new AttackStage(player1, player2, eventBroker);
 
       it('should return the damage dealt by the attacker', () => {
-        const result = attackStage.computeNextAttack([attacker]);
+        const result = attackStage.computeNextAction([attacker]);
 
         expect(result).toEqual([
           {
@@ -75,7 +75,7 @@ describe('AttackStage', () => {
       const attackStage = new AttackStage(player1, player2, eventBroker);
 
       it('should return the damage dealt by the attacker', () => {
-        const result = attackStage.computeNextAttack([attacker]);
+        const result = attackStage.computeNextAction([attacker]);
 
         expect(result).toEqual([
           {
@@ -126,7 +126,7 @@ describe('AttackStage', () => {
       const attackStage = new AttackStage(player1, player2, eventBroker);
 
       it('should return the damage dealt and the status change', () => {
-        const result = attackStage.computeNextAttack([attacker]);
+        const result = attackStage.computeNextAction([attacker]);
 
         expect(result).toEqual([
           {
@@ -182,7 +182,7 @@ describe('AttackStage', () => {
       const attackStage = new AttackStage(player1, player2, eventBroker);
 
       it('should return the damage dealt and the status change', () => {
-        const result = attackStage.computeNextAttack([attacker]);
+        const result = attackStage.computeNextAction([attacker]);
 
         expect(result).toEqual([
           {
@@ -250,7 +250,7 @@ describe('AttackStage', () => {
       const attackStage = new AttackStage(player1, player2, eventBroker);
 
       it('should return the damage dealt and the status change', () => {
-        const result = attackStage.computeNextAttack([attacker]);
+        const result = attackStage.computeNextAction([attacker]);
         expect(result).toEqual([
           {
             kind: 'special_attack',

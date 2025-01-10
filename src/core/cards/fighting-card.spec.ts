@@ -78,5 +78,31 @@ describe('FightingCard', () => {
         });
       });
     });
+
+    // describe('when the special attack heals the attacker team mates', () => {
+    //   const attacker = createFightingCard({
+    //     damage: 10,
+    //     criticalChance: 0,
+    //     skills: {
+    //       specialAttack: { damageRate: -1.5, energy: 0 },
+    //     },
+    //   });
+
+    //   const teamMate = createFightingCard({
+    //     health: 10,
+    //     defense: 0,
+    //     agility: 0,
+    //   });
+
+    //   it('should heal the team mates', () => {
+    //     expect(attacker.launchSpecial(teamMate)).toEqual({
+    //       damage: 0,
+    //       isCritical: false,
+    //       dodge: false,
+    //     });
+
+    //     expect(teamMate.actualHealth).toEqual(15);
+    //   });
+    // });
   });
 });

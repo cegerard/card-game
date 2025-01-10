@@ -55,7 +55,7 @@ export class Fight {
   }
 
   private nextIteration(): Step[] {
-    return this.attackManager.computeNextAttack(this.cardSelector.nextCards());
+    return this.attackManager.computeNextAction(this.cardSelector.nextCards());
   }
 
   private computeWinner(steps: Record<number, object>): void {

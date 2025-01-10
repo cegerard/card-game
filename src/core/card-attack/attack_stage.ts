@@ -24,26 +24,23 @@ export class AttackStage {
     this.eventBroker = eventBroker;
   }
 
-  public computeNextAttack(attackingCards: FightingCard[]): Step[] {
-    const attacksResults = attackingCards.reduce(
-      (acc: AttackResult[], card) => {
-        if (card.isSpecialReady()) {
-          acc.push(this.specialAttack(card));
-        } else {
-          acc.push(this.normalAttack(card));
-        }
+  public computeNextAction(cards: FightingCard[]): Step[] {
+    const attacksResults = cards.reduce((acc: AttackResult[], card) => {
+      if (card.isSpecialReady()) {
+        acc.push(this.launchSpecial(card));
+      } else {
+        acc.push(this.launchAttack(card));
+      }
 
-        return acc;
-      },
-      [],
-    );
+      return acc;
+    }, []);
 
     const resultSteps = this.convertIntoSteps(attacksResults);
 
     return [...resultSteps.attackSteps, ...resultSteps.statusChangeSteps];
   }
 
-  private normalAttack(card: FightingCard): AttackResult {
+  private launchAttack(card: FightingCard): AttackResult {
     const defensiveCards = this.getTargetedCards(card);
 
     const result: AttackResult = {
@@ -78,8 +75,8 @@ export class AttackStage {
     return result;
   }
 
-  private specialAttack(card: FightingCard): AttackResult {
-    const defensiveCards = this.getTargetedCards(card);
+  private launchSpecial(card: FightingCard): AttackResult {
+    const targetedCards = this.getTargetedCards(card);
 
     const result: AttackResult = {
       specialAttack: {
@@ -90,7 +87,7 @@ export class AttackStage {
       statusChanges: [],
     };
 
-    defensiveCards.forEach((defensiveCard) => {
+    targetedCards.forEach((defensiveCard) => {
       const damageDealt = card.launchSpecial(defensiveCard);
 
       result.specialAttack.damages.push({
@@ -148,29 +145,29 @@ export class AttackStage {
     );
   }
 
-  private getTargetedCards(attacker: FightingCard): FightingCard[] {
-    if (this.player1.ownCard(attacker)) {
-      return this.targetedCardsByPlayer(attacker, this.player1, this.player2);
+  private getTargetedCards(sourceCard: FightingCard): FightingCard[] {
+    if (this.player1.ownCard(sourceCard)) {
+      return this.targetedCardsByPlayer(sourceCard, this.player1, this.player2);
     }
 
-    return this.targetedCardsByPlayer(attacker, this.player2, this.player1);
+    return this.targetedCardsByPlayer(sourceCard, this.player2, this.player1);
   }
 
   private targetedCardsByPlayer(
-    attacker: FightingCard,
+    sourceCard: FightingCard,
     attackingPlayer: Player,
     defendingPlayer: Player,
   ): FightingCard[] {
     let targetedStrategy: TargetingCardStrategy;
 
-    if (attacker.isSpecialReady()) {
-      targetedStrategy = attacker.specialTargeting();
+    if (sourceCard.isSpecialReady()) {
+      targetedStrategy = sourceCard.specialTargeting();
     } else {
-      targetedStrategy = attacker.simpleAttackTargeting();
+      targetedStrategy = sourceCard.simpleAttackTargeting();
     }
 
     return targetedStrategy.targetedCards(
-      attacker,
+      sourceCard,
       attackingPlayer,
       defendingPlayer,
     );
