@@ -18,7 +18,7 @@ export class FightingCard {
   private agility: number;
   private accuracy: number;
   private criticalChance: number;
-  private specialAttackEnergy: number = 0;
+  private specialEnergy: number = 0;
 
   // Skills
   private simpleAttack: SimpleAttack;
@@ -113,21 +113,19 @@ export class FightingCard {
   }
 
   public isSpecialReady(): boolean {
-    return this.special.ready(this.specialAttackEnergy);
+    return this.special.ready(this.specialEnergy);
   }
 
   public increaseSpecialEnergy(): number {
-    this.specialAttackEnergy = this.special.increaseEnergy(
-      this.specialAttackEnergy,
-    );
+    this.specialEnergy = this.special.increaseEnergy(this.specialEnergy);
 
-    return this.specialAttackEnergy;
+    return this.specialEnergy;
   }
 
   public resetSpecialEnergy(): number {
-    this.specialAttackEnergy = 0;
+    this.specialEnergy = 0;
 
-    return this.specialAttackEnergy;
+    return this.specialEnergy;
   }
 
   public specialTargeting(): TargetingCardStrategy {
