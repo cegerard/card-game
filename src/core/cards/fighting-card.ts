@@ -10,15 +10,18 @@ export class FightingCard {
   public readonly name: string;
   private cardDeckIdentity: string = '';
 
-  // Stats
-  private damage: number;
-  private defense: number;
-  private health: number;
-  private speed: number;
-  private agility: number;
-  private accuracy: number;
-  private criticalChance: number;
+  // Fixed Stats
+  private readonly damage: number;
+  private readonly defense: number;
+  private readonly health: number;
+  private readonly speed: number;
+  private readonly agility: number;
+  private readonly accuracy: number;
+  private readonly criticalChance: number;
+
+  // Dynamic Stats
   private specialEnergy: number = 0;
+  private receivedDamages: number = 0;
 
   // Skills
   private simpleAttack: SimpleAttack;
@@ -60,7 +63,7 @@ export class FightingCard {
   }
 
   public get actualHealth(): number {
-    return this.health;
+    return Math.max(0, this.health - this.receivedDamages);
   }
 
   public get actualSpeed(): number {
@@ -109,7 +112,7 @@ export class FightingCard {
   }
 
   public isDead(): boolean {
-    return this.health <= 0;
+    return this.actualHealth <= 0;
   }
 
   public isSpecialReady(): boolean {
@@ -138,7 +141,8 @@ export class FightingCard {
 
   private collectsDamages(damage: number): number {
     const causedDamages = Math.max(0, damage - this.defense);
-    this.health = Math.max(0, this.health - causedDamages);
+    this.receivedDamages += causedDamages;
+
     return causedDamages;
   }
 
