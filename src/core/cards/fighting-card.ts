@@ -1,6 +1,7 @@
 import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
 import { AttackResult } from './@types/attack-result';
 import { CardInfo } from './@types/card-info';
+import { SpecialResult } from './@types/special-result';
 import { DodgeBehavior } from './behaviors/dodge-behaviors';
 import { SimpleAttack } from './skills/simple-attack';
 import { SpecialAttack } from './skills/special-attack';
@@ -70,6 +71,18 @@ export class FightingCard {
     return this.speed;
   }
 
+  public get actualCriticalChance(): number {
+    return this.criticalChance;
+  }
+
+  public get actualAccuracy(): number {
+    return this.accuracy;
+  }
+
+  public get actualDamage(): number {
+    return this.damage;
+  }
+
   public get identityInfo(): CardInfo {
     return { name: this.name, deckIdentity: this.cardDeckIdentity };
   }
@@ -94,17 +107,8 @@ export class FightingCard {
     return { damage, isCritical, dodge: false };
   }
 
-  public launchSpecial(defender: FightingCard): AttackResult {
-    const isCritical = Math.random() < this.criticalChance;
-
-    if (defender.dodge(this.accuracy)) {
-      return { damage: 0, isCritical, dodge: true };
-    }
-
-    const computedDamage = this.special.computeDamage(this.damage, isCritical);
-    const damage = defender.collectsDamages(computedDamage);
-
-    return { damage, isCritical, dodge: false };
+  public launchSpecial(defender: FightingCard): SpecialResult {
+    return this.special.launch(this, defender);
   }
 
   public fasterThan(defender: FightingCard | null): boolean {
@@ -139,14 +143,14 @@ export class FightingCard {
     return this.simpleAttack.targetingStrategy;
   }
 
-  private collectsDamages(damage: number): number {
+  public collectsDamages(damage: number): number {
     const causedDamages = Math.max(0, damage - this.defense);
     this.receivedDamages += causedDamages;
 
     return causedDamages;
   }
 
-  private dodge(attackerAccuracy: number): boolean {
+  public dodge(attackerAccuracy: number): boolean {
     return this.dodgeBehavior.dodge(this.agility, attackerAccuracy);
   }
 }

@@ -1,4 +1,6 @@
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
+import { SpecialResult } from '../@types/special-result';
+import { FightingCard } from '../fighting-card';
 import { Special } from './special';
 
 const ENERGY_INCREASE_FACTOR = 10;
@@ -16,10 +18,17 @@ export class SpecialAttack implements Special {
     return actualEnergy >= this.energyNeeded;
   }
 
-  public computeDamage(damage: number, isCritical: boolean): number {
-    const damageMultiplier = isCritical ? CRITICAL_RATE : DEFAULT_DAMAGE_RATE;
+  public launch(source: FightingCard, target: FightingCard): SpecialResult {
+    const isCritical = Math.random() < source.actualCriticalChance;
 
-    return Math.round(damage * this.damageRate * damageMultiplier);
+    if (target.dodge(source.actualAccuracy)) {
+      return { damage: 0, isCritical, dodge: true };
+    }
+
+    const computedDamage = this.computeDamage(source.actualDamage, isCritical);
+    const damage = target.collectsDamages(computedDamage);
+
+    return { damage, isCritical, dodge: false };
   }
 
   public increaseEnergy(actualEnergy: number): number {
@@ -28,5 +37,11 @@ export class SpecialAttack implements Special {
 
   public getSpecialKind(): string {
     return 'specialAttack';
+  }
+
+  private computeDamage(damage: number, isCritical: boolean): number {
+    const damageMultiplier = isCritical ? CRITICAL_RATE : DEFAULT_DAMAGE_RATE;
+
+    return Math.round(damage * this.damageRate * damageMultiplier);
   }
 }
