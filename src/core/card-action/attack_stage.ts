@@ -41,7 +41,10 @@ export class AttackStage {
   }
 
   private launchAttack(card: FightingCard): AttackResult {
-    const defensiveCards = this.getTargetedCards(card);
+    const defensiveCards = this.getTargetedCards(
+      card,
+      card.simpleAttackTargeting(),
+    );
 
     const result: AttackResult = {
       attack: {
@@ -76,7 +79,7 @@ export class AttackStage {
   }
 
   private launchSpecial(card: FightingCard): AttackResult {
-    const targetedCards = this.getTargetedCards(card);
+    const targetedCards = this.getTargetedCards(card, card.specialTargeting());
 
     const result: AttackResult = {
       specialAttack: {
@@ -145,32 +148,19 @@ export class AttackStage {
     );
   }
 
-  private getTargetedCards(sourceCard: FightingCard): FightingCard[] {
-    if (this.player1.ownCard(sourceCard)) {
-      return this.targetedCardsByPlayer(sourceCard, this.player1, this.player2);
-    }
-
-    return this.targetedCardsByPlayer(sourceCard, this.player2, this.player1);
-  }
-
-  private targetedCardsByPlayer(
+  private getTargetedCards(
     sourceCard: FightingCard,
-    attackingPlayer: Player,
-    defendingPlayer: Player,
+    targetStrategy: TargetingCardStrategy,
   ): FightingCard[] {
-    let targetedStrategy: TargetingCardStrategy;
+    let attacker = this.player1;
+    let defender = this.player2;
 
-    if (sourceCard.isSpecialReady()) {
-      targetedStrategy = sourceCard.specialTargeting();
-    } else {
-      targetedStrategy = sourceCard.simpleAttackTargeting();
+    if (this.player2.ownCard(sourceCard)) {
+      attacker = this.player2;
+      defender = this.player1;
     }
 
-    return targetedStrategy.targetedCards(
-      sourceCard,
-      attackingPlayer,
-      defendingPlayer,
-    );
+    return targetStrategy.targetedCards(sourceCard, attacker, defender);
   }
 
   private notifyDeath(card: FightingCard): void {
