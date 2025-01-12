@@ -1,13 +1,13 @@
-import { AttackStage } from './attack_stage';
+import { ActionStage } from './action_stage';
 import { Player } from '../player';
 import { createFightingCard } from '../../../test/helpers/fighting-card';
 
-describe('AttackStage', () => {
+describe('ActionStage', () => {
   const eventBroker = {
     onCardDeath: [],
   };
 
-  describe('computeNextAttack', () => {
+  describe('computeNextAction', () => {
     describe('without critical hit', () => {
       const attacker = createFightingCard({
         damage: 10,
@@ -27,7 +27,7 @@ describe('AttackStage', () => {
       });
       const player1 = new Player('Player 1', [attacker]);
       const player2 = new Player('Player 2', [defender]);
-      const attackStage = new AttackStage(player1, player2, eventBroker);
+      const attackStage = new ActionStage(player1, player2, eventBroker);
 
       it('should return the damage dealt by the attacker', () => {
         const result = attackStage.computeNextAction([attacker]);
@@ -72,7 +72,7 @@ describe('AttackStage', () => {
       });
       const player1 = new Player('Player 1', [attacker]);
       const player2 = new Player('Player 2', [defender]);
-      const attackStage = new AttackStage(player1, player2, eventBroker);
+      const attackStage = new ActionStage(player1, player2, eventBroker);
 
       it('should return the damage dealt by the attacker', () => {
         const result = attackStage.computeNextAction([attacker]);
@@ -123,7 +123,7 @@ describe('AttackStage', () => {
       });
       const player1 = new Player('Player 1', [attacker]);
       const player2 = new Player('Player 2', [defender]);
-      const attackStage = new AttackStage(player1, player2, eventBroker);
+      const attackStage = new ActionStage(player1, player2, eventBroker);
 
       it('should return the damage dealt and the status change', () => {
         const result = attackStage.computeNextAction([attacker]);
@@ -179,7 +179,7 @@ describe('AttackStage', () => {
       });
       const player1 = new Player('Player 1', [attacker]);
       const player2 = new Player('Player 2', [defender]);
-      const attackStage = new AttackStage(player1, player2, eventBroker);
+      const attackStage = new ActionStage(player1, player2, eventBroker);
 
       it('should return the damage dealt and the status change', () => {
         const result = attackStage.computeNextAction([attacker]);
@@ -247,7 +247,7 @@ describe('AttackStage', () => {
       const player1 = new Player('Player 1', [attacker]);
       const player2 = new Player('Player 2', [defender1, defender2]);
 
-      const attackStage = new AttackStage(player1, player2, eventBroker);
+      const attackStage = new ActionStage(player1, player2, eventBroker);
 
       it('should return the damage dealt and the status change', () => {
         const result = attackStage.computeNextAction([attacker]);

@@ -5,7 +5,7 @@ import { CardDeathSubscriber } from '../fight-simulator/card-death-subscriber';
 import { Step } from '../fight-simulator/@types/step';
 import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
 
-export class AttackStage {
+export class ActionStage {
   private player1: Player;
   private player2: Player;
   private eventBroker: {
