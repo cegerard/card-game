@@ -19,7 +19,7 @@ describe('fight', () => {
             simpleAttack: {
               damageRate: 1.0,
             },
-            specialAttack: {
+            special: {
               damageRate: 0,
               energy: 10,
             },
@@ -36,7 +36,7 @@ describe('fight', () => {
             simpleAttack: {
               damageRate: 1.0,
             },
-            specialAttack: {
+            special: {
               damageRate: 0,
               energy: 10,
             },
@@ -88,7 +88,7 @@ describe('fight', () => {
             simpleAttack: {
               damageRate: 1.0,
             },
-            specialAttack: {
+            special: {
               damageRate: 0,
               energy: 10,
             },
@@ -104,7 +104,7 @@ describe('fight', () => {
             simpleAttack: {
               damageRate: 1.0,
             },
-            specialAttack: {
+            special: {
               damageRate: 0,
               energy: 10,
             },
@@ -157,7 +157,7 @@ describe('fight', () => {
             simpleAttack: {
               damageRate: 1.0,
             },
-            specialAttack: {
+            special: {
               damageRate: 0,
               energy: 10,
             },
@@ -174,7 +174,7 @@ describe('fight', () => {
             simpleAttack: {
               damageRate: 1.0,
             },
-            specialAttack: {
+            special: {
               damageRate: 0,
               energy: 10,
             },
@@ -246,7 +246,7 @@ describe('fight', () => {
             simpleAttack: {
               damageRate: 1.0,
             },
-            specialAttack: {
+            special: {
               damageRate: 0,
               energy: 1000,
             },
@@ -263,7 +263,7 @@ describe('fight', () => {
             simpleAttack: {
               damageRate: 1.0,
             },
-            specialAttack: {
+            special: {
               damageRate: 0,
               energy: 1000,
             },
@@ -317,7 +317,7 @@ describe('fight', () => {
             simpleAttack: {
               damageRate: 1.0,
             },
-            specialAttack: {
+            special: {
               damageRate: 0,
               energy: 1000,
             },
@@ -334,7 +334,7 @@ describe('fight', () => {
             simpleAttack: {
               damageRate: 1.0,
             },
-            specialAttack: {
+            special: {
               damageRate: 0,
               energy: 1000,
             },
@@ -351,7 +351,7 @@ describe('fight', () => {
             simpleAttack: {
               damageRate: 1.0,
             },
-            specialAttack: {
+            special: {
               damageRate: 0,
               energy: 1000,
             },
@@ -368,7 +368,7 @@ describe('fight', () => {
             simpleAttack: {
               damageRate: 1.0,
             },
-            specialAttack: {
+            special: {
               damageRate: 0,
               energy: 1000,
             },
@@ -385,7 +385,7 @@ describe('fight', () => {
             simpleAttack: {
               damageRate: 1.0,
             },
-            specialAttack: {
+            special: {
               damageRate: 0,
               energy: 1000,
             },
@@ -402,7 +402,7 @@ describe('fight', () => {
             simpleAttack: {
               damageRate: 1.0,
             },
-            specialAttack: {
+            special: {
               damageRate: 0,
               energy: 1000,
             },
@@ -419,7 +419,7 @@ describe('fight', () => {
             simpleAttack: {
               damageRate: 1.0,
             },
-            specialAttack: {
+            special: {
               damageRate: 0,
               energy: 1000,
             },
@@ -436,7 +436,7 @@ describe('fight', () => {
             simpleAttack: {
               damageRate: 1.0,
             },
-            specialAttack: {
+            special: {
               damageRate: 0,
               energy: 1000,
             },
@@ -453,7 +453,7 @@ describe('fight', () => {
             simpleAttack: {
               damageRate: 1.0,
             },
-            specialAttack: {
+            special: {
               damageRate: 0,
               energy: 1000,
             },
@@ -470,7 +470,7 @@ describe('fight', () => {
             simpleAttack: {
               damageRate: 1.0,
             },
-            specialAttack: {
+            special: {
               damageRate: 0,
               energy: 1000,
             },

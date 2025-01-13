@@ -106,7 +106,7 @@ describe('ActionStage', () => {
         agility: 0,
         skills: {
           simpleAttack: { damageRate: 1.2 },
-          specialAttack: { damageRate: 0 },
+          special: { damageRate: 0 },
         },
       });
       const defender = createFightingCard({
@@ -118,7 +118,7 @@ describe('ActionStage', () => {
         agility: 0,
         skills: {
           simpleAttack: { damageRate: 1.0 },
-          specialAttack: { damageRate: 0 },
+          special: { damageRate: 0 },
         },
       });
       const player1 = new Player('Player 1', [attacker]);
@@ -162,7 +162,7 @@ describe('ActionStage', () => {
         agility: 0,
         skills: {
           simpleAttack: { damageRate: 1.0 },
-          specialAttack: { damageRate: 450, energy: 0 },
+          special: { damageRate: 450, energy: 0 },
         },
       });
       const defender = createFightingCard({
@@ -174,7 +174,7 @@ describe('ActionStage', () => {
         agility: 0,
         skills: {
           simpleAttack: { damageRate: 1.0 },
-          specialAttack: { damageRate: 0 },
+          special: { damageRate: 0 },
         },
       });
       const player1 = new Player('Player 1', [attacker]);
@@ -213,7 +213,7 @@ describe('ActionStage', () => {
         agility: 0,
         skills: {
           simpleAttack: { damageRate: 1.0 },
-          specialAttack: {
+          special: {
             damageRate: 450,
             energy: 0,
             targetingStrategy: 'target-all',
@@ -229,7 +229,7 @@ describe('ActionStage', () => {
         agility: 0,
         skills: {
           simpleAttack: { damageRate: 1.0 },
-          specialAttack: { damageRate: 0 },
+          special: { damageRate: 0 },
         },
       });
       const defender2 = createFightingCard({
@@ -241,7 +241,7 @@ describe('ActionStage', () => {
         agility: 0,
         skills: {
           simpleAttack: { damageRate: 1.0 },
-          specialAttack: { damageRate: 0 },
+          special: { damageRate: 0 },
         },
       });
       const player1 = new Player('Player 1', [attacker]);

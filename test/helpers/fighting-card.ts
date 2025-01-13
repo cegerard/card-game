@@ -23,7 +23,7 @@ type FightingCardParams = {
       damageRate?: number;
       targetingStrategy?: string;
     };
-    specialAttack?: {
+    special?: {
       name?: string;
       damageRate?: number;
       energy?: number;
@@ -98,7 +98,7 @@ export function createFightingCard(params: FightingCardParams): FightingCard {
     },
     {
       simpleAttack: createSimpleAttack(params.skills?.simpleAttack ?? {}),
-      special: createSpecialAttack(params.skills?.specialAttack ?? {}),
+      special: createSpecialAttack(params.skills?.special ?? {}),
     },
     {
       dodge: new SimpleDodge(),
