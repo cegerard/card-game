@@ -10,14 +10,14 @@ describe('ActionStage', () => {
   describe('computeNextAction', () => {
     describe('without critical hit', () => {
       const attacker = createFightingCard({
-        damage: 10,
+        attack: 10,
         criticalChance: 0,
         speed: 1,
         agility: 0,
         skills: { simpleAttack: { damageRate: 1.0 } },
       });
       const defender = createFightingCard({
-        damage: 0,
+        attack: 0,
         defense: 0,
         health: 100,
         speed: 0,
@@ -53,7 +53,7 @@ describe('ActionStage', () => {
 
     describe('with a critical hit', () => {
       const attacker = createFightingCard({
-        damage: 10,
+        attack: 10,
         defense: 0,
         health: 100,
         speed: 1,
@@ -62,7 +62,7 @@ describe('ActionStage', () => {
         skills: { simpleAttack: { damageRate: 1.0 } },
       });
       const defender = createFightingCard({
-        damage: 0,
+        attack: 0,
         defense: 0,
         health: 100,
         speed: 0,
@@ -98,7 +98,7 @@ describe('ActionStage', () => {
 
     describe('when the defender is killed', () => {
       const attacker = createFightingCard({
-        damage: 100,
+        attack: 100,
         defense: 0,
         health: 100,
         speed: 1,
@@ -110,7 +110,7 @@ describe('ActionStage', () => {
         },
       });
       const defender = createFightingCard({
-        damage: 0,
+        attack: 0,
         defense: 0,
         health: 120,
         speed: 0,
@@ -154,7 +154,7 @@ describe('ActionStage', () => {
 
     describe('when the attacker launch a special attack', () => {
       const attacker = createFightingCard({
-        damage: 1,
+        attack: 1,
         defense: 0,
         health: 1000,
         speed: 1,
@@ -166,7 +166,7 @@ describe('ActionStage', () => {
         },
       });
       const defender = createFightingCard({
-        damage: 0,
+        attack: 0,
         defense: 0,
         health: 1000,
         speed: 0,
@@ -205,7 +205,7 @@ describe('ActionStage', () => {
 
     describe('when the special attack hit all defender cards', () => {
       const attacker = createFightingCard({
-        damage: 1,
+        attack: 1,
         defense: 0,
         health: 1000,
         speed: 1,
@@ -221,7 +221,7 @@ describe('ActionStage', () => {
         },
       });
       const defender1 = createFightingCard({
-        damage: 0,
+        attack: 0,
         defense: 120,
         health: 300,
         speed: 0,
@@ -233,7 +233,7 @@ describe('ActionStage', () => {
         },
       });
       const defender2 = createFightingCard({
-        damage: 0,
+        attack: 0,
         defense: 200,
         health: 1000,
         speed: 0,

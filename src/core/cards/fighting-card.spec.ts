@@ -4,7 +4,7 @@ describe('FightingCard', () => {
   describe('when attacking', () => {
     const attackerAccuracy = 40;
     const attacker = createFightingCard({
-      damage: 10,
+      attack: 10,
       criticalChance: 0,
       accuracy: attackerAccuracy,
       skills: { simpleAttack: { damageRate: 1.0 } },
@@ -43,7 +43,7 @@ describe('FightingCard', () => {
   describe('when launching a special attack', () => {
     const attackerAccuracy = 25;
     const attacker = createFightingCard({
-      damage: 10,
+      attack: 10,
       criticalChance: 0,
       accuracy: attackerAccuracy,
       skills: { special: { damageRate: 1.0, energy: 0 } },

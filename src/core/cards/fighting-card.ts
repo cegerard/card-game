@@ -4,7 +4,7 @@ import { CardInfo } from './@types/card-info';
 import { SpecialResult } from './@types/special-result';
 import { DodgeBehavior } from './behaviors/dodge-behaviors';
 import { SimpleAttack } from './skills/simple-attack';
-import { SpecialAttack } from './skills/special-attack';
+import { Special } from './skills/special';
 
 export class FightingCard {
   // Info
@@ -26,7 +26,7 @@ export class FightingCard {
 
   // Skills
   private simpleAttack: SimpleAttack;
-  private special: SpecialAttack;
+  private special: Special;
 
   // Behaviors
   private dodgeBehavior: DodgeBehavior;
@@ -44,7 +44,7 @@ export class FightingCard {
     },
     skills: {
       simpleAttack: SimpleAttack;
-      special: SpecialAttack;
+      special: Special;
     },
     behaviors: {
       dodge: DodgeBehavior;
@@ -136,7 +136,7 @@ export class FightingCard {
   }
 
   public specialTargeting(): TargetingCardStrategy {
-    return this.special.targetingStrategy;
+    return this.special.getTargetingStrategy();
   }
 
   public simpleAttackTargeting(): TargetingCardStrategy {

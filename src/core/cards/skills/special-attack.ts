@@ -11,7 +11,7 @@ export class SpecialAttack implements Special {
   constructor(
     private readonly damageRate: number,
     private readonly energyNeeded: number,
-    public readonly targetingStrategy: TargetingCardStrategy,
+    private readonly targetingStrategy: TargetingCardStrategy,
   ) {}
 
   public ready(actualEnergy: number): boolean {
@@ -37,6 +37,10 @@ export class SpecialAttack implements Special {
 
   public getSpecialKind(): string {
     return 'specialAttack';
+  }
+
+  public getTargetingStrategy(): TargetingCardStrategy {
+    return this.targetingStrategy;
   }
 
   private computeDamage(damage: number, isCritical: boolean): number {

@@ -7,10 +7,11 @@ import { TargetedFromPosition } from '../../src/core/targeting-card-strategies/t
 import { TargetingCardStrategy } from '../../src/core/targeting-card-strategies/targeting-card-strategy';
 import { TargetedAll } from '../../src/core/targeting-card-strategies/targeted-all';
 import { SimpleDodge } from '../../src/core/cards/behaviors/simple-dodge';
+import { Special } from '../../src/core/cards/skills/special';
 
 type FightingCardParams = {
   name?: string;
-  damage?: number;
+  attack?: number;
   defense?: number;
   health?: number;
   speed?: number;
@@ -28,6 +29,7 @@ type FightingCardParams = {
       damageRate?: number;
       energy?: number;
       targetingStrategy?: string;
+      kind?: string;
     };
   };
 };
@@ -57,6 +59,22 @@ function createSimpleAttack(params: {
   );
 }
 
+function createSpecial(
+  kind: string,
+  params: {
+    damageRate?: number;
+    energy?: number;
+    targetingStrategy?: string;
+  },
+): Special {
+  switch (kind) {
+    case 'specialAttack':
+      return createSpecialAttack(params);
+    default:
+      throw new Error(`Unknown special kind: ${kind}`);
+  }
+}
+
 function createSpecialAttack(params: {
   damageRate?: number;
   energy?: number;
@@ -76,7 +94,7 @@ function createSpecialAttack(params: {
 
 export function createFightingCard(params: FightingCardParams): FightingCard {
   const cardName = params.name ?? faker.animal.type();
-  const damage = params.damage ?? faker.number.int({ min: 100, max: 800 });
+  const damage = params.attack ?? faker.number.int({ min: 100, max: 800 });
   const defense = params.defense ?? faker.number.int({ min: 100, max: 500 });
   const health = params.health ?? faker.number.int({ min: 2000, max: 10000 });
   const speed = params.speed ?? faker.number.int({ min: 100, max: 500 });
@@ -98,7 +116,7 @@ export function createFightingCard(params: FightingCardParams): FightingCard {
     },
     {
       simpleAttack: createSimpleAttack(params.skills?.simpleAttack ?? {}),
-      special: createSpecialAttack(params.skills?.special ?? {}),
+      special: createSpecial('specialAttack', params.skills?.special ?? {}),
     },
     {
       dodge: new SimpleDodge(),

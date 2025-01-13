@@ -10,7 +10,7 @@ describe('fight', () => {
     describe('with only one card each', () => {
       describe('when the first player has the strongest card', () => {
         const card1 = createFightingCard({
-          damage: 100,
+          attack: 100,
           defense: 100,
           health: 100,
           speed: 100,
@@ -26,7 +26,7 @@ describe('fight', () => {
           },
         });
         const card2 = createFightingCard({
-          damage: 1,
+          attack: 1,
           defense: 1,
           health: 1,
           speed: 1,
@@ -78,7 +78,7 @@ describe('fight', () => {
 
       describe('when the first player has the weakest card', () => {
         const card1 = createFightingCard({
-          damage: 1,
+          attack: 1,
           defense: 1,
           health: 1,
           speed: 1,
@@ -95,7 +95,7 @@ describe('fight', () => {
           },
         });
         const card2 = createFightingCard({
-          damage: 60,
+          attack: 60,
           defense: 60,
           health: 60,
           speed: 60,
@@ -147,7 +147,7 @@ describe('fight', () => {
       describe('when the cards have the same strength, health and speed', () => {
         const damage = 50;
         const card1 = createFightingCard({
-          damage,
+          attack: damage,
           defense: 20,
           health: 1,
           speed: 50,
@@ -164,7 +164,7 @@ describe('fight', () => {
           },
         });
         const card2 = createFightingCard({
-          damage,
+          attack: damage,
           defense: 25,
           health: 1,
           speed: 50,
@@ -236,7 +236,7 @@ describe('fight', () => {
       describe('when the cards have the same strength and defense', () => {
         const damage = 50;
         const card1 = createFightingCard({
-          damage,
+          attack: damage,
           defense: damage,
           health: 1,
           speed: 50,
@@ -253,7 +253,7 @@ describe('fight', () => {
           },
         });
         const card2 = createFightingCard({
-          damage,
+          attack: damage,
           defense: damage,
           health: 1,
           speed: 25,
@@ -307,7 +307,7 @@ describe('fight', () => {
     describe('with five cards each', () => {
       describe('when the first player has the strongest cards', () => {
         const card1 = createFightingCard({
-          damage: 100,
+          attack: 100,
           defense: 100,
           health: 100,
           speed: 100,
@@ -324,7 +324,7 @@ describe('fight', () => {
           },
         });
         const card2 = createFightingCard({
-          damage: 1,
+          attack: 1,
           defense: 1,
           health: 1,
           speed: 1,
@@ -341,7 +341,7 @@ describe('fight', () => {
           },
         });
         const card3 = createFightingCard({
-          damage: 5,
+          attack: 5,
           defense: 5,
           health: 5,
           speed: 5,
@@ -358,7 +358,7 @@ describe('fight', () => {
           },
         });
         const card4 = createFightingCard({
-          damage: 10,
+          attack: 10,
           defense: 10,
           health: 10,
           speed: 10,
@@ -375,7 +375,7 @@ describe('fight', () => {
           },
         });
         const card5 = createFightingCard({
-          damage: 20,
+          attack: 20,
           defense: 20,
           health: 20,
           speed: 20,
@@ -392,7 +392,7 @@ describe('fight', () => {
           },
         });
         const card6 = createFightingCard({
-          damage: 30,
+          attack: 30,
           defense: 30,
           health: 30,
           speed: 30,
@@ -409,7 +409,7 @@ describe('fight', () => {
           },
         });
         const card7 = createFightingCard({
-          damage: 40,
+          attack: 40,
           defense: 40,
           health: 40,
           speed: 40,
@@ -426,7 +426,7 @@ describe('fight', () => {
           },
         });
         const card8 = createFightingCard({
-          damage: 50,
+          attack: 50,
           defense: 50,
           health: 50,
           speed: 50,
@@ -443,7 +443,7 @@ describe('fight', () => {
           },
         });
         const card9 = createFightingCard({
-          damage: 60,
+          attack: 60,
           defense: 60,
           health: 60,
           speed: 60,
@@ -460,7 +460,7 @@ describe('fight', () => {
           },
         });
         const card10 = createFightingCard({
-          damage: 70,
+          attack: 70,
           defense: 70,
           health: 70,
           speed: 70,

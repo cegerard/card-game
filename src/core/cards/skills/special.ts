@@ -1,3 +1,4 @@
+import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 import { SpecialResult } from '../@types/special-result';
 import { FightingCard } from '../fighting-card';
 
@@ -36,4 +37,11 @@ export interface Special {
    * @returns The kind of special skill.
    */
   getSpecialKind(): string;
+
+  /**
+   * Get the targeting strategy of the special skill.
+   *
+   * @returns The targeting strategy of the special skill.
+   */
+  getTargetingStrategy(): TargetingCardStrategy;
 }
