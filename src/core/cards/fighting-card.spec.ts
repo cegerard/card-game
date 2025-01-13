@@ -17,7 +17,7 @@ describe('FightingCard', () => {
       });
 
       it('should compute the damage with the simple attack', () => {
-        expect(attacker.attack(defenderWithoutDodge)).toEqual({
+        expect(attacker.launchAttack(defenderWithoutDodge)).toEqual({
           damage: 10,
           isCritical: false,
           dodge: false,
@@ -31,7 +31,7 @@ describe('FightingCard', () => {
         agility: attackerAccuracy + 1,
       });
       it('should not deal any damage', () => {
-        expect(attacker.attack(defenderWithDodge)).toEqual({
+        expect(attacker.launchAttack(defenderWithDodge)).toEqual({
           damage: 0,
           isCritical: false,
           dodge: true,

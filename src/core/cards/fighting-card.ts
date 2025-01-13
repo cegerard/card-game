@@ -91,7 +91,7 @@ export class FightingCard {
     this.cardDeckIdentity = `${ownerName}-${cardPositionInDeck}`;
   }
 
-  public attack(defender: FightingCard): AttackResult {
+  public launchAttack(defender: FightingCard): AttackResult {
     const isCritical = Math.random() < this.criticalChance;
 
     if (defender.dodge(this.accuracy)) {

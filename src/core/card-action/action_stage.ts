@@ -56,7 +56,7 @@ export class ActionStage {
     };
 
     defensiveCards.forEach((defensiveCard) => {
-      const damageDealt = card.attack(defensiveCard);
+      const damageDealt = card.launchAttack(defensiveCard);
 
       result.attack.damages.push({
         defender: defensiveCard.identityInfo,
