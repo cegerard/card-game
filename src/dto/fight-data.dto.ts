@@ -56,7 +56,7 @@ export class FightingCardDto {
   name: string;
 
   @IsNumber()
-  damage: number;
+  attack: number;
 
   @IsNumber()
   defense: number;

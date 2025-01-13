@@ -12,7 +12,7 @@ export class FightingCard {
   private cardDeckIdentity: string = '';
 
   // Fixed Stats
-  private readonly damage: number;
+  private readonly attack: number;
   private readonly defense: number;
   private readonly health: number;
   private readonly speed: number;
@@ -34,7 +34,7 @@ export class FightingCard {
   constructor(
     name: string,
     stats: {
-      damage: number;
+      attack: number;
       defense: number;
       health: number;
       speed: number;
@@ -51,7 +51,7 @@ export class FightingCard {
     },
   ) {
     this.name = name;
-    this.damage = stats.damage;
+    this.attack = stats.attack;
     this.defense = stats.defense;
     this.health = stats.health;
     this.speed = stats.speed;
@@ -80,7 +80,7 @@ export class FightingCard {
   }
 
   public get actualDamage(): number {
-    return this.damage;
+    return this.attack;
   }
 
   public get identityInfo(): CardInfo {
@@ -99,7 +99,7 @@ export class FightingCard {
     }
 
     const computedDamage = this.simpleAttack.computeDamage(
-      this.damage,
+      this.attack,
       isCritical,
     );
     const damage = defender.collectsDamages(computedDamage);

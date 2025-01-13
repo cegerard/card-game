@@ -23,7 +23,7 @@ describe('AppController (e2e)', () => {
         deck: [
           {
             name: 'Axe',
-            damage: 10,
+            attack: 10,
             defense: 6,
             health: 100,
             speed: 3,
@@ -54,7 +54,7 @@ describe('AppController (e2e)', () => {
         deck: [
           {
             name: 'Sword',
-            damage: 11,
+            attack: 11,
             defense: 5,
             health: 100,
             speed: 2,

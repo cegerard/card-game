@@ -88,7 +88,7 @@ export function createFightingCard(params: FightingCardParams): FightingCard {
   return new FightingCard(
     cardName,
     {
-      damage,
+      attack: damage,
       defense,
       health,
       speed,
