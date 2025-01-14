@@ -1,6 +1,6 @@
 import { Fight } from './fight';
 import { Player } from '../player';
-import { DamageReport } from '../card-action/@types/damage-report';
+import { DamageReport } from './@types/damage-report';
 import { FightResult } from './@types/fight-result';
 import { PlayerByPlayerCardSelector } from './card-selectors/player-by-player';
 import { createFightingCard } from '../../../test/helpers/fighting-card';
@@ -19,10 +19,6 @@ describe('fight', () => {
             simpleAttack: {
               damageRate: 1.0,
             },
-            special: {
-              damageRate: 0,
-              energy: 10,
-            },
           },
         });
         const card2 = createFightingCard({
@@ -35,10 +31,6 @@ describe('fight', () => {
           skills: {
             simpleAttack: {
               damageRate: 1.0,
-            },
-            special: {
-              damageRate: 0,
-              energy: 10,
             },
           },
         });
@@ -87,10 +79,6 @@ describe('fight', () => {
           skills: {
             simpleAttack: {
               damageRate: 1.0,
-            },
-            special: {
-              damageRate: 0,
-              energy: 10,
             },
           },
         });
@@ -247,6 +235,7 @@ describe('fight', () => {
               damageRate: 1.0,
             },
             special: {
+              kind: 'specialAttack',
               damageRate: 0,
               energy: 1000,
             },
@@ -264,6 +253,7 @@ describe('fight', () => {
               damageRate: 1.0,
             },
             special: {
+              kind: 'specialAttack',
               damageRate: 0,
               energy: 1000,
             },
@@ -318,6 +308,7 @@ describe('fight', () => {
               damageRate: 1.0,
             },
             special: {
+              kind: 'specialAttack',
               damageRate: 0,
               energy: 1000,
             },
@@ -335,6 +326,7 @@ describe('fight', () => {
               damageRate: 1.0,
             },
             special: {
+              kind: 'specialAttack',
               damageRate: 0,
               energy: 1000,
             },
@@ -352,6 +344,7 @@ describe('fight', () => {
               damageRate: 1.0,
             },
             special: {
+              kind: 'specialAttack',
               damageRate: 0,
               energy: 1000,
             },
@@ -369,6 +362,7 @@ describe('fight', () => {
               damageRate: 1.0,
             },
             special: {
+              kind: 'specialAttack',
               damageRate: 0,
               energy: 1000,
             },
@@ -386,6 +380,7 @@ describe('fight', () => {
               damageRate: 1.0,
             },
             special: {
+              kind: 'specialAttack',
               damageRate: 0,
               energy: 1000,
             },
@@ -403,6 +398,7 @@ describe('fight', () => {
               damageRate: 1.0,
             },
             special: {
+              kind: 'specialAttack',
               damageRate: 0,
               energy: 1000,
             },
@@ -420,6 +416,7 @@ describe('fight', () => {
               damageRate: 1.0,
             },
             special: {
+              kind: 'specialAttack',
               damageRate: 0,
               energy: 1000,
             },
@@ -437,6 +434,7 @@ describe('fight', () => {
               damageRate: 1.0,
             },
             special: {
+              kind: 'specialAttack',
               damageRate: 0,
               energy: 1000,
             },
@@ -454,6 +452,7 @@ describe('fight', () => {
               damageRate: 1.0,
             },
             special: {
+              kind: 'specialAttack',
               damageRate: 0,
               energy: 1000,
             },
@@ -471,6 +470,7 @@ describe('fight', () => {
               damageRate: 1.0,
             },
             special: {
+              kind: 'specialAttack',
               damageRate: 0,
               energy: 1000,
             },

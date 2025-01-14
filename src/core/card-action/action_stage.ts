@@ -1,9 +1,13 @@
-import { AttackResult } from './@types/attack-result';
+import { AttackReport } from './@types/attack-report';
 import { FightingCard } from '../cards/fighting-card';
 import { Player } from '../player';
 import { CardDeathSubscriber } from '../fight-simulator/card-death-subscriber';
 import { Step } from '../fight-simulator/@types/step';
 import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
+import { ActionReport } from './@types/action-report';
+import { AttackResult } from '../cards/@types/attack-result';
+import { HealingReport } from './@types/healing-report';
+import { HealingResult } from '../cards/@types/healing-result';
 
 export class ActionStage {
   private player1: Player;
@@ -25,7 +29,7 @@ export class ActionStage {
   }
 
   public computeNextAction(cards: FightingCard[]): Step[] {
-    const attacksResults = cards.reduce((acc: AttackResult[], card) => {
+    const attacksReports = cards.reduce((acc: ActionReport[], card) => {
       if (card.isSpecialReady()) {
         acc.push(this.launchSpecial(card));
       } else {
@@ -35,18 +39,19 @@ export class ActionStage {
       return acc;
     }, []);
 
-    const resultSteps = this.convertIntoSteps(attacksResults);
+    const resultSteps = this.convertIntoSteps(attacksReports);
 
-    return [...resultSteps.attackSteps, ...resultSteps.statusChangeSteps];
+    return [...resultSteps.actionSteps, ...resultSteps.statusChangeSteps];
   }
 
-  private launchAttack(card: FightingCard): AttackResult {
+  private launchAttack(card: FightingCard): AttackReport {
     const defensiveCards = this.getTargetedCards(
       card,
       card.simpleAttackTargeting(),
     );
 
-    const result: AttackResult = {
+    const result: AttackReport = {
+      kind: 'attack',
       attack: {
         attacker: card.identityInfo,
         damages: [],
@@ -78,11 +83,27 @@ export class ActionStage {
     return result;
   }
 
-  private launchSpecial(card: FightingCard): AttackResult {
+  private launchSpecial(card: FightingCard): ActionReport {
     const targetedCards = this.getTargetedCards(card, card.specialTargeting());
 
-    const result: AttackResult = {
-      specialAttack: {
+    if (card.specialKind() === 'specialAttack') {
+      return this.computeSpecialAttackResult(card, targetedCards);
+    }
+
+    if (card.specialKind() === 'specialHealing') {
+      return this.computeSpecialHealingResult(card, targetedCards);
+    }
+
+    throw new Error('Unknown special skill');
+  }
+
+  private computeSpecialAttackResult(
+    card: FightingCard,
+    targetedCards: FightingCard[],
+  ): AttackReport {
+    const result: AttackReport = {
+      kind: 'special_attack',
+      attack: {
         attacker: card.identityInfo,
         damages: [],
         energy: card.resetSpecialEnergy(),
@@ -91,13 +112,13 @@ export class ActionStage {
     };
 
     targetedCards.forEach((defensiveCard) => {
-      const damageDealt = card.launchSpecial(defensiveCard);
+      const specialResult = card.launchSpecial(defensiveCard) as AttackResult;
 
-      result.specialAttack.damages.push({
+      result.attack.damages.push({
         defender: defensiveCard.identityInfo,
-        damage: damageDealt.damage,
-        isCritical: damageDealt.isCritical,
-        dodge: damageDealt.dodge,
+        damage: specialResult.damage,
+        isCritical: specialResult.isCritical,
+        dodge: specialResult.dodge,
         remainingHealth: defensiveCard.actualHealth,
       });
 
@@ -113,28 +134,43 @@ export class ActionStage {
     return result;
   }
 
-  private convertIntoSteps(attacksResults: AttackResult[]): {
-    attackSteps: Step[];
+  private computeSpecialHealingResult(
+    card: FightingCard,
+    targetedCards: FightingCard[],
+  ): ActionReport {
+    const result: HealingReport = {
+      kind: 'healing',
+      source: card.identityInfo,
+      energy: card.resetSpecialEnergy(),
+      heal: [],
+    };
+
+    targetedCards.forEach((targetedCard) => {
+      const healingResult = card.launchSpecial(targetedCard) as HealingResult;
+
+      result.heal.push({
+        target: targetedCard.identityInfo,
+        healed: healingResult.healed,
+        remainingHealth: targetedCard.actualHealth,
+      });
+    });
+
+    return result;
+  }
+
+  private convertIntoSteps(attacksReports: ActionReport[]): {
+    actionSteps: Step[];
     statusChangeSteps: Step[];
   } {
-    return attacksResults.reduce(
-      (acc, result) => {
-        if ('attack' in result) {
-          acc.attackSteps.push({
-            kind: 'attack',
-            ...result.attack,
+    return attacksReports.reduce(
+      (acc, report) => {
+        if (report.kind === 'attack' || report.kind === 'special_attack') {
+          acc.actionSteps.push({
+            kind: report.kind,
+            ...report.attack,
           });
-        }
 
-        if ('specialAttack' in result) {
-          acc.attackSteps.push({
-            kind: 'special_attack',
-            ...result.specialAttack,
-          });
-        }
-
-        if (result.statusChanges.length > 0) {
-          result.statusChanges.forEach((statusChange) => {
+          report.statusChanges.forEach((statusChange) => {
             acc.statusChangeSteps.push({
               kind: 'status_change',
               ...statusChange,
@@ -142,9 +178,13 @@ export class ActionStage {
           });
         }
 
+        if (report.kind === 'healing') {
+          acc.actionSteps.push(report);
+        }
+
         return acc;
       },
-      { attackSteps: [], statusChangeSteps: [] },
+      { actionSteps: [], statusChangeSteps: [] },
     );
   }
 

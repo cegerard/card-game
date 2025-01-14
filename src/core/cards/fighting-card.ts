@@ -14,7 +14,7 @@ export class FightingCard {
   // Fixed Stats
   private readonly attack: number;
   private readonly defense: number;
-  private readonly health: number;
+  private readonly maxHealth: number;
   private readonly speed: number;
   private readonly agility: number;
   private readonly accuracy: number;
@@ -23,6 +23,7 @@ export class FightingCard {
   // Dynamic Stats
   private specialEnergy: number = 0;
   private receivedDamages: number = 0;
+  private receivedHeal: number = 0;
 
   // Skills
   private simpleAttack: SimpleAttack;
@@ -53,7 +54,7 @@ export class FightingCard {
     this.name = name;
     this.attack = stats.attack;
     this.defense = stats.defense;
-    this.health = stats.health;
+    this.maxHealth = stats.health;
     this.speed = stats.speed;
     this.agility = stats.agility;
     this.accuracy = stats.accuracy;
@@ -64,7 +65,10 @@ export class FightingCard {
   }
 
   public get actualHealth(): number {
-    return Math.max(0, this.health - this.receivedDamages);
+    return Math.max(
+      0,
+      this.maxHealth - this.receivedDamages + this.receivedHeal,
+    );
   }
 
   public get actualSpeed(): number {
@@ -79,7 +83,7 @@ export class FightingCard {
     return this.accuracy;
   }
 
-  public get actualDamage(): number {
+  public get actualAttack(): number {
     return this.attack;
   }
 
@@ -139,15 +143,39 @@ export class FightingCard {
     return this.special.getTargetingStrategy();
   }
 
+  public specialKind(): string {
+    return this.special.getSpecialKind();
+  }
+
   public simpleAttackTargeting(): TargetingCardStrategy {
     return this.simpleAttack.targetingStrategy;
   }
 
   public collectsDamages(damage: number): number {
+    if (this.isDead()) {
+      return 0;
+    }
+
     const causedDamages = Math.max(0, damage - this.defense);
     this.receivedDamages += causedDamages;
 
     return causedDamages;
+  }
+
+  public heal(hpToRestore: number): number {
+    if (this.isDead()) {
+      return 0;
+    }
+
+    let healed = hpToRestore;
+
+    if (this.actualHealth + hpToRestore > this.maxHealth) {
+      healed = this.maxHealth - this.actualHealth;
+    }
+
+    this.receivedHeal += healed;
+
+    return healed;
   }
 
   public dodge(attackerAccuracy: number): boolean {

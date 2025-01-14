@@ -162,7 +162,7 @@ describe('ActionStage', () => {
         agility: 0,
         skills: {
           simpleAttack: { damageRate: 1.0 },
-          special: { damageRate: 450, energy: 0 },
+          special: { kind: 'specialAttack', damageRate: 450, energy: 0 },
         },
       });
       const defender = createFightingCard({
@@ -174,7 +174,6 @@ describe('ActionStage', () => {
         agility: 0,
         skills: {
           simpleAttack: { damageRate: 1.0 },
-          special: { damageRate: 0 },
         },
       });
       const player1 = new Player('Player 1', [attacker]);
@@ -214,6 +213,7 @@ describe('ActionStage', () => {
         skills: {
           simpleAttack: { damageRate: 1.0 },
           special: {
+            kind: 'specialAttack',
             damageRate: 450,
             energy: 0,
             targetingStrategy: 'target-all',
@@ -229,7 +229,6 @@ describe('ActionStage', () => {
         agility: 0,
         skills: {
           simpleAttack: { damageRate: 1.0 },
-          special: { damageRate: 0 },
         },
       });
       const defender2 = createFightingCard({
@@ -241,7 +240,6 @@ describe('ActionStage', () => {
         agility: 0,
         skills: {
           simpleAttack: { damageRate: 1.0 },
-          special: { damageRate: 0 },
         },
       });
       const player1 = new Player('Player 1', [attacker]);
@@ -277,6 +275,53 @@ describe('ActionStage', () => {
             kind: 'status_change',
             card: defender1.identityInfo,
             status: 'dead',
+          },
+        ]);
+      });
+    });
+
+    describe('when the card launch a special healing skill', () => {
+      const healer = createFightingCard({
+        attack: 100,
+        health: 1400,
+        skills: {
+          special: {
+            kind: 'specialHealing',
+            damageRate: 1.8,
+            energy: 0,
+            targetingStrategy: 'all-owner-cards',
+          },
+        },
+      });
+      const healed = createFightingCard({ health: 1000, defense: 0 });
+      const player1 = new Player('Player 1', [healer, healed]);
+      const player2 = new Player('Player 2', []);
+      const attackStage = new ActionStage(player1, player2, eventBroker);
+
+      beforeEach(() => {
+        healed.collectsDamages(500);
+      });
+
+      it('should return the healing report', () => {
+        const result = attackStage.computeNextAction([healer]);
+
+        expect(result).toEqual([
+          {
+            kind: 'healing',
+            source: healer.identityInfo,
+            energy: 0,
+            heal: [
+              {
+                target: healer.identityInfo,
+                healed: 0,
+                remainingHealth: 1400,
+              },
+              {
+                target: healed.identityInfo,
+                healed: 180,
+                remainingHealth: 680,
+              },
+            ],
           },
         ]);
       });

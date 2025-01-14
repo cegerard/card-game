@@ -8,6 +8,8 @@ import { TargetingCardStrategy } from '../../src/core/targeting-card-strategies/
 import { TargetedAll } from '../../src/core/targeting-card-strategies/targeted-all';
 import { SimpleDodge } from '../../src/core/cards/behaviors/simple-dodge';
 import { Special } from '../../src/core/cards/skills/special';
+import { SpecialHealing } from '../../src/core/cards/skills/special-healing';
+import { AllOwnerCards } from '../../src/core/targeting-card-strategies/all-allies';
 
 type FightingCardParams = {
   name?: string;
@@ -40,6 +42,8 @@ function createTargetingStrategy(strategy: string): TargetingCardStrategy {
       return new TargetedFromPosition();
     case 'target-all':
       return new TargetedAll();
+    case 'all-owner-cards':
+      return new AllOwnerCards();
     default:
       throw new Error(`Unknown targeting strategy: ${strategy}`);
   }
@@ -59,19 +63,17 @@ function createSimpleAttack(params: {
   );
 }
 
-function createSpecial(
-  kind: string,
-  params: {
-    damageRate?: number;
-    energy?: number;
-    targetingStrategy?: string;
-  },
-): Special {
-  switch (kind) {
-    case 'specialAttack':
-      return createSpecialAttack(params);
+function createSpecial(params: {
+  kind?: string;
+  damageRate?: number;
+  energy?: number;
+  targetingStrategy?: string;
+}): Special {
+  switch (params.kind) {
+    case 'specialHealing':
+      return createSpecialHealing(params);
     default:
-      throw new Error(`Unknown special kind: ${kind}`);
+      return createSpecialAttack(params);
   }
 }
 
@@ -92,6 +94,22 @@ function createSpecialAttack(params: {
   );
 }
 
+function createSpecialHealing(params: {
+  damageRate?: number;
+  energy?: number;
+  targetingStrategy?: string;
+}): SpecialHealing {
+  const rate = params.damageRate ?? faker.number.int({ min: 2.5, max: 8.0 });
+  const energy = params.energy ?? faker.number.int({ min: 30, max: 100 });
+  const targetingStrategy = params.targetingStrategy ?? 'position-based';
+
+  return new SpecialHealing(
+    rate,
+    energy,
+    createTargetingStrategy(targetingStrategy),
+  );
+}
+
 export function createFightingCard(params: FightingCardParams): FightingCard {
   const cardName = params.name ?? faker.animal.type();
   const damage = params.attack ?? faker.number.int({ min: 100, max: 800 });
@@ -102,6 +120,15 @@ export function createFightingCard(params: FightingCardParams): FightingCard {
   const accuracy = params.accuracy ?? faker.number.int({ min: 10, max: 50 });
   const criticalChance =
     params.criticalChance ?? faker.number.float({ max: 0.9 });
+
+  let specialParams = {};
+
+  if (
+    params.skills?.special?.kind === 'specialAttack' ||
+    params.skills?.special?.kind === 'specialHealing'
+  ) {
+    specialParams = params.skills.special;
+  }
 
   return new FightingCard(
     cardName,
@@ -116,7 +143,7 @@ export function createFightingCard(params: FightingCardParams): FightingCard {
     },
     {
       simpleAttack: createSimpleAttack(params.skills?.simpleAttack ?? {}),
-      special: createSpecial('specialAttack', params.skills?.special ?? {}),
+      special: createSpecial(specialParams),
     },
     {
       dodge: new SimpleDodge(),

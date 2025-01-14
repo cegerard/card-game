@@ -25,7 +25,7 @@ export class SpecialAttack implements Special {
       return { damage: 0, isCritical, dodge: true };
     }
 
-    const computedDamage = this.computeDamage(source.actualDamage, isCritical);
+    const computedDamage = this.computeDamage(source.actualAttack, isCritical);
     const damage = target.collectsDamages(computedDamage);
 
     return { damage, isCritical, dodge: false };

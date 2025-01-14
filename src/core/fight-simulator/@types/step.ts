@@ -1,8 +1,15 @@
-import { DamageReport } from '../../card-action/@types/damage-report';
-import { StatusChangeReport } from '../../card-action/@types/status-change-report';
+import { DamageReport } from './damage-report';
+import { StatusChangeReport } from './status-change-report';
 import { WinnerReport } from './winner-report';
 
-export type Step = { kind: string } & (
+type StepKind =
+  | 'fight_end'
+  | 'status_change'
+  | 'attack'
+  | 'special_attack'
+  | 'winner';
+
+export type Step = { kind: StepKind } & (
   | StatusChangeReport
   | DamageReport
   | WinnerReport
