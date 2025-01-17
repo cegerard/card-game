@@ -9,7 +9,7 @@ import { TargetedAll } from '../../src/core/targeting-card-strategies/targeted-a
 import { SimpleDodge } from '../../src/core/cards/behaviors/simple-dodge';
 import { Special } from '../../src/core/cards/skills/special';
 import { SpecialHealing } from '../../src/core/cards/skills/special-healing';
-import { AllOwnerCards } from '../../src/core/targeting-card-strategies/all-allies';
+import { AllOwnerCards } from '../../src/core/targeting-card-strategies/all-owner-cards';
 
 type FightingCardParams = {
   name?: string;
