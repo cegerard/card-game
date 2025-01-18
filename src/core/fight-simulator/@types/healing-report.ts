@@ -1,4 +1,5 @@
 import { CardInfo } from '../../cards/@types/card-info';
+import { StepKind } from './step';
 
 type Healing = {
   target: CardInfo;
@@ -7,7 +8,7 @@ type Healing = {
 };
 
 export type HealingReport = {
-  kind: 'healing';
+  kind: StepKind.Healing;
   source: CardInfo;
   heal: Healing[];
   energy: number;

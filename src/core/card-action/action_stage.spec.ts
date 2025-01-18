@@ -281,49 +281,152 @@ describe('ActionStage', () => {
     });
 
     describe('when the card launch a special healing skill', () => {
-      const healer = createFightingCard({
-        attack: 100,
-        health: 1400,
-        skills: {
-          special: {
-            kind: 'specialHealing',
-            damageRate: 1.8,
-            energy: 0,
-            targetingStrategy: 'all-owner-cards',
+      const specialHealing = {
+        kind: 'specialHealing',
+        damageRate: 1.8,
+        energy: 0,
+      };
+      describe('when the healing target only the healer', () => {
+        const targetingStrategy = 'self';
+
+        const healer = createFightingCard({
+          attack: 100,
+          defense: 0,
+          health: 1400,
+          skills: {
+            special: { ...specialHealing, targetingStrategy },
           },
-        },
+        });
+        const other = createFightingCard({ health: 1000, defense: 0 });
+        const enemies = createFightingCard({ health: 1000, defense: 0 });
+        const player1 = new Player('Player 1', [healer, other]);
+        const player2 = new Player('Player 2', [enemies]);
+        const attackStage = new ActionStage(player1, player2, eventBroker);
+
+        beforeEach(() => {
+          healer.collectsDamages(400);
+        });
+
+        it('should return the healing report', () => {
+          const result = attackStage.computeNextAction([healer]);
+
+          expect(result).toEqual([
+            {
+              kind: 'healing',
+              source: healer.identityInfo,
+              energy: 0,
+              heal: [
+                {
+                  target: healer.identityInfo,
+                  healed: 180,
+                  remainingHealth: 1180,
+                },
+              ],
+            },
+          ]);
+        });
       });
-      const healed = createFightingCard({ health: 1000, defense: 0 });
-      const player1 = new Player('Player 1', [healer, healed]);
-      const player2 = new Player('Player 2', []);
-      const attackStage = new ActionStage(player1, player2, eventBroker);
 
-      beforeEach(() => {
-        healed.collectsDamages(500);
-      });
+      describe('when the healing target all the allies adn the healer', () => {
+        const targetingStrategy = 'all-owner-cards';
 
-      it('should return the healing report', () => {
-        const result = attackStage.computeNextAction([healer]);
-
-        expect(result).toEqual([
-          {
-            kind: 'healing',
-            source: healer.identityInfo,
-            energy: 0,
-            heal: [
-              {
-                target: healer.identityInfo,
-                healed: 0,
-                remainingHealth: 1400,
-              },
-              {
-                target: healed.identityInfo,
-                healed: 180,
-                remainingHealth: 680,
-              },
-            ],
+        const healer = createFightingCard({
+          attack: 100,
+          defense: 0,
+          health: 1400,
+          skills: {
+            special: { ...specialHealing, targetingStrategy },
           },
-        ]);
+        });
+        const other = createFightingCard({ health: 1000, defense: 0 });
+        const allies1 = createFightingCard({ health: 1000, defense: 0 });
+        const allies2 = createFightingCard({ health: 900, defense: 0 });
+        const player1 = new Player('Player 1', [healer, allies1, allies2]);
+        const player2 = new Player('Player 2', [other]);
+        const attackStage = new ActionStage(player1, player2, eventBroker);
+
+        beforeEach(() => {
+          healer.collectsDamages(400);
+          allies1.collectsDamages(300);
+          allies2.collectsDamages(100);
+        });
+
+        it('should return the healing report', () => {
+          const result = attackStage.computeNextAction([healer]);
+
+          expect(result).toEqual([
+            {
+              kind: 'healing',
+              source: healer.identityInfo,
+              energy: 0,
+              heal: [
+                {
+                  target: healer.identityInfo,
+                  healed: 180,
+                  remainingHealth: 1180,
+                },
+                {
+                  target: allies1.identityInfo,
+                  healed: 180,
+                  remainingHealth: 880,
+                },
+                {
+                  target: allies2.identityInfo,
+                  healed: 100,
+                  remainingHealth: 900,
+                },
+              ],
+            },
+          ]);
+        });
+      });
+
+      describe('when the special healing heal only the allies', () => {
+        const targetingStrategy = 'all-allies';
+
+        const healer = createFightingCard({
+          attack: 100,
+          defense: 0,
+          health: 1400,
+          skills: {
+            special: { ...specialHealing, targetingStrategy },
+          },
+        });
+        const other = createFightingCard({ health: 1000, defense: 0 });
+        const allies1 = createFightingCard({ health: 1000, defense: 0 });
+        const allies2 = createFightingCard({ health: 900, defense: 0 });
+        const player1 = new Player('Player 1', [healer, allies1, allies2]);
+        const player2 = new Player('Player 2', [other]);
+        const attackStage = new ActionStage(player1, player2, eventBroker);
+
+        beforeEach(() => {
+          allies1.collectsDamages(300);
+          allies2.collectsDamages(100);
+        });
+
+        it('should return the healing report', () => {
+          const result = attackStage.computeNextAction([healer]);
+
+          expect(result).toEqual([
+            {
+              kind: 'healing',
+              source: healer.identityInfo,
+              energy: 0,
+              heal: [
+                {
+                  target: allies1.identityInfo,
+                  healed: 180,
+                  remainingHealth: 880,
+                },
+                {
+                  target: allies2.identityInfo,
+                  healed: 100,
+                  remainingHealth: 900,
+                },
+              ],
+            },
+          ]);
+        });
       });
     });
   });

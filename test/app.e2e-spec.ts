@@ -31,11 +31,39 @@ describe('AppController (e2e)', () => {
             accuracy: 15,
             criticalChance: 0.05,
             skills: {
-              specialAttack: {
+              special: {
+                kind: 'ATTACK',
                 name: 'Double Strike',
-                damageRate: 2.0,
+                rate: 2.0,
                 energy: 100,
+                targetingStrategy: 'target-all',
+              },
+              simpleAttack: {
+                name: 'Simple Attack',
+                damageRate: 1.0,
                 targetingStrategy: 'position-based',
+              },
+            },
+            behaviors: {
+              dodge: 'simple-dodge',
+            },
+          },
+          {
+            name: 'Hammer',
+            attack: 10,
+            defense: 6,
+            health: 100,
+            speed: 3,
+            agility: 25,
+            accuracy: 15,
+            criticalChance: 0.05,
+            skills: {
+              special: {
+                kind: 'ATTACK',
+                name: 'Double Strike',
+                rate: 2.0,
+                energy: 100,
+                targetingStrategy: 'all-owner-card',
               },
               simpleAttack: {
                 name: 'Simple Attack',
@@ -62,16 +90,44 @@ describe('AppController (e2e)', () => {
             accuracy: 18,
             criticalChance: 0.04,
             skills: {
-              specialAttack: {
+              special: {
+                kind: 'ATTACK',
                 name: 'Double Strike',
-                damageRate: 2.0,
+                rate: 2.0,
                 energy: 100,
-                targetingStrategy: 'position-based',
+                targetingStrategy: 'line-three',
               },
               simpleAttack: {
                 name: 'Simple Attack',
                 damageRate: 1.0,
                 targetingStrategy: 'position-based',
+              },
+            },
+            behaviors: {
+              dodge: 'random-dodge',
+            },
+          },
+          {
+            name: 'Priest',
+            attack: 11,
+            defense: 5,
+            health: 100,
+            speed: 2,
+            agility: 20,
+            accuracy: 18,
+            criticalChance: 0.04,
+            skills: {
+              special: {
+                kind: 'HEALING',
+                name: 'Cure',
+                rate: 2.0,
+                energy: 100,
+                targetingStrategy: 'all-allies',
+              },
+              simpleAttack: {
+                name: 'Suicide',
+                damageRate: 0,
+                targetingStrategy: 'self',
               },
             },
             behaviors: {

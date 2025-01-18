@@ -10,6 +10,8 @@ import { SimpleDodge } from '../../src/core/cards/behaviors/simple-dodge';
 import { Special } from '../../src/core/cards/skills/special';
 import { SpecialHealing } from '../../src/core/cards/skills/special-healing';
 import { AllOwnerCards } from '../../src/core/targeting-card-strategies/all-owner-cards';
+import { Launcher } from '../../src/core/targeting-card-strategies/launcher';
+import { AllAllies } from '../../src/core/targeting-card-strategies/all-allies';
 
 type FightingCardParams = {
   name?: string;
@@ -44,6 +46,10 @@ function createTargetingStrategy(strategy: string): TargetingCardStrategy {
       return new TargetedAll();
     case 'all-owner-cards':
       return new AllOwnerCards();
+    case 'all-allies':
+      return new AllAllies();
+    case 'self':
+      return new Launcher();
     default:
       throw new Error(`Unknown targeting strategy: ${strategy}`);
   }

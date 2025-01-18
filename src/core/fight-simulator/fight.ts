@@ -3,7 +3,7 @@ import { ActionStage } from '../card-action/action_stage';
 import { Player } from '../player';
 import { CardSelector } from './card-selectors/card-selector';
 import { CardDeathSubscriber } from './card-death-subscriber';
-import { Step } from './@types/step';
+import { Step, StepKind } from './@types/step';
 
 export class Fight {
   private player1: Player;
@@ -29,21 +29,21 @@ export class Fight {
   }
 
   public start(): FightResult {
-    const steps = {};
+    const fightResult: FightResult = {};
 
     while (this.bothPlayersCanFight() && this.thereIsTimeLeft()) {
       const nextIterationSteps = this.nextIteration();
 
       nextIterationSteps.forEach((step) => {
-        steps[++this.stepCounter] = step;
+        fightResult[++this.stepCounter] = step;
       });
 
       this.loopCounter++;
     }
 
-    this.computeWinner(steps);
+    this.computeWinner(fightResult);
 
-    return steps;
+    return fightResult;
   }
 
   private bothPlayersCanFight(): boolean {
@@ -67,6 +67,6 @@ export class Fight {
       winner = this.player2.name;
     }
 
-    steps[++this.stepCounter] = { kind: 'fight_end', winner };
+    steps[++this.stepCounter] = { kind: StepKind.FightEnd, winner };
   }
 }

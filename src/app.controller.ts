@@ -8,12 +8,18 @@ import {
 } from '@nestjs/common';
 import { AppService } from './app.service';
 import { FightResult } from './core/fight-simulator/@types/fight-result';
-import { FightDataDto, FightingCardDto } from './dto/fight-data.dto';
+import {
+  FightDataDto,
+  FightingCardDto,
+  SpecialKind,
+} from './dto/fight-data.dto';
 import { FightingCard } from './core/cards/fighting-card';
 import { SpecialAttack } from './core/cards/skills/special-attack';
 import { SimpleAttack } from './core/cards/skills/simple-attack';
 import { TargetingStrategyFactory } from './targeting-strategy-factory';
 import { DodgeStrategyFactory } from './dodge-strategy-factory';
+import { Special } from './core/cards/skills/special';
+import { SpecialHealing } from './core/cards/skills/special-healing';
 
 @Controller()
 @UsePipes(new ValidationPipe({ transform: true }))
@@ -34,13 +40,28 @@ export class AppController {
   }
 
   private convertCardDtoToCard(cardData: FightingCardDto): FightingCard {
-    const specialAttack = new SpecialAttack(
-      cardData.skills.specialAttack.damageRate,
-      cardData.skills.specialAttack.energy,
-      TargetingStrategyFactory.create(
-        cardData.skills.specialAttack.targetingStrategy,
-      ),
-    );
+    let special: Special;
+
+    if (cardData.skills.special.kind === SpecialKind.ATTACK) {
+      special = new SpecialAttack(
+        cardData.skills.special.rate,
+        cardData.skills.special.energy,
+        TargetingStrategyFactory.create(
+          cardData.skills.special.targetingStrategy,
+        ),
+      );
+    }
+
+    if (cardData.skills.special.kind === SpecialKind.HEALING) {
+      special = new SpecialHealing(
+        cardData.skills.special.rate,
+        cardData.skills.special.energy,
+        TargetingStrategyFactory.create(
+          cardData.skills.special.targetingStrategy,
+        ),
+      );
+    }
+
     const simpleAttack = new SimpleAttack(
       cardData.skills.simpleAttack.damageRate,
       TargetingStrategyFactory.create(
@@ -51,7 +72,7 @@ export class AppController {
       cardData.name,
       cardData,
       {
-        special: specialAttack,
+        special,
         simpleAttack,
       },
       {

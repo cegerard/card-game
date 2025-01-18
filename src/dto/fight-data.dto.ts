@@ -7,14 +7,23 @@ import {
   IsNumber,
   IsString,
   IsNotEmpty,
+  IsEnum,
 } from 'class-validator';
 
-class SpecialAttackDto {
+export enum SpecialKind {
+  ATTACK = 'ATTACK',
+  HEALING = 'HEALING',
+}
+
+class SpecialDto {
+  @IsEnum(SpecialKind)
+  kind: SpecialKind;
+
   @IsString()
   name: string;
 
   @IsNumber()
-  damageRate: number;
+  rate: number;
 
   @IsNumber()
   energy: number;
@@ -37,8 +46,8 @@ class SimpleAttackDto {
 class SkillsDto {
   @IsNotEmpty()
   @ValidateNested()
-  @Type(() => SpecialAttackDto)
-  specialAttack: SpecialAttackDto;
+  @Type(() => SpecialDto)
+  special: SpecialDto;
 
   @IsNotEmpty()
   @ValidateNested()

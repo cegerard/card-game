@@ -1,13 +1,18 @@
-import { AttackReport } from './@types/attack-report';
+import { AttackReport } from '../fight-simulator/@types/attack-report';
 import { FightingCard } from '../cards/fighting-card';
 import { Player } from '../player';
 import { CardDeathSubscriber } from '../fight-simulator/card-death-subscriber';
-import { Step } from '../fight-simulator/@types/step';
+import { Step, StepKind } from '../fight-simulator/@types/step';
 import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
-import { ActionReport } from './@types/action-report';
+import { ActionReport } from '../fight-simulator/@types/action-report';
 import { AttackResult } from '../cards/@types/attack-result';
-import { HealingReport } from './@types/healing-report';
+import { HealingReport } from '../fight-simulator/@types/healing-report';
 import { HealingResult } from '../cards/@types/healing-result';
+
+type SplittedSteps = {
+  actionSteps: Step[];
+  statusChangeSteps: Step[];
+};
 
 export class ActionStage {
   private player1: Player;
@@ -51,7 +56,7 @@ export class ActionStage {
     );
 
     const result: AttackReport = {
-      kind: 'attack',
+      kind: StepKind.Attack,
       attack: {
         attacker: card.identityInfo,
         damages: [],
@@ -102,7 +107,7 @@ export class ActionStage {
     targetedCards: FightingCard[],
   ): AttackReport {
     const result: AttackReport = {
-      kind: 'special_attack',
+      kind: StepKind.SpecialAttack,
       attack: {
         attacker: card.identityInfo,
         damages: [],
@@ -139,7 +144,7 @@ export class ActionStage {
     targetedCards: FightingCard[],
   ): ActionReport {
     const result: HealingReport = {
-      kind: 'healing',
+      kind: StepKind.Healing,
       source: card.identityInfo,
       energy: card.resetSpecialEnergy(),
       heal: [],
@@ -158,12 +163,9 @@ export class ActionStage {
     return result;
   }
 
-  private convertIntoSteps(attacksReports: ActionReport[]): {
-    actionSteps: Step[];
-    statusChangeSteps: Step[];
-  } {
+  private convertIntoSteps(attacksReports: ActionReport[]): SplittedSteps {
     return attacksReports.reduce(
-      (acc, report) => {
+      (acc: SplittedSteps, report) => {
         if (report.kind === 'attack' || report.kind === 'special_attack') {
           acc.actionSteps.push({
             kind: report.kind,
@@ -172,7 +174,7 @@ export class ActionStage {
 
           report.statusChanges.forEach((statusChange) => {
             acc.statusChangeSteps.push({
-              kind: 'status_change',
+              kind: StepKind.StatusChange,
               ...statusChange,
             });
           });
