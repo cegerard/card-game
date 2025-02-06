@@ -82,7 +82,9 @@ describe('FightingCard', () => {
       attack: 10,
       criticalChance: 0,
       accuracy: attackerAccuracy,
-      skills: { special: { damageRate: 1.0, energy: 0 } },
+      skills: {
+        special: { damageRate: 1.0, energy: 0, kind: 'specialAttack' },
+      },
     });
 
     describe('and the attack is not dodge', () => {
@@ -119,7 +121,9 @@ describe('FightingCard', () => {
   describe('when launching a special healing', () => {
     const healer = createFightingCard({
       attack: 100,
-      skills: { special: { kind: 'healing', damageRate: 2.5, energy: 0 } },
+      skills: {
+        special: { kind: 'specialHealing', damageRate: 2.5, energy: 0 },
+      },
     });
     let target: FightingCard;
 
