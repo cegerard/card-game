@@ -1,9 +1,12 @@
 import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
 import { AttackResult } from './@types/attack-result';
 import { CardInfo } from './@types/card-info';
+import { FightingContext } from './@types/fighting-context';
+import { HealingResults } from './@types/healing-results';
 import { SpecialResult } from './@types/special-result';
 import { DodgeBehavior } from './behaviors/dodge-behaviors';
 import { SimpleAttack } from './skills/simple-attack';
+import { Skill } from './skills/skill';
 import { Special } from './skills/special';
 
 export class FightingCard {
@@ -28,6 +31,7 @@ export class FightingCard {
   // Skills
   private simpleAttack: SimpleAttack;
   private special: Special;
+  private skills: Skill[];
 
   // Behaviors
   private dodgeBehavior: DodgeBehavior;
@@ -46,6 +50,7 @@ export class FightingCard {
     skills: {
       simpleAttack: SimpleAttack;
       special: Special;
+      others: Skill[];
     },
     behaviors: {
       dodge: DodgeBehavior;
@@ -62,6 +67,7 @@ export class FightingCard {
     this.simpleAttack = skills.simpleAttack;
     this.special = skills.special;
     this.dodgeBehavior = behaviors.dodge;
+    this.skills = skills.others;
   }
 
   public get actualHealth(): number {
@@ -113,6 +119,15 @@ export class FightingCard {
 
   public launchSpecial(defender: FightingCard): SpecialResult {
     return this.special.launch(this, defender);
+  }
+
+  public launchSkill(
+    trigger: string,
+    context: FightingContext,
+  ): HealingResults {
+    const skill = this.skills.find((s) => s.isTriggered(trigger));
+
+    return skill.launch(this, context);
   }
 
   public fasterThan(defender: FightingCard | null): boolean {

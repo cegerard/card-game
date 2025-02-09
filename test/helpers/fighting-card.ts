@@ -12,6 +12,10 @@ import { SpecialHealing } from '../../src/core/cards/skills/special-healing';
 import { AllOwnerCards } from '../../src/core/targeting-card-strategies/all-owner-cards';
 import { Launcher } from '../../src/core/targeting-card-strategies/launcher';
 import { AllAllies } from '../../src/core/targeting-card-strategies/all-allies';
+import { Healing } from '../../src/core/cards/skills/healing';
+import { Skill } from '../../src/core/cards/skills/skill';
+import { TurnEnd } from '../../src/core/trigger/turn-end';
+import { Trigger } from '../../src/core/trigger/trigger';
 
 type FightingCardParams = {
   name?: string;
@@ -35,6 +39,11 @@ type FightingCardParams = {
       targetingStrategy?: string;
       kind?: string;
     };
+    others?: {
+      effectRate: number;
+      trigger: string;
+      targetingStrategy: string;
+    }[];
   };
 };
 
@@ -52,6 +61,15 @@ function createTargetingStrategy(strategy: string): TargetingCardStrategy {
       return new Launcher();
     default:
       throw new Error(`Unknown targeting strategy: ${strategy}`);
+  }
+}
+
+function createTrigger(trigger: string): Trigger {
+  switch (trigger) {
+    case 'turn-end':
+      return new TurnEnd();
+    default:
+      throw new Error(`Unknown trigger: ${trigger}`);
   }
 }
 
@@ -116,6 +134,22 @@ function createSpecialHealing(params: {
   );
 }
 
+function createsSkills(
+  params: {
+    effectRate: number;
+    trigger: string;
+    targetingStrategy: string;
+  }[],
+): Skill[] {
+  return params.map((skill) => {
+    return new Healing(
+      skill.effectRate,
+      createTrigger(skill.trigger),
+      createTargetingStrategy(skill.targetingStrategy),
+    );
+  });
+}
+
 export function createFightingCard(params: FightingCardParams): FightingCard {
   const cardName = params.name ?? faker.animal.type();
   const damage = params.attack ?? faker.number.int({ min: 100, max: 800 });
@@ -150,6 +184,7 @@ export function createFightingCard(params: FightingCardParams): FightingCard {
     {
       simpleAttack: createSimpleAttack(params.skills?.simpleAttack ?? {}),
       special: createSpecial(specialParams),
+      others: createsSkills(params.skills?.others ?? []),
     },
     {
       dodge: new SimpleDodge(),
