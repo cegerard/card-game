@@ -43,6 +43,15 @@ describe('AppController (e2e)', () => {
                 damageRate: 1.0,
                 targetingStrategy: 'position-based',
               },
+              others: [
+                {
+                  kind: 'HEALING',
+                  name: 'Heal',
+                  rate: 0.3,
+                  targetingStrategy: 'self',
+                  event: 'turn-end',
+                },
+              ],
             },
             behaviors: {
               dodge: 'simple-dodge',
@@ -70,6 +79,7 @@ describe('AppController (e2e)', () => {
                 damageRate: 1.0,
                 targetingStrategy: 'position-based',
               },
+              others: [],
             },
             behaviors: {
               dodge: 'simple-dodge',
@@ -102,6 +112,7 @@ describe('AppController (e2e)', () => {
                 damageRate: 1.0,
                 targetingStrategy: 'position-based',
               },
+              others: [],
             },
             behaviors: {
               dodge: 'random-dodge',
@@ -129,6 +140,7 @@ describe('AppController (e2e)', () => {
                 damageRate: 0,
                 targetingStrategy: 'self',
               },
+              others: [],
             },
             behaviors: {
               dodge: 'random-dodge',

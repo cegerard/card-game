@@ -4,6 +4,7 @@ import { Player } from '../player';
 import { CardSelector } from './card-selectors/card-selector';
 import { CardDeathSubscriber } from './card-death-subscriber';
 import { Step, StepKind } from './@types/step';
+import { TurnManager } from './turn-manager';
 
 export class Fight {
   private player1: Player;
@@ -12,6 +13,7 @@ export class Fight {
   private loopCounter = 0;
 
   private actionManager: ActionStage;
+  private turnManager: TurnManager;
   private cardSelector: CardSelector;
   private eventBroker: {
     onCardDeath: CardDeathSubscriber[];
@@ -25,6 +27,7 @@ export class Fight {
     this.player1 = player1;
     this.player2 = player2;
     this.actionManager = new ActionStage(player1, player2, this.eventBroker);
+    this.turnManager = new TurnManager(player1, player2);
     this.cardSelector = cardSelector;
   }
 
@@ -55,7 +58,11 @@ export class Fight {
   }
 
   private nextIteration(): Step[] {
-    return this.actionManager.computeNextAction(this.cardSelector.nextCards());
+    const cards = this.cardSelector.nextCards();
+    const actionSteps = this.actionManager.computeNextAction(cards);
+    const endTurnSteps = this.turnManager.endTurn(cards);
+
+    return [...actionSteps, ...endTurnSteps];
   }
 
   private computeWinner(steps: Record<number, object>): void {

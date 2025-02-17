@@ -93,6 +93,10 @@ export class FightingCard {
     return this.attack;
   }
 
+  public get actualEnergy(): number {
+    return this.specialEnergy;
+  }
+
   public get identityInfo(): CardInfo {
     return { name: this.name, deckIdentity: this.cardDeckIdentity };
   }
@@ -124,8 +128,10 @@ export class FightingCard {
   public launchSkill(
     trigger: string,
     context: FightingContext,
-  ): HealingResults {
+  ): HealingResults | null {
     const skill = this.skills.find((s) => s.isTriggered(trigger));
+
+    if (!skill) return null;
 
     return skill.launch(this, context);
   }

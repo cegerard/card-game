@@ -20,6 +20,8 @@ import { TargetingStrategyFactory } from './targeting-strategy-factory';
 import { DodgeStrategyFactory } from './dodge-strategy-factory';
 import { Special } from './core/cards/skills/special';
 import { SpecialHealing } from './core/cards/skills/special-healing';
+import { Healing } from './core/cards/skills/healing';
+import { TriggerFactory } from './trigger-factory';
 
 @Controller()
 @UsePipes(new ValidationPipe({ transform: true }))
@@ -68,12 +70,20 @@ export class AppController {
         cardData.skills.simpleAttack.targetingStrategy,
       ),
     );
+
     return new FightingCard(
       cardData.name,
       cardData,
       {
         special,
         simpleAttack,
+        others: cardData.skills.others.map((skill) => {
+          return new Healing(
+            skill.rate,
+            TriggerFactory.create(skill.event),
+            TargetingStrategyFactory.create(skill.targetingStrategy),
+          );
+        }),
       },
       {
         dodge: DodgeStrategyFactory.create(cardData.behaviors.dodge),

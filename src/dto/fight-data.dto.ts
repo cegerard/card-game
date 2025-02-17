@@ -15,6 +15,10 @@ export enum SpecialKind {
   HEALING = 'HEALING',
 }
 
+export enum SkillKind {
+  HEALING = 'HEALING',
+}
+
 class SpecialDto {
   @IsEnum(SpecialKind)
   kind: SpecialKind;
@@ -43,6 +47,23 @@ class SimpleAttackDto {
   targetingStrategy: string;
 }
 
+class OtherSkillDto {
+  @IsEnum(SkillKind)
+  kind: SkillKind;
+
+  @IsString()
+  name: string;
+
+  @IsNumber()
+  rate: number;
+
+  @IsString()
+  targetingStrategy: string;
+
+  @IsString()
+  event: string;
+}
+
 class SkillsDto {
   @IsNotEmpty()
   @ValidateNested()
@@ -53,6 +74,11 @@ class SkillsDto {
   @ValidateNested()
   @Type(() => SimpleAttackDto)
   simpleAttack: SimpleAttackDto;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => OtherSkillDto)
+  others: OtherSkillDto[];
 }
 
 class BehaviorsDto {
