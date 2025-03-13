@@ -105,20 +105,8 @@ export class FightingCard {
     this.cardDeckIdentity = `${ownerName}-${cardPositionInDeck}`;
   }
 
-  public launchAttack(defender: FightingCard): AttackResult {
-    const isCritical = Math.random() < this.criticalChance;
-
-    if (defender.dodge(this.accuracy)) {
-      return { damage: 0, isCritical, dodge: true };
-    }
-
-    const computedDamage = this.simpleAttack.computeDamage(
-      this.attack,
-      isCritical,
-    );
-    const damage = defender.collectsDamages(computedDamage);
-
-    return { damage, isCritical, dodge: false };
+  public launchAttack(context: FightingContext): AttackResult[] {
+    return this.simpleAttack.launch(this, context);
   }
 
   public launchSpecial(defender: FightingCard): SpecialResult {
@@ -166,10 +154,6 @@ export class FightingCard {
 
   public specialKind(): string {
     return this.special.getSpecialKind();
-  }
-
-  public simpleAttackTargeting(): TargetingCardStrategy {
-    return this.simpleAttack.targetingStrategy;
   }
 
   public collectsDamages(damage: number): number {

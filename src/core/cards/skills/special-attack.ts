@@ -22,13 +22,13 @@ export class SpecialAttack implements Special {
     const isCritical = Math.random() < source.actualCriticalChance;
 
     if (target.dodge(source.actualAccuracy)) {
-      return { damage: 0, isCritical, dodge: true };
+      return { damage: 0, isCritical, dodge: true, defender: target };
     }
 
     const computedDamage = this.computeDamage(source.actualAttack, isCritical);
     const damage = target.collectsDamages(computedDamage);
 
-    return { damage, isCritical, dodge: false };
+    return { damage, isCritical, dodge: false, defender: target };
   }
 
   public increaseEnergy(actualEnergy: number): number {

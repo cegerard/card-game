@@ -8,6 +8,7 @@ import { ActionReport } from '../fight-simulator/@types/action-report';
 import { AttackResult } from '../cards/@types/attack-result';
 import { HealingReport } from '../fight-simulator/@types/healing-report';
 import { HealingResult } from '../cards/@types/healing-result';
+import { FightingContext } from '../cards/@types/fighting-context';
 
 type SplittedSteps = {
   actionSteps: Step[];
@@ -50,11 +51,6 @@ export class ActionStage {
   }
 
   private launchAttack(card: FightingCard): AttackReport {
-    const defensiveCards = this.getTargetedCards(
-      card,
-      card.simpleAttackTargeting(),
-    );
-
     const result: AttackReport = {
       kind: StepKind.Attack,
       attack: {
@@ -65,8 +61,8 @@ export class ActionStage {
       statusChanges: [],
     };
 
-    defensiveCards.forEach((defensiveCard) => {
-      const damageDealt = card.launchAttack(defensiveCard);
+    card.launchAttack(this.getFightingContext(card)).forEach((damageDealt) => {
+      const defensiveCard = damageDealt.defender;
 
       result.attack.damages.push({
         defender: defensiveCard.identityInfo,
@@ -203,6 +199,14 @@ export class ActionStage {
     }
 
     return targetStrategy.targetedCards(sourceCard, attacker, defender);
+  }
+
+  private getFightingContext(card: FightingCard): FightingContext {
+    const isPlayer1CardOwner = this.player1.ownCard(card);
+    return {
+      sourcePlayer: isPlayer1CardOwner ? this.player1 : this.player2,
+      opponentPlayer: isPlayer1CardOwner ? this.player2 : this.player1,
+    };
   }
 
   private notifyDeath(card: FightingCard): void {

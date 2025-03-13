@@ -1,4 +1,5 @@
 import { createFightingCard } from '../../../test/helpers/fighting-card';
+import { Player } from '../player';
 import { FightingCard } from './fighting-card';
 
 describe('FightingCard', () => {
@@ -37,6 +38,7 @@ describe('FightingCard', () => {
       });
     });
   });
+
   describe('when attacking', () => {
     const attackerAccuracy = 40;
     const attacker = createFightingCard({
@@ -45,19 +47,29 @@ describe('FightingCard', () => {
       accuracy: attackerAccuracy,
       skills: { simpleAttack: { damageRate: 1.0 } },
     });
+    const player1 = new Player('player1', [attacker]);
 
     describe('and the attack is not dodge', () => {
       const defenderWithoutDodge = createFightingCard({
         defense: 0,
         agility: attackerAccuracy,
       });
+      const player2 = new Player('player2', [defenderWithoutDodge]);
 
       it('should compute the damage with the simple attack', () => {
-        expect(attacker.launchAttack(defenderWithoutDodge)).toEqual({
-          damage: 10,
-          isCritical: false,
-          dodge: false,
-        });
+        expect(
+          attacker.launchAttack({
+            sourcePlayer: player1,
+            opponentPlayer: player2,
+          }),
+        ).toEqual([
+          {
+            damage: 10,
+            isCritical: false,
+            dodge: false,
+            defender: defenderWithoutDodge,
+          },
+        ]);
       });
     });
 
@@ -66,12 +78,22 @@ describe('FightingCard', () => {
         defense: 0,
         agility: attackerAccuracy + 1,
       });
+      const player2 = new Player('player2', [defenderWithDodge]);
+
       it('should not deal any damage', () => {
-        expect(attacker.launchAttack(defenderWithDodge)).toEqual({
-          damage: 0,
-          isCritical: false,
-          dodge: true,
-        });
+        expect(
+          attacker.launchAttack({
+            sourcePlayer: player1,
+            opponentPlayer: player2,
+          }),
+        ).toEqual([
+          {
+            damage: 0,
+            isCritical: false,
+            dodge: true,
+            defender: defenderWithDodge,
+          },
+        ]);
       });
     });
   });
@@ -98,6 +120,7 @@ describe('FightingCard', () => {
           damage: 10,
           isCritical: false,
           dodge: false,
+          defender: defenderWithoutDodge,
         });
       });
     });
@@ -113,6 +136,7 @@ describe('FightingCard', () => {
           damage: 0,
           isCritical: false,
           dodge: true,
+          defender: defenderWithDodge,
         });
       });
     });
