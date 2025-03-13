@@ -1,3 +1,4 @@
+import { FightingContext } from '../cards/@types/fighting-context';
 import { FightingCard } from '../cards/fighting-card';
 import { Player } from '../player';
 import { Step, StepKind } from './@types/step';
@@ -15,10 +16,10 @@ export class TurnManager {
     const steps: Step[] = [];
 
     cards.forEach((card) => {
-      const results = card.launchSkill('turn-end', {
-        sourcePlayer: this.player1,
-        opponentPlayer: this.player2,
-      });
+      const results = card.launchSkill(
+        'turn-end',
+        this.getFightingContext(card),
+      );
 
       if (results !== null) {
         steps.push({
@@ -35,5 +36,13 @@ export class TurnManager {
     });
 
     return steps;
+  }
+
+  private getFightingContext(card: FightingCard): FightingContext {
+    const isPlayer1CardOwner = this.player1.ownCard(card);
+    return {
+      sourcePlayer: isPlayer1CardOwner ? this.player1 : this.player2,
+      opponentPlayer: isPlayer1CardOwner ? this.player2 : this.player1,
+    };
   }
 }

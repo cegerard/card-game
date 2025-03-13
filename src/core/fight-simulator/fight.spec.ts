@@ -926,4 +926,103 @@ describe('fight', () => {
       });
     });
   });
+
+  describe('Trigger card skill at turn end from opponent', () => {
+    const card1 = createFightingCard({
+      attack: 100,
+      defense: 100,
+      health: 100,
+      speed: 1,
+      criticalChance: 0,
+      agility: 0,
+      skills: {
+        simpleAttack: {
+          damageRate: 1.0,
+        },
+      },
+    });
+    const card2 = createFightingCard({
+      attack: 1,
+      defense: 1,
+      health: 1,
+      speed: 2,
+      criticalChance: 0,
+      agility: 0,
+      skills: {
+        simpleAttack: {
+          damageRate: 1.0,
+        },
+        others: [
+          {
+            effectRate: 0,
+            trigger: 'turn-end',
+            targetingStrategy: 'all-owner-cards',
+          },
+        ],
+      },
+    });
+    const player1 = new Player('Player 1', [card1]);
+    const player2 = new Player('Player 2', [card2]);
+    const fight = new Fight(
+      player1,
+      player2,
+      new PlayerByPlayerCardSelector(player1, player2),
+    );
+
+    it('should return skill step', () => {
+      const res = fight.start();
+      console.log(res);
+      expect(res).toEqual({
+        1: {
+          attacker: card2.identityInfo,
+          damages: [
+            {
+              damage: 0,
+              defender: card1.identityInfo,
+              dodge: false,
+              isCritical: false,
+              remainingHealth: 100,
+            },
+          ],
+          energy: 10,
+          kind: 'attack',
+        },
+        2: {
+          kind: 'healing',
+          source: card2.identityInfo,
+          heal: [
+            {
+              target: card2.identityInfo,
+              healed: 0,
+              remainingHealth: 1,
+            },
+          ],
+          energy: 10,
+        },
+        3: {
+          attacker: card1.identityInfo,
+          damages: [
+            {
+              damage: 99,
+              defender: card2.identityInfo,
+              dodge: false,
+              isCritical: false,
+              remainingHealth: 0,
+            },
+          ],
+          energy: 10,
+          kind: 'attack',
+        },
+        4: {
+          card: card2.identityInfo,
+          kind: 'status_change',
+          status: 'dead',
+        },
+        5: {
+          kind: 'fight_end',
+          winner: 'Player 1',
+        },
+      });
+    });
+  });
 });

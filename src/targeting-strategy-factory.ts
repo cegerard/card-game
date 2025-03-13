@@ -14,7 +14,7 @@ export class TargetingStrategyFactory {
         return new TargetedAll();
       case 'line-three':
         return new TargetedLineThree();
-      case 'all-owner-card':
+      case 'all-owner-cards':
         return new AllOwnerCards();
       case 'all-allies':
         return new AllAllies();

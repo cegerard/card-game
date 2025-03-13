@@ -72,7 +72,7 @@ describe('AppController (e2e)', () => {
                 name: 'Double Strike',
                 rate: 2.0,
                 energy: 100,
-                targetingStrategy: 'all-owner-card',
+                targetingStrategy: 'all-owner-cards',
               },
               simpleAttack: {
                 name: 'Simple Attack',
