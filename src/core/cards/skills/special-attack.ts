@@ -1,4 +1,5 @@
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
+import { FightingContext } from '../@types/fighting-context';
 import { SpecialResult } from '../@types/special-result';
 import { FightingCard } from '../fighting-card';
 import { Special } from './special';
@@ -18,17 +19,30 @@ export class SpecialAttack implements Special {
     return actualEnergy >= this.energyNeeded;
   }
 
-  public launch(source: FightingCard, target: FightingCard): SpecialResult {
+  public launch(
+    source: FightingCard,
+    context: FightingContext,
+  ): SpecialResult[] {
     const isCritical = Math.random() < source.actualCriticalChance;
+    const targetedCards = this.targetingStrategy.targetedCards(
+      source,
+      context.sourcePlayer,
+      context.opponentPlayer,
+    );
 
-    if (target.dodge(source.actualAccuracy)) {
-      return { damage: 0, isCritical, dodge: true, defender: target };
-    }
+    return targetedCards.map((target) => {
+      if (target.dodge(source.actualAccuracy)) {
+        return { damage: 0, isCritical, dodge: true, defender: target };
+      }
 
-    const computedDamage = this.computeDamage(source.actualAttack, isCritical);
-    const damage = target.collectsDamages(computedDamage);
+      const computedDamage = this.computeDamage(
+        source.actualAttack,
+        isCritical,
+      );
+      const damage = target.collectsDamages(computedDamage);
 
-    return { damage, isCritical, dodge: false, defender: target };
+      return { damage, isCritical, dodge: false, defender: target };
+    });
   }
 
   public increaseEnergy(actualEnergy: number): number {

@@ -3,7 +3,6 @@ import { FightingCard } from '../cards/fighting-card';
 import { Player } from '../player';
 import { CardDeathSubscriber } from '../fight-simulator/card-death-subscriber';
 import { Step, StepKind } from '../fight-simulator/@types/step';
-import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
 import { ActionReport } from '../fight-simulator/@types/action-report';
 import { AttackResult } from '../cards/@types/attack-result';
 import { HealingReport } from '../fight-simulator/@types/healing-report';
@@ -85,23 +84,18 @@ export class ActionStage {
   }
 
   private launchSpecial(card: FightingCard): ActionReport {
-    const targetedCards = this.getTargetedCards(card, card.specialTargeting());
-
     if (card.specialKind() === 'specialAttack') {
-      return this.computeSpecialAttackResult(card, targetedCards);
+      return this.computeSpecialAttackResult(card);
     }
 
     if (card.specialKind() === 'specialHealing') {
-      return this.computeSpecialHealingResult(card, targetedCards);
+      return this.computeSpecialHealingResult(card);
     }
 
     throw new Error('Unknown special skill');
   }
 
-  private computeSpecialAttackResult(
-    card: FightingCard,
-    targetedCards: FightingCard[],
-  ): AttackReport {
+  private computeSpecialAttackResult(card: FightingCard): AttackReport {
     const result: AttackReport = {
       kind: StepKind.SpecialAttack,
       attack: {
@@ -112,21 +106,23 @@ export class ActionStage {
       statusChanges: [],
     };
 
-    targetedCards.forEach((defensiveCard) => {
-      const specialResult = card.launchSpecial(defensiveCard) as AttackResult;
-
+    const specialResults = card.launchSpecial(
+      this.getFightingContext(card),
+    ) as AttackResult[];
+    specialResults.forEach((specialResult) => {
+      const targetedCard = specialResult.defender;
       result.attack.damages.push({
-        defender: defensiveCard.identityInfo,
+        defender: targetedCard.identityInfo,
         damage: specialResult.damage,
         isCritical: specialResult.isCritical,
         dodge: specialResult.dodge,
-        remainingHealth: defensiveCard.actualHealth,
+        remainingHealth: targetedCard.actualHealth,
       });
 
-      if (defensiveCard.isDead()) {
-        this.notifyDeath(defensiveCard);
+      if (targetedCard.isDead()) {
+        this.notifyDeath(targetedCard);
         result.statusChanges.push({
-          card: defensiveCard.identityInfo,
+          card: targetedCard.identityInfo,
           status: 'dead',
         });
       }
@@ -135,10 +131,7 @@ export class ActionStage {
     return result;
   }
 
-  private computeSpecialHealingResult(
-    card: FightingCard,
-    targetedCards: FightingCard[],
-  ): ActionReport {
+  private computeSpecialHealingResult(card: FightingCard): ActionReport {
     const result: HealingReport = {
       kind: StepKind.Healing,
       source: card.identityInfo,
@@ -146,13 +139,15 @@ export class ActionStage {
       heal: [],
     };
 
-    targetedCards.forEach((targetedCard) => {
-      const healingResult = card.launchSpecial(targetedCard) as HealingResult;
+    const healingResults = card.launchSpecial(
+      this.getFightingContext(card),
+    ) as HealingResult[];
 
+    healingResults.forEach((healingResult) => {
       result.heal.push({
-        target: targetedCard.identityInfo,
+        target: healingResult.target.identityInfo,
         healed: healingResult.healed,
-        remainingHealth: targetedCard.actualHealth,
+        remainingHealth: healingResult.target.actualHealth,
       });
     });
 
@@ -184,21 +179,6 @@ export class ActionStage {
       },
       { actionSteps: [], statusChangeSteps: [] },
     );
-  }
-
-  private getTargetedCards(
-    sourceCard: FightingCard,
-    targetStrategy: TargetingCardStrategy,
-  ): FightingCard[] {
-    let attacker = this.player1;
-    let defender = this.player2;
-
-    if (this.player2.ownCard(sourceCard)) {
-      attacker = this.player2;
-      defender = this.player1;
-    }
-
-    return targetStrategy.targetedCards(sourceCard, attacker, defender);
   }
 
   private getFightingContext(card: FightingCard): FightingContext {

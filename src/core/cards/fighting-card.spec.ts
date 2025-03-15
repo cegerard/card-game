@@ -108,20 +108,29 @@ describe('FightingCard', () => {
         special: { damageRate: 1.0, energy: 0, kind: 'specialAttack' },
       },
     });
+    const player1 = new Player('player1', [attacker]);
 
     describe('and the attack is not dodge', () => {
       const defenderWithoutDodge = createFightingCard({
         defense: 0,
         agility: attackerAccuracy,
       });
+      const player2 = new Player('player2', [defenderWithoutDodge]);
 
       it('should compute the damage with the special attack', () => {
-        expect(attacker.launchSpecial(defenderWithoutDodge)).toEqual({
-          damage: 10,
-          isCritical: false,
-          dodge: false,
-          defender: defenderWithoutDodge,
-        });
+        expect(
+          attacker.launchSpecial({
+            sourcePlayer: player1,
+            opponentPlayer: player2,
+          }),
+        ).toEqual([
+          {
+            damage: 10,
+            isCritical: false,
+            dodge: false,
+            defender: defenderWithoutDodge,
+          },
+        ]);
       });
     });
 
@@ -130,14 +139,22 @@ describe('FightingCard', () => {
         defense: 0,
         agility: attackerAccuracy + 1,
       });
+      const player2 = new Player('player2', [defenderWithDodge]);
 
       it('should not deal any damage', () => {
-        expect(attacker.launchSpecial(defenderWithDodge)).toEqual({
-          damage: 0,
-          isCritical: false,
-          dodge: true,
-          defender: defenderWithDodge,
-        });
+        expect(
+          attacker.launchSpecial({
+            sourcePlayer: player1,
+            opponentPlayer: player2,
+          }),
+        ).toEqual([
+          {
+            damage: 0,
+            isCritical: false,
+            dodge: true,
+            defender: defenderWithDodge,
+          },
+        ]);
       });
     });
   });
@@ -149,22 +166,32 @@ describe('FightingCard', () => {
         special: { kind: 'specialHealing', damageRate: 2.5, energy: 0 },
       },
     });
+    const player1 = new Player('player1', [healer]);
     let target: FightingCard;
+    let player2: Player;
 
     describe('and the target is not full health', () => {
       beforeEach(() => {
         target = createFightingCard({ health: 500, defense: 0 });
+        player2 = new Player('player2', [target]);
+
         target.collectsDamages(400);
       });
 
       it('should return the healing result', () => {
-        const result = healer.launchSpecial(target);
+        const result = healer.launchSpecial({
+          sourcePlayer: player1,
+          opponentPlayer: player2,
+        });
 
-        expect(result).toEqual({ healed: 250 });
+        expect(result).toEqual([{ healed: 250, target }]);
       });
 
       it('should increase the health of the card', () => {
-        healer.launchSpecial(target);
+        healer.launchSpecial({
+          sourcePlayer: player1,
+          opponentPlayer: player2,
+        });
 
         expect(target.actualHealth).toEqual(350);
       });
@@ -175,16 +202,23 @@ describe('FightingCard', () => {
 
       beforeEach(() => {
         target = createFightingCard({ health: maxHealth, defense: 0 });
+        player2 = new Player('player2', [target]);
       });
 
       it('should return a null healing result', () => {
-        const result = healer.launchSpecial(target);
+        const result = healer.launchSpecial({
+          sourcePlayer: player1,
+          opponentPlayer: player2,
+        });
 
-        expect(result).toEqual({ healed: 0 });
+        expect(result).toEqual([{ healed: 0, target }]);
       });
 
       it('should not change the health of the card', () => {
-        healer.launchSpecial(target);
+        healer.launchSpecial({
+          sourcePlayer: player1,
+          opponentPlayer: player2,
+        });
 
         expect(target.actualHealth).toEqual(maxHealth);
       });
@@ -195,17 +229,25 @@ describe('FightingCard', () => {
 
       beforeEach(() => {
         target = createFightingCard({ health: maxHealth, defense: 0 });
+        player2 = new Player('player2', [target]);
+
         target.collectsDamages(maxHealth);
       });
 
       it('should return a null healing result', () => {
-        const result = healer.launchSpecial(target);
+        const result = healer.launchSpecial({
+          sourcePlayer: player1,
+          opponentPlayer: player2,
+        });
 
-        expect(result).toEqual({ healed: 0 });
+        expect(result).toEqual([]);
       });
 
       it('should not change the health of the card', () => {
-        healer.launchSpecial(target);
+        healer.launchSpecial({
+          sourcePlayer: player1,
+          opponentPlayer: player2,
+        });
 
         expect(target.actualHealth).toEqual(0);
       });
@@ -217,17 +259,25 @@ describe('FightingCard', () => {
 
       beforeEach(() => {
         target = createFightingCard({ health: maxHealth, defense: 0 });
+        player2 = new Player('player2', [target]);
+
         target.collectsDamages(damage);
       });
 
       it('should return the healing result', () => {
-        const result = healer.launchSpecial(target);
+        const result = healer.launchSpecial({
+          sourcePlayer: player1,
+          opponentPlayer: player2,
+        });
 
-        expect(result).toEqual({ healed: damage });
+        expect(result).toEqual([{ healed: damage, target }]);
       });
 
       it('should increase the health of the card to the max health', () => {
-        healer.launchSpecial(target);
+        healer.launchSpecial({
+          sourcePlayer: player1,
+          opponentPlayer: player2,
+        });
 
         expect(target.actualHealth).toEqual(maxHealth);
       });

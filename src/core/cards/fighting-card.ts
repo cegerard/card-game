@@ -109,8 +109,8 @@ export class FightingCard {
     return this.simpleAttack.launch(this, context);
   }
 
-  public launchSpecial(defender: FightingCard): SpecialResult {
-    return this.special.launch(this, defender);
+  public launchSpecial(context: FightingContext): SpecialResult[] {
+    return this.special.launch(this, context);
   }
 
   public launchSkill(
