@@ -12,10 +12,17 @@ import { SpecialHealing } from '../../src/core/cards/skills/special-healing';
 import { AllOwnerCards } from '../../src/core/targeting-card-strategies/all-owner-cards';
 import { Launcher } from '../../src/core/targeting-card-strategies/launcher';
 import { AllAllies } from '../../src/core/targeting-card-strategies/all-allies';
+import { PoisonedAttackEffect } from '../../src/core/cards/@types/attack-poisoned-effect';
 import { Healing } from '../../src/core/cards/skills/healing';
 import { Skill } from '../../src/core/cards/skills/skill';
 import { TurnEnd } from '../../src/core/trigger/turn-end';
 import { Trigger } from '../../src/core/trigger/trigger';
+
+type effect = {
+  type: string;
+  rate: number;
+  level: 1 | 2 | 3;
+};
 
 type FightingCardParams = {
   name?: string;
@@ -31,6 +38,7 @@ type FightingCardParams = {
       name?: string;
       damageRate?: number;
       targetingStrategy?: string;
+      effect?: effect;
     };
     special?: {
       name?: string;
@@ -76,14 +84,19 @@ function createTrigger(trigger: string): Trigger {
 function createSimpleAttack(params: {
   damageRate?: number;
   targetingStrategy?: string;
+  effect?: effect;
 }): SimpleAttack {
   const damageRate =
     params.damageRate ?? faker.number.float({ min: 1.0, max: 3.0 });
   const targetingStrategy = params.targetingStrategy ?? 'position-based';
+  const effect = params.effect
+    ? new PoisonedAttackEffect(params.effect.rate, params.effect.level)
+    : undefined;
 
   return new SimpleAttack(
     damageRate,
     createTargetingStrategy(targetingStrategy),
+    effect,
   );
 }
 

@@ -8,6 +8,7 @@ import { DodgeBehavior } from './behaviors/dodge-behaviors';
 import { SimpleAttack } from './skills/simple-attack';
 import { Skill } from './skills/skill';
 import { Special } from './skills/special';
+import { CardState } from './@types/card-state';
 
 export class FightingCard {
   // Info
@@ -35,6 +36,9 @@ export class FightingCard {
 
   // Behaviors
   private dodgeBehavior: DodgeBehavior;
+
+  //Status
+  private poisoned?: CardState;
 
   constructor(
     name: string,
@@ -101,8 +105,18 @@ export class FightingCard {
     return { name: this.name, deckIdentity: this.cardDeckIdentity };
   }
 
+  public get states(): CardState[] {
+    return this.poisoned ? [this.poisoned] : [];
+  }
+
   public setOwnerInfo(ownerName: string, cardPositionInDeck: number): void {
     this.cardDeckIdentity = `${ownerName}-${cardPositionInDeck}`;
+  }
+
+  public setState(state: CardState): void {
+    if (state.type === 'poison') {
+      this.poisoned = state;
+    }
   }
 
   public launchAttack(context: FightingContext): AttackResult[] {

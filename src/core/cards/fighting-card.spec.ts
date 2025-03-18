@@ -366,4 +366,33 @@ describe('FightingCard', () => {
       });
     });
   });
+
+  describe('when attacking with a poisoned effect', () => {
+    const poisonRate = 0.1;
+    const attacker = createFightingCard({
+      accuracy: 1,
+      skills: {
+        simpleAttack: {
+          effect: { type: 'poison', level: 1, rate: poisonRate },
+        },
+      },
+    });
+    const defender = createFightingCard({
+      agility: 0,
+    });
+    const player1 = new Player('player1', [attacker]);
+    const player2 = new Player('player2', [defender]);
+
+    it('should add a poison effect to the defender', () => {
+      attacker.launchAttack({ sourcePlayer: player1, opponentPlayer: player2 });
+
+      expect(defender.states).toEqual([
+        {
+          type: 'poison',
+          remainingTurns: 3,
+          damageValue: attacker.actualAttack * poisonRate,
+        },
+      ]);
+    });
+  });
 });

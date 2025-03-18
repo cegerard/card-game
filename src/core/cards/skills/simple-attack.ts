@@ -1,5 +1,6 @@
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 import { AttackResult } from '../@types/attack-result';
+import { AttackEffect } from '../@types/attack-effect';
 import { FightingContext } from '../@types/fighting-context';
 import { FightingCard } from '../fighting-card';
 
@@ -7,6 +8,7 @@ export class SimpleAttack {
   constructor(
     private readonly damageRate: number,
     private readonly targetingStrategy: TargetingCardStrategy,
+    private readonly effect?: AttackEffect,
   ) {}
 
   public launch(card: FightingCard, context: FightingContext): AttackResult[] {
@@ -27,6 +29,10 @@ export class SimpleAttack {
         card.actualAttack * this.damageRate * damageMultiplier,
       );
       const collectedDamage = defender.collectsDamages(computedDamage);
+
+      if (this.effect) {
+        this.effect.applyEffect(defender, card, context);
+      }
 
       return {
         damage: collectedDamage,
