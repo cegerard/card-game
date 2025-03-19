@@ -1,4 +1,4 @@
-import { FightingCard } from '../fighting-card';
+import { FightingCard } from '../../fighting-card';
 
 export type AttackResult = {
   damage: number;

@@ -1,6 +1,6 @@
-import { FightingCard } from '../fighting-card';
+import { FightingCard } from '../../fighting-card';
 import { EffectLevel } from './effect-level';
-import { FightingContext } from './fighting-context';
+import { FightingContext } from '../fighting-context';
 
 export interface AttackEffect {
   rate: number;

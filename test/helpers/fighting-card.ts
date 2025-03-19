@@ -12,7 +12,7 @@ import { SpecialHealing } from '../../src/core/cards/skills/special-healing';
 import { AllOwnerCards } from '../../src/core/targeting-card-strategies/all-owner-cards';
 import { Launcher } from '../../src/core/targeting-card-strategies/launcher';
 import { AllAllies } from '../../src/core/targeting-card-strategies/all-allies';
-import { PoisonedAttackEffect } from '../../src/core/cards/@types/attack-poisoned-effect';
+import { PoisonedAttackEffect } from '../../src/core/cards/@types/attack/attack-poisoned-effect';
 import { Healing } from '../../src/core/cards/skills/healing';
 import { Skill } from '../../src/core/cards/skills/skill';
 import { TurnEnd } from '../../src/core/trigger/turn-end';

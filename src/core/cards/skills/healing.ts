@@ -1,5 +1,5 @@
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
-import { HealingResults } from '../@types/healing-results';
+import { HealingResults } from '../@types/action-result/healing-results';
 import { FightingCard } from '../fighting-card';
 import { Skill } from './skill';
 import { Trigger } from '../../trigger/trigger';

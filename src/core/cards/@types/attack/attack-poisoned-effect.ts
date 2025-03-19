@@ -1,8 +1,8 @@
-import { FightingCard } from '../fighting-card';
+import { FightingCard } from '../../fighting-card';
 import { AttackEffect } from './attack-effect';
-import { CardStatePoisoned } from './card-state-poisoned';
+import { CardStatePoisoned } from '../state/card-state-poisoned';
 import { EffectLevel } from './effect-level';
-import { FightingContext } from './fighting-context';
+import { FightingContext } from '../fighting-context';
 
 export class PoisonedAttackEffect implements AttackEffect {
   public readonly rate: number;

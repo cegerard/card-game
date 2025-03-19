@@ -1,6 +1,6 @@
 import { TargetingCardStrategy } from 'src/core/targeting-card-strategies/targeting-card-strategy';
 import { FightingCard } from '../fighting-card';
-import { HealingResults } from '../@types/healing-results';
+import { HealingResults } from '../@types/action-result/healing-results';
 import { FightingContext } from '../@types/fighting-context';
 
 export interface Skill {

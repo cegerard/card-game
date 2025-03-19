@@ -1,14 +1,14 @@
 import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
-import { AttackResult } from './@types/attack-result';
+import { AttackResult } from './@types/action-result/attack-result';
 import { CardInfo } from './@types/card-info';
 import { FightingContext } from './@types/fighting-context';
-import { HealingResults } from './@types/healing-results';
-import { SpecialResult } from './@types/special-result';
+import { HealingResults } from './@types/action-result/healing-results';
+import { SpecialResult } from './@types/action-result/special-result';
 import { DodgeBehavior } from './behaviors/dodge-behaviors';
 import { SimpleAttack } from './skills/simple-attack';
 import { Skill } from './skills/skill';
 import { Special } from './skills/special';
-import { CardState } from './@types/card-state';
+import { CardState } from './@types/state/card-state';
 
 export class FightingCard {
   // Info

@@ -4,9 +4,9 @@ import { Player } from '../player';
 import { CardDeathSubscriber } from '../fight-simulator/card-death-subscriber';
 import { Step, StepKind } from '../fight-simulator/@types/step';
 import { ActionReport } from '../fight-simulator/@types/action-report';
-import { AttackResult } from '../cards/@types/attack-result';
+import { AttackResult } from '../cards/@types/action-result/attack-result';
 import { HealingReport } from '../fight-simulator/@types/healing-report';
-import { HealingResult } from '../cards/@types/healing-result';
+import { HealingResult } from '../cards/@types/action-result/healing-result';
 import { FightingContext } from '../cards/@types/fighting-context';
 
 type SplittedSteps = {
