@@ -37,7 +37,7 @@ export class FightingCard {
   // Behaviors
   private dodgeBehavior: DodgeBehavior;
 
-  //Status
+  // Status
   private poisoned?: CardState;
 
   constructor(
@@ -114,8 +114,16 @@ export class FightingCard {
   }
 
   public setState(state: CardState): void {
+    if (this.isDead()) return;
+
     if (state.type === 'poison') {
       this.poisoned = state;
+    }
+  }
+
+  public removeState(state: CardState): void {
+    if (state.type === 'poison') {
+      this.poisoned = undefined;
     }
   }
 
@@ -136,6 +144,14 @@ export class FightingCard {
     if (!skill) return null;
 
     return skill.launch(this, context);
+  }
+
+  public applyStateEffects(): any {
+    if (this.isDead()) {
+      return [];
+    }
+
+    return [this.poisoned?.applyState(this)];
   }
 
   public fasterThan(defender: FightingCard | null): boolean {
@@ -179,6 +195,12 @@ export class FightingCard {
     this.receivedDamages += causedDamages;
 
     return causedDamages;
+  }
+
+  public addRealDamage(damage: number): number {
+    this.receivedDamages += damage;
+
+    return damage;
   }
 
   public heal(hpToRestore: number): number {
