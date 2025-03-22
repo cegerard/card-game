@@ -432,7 +432,7 @@ describe('FightingCard', () => {
         expect(defender.applyStateEffects()).toEqual([
           {
             type: 'poison',
-            defender,
+            card: defender,
             damage: attacker.actualAttack * poisonRate,
             remainingTurns: 2,
           },
@@ -454,7 +454,7 @@ describe('FightingCard', () => {
         expect(defender.applyStateEffects()).toEqual([
           {
             type: 'poison',
-            defender,
+            card: defender,
             damage: attacker.actualAttack * poisonRate,
             remainingTurns: 0,
           },

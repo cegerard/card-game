@@ -1,4 +1,5 @@
 import { FightingCard } from '../../fighting-card';
+import { StateResult } from '../action-result/state-result';
 import { CardState } from './card-state';
 
 export class CardStatePoisoned implements CardState {
@@ -11,7 +12,7 @@ export class CardStatePoisoned implements CardState {
     this.damageValue = damageValue;
   }
 
-  public applyState(card: FightingCard): any {
+  public applyState(card: FightingCard): StateResult {
     this.remainingTurns--;
     const damage = card.addRealDamage(this.damageValue);
 
@@ -21,7 +22,7 @@ export class CardStatePoisoned implements CardState {
 
     return {
       type: 'poison',
-      defender: card,
+      card,
       damage,
       remainingTurns: this.remainingTurns,
     };

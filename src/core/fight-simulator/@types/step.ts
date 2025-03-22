@@ -1,5 +1,6 @@
 import { DamageReport } from './damage-report';
 import { HealingReport } from './healing-report';
+import { StateEffectReport } from './state-effect-report';
 import { StatusChangeReport } from './status-change-report';
 import { WinnerReport } from './winner-report';
 
@@ -10,6 +11,7 @@ export enum StepKind {
   SpecialAttack = 'special_attack',
   Healing = 'healing',
   Winner = 'winner',
+  StateEffect = 'state_effect',
 }
 
 export type Step = { kind: StepKind } & (
@@ -17,4 +19,5 @@ export type Step = { kind: StepKind } & (
   | DamageReport
   | HealingReport
   | WinnerReport
+  | StateEffectReport
 );

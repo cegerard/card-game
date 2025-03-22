@@ -9,6 +9,7 @@ import { SimpleAttack } from './skills/simple-attack';
 import { Skill } from './skills/skill';
 import { Special } from './skills/special';
 import { CardState } from './@types/state/card-state';
+import { StateResult } from './@types/action-result/state-result';
 
 export class FightingCard {
   // Info
@@ -146,12 +147,16 @@ export class FightingCard {
     return skill.launch(this, context);
   }
 
-  public applyStateEffects(): any {
+  public applyStateEffects(): StateResult[] {
     if (this.isDead()) {
       return [];
     }
 
-    return [this.poisoned?.applyState(this)];
+    if (this.poisoned) {
+      return [this.poisoned.applyState(this)];
+    }
+
+    return [];
   }
 
   public fasterThan(defender: FightingCard | null): boolean {

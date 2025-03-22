@@ -16,26 +16,40 @@ export class TurnManager {
     const steps: Step[] = [];
 
     cards.forEach((card) => {
-      const results = card.launchSkill(
-        'turn-end',
-        this.getFightingContext(card),
-      );
-
-      if (results !== null) {
-        steps.push({
-          kind: StepKind.Healing,
-          source: card.identityInfo,
-          heal: results.map((heal) => ({
-            target: heal.target,
-            healed: heal.healAmount,
-            remainingHealth: heal.remainingHealth,
-          })),
-          energy: card.actualEnergy,
-        });
-      }
+      this.processCardSkill(card, steps);
+      this.processCardEffectStates(card, steps);
     });
 
     return steps;
+  }
+
+  private processCardSkill(card: FightingCard, steps: Step[]) {
+    const results = card.launchSkill('turn-end', this.getFightingContext(card));
+
+    if (results !== null) {
+      steps.push({
+        kind: StepKind.Healing,
+        source: card.identityInfo,
+        heal: results.map((heal) => ({
+          target: heal.target,
+          healed: heal.healAmount,
+          remainingHealth: heal.remainingHealth,
+        })),
+        energy: card.actualEnergy,
+      });
+    }
+  }
+
+  private processCardEffectStates(card: FightingCard, steps: Step[]) {
+    card.applyStateEffects().forEach((result) => {
+      steps.push({
+        kind: StepKind.StateEffect,
+        card: card.identityInfo,
+        type: result.type,
+        damage: result.damage,
+        remainingTurns: result.remainingTurns,
+      });
+    });
   }
 
   private getFightingContext(card: FightingCard): FightingContext {
