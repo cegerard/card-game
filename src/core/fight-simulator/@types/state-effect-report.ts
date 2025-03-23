@@ -5,4 +5,5 @@ export type StateEffectReport = {
   card: CardInfo;
   damage: number;
   remainingTurns: number;
+  remainingHealth: number;
 };

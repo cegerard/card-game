@@ -77,6 +77,11 @@ export class ActionStage {
           card: defensiveCard.identityInfo,
           status: 'dead',
         });
+      } else if (damageDealt.effect) {
+        result.statusChanges.push({
+          status: damageDealt.effect.type,
+          card: damageDealt.effect.card.identityInfo,
+        });
       }
     });
 

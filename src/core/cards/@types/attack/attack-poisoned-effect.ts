@@ -1,5 +1,5 @@
 import { FightingCard } from '../../fighting-card';
-import { AttackEffect } from './attack-effect';
+import { AttackEffect, EffectResult } from './attack-effect';
 import { CardStatePoisoned } from '../state/card-state-poisoned';
 import { EffectLevel } from './effect-level';
 import { FightingContext } from '../fighting-context';
@@ -17,11 +17,13 @@ export class PoisonedAttackEffect implements AttackEffect {
     defender: FightingCard,
     card: FightingCard,
     _context: FightingContext,
-  ): void {
+  ): EffectResult {
     const poisonedState = new CardStatePoisoned(
       3,
       card.actualAttack * this.rate,
     );
     defender.setState(poisonedState);
+
+    return { type: 'poisoned', card: defender };
   }
 }
