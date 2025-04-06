@@ -111,6 +111,11 @@ describe('AppController (e2e)', () => {
                 name: 'Simple Attack',
                 damageRate: 1.0,
                 targetingStrategy: 'position-based',
+                effect: {
+                  type: 'poison',
+                  rate: 0.5,
+                  level: 1,
+                },
               },
               others: [],
             },
