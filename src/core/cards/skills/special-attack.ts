@@ -1,6 +1,6 @@
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 import { FightingContext } from '../@types/fighting-context';
-import { SpecialResult } from '../@types/special-result';
+import { SpecialResult } from '../@types/action-result/special-result';
 import { FightingCard } from '../fighting-card';
 import { Special } from './special';
 

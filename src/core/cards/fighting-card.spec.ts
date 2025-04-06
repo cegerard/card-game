@@ -1,5 +1,8 @@
+import { createEffect } from '../../../test/helpers/effect';
 import { createFightingCard } from '../../../test/helpers/fighting-card';
 import { Player } from '../player';
+import { AttackEffect } from './@types/attack/attack-effect';
+import { CardStatePoisoned } from './@types/state/card-state-poisoned';
 import { FightingCard } from './fighting-card';
 
 describe('FightingCard', () => {
@@ -364,6 +367,139 @@ describe('FightingCard', () => {
           },
         ]);
       });
+    });
+  });
+
+  describe('when attacking with a poisoned effect', () => {
+    const poisonRate = 0.1;
+    const attacker = createFightingCard({
+      accuracy: 1,
+      skills: {
+        simpleAttack: {
+          effect: { type: 'poison', level: 1, rate: poisonRate },
+        },
+      },
+    });
+    const defender = createFightingCard({
+      agility: 0,
+    });
+    const player1 = new Player('player1', [attacker]);
+    const player2 = new Player('player2', [defender]);
+
+    it('should add a poison effect to the defender', () => {
+      attacker.launchAttack({ sourcePlayer: player1, opponentPlayer: player2 });
+
+      expect(defender.states).toEqual([
+        {
+          type: 'poison',
+          remainingTurns: 3,
+          damageValue: attacker.actualAttack * poisonRate,
+        },
+      ]);
+    });
+  });
+
+  describe('when applying a poison state', () => {
+    const poisonRate = 0.1;
+
+    let poisonedEffect: AttackEffect;
+    let attacker: FightingCard;
+    let defender: FightingCard;
+    let player1: Player;
+    let player2: Player;
+
+    beforeEach(() => {
+      poisonedEffect = createEffect({
+        rate: poisonRate,
+        level: 1,
+        type: 'poison',
+      });
+      attacker = createFightingCard({ attack: 100 });
+      defender = createFightingCard({ health: 500, defense: 0 });
+      player1 = new Player('player1', [attacker]);
+      player2 = new Player('player2', [defender]);
+    });
+
+    describe('and it is the first time to apply the state', () => {
+      beforeEach(() => {
+        poisonedEffect.applyEffect(defender, attacker, {
+          sourcePlayer: player1,
+          opponentPlayer: player2,
+        });
+      });
+
+      it('should affect the defender with poison', () => {
+        expect(defender.applyStateEffects()).toEqual([
+          {
+            type: 'poison',
+            card: defender,
+            damage: attacker.actualAttack * poisonRate,
+            remainingTurns: 2,
+          },
+        ]);
+      });
+    });
+
+    describe('and it is the last time to apply the state', () => {
+      beforeEach(() => {
+        poisonedEffect.applyEffect(defender, attacker, {
+          sourcePlayer: player1,
+          opponentPlayer: player2,
+        });
+        defender.applyStateEffects();
+        defender.applyStateEffects();
+      });
+
+      it('should affect the defender with poison', () => {
+        expect(defender.applyStateEffects()).toEqual([
+          {
+            type: 'poison',
+            card: defender,
+            damage: attacker.actualAttack * poisonRate,
+            remainingTurns: 0,
+          },
+        ]);
+      });
+    });
+
+    describe('and the defender is dead', () => {
+      beforeEach(() => {
+        defender.collectsDamages(500);
+        poisonedEffect.applyEffect(defender, attacker, {
+          sourcePlayer: player1,
+          opponentPlayer: player2,
+        });
+      });
+
+      it('should not affect the defender with poison', () => {
+        expect(defender.applyStateEffects()).toEqual([]);
+      });
+    });
+
+    describe('and the defender is no more poisoned', () => {
+      beforeEach(() => {
+        poisonedEffect.applyEffect(defender, attacker, {
+          sourcePlayer: player1,
+          opponentPlayer: player2,
+        });
+        defender.applyStateEffects();
+        defender.applyStateEffects();
+        defender.applyStateEffects();
+      });
+
+      it('should not affect the defender with poison', () => {
+        expect(defender.applyStateEffects()).toEqual([]);
+      });
+    });
+  });
+
+  describe('when setting a card state on a dead card', () => {
+    const card = createFightingCard({ health: 0 });
+
+    it('should not set the state', () => {
+      card.setState(new CardStatePoisoned(3, 10));
+
+      expect(card.states).toEqual([]);
     });
   });
 });

@@ -1,4 +1,4 @@
-import { CardInfo } from './card-info';
+import { CardInfo } from '../card-info';
 
 export type HealingResults = {
   target: CardInfo;

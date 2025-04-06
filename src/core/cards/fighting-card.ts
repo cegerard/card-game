@@ -1,13 +1,15 @@
 import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
-import { AttackResult } from './@types/attack-result';
+import { AttackResult } from './@types/action-result/attack-result';
 import { CardInfo } from './@types/card-info';
 import { FightingContext } from './@types/fighting-context';
-import { HealingResults } from './@types/healing-results';
-import { SpecialResult } from './@types/special-result';
+import { HealingResults } from './@types/action-result/healing-results';
+import { SpecialResult } from './@types/action-result/special-result';
 import { DodgeBehavior } from './behaviors/dodge-behaviors';
 import { SimpleAttack } from './skills/simple-attack';
 import { Skill } from './skills/skill';
 import { Special } from './skills/special';
+import { CardState } from './@types/state/card-state';
+import { StateResult } from './@types/action-result/state-result';
 
 export class FightingCard {
   // Info
@@ -35,6 +37,9 @@ export class FightingCard {
 
   // Behaviors
   private dodgeBehavior: DodgeBehavior;
+
+  // Status
+  private poisoned?: CardState;
 
   constructor(
     name: string,
@@ -101,8 +106,26 @@ export class FightingCard {
     return { name: this.name, deckIdentity: this.cardDeckIdentity };
   }
 
+  public get states(): CardState[] {
+    return this.poisoned ? [this.poisoned] : [];
+  }
+
   public setOwnerInfo(ownerName: string, cardPositionInDeck: number): void {
     this.cardDeckIdentity = `${ownerName}-${cardPositionInDeck}`;
+  }
+
+  public setState(state: CardState): void {
+    if (this.isDead()) return;
+
+    if (state.type === 'poison') {
+      this.poisoned = state;
+    }
+  }
+
+  public removeState(state: CardState): void {
+    if (state.type === 'poison') {
+      this.poisoned = undefined;
+    }
   }
 
   public launchAttack(context: FightingContext): AttackResult[] {
@@ -122,6 +145,18 @@ export class FightingCard {
     if (!skill) return null;
 
     return skill.launch(this, context);
+  }
+
+  public applyStateEffects(): StateResult[] {
+    if (this.isDead()) {
+      return [];
+    }
+
+    if (this.poisoned) {
+      return [this.poisoned.applyState(this)];
+    }
+
+    return [];
   }
 
   public fasterThan(defender: FightingCard | null): boolean {
@@ -165,6 +200,12 @@ export class FightingCard {
     this.receivedDamages += causedDamages;
 
     return causedDamages;
+  }
+
+  public addRealDamage(damage: number): number {
+    this.receivedDamages += damage;
+
+    return damage;
   }
 
   public heal(hpToRestore: number): number {

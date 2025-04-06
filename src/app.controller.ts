@@ -22,9 +22,18 @@ import { Special } from './core/cards/skills/special';
 import { SpecialHealing } from './core/cards/skills/special-healing';
 import { Healing } from './core/cards/skills/healing';
 import { TriggerFactory } from './trigger-factory';
+import { PoisonedAttackEffect } from './core/cards/@types/attack/attack-poisoned-effect';
+import { EffectLevel } from './core/cards/@types/attack/effect-level';
+import { AttackEffect } from './core/cards/@types/attack/attack-effect';
 
 @Controller()
-@UsePipes(new ValidationPipe({ transform: true }))
+@UsePipes(
+  new ValidationPipe({
+    transform: true,
+    whitelist: true,
+    forbidNonWhitelisted: true,
+  }),
+)
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
@@ -64,11 +73,19 @@ export class AppController {
       );
     }
 
+    let effect: AttackEffect | undefined;
+    if (cardData.skills.simpleAttack.effect) {
+      effect = new PoisonedAttackEffect(
+        cardData.skills.simpleAttack.effect.rate,
+        cardData.skills.simpleAttack.effect.level as EffectLevel,
+      );
+    }
     const simpleAttack = new SimpleAttack(
       cardData.skills.simpleAttack.damageRate,
       TargetingStrategyFactory.create(
         cardData.skills.simpleAttack.targetingStrategy,
       ),
+      effect,
     );
 
     return new FightingCard(

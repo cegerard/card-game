@@ -27,7 +27,7 @@ export class Fight {
     this.player1 = player1;
     this.player2 = player2;
     this.actionManager = new ActionStage(player1, player2, this.eventBroker);
-    this.turnManager = new TurnManager(player1, player2);
+    this.turnManager = new TurnManager(player1, player2, this.eventBroker);
     this.cardSelector = cardSelector;
   }
 

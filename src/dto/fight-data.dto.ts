@@ -8,6 +8,7 @@ import {
   IsString,
   IsNotEmpty,
   IsEnum,
+  IsOptional,
 } from 'class-validator';
 
 export enum SpecialKind {
@@ -17,6 +18,17 @@ export enum SpecialKind {
 
 export enum SkillKind {
   HEALING = 'HEALING',
+}
+
+class EffectDto {
+  @IsString()
+  type: string;
+
+  @IsNumber()
+  rate: number;
+
+  @IsNumber()
+  level: number;
 }
 
 class SpecialDto {
@@ -45,6 +57,11 @@ class SimpleAttackDto {
 
   @IsString()
   targetingStrategy: string;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => EffectDto)
+  effect: EffectDto;
 }
 
 class OtherSkillDto {
