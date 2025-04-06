@@ -137,6 +137,12 @@ export class FightingCardDto {
   @ValidateNested()
   @Type(() => BehaviorsDto)
   behaviors: BehaviorsDto;
+
+  @IsOptional()
+  image: string;
+
+  @IsOptional()
+  cardDeckIdentity: string;
 }
 
 class PlayerDto {
