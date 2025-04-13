@@ -18,6 +18,8 @@ export class PoisonedAttackEffect implements AttackEffect {
     card: FightingCard,
     _context: FightingContext,
   ): EffectResult {
+    if (defender.isPoisoned()) return;
+
     const poisonedState = new CardStatePoisoned(
       3,
       card.actualAttack * this.rate,

@@ -167,6 +167,10 @@ export class FightingCard {
     return this.actualHealth <= 0;
   }
 
+  public isPoisoned(): boolean {
+    return !!this.poisoned;
+  }
+
   public isSpecialReady(): boolean {
     return this.special.ready(this.specialEnergy);
   }
