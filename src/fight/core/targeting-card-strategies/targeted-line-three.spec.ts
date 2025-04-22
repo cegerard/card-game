@@ -1,4 +1,4 @@
-import { createFightingCard } from '../../../test/helpers/fighting-card';
+import { createFightingCard } from '../../../../test/helpers/fighting-card';
 import { Player } from '../player';
 import { TargetedLineThree } from './targeted-line-three';
 

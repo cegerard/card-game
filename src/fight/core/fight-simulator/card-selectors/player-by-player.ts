@@ -1,5 +1,5 @@
-import { FightingCard } from 'src/core/cards/fighting-card';
-import { Player } from 'src/core/player';
+import { FightingCard } from 'src/fight/core/cards/fighting-card';
+import { Player } from 'src/fight/core/player';
 import { CardSelector } from './card-selector';
 
 export class PlayerByPlayerCardSelector implements CardSelector {

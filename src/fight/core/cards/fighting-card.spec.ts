@@ -1,5 +1,5 @@
-import { createEffect } from '../../../test/helpers/effect';
-import { createFightingCard } from '../../../test/helpers/fighting-card';
+import { createEffect } from '../../../../test/helpers/effect';
+import { createFightingCard } from '../../../../test/helpers/fighting-card';
 import { Player } from '../player';
 import { AttackEffect } from './@types/attack/attack-effect';
 import { CardStatePoisoned } from './@types/state/card-state-poisoned';

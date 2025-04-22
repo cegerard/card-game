@@ -1,6 +1,6 @@
 import { ActionStage } from './action_stage';
 import { Player } from '../player';
-import { createFightingCard } from '../../../test/helpers/fighting-card';
+import { createFightingCard } from '../../../../test/helpers/fighting-card';
 
 describe('ActionStage', () => {
   const eventBroker = {

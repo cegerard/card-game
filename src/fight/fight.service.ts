@@ -8,7 +8,7 @@ import { PlayerByPlayerCardSelector } from './core/fight-simulator/card-selector
 import { SpeedWeightedCardSelector } from './core/fight-simulator/card-selectors/speed-weighted-card-pool';
 
 @Injectable()
-export class AppService {
+export class FightService {
   simulateFight(
     player1Data: { name: string; deck: FightingCard[] },
     player2Data: { name: string; deck: FightingCard[] },

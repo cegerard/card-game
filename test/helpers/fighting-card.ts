@@ -1,21 +1,21 @@
 import { faker } from '@faker-js/faker';
 
-import { FightingCard } from '../../src/core/cards/fighting-card';
-import { SimpleAttack } from '../../src/core/cards/skills/simple-attack';
-import { SpecialAttack } from '../../src/core/cards/skills/special-attack';
-import { TargetedFromPosition } from '../../src/core/targeting-card-strategies/targeted-from-position';
-import { TargetingCardStrategy } from '../../src/core/targeting-card-strategies/targeting-card-strategy';
-import { TargetedAll } from '../../src/core/targeting-card-strategies/targeted-all';
-import { SimpleDodge } from '../../src/core/cards/behaviors/simple-dodge';
-import { Special } from '../../src/core/cards/skills/special';
-import { SpecialHealing } from '../../src/core/cards/skills/special-healing';
-import { AllOwnerCards } from '../../src/core/targeting-card-strategies/all-owner-cards';
-import { Launcher } from '../../src/core/targeting-card-strategies/launcher';
-import { AllAllies } from '../../src/core/targeting-card-strategies/all-allies';
-import { Healing } from '../../src/core/cards/skills/healing';
-import { Skill } from '../../src/core/cards/skills/skill';
-import { TurnEnd } from '../../src/core/trigger/turn-end';
-import { Trigger } from '../../src/core/trigger/trigger';
+import { FightingCard } from '../../src/fight/core/cards/fighting-card';
+import { SimpleAttack } from '../../src/fight/core/cards/skills/simple-attack';
+import { SpecialAttack } from '../../src/fight/core/cards/skills/special-attack';
+import { TargetedFromPosition } from '../../src/fight/core/targeting-card-strategies/targeted-from-position';
+import { TargetingCardStrategy } from '../../src/fight/core/targeting-card-strategies/targeting-card-strategy';
+import { TargetedAll } from '../../src/fight/core/targeting-card-strategies/targeted-all';
+import { SimpleDodge } from '../../src/fight/core/cards/behaviors/simple-dodge';
+import { Special } from '../../src/fight/core/cards/skills/special';
+import { SpecialHealing } from '../../src/fight/core/cards/skills/special-healing';
+import { AllOwnerCards } from '../../src/fight/core/targeting-card-strategies/all-owner-cards';
+import { Launcher } from '../../src/fight/core/targeting-card-strategies/launcher';
+import { AllAllies } from '../../src/fight/core/targeting-card-strategies/all-allies';
+import { Healing } from '../../src/fight/core/cards/skills/healing';
+import { Skill } from '../../src/fight/core/cards/skills/skill';
+import { TurnEnd } from '../../src/fight/core/trigger/turn-end';
+import { Trigger } from '../../src/fight/core/trigger/trigger';
 import { createEffect } from './effect';
 
 type effect = {

@@ -1,6 +1,6 @@
 import { Player } from '../../player';
 import { SpeedWeightedCardSelector } from './speed-weighted-card-pool';
-import { createFightingCard } from '../../../../test/helpers/fighting-card';
+import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 
 describe('SpeedWeightedCardSelector', () => {
   const countCardOccurrences = (

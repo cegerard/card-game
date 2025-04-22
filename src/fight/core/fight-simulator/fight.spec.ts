@@ -3,7 +3,7 @@ import { Player } from '../player';
 import { DamageReport } from './@types/damage-report';
 import { FightResult } from './@types/fight-result';
 import { PlayerByPlayerCardSelector } from './card-selectors/player-by-player';
-import { createFightingCard } from '../../../test/helpers/fighting-card';
+import { createFightingCard } from '../../../../test/helpers/fighting-card';
 import { CardStatePoisoned } from '../cards/@types/state/card-state-poisoned';
 
 describe('fight', () => {
@@ -972,7 +972,6 @@ describe('fight', () => {
 
     it('should return skill step', () => {
       const res = fight.start();
-      console.log(res);
       expect(res).toEqual({
         1: {
           attacker: card2.identityInfo,

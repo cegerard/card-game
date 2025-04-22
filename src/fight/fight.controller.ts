@@ -6,7 +6,7 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { AppService } from './app.service';
+import { FightService } from './fight.service';
 import { FightResult } from './core/fight-simulator/@types/fight-result';
 import {
   FightDataDto,
@@ -34,8 +34,8 @@ import { AttackEffect } from './core/cards/@types/attack/attack-effect';
     forbidNonWhitelisted: true,
   }),
 )
-export class AppController {
-  constructor(private readonly appService: AppService) {}
+export class FightController {
+  constructor(private readonly appService: FightService) {}
 
   @Post('fight')
   @HttpCode(200)

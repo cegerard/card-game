@@ -1,8 +1,8 @@
 import { faker } from '@faker-js/faker/.';
 
-import { PoisonedAttackEffect } from '../../src/core/cards/@types/attack/attack-poisoned-effect';
-import { AttackEffect } from '../../src/core/cards/@types/attack/attack-effect';
-import { EffectLevel } from '../../src/core/cards/@types/attack/effect-level';
+import { PoisonedAttackEffect } from '../../src/fight/core/cards/@types/attack/attack-poisoned-effect';
+import { AttackEffect } from '../../src/fight/core/cards/@types/attack/attack-effect';
+import { EffectLevel } from '../../src/fight/core/cards/@types/attack/effect-level';
 
 export function createEffect(params: {
   rate: number;
