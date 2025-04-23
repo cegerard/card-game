@@ -1,4 +1,4 @@
-import { Randomizer } from './randomizer';
+import { Randomizer } from '../core/randomizer';
 
 export class MathRandomizer implements Randomizer {
   public random_int_between(min: number, max: number): number {

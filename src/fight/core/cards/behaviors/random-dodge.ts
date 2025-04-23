@@ -1,4 +1,4 @@
-import { Randomizer } from '../../tools/randomizer';
+import { Randomizer } from '../../randomizer';
 import { DodgeBehavior } from './dodge-behaviors';
 
 export class RandomDodge implements DodgeBehavior {

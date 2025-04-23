@@ -1,4 +1,4 @@
-import { Randomizer } from '../../src/fight/core/tools/randomizer';
+import { Randomizer } from '../../src/fight/core/randomizer';
 
 export class RandomizerFake implements Randomizer {
   private nextRandomValue: number = 0;

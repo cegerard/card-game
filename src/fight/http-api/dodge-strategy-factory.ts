@@ -1,6 +1,6 @@
 import { RandomDodge } from '../core/cards/behaviors/random-dodge';
 import { SimpleDodge } from '../core/cards/behaviors/simple-dodge';
-import { MathRandomizer } from '../core/tools/math-randomizer';
+import { MathRandomizer } from '../tools/math-randomizer';
 
 export class DodgeStrategyFactory {
   static create(strategyName: string) {
