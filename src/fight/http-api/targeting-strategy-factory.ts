@@ -1,9 +1,9 @@
-import { TargetedAll } from './core/targeting-card-strategies/targeted-all';
-import { TargetedFromPosition } from './core/targeting-card-strategies/targeted-from-position';
-import { TargetedLineThree } from './core/targeting-card-strategies/targeted-line-three';
-import { AllOwnerCards } from './core/targeting-card-strategies/all-owner-cards';
-import { AllAllies } from './core/targeting-card-strategies/all-allies';
-import { Launcher } from './core/targeting-card-strategies/launcher';
+import { TargetedAll } from '../core/targeting-card-strategies/targeted-all';
+import { TargetedFromPosition } from '../core/targeting-card-strategies/targeted-from-position';
+import { TargetedLineThree } from '../core/targeting-card-strategies/targeted-line-three';
+import { AllOwnerCards } from '../core/targeting-card-strategies/all-owner-cards';
+import { AllAllies } from '../core/targeting-card-strategies/all-allies';
+import { Launcher } from '../core/targeting-card-strategies/launcher';
 
 export class TargetingStrategyFactory {
   static create(strategyName: string) {

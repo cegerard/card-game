@@ -1,4 +1,4 @@
-import { TurnEnd } from './core/trigger/turn-end';
+import { TurnEnd } from '../core/trigger/turn-end';
 
 export class TriggerFactory {
   static create(triggerName: string) {

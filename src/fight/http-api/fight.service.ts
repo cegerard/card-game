@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { Fight } from './core/fight-simulator/fight';
-import { Player } from './core/player';
-import { FightResult } from './core/fight-simulator/@types/fight-result';
-import { FightingCard } from './core/cards/fighting-card';
-import { CardSelector } from './core/fight-simulator/card-selectors/card-selector';
-import { PlayerByPlayerCardSelector } from './core/fight-simulator/card-selectors/player-by-player';
-import { SpeedWeightedCardSelector } from './core/fight-simulator/card-selectors/speed-weighted-card-pool';
+import { Fight } from '../core/fight-simulator/fight';
+import { Player } from '../core/player';
+import { FightResult } from '../core/fight-simulator/@types/fight-result';
+import { FightingCard } from '../core/cards/fighting-card';
+import { CardSelector } from '../core/fight-simulator/card-selectors/card-selector';
+import { PlayerByPlayerCardSelector } from '../core/fight-simulator/card-selectors/player-by-player';
+import { SpeedWeightedCardSelector } from '../core/fight-simulator/card-selectors/speed-weighted-card-pool';
 
 @Injectable()
 export class FightService {

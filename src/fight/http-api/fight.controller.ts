@@ -7,24 +7,24 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { FightService } from './fight.service';
-import { FightResult } from './core/fight-simulator/@types/fight-result';
+import { FightResult } from '../core/fight-simulator/@types/fight-result';
 import {
   FightDataDto,
   FightingCardDto,
   SpecialKind,
 } from './dto/fight-data.dto';
-import { FightingCard } from './core/cards/fighting-card';
-import { SpecialAttack } from './core/cards/skills/special-attack';
-import { SimpleAttack } from './core/cards/skills/simple-attack';
+import { FightingCard } from '../core/cards/fighting-card';
+import { SpecialAttack } from '../core/cards/skills/special-attack';
+import { SimpleAttack } from '../core/cards/skills/simple-attack';
 import { TargetingStrategyFactory } from './targeting-strategy-factory';
 import { DodgeStrategyFactory } from './dodge-strategy-factory';
-import { Special } from './core/cards/skills/special';
-import { SpecialHealing } from './core/cards/skills/special-healing';
-import { Healing } from './core/cards/skills/healing';
+import { Special } from '../core/cards/skills/special';
+import { SpecialHealing } from '../core/cards/skills/special-healing';
+import { Healing } from '../core/cards/skills/healing';
 import { TriggerFactory } from './trigger-factory';
-import { PoisonedAttackEffect } from './core/cards/@types/attack/attack-poisoned-effect';
-import { EffectLevel } from './core/cards/@types/attack/effect-level';
-import { AttackEffect } from './core/cards/@types/attack/attack-effect';
+import { PoisonedAttackEffect } from '../core/cards/@types/attack/attack-poisoned-effect';
+import { EffectLevel } from '../core/cards/@types/attack/effect-level';
+import { AttackEffect } from '../core/cards/@types/attack/attack-effect';
 
 @Controller()
 @UsePipes(
