@@ -46,6 +46,11 @@ class SpecialDto {
 
   @IsString()
   targetingStrategy: string;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => EffectDto)
+  effect?: EffectDto;
 }
 
 class SimpleAttackDto {
@@ -61,7 +66,7 @@ class SimpleAttackDto {
   @IsOptional()
   @ValidateNested()
   @Type(() => EffectDto)
-  effect: EffectDto;
+  effect?: EffectDto;
 }
 
 class OtherSkillDto {
@@ -139,10 +144,10 @@ export class FightingCardDto {
   behaviors: BehaviorsDto;
 
   @IsOptional()
-  image: string;
+  image?: string;
 
   @IsOptional()
-  cardDeckIdentity: string;
+  cardDeckIdentity?: string;
 }
 
 class PlayerDto {

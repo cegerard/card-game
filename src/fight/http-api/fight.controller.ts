@@ -53,6 +53,13 @@ export class FightController {
   private convertCardDtoToCard(cardData: FightingCardDto): FightingCard {
     let special: Special;
 
+    let specialEffect: AttackEffect | undefined;
+    if (cardData.skills.special.effect) {
+      specialEffect = new PoisonedAttackEffect(
+        cardData.skills.special.effect.rate,
+        cardData.skills.special.effect.level as EffectLevel,
+      );
+    }
     if (cardData.skills.special.kind === SpecialKind.ATTACK) {
       special = new SpecialAttack(
         cardData.skills.special.rate,
@@ -60,6 +67,7 @@ export class FightController {
         TargetingStrategyFactory.create(
           cardData.skills.special.targetingStrategy,
         ),
+        specialEffect,
       );
     }
 

@@ -7,6 +7,7 @@ import { FightingContext } from '../fighting-context';
 export class PoisonedAttackEffect implements AttackEffect {
   public readonly rate: number;
   public readonly level: EffectLevel;
+  public readonly type = 'poisoned';
 
   constructor(rate: number, level: EffectLevel) {
     this.rate = rate;
@@ -26,6 +27,6 @@ export class PoisonedAttackEffect implements AttackEffect {
     );
     defender.setState(poisonedState);
 
-    return { type: 'poisoned', card: defender };
+    return { type: this.type, card: defender };
   }
 }

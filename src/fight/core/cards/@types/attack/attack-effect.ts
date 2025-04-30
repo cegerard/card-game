@@ -7,6 +7,7 @@ export type EffectResult = { type: 'poisoned'; card: FightingCard };
 export interface AttackEffect {
   rate: number;
   level: EffectLevel;
+  type: string;
 
   applyEffect(
     defender: FightingCard,

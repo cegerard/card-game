@@ -37,6 +37,11 @@ describe('AppController (e2e)', () => {
                 rate: 2.0,
                 energy: 100,
                 targetingStrategy: 'target-all',
+                effect: {
+                  type: 'poison',
+                  rate: 0.5,
+                  level: 2,
+                },
               },
               simpleAttack: {
                 name: 'Simple Attack',

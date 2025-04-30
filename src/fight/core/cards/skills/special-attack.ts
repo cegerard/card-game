@@ -3,6 +3,7 @@ import { FightingContext } from '../@types/fighting-context';
 import { SpecialResult } from '../@types/action-result/special-result';
 import { FightingCard } from '../fighting-card';
 import { Special } from './special';
+import { AttackEffect, EffectResult } from '../@types/attack/attack-effect';
 
 const ENERGY_INCREASE_FACTOR = 10;
 const CRITICAL_RATE = 1.3;
@@ -13,6 +14,7 @@ export class SpecialAttack implements Special {
     private readonly damageRate: number,
     private readonly energyNeeded: number,
     private readonly targetingStrategy: TargetingCardStrategy,
+    private readonly effect?: AttackEffect,
   ) {}
 
   public ready(actualEnergy: number): boolean {
@@ -41,7 +43,18 @@ export class SpecialAttack implements Special {
       );
       const damage = target.collectsDamages(computedDamage);
 
-      return { damage, isCritical, dodge: false, defender: target };
+      let effectResult: EffectResult;
+      if (this.effect) {
+        effectResult = this.effect.applyEffect(target, source, context);
+      }
+
+      return {
+        damage,
+        isCritical,
+        dodge: false,
+        defender: target,
+        effect: effectResult,
+      };
     });
   }
 

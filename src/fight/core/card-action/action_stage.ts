@@ -131,6 +131,13 @@ export class ActionStage {
           status: 'dead',
         });
       }
+
+      if (specialResult.effect) {
+        result.statusChanges.push({
+          status: specialResult.effect.type,
+          card: specialResult.effect.card.identityInfo,
+        });
+      }
     });
 
     return result;

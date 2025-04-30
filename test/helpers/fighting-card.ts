@@ -46,6 +46,7 @@ type FightingCardParams = {
       energy?: number;
       targetingStrategy?: string;
       kind?: string;
+      effect?: effect;
     };
     others?: {
       effectRate: number;
@@ -116,16 +117,19 @@ function createSpecialAttack(params: {
   damageRate?: number;
   energy?: number;
   targetingStrategy?: string;
+  effect?: effect;
 }): SpecialAttack {
   const damageRate =
     params.damageRate ?? faker.number.int({ min: 2.5, max: 8.0 });
   const energy = params.energy ?? faker.number.int({ min: 30, max: 100 });
   const targetingStrategy = params.targetingStrategy ?? 'position-based';
+  const effect = params.effect ? createEffect(params.effect) : undefined;
 
   return new SpecialAttack(
     damageRate,
     energy,
     createTargetingStrategy(targetingStrategy),
+    effect,
   );
 }
 
