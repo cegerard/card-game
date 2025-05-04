@@ -1040,7 +1040,7 @@ describe('fight', () => {
           effect: {
             type: 'poison',
             rate: 0.5,
-            level: 1,
+            level: 2,
           },
         },
       },
@@ -1140,7 +1140,7 @@ describe('fight', () => {
           effect: {
             type: 'poison',
             rate: 0.5,
-            level: 1,
+            level: 2,
           },
         },
       },

@@ -1,9 +1,12 @@
+import { faker } from '@faker-js/faker';
+
 import { createEffect } from '../../../../test/helpers/effect';
 import { createFightingCard } from '../../../../test/helpers/fighting-card';
 import { Player } from '../player';
 import { AttackEffect } from './@types/attack/attack-effect';
 import { CardStatePoisoned } from './@types/state/card-state-poisoned';
 import { FightingCard } from './fighting-card';
+import { EffectLevel } from './@types/attack/effect-level';
 
 describe('FightingCard', () => {
   describe('when collecting damages', () => {
@@ -372,12 +375,14 @@ describe('FightingCard', () => {
 
   describe('when attacking with a poisoned effect', () => {
     const poisonRate = 0.1;
+    const level = faker.number.int({ min: 1, max: 3 }) as EffectLevel;
+
     const attacker = createFightingCard({
       accuracy: 1,
       attack: 0,
       skills: {
         simpleAttack: {
-          effect: { type: 'poison', level: 1, rate: poisonRate },
+          effect: { type: 'poison', level: level, rate: poisonRate },
         },
       },
     });
@@ -398,7 +403,7 @@ describe('FightingCard', () => {
         expect(defender.states).toEqual([
           {
             type: 'poison',
-            remainingTurns: 3,
+            remainingTurns: 2 * level - 1,
             damageValue: attacker.actualAttack * poisonRate,
           },
         ]);
@@ -444,7 +449,7 @@ describe('FightingCard', () => {
     beforeEach(() => {
       poisonedEffect = createEffect({
         rate: poisonRate,
-        level: 1,
+        level: 2,
         type: 'poison',
       });
       attacker = createFightingCard({ attack: 100 });

@@ -22,11 +22,15 @@ export class PoisonedAttackEffect implements AttackEffect {
     if (defender.isPoisoned()) return;
 
     const poisonedState = new CardStatePoisoned(
-      3,
+      this.computePoisonedTurns(),
       card.actualAttack * this.rate,
     );
     defender.setState(poisonedState);
 
     return { type: this.type, card: defender };
+  }
+
+  private computePoisonedTurns() {
+    return 2 * this.level - 1;
   }
 }
