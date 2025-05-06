@@ -38,7 +38,7 @@ describe('AppController (e2e)', () => {
                 energy: 100,
                 targetingStrategy: 'target-all',
                 effect: {
-                  type: 'poison',
+                  type: 'POISON',
                   rate: 0.5,
                   level: 2,
                 },
@@ -47,6 +47,11 @@ describe('AppController (e2e)', () => {
                 name: 'Simple Attack',
                 damageRate: 1.0,
                 targetingStrategy: 'position-based',
+                effect: {
+                  type: 'BURN',
+                  rate: 0.2,
+                  level: 3,
+                },
               },
               others: [
                 {
@@ -78,6 +83,11 @@ describe('AppController (e2e)', () => {
                 rate: 2.0,
                 energy: 100,
                 targetingStrategy: 'all-owner-cards',
+                effect: {
+                  type: 'BURN',
+                  rate: 0.1,
+                  level: 1,
+                },
               },
               simpleAttack: {
                 name: 'Simple Attack',
@@ -117,7 +127,7 @@ describe('AppController (e2e)', () => {
                 damageRate: 1.0,
                 targetingStrategy: 'position-based',
                 effect: {
-                  type: 'poison',
+                  type: 'POISON',
                   rate: 0.5,
                   level: 1,
                 },

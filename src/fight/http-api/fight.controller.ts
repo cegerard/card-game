@@ -9,6 +9,7 @@ import {
 import { FightService } from './fight.service';
 import { FightResult } from '../core/fight-simulator/@types/fight-result';
 import {
+  Effect,
   FightDataDto,
   FightingCardDto,
   SpecialKind,
@@ -25,6 +26,7 @@ import { TriggerFactory } from './trigger-factory';
 import { PoisonedAttackEffect } from '../core/cards/@types/attack/attack-poisoned-effect';
 import { EffectLevel } from '../core/cards/@types/attack/effect-level';
 import { AttackEffect } from '../core/cards/@types/attack/attack-effect';
+import { BurnedAttackEffect } from '../core/cards/@types/attack/attack-burned-effect';
 
 @Controller()
 @UsePipes(
@@ -54,12 +56,20 @@ export class FightController {
     let special: Special;
 
     let specialEffect: AttackEffect | undefined;
-    if (cardData.skills.special.effect) {
+    if (cardData.skills.special.effect?.type === Effect.POISON) {
       specialEffect = new PoisonedAttackEffect(
         cardData.skills.special.effect.rate,
         cardData.skills.special.effect.level as EffectLevel,
       );
     }
+
+    if (cardData.skills.special.effect?.type === Effect.BURN) {
+      specialEffect = new BurnedAttackEffect(
+        cardData.skills.special.effect.rate,
+        cardData.skills.special.effect.level as EffectLevel,
+      );
+    }
+
     if (cardData.skills.special.kind === SpecialKind.ATTACK) {
       special = new SpecialAttack(
         cardData.skills.special.rate,
@@ -82,12 +92,20 @@ export class FightController {
     }
 
     let effect: AttackEffect | undefined;
-    if (cardData.skills.simpleAttack.effect) {
+    if (cardData.skills.simpleAttack.effect?.type === Effect.POISON) {
       effect = new PoisonedAttackEffect(
         cardData.skills.simpleAttack.effect.rate,
         cardData.skills.simpleAttack.effect.level as EffectLevel,
       );
     }
+
+    if (cardData.skills.simpleAttack.effect?.type === Effect.BURN) {
+      effect = new BurnedAttackEffect(
+        cardData.skills.simpleAttack.effect.rate,
+        cardData.skills.simpleAttack.effect.level as EffectLevel,
+      );
+    }
+
     const simpleAttack = new SimpleAttack(
       cardData.skills.simpleAttack.damageRate,
       TargetingStrategyFactory.create(

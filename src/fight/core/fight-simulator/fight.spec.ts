@@ -1124,6 +1124,99 @@ describe('fight', () => {
     });
   });
 
+  describe('Trigger card attack with burn effect', () => {
+    const card1 = createFightingCard({
+      attack: 100,
+      defense: 100,
+      health: 100,
+      speed: 100,
+      criticalChance: 0,
+      agility: 0,
+      skills: {
+        simpleAttack: {
+          damageRate: 1.0,
+          effect: {
+            type: 'burn',
+            rate: 0.5,
+            level: 3,
+          },
+        },
+      },
+    });
+
+    const card2 = createFightingCard({
+      attack: 1,
+      defense: 0,
+      health: 150,
+      speed: 1,
+      criticalChance: 0,
+      agility: 0,
+    });
+
+    const player1 = new Player('Player 1', [card1]);
+    const player2 = new Player('Player 2', [card2]);
+    const fight = new Fight(
+      player1,
+      player2,
+      new PlayerByPlayerCardSelector(player1, player2),
+    );
+
+    it('should return skill step', () => {
+      expect(fight.start()).toEqual({
+        1: {
+          attacker: card1.identityInfo,
+          damages: [
+            {
+              damage: 100,
+              defender: card2.identityInfo,
+              dodge: false,
+              isCritical: false,
+              remainingHealth: 50,
+            },
+          ],
+          energy: 10,
+          kind: 'attack',
+        },
+        2: {
+          kind: 'status_change',
+          status: 'burned',
+          card: card2.identityInfo,
+        },
+        3: {
+          attacker: card2.identityInfo,
+          damages: [
+            {
+              damage: 0,
+              defender: card1.identityInfo,
+              dodge: false,
+              isCritical: false,
+              remainingHealth: 100,
+            },
+          ],
+          energy: 10,
+          kind: 'attack',
+        },
+        4: {
+          kind: 'state_effect',
+          type: 'burn',
+          card: card2.identityInfo,
+          remainingTurns: 4,
+          damage: 50,
+          remainingHealth: 0,
+        },
+        5: {
+          card: card2.identityInfo,
+          kind: 'status_change',
+          status: 'dead',
+        },
+        6: {
+          kind: 'fight_end',
+          winner: 'Player 1',
+        },
+      });
+    });
+  });
+
   describe('Trigger card special attack with poison effect', () => {
     const card1 = createFightingCard({
       attack: 100,
@@ -1218,6 +1311,7 @@ describe('fight', () => {
       });
     });
   });
+
   describe('Process card state effect at turn end', () => {
     const card1 = createFightingCard({
       attack: 100,

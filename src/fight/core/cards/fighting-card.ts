@@ -40,6 +40,7 @@ export class FightingCard {
 
   // Status
   private poisoned?: CardState;
+  private burned?: CardState;
 
   constructor(
     name: string,
@@ -107,7 +108,9 @@ export class FightingCard {
   }
 
   public get states(): CardState[] {
-    return this.poisoned ? [this.poisoned] : [];
+    return [this.poisoned, this.burned]
+      .filter(Boolean)
+      .sort((a, b) => a.type.localeCompare(b.type));
   }
 
   public setOwnerInfo(ownerName: string, cardPositionInDeck: number): void {
@@ -120,11 +123,19 @@ export class FightingCard {
     if (state.type === 'poison') {
       this.poisoned = state;
     }
+
+    if (state.type === 'burn') {
+      this.burned = state;
+    }
   }
 
   public removeState(state: CardState): void {
     if (state.type === 'poison') {
       this.poisoned = undefined;
+    }
+
+    if (state.type === 'burn') {
+      this.burned = undefined;
     }
   }
 
@@ -152,11 +163,17 @@ export class FightingCard {
       return [];
     }
 
+    const stateResults: StateResult[] = [];
+
     if (this.poisoned) {
-      return [this.poisoned.applyState(this)];
+      stateResults.push(this.poisoned.applyState(this));
     }
 
-    return [];
+    if (this.burned) {
+      stateResults.push(this.burned.applyState(this));
+    }
+
+    return stateResults;
   }
 
   public fasterThan(defender: FightingCard | null): boolean {
@@ -169,6 +186,10 @@ export class FightingCard {
 
   public isPoisoned(): boolean {
     return !!this.poisoned;
+  }
+
+  public isBurned(): boolean {
+    return !!this.burned;
   }
 
   public isSpecialReady(): boolean {

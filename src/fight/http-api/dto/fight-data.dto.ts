@@ -20,9 +20,14 @@ export enum SkillKind {
   HEALING = 'HEALING',
 }
 
+export enum Effect {
+  POISON = 'POISON',
+  BURN = 'BURN',
+}
+
 class EffectDto {
-  @IsString()
-  type: string;
+  @IsEnum(Effect)
+  type: Effect;
 
   @IsNumber()
   rate: number;
