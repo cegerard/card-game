@@ -1,9 +1,9 @@
 import 'reflect-metadata';
 
-import { Effect, FightDataDto, SpecialKind } from './dto/fight-data.dto';
-import { FightController } from './fight.controller';
-import { FightingCard } from '../core/cards/fighting-card';
-import { FakeFightService } from '../../../test/fake/fake-fight-service';
+import { Effect, FightDataDto, SpecialKind } from '../dto/fight-data.dto';
+import { FightController } from '../fight.controller';
+import { FightingCard } from '../../core/cards/fighting-card';
+import { FakeFightService } from './fake-fight-service';
 
 describe('FightController', () => {
   const fakeFightService = new FakeFightService();

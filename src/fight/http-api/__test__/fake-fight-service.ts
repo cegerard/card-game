@@ -1,6 +1,6 @@
-import { FightingCard } from '../../src/fight/core/cards/fighting-card';
-import { FightResult } from '../../src/fight/core/fight-simulator/@types/fight-result';
-import { FightService } from '../../src/fight/http-api/fight.service';
+import { FightingCard } from '../../core/cards/fighting-card';
+import { FightResult } from '../../core/fight-simulator/@types/fight-result';
+import { FightService } from '../fight.service';
 
 export class FakeFightService extends FightService {
   private player1Name: string = '';
