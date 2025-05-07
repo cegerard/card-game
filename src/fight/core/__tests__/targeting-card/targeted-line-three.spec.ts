@@ -1,6 +1,6 @@
-import { createFightingCard } from '../../../../test/helpers/fighting-card';
-import { Player } from '../player';
-import { TargetedLineThree } from './targeted-line-three';
+import { createFightingCard } from '../../../../../test/helpers/fighting-card';
+import { Player } from '../../player';
+import { TargetedLineThree } from '../../targeting-card-strategies/targeted-line-three';
 
 describe('TargetedLineThree Strategy', () => {
   const targetedLineThree = new TargetedLineThree();

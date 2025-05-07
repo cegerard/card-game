@@ -1,4 +1,4 @@
-import { SimpleDodge } from './simple-dodge';
+import { SimpleDodge } from '../../cards/behaviors/simple-dodge';
 
 describe('dodge', () => {
   it('should dodge the attack', () => {

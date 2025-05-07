@@ -1,4 +1,4 @@
-import { ActionStage } from './action_stage';
+import { ActionStage } from '../card-action/action_stage';
 import { Player } from '../player';
 import { createFightingCard } from '../../../../test/helpers/fighting-card';
 

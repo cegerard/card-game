@@ -1,8 +1,8 @@
-import { Fight } from './fight';
+import { Fight } from '../fight-simulator/fight';
 import { Player } from '../player';
-import { DamageReport } from './@types/damage-report';
-import { FightResult } from './@types/fight-result';
-import { PlayerByPlayerCardSelector } from './card-selectors/player-by-player';
+import { DamageReport } from '../fight-simulator/@types/damage-report';
+import { FightResult } from '../fight-simulator/@types/fight-result';
+import { PlayerByPlayerCardSelector } from '../fight-simulator/card-selectors/player-by-player';
 import { createFightingCard } from '../../../../test/helpers/fighting-card';
 import { CardStatePoisoned } from '../cards/@types/state/card-state-poisoned';
 

@@ -1,5 +1,5 @@
 import { Player } from '../../player';
-import { SpeedWeightedCardSelector } from './speed-weighted-card-pool';
+import { SpeedWeightedCardSelector } from '../../fight-simulator/card-selectors/speed-weighted-card-pool';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 
 describe('SpeedWeightedCardSelector', () => {
