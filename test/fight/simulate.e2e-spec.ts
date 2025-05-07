@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { AppModule } from './../src/app.module';
+import { AppModule } from '../../src/app.module';
 
-describe('AppController (e2e)', () => {
+describe('Simulate fight', () => {
   let app: INestApplication;
 
   beforeEach(async () => {
@@ -15,7 +15,7 @@ describe('AppController (e2e)', () => {
     await app.init();
   });
 
-  it('/fight (POST)', () => {
+  it('runs to the end', () => {
     const fightData = {
       cardSelectorStrategy: 'player-by-player',
       player1: {
