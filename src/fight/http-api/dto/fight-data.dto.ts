@@ -23,6 +23,7 @@ export enum SkillKind {
 export enum Effect {
   POISON = 'POISON',
   BURN = 'BURN',
+  FREEZE = 'FREEZE',
 }
 
 class EffectDto {

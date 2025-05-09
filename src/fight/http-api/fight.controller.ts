@@ -27,6 +27,7 @@ import { PoisonedAttackEffect } from '../core/cards/@types/attack/attack-poisone
 import { EffectLevel } from '../core/cards/@types/attack/effect-level';
 import { AttackEffect } from '../core/cards/@types/attack/attack-effect';
 import { BurnedAttackEffect } from '../core/cards/@types/attack/attack-burned-effect';
+import { FrozenAttackEffect } from '../core/cards/@types/attack/attack-frozen-effect';
 
 @Controller()
 @UsePipes(
@@ -62,9 +63,14 @@ export class FightController {
         cardData.skills.special.effect.level as EffectLevel,
       );
     }
-
     if (cardData.skills.special.effect?.type === Effect.BURN) {
       specialEffect = new BurnedAttackEffect(
+        cardData.skills.special.effect.rate,
+        cardData.skills.special.effect.level as EffectLevel,
+      );
+    }
+    if (cardData.skills.special.effect?.type === Effect.FREEZE) {
+      specialEffect = new FrozenAttackEffect(
         cardData.skills.special.effect.rate,
         cardData.skills.special.effect.level as EffectLevel,
       );
@@ -98,9 +104,14 @@ export class FightController {
         cardData.skills.simpleAttack.effect.level as EffectLevel,
       );
     }
-
     if (cardData.skills.simpleAttack.effect?.type === Effect.BURN) {
       effect = new BurnedAttackEffect(
+        cardData.skills.simpleAttack.effect.rate,
+        cardData.skills.simpleAttack.effect.level as EffectLevel,
+      );
+    }
+    if (cardData.skills.simpleAttack.effect?.type === Effect.FREEZE) {
+      effect = new FrozenAttackEffect(
         cardData.skills.simpleAttack.effect.rate,
         cardData.skills.simpleAttack.effect.level as EffectLevel,
       );

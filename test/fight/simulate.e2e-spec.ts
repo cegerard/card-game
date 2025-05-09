@@ -93,6 +93,11 @@ describe('Simulate fight', () => {
                 name: 'Simple Attack',
                 damageRate: 1.0,
                 targetingStrategy: 'position-based',
+                effect: {
+                  type: 'FREEZE',
+                  rate: 0.35,
+                  level: 2,
+                },
               },
               others: [],
             },
@@ -121,6 +126,11 @@ describe('Simulate fight', () => {
                 rate: 2.0,
                 energy: 100,
                 targetingStrategy: 'line-three',
+                effect: {
+                  type: 'FREEZE',
+                  rate: 0.2,
+                  level: 1,
+                },
               },
               simpleAttack: {
                 name: 'Simple Attack',

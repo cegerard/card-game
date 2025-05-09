@@ -10,6 +10,7 @@ import { Skill } from './skills/skill';
 import { Special } from './skills/special';
 import { CardState } from './@types/state/card-state';
 import { StateResult } from './@types/action-result/state-result';
+import { CardStateFrozen } from './@types/state/card-state-frozen';
 
 export class FightingCard {
   // Info
@@ -41,6 +42,7 @@ export class FightingCard {
   // Status
   private poisoned?: CardState;
   private burned?: CardState;
+  private frozen?: CardState;
 
   constructor(
     name: string,
@@ -108,7 +110,7 @@ export class FightingCard {
   }
 
   public get states(): CardState[] {
-    return [this.poisoned, this.burned]
+    return [this.poisoned, this.burned, this.frozen]
       .filter(Boolean)
       .sort((a, b) => a.type.localeCompare(b.type));
   }
@@ -127,6 +129,10 @@ export class FightingCard {
     if (state.type === 'burn') {
       this.burned = state;
     }
+
+    if (state.type === 'freeze') {
+      this.frozen = state;
+    }
   }
 
   public removeState(state: CardState): void {
@@ -136,6 +142,10 @@ export class FightingCard {
 
     if (state.type === 'burn') {
       this.burned = undefined;
+    }
+
+    if (state.type === 'freeze') {
+      this.frozen = undefined;
     }
   }
 
@@ -173,6 +183,10 @@ export class FightingCard {
       stateResults.push(this.burned.applyState(this));
     }
 
+    if (this.frozen) {
+      stateResults.push(this.frozen.applyState(this));
+    }
+
     return stateResults;
   }
 
@@ -190,6 +204,10 @@ export class FightingCard {
 
   public isBurned(): boolean {
     return !!this.burned;
+  }
+
+  public isFrozen(): boolean {
+    return !!this.frozen;
   }
 
   public isSpecialReady(): boolean {
@@ -221,7 +239,11 @@ export class FightingCard {
       return 0;
     }
 
-    const causedDamages = Math.max(0, damage - this.defense);
+    let causedDamages = Math.max(0, damage - this.defense);
+    if (this.isFrozen()) {
+      const frozenState = this.frozen as CardStateFrozen;
+      causedDamages = frozenState.applyDamageRate(causedDamages);
+    }
     this.receivedDamages += causedDamages;
 
     return causedDamages;

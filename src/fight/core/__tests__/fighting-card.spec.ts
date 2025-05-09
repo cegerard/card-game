@@ -8,6 +8,7 @@ import { CardStatePoisoned } from '../cards/@types/state/card-state-poisoned';
 import { FightingCard } from '../cards/fighting-card';
 import { EffectLevel } from '../cards/@types/attack/effect-level';
 import { CardStateBurned } from '../cards/@types/state/card-state-burned';
+import { CardStateFrozen } from '../cards/@types/state/card-state-frozen';
 
 describe('when collecting damages', () => {
   let card: FightingCard;
@@ -466,6 +467,37 @@ describe('when attacking with a poison effect', () => {
       ]);
     });
   });
+
+  describe('and the defender is already frozen', () => {
+    const defender = createFightingCard({
+      agility: 0,
+    });
+    const player2 = new Player('player2', [defender]);
+
+    beforeEach(() => {
+      defender.setState(new CardStateFrozen(1, 0.5));
+    });
+
+    it('should add a new poison effect to the defender', () => {
+      attacker.launchAttack({
+        sourcePlayer: player1,
+        opponentPlayer: player2,
+      });
+
+      expect(defender.states).toEqual([
+        {
+          type: 'freeze',
+          remainingTurns: 1,
+          damageRate: 0.5,
+        },
+        {
+          type: 'poison',
+          remainingTurns: 2 * level - 1,
+          damageValue: 0,
+        },
+      ]);
+    });
+  });
 });
 
 describe('when applying a poison state', () => {
@@ -643,6 +675,37 @@ describe('when attacking with a burn effect', () => {
       ]);
     });
   });
+
+  describe('and the defender is frozen', () => {
+    const defender = createFightingCard({
+      agility: 0,
+    });
+    const player2 = new Player('player2', [defender]);
+
+    beforeEach(() => {
+      defender.setState(new CardStateFrozen(1, 0.3));
+    });
+
+    it('should add a new burn effect to the defender', () => {
+      attacker.launchAttack({
+        sourcePlayer: player1,
+        opponentPlayer: player2,
+      });
+
+      expect(defender.states).toEqual([
+        {
+          type: 'burn',
+          remainingTurns: 2 * level - 1,
+          damageValue: 0,
+        },
+        {
+          type: 'freeze',
+          remainingTurns: 1,
+          damageRate: 0.3,
+        },
+      ]);
+    });
+  });
 });
 
 describe('when applying a burn state', () => {
@@ -763,5 +826,203 @@ describe('when a card is poisoned and burned', () => {
         remainingTurns: 0,
       },
     ]);
+  });
+});
+
+describe('when attacking with a freeze effect', () => {
+  const freezeRate = 0.1;
+  const level = faker.number.int({ min: 1, max: 3 }) as EffectLevel;
+
+  const attacker = createFightingCard({
+    accuracy: 1,
+    attack: 0,
+    skills: {
+      simpleAttack: {
+        effect: { type: 'freeze', level: level, rate: freezeRate },
+      },
+    },
+  });
+  const player1 = new Player('player1', [attacker]);
+
+  describe('and the defender is already frozen', () => {
+    const defender = createFightingCard({
+      agility: 0,
+    });
+    const player2 = new Player('player2', [defender]);
+
+    beforeEach(() => {
+      defender.setState(new CardStateFrozen(1, freezeRate));
+    });
+
+    it('should not add a new freeze effect to the defender', () => {
+      attacker.launchAttack({
+        sourcePlayer: player1,
+        opponentPlayer: player2,
+      });
+
+      expect(defender.states).toEqual([
+        {
+          type: 'freeze',
+          remainingTurns: 1,
+          damageRate: freezeRate,
+        },
+      ]);
+    });
+  });
+
+  describe('and the defender is poisoned', () => {
+    const defender = createFightingCard({
+      agility: 0,
+    });
+    const player2 = new Player('player2', [defender]);
+
+    beforeEach(() => {
+      defender.setState(new CardStatePoisoned(1, 10));
+    });
+
+    it('should add a new freeze effect to the defender', () => {
+      attacker.launchAttack({
+        sourcePlayer: player1,
+        opponentPlayer: player2,
+      });
+
+      expect(defender.states).toEqual([
+        {
+          type: 'freeze',
+          remainingTurns: 2 * level - 1,
+          damageRate: freezeRate,
+        },
+        {
+          type: 'poison',
+          remainingTurns: 1,
+          damageValue: 10,
+        },
+      ]);
+    });
+  });
+
+  describe('and the defender is burned', () => {
+    const defender = createFightingCard({
+      agility: 0,
+    });
+    const player2 = new Player('player2', [defender]);
+
+    beforeEach(() => {
+      defender.setState(new CardStateBurned(1, 10));
+    });
+
+    it('should add a new freeze effect to the defender', () => {
+      attacker.launchAttack({
+        sourcePlayer: player1,
+        opponentPlayer: player2,
+      });
+
+      expect(defender.states).toEqual([
+        {
+          type: 'burn',
+          remainingTurns: 1,
+          damageValue: 10,
+        },
+        {
+          type: 'freeze',
+          remainingTurns: 2 * level - 1,
+          damageRate: freezeRate,
+        },
+      ]);
+    });
+  });
+});
+
+describe('when applying a freeze state', () => {
+  const freezeRate = 0.1;
+
+  let freezeEffect: AttackEffect;
+  let attacker: FightingCard;
+  let defender: FightingCard;
+  let player1: Player;
+  let player2: Player;
+
+  beforeEach(() => {
+    freezeEffect = createEffect({
+      rate: freezeRate,
+      level: 2,
+      type: 'freeze',
+    });
+    attacker = createFightingCard({ attack: 100 });
+    defender = createFightingCard({ health: 500, defense: 0 });
+    player1 = new Player('player1', [attacker]);
+    player2 = new Player('player2', [defender]);
+  });
+
+  describe('and it is the first time to apply the state', () => {
+    beforeEach(() => {
+      freezeEffect.applyEffect(defender, attacker, {
+        sourcePlayer: player1,
+        opponentPlayer: player2,
+      });
+    });
+
+    it('should affect the defender with freeze', () => {
+      expect(defender.applyStateEffects()).toEqual([
+        {
+          type: 'freeze',
+          card: defender,
+          damage: 0,
+          remainingTurns: 2,
+        },
+      ]);
+    });
+  });
+
+  describe('and it is the last time to apply the state', () => {
+    beforeEach(() => {
+      freezeEffect.applyEffect(defender, attacker, {
+        sourcePlayer: player1,
+        opponentPlayer: player2,
+      });
+      defender.applyStateEffects();
+      defender.applyStateEffects();
+    });
+
+    it('should affect the defender with freeze', () => {
+      expect(defender.applyStateEffects()).toEqual([
+        {
+          type: 'freeze',
+          card: defender,
+          damage: 0,
+          remainingTurns: 0,
+        },
+      ]);
+    });
+  });
+
+  describe('and the defender is dead', () => {
+    beforeEach(() => {
+      defender.collectsDamages(500);
+      freezeEffect.applyEffect(defender, attacker, {
+        sourcePlayer: player1,
+        opponentPlayer: player2,
+      });
+    });
+
+    it('should not affect the defender with freeze', () => {
+      expect(defender.applyStateEffects()).toEqual([]);
+    });
+  });
+
+  describe('and the defender is no more frozen', () => {
+    beforeEach(() => {
+      freezeEffect.applyEffect(defender, attacker, {
+        sourcePlayer: player1,
+        opponentPlayer: player2,
+      });
+      defender.applyStateEffects();
+      defender.applyStateEffects();
+      defender.applyStateEffects();
+    });
+
+    it('should not affect the defender with freeze', () => {
+      expect(defender.applyStateEffects()).toEqual([]);
+    });
   });
 });

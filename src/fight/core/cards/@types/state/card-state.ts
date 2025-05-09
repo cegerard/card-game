@@ -4,7 +4,6 @@ import { StateResult } from '../action-result/state-result';
 export interface CardState {
   type: string;
   remainingTurns: number;
-  damageValue: number;
 
   applyState(card: FightingCard): StateResult;
 }

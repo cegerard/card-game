@@ -1217,6 +1217,99 @@ describe('fight', () => {
     });
   });
 
+  describe('Trigger card attack with freeze effect', () => {
+    const card1 = createFightingCard({
+      attack: 100,
+      defense: 100,
+      health: 100,
+      speed: 100,
+      criticalChance: 0,
+      agility: 0,
+      skills: {
+        simpleAttack: {
+          damageRate: 1.0,
+          effect: {
+            type: 'freeze',
+            rate: 0.2,
+            level: 2,
+          },
+        },
+      },
+    });
+
+    const card2 = createFightingCard({
+      attack: 1,
+      defense: 0,
+      health: 220,
+      speed: 1,
+      criticalChance: 0,
+      agility: 0,
+    });
+
+    const player1 = new Player('Player 1', [card1]);
+    const player2 = new Player('Player 2', [card2]);
+    const fight = new Fight(
+      player1,
+      player2,
+      new PlayerByPlayerCardSelector(player1, player2),
+    );
+
+    it('should return effect steps', () => {
+      expect(fight.start()).toEqual({
+        1: {
+          attacker: card1.identityInfo,
+          damages: [
+            {
+              damage: 100,
+              defender: card2.identityInfo,
+              dodge: false,
+              isCritical: false,
+              remainingHealth: 120,
+            },
+          ],
+          energy: 10,
+          kind: 'attack',
+        },
+        2: {
+          kind: 'status_change',
+          status: 'frozen',
+          card: card2.identityInfo,
+        },
+        3: {
+          kind: 'state_effect',
+          type: 'freeze',
+          card: card2.identityInfo,
+          remainingTurns: 2,
+          damage: 0,
+          remainingHealth: 120,
+        },
+        4: {
+          attacker: card1.identityInfo,
+          damages: [
+            {
+              damage: 120,
+              defender: card2.identityInfo,
+              dodge: false,
+              isCritical: false,
+              remainingHealth: 0,
+            },
+          ],
+          energy: 20,
+          kind: 'attack',
+        },
+        5: {
+          card: card2.identityInfo,
+          kind: 'status_change',
+          status: 'dead',
+        },
+        6: {
+          kind: 'fight_end',
+          winner: 'Player 1',
+        },
+      });
+    });
+  });
+
   describe('Trigger card special attack with poison effect', () => {
     const card1 = createFightingCard({
       attack: 100,

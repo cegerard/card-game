@@ -35,6 +35,8 @@ export class ActionStage {
 
   public computeNextAction(cards: FightingCard[]): Step[] {
     const attacksReports = cards.reduce((acc: ActionReport[], card) => {
+      if (card.isFrozen()) return acc;
+
       if (card.isSpecialReady()) {
         acc.push(this.launchSpecial(card));
       } else {

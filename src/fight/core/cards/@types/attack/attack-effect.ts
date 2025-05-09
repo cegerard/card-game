@@ -2,7 +2,7 @@ import { FightingCard } from '../../fighting-card';
 import { EffectLevel } from './effect-level';
 import { FightingContext } from '../fighting-context';
 
-type EffectType = 'poisoned' | 'burned';
+type EffectType = 'poisoned' | 'burned' | 'frozen';
 export type EffectResult = { type: EffectType; card: FightingCard };
 
 export interface AttackEffect {

@@ -4,6 +4,7 @@ import { PoisonedAttackEffect } from '../../src/fight/core/cards/@types/attack/a
 import { BurnedAttackEffect } from '../../src/fight/core/cards/@types/attack/attack-burned-effect';
 import { AttackEffect } from '../../src/fight/core/cards/@types/attack/attack-effect';
 import { EffectLevel } from '../../src/fight/core/cards/@types/attack/effect-level';
+import { FrozenAttackEffect } from '../../src/fight/core/cards/@types/attack/attack-frozen-effect';
 
 export function createEffect(params: {
   rate: number;
@@ -19,6 +20,8 @@ export function createEffect(params: {
       return new PoisonedAttackEffect(effectRate, effectLevel);
     case 'burn':
       return new BurnedAttackEffect(effectRate, effectLevel);
+    case 'freeze':
+      return new FrozenAttackEffect(effectRate, effectLevel);
     default:
       throw new Error(`Unknown effect type: ${params.type}`);
   }
