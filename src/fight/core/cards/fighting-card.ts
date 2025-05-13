@@ -1,4 +1,3 @@
-import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
 import { AttackResult } from './@types/action-result/attack-result';
 import { CardInfo } from './@types/card-info';
 import { FightingContext } from './@types/fighting-context';
@@ -226,19 +225,11 @@ export class FightingCard {
     return this.specialEnergy;
   }
 
-  public specialTargeting(): TargetingCardStrategy {
-    return this.special.getTargetingStrategy();
-  }
-
   public specialKind(): string {
     return this.special.getSpecialKind();
   }
 
   public collectsDamages(damage: number): number {
-    if (this.isDead()) {
-      return 0;
-    }
-
     let causedDamages = Math.max(0, damage - this.defense);
     if (this.isFrozen()) {
       const frozenState = this.frozen as CardStateFrozen;
@@ -256,10 +247,6 @@ export class FightingCard {
   }
 
   public heal(hpToRestore: number): number {
-    if (this.isDead()) {
-      return 0;
-    }
-
     let healed = hpToRestore;
 
     if (this.actualHealth + hpToRestore > this.maxHealth) {
