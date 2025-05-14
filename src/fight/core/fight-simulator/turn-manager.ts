@@ -60,7 +60,7 @@ export class TurnManager {
         type: result.type,
         damage: result.damage,
         remainingTurns: result.remainingTurns,
-        remainingHealth: card.actualHealth,
+        remainingHealth: result.remainingHealth,
       });
     });
 

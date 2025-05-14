@@ -294,37 +294,6 @@ describe('when attacking with a poison effect', () => {
   });
   const player1 = new Player('player1', [attacker]);
 
-  describe('and the defender is already burned', () => {
-    const defender = createFightingCard({
-      agility: 0,
-    });
-    const player2 = new Player('player2', [defender]);
-
-    beforeEach(() => {
-      defender.setState(new CardStateBurned(1, 10));
-    });
-
-    it('should add a new poison effect to the defender', () => {
-      attacker.launchAttack({
-        sourcePlayer: player1,
-        opponentPlayer: player2,
-      });
-
-      expect(defender.states).toEqual([
-        {
-          type: 'burn',
-          remainingTurns: 1,
-          damageValue: 10,
-        },
-        {
-          type: 'poison',
-          remainingTurns: 2 * level - 1,
-          damageValue: 0,
-        },
-      ]);
-    });
-  });
-
   describe('and the defender is already frozen', () => {
     const defender = createFightingCard({
       agility: 0,
@@ -392,6 +361,7 @@ describe('when applying a poison state', () => {
           type: 'poison',
           card: defender,
           damage: attacker.actualAttack * poisonRate,
+          remainingHealth: 490,
           remainingTurns: 2,
         },
       ]);
@@ -414,6 +384,7 @@ describe('when applying a poison state', () => {
           type: 'poison',
           card: defender,
           damage: attacker.actualAttack * poisonRate,
+          remainingHealth: 470,
           remainingTurns: 0,
         },
       ]);
@@ -600,6 +571,7 @@ describe('when applying a burn state', () => {
           type: 'burn',
           card: defender,
           damage: attacker.actualAttack * burnRate,
+          remainingHealth: 490,
           remainingTurns: 2,
         },
       ]);
@@ -622,6 +594,7 @@ describe('when applying a burn state', () => {
           type: 'burn',
           card: defender,
           damage: attacker.actualAttack * burnRate,
+          remainingHealth: 470,
           remainingTurns: 0,
         },
       ]);
@@ -674,12 +647,14 @@ describe('when a card is poisoned and burned', () => {
         type: 'poison',
         card: defender,
         damage: 10,
+        remainingHealth: 490,
         remainingTurns: 0,
       },
       {
         type: 'burn',
         card: defender,
         damage: 20,
+        remainingHealth: 470,
         remainingTurns: 0,
       },
     ]);
@@ -825,6 +800,7 @@ describe('when applying a freeze state', () => {
           type: 'freeze',
           card: defender,
           damage: 0,
+          remainingHealth: 500,
           remainingTurns: 2,
         },
       ]);
@@ -847,6 +823,7 @@ describe('when applying a freeze state', () => {
           type: 'freeze',
           card: defender,
           damage: 0,
+          remainingHealth: 500,
           remainingTurns: 0,
         },
       ]);

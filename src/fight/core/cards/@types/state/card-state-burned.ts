@@ -24,6 +24,7 @@ export class CardStateBurned implements CardState {
       type: 'burn',
       card,
       damage,
+      remainingHealth: card.actualHealth,
       remainingTurns: this.remainingTurns,
     };
   }
