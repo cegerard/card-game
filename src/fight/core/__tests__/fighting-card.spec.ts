@@ -279,53 +279,6 @@ describe('when launching a self healing skill', () => {
   });
 });
 
-describe('when attacking with a poison effect', () => {
-  const poisonRate = 0.1;
-  const level = faker.number.int({ min: 1, max: 3 }) as EffectLevel;
-
-  const attacker = createFightingCard({
-    accuracy: 1,
-    attack: 0,
-    skills: {
-      simpleAttack: {
-        effect: { type: 'poison', level: level, rate: poisonRate },
-      },
-    },
-  });
-  const player1 = new Player('player1', [attacker]);
-
-  describe('and the defender is already frozen', () => {
-    const defender = createFightingCard({
-      agility: 0,
-    });
-    const player2 = new Player('player2', [defender]);
-
-    beforeEach(() => {
-      defender.setState(new CardStateFrozen(1, 0.5));
-    });
-
-    it('should add a new poison effect to the defender', () => {
-      attacker.launchAttack({
-        sourcePlayer: player1,
-        opponentPlayer: player2,
-      });
-
-      expect(defender.states).toEqual([
-        {
-          type: 'freeze',
-          remainingTurns: 1,
-          damageRate: 0.5,
-        },
-        {
-          type: 'poison',
-          remainingTurns: 2 * level - 1,
-          damageValue: 0,
-        },
-      ]);
-    });
-  });
-});
-
 describe('when applying a poison state', () => {
   const poisonRate = 0.1;
 

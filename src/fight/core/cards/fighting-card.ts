@@ -174,16 +174,16 @@ export class FightingCard {
 
     const stateResults: StateResult[] = [];
 
+    if (this.frozen) {
+      stateResults.push(this.frozen.applyState(this));
+    }
+
     if (this.poisoned) {
       stateResults.push(this.poisoned.applyState(this));
     }
 
     if (this.burned) {
       stateResults.push(this.burned.applyState(this));
-    }
-
-    if (this.frozen) {
-      stateResults.push(this.frozen.applyState(this));
     }
 
     return stateResults;

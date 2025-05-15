@@ -5,6 +5,7 @@ import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 import { CardStatePoisoned } from '../../cards/@types/state/card-state-poisoned';
 import { FightingCard } from '../../cards/fighting-card';
 import { CardStateBurned } from '../../cards/@types/state/card-state-burned';
+import { CardStateFrozen } from '../../cards/@types/state/card-state-frozen';
 
 describe('Trigger an attack without effect', () => {
   const attackerAccuracy = 40;
@@ -419,6 +420,86 @@ describe('Trigger card attack with poison effect', () => {
           status: 'dead',
         },
         7: {
+          kind: 'fight_end',
+          winner: 'Player 1',
+        },
+      });
+    });
+  });
+
+  describe('and the defender is already frozen', () => {
+    let card2: FightingCard;
+    let player2: Player;
+    let fight: Fight;
+
+    beforeEach(() => {
+      card2 = createFightingCard({
+        attack: 1,
+        defense: 0,
+        health: 160,
+        speed: 1,
+        criticalChance: 0,
+        agility: 0,
+        skills: {
+          simpleAttack: {
+            damageRate: 1.0,
+          },
+        },
+      });
+      player2 = new Player('Player 2', [card2]);
+
+      card2.setState(new CardStateFrozen(1, 0.5));
+
+      fight = new Fight(
+        firstPlayer,
+        player2,
+        new PlayerByPlayerCardSelector(firstPlayer, player2),
+      );
+    });
+
+    it('should add poison effect while keeping freeze effect', () => {
+      expect(fight.start()).toEqual({
+        1: {
+          attacker: card1.identityInfo,
+          damages: [
+            {
+              damage: 150,
+              defender: card2.identityInfo,
+              dodge: false,
+              isCritical: false,
+              remainingHealth: 10,
+            },
+          ],
+          energy: 10,
+          kind: 'attack',
+        },
+        2: {
+          kind: 'status_change',
+          status: 'poisoned',
+          card: card2.identityInfo,
+        },
+        3: {
+          kind: 'state_effect',
+          type: 'freeze',
+          card: card2.identityInfo,
+          remainingTurns: 0,
+          damage: 0,
+          remainingHealth: 10,
+        },
+        4: {
+          kind: 'state_effect',
+          type: 'poison',
+          card: card2.identityInfo,
+          remainingTurns: 2,
+          damage: 50,
+          remainingHealth: 0,
+        },
+        5: {
+          card: card2.identityInfo,
+          kind: 'status_change',
+          status: 'dead',
+        },
+        6: {
           kind: 'fight_end',
           winner: 'Player 1',
         },
