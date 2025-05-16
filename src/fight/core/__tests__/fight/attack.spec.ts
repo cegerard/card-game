@@ -10,8 +10,11 @@ import { CardStateFrozen } from '../../cards/@types/state/card-state-frozen';
 describe('Trigger an attack without effect', () => {
   const attackerAccuracy = 40;
 
-  describe('and the attack is not dodge', () => {
-    const attacker = createFightingCard({
+  let attacker: FightingCard;
+  let player1: Player;
+
+  beforeEach(() => {
+    attacker = createFightingCard({
       attack: 10,
       defense: 0,
       health: 10,
@@ -21,22 +24,30 @@ describe('Trigger an attack without effect', () => {
       agility: 0,
       skills: { simpleAttack: { damageRate: 1.0 } },
     });
+    player1 = new Player('player1', [attacker]);
+  });
 
-    const defenderWithoutDodge = createFightingCard({
-      defense: 0,
-      health: 10,
-      speed: 1,
-      agility: attackerAccuracy,
+  describe('and the attack is not dodge', () => {
+    let defenderWithoutDodge: FightingCard;
+    let player2: Player;
+
+    let fight: Fight;
+
+    beforeEach(() => {
+      defenderWithoutDodge = createFightingCard({
+        defense: 0,
+        health: 10,
+        speed: 1,
+        agility: attackerAccuracy,
+      });
+      player2 = new Player('player2', [defenderWithoutDodge]);
+
+      fight = new Fight(
+        player1,
+        player2,
+        new PlayerByPlayerCardSelector(player1, player2),
+      );
     });
-
-    const player1 = new Player('player1', [attacker]);
-    const player2 = new Player('player2', [defenderWithoutDodge]);
-
-    const fight = new Fight(
-      player1,
-      player2,
-      new PlayerByPlayerCardSelector(player1, player2),
-    );
 
     it('should kill the other card', () => {
       expect(fight.start()).toEqual({
@@ -68,36 +79,32 @@ describe('Trigger an attack without effect', () => {
   });
 
   describe('and the attack is dodge', () => {
-    const attacker = createFightingCard({
-      attack: 10,
-      defense: 0,
-      health: 10,
-      criticalChance: 0,
-      speed: 100,
-      accuracy: attackerAccuracy,
-      agility: 0,
-      skills: { simpleAttack: { damageRate: 1.0 } },
+    let defenderWithDodge: FightingCard;
+
+    let player2: Player;
+
+    let fight: Fight;
+
+    beforeEach(() => {
+      defenderWithDodge = createFightingCard({
+        attack: 10,
+        defense: 0,
+        health: 10,
+        criticalChance: 0,
+        speed: 1,
+        accuracy: attackerAccuracy,
+        agility: attackerAccuracy + 1,
+        skills: { simpleAttack: { damageRate: 1.0 } },
+      });
+
+      player2 = new Player('player2', [defenderWithDodge]);
+
+      fight = new Fight(
+        player1,
+        player2,
+        new PlayerByPlayerCardSelector(player1, player2),
+      );
     });
-
-    const defenderWithDodge = createFightingCard({
-      attack: 10,
-      defense: 0,
-      health: 10,
-      criticalChance: 0,
-      speed: 1,
-      accuracy: attackerAccuracy,
-      agility: attackerAccuracy + 1,
-      skills: { simpleAttack: { damageRate: 1.0 } },
-    });
-
-    const player1 = new Player('player1', [attacker]);
-    const player2 = new Player('player2', [defenderWithDodge]);
-
-    const fight = new Fight(
-      player1,
-      player2,
-      new PlayerByPlayerCardSelector(player1, player2),
-    );
 
     it('should be killed by the opponent', () => {
       expect(fight.start()).toEqual({
@@ -509,41 +516,51 @@ describe('Trigger card attack with poison effect', () => {
 });
 
 describe('Trigger card attack with burn effect', () => {
-  const card1 = createFightingCard({
-    attack: 100,
-    defense: 100,
-    health: 100,
-    speed: 100,
-    criticalChance: 0,
-    agility: 0,
-    skills: {
-      simpleAttack: {
-        damageRate: 1.0,
-        effect: {
-          type: 'burn',
-          rate: 0.5,
-          level: 3,
+  let card1: FightingCard;
+  let player1: Player;
+
+  let card2: FightingCard;
+  let player2: Player;
+
+  let fight: Fight;
+
+  beforeEach(() => {
+    card1 = createFightingCard({
+      attack: 100,
+      defense: 100,
+      health: 100,
+      speed: 100,
+      criticalChance: 0,
+      agility: 0,
+      skills: {
+        simpleAttack: {
+          damageRate: 1.0,
+          effect: {
+            type: 'burn',
+            rate: 0.5,
+            level: 3,
+          },
         },
       },
-    },
-  });
+    });
 
-  const card2 = createFightingCard({
-    attack: 1,
-    defense: 0,
-    health: 150,
-    speed: 1,
-    criticalChance: 0,
-    agility: 0,
-  });
+    card2 = createFightingCard({
+      attack: 1,
+      defense: 0,
+      health: 150,
+      speed: 1,
+      criticalChance: 0,
+      agility: 0,
+    });
 
-  const player1 = new Player('Player 1', [card1]);
-  const player2 = new Player('Player 2', [card2]);
-  const fight = new Fight(
-    player1,
-    player2,
-    new PlayerByPlayerCardSelector(player1, player2),
-  );
+    player1 = new Player('Player 1', [card1]);
+    player2 = new Player('Player 2', [card2]);
+    fight = new Fight(
+      player1,
+      player2,
+      new PlayerByPlayerCardSelector(player1, player2),
+    );
+  });
 
   it('should return attack effect step', () => {
     expect(fight.start()).toEqual({
@@ -602,41 +619,51 @@ describe('Trigger card attack with burn effect', () => {
 });
 
 describe('Trigger card attack with freeze effect', () => {
-  const card1 = createFightingCard({
-    attack: 100,
-    defense: 100,
-    health: 100,
-    speed: 100,
-    criticalChance: 0,
-    agility: 0,
-    skills: {
-      simpleAttack: {
-        damageRate: 1.0,
-        effect: {
-          type: 'freeze',
-          rate: 0.2,
-          level: 2,
+  let card1: FightingCard;
+  let player1: Player;
+
+  let card2: FightingCard;
+  let player2: Player;
+
+  let fight: Fight;
+
+  beforeEach(() => {
+    card1 = createFightingCard({
+      attack: 100,
+      defense: 100,
+      health: 100,
+      speed: 100,
+      criticalChance: 0,
+      agility: 0,
+      skills: {
+        simpleAttack: {
+          damageRate: 1.0,
+          effect: {
+            type: 'freeze',
+            rate: 0.2,
+            level: 2,
+          },
         },
       },
-    },
-  });
+    });
 
-  const card2 = createFightingCard({
-    attack: 1,
-    defense: 0,
-    health: 220,
-    speed: 1,
-    criticalChance: 0,
-    agility: 0,
-  });
+    card2 = createFightingCard({
+      attack: 1,
+      defense: 0,
+      health: 220,
+      speed: 1,
+      criticalChance: 0,
+      agility: 0,
+    });
 
-  const player1 = new Player('Player 1', [card1]);
-  const player2 = new Player('Player 2', [card2]);
-  const fight = new Fight(
-    player1,
-    player2,
-    new PlayerByPlayerCardSelector(player1, player2),
-  );
+    player1 = new Player('Player 1', [card1]);
+    player2 = new Player('Player 2', [card2]);
+    fight = new Fight(
+      player1,
+      player2,
+      new PlayerByPlayerCardSelector(player1, player2),
+    );
+  });
 
   it('should return attack effect step', () => {
     expect(fight.start()).toEqual({
