@@ -2,67 +2,6 @@ import { createFightingCard } from '../../../../test/helpers/fighting-card';
 import { Player } from '../player';
 import { FightingCard } from '../cards/fighting-card';
 
-describe('when launching a special attack', () => {
-  const attackerAccuracy = 25;
-  const attacker = createFightingCard({
-    attack: 10,
-    criticalChance: 0,
-    accuracy: attackerAccuracy,
-    skills: {
-      special: { damageRate: 1.0, energy: 0, kind: 'specialAttack' },
-    },
-  });
-  const player1 = new Player('player1', [attacker]);
-
-  describe('and the attack is not dodge', () => {
-    const defenderWithoutDodge = createFightingCard({
-      defense: 0,
-      agility: attackerAccuracy,
-    });
-    const player2 = new Player('player2', [defenderWithoutDodge]);
-
-    it('should compute the damage with the special attack', () => {
-      expect(
-        attacker.launchSpecial({
-          sourcePlayer: player1,
-          opponentPlayer: player2,
-        }),
-      ).toEqual([
-        {
-          damage: 10,
-          isCritical: false,
-          dodge: false,
-          defender: defenderWithoutDodge,
-        },
-      ]);
-    });
-  });
-
-  describe('and the attack is dodge', () => {
-    const defenderWithDodge = createFightingCard({
-      defense: 0,
-      agility: attackerAccuracy + 1,
-    });
-    const player2 = new Player('player2', [defenderWithDodge]);
-
-    it('should not deal any damage', () => {
-      expect(
-        attacker.launchSpecial({
-          sourcePlayer: player1,
-          opponentPlayer: player2,
-        }),
-      ).toEqual([
-        {
-          damage: 0,
-          isCritical: false,
-          dodge: true,
-          defender: defenderWithDodge,
-        },
-      ]);
-    });
-  });
-});
-
 describe('when launching a special healing', () => {
   const healer = createFightingCard({
     attack: 100,

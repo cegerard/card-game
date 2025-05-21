@@ -3,6 +3,127 @@ import { Player } from '../../player';
 import { PlayerByPlayerCardSelector } from '../../fight-simulator/card-selectors/player-by-player';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 
+describe('Trigger card special attack without effect', () => {
+  const attackerAccuracy = 25;
+  const attacker = createFightingCard({
+    attack: 10,
+    criticalChance: 0,
+    health: 5,
+    accuracy: attackerAccuracy,
+    agility: 0,
+    speed: 100,
+    defense: 0,
+    skills: {
+      special: { damageRate: 1.0, energy: 0, kind: 'specialAttack' },
+    },
+  });
+  const player1 = new Player('Player 1', [attacker]);
+
+  describe('and the attack is not dodge', () => {
+    const defenderWithoutDodge = createFightingCard({
+      defense: 0,
+      health: 10,
+      speed: 0,
+      agility: attackerAccuracy,
+    });
+    const player2 = new Player('Player 2', [defenderWithoutDodge]);
+    const fight = new Fight(
+      player1,
+      player2,
+      new PlayerByPlayerCardSelector(player1, player2),
+    );
+
+    it('should compute the damage with the special attack', () => {
+      expect(fight.start()).toEqual({
+        1: {
+          attacker: attacker.identityInfo,
+          damages: [
+            {
+              damage: 10,
+              isCritical: false,
+              dodge: false,
+              defender: defenderWithoutDodge.identityInfo,
+              remainingHealth: defenderWithoutDodge.actualHealth,
+            },
+          ],
+          energy: 0,
+          kind: 'special_attack',
+        },
+        2: {
+          card: defenderWithoutDodge.identityInfo,
+          kind: 'status_change',
+          status: 'dead',
+        },
+        3: {
+          kind: 'fight_end',
+          winner: 'Player 1',
+        },
+      });
+    });
+  });
+
+  describe('and the attack is dodge', () => {
+    const defenderWithDodge = createFightingCard({
+      attack: 10,
+      defense: 0,
+      speed: 0,
+      criticalChance: 0,
+      agility: attackerAccuracy + 1,
+      skills: {
+        special: { damageRate: 1.0, energy: 0, kind: 'specialAttack' },
+      },
+    });
+    const player2 = new Player('Player 2', [defenderWithDodge]);
+    const fight = new Fight(
+      player1,
+      player2,
+      new PlayerByPlayerCardSelector(player1, player2),
+    );
+
+    it('should not deal any damage', () => {
+      expect(fight.start()).toEqual({
+        1: {
+          attacker: attacker.identityInfo,
+          damages: [
+            {
+              damage: 0,
+              isCritical: false,
+              dodge: true,
+              defender: defenderWithDodge.identityInfo,
+              remainingHealth: defenderWithDodge.actualHealth,
+            },
+          ],
+          energy: 0,
+          kind: 'special_attack',
+        },
+        2: {
+          attacker: defenderWithDodge.identityInfo,
+          damages: [
+            {
+              damage: 10,
+              isCritical: false,
+              dodge: false,
+              defender: attacker.identityInfo,
+              remainingHealth: 0,
+            },
+          ],
+          energy: 0,
+          kind: 'special_attack',
+        },
+        3: {
+          card: attacker.identityInfo,
+          kind: 'status_change',
+          status: 'dead',
+        },
+        4: {
+          kind: 'fight_end',
+          winner: 'Player 2',
+        },
+      });
+    });
+  });
+});
+
 describe('Trigger card special attack with poison effect', () => {
   const card1 = createFightingCard({
     attack: 100,
