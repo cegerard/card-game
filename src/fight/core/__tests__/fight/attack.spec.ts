@@ -150,6 +150,68 @@ describe('Trigger an attack without effect', () => {
   });
 });
 
+describe('Trigger an attack with critical hit', () => {
+  let attacker: FightingCard;
+  let defender: FightingCard;
+  let player1: Player;
+  let player2: Player;
+  let fight: Fight;
+
+  beforeEach(() => {
+    attacker = createFightingCard({
+      attack: 100,
+      criticalChance: 100,
+      speed: 100,
+      agility: 0,
+      skills: { simpleAttack: { damageRate: 1.0 } },
+    });
+    defender = createFightingCard({
+      attack: 0,
+      defense: 0,
+      health: 100,
+      speed: 0,
+      criticalChance: 0,
+      agility: 0,
+      skills: { simpleAttack: { damageRate: 1.0 } },
+    });
+    player1 = new Player('Player 1', [attacker]);
+    player2 = new Player('Player 2', [defender]);
+    fight = new Fight(
+      player1,
+      player2,
+      new PlayerByPlayerCardSelector(player1, player2),
+    );
+  });
+
+  it('should deal critical damage to the defender', () => {
+    expect(fight.start()).toEqual({
+      1: {
+        attacker: attacker.identityInfo,
+        damages: [
+          {
+            damage: 200,
+            defender: defender.identityInfo,
+            dodge: false,
+            isCritical: true,
+            remainingHealth: 0,
+          },
+        ],
+        energy: 10,
+        kind: 'attack',
+      },
+      2: {
+        card: defender.identityInfo,
+        kind: 'status_change',
+        status: 'dead',
+      },
+      3: {
+        kind: 'fight_end',
+        winner: 'Player 1',
+      },
+    });
+  });
+});
+
 describe('Trigger card attack with poison effect', () => {
   let card1: FightingCard;
   let firstPlayer: Player;
