@@ -24,6 +24,7 @@ export class CardStatePoisoned implements CardState {
       type: 'poison',
       card,
       damage,
+      remainingHealth: card.actualHealth,
       remainingTurns: this.remainingTurns,
     };
   }

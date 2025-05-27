@@ -23,6 +23,7 @@ export class CardStateFrozen implements CardState {
       type: 'freeze',
       card,
       damage: 0,
+      remainingHealth: card.actualHealth,
       remainingTurns: this.remainingTurns,
     };
   }
