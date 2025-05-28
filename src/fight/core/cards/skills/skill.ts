@@ -1,4 +1,3 @@
-import { TargetingCardStrategy } from 'src/fight/core/targeting-card-strategies/targeting-card-strategy';
 import { FightingCard } from '../fighting-card';
 import { HealingResults } from '../@types/action-result/healing-results';
 import { FightingContext } from '../@types/fighting-context';
@@ -12,13 +11,6 @@ export interface Skill {
    * @returns The result of the skill.
    */
   launch(source: FightingCard, context: FightingContext): HealingResults;
-
-  /**
-   * Get the targeting strategy of the special skill.
-   *
-   * @returns The targeting strategy of the special skill.
-   */
-  getTargetingStrategy(): TargetingCardStrategy;
 
   /**
    * Checks if the skill is triggered.

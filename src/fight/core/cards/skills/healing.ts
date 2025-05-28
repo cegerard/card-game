@@ -36,10 +36,6 @@ export class Healing implements Skill {
     });
   }
 
-  getTargetingStrategy(): TargetingCardStrategy {
-    return this.targetingStrategy;
-  }
-
   isTriggered(triggerName: string): boolean {
     return this.trigger.isTriggered(triggerName);
   }

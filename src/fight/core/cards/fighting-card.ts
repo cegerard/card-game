@@ -108,12 +108,6 @@ export class FightingCard {
     return { name: this.name, deckIdentity: this.cardDeckIdentity };
   }
 
-  public get states(): CardState[] {
-    return [this.poisoned, this.burned, this.frozen]
-      .filter(Boolean)
-      .sort((a, b) => a.type.localeCompare(b.type));
-  }
-
   public setOwnerInfo(ownerName: string, cardPositionInDeck: number): void {
     this.cardDeckIdentity = `${ownerName}-${cardPositionInDeck}`;
   }

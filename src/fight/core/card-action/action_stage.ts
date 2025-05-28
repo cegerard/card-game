@@ -95,11 +95,7 @@ export class ActionStage {
       return this.computeSpecialAttackResult(card);
     }
 
-    if (card.specialKind() === 'specialHealing') {
-      return this.computeSpecialHealingResult(card);
-    }
-
-    throw new Error('Unknown special skill');
+    return this.computeSpecialHealingResult(card);
   }
 
   private computeSpecialAttackResult(card: FightingCard): AttackReport {

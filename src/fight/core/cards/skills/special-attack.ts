@@ -66,10 +66,6 @@ export class SpecialAttack implements Special {
     return 'specialAttack';
   }
 
-  public getTargetingStrategy(): TargetingCardStrategy {
-    return this.targetingStrategy;
-  }
-
   private computeDamage(damage: number, isCritical: boolean): number {
     const damageMultiplier = isCritical ? CRITICAL_RATE : DEFAULT_DAMAGE_RATE;
 

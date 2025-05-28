@@ -41,8 +41,4 @@ export class SpecialHealing implements Special {
   public getSpecialKind(): string {
     return 'specialHealing';
   }
-
-  public getTargetingStrategy(): TargetingCardStrategy {
-    return this.targetingStrategy;
-  }
 }
