@@ -8,26 +8,23 @@ describe('Trigger card special healing', () => {
   let healer: FightingCard;
   let player1: Player;
 
-  beforeEach(() => {
-    healer = createFightingCard({
-      attack: 100,
-      defense: 0,
-      health: 200,
-      agility: 0,
-      speed: 1,
-      skills: {
-        special: { kind: 'specialHealing', damageRate: 2.5, energy: 0 },
-      },
-    });
-    player1 = new Player('player1', [healer]);
-  });
-
   describe('and the target is not full health', () => {
     let target: FightingCard;
     let player2: Player;
     let fight: Fight;
 
     beforeEach(() => {
+      healer = createFightingCard({
+        attack: 100,
+        defense: 0,
+        health: 200,
+        agility: 0,
+        speed: 1,
+        skills: {
+          special: { kind: 'specialHealing', damageRate: 2.5, energy: 0 },
+        },
+      });
+      player1 = new Player('player1', [healer]);
       target = createFightingCard({
         health: 500,
         defense: 0,
@@ -97,6 +94,17 @@ describe('Trigger card special healing', () => {
     let fight: Fight;
 
     beforeEach(() => {
+      healer = createFightingCard({
+        attack: 100,
+        defense: 0,
+        health: 200,
+        agility: 0,
+        speed: 1,
+        skills: {
+          special: { kind: 'specialHealing', damageRate: 2.5, energy: 0 },
+        },
+      });
+      player1 = new Player('player1', [healer]);
       target = createFightingCard({
         health: 500,
         defense: 0,
@@ -164,20 +172,33 @@ describe('Trigger card special healing', () => {
     let fight: Fight;
 
     beforeEach(() => {
+      healer = createFightingCard({
+        attack: 100,
+        defense: 0,
+        health: 200,
+        accuracy: 1,
+        agility: 0,
+        criticalChance: 0,
+        speed: 1,
+        skills: {
+          simpleAttack: { damageRate: 1.0 },
+          special: { kind: 'specialHealing', damageRate: 2.5, energy: 10 },
+        },
+      });
+      player1 = new Player('player1', [healer]);
       target = createFightingCard({
-        health: 500,
+        health: 200,
         defense: 0,
         accuracy: 1,
+        agility: 0,
         speed: 0,
-        attack: 100,
+        attack: 50,
         criticalChance: 0,
         skills: {
           simpleAttack: { damageRate: 2.0 },
         },
       });
       player2 = new Player('player2', [target]);
-
-      target.collectsDamages(100);
 
       fight = new Fight(
         player1,
@@ -189,16 +210,18 @@ describe('Trigger card special healing', () => {
     it('heals the target', () => {
       expect(fight.start()).toEqual({
         1: {
-          kind: 'healing',
-          source: healer.identityInfo,
-          heal: [
+          kind: 'attack',
+          attacker: healer.identityInfo,
+          damages: [
             {
-              target: target.identityInfo,
-              healed: 100,
-              remainingHealth: 500,
+              defender: target.identityInfo,
+              damage: 100,
+              dodge: false,
+              isCritical: false,
+              remainingHealth: 100,
             },
           ],
-          energy: 0,
+          energy: 10,
         },
         2: {
           kind: 'attack',
@@ -206,20 +229,46 @@ describe('Trigger card special healing', () => {
           damages: [
             {
               defender: healer.identityInfo,
-              damage: 200,
+              damage: 100,
               dodge: false,
               isCritical: false,
-              remainingHealth: 0,
+              remainingHealth: 100,
             },
           ],
           energy: 10,
         },
         3: {
+          kind: 'healing',
+          source: healer.identityInfo,
+          heal: [
+            {
+              target: target.identityInfo,
+              healed: 100,
+              remainingHealth: 200,
+            },
+          ],
+          energy: 0,
+        },
+        4: {
+          kind: 'attack',
+          attacker: target.identityInfo,
+          damages: [
+            {
+              defender: healer.identityInfo,
+              damage: 100,
+              dodge: false,
+              isCritical: false,
+              remainingHealth: 0,
+            },
+          ],
+          energy: 20,
+        },
+        5: {
           card: healer.identityInfo,
           kind: 'status_change',
           status: 'dead',
         },
-        4: {
+        6: {
           kind: 'fight_end',
           winner: 'player2',
         },
