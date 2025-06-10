@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 
-import { RandomizerFake } from '../../../../../test/helpers/randomizer-fake';
-import { RandomDodge } from '../../cards/behaviors/random-dodge';
+import { RandomizerFake } from '../../../../../../../test/helpers/randomizer-fake';
+import { RandomDodge } from '../../random-dodge';
 
 describe('RandomDodge', () => {
   const randomizer = new RandomizerFake();
