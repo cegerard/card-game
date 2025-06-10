@@ -1,8 +1,8 @@
-import { Fight } from '../../fight-simulator/fight';
-import { Player } from '../../player';
-import { PlayerByPlayerCardSelector } from '../../fight-simulator/card-selectors/player-by-player';
-import { createFightingCard } from '../../../../../test/helpers/fighting-card';
-import { CardStatePoisoned } from '../../cards/@types/state/card-state-poisoned';
+import { Fight } from '../fight-simulator/fight';
+import { Player } from '../player';
+import { PlayerByPlayerCardSelector } from '../fight-simulator/card-selectors/player-by-player';
+import { createFightingCard } from '../../../../test/helpers/fighting-card';
+import { CardStatePoisoned } from '../cards/@types/state/card-state-poisoned';
 
 describe('Process card poisoned effect at turn end', () => {
   const card1 = createFightingCard({

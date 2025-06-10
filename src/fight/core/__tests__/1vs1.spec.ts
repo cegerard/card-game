@@ -1,9 +1,9 @@
-import { Fight } from '../../fight-simulator/fight';
-import { Player } from '../../player';
-import { DamageReport } from '../../fight-simulator/@types/damage-report';
-import { FightResult } from '../../fight-simulator/@types/fight-result';
-import { PlayerByPlayerCardSelector } from '../../fight-simulator/card-selectors/player-by-player';
-import { createFightingCard } from '../../../../../test/helpers/fighting-card';
+import { Fight } from '../fight-simulator/fight';
+import { Player } from '../player';
+import { DamageReport } from '../fight-simulator/@types/damage-report';
+import { FightResult } from '../fight-simulator/@types/fight-result';
+import { PlayerByPlayerCardSelector } from '../fight-simulator/card-selectors/player-by-player';
+import { createFightingCard } from '../../../../test/helpers/fighting-card';
 
 describe('with only one card each', () => {
   describe('when the first player has the strongest card', () => {

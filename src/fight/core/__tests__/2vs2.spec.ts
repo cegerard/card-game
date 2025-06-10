@@ -1,9 +1,9 @@
-import { Fight } from '../../fight-simulator/fight';
-import { Player } from '../../player';
-import { DamageReport } from '../../fight-simulator/@types/damage-report';
-import { FightResult } from '../../fight-simulator/@types/fight-result';
-import { createFightingCard } from '../../../../../test/helpers/fighting-card';
-import { SpeedWeightedCardSelector } from '../../fight-simulator/card-selectors/speed-weighted-card-pool';
+import { Fight } from '../fight-simulator/fight';
+import { Player } from '../player';
+import { DamageReport } from '../fight-simulator/@types/damage-report';
+import { FightResult } from '../fight-simulator/@types/fight-result';
+import { createFightingCard } from '../../../../test/helpers/fighting-card';
+import { SpeedWeightedCardSelector } from '../fight-simulator/card-selectors/speed-weighted-card-pool';
 
 describe('with only two cards each', () => {
   describe('when the player1 has the speediest cards in speed weighted card pool selection', () => {

@@ -1,11 +1,11 @@
-import { Fight } from '../../fight-simulator/fight';
-import { Player } from '../../player';
-import { PlayerByPlayerCardSelector } from '../../fight-simulator/card-selectors/player-by-player';
-import { createFightingCard } from '../../../../../test/helpers/fighting-card';
-import { CardStatePoisoned } from '../../cards/@types/state/card-state-poisoned';
-import { FightingCard } from '../../cards/fighting-card';
-import { CardStateBurned } from '../../cards/@types/state/card-state-burned';
-import { CardStateFrozen } from '../../cards/@types/state/card-state-frozen';
+import { Fight } from '../fight-simulator/fight';
+import { Player } from '../player';
+import { PlayerByPlayerCardSelector } from '../fight-simulator/card-selectors/player-by-player';
+import { createFightingCard } from '../../../../test/helpers/fighting-card';
+import { CardStatePoisoned } from '../cards/@types/state/card-state-poisoned';
+import { FightingCard } from '../cards/fighting-card';
+import { CardStateBurned } from '../cards/@types/state/card-state-burned';
+import { CardStateFrozen } from '../cards/@types/state/card-state-frozen';
 
 describe('Trigger an attack without effect', () => {
   const attackerAccuracy = 40;

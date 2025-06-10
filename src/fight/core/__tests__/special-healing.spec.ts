@@ -1,8 +1,8 @@
-import { createFightingCard } from '../../../../../test/helpers/fighting-card';
-import { FightingCard } from '../../cards/fighting-card';
-import { Player } from '../../player';
-import { Fight } from '../../fight-simulator/fight';
-import { PlayerByPlayerCardSelector } from '../../fight-simulator/card-selectors/player-by-player';
+import { createFightingCard } from '../../../../test/helpers/fighting-card';
+import { FightingCard } from '../cards/fighting-card';
+import { Player } from '../player';
+import { Fight } from '../fight-simulator/fight';
+import { PlayerByPlayerCardSelector } from '../fight-simulator/card-selectors/player-by-player';
 
 describe('Trigger card special healing', () => {
   let healer: FightingCard;
