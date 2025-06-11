@@ -26,6 +26,11 @@ export enum Effect {
   FREEZE = 'FREEZE',
 }
 
+export enum DodgeStrategy {
+  SIMPLE_DODGE = 'simple-dodge',
+  RANDOM_DODGE = 'random-dodge',
+}
+
 class EffectDto {
   @IsEnum(Effect)
   type: Effect;
@@ -110,8 +115,8 @@ class SkillsDto {
 }
 
 class BehaviorsDto {
-  @IsString()
-  dodge: string;
+  @IsEnum(DodgeStrategy)
+  dodge: DodgeStrategy;
 }
 
 export class FightingCardDto {

@@ -1,6 +1,11 @@
 import 'reflect-metadata';
 
-import { Effect, FightDataDto, SpecialKind } from '../dto/fight-data.dto';
+import {
+  DodgeStrategy,
+  Effect,
+  FightDataDto,
+  SpecialKind,
+} from '../dto/fight-data.dto';
 import { FightController } from '../fight.controller';
 import { FightingCard } from '../../core/cards/fighting-card';
 import { FakeFightService } from './fake-fight-service';
@@ -56,7 +61,7 @@ describe('FightController', () => {
                   others: [],
                 },
                 behaviors: {
-                  dodge: 'simple-dodge',
+                  dodge: DodgeStrategy.SIMPLE_DODGE,
                 },
               },
             ],
@@ -122,7 +127,7 @@ describe('FightController', () => {
                   others: [],
                 },
                 behaviors: {
-                  dodge: 'simple-dodge',
+                  dodge: DodgeStrategy.SIMPLE_DODGE,
                 },
               },
             ],
@@ -188,7 +193,7 @@ describe('FightController', () => {
                   others: [],
                 },
                 behaviors: {
-                  dodge: 'simple-dodge',
+                  dodge: DodgeStrategy.SIMPLE_DODGE,
                 },
               },
             ],
@@ -264,7 +269,7 @@ describe('FightController', () => {
                   others: [],
                 },
                 behaviors: {
-                  dodge: 'simple-dodge',
+                  dodge: DodgeStrategy.SIMPLE_DODGE,
                 },
               },
             ],
@@ -332,7 +337,7 @@ describe('FightController', () => {
                   others: [],
                 },
                 behaviors: {
-                  dodge: 'simple-dodge',
+                  dodge: DodgeStrategy.SIMPLE_DODGE,
                 },
               },
             ],
@@ -400,7 +405,7 @@ describe('FightController', () => {
                   others: [],
                 },
                 behaviors: {
-                  dodge: 'simple-dodge',
+                  dodge: DodgeStrategy.SIMPLE_DODGE,
                 },
               },
             ],
@@ -427,6 +432,124 @@ describe('FightController', () => {
 
         fakeFightService.playersNthCardValidate('Player 1', 0, validation);
       });
+    });
+  });
+
+  describe('when a player use a card with a simple dodge strategy', () => {
+    const dodgeStrategy = DodgeStrategy.SIMPLE_DODGE;
+
+    beforeEach(() => {
+      fightData = {
+        cardSelectorStrategy: 'player-by-player',
+        player1: {
+          name: 'Player 1',
+          deck: [
+            {
+              name: 'Axe',
+              attack: 10,
+              defense: 6,
+              health: 100,
+              speed: 3,
+              agility: 25,
+              accuracy: 15,
+              criticalChance: 0.05,
+              skills: {
+                special: {
+                  name: 'No Special Attack',
+                  kind: SpecialKind.ATTACK,
+                  rate: 0,
+                  energy: 0,
+                  targetingStrategy: 'position-based',
+                },
+                simpleAttack: {
+                  name: 'Strike',
+                  damageRate: 2.0,
+                  targetingStrategy: 'target-all',
+                },
+                others: [],
+              },
+              behaviors: {
+                dodge: dodgeStrategy,
+              },
+            },
+          ],
+        },
+        player2: {
+          name: 'Player 2',
+          deck: [],
+        },
+      };
+
+      fightController.startFight(fightData);
+    });
+
+    it('creates a fighting card with a dodge strategy', () => {
+      const validation = (card: FightingCard) => {
+        const jsonCard = JSON.parse(JSON.stringify(card));
+
+        expect(jsonCard.dodgeBehavior).toEqual({});
+      };
+
+      fakeFightService.playersNthCardValidate('Player 1', 0, validation);
+    });
+  });
+
+  describe('when a player use a card with a random dodge strategy', () => {
+    const dodgeStrategy = DodgeStrategy.RANDOM_DODGE;
+
+    beforeEach(() => {
+      fightData = {
+        cardSelectorStrategy: 'player-by-player',
+        player1: {
+          name: 'Player 1',
+          deck: [
+            {
+              name: 'Axe',
+              attack: 10,
+              defense: 6,
+              health: 100,
+              speed: 3,
+              agility: 25,
+              accuracy: 15,
+              criticalChance: 0.05,
+              skills: {
+                special: {
+                  name: 'No Special Attack',
+                  kind: SpecialKind.ATTACK,
+                  rate: 0,
+                  energy: 0,
+                  targetingStrategy: 'position-based',
+                },
+                simpleAttack: {
+                  name: 'Strike',
+                  damageRate: 2.0,
+                  targetingStrategy: 'target-all',
+                },
+                others: [],
+              },
+              behaviors: {
+                dodge: dodgeStrategy,
+              },
+            },
+          ],
+        },
+        player2: {
+          name: 'Player 2',
+          deck: [],
+        },
+      };
+
+      fightController.startFight(fightData);
+    });
+
+    it('creates a fighting card with a dodge strategy', () => {
+      const validation = (card: FightingCard) => {
+        const jsonCard = JSON.parse(JSON.stringify(card));
+
+        expect(jsonCard.dodgeBehavior).toEqual({ randomizer: {} });
+      };
+
+      fakeFightService.playersNthCardValidate('Player 1', 0, validation);
     });
   });
 });

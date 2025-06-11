@@ -18,7 +18,7 @@ import { FightingCard } from '../core/cards/fighting-card';
 import { SpecialAttack } from '../core/cards/skills/special-attack';
 import { SimpleAttack } from '../core/cards/skills/simple-attack';
 import { TargetingStrategyFactory } from './targeting-strategy-factory';
-import { DodgeStrategyFactory } from './dodge-strategy-factory';
+import { buildDodgeStrategy } from './dodge-strategy-factory';
 import { Special } from '../core/cards/skills/special';
 import { SpecialHealing } from '../core/cards/skills/special-healing';
 import { Healing } from '../core/cards/skills/healing';
@@ -140,7 +140,7 @@ export class FightController {
         }),
       },
       {
-        dodge: DodgeStrategyFactory.create(cardData.behaviors.dodge),
+        dodge: buildDodgeStrategy(cardData.behaviors.dodge),
       },
     );
   }
