@@ -20,13 +20,13 @@ describe('FightController', () => {
     };
 
     describe('and the special attack has a poisoned effect', () => {
-      const effect = {
-        type: Effect.POISON,
-        rate: 0.5,
-        level: 2,
-      };
-
       beforeEach(() => {
+        const effect = {
+          type: Effect.POISON,
+          rate: 0.5,
+          level: 2,
+        };
+
         const poisonedSpecialAttack = {
           ...specialAttack,
           effect,
@@ -86,13 +86,13 @@ describe('FightController', () => {
     });
 
     describe('and the special attack has a burned effect', () => {
-      const effect = {
-        type: Effect.BURN,
-        rate: 0.2,
-        level: 3,
-      };
-
       beforeEach(() => {
+        const effect = {
+          type: Effect.BURN,
+          rate: 0.2,
+          level: 3,
+        };
+
         const burnedSpecialAttack = {
           ...specialAttack,
           effect,
@@ -152,13 +152,13 @@ describe('FightController', () => {
     });
 
     describe('and the special attack has a freeze effect', () => {
-      const effect = {
-        type: Effect.FREEZE,
-        rate: 0.2,
-        level: 2,
-      };
-
       beforeEach(() => {
+        const effect = {
+          type: Effect.FREEZE,
+          rate: 0.2,
+          level: 2,
+        };
+
         const freezeSpecialAttack = {
           ...specialAttack,
           effect,
@@ -226,13 +226,13 @@ describe('FightController', () => {
     };
 
     describe('and the simple attack has a poisoned effect', () => {
-      const effect = {
-        type: Effect.POISON,
-        rate: 0.5,
-        level: 2,
-      };
-
       beforeEach(() => {
+        const effect = {
+          type: Effect.POISON,
+          rate: 0.5,
+          level: 2,
+        };
+
         const poisonedSimpleAttack = {
           ...simpleAttack,
           effect,
@@ -294,13 +294,13 @@ describe('FightController', () => {
     });
 
     describe('and the simple attack has a burned effect', () => {
-      const effect = {
-        type: Effect.BURN,
-        rate: 0.2,
-        level: 3,
-      };
-
       beforeEach(() => {
+        const effect = {
+          type: Effect.BURN,
+          rate: 0.2,
+          level: 3,
+        };
+
         const burnedSimpleAttack = {
           ...simpleAttack,
           effect,
@@ -361,14 +361,14 @@ describe('FightController', () => {
       });
     });
 
-    describe('and the special attack has a freeze effect', () => {
-      const effect = {
-        type: Effect.FREEZE,
-        rate: 0.2,
-        level: 2,
-      };
-
+    describe('and the simple attack has a freeze effect', () => {
       beforeEach(() => {
+        const effect = {
+          type: Effect.FREEZE,
+          rate: 0.2,
+          level: 2,
+        };
+
         const freezeSimpleAttack = {
           ...simpleAttack,
           effect,
