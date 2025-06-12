@@ -3,6 +3,8 @@ import { Player } from '../player';
 import { TargetingCardStrategy } from './targeting-card-strategy';
 
 export class AllOwnerCards implements TargetingCardStrategy {
+  public id = 'all-owner-cards';
+
   public targetedCards(
     _source: FightingCard,
     sourceCardPlayer: Player,

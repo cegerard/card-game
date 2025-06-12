@@ -3,6 +3,8 @@ import { Player } from '../player';
 import { TargetingCardStrategy } from './targeting-card-strategy';
 
 export class TargetedLineThree implements TargetingCardStrategy {
+  public id = 'line-three';
+
   public targetedCards(
     attackingCard: FightingCard,
     attackingPlayer: Player,

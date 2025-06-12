@@ -4,6 +4,8 @@ import { DodgeBehavior } from './dodge-behaviors';
 export class RandomDodge implements DodgeBehavior {
   public static readonly MAX_AGILITY = 80;
 
+  public id = 'random';
+
   private randomizer: Randomizer;
 
   public constructor(randomizer: Randomizer) {

@@ -223,6 +223,71 @@ describe('FightController', () => {
     });
   });
 
+  describe('when a player use a card with a special healing', () => {
+    beforeEach(() => {
+      const specialHealing = {
+        name: 'heal me',
+        kind: SpecialKind.HEALING,
+        rate: 2.0,
+        energy: 100,
+        targetingStrategy: 'self',
+      };
+
+      fightData = {
+        cardSelectorStrategy: 'player-by-player',
+        player1: {
+          name: 'Player 1',
+          deck: [
+            {
+              name: 'Axe',
+              attack: 10,
+              defense: 6,
+              health: 100,
+              speed: 3,
+              agility: 25,
+              accuracy: 15,
+              criticalChance: 0.05,
+              skills: {
+                special: specialHealing,
+                simpleAttack: {
+                  name: 'Simple Attack',
+                  damageRate: 1.0,
+                  targetingStrategy: 'position-based',
+                },
+                others: [],
+              },
+              behaviors: {
+                dodge: DodgeStrategy.SIMPLE_DODGE,
+              },
+            },
+          ],
+        },
+        player2: {
+          name: 'Player 2',
+          deck: [],
+        },
+      };
+
+      fightController.startFight(fightData);
+    });
+
+    it('creates a fighting card with a special healing', () => {
+      const validation = (card: FightingCard) => {
+        const jsonCard = JSON.parse(JSON.stringify(card));
+
+        expect(jsonCard.special).toEqual({
+          rate: 2.0,
+          energyNeeded: 100,
+          targetingStrategy: {
+            id: 'launcher',
+          },
+        });
+      };
+
+      fakeFightService.validatePlayer1FirstCard(validation);
+    });
+  });
+
   describe('when a player use a card with a only a simple attack', () => {
     const simpleAttack = {
       name: 'Strike',
@@ -487,7 +552,9 @@ describe('FightController', () => {
       const validation = (card: FightingCard) => {
         const jsonCard = JSON.parse(JSON.stringify(card));
 
-        expect(jsonCard.dodgeBehavior).toEqual({});
+        expect(jsonCard.dodgeBehavior).toEqual({
+          id: 'simple',
+        });
       };
 
       fakeFightService.validatePlayer1FirstCard(validation);
@@ -546,7 +613,10 @@ describe('FightController', () => {
       const validation = (card: FightingCard) => {
         const jsonCard = JSON.parse(JSON.stringify(card));
 
-        expect(jsonCard.dodgeBehavior).toEqual({ randomizer: {} });
+        expect(jsonCard.dodgeBehavior).toEqual({
+          id: 'random',
+          randomizer: {},
+        });
       };
 
       fakeFightService.validatePlayer1FirstCard(validation);

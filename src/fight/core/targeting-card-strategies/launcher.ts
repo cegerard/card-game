@@ -3,6 +3,8 @@ import { Player } from '../player';
 import { TargetingCardStrategy } from './targeting-card-strategy';
 
 export class Launcher implements TargetingCardStrategy {
+  public id = 'launcher';
+
   public targetedCards(
     source: FightingCard,
     _sourceCardPlayer: Player,

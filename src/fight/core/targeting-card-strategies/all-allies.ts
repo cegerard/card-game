@@ -3,6 +3,8 @@ import { Player } from '../player';
 import { TargetingCardStrategy } from './targeting-card-strategy';
 
 export class AllAllies implements TargetingCardStrategy {
+  public id = 'all-allies';
+
   public targetedCards(
     source: FightingCard,
     sourceCardPlayer: Player,
