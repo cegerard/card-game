@@ -86,7 +86,7 @@ describe('FightController', () => {
           expect(jsonCard.special.effect.level).toBe(2);
         };
 
-        fakeFightService.playersNthCardValidate('Player 1', 0, validation);
+        fakeFightService.validatePlayer1FirstCard(validation);
       });
     });
 
@@ -152,7 +152,7 @@ describe('FightController', () => {
           expect(jsonCard.special.effect.level).toBe(3);
         };
 
-        fakeFightService.playersNthCardValidate('Player 1', 0, validation);
+        fakeFightService.validatePlayer1FirstCard(validation);
       });
     });
 
@@ -218,7 +218,7 @@ describe('FightController', () => {
           expect(jsonCard.special.effect.level).toBe(2);
         };
 
-        fakeFightService.playersNthCardValidate('Player 1', 0, validation);
+        fakeFightService.validatePlayer1FirstCard(validation);
       });
     });
   });
@@ -294,7 +294,7 @@ describe('FightController', () => {
           expect(jsonCard.simpleAttack.effect.level).toBe(2);
         };
 
-        fakeFightService.playersNthCardValidate('Player 1', 0, validation);
+        fakeFightService.validatePlayer1FirstCard(validation);
       });
     });
 
@@ -362,7 +362,7 @@ describe('FightController', () => {
           expect(jsonCard.simpleAttack.effect.level).toBe(3);
         };
 
-        fakeFightService.playersNthCardValidate('Player 1', 0, validation);
+        fakeFightService.validatePlayer1FirstCard(validation);
       });
     });
 
@@ -430,7 +430,7 @@ describe('FightController', () => {
           expect(jsonCard.simpleAttack.effect.level).toBe(2);
         };
 
-        fakeFightService.playersNthCardValidate('Player 1', 0, validation);
+        fakeFightService.validatePlayer1FirstCard(validation);
       });
     });
   });
@@ -490,7 +490,7 @@ describe('FightController', () => {
         expect(jsonCard.dodgeBehavior).toEqual({});
       };
 
-      fakeFightService.playersNthCardValidate('Player 1', 0, validation);
+      fakeFightService.validatePlayer1FirstCard(validation);
     });
   });
 
@@ -549,7 +549,7 @@ describe('FightController', () => {
         expect(jsonCard.dodgeBehavior).toEqual({ randomizer: {} });
       };
 
-      fakeFightService.playersNthCardValidate('Player 1', 0, validation);
+      fakeFightService.validatePlayer1FirstCard(validation);
     });
   });
 });

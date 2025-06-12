@@ -21,17 +21,7 @@ export class FakeFightService extends FightService {
     return [];
   }
 
-  public playersNthCardValidate(
-    playerName: string,
-    cardIndex: number,
-    test: (card: FightingCard) => void,
-  ): void {
-    if (playerName === this.player1Name) {
-      return test(this.player1Deck[cardIndex]);
-    } else if (playerName === this.player2Name) {
-      return test(this.player2Deck[cardIndex]);
-    }
-
-    throw new Error(`Player ${playerName} not found`);
+  public validatePlayer1FirstCard(test: (card: FightingCard) => void): void {
+    test(this.player1Deck[0]);
   }
 }
