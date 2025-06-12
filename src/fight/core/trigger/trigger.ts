@@ -1,3 +1,5 @@
 export interface Trigger {
-  isTriggered(triggerName: string): boolean;
+  id: string;
+
+  isTriggered(triggerId: string): boolean;
 }

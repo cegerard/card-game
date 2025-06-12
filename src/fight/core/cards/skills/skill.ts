@@ -3,6 +3,8 @@ import { HealingResults } from '../@types/action-result/healing-results';
 import { FightingContext } from '../@types/fighting-context';
 
 export interface Skill {
+  id: string;
+
   /**
    * Launches the skill.
    *

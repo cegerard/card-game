@@ -6,6 +6,8 @@ import { Trigger } from '../../trigger/trigger';
 import { FightingContext } from '../@types/fighting-context';
 
 export class Healing implements Skill {
+  public id = 'healing-skill';
+
   private readonly effectRate: number;
   private readonly trigger: Trigger;
   private readonly targetingStrategy: TargetingCardStrategy;

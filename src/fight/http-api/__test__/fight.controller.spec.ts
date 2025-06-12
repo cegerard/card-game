@@ -4,7 +4,10 @@ import {
   DodgeStrategy,
   Effect,
   FightDataDto,
+  SkillKind,
   SpecialKind,
+  TargetingStrategy,
+  TriggerEvent,
 } from '../dto/fight-data.dto';
 import { FightController } from '../fight.controller';
 import { FightingCard } from '../../core/cards/fighting-card';
@@ -21,7 +24,7 @@ describe('FightController', () => {
       name: 'Double Strike',
       rate: 2.0,
       energy: 100,
-      targetingStrategy: 'target-all',
+      targetingStrategy: TargetingStrategy.TARGET_ALL,
     };
 
     describe('and the special attack has a poisoned effect', () => {
@@ -56,7 +59,7 @@ describe('FightController', () => {
                   simpleAttack: {
                     name: 'Simple Attack',
                     damageRate: 1.0,
-                    targetingStrategy: 'position-based',
+                    targetingStrategy: TargetingStrategy.POSITION_BASED,
                   },
                   others: [],
                 },
@@ -122,7 +125,7 @@ describe('FightController', () => {
                   simpleAttack: {
                     name: 'Simple Attack',
                     damageRate: 1.0,
-                    targetingStrategy: 'position-based',
+                    targetingStrategy: TargetingStrategy.POSITION_BASED,
                   },
                   others: [],
                 },
@@ -188,7 +191,7 @@ describe('FightController', () => {
                   simpleAttack: {
                     name: 'Simple Attack',
                     damageRate: 1.0,
-                    targetingStrategy: 'position-based',
+                    targetingStrategy: TargetingStrategy.POSITION_BASED,
                   },
                   others: [],
                 },
@@ -230,7 +233,7 @@ describe('FightController', () => {
         kind: SpecialKind.HEALING,
         rate: 2.0,
         energy: 100,
-        targetingStrategy: 'self',
+        targetingStrategy: TargetingStrategy.SELF,
       };
 
       fightData = {
@@ -252,7 +255,7 @@ describe('FightController', () => {
                 simpleAttack: {
                   name: 'Simple Attack',
                   damageRate: 1.0,
-                  targetingStrategy: 'position-based',
+                  targetingStrategy: TargetingStrategy.POSITION_BASED,
                 },
                 others: [],
               },
@@ -292,7 +295,7 @@ describe('FightController', () => {
     const simpleAttack = {
       name: 'Strike',
       damageRate: 2.0,
-      targetingStrategy: 'target-all',
+      targetingStrategy: TargetingStrategy.POSITION_BASED,
     };
 
     describe('and the simple attack has a poisoned effect', () => {
@@ -328,7 +331,7 @@ describe('FightController', () => {
                     kind: SpecialKind.ATTACK,
                     rate: 0,
                     energy: 0,
-                    targetingStrategy: 'position-based',
+                    targetingStrategy: TargetingStrategy.POSITION_BASED,
                   },
                   simpleAttack: poisonedSimpleAttack,
                   others: [],
@@ -396,7 +399,7 @@ describe('FightController', () => {
                     kind: SpecialKind.ATTACK,
                     rate: 0,
                     energy: 0,
-                    targetingStrategy: 'position-based',
+                    targetingStrategy: TargetingStrategy.POSITION_BASED,
                   },
                   simpleAttack: burnedSimpleAttack,
                   others: [],
@@ -464,7 +467,7 @@ describe('FightController', () => {
                     kind: SpecialKind.ATTACK,
                     rate: 0,
                     energy: 0,
-                    targetingStrategy: 'position-based',
+                    targetingStrategy: TargetingStrategy.POSITION_BASED,
                   },
                   simpleAttack: freezeSimpleAttack,
                   others: [],
@@ -524,12 +527,12 @@ describe('FightController', () => {
                   kind: SpecialKind.ATTACK,
                   rate: 0,
                   energy: 0,
-                  targetingStrategy: 'position-based',
+                  targetingStrategy: TargetingStrategy.POSITION_BASED,
                 },
                 simpleAttack: {
                   name: 'Strike',
                   damageRate: 2.0,
-                  targetingStrategy: 'target-all',
+                  targetingStrategy: TargetingStrategy.TARGET_ALL,
                 },
                 others: [],
               },
@@ -585,12 +588,12 @@ describe('FightController', () => {
                   kind: SpecialKind.ATTACK,
                   rate: 0,
                   energy: 0,
-                  targetingStrategy: 'position-based',
+                  targetingStrategy: TargetingStrategy.POSITION_BASED,
                 },
                 simpleAttack: {
                   name: 'Strike',
                   damageRate: 2.0,
-                  targetingStrategy: 'target-all',
+                  targetingStrategy: TargetingStrategy.TARGET_ALL,
                 },
                 others: [],
               },
@@ -616,6 +619,76 @@ describe('FightController', () => {
         expect(jsonCard.dodgeBehavior).toEqual({
           id: 'random',
           randomizer: {},
+        });
+      };
+
+      fakeFightService.validatePlayer1FirstCard(validation);
+    });
+  });
+
+  describe('when a player use a healing skill triggered at turn end', () => {
+    beforeEach(() => {
+      fightData = {
+        cardSelectorStrategy: 'player-by-player',
+        player1: {
+          name: 'Player 1',
+          deck: [
+            {
+              name: 'Axe',
+              attack: 10,
+              defense: 6,
+              health: 100,
+              speed: 3,
+              agility: 25,
+              accuracy: 15,
+              criticalChance: 0.05,
+              skills: {
+                special: {
+                  name: 'No Special Attack',
+                  kind: SpecialKind.ATTACK,
+                  rate: 0,
+                  energy: 0,
+                  targetingStrategy: TargetingStrategy.ALL_OWNER_CARD,
+                },
+                simpleAttack: {
+                  name: 'Slice',
+                  damageRate: 2.0,
+                  targetingStrategy: TargetingStrategy.LINE_THREE,
+                },
+                others: [
+                  {
+                    kind: SkillKind.HEALING,
+                    name: 'heal',
+                    rate: 1,
+                    event: TriggerEvent.TURN_END,
+                    targetingStrategy: TargetingStrategy.ALL_ALLIES,
+                  },
+                ],
+              },
+              behaviors: {
+                dodge: DodgeStrategy.RANDOM_DODGE,
+              },
+            },
+          ],
+        },
+        player2: {
+          name: 'Player 2',
+          deck: [],
+        },
+      };
+
+      fightController.startFight(fightData);
+    });
+
+    it('creates a fighting card with the healing skill', () => {
+      const validation = (card: FightingCard) => {
+        const jsonCard = JSON.parse(JSON.stringify(card));
+
+        expect(jsonCard.skills[0]).toEqual({
+          id: 'healing-skill',
+          effectRate: 1,
+          trigger: { id: 'turn-end' },
+          targetingStrategy: { id: 'all-allies' },
         });
       };
 

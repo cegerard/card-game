@@ -17,12 +17,12 @@ import {
 import { FightingCard } from '../core/cards/fighting-card';
 import { SpecialAttack } from '../core/cards/skills/special-attack';
 import { SimpleAttack } from '../core/cards/skills/simple-attack';
-import { TargetingStrategyFactory } from './targeting-strategy-factory';
+import { buildTargetingStrategy } from './targeting-strategy-factory';
 import { buildDodgeStrategy } from './dodge-strategy-factory';
 import { Special } from '../core/cards/skills/special';
 import { SpecialHealing } from '../core/cards/skills/special-healing';
 import { Healing } from '../core/cards/skills/healing';
-import { TriggerFactory } from './trigger-factory';
+import { buildTriggerStrategy } from './trigger-factory';
 import { PoisonedAttackEffect } from '../core/cards/@types/attack/attack-poisoned-effect';
 import { EffectLevel } from '../core/cards/@types/attack/effect-level';
 import { AttackEffect } from '../core/cards/@types/attack/attack-effect';
@@ -80,9 +80,7 @@ export class FightController {
       special = new SpecialAttack(
         cardData.skills.special.rate,
         cardData.skills.special.energy,
-        TargetingStrategyFactory.create(
-          cardData.skills.special.targetingStrategy,
-        ),
+        buildTargetingStrategy(cardData.skills.special.targetingStrategy),
         specialEffect,
       );
     }
@@ -91,9 +89,7 @@ export class FightController {
       special = new SpecialHealing(
         cardData.skills.special.rate,
         cardData.skills.special.energy,
-        TargetingStrategyFactory.create(
-          cardData.skills.special.targetingStrategy,
-        ),
+        buildTargetingStrategy(cardData.skills.special.targetingStrategy),
       );
     }
 
@@ -119,9 +115,7 @@ export class FightController {
 
     const simpleAttack = new SimpleAttack(
       cardData.skills.simpleAttack.damageRate,
-      TargetingStrategyFactory.create(
-        cardData.skills.simpleAttack.targetingStrategy,
-      ),
+      buildTargetingStrategy(cardData.skills.simpleAttack.targetingStrategy),
       effect,
     );
 
@@ -134,8 +128,8 @@ export class FightController {
         others: cardData.skills.others.map((skill) => {
           return new Healing(
             skill.rate,
-            TriggerFactory.create(skill.event),
-            TargetingStrategyFactory.create(skill.targetingStrategy),
+            buildTriggerStrategy(skill.event),
+            buildTargetingStrategy(skill.targetingStrategy),
           );
         }),
       },

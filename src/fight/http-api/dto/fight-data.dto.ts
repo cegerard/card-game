@@ -31,6 +31,19 @@ export enum DodgeStrategy {
   RANDOM_DODGE = 'random-dodge',
 }
 
+export enum TriggerEvent {
+  TURN_END = 'turn-end',
+}
+
+export enum TargetingStrategy {
+  POSITION_BASED = 'position-based',
+  TARGET_ALL = 'target-all',
+  LINE_THREE = 'line-three',
+  ALL_OWNER_CARD = 'all-owner-cards',
+  ALL_ALLIES = 'all-allies',
+  SELF = 'self',
+}
+
 class EffectDto {
   @IsEnum(Effect)
   type: Effect;
@@ -55,8 +68,8 @@ class SpecialDto {
   @IsNumber()
   energy: number;
 
-  @IsString()
-  targetingStrategy: string;
+  @IsEnum(TargetingStrategy)
+  targetingStrategy: TargetingStrategy;
 
   @IsOptional()
   @ValidateNested()
@@ -71,8 +84,8 @@ class SimpleAttackDto {
   @IsNumber()
   damageRate: number;
 
-  @IsString()
-  targetingStrategy: string;
+  @IsEnum(TargetingStrategy)
+  targetingStrategy: TargetingStrategy;
 
   @IsOptional()
   @ValidateNested()
@@ -90,11 +103,11 @@ class OtherSkillDto {
   @IsNumber()
   rate: number;
 
-  @IsString()
-  targetingStrategy: string;
+  @IsEnum(TargetingStrategy)
+  targetingStrategy: TargetingStrategy;
 
-  @IsString()
-  event: string;
+  @IsEnum(TriggerEvent)
+  event: TriggerEvent;
 }
 
 class SkillsDto {

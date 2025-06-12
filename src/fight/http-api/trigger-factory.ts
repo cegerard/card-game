@@ -1,12 +1,10 @@
 import { TurnEnd } from '../core/trigger/turn-end';
+import { TriggerEvent } from './dto/fight-data.dto';
 
-export class TriggerFactory {
-  static create(triggerName: string) {
-    switch (triggerName) {
-      case 'turn-end':
-        return new TurnEnd();
-      default:
-        throw new Error(`Trigger unknown: ${triggerName}`);
-    }
-  }
+const STRATEGY_MAP = {
+  [TriggerEvent.TURN_END]: new TurnEnd(),
+};
+
+export function buildTriggerStrategy(triggerEvent: TriggerEvent) {
+  return STRATEGY_MAP[triggerEvent];
 }
