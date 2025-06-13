@@ -5,8 +5,8 @@ import {
   HttpCode,
   UsePipes,
   ValidationPipe,
+  Inject,
 } from '@nestjs/common';
-import { FightService } from './fight.service';
 import { FightResult } from '../core/fight-simulator/@types/fight-result';
 import {
   Effect,
@@ -28,6 +28,11 @@ import { EffectLevel } from '../core/cards/@types/attack/effect-level';
 import { AttackEffect } from '../core/cards/@types/attack/attack-effect';
 import { BurnedAttackEffect } from '../core/cards/@types/attack/attack-burned-effect';
 import { FrozenAttackEffect } from '../core/cards/@types/attack/attack-frozen-effect';
+import { CardSelector } from '../core/fight-simulator/card-selectors/card-selector';
+import { PlayerByPlayerCardSelector } from '../core/fight-simulator/card-selectors/player-by-player';
+import { SpeedWeightedCardSelector } from '../core/fight-simulator/card-selectors/speed-weighted-card-pool';
+import { Player } from '../core/player';
+import { FightSimulator } from '../core/fight-simulator/@types/fight-simulator';
 
 @Controller()
 @UsePipes(
@@ -38,7 +43,14 @@ import { FrozenAttackEffect } from '../core/cards/@types/attack/attack-frozen-ef
   }),
 )
 export class FightController {
-  constructor(private readonly appService: FightService) {}
+  constructor(
+    @Inject('FIGHT_SIMULATOR_BUILDER')
+    private readonly buildFightSimulator: (
+      player1: Player,
+      player2: Player,
+      cardSelector: CardSelector,
+    ) => FightSimulator,
+  ) {}
 
   @Post('fight')
   @HttpCode(200)
@@ -46,11 +58,20 @@ export class FightController {
     const player1Deck = fightData.player1.deck.map(this.convertCardDtoToCard);
     const player2Deck = fightData.player2.deck.map(this.convertCardDtoToCard);
 
-    return this.appService.simulateFight(
-      { name: fightData.player1.name, deck: player1Deck },
-      { name: fightData.player2.name, deck: player2Deck },
-      fightData.cardSelectorStrategy,
+    const player1 = new Player(fightData.player1.name, player1Deck);
+    const player2 = new Player(fightData.player2.name, player2Deck);
+
+    const fightSimulator = this.buildFightSimulator(
+      player1,
+      player2,
+      this.getSelectorStrategy(
+        fightData.cardSelectorStrategy,
+        player1,
+        player2,
+      ),
     );
+
+    return fightSimulator.start();
   }
 
   private convertCardDtoToCard(cardData: FightingCardDto): FightingCard {
@@ -137,5 +158,18 @@ export class FightController {
         dodge: buildDodgeStrategy(cardData.behaviors.dodge),
       },
     );
+  }
+
+  private getSelectorStrategy(
+    cardSelectorStrategy: string,
+    player1: Player,
+    player2: Player,
+  ): CardSelector {
+    switch (cardSelectorStrategy) {
+      case 'speed-weighted':
+        return new SpeedWeightedCardSelector(player1, player2);
+      default:
+        return new PlayerByPlayerCardSelector(player1, player2);
+    }
   }
 }

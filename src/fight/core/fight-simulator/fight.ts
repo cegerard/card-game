@@ -5,8 +5,9 @@ import { CardSelector } from './card-selectors/card-selector';
 import { CardDeathSubscriber } from './card-death-subscriber';
 import { Step, StepKind } from './@types/step';
 import { TurnManager } from './turn-manager';
+import { FightSimulator } from './@types/fight-simulator';
 
-export class Fight {
+export class Fight implements FightSimulator {
   private player1: Player;
   private player2: Player;
   private stepCounter = 0;

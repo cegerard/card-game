@@ -11,11 +11,16 @@ import {
 } from '../dto/fight-data.dto';
 import { FightController } from '../fight.controller';
 import { FightingCard } from '../../core/cards/fighting-card';
-import { FakeFightService } from './fake-fight-service';
+import { FightSimulatorStub } from './fight-simulator-stub';
+import { Player } from 'src/fight/core/player';
 
 describe('FightController', () => {
-  const fakeFightService = new FakeFightService();
-  const fightController = new FightController(fakeFightService);
+  let fightSimulatorStub: FightSimulatorStub;
+  const builder = (player1: Player, _1: any, _2: any) => {
+    fightSimulatorStub = new FightSimulatorStub(player1);
+    return fightSimulatorStub;
+  };
+  const fightController = new FightController(builder);
 
   let fightData: FightDataDto;
   describe('when a player use a card with a special attack', () => {
@@ -89,7 +94,7 @@ describe('FightController', () => {
           expect(jsonCard.special.effect.level).toBe(2);
         };
 
-        fakeFightService.validatePlayer1FirstCard(validation);
+        fightSimulatorStub.validatePlayer1FirstCard(validation);
       });
     });
 
@@ -155,7 +160,7 @@ describe('FightController', () => {
           expect(jsonCard.special.effect.level).toBe(3);
         };
 
-        fakeFightService.validatePlayer1FirstCard(validation);
+        fightSimulatorStub.validatePlayer1FirstCard(validation);
       });
     });
 
@@ -221,7 +226,7 @@ describe('FightController', () => {
           expect(jsonCard.special.effect.level).toBe(2);
         };
 
-        fakeFightService.validatePlayer1FirstCard(validation);
+        fightSimulatorStub.validatePlayer1FirstCard(validation);
       });
     });
   });
@@ -287,7 +292,7 @@ describe('FightController', () => {
         });
       };
 
-      fakeFightService.validatePlayer1FirstCard(validation);
+      fightSimulatorStub.validatePlayer1FirstCard(validation);
     });
   });
 
@@ -362,7 +367,7 @@ describe('FightController', () => {
           expect(jsonCard.simpleAttack.effect.level).toBe(2);
         };
 
-        fakeFightService.validatePlayer1FirstCard(validation);
+        fightSimulatorStub.validatePlayer1FirstCard(validation);
       });
     });
 
@@ -430,7 +435,7 @@ describe('FightController', () => {
           expect(jsonCard.simpleAttack.effect.level).toBe(3);
         };
 
-        fakeFightService.validatePlayer1FirstCard(validation);
+        fightSimulatorStub.validatePlayer1FirstCard(validation);
       });
     });
 
@@ -498,7 +503,7 @@ describe('FightController', () => {
           expect(jsonCard.simpleAttack.effect.level).toBe(2);
         };
 
-        fakeFightService.validatePlayer1FirstCard(validation);
+        fightSimulatorStub.validatePlayer1FirstCard(validation);
       });
     });
   });
@@ -560,7 +565,7 @@ describe('FightController', () => {
         });
       };
 
-      fakeFightService.validatePlayer1FirstCard(validation);
+      fightSimulatorStub.validatePlayer1FirstCard(validation);
     });
   });
 
@@ -622,7 +627,7 @@ describe('FightController', () => {
         });
       };
 
-      fakeFightService.validatePlayer1FirstCard(validation);
+      fightSimulatorStub.validatePlayer1FirstCard(validation);
     });
   });
 
@@ -692,7 +697,7 @@ describe('FightController', () => {
         });
       };
 
-      fakeFightService.validatePlayer1FirstCard(validation);
+      fightSimulatorStub.validatePlayer1FirstCard(validation);
     });
   });
 });
