@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 
 import {
+  CardSelectorStrategy,
   DodgeStrategy,
   Effect,
   FightDataDto,
@@ -13,11 +14,12 @@ import { FightController } from '../fight.controller';
 import { FightingCard } from '../../core/cards/fighting-card';
 import { FightSimulatorStub } from './fight-simulator-stub';
 import { Player } from 'src/fight/core/player';
+import { CardSelector } from 'src/fight/core/fight-simulator/card-selectors/card-selector';
 
 describe('FightController', () => {
   let fightSimulatorStub: FightSimulatorStub;
-  const builder = (player1: Player, _1: any, _2: any) => {
-    fightSimulatorStub = new FightSimulatorStub(player1);
+  const builder = (player1: Player, _1: any, cardSelector: CardSelector) => {
+    fightSimulatorStub = new FightSimulatorStub(player1, cardSelector);
     return fightSimulatorStub;
   };
   const fightController = new FightController(builder);
@@ -46,7 +48,7 @@ describe('FightController', () => {
         };
 
         fightData = {
-          cardSelectorStrategy: 'player-by-player',
+          cardSelectorStrategy: CardSelectorStrategy.PLAYER_BY_PLAYER,
           player1: {
             name: 'Player 1',
             deck: [
@@ -112,7 +114,7 @@ describe('FightController', () => {
         };
 
         fightData = {
-          cardSelectorStrategy: 'player-by-player',
+          cardSelectorStrategy: CardSelectorStrategy.PLAYER_BY_PLAYER,
           player1: {
             name: 'Player 1',
             deck: [
@@ -178,7 +180,7 @@ describe('FightController', () => {
         };
 
         fightData = {
-          cardSelectorStrategy: 'player-by-player',
+          cardSelectorStrategy: CardSelectorStrategy.PLAYER_BY_PLAYER,
           player1: {
             name: 'Player 1',
             deck: [
@@ -242,7 +244,7 @@ describe('FightController', () => {
       };
 
       fightData = {
-        cardSelectorStrategy: 'player-by-player',
+        cardSelectorStrategy: CardSelectorStrategy.PLAYER_BY_PLAYER,
         player1: {
           name: 'Player 1',
           deck: [
@@ -317,7 +319,7 @@ describe('FightController', () => {
         };
 
         fightData = {
-          cardSelectorStrategy: 'player-by-player',
+          cardSelectorStrategy: CardSelectorStrategy.PLAYER_BY_PLAYER,
           player1: {
             name: 'Player 1',
             deck: [
@@ -385,7 +387,7 @@ describe('FightController', () => {
         };
 
         fightData = {
-          cardSelectorStrategy: 'player-by-player',
+          cardSelectorStrategy: CardSelectorStrategy.PLAYER_BY_PLAYER,
           player1: {
             name: 'Player 1',
             deck: [
@@ -453,7 +455,7 @@ describe('FightController', () => {
         };
 
         fightData = {
-          cardSelectorStrategy: 'player-by-player',
+          cardSelectorStrategy: CardSelectorStrategy.PLAYER_BY_PLAYER,
           player1: {
             name: 'Player 1',
             deck: [
@@ -513,7 +515,7 @@ describe('FightController', () => {
 
     beforeEach(() => {
       fightData = {
-        cardSelectorStrategy: 'player-by-player',
+        cardSelectorStrategy: CardSelectorStrategy.PLAYER_BY_PLAYER,
         player1: {
           name: 'Player 1',
           deck: [
@@ -574,7 +576,7 @@ describe('FightController', () => {
 
     beforeEach(() => {
       fightData = {
-        cardSelectorStrategy: 'player-by-player',
+        cardSelectorStrategy: CardSelectorStrategy.PLAYER_BY_PLAYER,
         player1: {
           name: 'Player 1',
           deck: [
@@ -634,7 +636,7 @@ describe('FightController', () => {
   describe('when a player use a healing skill triggered at turn end', () => {
     beforeEach(() => {
       fightData = {
-        cardSelectorStrategy: 'player-by-player',
+        cardSelectorStrategy: CardSelectorStrategy.PLAYER_BY_PLAYER,
         player1: {
           name: 'Player 1',
           deck: [
@@ -698,6 +700,63 @@ describe('FightController', () => {
       };
 
       fightSimulatorStub.validatePlayer1FirstCard(validation);
+    });
+  });
+
+  describe('when the fight use the speed weighted card selector', () => {
+    beforeEach(() => {
+      fightData = {
+        cardSelectorStrategy: CardSelectorStrategy.SPEED_WEIGHTED,
+        player1: {
+          name: 'Player 1',
+          deck: [
+            {
+              name: 'Axe',
+              attack: 10,
+              defense: 6,
+              health: 100,
+              speed: 3,
+              agility: 25,
+              accuracy: 15,
+              criticalChance: 0.05,
+              skills: {
+                special: {
+                  name: 'No Special Attack',
+                  kind: SpecialKind.ATTACK,
+                  rate: 0,
+                  energy: 0,
+                  targetingStrategy: TargetingStrategy.ALL_OWNER_CARD,
+                },
+                simpleAttack: {
+                  name: 'Slice',
+                  damageRate: 2.0,
+                  targetingStrategy: TargetingStrategy.LINE_THREE,
+                },
+                others: [],
+              },
+              behaviors: {
+                dodge: DodgeStrategy.RANDOM_DODGE,
+              },
+            },
+          ],
+        },
+        player2: {
+          name: 'Player 2',
+          deck: [],
+        },
+      };
+
+      fightController.startFight(fightData);
+    });
+
+    it('creates a fight based on the speed weighted card strategy', () => {
+      const validation = (cardSelector: CardSelector) => {
+        const jsonCardSelector = JSON.parse(JSON.stringify(cardSelector));
+
+        expect(jsonCardSelector.id).toEqual('speed-weighted');
+      };
+
+      fightSimulatorStub.validateCardSelectorStrategy(validation);
     });
   });
 });

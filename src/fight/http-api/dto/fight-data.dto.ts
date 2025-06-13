@@ -44,6 +44,11 @@ export enum TargetingStrategy {
   SELF = 'self',
 }
 
+export enum CardSelectorStrategy {
+  PLAYER_BY_PLAYER = 'player-by-player',
+  SPEED_WEIGHTED = 'speed-weighted',
+}
+
 class EffectDto {
   @IsEnum(Effect)
   type: Effect;
@@ -195,6 +200,6 @@ export class FightDataDto {
   @Type(() => PlayerDto)
   player2: PlayerDto;
 
-  @IsString()
-  cardSelectorStrategy: string;
+  @IsEnum(CardSelectorStrategy)
+  cardSelectorStrategy: CardSelectorStrategy;
 }

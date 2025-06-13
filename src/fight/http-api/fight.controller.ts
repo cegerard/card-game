@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { FightResult } from '../core/fight-simulator/@types/fight-result';
 import {
+  CardSelectorStrategy,
   Effect,
   FightDataDto,
   FightingCardDto,
@@ -161,15 +162,21 @@ export class FightController {
   }
 
   private getSelectorStrategy(
-    cardSelectorStrategy: string,
+    cardSelectorStrategy: CardSelectorStrategy,
     player1: Player,
     player2: Player,
   ): CardSelector {
-    switch (cardSelectorStrategy) {
-      case 'speed-weighted':
-        return new SpeedWeightedCardSelector(player1, player2);
-      default:
-        return new PlayerByPlayerCardSelector(player1, player2);
-    }
+    const STRATEGY_MAP = {
+      [CardSelectorStrategy.PLAYER_BY_PLAYER]: new PlayerByPlayerCardSelector(
+        player1,
+        player2,
+      ),
+      [CardSelectorStrategy.SPEED_WEIGHTED]: new SpeedWeightedCardSelector(
+        player1,
+        player2,
+      ),
+    };
+
+    return STRATEGY_MAP[cardSelectorStrategy];
   }
 }

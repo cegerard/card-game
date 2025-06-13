@@ -7,6 +7,8 @@ export class SpeedWeightedCardSelector implements CardSelector {
   private player2: Player;
   private cardPool: FightingCard[] = [];
 
+  public readonly id = 'speed-weighted';
+
   constructor(player1: Player, player2: Player) {
     this.player1 = player1;
     this.player2 = player2;
