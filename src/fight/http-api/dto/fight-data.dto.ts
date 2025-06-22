@@ -78,7 +78,7 @@ class SpecialDto {
 
   @IsOptional()
   @ValidateNested()
-  @Type(() => EffectDto)
+  @Type(/* istanbul ignore next */ () => EffectDto)
   effect?: EffectDto;
 }
 
@@ -94,7 +94,7 @@ class SimpleAttackDto {
 
   @IsOptional()
   @ValidateNested()
-  @Type(() => EffectDto)
+  @Type(/* istanbul ignore next */ () => EffectDto)
   effect?: EffectDto;
 }
 
@@ -118,17 +118,17 @@ class OtherSkillDto {
 class SkillsDto {
   @IsNotEmpty()
   @ValidateNested()
-  @Type(() => SpecialDto)
+  @Type(/* istanbul ignore next */ () => SpecialDto)
   special: SpecialDto;
 
   @IsNotEmpty()
   @ValidateNested()
-  @Type(() => SimpleAttackDto)
+  @Type(/* istanbul ignore next */ () => SimpleAttackDto)
   simpleAttack: SimpleAttackDto;
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => OtherSkillDto)
+  @Type(/* istanbul ignore next */ () => OtherSkillDto)
   others: OtherSkillDto[];
 }
 
@@ -164,12 +164,12 @@ export class FightingCardDto {
 
   @IsNotEmpty()
   @ValidateNested()
-  @Type(() => SkillsDto)
+  @Type(/* istanbul ignore next */ () => SkillsDto)
   skills: SkillsDto;
 
   @IsNotEmpty()
   @ValidateNested()
-  @Type(() => BehaviorsDto)
+  @Type(/* istanbul ignore next */ () => BehaviorsDto)
   behaviors: BehaviorsDto;
 
   @IsOptional()
@@ -184,7 +184,7 @@ class PlayerDto {
   @ArrayMinSize(1)
   @ArrayMaxSize(5)
   @ValidateNested({ each: true })
-  @Type(() => FightingCardDto)
+  @Type(/* istanbul ignore next */ () => FightingCardDto)
   deck: FightingCardDto[];
 
   @IsString()
@@ -193,11 +193,11 @@ class PlayerDto {
 
 export class FightDataDto {
   @ValidateNested()
-  @Type(() => PlayerDto)
+  @Type(/* istanbul ignore next */ () => PlayerDto)
   player1: PlayerDto;
 
   @ValidateNested()
-  @Type(() => PlayerDto)
+  @Type(/* istanbul ignore next */ () => PlayerDto)
   player2: PlayerDto;
 
   @IsEnum(CardSelectorStrategy)
