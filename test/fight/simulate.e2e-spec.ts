@@ -15,6 +15,10 @@ describe('Simulate fight', () => {
     await app.init();
   });
 
+  afterEach(async () => {
+    await app.close();
+  });
+
   it('runs to the end', () => {
     const fightData = {
       cardSelectorStrategy: 'player-by-player',

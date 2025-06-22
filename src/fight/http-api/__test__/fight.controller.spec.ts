@@ -18,11 +18,15 @@ import { CardSelector } from 'src/fight/core/fight-simulator/card-selectors/card
 
 describe('FightController', () => {
   let fightSimulatorStub: FightSimulatorStub;
+  let fightController: FightController;
   const builder = (player1: Player, _1: any, cardSelector: CardSelector) => {
     fightSimulatorStub = new FightSimulatorStub(player1, cardSelector);
     return fightSimulatorStub;
   };
-  const fightController = new FightController(builder);
+
+  beforeEach(() => {
+    fightController = new FightController(builder);
+  });
 
   let fightData: FightDataDto;
   describe('when a player use a card with a special attack', () => {
