@@ -124,6 +124,64 @@ describe('Trigger card special attack without effect', () => {
   });
 });
 
+describe('Trigger card special attack with critical hit', () => {
+  const attackerAccuracy = 25;
+  const attacker = createFightingCard({
+    attack: 10,
+    criticalChance: 100,
+    health: 5,
+    accuracy: attackerAccuracy,
+    agility: 0,
+    speed: 100,
+    defense: 0,
+    skills: {
+      special: { damageRate: 1.0, energy: 0, kind: 'specialAttack' },
+    },
+  });
+  const player1 = new Player('Player 1', [attacker]);
+
+  const defenderWithoutDodge = createFightingCard({
+    defense: 0,
+    health: 13,
+    speed: 0,
+    agility: attackerAccuracy,
+  });
+  const player2 = new Player('Player 2', [defenderWithoutDodge]);
+  const fight = new Fight(
+    player1,
+    player2,
+    new PlayerByPlayerCardSelector(player1, player2),
+  );
+
+  it('should compute the damage with the special attack', () => {
+    expect(fight.start()).toEqual({
+      1: {
+        attacker: attacker.identityInfo,
+        damages: [
+          {
+            damage: 13,
+            isCritical: true,
+            dodge: false,
+            defender: defenderWithoutDodge.identityInfo,
+            remainingHealth: defenderWithoutDodge.actualHealth,
+          },
+        ],
+        energy: 0,
+        kind: 'special_attack',
+      },
+      2: {
+        card: defenderWithoutDodge.identityInfo,
+        kind: 'status_change',
+        status: 'dead',
+      },
+      3: {
+        kind: 'fight_end',
+        winner: 'Player 1',
+      },
+    });
+  });
+});
+
 describe('Trigger card special attack with poison effect', () => {
   const card1 = createFightingCard({
     attack: 100,
@@ -155,8 +213,8 @@ describe('Trigger card special attack with poison effect', () => {
     agility: 0,
   });
 
-  const player1 = new Player('Player 1', [card1]);
-  const player2 = new Player('Player 2', [card2]);
+  const player1 = new Player('Player 1', [card2]);
+  const player2 = new Player('Player 2', [card1]);
   const fight = new Fight(
     player1,
     player2,
@@ -213,7 +271,7 @@ describe('Trigger card special attack with poison effect', () => {
       },
       6: {
         kind: 'fight_end',
-        winner: 'Player 1',
+        winner: 'Player 2',
       },
     });
   });
