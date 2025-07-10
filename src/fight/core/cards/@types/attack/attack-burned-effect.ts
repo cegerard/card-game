@@ -22,6 +22,7 @@ export class BurnedAttackEffect implements AttackEffect {
     if (defender.isBurned()) return;
 
     const burnedState = new CardStateBurned(
+      this.level,
       this.computeBurnedTurns(),
       card.actualAttack * this.rate,
     );

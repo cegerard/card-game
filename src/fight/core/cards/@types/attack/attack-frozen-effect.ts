@@ -22,6 +22,7 @@ export class FrozenAttackEffect implements AttackEffect {
     if (defender.isFrozen()) return;
 
     const frozenState = new CardStateFrozen(
+      this.level,
       this.computeFrozenTurns(),
       this.rate,
     );

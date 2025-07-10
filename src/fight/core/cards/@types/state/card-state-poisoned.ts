@@ -1,13 +1,16 @@
 import { FightingCard } from '../../fighting-card';
 import { StateResult } from '../action-result/state-result';
+import { EffectLevel } from '../attack/effect-level';
 import { CardState } from './card-state';
 
 export class CardStatePoisoned implements CardState {
   public readonly type = 'poison';
+  public readonly level: EffectLevel;
   public remainingTurns: number;
   public damageValue: number;
 
-  constructor(remainingTurns: number, damageValue: number) {
+  constructor(level: EffectLevel, remainingTurns: number, damageValue: number) {
+    this.level = level;
     this.remainingTurns = remainingTurns;
     this.damageValue = damageValue;
   }

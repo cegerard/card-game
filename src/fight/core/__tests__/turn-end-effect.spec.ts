@@ -16,7 +16,7 @@ describe('Process card poisoned effect at turn end', () => {
       },
     },
   });
-  card1.setState(new CardStatePoisoned(1, 30));
+  card1.setState(new CardStatePoisoned(1, 1, 30));
 
   const card2 = createFightingCard({
     defense: 0,

@@ -10,6 +10,7 @@ import { Special } from './skills/special';
 import { CardState } from './@types/state/card-state';
 import { StateResult } from './@types/action-result/state-result';
 import { CardStateFrozen } from './@types/state/card-state-frozen';
+import { EffectLevel } from './@types/attack/effect-level';
 
 export class FightingCard {
   // Info
@@ -112,19 +113,19 @@ export class FightingCard {
     this.cardDeckIdentity = `${ownerName}-${cardPositionInDeck}`;
   }
 
-  public setState(state: CardState): void {
+  public setState(newState: CardState): void {
     if (this.isDead()) return;
 
-    if (state.type === 'poison') {
-      this.poisoned = state;
+    if (newState.type === 'poison') {
+      this.poisoned = newState;
     }
 
-    if (state.type === 'burn') {
-      this.burned = state;
+    if (newState.type === 'burn') {
+      this.burned = newState;
     }
 
-    if (state.type === 'freeze') {
-      this.frozen = state;
+    if (newState.type === 'freeze') {
+      this.frozen = newState;
     }
   }
 
@@ -191,8 +192,8 @@ export class FightingCard {
     return this.actualHealth <= 0;
   }
 
-  public isPoisoned(): boolean {
-    return !!this.poisoned;
+  public poisonLevel(): EffectLevel {
+    return this.poisoned?.level ?? 0;
   }
 
   public isBurned(): boolean {

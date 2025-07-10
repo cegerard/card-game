@@ -1,1 +1,1 @@
-export type EffectLevel = 1 | 2 | 3;
+export type EffectLevel = 0 | 1 | 2 | 3;

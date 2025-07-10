@@ -348,7 +348,7 @@ describe('Trigger card attack with poison effect', () => {
         player2,
         new PlayerByPlayerCardSelector(firstPlayer, player2),
       );
-      card2.setState(new CardStatePoisoned(1, 150));
+      card2.setState(new CardStatePoisoned(2, 1, 150));
     });
 
     it('should not change the poison state', () => {
@@ -423,7 +423,7 @@ describe('Trigger card attack with poison effect', () => {
       });
       player2 = new Player('Player 2', [card2]);
 
-      card2.setState(new CardStateBurned(1, 10));
+      card2.setState(new CardStateBurned(1, 1, 10));
 
       fight = new Fight(
         firstPlayer,
@@ -517,7 +517,7 @@ describe('Trigger card attack with poison effect', () => {
       });
       player2 = new Player('Player 2', [card2]);
 
-      card2.setState(new CardStateFrozen(1, 0.5));
+      card2.setState(new CardStateFrozen(1, 1, 0.5));
 
       fight = new Fight(
         firstPlayer,
@@ -610,7 +610,7 @@ describe('Trigger card attack after poison dissipation', () => {
     player1 = new Player('Player 1', [card1]);
     player2 = new Player('Player 2', [card2]);
 
-    card1.setState(new CardStatePoisoned(1, 10));
+    card1.setState(new CardStatePoisoned(1, 1, 10));
 
     fight = new Fight(
       player1,
@@ -803,7 +803,7 @@ describe('Trigger card attack with burn effect', () => {
         criticalChance: 0,
         agility: 0,
       });
-      card2.setState(new CardStateBurned(1, 50));
+      card2.setState(new CardStateBurned(1, 1, 50));
       player2 = new Player('Player 2', [card2]);
       fight = new Fight(
         player1,
@@ -876,7 +876,7 @@ describe('Trigger card attack with burn effect', () => {
         criticalChance: 0,
         agility: 0,
       });
-      card2.setState(new CardStatePoisoned(1, 10));
+      card2.setState(new CardStatePoisoned(1, 1, 10));
       player2 = new Player('Player 2', [card2]);
       fight = new Fight(
         player1,
@@ -962,7 +962,7 @@ describe('Trigger card attack with burn effect', () => {
         criticalChance: 0,
         agility: 0,
       });
-      card2.setState(new CardStateFrozen(1, 0.3));
+      card2.setState(new CardStateFrozen(1, 1, 0.3));
       player2 = new Player('Player 2', [card2]);
       fight = new Fight(
         player1,
@@ -1054,7 +1054,7 @@ describe('Trigger card attack after burn dissipation', () => {
     player1 = new Player('Player 1', [card1]);
     player2 = new Player('Player 2', [card2]);
 
-    card1.setState(new CardStateBurned(1, 10));
+    card1.setState(new CardStateBurned(1, 1, 10));
 
     fight = new Fight(
       player1,
@@ -1248,7 +1248,7 @@ describe('Trigger card attack with freeze effect', () => {
         criticalChance: 0,
         agility: 0,
       });
-      card2.setState(new CardStateFrozen(1, 0.2));
+      card2.setState(new CardStateFrozen(1, 1, 0.2));
       player2 = new Player('Player 2', [card2]);
       fight = new Fight(
         player1,
@@ -1321,7 +1321,7 @@ describe('Trigger card attack with freeze effect', () => {
         criticalChance: 0,
         agility: 0,
       });
-      card2.setState(new CardStatePoisoned(1, 10));
+      card2.setState(new CardStatePoisoned(1, 1, 10));
       player2 = new Player('Player 2', [card2]);
       fight = new Fight(
         player1,
@@ -1407,7 +1407,7 @@ describe('Trigger card attack with freeze effect', () => {
         criticalChance: 0,
         agility: 0,
       });
-      card2.setState(new CardStateBurned(1, 50));
+      card2.setState(new CardStateBurned(1, 1, 50));
       player2 = new Player('Player 2', [card2]);
       fight = new Fight(
         player1,
@@ -1513,7 +1513,7 @@ describe('Trigger card attack after freeze dissipation', () => {
     player1 = new Player('Player 1', [card1]);
     player2 = new Player('Player 2', [card2]);
 
-    card1.setState(new CardStateFrozen(1, 0.2));
+    card1.setState(new CardStateFrozen(1, 1, 0.2));
 
     fight = new Fight(
       player1,
