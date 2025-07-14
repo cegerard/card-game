@@ -19,8 +19,8 @@ export class PoisonedAttackEffect implements AttackEffect {
     card: FightingCard,
     _context: FightingContext,
   ): EffectResult {
-    if (defender.isFrozen()) return;
-    if (defender.poisonLevel() >= this.level) return;
+    if (defender.frozenLevel > 0) return;
+    if (defender.poisonLevel >= this.level) return;
 
     const poisonedState = new CardStatePoisoned(
       this.level,

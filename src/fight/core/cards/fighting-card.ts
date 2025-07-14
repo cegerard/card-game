@@ -109,6 +109,18 @@ export class FightingCard {
     return { name: this.name, deckIdentity: this.cardDeckIdentity };
   }
 
+  public get poisonLevel(): EffectLevel {
+    return this.poisoned?.level ?? 0;
+  }
+
+  public get frozenLevel(): EffectLevel {
+    return this.frozen?.level ?? 0;
+  }
+
+  public get burnLevel(): EffectLevel {
+    return this.burned?.level ?? 0;
+  }
+
   public setOwnerInfo(ownerName: string, cardPositionInDeck: number): void {
     this.cardDeckIdentity = `${ownerName}-${cardPositionInDeck}`;
   }
@@ -141,6 +153,10 @@ export class FightingCard {
     if (state.type === 'freeze') {
       this.frozen = undefined;
     }
+  }
+
+  public unFreeze(): void {
+    this.frozen = undefined;
   }
 
   public launchAttack(context: FightingContext): AttackResult[] {
@@ -192,18 +208,6 @@ export class FightingCard {
     return this.actualHealth <= 0;
   }
 
-  public poisonLevel(): EffectLevel {
-    return this.poisoned?.level ?? 0;
-  }
-
-  public isBurned(): boolean {
-    return !!this.burned;
-  }
-
-  public isFrozen(): boolean {
-    return !!this.frozen;
-  }
-
   public isSpecialReady(): boolean {
     return this.special.ready(this.specialEnergy);
   }
@@ -226,7 +230,7 @@ export class FightingCard {
 
   public collectsDamages(damage: number): number {
     let causedDamages = Math.max(0, damage - this.defense);
-    if (this.isFrozen()) {
+    if (this.frozen) {
       const frozenState = this.frozen as CardStateFrozen;
       causedDamages = frozenState.applyDamageRate(causedDamages);
     }

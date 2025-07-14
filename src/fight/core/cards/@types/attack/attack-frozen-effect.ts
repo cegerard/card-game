@@ -19,7 +19,7 @@ export class FrozenAttackEffect implements AttackEffect {
     _card: FightingCard,
     _context: FightingContext,
   ): EffectResult {
-    if (defender.isFrozen()) return;
+    if (defender.frozenLevel > 0) return;
 
     const frozenState = new CardStateFrozen(
       this.level,
