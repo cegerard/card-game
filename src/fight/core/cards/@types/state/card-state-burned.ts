@@ -19,10 +19,6 @@ export class CardStateBurned implements CardState {
     this.remainingTurns--;
     const damage = card.addRealDamage(this.damageValue);
 
-    if (this.remainingTurns === 0) {
-      card.removeState(this);
-    }
-
     return {
       type: 'burn',
       card,

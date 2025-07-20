@@ -19,11 +19,23 @@ export class FrozenAttackEffect implements AttackEffect {
     _card: FightingCard,
     _context: FightingContext,
   ): EffectResult {
-    if (defender.frozenLevel > 0) return;
+    if (defender.frozenLevel >= this.level) return;
+    if (defender.burnLevel > this.level) return;
+
+    if (defender.burnLevel === this.level) {
+      defender.unBurn();
+      return;
+    }
+
+    let effectLevel = this.level;
+    if (defender.burnLevel > 0 && defender.burnLevel < this.level) {
+      defender.unBurn();
+      effectLevel = effectLevel - 1;
+    }
 
     const frozenState = new CardStateFrozen(
-      this.level,
-      this.computeFrozenTurns(),
+      effectLevel,
+      this.computeFrozenTurns(effectLevel),
       this.rate,
     );
     defender.setState(frozenState);
@@ -31,7 +43,7 @@ export class FrozenAttackEffect implements AttackEffect {
     return { type: this.type, card: defender };
   }
 
-  private computeFrozenTurns() {
-    return 2 * this.level - 1;
+  private computeFrozenTurns(effectLevel: EffectLevel): number {
+    return 2 * effectLevel - 1;
   }
 }

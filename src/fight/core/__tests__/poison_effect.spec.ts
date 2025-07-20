@@ -944,3 +944,110 @@ describe('Add Poison effect level 3', () => {
     });
   });
 });
+
+describe('Trigger card attack after poison dissipation', () => {
+  let card1: FightingCard;
+  let card2: FightingCard;
+  let player1: Player;
+  let player2: Player;
+  let fight: Fight;
+
+  beforeEach(() => {
+    card1 = createFightingCard({
+      attack: 50,
+      defense: 100,
+      health: 100,
+      speed: 100,
+      criticalChance: 0,
+      agility: 0,
+      skills: {
+        simpleAttack: {
+          damageRate: 1.0,
+        },
+      },
+    });
+    card2 = createFightingCard({
+      attack: 1,
+      defense: 0,
+      health: 100,
+      speed: 1,
+      criticalChance: 0,
+      agility: 0,
+    });
+
+    player1 = new Player('Player 1', [card1]);
+    player2 = new Player('Player 2', [card2]);
+
+    card1.setState(new CardStatePoisoned(1, 1, 10));
+
+    fight = new Fight(
+      player1,
+      player2,
+      new PlayerByPlayerCardSelector(player1, player2),
+    );
+  });
+
+  it('should kill the opponent', () => {
+    expect(fight.start()).toEqual({
+      1: {
+        attacker: card1.identityInfo,
+        damages: [
+          {
+            damage: 50,
+            defender: card2.identityInfo,
+            dodge: false,
+            isCritical: false,
+            remainingHealth: 50,
+          },
+        ],
+        energy: 10,
+        kind: 'attack',
+      },
+      2: {
+        kind: 'state_effect',
+        type: 'poison',
+        card: card1.identityInfo,
+        remainingTurns: 0,
+        damage: 10,
+        remainingHealth: 90,
+      },
+      3: {
+        attacker: card2.identityInfo,
+        damages: [
+          {
+            damage: 0,
+            defender: card1.identityInfo,
+            dodge: false,
+            isCritical: false,
+            remainingHealth: 90,
+          },
+        ],
+        energy: 10,
+        kind: 'attack',
+      },
+      4: {
+        attacker: card1.identityInfo,
+        damages: [
+          {
+            damage: 50,
+            defender: card2.identityInfo,
+            dodge: false,
+            isCritical: false,
+            remainingHealth: 0,
+          },
+        ],
+        energy: 20,
+        kind: 'attack',
+      },
+      5: {
+        card: card2.identityInfo,
+        kind: 'status_change',
+        status: 'dead',
+      },
+      6: {
+        kind: 'fight_end',
+        winner: 'Player 1',
+      },
+    });
+  });
+});

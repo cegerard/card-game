@@ -18,10 +18,6 @@ export class CardStateFrozen implements CardState {
   public applyState(card: FightingCard): StateResult {
     this.remainingTurns--;
 
-    if (this.remainingTurns === 0) {
-      card.removeState(this);
-    }
-
     return {
       type: 'freeze',
       card,

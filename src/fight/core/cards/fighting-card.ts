@@ -117,6 +117,10 @@ export class FightingCard {
     return this.frozen?.level ?? 0;
   }
 
+  public get isFrozen(): boolean {
+    return !!this.frozen;
+  }
+
   public get burnLevel(): EffectLevel {
     return this.burned?.level ?? 0;
   }
@@ -141,22 +145,12 @@ export class FightingCard {
     }
   }
 
-  public removeState(state: CardState): void {
-    if (state.type === 'poison') {
-      this.poisoned = undefined;
-    }
-
-    if (state.type === 'burn') {
-      this.burned = undefined;
-    }
-
-    if (state.type === 'freeze') {
-      this.frozen = undefined;
-    }
-  }
-
   public unFreeze(): void {
     this.frozen = undefined;
+  }
+
+  public unBurn(): void {
+    this.burned = undefined;
   }
 
   public launchAttack(context: FightingContext): AttackResult[] {
@@ -197,7 +191,12 @@ export class FightingCard {
       stateResults.push(this.burned.applyState(this));
     }
 
-    return stateResults;
+    this.frozen = this.frozen?.remainingTurns ? this.frozen : undefined;
+    this.poisoned = this.poisoned?.remainingTurns ? this.poisoned : undefined;
+    this.burned = this.burned?.remainingTurns ? this.burned : undefined;
+
+    // remove undefined states results
+    return stateResults.filter((result) => result !== undefined);
   }
 
   public fasterThan(defender: FightingCard | null): boolean {

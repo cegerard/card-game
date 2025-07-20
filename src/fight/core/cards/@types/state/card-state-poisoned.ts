@@ -16,12 +16,10 @@ export class CardStatePoisoned implements CardState {
   }
 
   public applyState(card: FightingCard): StateResult {
+    if (card.isFrozen) return;
+
     this.remainingTurns--;
     const damage = card.addRealDamage(this.damageValue);
-
-    if (this.remainingTurns === 0) {
-      card.removeState(this);
-    }
 
     return {
       type: 'poison',
