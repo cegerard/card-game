@@ -1,5 +1,10 @@
+import {
+  BuffResult,
+  BuffResults,
+} from '../cards/@types/action-result/buff-results';
 import { FightingContext } from '../cards/@types/fighting-context';
 import { FightingCard } from '../cards/fighting-card';
+import { SkillKind } from '../cards/skills/skill';
 import { Player } from '../player';
 import { Step, StepKind } from './@types/step';
 import { CardDeathSubscriber } from './card-death-subscriber';
@@ -27,6 +32,7 @@ export class TurnManager {
     const steps: Step[] = [];
 
     cards.forEach((card) => {
+      card.decreaseBuffDuration();
       this.processCardSkill(card, steps);
       this.processCardEffectStates(card, steps);
     });
@@ -35,16 +41,34 @@ export class TurnManager {
   }
 
   private processCardSkill(card: FightingCard, steps: Step[]) {
-    const results = card.launchSkill('turn-end', this.getFightingContext(card));
+    const appliedSkill = card.launchSkill(
+      'turn-end',
+      this.getFightingContext(card),
+    );
 
-    if (results !== null) {
+    if (appliedSkill?.skillKind === SkillKind.Healing) {
       steps.push({
         kind: StepKind.Healing,
         source: card.identityInfo,
-        heal: results.map((heal) => ({
+        heal: appliedSkill.results.map((heal) => ({
           target: heal.target,
           healed: heal.healAmount,
           remainingHealth: heal.remainingHealth,
+        })),
+        energy: card.actualEnergy,
+      });
+    }
+
+    if (appliedSkill?.skillKind === SkillKind.Buff) {
+      const buffResults = appliedSkill.results as BuffResults;
+      steps.push({
+        kind: StepKind.Buff,
+        source: card.identityInfo,
+        buffs: buffResults.map((result: BuffResult) => ({
+          target: result.target,
+          kind: result.buff.type,
+          value: result.buff.value,
+          remainingTurns: result.buff.duration,
         })),
         energy: card.actualEnergy,
       });

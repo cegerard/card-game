@@ -1,22 +1,29 @@
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 import { FightingCard } from '../fighting-card';
-import { Skill, SkillKind, SkillResults } from './skill';
 import { Trigger } from '../../trigger/trigger';
 import { FightingContext } from '../@types/fighting-context';
+import { BuffType } from '../@types/buff/buff-type';
+import { Skill, SkillKind, SkillResults } from './skill';
 
-export class Healing implements Skill {
-  public id = 'healing-skill';
+export class BuffSkill implements Skill {
+  public id = 'buff-skill';
 
-  private readonly effectRate: number;
+  private readonly buffType: BuffType;
+  private readonly buffRate: number;
+  private readonly duration: number;
   private readonly trigger: Trigger;
   private readonly targetingStrategy: TargetingCardStrategy;
 
   constructor(
-    effectRate: number,
+    buffType: BuffType,
+    buffRate: number,
+    duration: number,
     trigger: Trigger,
     targetingStrategy: TargetingCardStrategy,
   ) {
-    this.effectRate = effectRate;
+    this.buffType = buffType;
+    this.buffRate = buffRate;
+    this.duration = duration;
     this.trigger = trigger;
     this.targetingStrategy = targetingStrategy;
   }
@@ -28,17 +35,22 @@ export class Healing implements Skill {
       context.opponentPlayer,
     );
 
-    const healingResults = targetedCards.map((targetedCard) => {
+    const buffResults = targetedCards.map((targetedCard) => {
+      const buff = targetedCard.applyBuff(
+        this.buffType,
+        this.buffRate,
+        this.duration,
+      );
+
       return {
         target: targetedCard.identityInfo,
-        healAmount: targetedCard.heal(source.actualAttack * this.effectRate),
-        remainingHealth: targetedCard.actualHealth,
+        buff,
       };
     });
 
     return {
-      skillKind: SkillKind.Healing,
-      results: healingResults,
+      skillKind: SkillKind.Buff,
+      results: buffResults,
     };
   }
 

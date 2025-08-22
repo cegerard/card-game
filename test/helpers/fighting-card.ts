@@ -13,10 +13,12 @@ import { AllOwnerCards } from '../../src/fight/core/targeting-card-strategies/al
 import { Launcher } from '../../src/fight/core/targeting-card-strategies/launcher';
 import { AllAllies } from '../../src/fight/core/targeting-card-strategies/all-allies';
 import { Healing } from '../../src/fight/core/cards/skills/healing';
-import { Skill } from '../../src/fight/core/cards/skills/skill';
+import { BuffSkill } from '../../src/fight/core/cards/skills/buff-skill';
 import { TurnEnd } from '../../src/fight/core/trigger/turn-end';
 import { Trigger } from '../../src/fight/core/trigger/trigger';
 import { createEffect } from './effect';
+import { BuffType } from '../../src/fight/core/cards/@types/buff/buff-type';
+import { Skill } from 'src/fight/core/cards/skills/skill';
 
 type effect = {
   type: string;
@@ -48,11 +50,20 @@ type FightingCardParams = {
       kind?: string;
       effect?: effect;
     };
-    others?: {
-      effectRate: number;
-      trigger: string;
-      targetingStrategy: string;
-    }[];
+    others?: (
+      | {
+          effectRate: number;
+          trigger: string;
+          targetingStrategy: string;
+        }
+      | {
+          buffType: BuffType;
+          buffRate: number;
+          duration: number;
+          trigger: string;
+          targetingStrategy: string;
+        }
+    )[];
   };
 };
 
@@ -150,18 +161,37 @@ function createSpecialHealing(params: {
 }
 
 function createsSkills(
-  params: {
-    effectRate: number;
-    trigger: string;
-    targetingStrategy: string;
-  }[],
+  params: (
+    | {
+        effectRate: number;
+        trigger: string;
+        targetingStrategy: string;
+      }
+    | {
+        buffType: BuffType;
+        buffRate: number;
+        duration: number;
+        trigger: string;
+        targetingStrategy: string;
+      }
+  )[],
 ): Skill[] {
   return params.map((skill) => {
-    return new Healing(
-      skill.effectRate,
-      createTrigger(skill.trigger),
-      createTargetingStrategy(skill.targetingStrategy),
-    );
+    if ('effectRate' in skill) {
+      return new Healing(
+        skill.effectRate,
+        createTrigger(skill.trigger),
+        createTargetingStrategy(skill.targetingStrategy),
+      );
+    } else {
+      return new BuffSkill(
+        skill.buffType,
+        skill.buffRate,
+        skill.duration,
+        createTrigger(skill.trigger),
+        createTargetingStrategy(skill.targetingStrategy),
+      );
+    }
   });
 }
 

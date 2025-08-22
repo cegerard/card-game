@@ -18,6 +18,14 @@ export enum SpecialKind {
 
 export enum SkillKind {
   HEALING = 'HEALING',
+  BUFF = 'BUFF',
+}
+
+export enum BuffType {
+  ATTACK = 'attack',
+  DEFENSE = 'defense',
+  AGILITY = 'agility',
+  ACCURACY = 'accuracy',
 }
 
 export enum Effect {
@@ -98,7 +106,7 @@ class SimpleAttackDto {
   effect?: EffectDto;
 }
 
-class OtherSkillDto {
+export class OtherSkillDto {
   @IsEnum(SkillKind)
   kind: SkillKind;
 
@@ -113,6 +121,15 @@ class OtherSkillDto {
 
   @IsEnum(TriggerEvent)
   event: TriggerEvent;
+
+  // Buff property
+  @IsOptional()
+  @IsEnum(BuffType)
+  buffType?: BuffType;
+
+  @IsOptional()
+  @IsNumber()
+  duration?: number;
 }
 
 class SkillsDto {

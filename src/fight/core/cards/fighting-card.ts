@@ -1,16 +1,17 @@
 import { AttackResult } from './@types/action-result/attack-result';
 import { CardInfo } from './@types/card-info';
 import { FightingContext } from './@types/fighting-context';
-import { HealingResults } from './@types/action-result/healing-results';
 import { SpecialResult } from './@types/action-result/special-result';
 import { DodgeBehavior } from './behaviors/dodge-behaviors';
 import { SimpleAttack } from './skills/simple-attack';
-import { Skill } from './skills/skill';
 import { Special } from './skills/special';
 import { CardState } from './@types/state/card-state';
 import { StateResult } from './@types/action-result/state-result';
 import { CardStateFrozen } from './@types/state/card-state-frozen';
 import { EffectLevel } from './@types/attack/effect-level';
+import { Buff } from './@types/buff/buff';
+import { Skill, SkillResults } from './skills/skill';
+import { BuffType } from './@types/buff/buff-type';
 
 export class FightingCard {
   // Info
@@ -30,6 +31,9 @@ export class FightingCard {
   private specialEnergy: number = 0;
   private receivedDamages: number = 0;
   private receivedHeal: number = 0;
+
+  // Buffs
+  private buffs: Buff[] = [];
 
   // Skills
   private simpleAttack: SimpleAttack;
@@ -94,11 +98,31 @@ export class FightingCard {
   }
 
   public get actualAccuracy(): number {
-    return this.accuracy;
+    const accuracyBuffs = this.buffs
+      .filter((buff) => buff.type === 'accuracy')
+      .reduce((sum, buff) => sum + buff.value, 0);
+    return this.accuracy + accuracyBuffs;
   }
 
   public get actualAttack(): number {
-    return this.attack;
+    const attackBuffs = this.buffs
+      .filter((buff) => buff.type === 'attack')
+      .reduce((sum, buff) => sum + buff.value, 0);
+    return this.attack + attackBuffs;
+  }
+
+  public get actualDefense(): number {
+    const defenseBuffs = this.buffs
+      .filter((buff) => buff.type === 'defense')
+      .reduce((sum, buff) => sum + buff.value, 0);
+    return this.defense + defenseBuffs;
+  }
+
+  public get actualAgility(): number {
+    const agilityBuffs = this.buffs
+      .filter((buff) => buff.type === 'agility')
+      .reduce((sum, buff) => sum + buff.value, 0);
+    return this.agility + agilityBuffs;
   }
 
   public get actualEnergy(): number {
@@ -164,7 +188,7 @@ export class FightingCard {
   public launchSkill(
     trigger: string,
     context: FightingContext,
-  ): HealingResults | null {
+  ): SkillResults | null {
     const skill = this.skills.find((s) => s.isTriggered(trigger));
 
     if (!skill) return null;
@@ -257,6 +281,41 @@ export class FightingCard {
   }
 
   public dodge(attackerAccuracy: number): boolean {
-    return this.dodgeBehavior.dodge(this.agility, attackerAccuracy);
+    return this.dodgeBehavior.dodge(this.actualAgility, attackerAccuracy);
+  }
+
+  public applyBuff(
+    buffType: BuffType,
+    buffRate: number,
+    duration: number,
+  ): Buff {
+    const buff: Buff = {
+      type: buffType,
+      value: this.computeBuffValue(buffType, buffRate),
+      duration: duration,
+    };
+
+    this.buffs.push(buff);
+
+    return buff;
+  }
+
+  public decreaseBuffDuration(): void {
+    this.buffs = this.buffs
+      .map((buff) => ({ ...buff, duration: buff.duration - 1 }))
+      .filter((buff) => buff.duration > 0);
+  }
+
+  public getActiveBuffs(): Buff[] {
+    return [...this.buffs];
+  }
+
+  private computeBuffValue(buffType: BuffType, buffRate: number): number {
+    switch (buffType) {
+      case 'attack':
+        return buffRate * this.attack;
+      case 'defense':
+        return buffRate * this.defense;
+    }
   }
 }

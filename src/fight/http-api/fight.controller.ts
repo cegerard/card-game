@@ -14,6 +14,8 @@ import {
   FightDataDto,
   FightingCardDto,
   SpecialKind,
+  SkillKind,
+  BuffType,
 } from './dto/fight-data.dto';
 import { FightingCard } from '../core/cards/fighting-card';
 import { SpecialAttack } from '../core/cards/skills/special-attack';
@@ -23,6 +25,7 @@ import { buildDodgeStrategy } from './dodge-strategy-factory';
 import { Special } from '../core/cards/skills/special';
 import { SpecialHealing } from '../core/cards/skills/special-healing';
 import { Healing } from '../core/cards/skills/healing';
+import { BuffSkill } from '../core/cards/skills/buff-skill';
 import { buildTriggerStrategy } from './trigger-factory';
 import { PoisonedAttackEffect } from '../core/cards/@types/attack/attack-poisoned-effect';
 import { EffectLevel } from '../core/cards/@types/attack/effect-level';
@@ -34,6 +37,7 @@ import { PlayerByPlayerCardSelector } from '../core/fight-simulator/card-selecto
 import { SpeedWeightedCardSelector } from '../core/fight-simulator/card-selectors/speed-weighted-card-pool';
 import { Player } from '../core/player';
 import { FightSimulator } from '../core/fight-simulator/@types/fight-simulator';
+import { Skill } from '../core/cards/skills/skill';
 
 @Controller()
 @UsePipes(
@@ -56,8 +60,12 @@ export class FightController {
   @Post('fight')
   @HttpCode(200)
   startFight(@Body() fightData: FightDataDto): FightResult {
-    const player1Deck = fightData.player1.deck.map(this.convertCardDtoToCard);
-    const player2Deck = fightData.player2.deck.map(this.convertCardDtoToCard);
+    const player1Deck = fightData.player1.deck.map((card) =>
+      this.convertCardDtoToCard(card),
+    );
+    const player2Deck = fightData.player2.deck.map((card) =>
+      this.convertCardDtoToCard(card),
+    );
 
     const player1 = new Player(fightData.player1.name, player1Deck);
     const player2 = new Player(fightData.player2.name, player2Deck);
@@ -148,17 +156,50 @@ export class FightController {
         special,
         simpleAttack,
         others: cardData.skills.others.map((skill) => {
-          return new Healing(
-            skill.rate,
-            buildTriggerStrategy(skill.event),
-            buildTargetingStrategy(skill.targetingStrategy),
-          );
+          return this.createOtherSkill(skill);
         }),
       },
       {
         dodge: buildDodgeStrategy(cardData.behaviors.dodge),
       },
     );
+  }
+
+  private createOtherSkill(skillData: any): Skill {
+    switch (skillData.kind) {
+      case SkillKind.HEALING:
+        return new Healing(
+          skillData.rate,
+          buildTriggerStrategy(skillData.event),
+          buildTargetingStrategy(skillData.targetingStrategy),
+        );
+      case SkillKind.BUFF:
+        if (!skillData.buffType || !skillData.duration) {
+          throw new Error('Buff skill requires buffType and duration');
+        }
+        return new BuffSkill(
+          this.mapBuffType(skillData.buffType),
+          skillData.rate,
+          skillData.duration,
+          buildTriggerStrategy(skillData.event),
+          buildTargetingStrategy(skillData.targetingStrategy),
+        );
+      default:
+        throw new Error(`Unknown skill kind: ${skillData.kind}`);
+    }
+  }
+
+  private mapBuffType(
+    buffType: BuffType,
+  ): import('../core/cards/@types/buff/buff-type').BuffType {
+    const BUFF_TYPE_MAP = {
+      [BuffType.ATTACK]: 'attack' as const,
+      [BuffType.DEFENSE]: 'defense' as const,
+      [BuffType.AGILITY]: 'agility' as const,
+      [BuffType.ACCURACY]: 'accuracy' as const,
+    };
+
+    return BUFF_TYPE_MAP[buffType];
   }
 
   private getSelectorStrategy(

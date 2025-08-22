@@ -1,6 +1,17 @@
 import { FightingCard } from '../fighting-card';
 import { HealingResults } from '../@types/action-result/healing-results';
+import { BuffResults } from '../@types/action-result/buff-results';
 import { FightingContext } from '../@types/fighting-context';
+
+export enum SkillKind {
+  Healing = 'healing',
+  Buff = 'buff',
+}
+
+export type SkillResults = {
+  skillKind: SkillKind;
+  results: HealingResults | BuffResults;
+};
 
 export interface Skill {
   id: string;
@@ -9,10 +20,10 @@ export interface Skill {
    * Launches the skill.
    *
    * @param source - The card that is using the skill.
-   * @param target - The card that is being targeted by the skill.
+   * @param context - The fighting context.
    * @returns The result of the skill.
    */
-  launch(source: FightingCard, context: FightingContext): HealingResults;
+  launch(source: FightingCard, context: FightingContext): SkillResults;
 
   /**
    * Checks if the skill is triggered.
