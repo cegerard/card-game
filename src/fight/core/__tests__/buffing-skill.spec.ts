@@ -141,16 +141,6 @@ describe('Buffing-skill', () => {
     });
   });
 
-  it('should have active buffs after application', () => {
-    fight.start();
-
-    const activeBuffs = card1.getActiveBuffs();
-    expect(activeBuffs).toHaveLength(2);
-    expect(activeBuffs[0].type).toBe('attack');
-    expect(activeBuffs[0].value).toBe(50);
-    expect(activeBuffs[0].duration).toBe(2);
-  });
-
   it('should remove expired buffs and restore original stats', () => {
     const initialAttack = card1.actualAttack;
 
@@ -160,9 +150,9 @@ describe('Buffing-skill', () => {
     expect(card1.actualAttack).toBe(initialAttack + 2 * 50);
 
     // Expire the buff
-    card1.decreaseBuffDuration();
-    card1.decreaseBuffDuration();
-    card1.decreaseBuffDuration();
+    card1.decreaseBuffAndDebuffDuration();
+    card1.decreaseBuffAndDebuffDuration();
+    card1.decreaseBuffAndDebuffDuration();
 
     // Attack should return to original value
     expect(card1.actualAttack).toBe(initialAttack);

@@ -191,7 +191,7 @@ export class FightController {
 
   private mapBuffType(
     buffType: BuffType,
-  ): import('../core/cards/@types/buff/buff-type').BuffType {
+  ): import('../core/cards/@types/buff/type').BuffType {
     const BUFF_TYPE_MAP = {
       [BuffType.ATTACK]: 'attack' as const,
       [BuffType.DEFENSE]: 'defense' as const,

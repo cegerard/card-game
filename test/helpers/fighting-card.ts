@@ -14,10 +14,14 @@ import { Launcher } from '../../src/fight/core/targeting-card-strategies/launche
 import { AllAllies } from '../../src/fight/core/targeting-card-strategies/all-allies';
 import { Healing } from '../../src/fight/core/cards/skills/healing';
 import { BuffSkill } from '../../src/fight/core/cards/skills/buff-skill';
+import { DebuffSkill } from '../../src/fight/core/cards/skills/debuff-skill';
 import { TurnEnd } from '../../src/fight/core/trigger/turn-end';
 import { Trigger } from '../../src/fight/core/trigger/trigger';
 import { createEffect } from './effect';
-import { BuffType } from '../../src/fight/core/cards/@types/buff/buff-type';
+import {
+  BuffType,
+  DebuffType,
+} from '../../src/fight/core/cards/@types/buff/type';
 import { Skill } from 'src/fight/core/cards/skills/skill';
 
 type effect = {
@@ -59,6 +63,13 @@ type FightingCardParams = {
       | {
           buffType: BuffType;
           buffRate: number;
+          duration: number;
+          trigger: string;
+          targetingStrategy: string;
+        }
+      | {
+          debuffType: DebuffType;
+          debuffRate: number;
           duration: number;
           trigger: string;
           targetingStrategy: string;
@@ -174,6 +185,13 @@ function createsSkills(
         trigger: string;
         targetingStrategy: string;
       }
+    | {
+        debuffType: DebuffType;
+        debuffRate: number;
+        duration: number;
+        trigger: string;
+        targetingStrategy: string;
+      }
   )[],
 ): Skill[] {
   return params.map((skill) => {
@@ -183,10 +201,18 @@ function createsSkills(
         createTrigger(skill.trigger),
         createTargetingStrategy(skill.targetingStrategy),
       );
-    } else {
+    } else if ('buffType' in skill) {
       return new BuffSkill(
         skill.buffType,
         skill.buffRate,
+        skill.duration,
+        createTrigger(skill.trigger),
+        createTargetingStrategy(skill.targetingStrategy),
+      );
+    } else {
+      return new DebuffSkill(
+        skill.debuffType,
+        skill.debuffRate,
         skill.duration,
         createTrigger(skill.trigger),
         createTargetingStrategy(skill.targetingStrategy),

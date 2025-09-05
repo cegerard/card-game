@@ -2,6 +2,10 @@ import {
   BuffResult,
   BuffResults,
 } from '../cards/@types/action-result/buff-results';
+import {
+  DebuffResult,
+  DebuffResults,
+} from '../cards/@types/action-result/debuff-results';
 import { FightingContext } from '../cards/@types/fighting-context';
 import { FightingCard } from '../cards/fighting-card';
 import { SkillKind } from '../cards/skills/skill';
@@ -32,7 +36,7 @@ export class TurnManager {
     const steps: Step[] = [];
 
     cards.forEach((card) => {
-      card.decreaseBuffDuration();
+      card.decreaseBuffAndDebuffDuration();
       this.processCardSkill(card, steps);
       this.processCardEffectStates(card, steps);
     });
@@ -69,6 +73,21 @@ export class TurnManager {
           kind: result.buff.type,
           value: result.buff.value,
           remainingTurns: result.buff.duration,
+        })),
+        energy: card.actualEnergy,
+      });
+    }
+
+    if (appliedSkill?.skillKind === SkillKind.Debuff) {
+      const debuffResults = appliedSkill.results as DebuffResults;
+      steps.push({
+        kind: StepKind.Debuff,
+        source: card.identityInfo,
+        debuffs: debuffResults.map((result: DebuffResult) => ({
+          target: result.target,
+          kind: result.debuff.type,
+          value: result.debuff.value,
+          remainingTurns: result.debuff.duration,
         })),
         energy: card.actualEnergy,
       });

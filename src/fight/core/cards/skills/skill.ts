@@ -1,16 +1,18 @@
 import { FightingCard } from '../fighting-card';
 import { HealingResults } from '../@types/action-result/healing-results';
 import { BuffResults } from '../@types/action-result/buff-results';
+import { DebuffResults } from '../@types/action-result/debuff-results';
 import { FightingContext } from '../@types/fighting-context';
 
 export enum SkillKind {
   Healing = 'healing',
   Buff = 'buff',
+  Debuff = 'debuff',
 }
 
 export type SkillResults = {
   skillKind: SkillKind;
-  results: HealingResults | BuffResults;
+  results: HealingResults | BuffResults | DebuffResults;
 };
 
 export interface Skill {

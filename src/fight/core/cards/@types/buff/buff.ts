@@ -1,7 +1,7 @@
-import { BuffType } from './buff-type';
+import { BuffType } from './type';
 
-export interface Buff {
+export type Buff = {
   type: BuffType;
   value: number;
   duration: number;
-}
+};

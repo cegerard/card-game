@@ -1,17 +1,17 @@
-import { BuffType } from '../../cards/@types/buff/type';
+import { DebuffType } from '../../cards/@types/buff/type';
 import { CardInfo } from '../../cards/@types/card-info';
 import { StepKind } from './step';
 
-type Buff = {
+type Debuff = {
   target: CardInfo;
-  kind: BuffType;
+  kind: DebuffType;
   value: number;
   remainingTurns: number;
 };
 
-export type BuffReport = {
-  kind: StepKind.Buff;
+export type DebuffReport = {
+  kind: StepKind.Debuff;
   source: CardInfo;
-  buffs: Buff[];
+  debuffs: Debuff[];
   energy: number;
 };

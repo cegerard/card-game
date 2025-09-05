@@ -10,8 +10,9 @@ import { StateResult } from './@types/action-result/state-result';
 import { CardStateFrozen } from './@types/state/card-state-frozen';
 import { EffectLevel } from './@types/attack/effect-level';
 import { Buff } from './@types/buff/buff';
+import { Debuff } from './@types/buff/debuff';
 import { Skill, SkillResults } from './skills/skill';
-import { BuffType } from './@types/buff/buff-type';
+import { BuffType, DebuffType } from './@types/buff/type';
 
 export class FightingCard {
   // Info
@@ -34,6 +35,9 @@ export class FightingCard {
 
   // Buffs
   private buffs: Buff[] = [];
+
+  // Debuffs
+  private debuffs: Debuff[] = [];
 
   // Skills
   private simpleAttack: SimpleAttack;
@@ -101,28 +105,40 @@ export class FightingCard {
     const accuracyBuffs = this.buffs
       .filter((buff) => buff.type === 'accuracy')
       .reduce((sum, buff) => sum + buff.value, 0);
-    return this.accuracy + accuracyBuffs;
+    const accuracyDebuffs = this.debuffs
+      .filter((debuff) => debuff.type === 'accuracy')
+      .reduce((sum, debuff) => sum + debuff.value, 0);
+    return Math.max(0, this.accuracy + accuracyBuffs - accuracyDebuffs);
   }
 
   public get actualAttack(): number {
     const attackBuffs = this.buffs
       .filter((buff) => buff.type === 'attack')
       .reduce((sum, buff) => sum + buff.value, 0);
-    return this.attack + attackBuffs;
+    const attackDebuffs = this.debuffs
+      .filter((debuff) => debuff.type === 'attack')
+      .reduce((sum, debuff) => sum + debuff.value, 0);
+    return Math.max(0, this.attack + attackBuffs - attackDebuffs);
   }
 
   public get actualDefense(): number {
     const defenseBuffs = this.buffs
       .filter((buff) => buff.type === 'defense')
       .reduce((sum, buff) => sum + buff.value, 0);
-    return this.defense + defenseBuffs;
+    const defenseDebuffs = this.debuffs
+      .filter((debuff) => debuff.type === 'defense')
+      .reduce((sum, debuff) => sum + debuff.value, 0);
+    return Math.max(0, this.defense + defenseBuffs - defenseDebuffs);
   }
 
   public get actualAgility(): number {
     const agilityBuffs = this.buffs
       .filter((buff) => buff.type === 'agility')
       .reduce((sum, buff) => sum + buff.value, 0);
-    return this.agility + agilityBuffs;
+    const agilityDebuffs = this.debuffs
+      .filter((debuff) => debuff.type === 'agility')
+      .reduce((sum, debuff) => sum + debuff.value, 0);
+    return Math.max(0, this.agility + agilityBuffs - agilityDebuffs);
   }
 
   public get actualEnergy(): number {
@@ -291,7 +307,7 @@ export class FightingCard {
   ): Buff {
     const buff: Buff = {
       type: buffType,
-      value: this.computeBuffValue(buffType, buffRate),
+      value: this.computeAttributeModifierValue(buffType, buffRate),
       duration: duration,
     };
 
@@ -300,22 +316,45 @@ export class FightingCard {
     return buff;
   }
 
-  public decreaseBuffDuration(): void {
+  public decreaseBuffAndDebuffDuration(): void {
     this.buffs = this.buffs
       .map((buff) => ({ ...buff, duration: buff.duration - 1 }))
       .filter((buff) => buff.duration > 0);
+
+    this.debuffs = this.debuffs
+      .map((debuff) => ({ ...debuff, duration: debuff.duration - 1 }))
+      .filter((debuff) => debuff.duration > 0);
   }
 
-  public getActiveBuffs(): Buff[] {
-    return [...this.buffs];
+  public applyDebuff(
+    debuffType: DebuffType,
+    debuffRate: number,
+    duration: number,
+  ): Debuff {
+    const debuff: Debuff = {
+      type: debuffType,
+      value: this.computeAttributeModifierValue(debuffType, debuffRate),
+      duration: duration,
+    };
+
+    this.debuffs.push(debuff);
+
+    return debuff;
   }
 
-  private computeBuffValue(buffType: BuffType, buffRate: number): number {
-    switch (buffType) {
+  private computeAttributeModifierValue(
+    type: BuffType | DebuffType,
+    rate: number,
+  ): number {
+    switch (type) {
       case 'attack':
-        return buffRate * this.attack;
+        return rate * this.attack;
       case 'defense':
-        return buffRate * this.defense;
+        return rate * this.defense;
+      case 'agility':
+        return rate * this.agility;
+      case 'accuracy':
+        return rate * this.accuracy;
     }
   }
 }

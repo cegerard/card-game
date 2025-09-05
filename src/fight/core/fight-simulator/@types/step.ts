@@ -1,4 +1,5 @@
 import { BuffReport } from './buff-report';
+import { DebuffReport } from './debuff-report';
 import { DamageReport } from './damage-report';
 import { HealingReport } from './healing-report';
 import { StateEffectReport } from './state-effect-report';
@@ -14,6 +15,7 @@ export enum StepKind {
   Winner = 'winner',
   StateEffect = 'state_effect',
   Buff = 'buff',
+  Debuff = 'debuff',
 }
 
 export type Step = { kind: StepKind } & (
@@ -23,4 +25,5 @@ export type Step = { kind: StepKind } & (
   | WinnerReport
   | StateEffectReport
   | BuffReport
+  | DebuffReport
 );
