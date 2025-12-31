@@ -1,0 +1,1 @@
+/home/cgerard/dev/card-game/.aidd/prompts/10_maintenance/debug.prompt.md

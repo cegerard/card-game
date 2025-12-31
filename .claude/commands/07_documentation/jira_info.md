@@ -1,0 +1,1 @@
+/home/cgerard/dev/card-game/.aidd/prompts/07_documentation/jira_info.prompt.md

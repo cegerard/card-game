@@ -1,0 +1,1 @@
+/home/cgerard/dev/card-game/.aidd/prompts/04_code/run_projection.prompt.md

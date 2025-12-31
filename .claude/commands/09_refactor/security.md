@@ -1,0 +1,1 @@
+/home/cgerard/dev/card-game/.aidd/prompts/09_refactor/security.prompt.md

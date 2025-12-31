@@ -1,0 +1,1 @@
+/home/cgerard/dev/card-game/.aidd/prompts/03_plan/elaborate.prompt.md

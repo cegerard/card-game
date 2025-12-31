@@ -1,0 +1,1 @@
+/home/cgerard/dev/card-game/.aidd/prompts/02_context/extract_flow.prompt.md
