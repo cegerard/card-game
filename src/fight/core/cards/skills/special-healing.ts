@@ -1,8 +1,8 @@
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 import { FightingContext } from '../@types/fighting-context';
-import { HealingResult } from '../@types/action-result/healing-result';
 import { FightingCard } from '../fighting-card';
 import { Special } from './special';
+import { SpecialResult } from '../@types/action-result/special-result';
 
 const ENERGY_INCREASE_FACTOR = 10;
 
@@ -17,21 +17,20 @@ export class SpecialHealing implements Special {
     return actualEnergy >= this.energyNeeded;
   }
 
-  public launch(
-    source: FightingCard,
-    context: FightingContext,
-  ): HealingResult[] {
+  public launch(source: FightingCard, context: FightingContext): SpecialResult {
     const targetedCards = this.targetingStrategy.targetedCards(
       source,
       context.sourcePlayer,
       context.opponentPlayer,
     );
 
-    return targetedCards.map((target) => {
+    const actionResults = targetedCards.map((target) => {
       const healed = target.heal(source.actualAttack * this.rate);
 
       return { healed, target };
     });
+
+    return { actionResults, buffResults: [] };
   }
 
   public increaseEnergy(actualEnergy: number): number {

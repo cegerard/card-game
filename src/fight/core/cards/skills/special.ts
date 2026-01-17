@@ -19,9 +19,9 @@ export interface Special {
    *
    * @param source - The card that is using the special skill.
    * @param context - The context of the fight.
-   * @returns The result of the special skill attack as a array of result.
+   * @returns The result of the special skill attack.
    */
-  launch(source: FightingCard, context: FightingContext): SpecialResult[];
+  launch(source: FightingCard, context: FightingContext): SpecialResult;
 
   /**
    * Increases the current energy level.

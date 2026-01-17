@@ -88,6 +88,22 @@ class SpecialDto {
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => EffectDto)
   effect?: EffectDto;
+
+  @IsOptional()
+  @IsEnum(BuffType)
+  buffType?: BuffType;
+
+  @IsOptional()
+  @IsNumber()
+  buffRate?: number;
+
+  @IsOptional()
+  @IsNumber()
+  buffDuration?: number;
+
+  @IsOptional()
+  @IsEnum(TargetingStrategy)
+  buffTargetingStrategy?: TargetingStrategy;
 }
 
 class SimpleAttackDto {

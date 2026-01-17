@@ -107,11 +107,22 @@ export class FightController {
     }
 
     if (cardData.skills.special.kind === SpecialKind.ATTACK) {
+      const buffTargetingStrategy = cardData.skills.special
+        .buffTargetingStrategy
+        ? buildTargetingStrategy(cardData.skills.special.buffTargetingStrategy)
+        : undefined;
+
       special = new SpecialAttack(
         cardData.skills.special.rate,
         cardData.skills.special.energy,
         buildTargetingStrategy(cardData.skills.special.targetingStrategy),
         specialEffect,
+        cardData.skills.special.buffType
+          ? this.mapBuffType(cardData.skills.special.buffType)
+          : undefined,
+        cardData.skills.special.buffRate,
+        cardData.skills.special.buffDuration,
+        buffTargetingStrategy,
       );
     }
 

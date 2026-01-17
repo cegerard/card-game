@@ -8,6 +8,7 @@ import { AttackResult } from '../cards/@types/action-result/attack-result';
 import { HealingReport } from '../fight-simulator/@types/healing-report';
 import { HealingResult } from '../cards/@types/action-result/healing-result';
 import { FightingContext } from '../cards/@types/fighting-context';
+import { BuffReport } from '../fight-simulator/@types/buff-report';
 
 type SplittedSteps = {
   actionSteps: Step[];
@@ -109,16 +110,16 @@ export class ActionStage {
       statusChanges: [],
     };
 
-    const specialResults = card.launchSpecial(
-      this.getFightingContext(card),
-    ) as AttackResult[];
-    specialResults.forEach((specialResult) => {
-      const targetedCard = specialResult.defender;
+    const specialResults = card.launchSpecial(this.getFightingContext(card));
+    const actionResults = specialResults.actionResults as AttackResult[];
+
+    actionResults.forEach((attackResult) => {
+      const targetedCard = attackResult.defender;
       result.attack.damages.push({
         defender: targetedCard.identityInfo,
-        damage: specialResult.damage,
-        isCritical: specialResult.isCritical,
-        dodge: specialResult.dodge,
+        damage: attackResult.damage,
+        isCritical: attackResult.isCritical,
+        dodge: attackResult.dodge,
         remainingHealth: targetedCard.actualHealth,
       });
 
@@ -130,13 +131,29 @@ export class ActionStage {
         });
       }
 
-      if (specialResult.effect) {
+      if (attackResult.effect) {
         result.statusChanges.push({
-          status: specialResult.effect.type,
-          card: specialResult.effect.card.identityInfo,
+          status: attackResult.effect.type,
+          card: attackResult.effect.card.identityInfo,
         });
       }
     });
+
+    if (specialResults.buffResults.length > 0) {
+      const buffReport: BuffReport = {
+        kind: StepKind.Buff,
+        source: card.identityInfo,
+        buffs: specialResults.buffResults.map((buffResult) => ({
+          target: buffResult.target,
+          kind: buffResult.buff.type,
+          value: buffResult.buff.value,
+          remainingTurns: buffResult.buff.duration,
+        })),
+        energy: 0,
+      };
+
+      result.buffReport = buffReport;
+    }
 
     return result;
   }
@@ -149,9 +166,8 @@ export class ActionStage {
       heal: [],
     };
 
-    const healingResults = card.launchSpecial(
-      this.getFightingContext(card),
-    ) as HealingResult[];
+    const specialResults = card.launchSpecial(this.getFightingContext(card));
+    const healingResults = specialResults.actionResults as HealingResult[];
 
     healingResults.forEach((healingResult) => {
       result.heal.push({
@@ -172,6 +188,10 @@ export class ActionStage {
             kind: report.kind,
             ...report.attack,
           });
+
+          if (report.buffReport) {
+            acc.actionSteps.push(report.buffReport);
+          }
 
           report.statusChanges.forEach((statusChange) => {
             acc.statusChangeSteps.push({

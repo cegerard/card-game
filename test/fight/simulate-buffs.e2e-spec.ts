@@ -12,6 +12,7 @@ describe('Simulate fight with buffs', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useLogger(false);
     await app.init();
   });
 
@@ -178,19 +179,28 @@ describe('Simulate fight with buffs', () => {
       .post('/fight')
       .send(fightDataWithBuffs)
       .expect(200)
-      .then((response) => {
-        expect(response.body).toHaveProperty('winner');
-        expect(response.body).toHaveProperty('rounds');
-        expect(response.body.rounds).toBeInstanceOf(Array);
-        expect(response.body.rounds.length).toBeGreaterThan(0);
+      .then((res) => {
+        expect(res.body[Object.keys(res.body).length].kind).toBe('fight_end');
 
-        const hasSkillResults = response.body.rounds.some((round: any) =>
-          round.turns?.some(
-            (turn: any) => turn.skillsResults && turn.skillsResults.length > 0,
-          ),
-        );
-
-        expect(hasSkillResults).toBe(true);
+        expect(res.body[3]).toEqual({
+          buffs: [
+            {
+              kind: 'attack',
+              remainingTurns: 4,
+              target: {
+                deckIdentity: 'Team Buffer-1',
+                name: 'DPS Warrior',
+              },
+              value: 12,
+            },
+          ],
+          energy: 10,
+          kind: 'buff',
+          source: {
+            deckIdentity: 'Team Buffer-1',
+            name: 'DPS Warrior',
+          },
+        });
       });
   });
 

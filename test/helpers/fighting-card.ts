@@ -53,6 +53,10 @@ type FightingCardParams = {
       targetingStrategy?: string;
       kind?: string;
       effect?: effect;
+      buffType?: BuffType;
+      buffRate?: number;
+      buffDuration?: number;
+      buffTargetingStrategy?: string;
     };
     others?: (
       | {
@@ -140,6 +144,10 @@ function createSpecialAttack(params: {
   energy?: number;
   targetingStrategy?: string;
   effect?: effect;
+  buffType?: BuffType;
+  buffRate?: number;
+  buffDuration?: number;
+  buffTargetingStrategy?: string;
 }): SpecialAttack {
   const damageRate =
     params.damageRate ?? faker.number.int({ min: 2.5, max: 8.0 });
@@ -147,11 +155,22 @@ function createSpecialAttack(params: {
   const targetingStrategy = params.targetingStrategy ?? 'position-based';
   const effect = params.effect ? createEffect(params.effect) : undefined;
 
+  const buffType = params.buffType;
+  const buffRate = params.buffRate;
+  const buffDuration = params.buffDuration;
+  const buffTargetingStrategy = params.buffTargetingStrategy
+    ? createTargetingStrategy(params.buffTargetingStrategy)
+    : undefined;
+
   return new SpecialAttack(
     damageRate,
     energy,
     createTargetingStrategy(targetingStrategy),
     effect,
+    buffType,
+    buffRate,
+    buffDuration,
+    buffTargetingStrategy,
   );
 }
 
