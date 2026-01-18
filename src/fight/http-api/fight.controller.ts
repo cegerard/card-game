@@ -32,6 +32,7 @@ import { EffectLevel } from '../core/cards/@types/attack/effect-level';
 import { AttackEffect } from '../core/cards/@types/attack/attack-effect';
 import { BurnedAttackEffect } from '../core/cards/@types/attack/attack-burned-effect';
 import { FrozenAttackEffect } from '../core/cards/@types/attack/attack-frozen-effect';
+import { BuffApplication } from '../core/cards/@types/buff/buff-application';
 import { CardSelector } from '../core/fight-simulator/card-selectors/card-selector';
 import { PlayerByPlayerCardSelector } from '../core/fight-simulator/card-selectors/player-by-player';
 import { SpeedWeightedCardSelector } from '../core/fight-simulator/card-selectors/speed-weighted-card-pool';
@@ -107,22 +108,24 @@ export class FightController {
     }
 
     if (cardData.skills.special.kind === SpecialKind.ATTACK) {
-      const buffTargetingStrategy = cardData.skills.special
-        .buffTargetingStrategy
-        ? buildTargetingStrategy(cardData.skills.special.buffTargetingStrategy)
-        : undefined;
+      let buffApplication;
+      if (cardData.skills.special.buffApplication) {
+        buffApplication = new BuffApplication(
+          this.mapBuffType(cardData.skills.special.buffApplication.type),
+          cardData.skills.special.buffApplication.rate,
+          cardData.skills.special.buffApplication.duration,
+          buildTargetingStrategy(
+            cardData.skills.special.buffApplication.targetingStrategy,
+          ),
+        );
+      }
 
       special = new SpecialAttack(
         cardData.skills.special.rate,
         cardData.skills.special.energy,
         buildTargetingStrategy(cardData.skills.special.targetingStrategy),
         specialEffect,
-        cardData.skills.special.buffType
-          ? this.mapBuffType(cardData.skills.special.buffType)
-          : undefined,
-        cardData.skills.special.buffRate,
-        cardData.skills.special.buffDuration,
-        buffTargetingStrategy,
+        buffApplication,
       );
     }
 

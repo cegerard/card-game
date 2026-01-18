@@ -33,6 +33,7 @@ Not implemented - API is currently open without authentication.
 Simulates a turn-based card battle between two players.
 
 **Request Body** (`FightDataDto`):
+
 ```typescript
 {
   player1: {
@@ -48,6 +49,7 @@ Simulates a turn-based card battle between two players.
 ```
 
 **FightingCardDto Structure**:
+
 ```typescript
 {
   name: string,
@@ -72,6 +74,7 @@ Simulates a turn-based card battle between two players.
 ```
 
 **SpecialDto**:
+
 ```typescript
 {
   kind: "ATTACK" | "HEALING",
@@ -80,17 +83,14 @@ Simulates a turn-based card battle between two players.
   energy: number,             // Energy cost to use special
   targetingStrategy: TargetingStrategy,
   effect?: EffectDto,         // Optional status effect (poison, burn, freeze)
-  // Optional buff application (for special attacks)
-  buffType?: "attack" | "defense" | "agility" | "accuracy",
-  buffRate?: number,          // Buff strength multiplier
-  buffDuration?: number,      // Number of turns buff lasts
-  buffTargetingStrategy?: TargetingStrategy  // Independent targeting for buffs
+  buffApplication?: BuffApplicationDto // Optional buff application (for special attacks)
 }
 ```
 
 **Note on Buff Application**: When `buffType`, `buffRate`, `buffDuration`, and `buffTargetingStrategy` are all provided, the special attack will apply buffs after dealing damage. The buff targeting is independent from the attack targeting, allowing combos like "attack all enemies while buffing all allies".
 
 **SimpleAttackDto**:
+
 ```typescript
 {
   name: string,
@@ -101,6 +101,7 @@ Simulates a turn-based card battle between two players.
 ```
 
 **OtherSkillDto**:
+
 ```typescript
 {
   kind: "HEALING" | "BUFF",
@@ -114,6 +115,7 @@ Simulates a turn-based card battle between two players.
 ```
 
 **EffectDto**:
+
 ```typescript
 {
   type: "POISON" | "BURN" | "FREEZE",
@@ -122,7 +124,19 @@ Simulates a turn-based card battle between two players.
 }
 ```
 
+**BuffApplicationDto**:
+
+```typescript
+{
+  type?: "attack" | "defense" | "agility" | "accuracy",
+  rate?: number,          // Buff strength multiplier
+  duration?: number,      // Number of turns buff lasts
+  targetingStrategy?: TargetingStrategy  // Independent targeting for buffs
+}
+```
+
 **Response** (`FightResult`):
+
 ```typescript
 {
   [stepNumber: number]: {
@@ -135,10 +149,12 @@ Simulates a turn-based card battle between two players.
 ## Enums
 
 ### CardSelectorStrategy
+
 - `player-by-player`: Cards alternate between players
 - `speed-weighted`: Cards act based on speed stat probability
 
 ### TargetingStrategy
+
 - `position-based`: Targets opponent at same position
 - `target-all`: Targets all opponents
 - `line-three`: Targets 3 cards in a line
@@ -147,26 +163,32 @@ Simulates a turn-based card battle between two players.
 - `self`: Targets the card itself
 
 ### DodgeStrategy
+
 - `simple-dodge`: Uses agility stat for dodge calculation
 - `random-dodge`: Random dodge chance
 
 ### TriggerEvent
+
 - `turn-end`: Skill triggers at end of turn
 
 ### SpecialKind
+
 - `ATTACK`: Special ability that deals damage
 - `HEALING`: Special ability that heals
 
 ### SkillKind
+
 - `HEALING`: Healing skill
 - `BUFF`: Temporary stat boost
 
 ### Effect
+
 - `POISON`: Damage over time
 - `BURN`: Damage over time
 - `FREEZE`: Prevents action, increases damage taken
 
 ### BuffType
+
 - `attack`: Increases attack stat
 - `defense`: Increases defense stat
 - `agility`: Increases agility stat
@@ -175,6 +197,7 @@ Simulates a turn-based card battle between two players.
 ## Validation
 
 All DTOs use `class-validator` decorators:
+
 - `@IsString()`: Validates string fields
 - `@IsNumber()`: Validates numeric fields
 - `@IsEnum()`: Validates enum values
@@ -203,6 +226,7 @@ Three factory functions map DTO enums to domain implementations:
 ## Response Types
 
 See @src/fight/core/fight-simulator/@types/ for complete type definitions:
+
 - `FightResult`: Map of step numbers to `Step` objects
 - `Step`: Union type with `kind` discriminator
 - `DamageReport`, `HealingReport`, `BuffReport`, `DebuffReport`, `StateEffectReport`, `StatusChangeReport`, `WinnerReport`: Specific step types

@@ -4,9 +4,7 @@ import { SpecialResult } from '../@types/action-result/special-result';
 import { FightingCard } from '../fighting-card';
 import { Special } from './special';
 import { AttackEffect, EffectResult } from '../@types/attack/attack-effect';
-import { BuffType } from '../@types/buff/type';
-import { Buff } from '../@types/buff/buff';
-import { CardInfo } from '../@types/card-info';
+import { BuffApplication } from '../@types/buff/buff-application';
 
 const ENERGY_INCREASE_FACTOR = 10;
 const CRITICAL_RATE = 1.3;
@@ -18,10 +16,7 @@ export class SpecialAttack implements Special {
     private readonly energyNeeded: number,
     private readonly targetingStrategy: TargetingCardStrategy,
     private readonly effect?: AttackEffect,
-    private readonly buffType?: BuffType,
-    private readonly buffRate?: number,
-    private readonly buffDuration?: number,
-    private readonly buffTargetingStrategy?: TargetingCardStrategy,
+    private readonly buffApplication?: BuffApplication,
   ) {}
 
   public ready(actualEnergy: number): boolean {
@@ -83,32 +78,11 @@ export class SpecialAttack implements Special {
     return Math.round(damage * this.damageRate * damageMultiplier);
   }
 
-  private applyBuffs(
-    source: FightingCard,
-    context: FightingContext,
-  ): Array<{ target: CardInfo; buff: Buff }> {
-    if (
-      !this.buffType ||
-      !this.buffRate ||
-      !this.buffDuration ||
-      !this.buffTargetingStrategy
-    ) {
+  private applyBuffs(source: FightingCard, context: FightingContext) {
+    if (!this.buffApplication) {
       return [];
     }
 
-    const buffTargets = this.buffTargetingStrategy.targetedCards(
-      source,
-      context.sourcePlayer,
-      context.opponentPlayer,
-    );
-
-    return buffTargets.map((target) => {
-      const buff = target.applyBuff(
-        this.buffType,
-        this.buffRate,
-        this.buffDuration,
-      );
-      return { target: target.identityInfo, buff };
-    });
+    return this.buffApplication.applyBuff(source, context);
   }
 }

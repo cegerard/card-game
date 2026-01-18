@@ -68,6 +68,20 @@ class EffectDto {
   level: number;
 }
 
+class BuffApplicationDto {
+  @IsEnum(BuffType)
+  type: BuffType;
+
+  @IsNumber()
+  rate: number;
+
+  @IsNumber()
+  duration: number;
+
+  @IsEnum(TargetingStrategy)
+  targetingStrategy: TargetingStrategy;
+}
+
 class SpecialDto {
   @IsEnum(SpecialKind)
   kind: SpecialKind;
@@ -90,20 +104,9 @@ class SpecialDto {
   effect?: EffectDto;
 
   @IsOptional()
-  @IsEnum(BuffType)
-  buffType?: BuffType;
-
-  @IsOptional()
-  @IsNumber()
-  buffRate?: number;
-
-  @IsOptional()
-  @IsNumber()
-  buffDuration?: number;
-
-  @IsOptional()
-  @IsEnum(TargetingStrategy)
-  buffTargetingStrategy?: TargetingStrategy;
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => BuffApplicationDto)
+  buffApplication?: BuffApplicationDto;
 }
 
 class SimpleAttackDto {

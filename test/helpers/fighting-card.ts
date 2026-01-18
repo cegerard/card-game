@@ -22,7 +22,8 @@ import {
   BuffType,
   DebuffType,
 } from '../../src/fight/core/cards/@types/buff/type';
-import { Skill } from 'src/fight/core/cards/skills/skill';
+import { Skill } from '../../src/fight/core/cards/skills/skill';
+import { BuffApplication } from '../../src/fight/core/cards/@types/buff/buff-application';
 
 type effect = {
   type: string;
@@ -155,22 +156,27 @@ function createSpecialAttack(params: {
   const targetingStrategy = params.targetingStrategy ?? 'position-based';
   const effect = params.effect ? createEffect(params.effect) : undefined;
 
-  const buffType = params.buffType;
-  const buffRate = params.buffRate;
-  const buffDuration = params.buffDuration;
-  const buffTargetingStrategy = params.buffTargetingStrategy
-    ? createTargetingStrategy(params.buffTargetingStrategy)
-    : undefined;
+  let buffApplication;
+  if (
+    params.buffType &&
+    params.buffRate &&
+    params.buffDuration &&
+    params.buffTargetingStrategy
+  ) {
+    buffApplication = new BuffApplication(
+      params.buffType,
+      params.buffRate,
+      params.buffDuration,
+      createTargetingStrategy(params.buffTargetingStrategy),
+    );
+  }
 
   return new SpecialAttack(
     damageRate,
     energy,
     createTargetingStrategy(targetingStrategy),
     effect,
-    buffType,
-    buffRate,
-    buffDuration,
-    buffTargetingStrategy,
+    buffApplication,
   );
 }
 
