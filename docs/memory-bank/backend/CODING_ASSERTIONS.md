@@ -136,6 +136,19 @@ argument-hint: N/A
 - Constructor parameters use object destructuring for complex configs
 - Private methods at bottom of class
 
+### Special Skills with Optional Effects
+
+When implementing special skills (attacks or healing) that can optionally apply secondary effects like buffs:
+
+- Use optional parameters in constructor for effect configuration (type, rate, duration, targeting)
+- All related optional parameters must be checked together (if one is missing, skip the entire effect)
+- Apply effects after primary action completes
+- Use independent targeting strategies for primary action vs secondary effects
+  - Example: Special attack targets enemies (primary), buffs target allies (secondary)
+  - This dual-targeting pattern allows rich combat mechanics (damage enemies while buffing team)
+- Return unified result structure: `{ actionResults: [], buffResults: [] }`
+- Empty arrays for unused effects (e.g., `buffResults: []` when no buffs configured)
+
 ## Comments and Documentation
 
 - Use JSDoc comments for public interfaces and complex methods

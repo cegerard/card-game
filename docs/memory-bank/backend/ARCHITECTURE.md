@@ -171,8 +171,9 @@ sequenceDiagram
 - **Value Objects**: Immutable types for attack effects, buffs, debuffs
 - **Rich Domain Model**: `FightingCard` encapsulates stats, behaviors, and state mutations
 - **Event-Driven**: Skills triggered by events (`turn-end`), extensible trigger system
+- **Unified Special Result**: `Special.launch()` returns `SpecialResult` containing both `actionResults` (AttackResult[] or HealingResult[]) and `buffResults` (BuffResults) for consistent handling across attack and healing specials
 - **Separation of Concerns**:
   - `Fight` orchestrates battle flow
-  - `ActionStage` handles attack/heal resolution
+  - `ActionStage` handles attack/heal resolution and extracts buff applications from special results
   - `TurnManager` handles turn-end effects
   - `CardSelector` determines turn order

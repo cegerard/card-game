@@ -59,7 +59,7 @@ cards/
 ├── skills/                 # Card abilities
 │   ├── simple-attack.ts    # Basic attack action
 │   ├── special.ts          # Ultimate abilities base class
-│   ├── special-attack.ts   # Offensive ultimate
+│   ├── special-attack.ts   # Offensive ultimate (supports optional buff application)
 │   ├── special-healing.ts  # Healing ultimate
 │   ├── skill.ts            # Event-triggered abilities
 │   ├── healing.ts          # Healing skill
@@ -71,10 +71,20 @@ cards/
 │   └── random-dodge.ts     # Probabilistic dodge
 └── @types/                 # Type definitions
     ├── action-result/      # Action outcome types
+    │   ├── special-result.ts # Unified result: { actionResults, buffResults }
+    │   ├── attack-result.ts
+    │   ├── healing-result.ts
+    │   └── buff-results.ts
     ├── attack/             # Attack and effect types
     ├── buff/               # Buff/debuff types
     └── state/              # Card state types
 ```
+
+**Special Skills Pattern**: Both `SpecialAttack` and `SpecialHealing` implement the `Special` interface with a unified return type `SpecialResult` containing:
+- `actionResults`: Array of `AttackResult[]` or `HealingResult[]`
+- `buffResults`: Array of buff applications (can be empty)
+
+This allows special attacks to perform their primary action (damage/healing) while optionally applying buffs to a separate set of targets using independent targeting strategies.
 
 #### Fight Simulator (`src/fight/core/fight-simulator/`)
 

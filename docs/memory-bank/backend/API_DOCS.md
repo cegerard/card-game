@@ -79,9 +79,16 @@ Simulates a turn-based card battle between two players.
   rate: number,               // Damage/healing multiplier
   energy: number,             // Energy cost to use special
   targetingStrategy: TargetingStrategy,
-  effect?: EffectDto          // Optional status effect (poison, burn, freeze)
+  effect?: EffectDto,         // Optional status effect (poison, burn, freeze)
+  // Optional buff application (for special attacks)
+  buffType?: "attack" | "defense" | "agility" | "accuracy",
+  buffRate?: number,          // Buff strength multiplier
+  buffDuration?: number,      // Number of turns buff lasts
+  buffTargetingStrategy?: TargetingStrategy  // Independent targeting for buffs
 }
 ```
+
+**Note on Buff Application**: When `buffType`, `buffRate`, `buffDuration`, and `buffTargetingStrategy` are all provided, the special attack will apply buffs after dealing damage. The buff targeting is independent from the attack targeting, allowing combos like "attack all enemies while buffing all allies".
 
 **SimpleAttackDto**:
 ```typescript
