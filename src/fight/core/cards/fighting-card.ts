@@ -13,6 +13,7 @@ import { Buff } from './@types/buff/buff';
 import { Debuff } from './@types/buff/debuff';
 import { Skill, SkillResults } from './skills/skill';
 import { BuffType, DebuffType } from './@types/buff/type';
+import { Element } from './@types/damage/element';
 
 export class FightingCard {
   // Info
@@ -27,6 +28,7 @@ export class FightingCard {
   private readonly agility: number;
   private readonly accuracy: number;
   private readonly criticalChance: number;
+  private readonly element: Element;
 
   // Dynamic Stats
   private specialEnergy: number = 0;
@@ -71,6 +73,7 @@ export class FightingCard {
     behaviors: {
       dodge: DodgeBehavior;
     },
+    element: Element = Element.PHYSICAL,
   ) {
     this.name = name;
     this.attack = stats.attack;
@@ -80,6 +83,7 @@ export class FightingCard {
     this.agility = stats.agility;
     this.accuracy = stats.accuracy;
     this.criticalChance = stats.criticalChance;
+    this.element = element;
     this.simpleAttack = skills.simpleAttack;
     this.special = skills.special;
     this.dodgeBehavior = behaviors.dodge;
@@ -147,6 +151,10 @@ export class FightingCard {
 
   public get identityInfo(): CardInfo {
     return { name: this.name, deckIdentity: this.cardDeckIdentity };
+  }
+
+  public get cardElement(): Element {
+    return this.element;
   }
 
   public get poisonLevel(): EffectLevel {

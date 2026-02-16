@@ -24,6 +24,7 @@ import {
 } from '../../src/fight/core/cards/@types/buff/type';
 import { Skill } from '../../src/fight/core/cards/skills/skill';
 import { BuffApplication } from '../../src/fight/core/cards/@types/buff/buff-application';
+import { Element } from '../../src/fight/core/cards/@types/damage/element';
 
 type effect = {
   type: string;
@@ -40,6 +41,7 @@ type FightingCardParams = {
   criticalChance?: number;
   agility?: number;
   accuracy?: number;
+  element?: Element;
   skills?: {
     simpleAttack?: {
       name?: string;
@@ -256,6 +258,7 @@ export function createFightingCard(params: FightingCardParams): FightingCard {
   const accuracy = params.accuracy ?? faker.number.int({ min: 10, max: 50 });
   const criticalChance =
     params.criticalChance ?? faker.number.float({ max: 0.9 });
+  const element = params.element ?? Element.PHYSICAL;
 
   let specialParams = {};
 
@@ -285,5 +288,6 @@ export function createFightingCard(params: FightingCardParams): FightingCard {
     {
       dodge: new SimpleDodge(),
     },
+    element,
   );
 }

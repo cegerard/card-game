@@ -57,6 +57,14 @@ export enum CardSelectorStrategy {
   SPEED_WEIGHTED = 'speed-weighted',
 }
 
+export enum ElementDto {
+  PHYSICAL = 'PHYSICAL',
+  FIRE = 'FIRE',
+  WATER = 'WATER',
+  EARTH = 'EARTH',
+  AIR = 'AIR',
+}
+
 class EffectDto {
   @IsEnum(Effect)
   type: Effect;
@@ -197,6 +205,10 @@ export class FightingCardDto {
 
   @IsNumber()
   criticalChance: number;
+
+  @IsOptional()
+  @IsEnum(ElementDto)
+  element?: ElementDto;
 
   @IsNotEmpty()
   @ValidateNested()
