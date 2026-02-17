@@ -17,7 +17,7 @@ describe('Debuff System - Basic Tests', () => {
   });
 
   describe('Multiple debuffs', () => {
-    it('should apply multiple debuffs of different types', () => {
+    it('apply multiple debuffs of different types', () => {
       const initialAttack = card.actualAttack;
       const initialDefense = card.actualDefense;
 
@@ -28,7 +28,7 @@ describe('Debuff System - Basic Tests', () => {
       expect(card.actualDefense).toBe(Math.max(0, initialDefense - 10));
     });
 
-    it('should stack debuffs of the same type', () => {
+    it('stack debuffs of the same type', () => {
       const initialAttack = card.actualAttack;
 
       card.applyDebuff('attack', 0.1, 3);
@@ -39,7 +39,7 @@ describe('Debuff System - Basic Tests', () => {
   });
 
   describe('Debuff duration management', () => {
-    it('should restore original stats when debuffs expire', () => {
+    it('restore original stats when debuffs expire', () => {
       const initialAttack = card.actualAttack;
 
       card.applyDebuff('attack', 0.2, 1);
@@ -51,7 +51,7 @@ describe('Debuff System - Basic Tests', () => {
   });
 
   describe('Combined buffs and debuffs', () => {
-    it('should properly calculate stats with both buffs and debuffs', () => {
+    it('properly calculate stats with both buffs and debuffs', () => {
       const initialAttack = card.actualAttack;
 
       card.applyBuff('attack', 0.3, 3); // +30% buff
@@ -61,7 +61,7 @@ describe('Debuff System - Basic Tests', () => {
       expect(card.actualAttack).toBe(expectedAttack);
     });
 
-    it('should never go below 0 even with strong debuffs', () => {
+    it('never go below 0 even with strong debuffs', () => {
       card.applyDebuff('attack', 2.0, 3); // 200% debuff (more than the stat)
 
       expect(card.actualAttack).toBe(0);

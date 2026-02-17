@@ -33,7 +33,7 @@ describe('Process card poisoned effect at turn end', () => {
     new PlayerByPlayerCardSelector(player1, player2),
   );
 
-  it('should return the poisoned effect step', () => {
+  it('return the poisoned effect step', () => {
     expect(fight.start()).toEqual({
       1: {
         attacker: card1.identityInfo,

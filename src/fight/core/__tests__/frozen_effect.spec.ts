@@ -1323,7 +1323,7 @@ describe('Trigger card attack after freeze dissipation', () => {
     );
   });
 
-  it('should kill the opponent', () => {
+  it('kill the opponent', () => {
     expect(fight.start()).toEqual({
       1: {
         kind: 'state_effect',

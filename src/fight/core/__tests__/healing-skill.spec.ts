@@ -80,7 +80,7 @@ describe('Trigger-healing-skill', () => {
       );
     });
 
-    it('should not heal the target', () => {
+    it('not heal the target', () => {
       expect(fight.start()).toEqual({
         1: {
           attacker: card1.identityInfo,
@@ -126,7 +126,7 @@ describe('Trigger-healing-skill', () => {
       card1.collectsDamages(150);
     });
 
-    it('should heal as much as he can', () => {
+    it('heal as much as he can', () => {
       expect(fight.start()).toEqual({
         1: {
           attacker: card1.identityInfo,
@@ -172,7 +172,7 @@ describe('Trigger-healing-skill', () => {
       card1.collectsDamages(110);
     });
 
-    it('should heal to the max health', () => {
+    it('heal to the max health', () => {
       expect(fight.start()).toEqual({
         1: {
           attacker: card1.identityInfo,

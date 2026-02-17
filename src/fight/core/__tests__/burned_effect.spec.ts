@@ -1347,7 +1347,7 @@ describe('Trigger card attack after burn dissipation', () => {
     );
   });
 
-  it('should kill the opponent', () => {
+  it('kill the opponent', () => {
     expect(fight.start()).toEqual({
       1: {
         attacker: card1.identityInfo,

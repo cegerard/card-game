@@ -40,7 +40,7 @@ describe('with only one card each', () => {
       new PlayerByPlayerCardSelector(player1, player2),
     );
 
-    it('should return the fight steps', () => {
+    it('return the fight steps', () => {
       expect(fight.start()).toEqual({
         1: {
           kind: 'attack',
@@ -104,7 +104,7 @@ describe('with only one card each', () => {
       new PlayerByPlayerCardSelector(player1, player2),
     );
 
-    it('should return the fight steps', () => {
+    it('return the fight steps', () => {
       expect(fight.start()).toEqual({
         1: {
           kind: 'attack',
@@ -174,7 +174,7 @@ describe('with only one card each', () => {
       new PlayerByPlayerCardSelector(player1, player2),
     );
 
-    it('should return the fight steps', () => {
+    it('return the fight steps', () => {
       expect(fight.start()).toEqual({
         1: {
           kind: 'attack',

@@ -33,7 +33,7 @@ describe('Trigger card special attack without effect', () => {
       new PlayerByPlayerCardSelector(player1, player2),
     );
 
-    it('should compute the damage with the special attack', () => {
+    it('compute the damage with the special attack', () => {
       expect(fight.start()).toEqual({
         1: {
           attacker: attacker.identityInfo,
@@ -80,7 +80,7 @@ describe('Trigger card special attack without effect', () => {
       new PlayerByPlayerCardSelector(player1, player2),
     );
 
-    it('should not deal any damage', () => {
+    it('not deal any damage', () => {
       expect(fight.start()).toEqual({
         1: {
           attacker: attacker.identityInfo,
@@ -153,7 +153,7 @@ describe('Trigger card special attack with critical hit', () => {
     new PlayerByPlayerCardSelector(player1, player2),
   );
 
-  it('should compute the damage with the special attack', () => {
+  it('compute the damage with the special attack', () => {
     expect(fight.start()).toEqual({
       1: {
         attacker: attacker.identityInfo,
@@ -221,7 +221,7 @@ describe('Trigger card special attack with poison effect', () => {
     new PlayerByPlayerCardSelector(player1, player2),
   );
 
-  it('should return the special attack effect step', () => {
+  it('return the special attack effect step', () => {
     expect(fight.start()).toEqual({
       1: {
         attacker: card1.identityInfo,
@@ -330,7 +330,7 @@ describe('Trigger card special attack with buff', () => {
     attacker.increaseSpecialEnergy();
   });
 
-  it('should apply buffs to targeted cards after special attack', () => {
+  it('apply buffs to targeted cards after special attack', () => {
     const result = fight.start();
 
     expect(result[1]).toEqual({

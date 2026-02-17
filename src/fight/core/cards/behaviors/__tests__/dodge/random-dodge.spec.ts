@@ -24,7 +24,7 @@ describe('RandomDodge', () => {
           randomizer.setNextRandomValue(random);
         });
 
-        it('should dodge', () => {
+        it('dodge', () => {
           const isDodge = randomDodge.dodge(defenderAgility, attackerAccuracy);
           expect(isDodge).toBe(true);
         });
@@ -37,7 +37,7 @@ describe('RandomDodge', () => {
           randomizer.setNextRandomValue(random);
         });
 
-        it('should not dodge', () => {
+        it('not dodge', () => {
           const isDodge = randomDodge.dodge(defenderAgility, attackerAccuracy);
           expect(isDodge).toBe(false);
         });
@@ -51,7 +51,7 @@ describe('RandomDodge', () => {
         randomizer.setNextRandomValue(0);
       });
 
-      it('should not dodge', () => {
+      it('not dodge', () => {
         const isDodge = randomDodge.dodge(defenderAgility, attackerAccuracy);
         expect(isDodge).toBe(false);
       });
@@ -64,7 +64,7 @@ describe('RandomDodge', () => {
         randomizer.setNextRandomValue(0);
       });
 
-      it('should not dodge', () => {
+      it('not dodge', () => {
         const isDodge = randomDodge.dodge(defenderAgility, attackerAccuracy);
         expect(isDodge).toBe(false);
       });
@@ -80,7 +80,7 @@ describe('RandomDodge', () => {
           randomizer.setNextRandomValue(random);
         });
 
-        it('should dodge', () => {
+        it('dodge', () => {
           const isDodge = randomDodge.dodge(defenderAgility, attackerAccuracy);
           expect(isDodge).toBe(true);
         });
@@ -93,7 +93,7 @@ describe('RandomDodge', () => {
           randomizer.setNextRandomValue(random);
         });
 
-        it('should not dodge', () => {
+        it('not dodge', () => {
           const isDodge = randomDodge.dodge(defenderAgility, attackerAccuracy);
           expect(isDodge).toBe(false);
         });

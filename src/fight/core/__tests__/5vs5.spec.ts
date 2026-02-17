@@ -199,7 +199,7 @@ describe('with five cards each', () => {
       new PlayerByPlayerCardSelector(player1, player2),
     );
 
-    it('should return the fight steps', () => {
+    it('return the fight steps', () => {
       const steps = fight.start();
       expect(steps).toEqual({
         1: {

@@ -46,7 +46,7 @@ describe('Trigger an attack without effect', () => {
       );
     });
 
-    it('should kill the other card', () => {
+    it('kill the other card', () => {
       expect(fight.start()).toEqual({
         1: {
           attacker: attacker.identityInfo,
@@ -103,7 +103,7 @@ describe('Trigger an attack without effect', () => {
       );
     });
 
-    it('should be killed by the opponent', () => {
+    it('be killed by the opponent', () => {
       expect(fight.start()).toEqual({
         1: {
           attacker: attacker.identityInfo,
@@ -180,7 +180,7 @@ describe('Trigger an attack with critical hit', () => {
     );
   });
 
-  it('should deal critical damage to the defender', () => {
+  it('deal critical damage to the defender', () => {
     expect(fight.start()).toEqual({
       1: {
         attacker: attacker.identityInfo,

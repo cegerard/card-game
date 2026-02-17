@@ -59,7 +59,7 @@ describe('Buffing-skill', () => {
     );
   });
 
-  it('should apply attack buff to self when triggered at turn end', () => {
+  it('apply attack buff to self when triggered at turn end', () => {
     expect(fight.start()).toEqual({
       1: {
         attacker: card1.identityInfo,
@@ -141,12 +141,12 @@ describe('Buffing-skill', () => {
     });
   });
 
-  it('should remove expired buffs and restore original stats', () => {
+  it('remove expired buffs and restore original stats', () => {
     const initialAttack = card1.actualAttack;
 
     fight.start();
 
-    // Attack should be buffed
+    // Attack be buffed
     expect(card1.actualAttack).toBe(initialAttack + 2 * 50);
 
     // Expire the buff
@@ -154,7 +154,7 @@ describe('Buffing-skill', () => {
     card1.decreaseBuffAndDebuffDuration();
     card1.decreaseBuffAndDebuffDuration();
 
-    // Attack should return to original value
+    // Attack return to original value
     expect(card1.actualAttack).toBe(initialAttack);
   });
 });
