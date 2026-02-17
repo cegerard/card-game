@@ -106,6 +106,8 @@ argument-hint: N/A
 - Use `describe` blocks for test organization
 - Use `beforeEach` for test setup
 - Helper functions in `test/helpers/` directory
+- Only one expectation by `it` block
+- Maximum 10 lines for a `it` block
 
 ### Coverage Requirements
 

@@ -65,7 +65,8 @@ src/
     │   │   │   ├── action-result/    # Action result types
     │   │   │   ├── attack/           # Attack effects (poison, burn, freeze)
     │   │   │   ├── state/            # Status effect state
-    │   │   │   └── buff/             # Buff/debuff types
+    │   │   │   ├── buff/             # Buff/debuff types
+    │   │   │   └── damage/           # Damage types (DamageType, DamageComposition, Element)
     │   │   ├── skills/               # Card abilities
     │   │   │   ├── simple-attack.ts
     │   │   │   ├── special.ts        # Abstract special skill
@@ -75,10 +76,13 @@ src/
     │   │   │   ├── healing.ts
     │   │   │   ├── buff-skill.ts
     │   │   │   └── debuff-skill.ts
-    │   │   └── behaviors/            # Card behaviors
-    │   │       ├── dodge-behaviors.ts
-    │   │       ├── simple-dodge.ts
-    │   │       └── random-dodge.ts
+    │   │   ├── behaviors/            # Card behaviors
+    │   │   │   ├── dodge-behaviors.ts
+    │   │   │   ├── simple-dodge.ts
+    │   │   │   └── random-dodge.ts
+    │   │   └── damage/              # Damage calculation engine
+    │   │       ├── damage-calculator.ts   # Multi-type damage computation
+    │   │       └── elemental-matrix.ts    # Element effectiveness multipliers
     │   ├── targeting-card-strategies/  # Targeting logic
     │   │   ├── targeting-card-strategy.ts
     │   │   ├── targeted-all.ts
@@ -168,8 +172,9 @@ sequenceDiagram
   - Dodge behaviors (simple, random)
 - **Observer Pattern**: `CardDeathSubscriber` interface for death notifications
 - **Dependency Injection**: NestJS provider system for `FIGHT_SIMULATOR_BUILDER`
-- **Value Objects**: Immutable types for attack effects, buffs, debuffs
-- **Rich Domain Model**: `FightingCard` encapsulates stats, behaviors, and state mutations
+- **Value Objects**: Immutable types for attack effects, buffs, debuffs, damage compositions
+- **Rich Domain Model**: `FightingCard` encapsulates stats, behaviors, element, and state mutations
+- **Multi-Damage System**: `DamageCalculator` computes damage from multiple `DamageComposition` entries (type + rate), applying `ElementalMatrix` multipliers based on attacker damage types vs defender element
 - **Event-Driven**: Skills triggered by events (`turn-end`), extensible trigger system
 - **Unified Special Result**: `Special.launch()` returns `SpecialResult` containing both `actionResults` (AttackResult[] or HealingResult[]) and `buffResults` (BuffResults) for consistent handling across attack and healing specials
 - **Separation of Concerns**:

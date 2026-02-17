@@ -47,6 +47,11 @@ The battle simulation domain encompasses strategic turn-based combat where entit
 | Turn Manager | Handles turn-end effects, buff/debuff duration, status damage | End-of-Turn Phase |
 | Fight Result | Complete step-by-step record of battle events | Battle Log, Combat Result |
 | Effect Level | Intensity of status effects (1-3) affecting potency and duration | Effect Potency |
+| Element | Elemental affinity of a fighting card (PHYSICAL, FIRE, WATER, EARTH, AIR) | Card Element, Affinity |
+| Damage Type | Type of damage dealt by an attack, matching Element values | Attack Element |
+| Damage Composition | A type + rate pair defining a portion of an attack's damage | Damage Split |
+| Elemental Matrix | 5x5 multiplier table defining effectiveness of each damage type against each element | Type Chart |
+| Damage Calculator | Engine computing total damage from multiple damage compositions against a defender's element | Damage Engine |
 
 ## Features & Use-cases
 
@@ -55,7 +60,8 @@ The main use-cases and features of the project:
 - Simulate complete turn-based battles between two players via REST API
 - Support configurable deck sizes (1-5 cards per player)
 - Execute combat rounds with card selection strategies (player-by-player or speed-weighted)
-- Resolve simple attacks with damage calculation considering attack, defense, accuracy, and dodge
+- Resolve simple attacks with damage calculation considering attack, defense, accuracy, dodge, and elemental effectiveness
+- Support multi-damage type attacks (e.g., 70% physical + 30% fire) with per-type elemental matrix multipliers
 - Trigger special abilities when energy threshold is met (attack or healing variants)
 - Apply status effects on hit (poison, burn, freeze) with level-based potency
 - Manage temporary stat buffs and debuffs with automatic duration tracking

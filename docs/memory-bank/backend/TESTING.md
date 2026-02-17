@@ -41,6 +41,9 @@ This document outlines the testing strategies and guidelines for the card game b
   - Fight simulations (1v1, 2v2, 5v5)
   - Buff/debuff system
   - Turn-end effects
+  - Elemental matrix multipliers (type effectiveness lookups)
+  - Damage calculator (multi-type compositions, default physical fallback)
+  - Card element property
 
 ### End-to-End Tests
 
@@ -71,12 +74,14 @@ This document outlines the testing strategies and guidelines for the card game b
 ### Configuration
 
 Unit tests:
+
 - Root directory: `src`
 - Test pattern: `.*\.spec\.ts$`
 - Transform: ts-jest for TypeScript files
 - Environment: node
 
 E2E tests:
+
 - Root directory: `test`
 - Test pattern: `.e2e-spec.ts$`
 - Transform: ts-jest for TypeScript files
@@ -87,6 +92,7 @@ E2E tests:
 ### Test Helpers
 
 - `createFightingCard()` in `@test/helpers/fighting-card.ts`
+
   - Factory function with faker.js defaults
   - Configurable params for all card attributes
   - Automatically creates skills and behaviors
@@ -110,3 +116,4 @@ E2E tests:
 - Verify exact fight step sequences using `toEqual()`
 - Test status effect interactions (e.g., poison + burn, freeze blocking effects)
 - Test buff/debuff duration and stacking behavior
+- Only one expectation by `it`

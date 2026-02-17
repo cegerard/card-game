@@ -69,6 +69,9 @@ cards/
 │   ├── dodge-behaviors.ts  # Dodge behavior interface
 │   ├── simple-dodge.ts     # Standard dodge implementation
 │   └── random-dodge.ts     # Probabilistic dodge
+├── damage/                 # Damage calculation engine
+│   ├── damage-calculator.ts   # Multi-type damage computation
+│   └── elemental-matrix.ts    # Element effectiveness multipliers (5x5 matrix)
 └── @types/                 # Type definitions
     ├── action-result/      # Action outcome types
     │   ├── special-result.ts # Unified result: { actionResults, buffResults }
@@ -77,6 +80,10 @@ cards/
     │   └── buff-results.ts
     ├── attack/             # Attack and effect types
     ├── buff/               # Buff/debuff types
+    ├── damage/             # Damage type definitions
+    │   ├── damage-type.ts     # DamageType enum (PHYSICAL, FIRE, WATER, EARTH, AIR)
+    │   ├── damage-composition.ts # Value object: type + rate pair
+    │   └── element.ts         # Element enum for card affinity
     └── state/              # Card state types
 ```
 
