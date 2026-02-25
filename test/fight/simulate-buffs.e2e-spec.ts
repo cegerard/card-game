@@ -45,7 +45,7 @@ describe('Simulate fight with buffs', () => {
               },
               simpleAttack: {
                 name: 'Shield Bash',
-                damageRate: 1.0,
+                damages: [{ type: 'PHYSICAL', rate: 1 }],
                 targetingStrategy: 'position-based',
               },
               others: [
@@ -83,7 +83,7 @@ describe('Simulate fight with buffs', () => {
               },
               simpleAttack: {
                 name: 'Sword Slash',
-                damageRate: 1.2,
+                damages: [{ type: 'PHYSICAL', rate: 1.2 }],
                 targetingStrategy: 'position-based',
               },
               others: [
@@ -126,7 +126,7 @@ describe('Simulate fight with buffs', () => {
               },
               simpleAttack: {
                 name: 'Basic Attack',
-                damageRate: 1.0,
+                damages: [{ type: 'PHYSICAL', rate: 1.0 }],
                 targetingStrategy: 'position-based',
               },
               others: [
@@ -162,7 +162,7 @@ describe('Simulate fight with buffs', () => {
               },
               simpleAttack: {
                 name: 'Arrow Shot',
-                damageRate: 1.1,
+                damages: [{ type: 'PHYSICAL', rate: 1.1 }],
                 targetingStrategy: 'position-based',
               },
               others: [],
@@ -229,7 +229,7 @@ describe('Simulate fight with buffs', () => {
               },
               simpleAttack: {
                 name: 'Test Attack',
-                damageRate: 1.0,
+                damages: [{ type: 'PHYSICAL', rate: 1.0 }],
                 targetingStrategy: 'position-based',
               },
               others: [
@@ -270,7 +270,7 @@ describe('Simulate fight with buffs', () => {
               },
               simpleAttack: {
                 name: 'Enemy Attack',
-                damageRate: 1.0,
+                damages: [{ type: 'PHYSICAL', rate: 1.0 }],
                 targetingStrategy: 'position-based',
               },
               others: [],

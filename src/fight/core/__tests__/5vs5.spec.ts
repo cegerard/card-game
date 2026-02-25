@@ -1,4 +1,6 @@
 import { Fight } from '../fight-simulator/fight';
+import { DamageComposition } from '../cards/@types/damage/damage-composition';
+import { DamageType } from '../cards/@types/damage/damage-type';
 import { Player } from '../player';
 import { PlayerByPlayerCardSelector } from '../fight-simulator/card-selectors/player-by-player';
 import { createFightingCard } from '../../../../test/helpers/fighting-card';
@@ -14,7 +16,7 @@ describe('with five cards each', () => {
       agility: 0,
       skills: {
         simpleAttack: {
-          damageRate: 1.0,
+          damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
         },
         special: {
           kind: 'specialAttack',
@@ -32,7 +34,7 @@ describe('with five cards each', () => {
       agility: 0,
       skills: {
         simpleAttack: {
-          damageRate: 1.0,
+          damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
         },
         special: {
           kind: 'specialAttack',
@@ -50,7 +52,7 @@ describe('with five cards each', () => {
       agility: 0,
       skills: {
         simpleAttack: {
-          damageRate: 1.0,
+          damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
         },
         special: {
           kind: 'specialAttack',
@@ -68,7 +70,7 @@ describe('with five cards each', () => {
       agility: 0,
       skills: {
         simpleAttack: {
-          damageRate: 1.0,
+          damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
         },
         special: {
           kind: 'specialAttack',
@@ -86,7 +88,7 @@ describe('with five cards each', () => {
       agility: 0,
       skills: {
         simpleAttack: {
-          damageRate: 1.0,
+          damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
         },
         special: {
           kind: 'specialAttack',
@@ -104,7 +106,7 @@ describe('with five cards each', () => {
       agility: 0,
       skills: {
         simpleAttack: {
-          damageRate: 1.0,
+          damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
         },
         special: {
           kind: 'specialAttack',
@@ -122,7 +124,7 @@ describe('with five cards each', () => {
       agility: 0,
       skills: {
         simpleAttack: {
-          damageRate: 1.0,
+          damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
         },
         special: {
           kind: 'specialAttack',
@@ -140,7 +142,7 @@ describe('with five cards each', () => {
       agility: 0,
       skills: {
         simpleAttack: {
-          damageRate: 1.0,
+          damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
         },
         special: {
           kind: 'specialAttack',
@@ -158,7 +160,7 @@ describe('with five cards each', () => {
       agility: 0,
       skills: {
         simpleAttack: {
-          damageRate: 1.0,
+          damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
         },
         special: {
           kind: 'specialAttack',
@@ -176,7 +178,7 @@ describe('with five cards each', () => {
       agility: 0,
       skills: {
         simpleAttack: {
-          damageRate: 1.0,
+          damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
         },
         special: {
           kind: 'specialAttack',

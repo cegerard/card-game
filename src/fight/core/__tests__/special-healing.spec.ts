@@ -3,6 +3,8 @@ import { FightingCard } from '../cards/fighting-card';
 import { Player } from '../player';
 import { Fight } from '../fight-simulator/fight';
 import { PlayerByPlayerCardSelector } from '../fight-simulator/card-selectors/player-by-player';
+import { DamageComposition } from '../cards/@types/damage/damage-composition';
+import { DamageType } from '../cards/@types/damage/damage-type';
 
 describe('Trigger card special healing', () => {
   let healer: FightingCard;
@@ -33,7 +35,9 @@ describe('Trigger card special healing', () => {
         attack: 100,
         criticalChance: 0,
         skills: {
-          simpleAttack: { damageRate: 2.0 },
+          simpleAttack: {
+            damages: [new DamageComposition(DamageType.PHYSICAL, 2.0)],
+          },
         },
       });
       player2 = new Player('player2', [target]);
@@ -113,7 +117,9 @@ describe('Trigger card special healing', () => {
         attack: 100,
         criticalChance: 0,
         skills: {
-          simpleAttack: { damageRate: 2.0 },
+          simpleAttack: {
+            damages: [new DamageComposition(DamageType.PHYSICAL, 2.0)],
+          },
         },
       });
       player2 = new Player('player2', [target]);
@@ -181,7 +187,9 @@ describe('Trigger card special healing', () => {
         criticalChance: 0,
         speed: 1,
         skills: {
-          simpleAttack: { damageRate: 1.0 },
+          simpleAttack: {
+            damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
+          },
           special: { kind: 'specialHealing', damageRate: 2.5, energy: 10 },
         },
       });
@@ -195,7 +203,9 @@ describe('Trigger card special healing', () => {
         attack: 50,
         criticalChance: 0,
         skills: {
-          simpleAttack: { damageRate: 2.0 },
+          simpleAttack: {
+            damages: [new DamageComposition(DamageType.PHYSICAL, 2.0)],
+          },
         },
       });
       player2 = new Player('player2', [target]);

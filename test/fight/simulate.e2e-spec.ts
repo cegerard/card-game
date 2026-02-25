@@ -49,7 +49,7 @@ describe('Simulate fight', () => {
               },
               simpleAttack: {
                 name: 'Simple Attack',
-                damageRate: 1.0,
+                damages: [{ type: 'PHYSICAL', rate: 1.0 }],
                 targetingStrategy: 'position-based',
                 effect: {
                   type: 'BURN',
@@ -95,7 +95,7 @@ describe('Simulate fight', () => {
               },
               simpleAttack: {
                 name: 'Simple Attack',
-                damageRate: 1.0,
+                damages: [{ type: 'PHYSICAL', rate: 1.0 }],
                 targetingStrategy: 'position-based',
                 effect: {
                   type: 'FREEZE',
@@ -138,7 +138,7 @@ describe('Simulate fight', () => {
               },
               simpleAttack: {
                 name: 'Simple Attack',
-                damageRate: 1.0,
+                damages: [{ type: 'PHYSICAL', rate: 1.0 }],
                 targetingStrategy: 'position-based',
                 effect: {
                   type: 'POISON',
@@ -171,7 +171,7 @@ describe('Simulate fight', () => {
               },
               simpleAttack: {
                 name: 'Suicide',
-                damageRate: 0,
+                damages: [{ type: 'PHYSICAL', rate: 0 }],
                 targetingStrategy: 'self',
               },
               others: [],

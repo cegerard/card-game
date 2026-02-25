@@ -25,6 +25,8 @@ import {
 import { Skill } from '../../src/fight/core/cards/skills/skill';
 import { BuffApplication } from '../../src/fight/core/cards/@types/buff/buff-application';
 import { Element } from '../../src/fight/core/cards/@types/damage/element';
+import { DamageComposition } from '../../src/fight/core/cards/@types/damage/damage-composition';
+import { DamageType } from '../../src/fight/core/cards/@types/damage/damage-type';
 
 type effect = {
   type: string;
@@ -45,7 +47,7 @@ type FightingCardParams = {
   skills?: {
     simpleAttack?: {
       name?: string;
-      damageRate?: number;
+      damages?: DamageComposition[];
       targetingStrategy?: string;
       effect?: effect;
     };
@@ -112,17 +114,21 @@ function createTrigger(trigger: string): Trigger {
 }
 
 function createSimpleAttack(params: {
-  damageRate?: number;
+  damages?: DamageComposition[];
   targetingStrategy?: string;
   effect?: effect;
 }): SimpleAttack {
-  const damageRate =
-    params.damageRate ?? faker.number.float({ min: 1.0, max: 3.0 });
+  const damages = params.damages ?? [
+    new DamageComposition(
+      DamageType.PHYSICAL,
+      faker.number.float({ min: 1.0, max: 3.0 }),
+    ),
+  ];
   const targetingStrategy = params.targetingStrategy ?? 'position-based';
   const effect = params.effect ? createEffect(params.effect) : undefined;
 
   return new SimpleAttack(
-    damageRate,
+    damages,
     createTargetingStrategy(targetingStrategy),
     effect,
   );

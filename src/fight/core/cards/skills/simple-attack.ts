@@ -1,12 +1,14 @@
+import { DamageComposition } from '../@types/damage/damage-composition';
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 import { AttackResult } from '../@types/action-result/attack-result';
 import { AttackEffect, EffectResult } from '../@types/attack/attack-effect';
 import { FightingContext } from '../@types/fighting-context';
 import { FightingCard } from '../fighting-card';
+import { DamageCalculator } from '../damage/damage-calculator';
 
 export class SimpleAttack {
   constructor(
-    private readonly damageRate: number,
+    private readonly damages: DamageComposition[],
     private readonly targetingStrategy: TargetingCardStrategy,
     private readonly effect?: AttackEffect,
   ) {}
@@ -25,10 +27,12 @@ export class SimpleAttack {
         return { damage: 0, isCritical, dodge: true, defender: defender };
       }
 
-      const computedDamage = Math.round(
-        card.actualAttack * this.damageRate * damageMultiplier,
+      const { total } = DamageCalculator.calculateDamage(
+        this.damages,
+        card.actualAttack * damageMultiplier,
+        defender,
       );
-      const collectedDamage = defender.collectsDamages(computedDamage);
+      const collectedDamage = defender.applyFinalDamage(total);
 
       let effectResult: EffectResult;
       if (this.effect) {

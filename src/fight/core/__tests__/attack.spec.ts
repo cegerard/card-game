@@ -3,6 +3,8 @@ import { Player } from '../player';
 import { PlayerByPlayerCardSelector } from '../fight-simulator/card-selectors/player-by-player';
 import { createFightingCard } from '../../../../test/helpers/fighting-card';
 import { FightingCard } from '../cards/fighting-card';
+import { DamageComposition } from '../cards/@types/damage/damage-composition';
+import { DamageType } from '../cards/@types/damage/damage-type';
 
 describe('Trigger an attack without effect', () => {
   const attackerAccuracy = 40;
@@ -19,7 +21,11 @@ describe('Trigger an attack without effect', () => {
       speed: 100,
       accuracy: attackerAccuracy,
       agility: 0,
-      skills: { simpleAttack: { damageRate: 1.0 } },
+      skills: {
+        simpleAttack: {
+          damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
+        },
+      },
     });
     player1 = new Player('player1', [attacker]);
   });
@@ -91,7 +97,11 @@ describe('Trigger an attack without effect', () => {
         speed: 1,
         accuracy: attackerAccuracy,
         agility: attackerAccuracy + 1,
-        skills: { simpleAttack: { damageRate: 1.0 } },
+        skills: {
+          simpleAttack: {
+            damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
+          },
+        },
       });
 
       player2 = new Player('player2', [defenderWithDodge]);
@@ -160,7 +170,11 @@ describe('Trigger an attack with critical hit', () => {
       criticalChance: 100,
       speed: 100,
       agility: 0,
-      skills: { simpleAttack: { damageRate: 1.0 } },
+      skills: {
+        simpleAttack: {
+          damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
+        },
+      },
     });
     defender = createFightingCard({
       attack: 0,
@@ -169,7 +183,11 @@ describe('Trigger an attack with critical hit', () => {
       speed: 0,
       criticalChance: 0,
       agility: 0,
-      skills: { simpleAttack: { damageRate: 1.0 } },
+      skills: {
+        simpleAttack: {
+          damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
+        },
+      },
     });
     player1 = new Player('Player 1', [attacker]);
     player2 = new Player('Player 2', [defender]);

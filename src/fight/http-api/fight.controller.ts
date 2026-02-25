@@ -39,6 +39,7 @@ import { SpeedWeightedCardSelector } from '../core/fight-simulator/card-selector
 import { Player } from '../core/player';
 import { FightSimulator } from '../core/fight-simulator/@types/fight-simulator';
 import { Skill } from '../core/cards/skills/skill';
+import { DamageComposition } from '../core/cards/@types/damage/damage-composition';
 
 @Controller()
 @UsePipes(
@@ -157,8 +158,11 @@ export class FightController {
       );
     }
 
+    const damages = cardData.skills.simpleAttack.damages.map(
+      (d) => new DamageComposition(d.type, d.rate),
+    );
     const simpleAttack = new SimpleAttack(
-      cardData.skills.simpleAttack.damageRate,
+      damages,
       buildTargetingStrategy(cardData.skills.simpleAttack.targetingStrategy),
       effect,
     );

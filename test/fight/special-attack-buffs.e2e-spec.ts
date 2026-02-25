@@ -37,7 +37,7 @@ describe('Special Attack with Buffs (e2e)', () => {
             skills: {
               simpleAttack: {
                 name: 'Simple Attack',
-                damageRate: 1.0,
+                damages: [{ type: 'PHYSICAL', rate: 1.0 }],
                 targetingStrategy: 'position-based',
               },
               special: {
@@ -76,7 +76,7 @@ describe('Special Attack with Buffs (e2e)', () => {
             skills: {
               simpleAttack: {
                 name: 'Simple Attack',
-                damageRate: 1.0,
+                damages: [{ type: 'PHYSICAL', rate: 1.0 }],
                 targetingStrategy: 'position-based',
               },
               special: {

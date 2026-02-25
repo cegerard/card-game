@@ -15,7 +15,7 @@
       },
       "simpleAttack": {
         "name": "Simple Attack",
-        "damageRate": 1,
+        "damages": [{ "type": "PHYSICAL", "rate": 1 }],
         "targetingStrategy": "position-based"
       }
     },
@@ -37,7 +37,7 @@
       },
       "simpleAttack": {
         "name": "Chop",
-        "damageRate": 1.2,
+        "damages": [{ "type": "PHYSICAL", "rate": 1.2 }],
         "targetingStrategy": "position-based"
       }
     },
@@ -59,7 +59,7 @@
       },
       "simpleAttack": {
         "name": "Quick Shot",
-        "damageRate": 1.0,
+        "damages": [{ "type": "PHYSICAL", "rate": 1.0 }],
         "targetingStrategy": "position-based"
       }
     },
@@ -81,7 +81,7 @@
       },
       "simpleAttack": {
         "name": "Stab",
-        "damageRate": 1,
+        "damages": [{ "type": "PHYSICAL", "rate": 1 }],
         "targetingStrategy": "position-based"
       }
     },
@@ -103,7 +103,7 @@
       },
       "simpleAttack": {
         "name": "Magic Missile",
-        "damageRate": 1,
+        "damages": [{ "type": "PHYSICAL", "rate": 1 }],
         "targetingStrategy": "position-based"
       }
     },
@@ -125,7 +125,7 @@
       },
       "simpleAttack": {
         "name": "Stone Missile",
-        "damageRate": 1,
+        "damages": [{ "type": "PHYSICAL", "rate": 1 }],
         "targetingStrategy": "position-based"
       }
     },
@@ -147,7 +147,7 @@
       },
       "simpleAttack": {
         "name": "Smash",
-        "damageRate": 1,
+        "damages": [{ "type": "PHYSICAL", "rate": 1 }],
         "targetingStrategy": "position-based"
       }
     },
@@ -169,7 +169,7 @@
       },
       "simpleAttack": {
         "name": "Bolt Shot",
-        "damageRate": 1,
+        "damages": [{ "type": "PHYSICAL", "rate": 1 }],
         "targetingStrategy": "position-based"
       }
     },
@@ -191,7 +191,7 @@
       },
       "simpleAttack": {
         "name": "Bash",
-        "damageRate": 1,
+        "damages": [{ "type": "PHYSICAL", "rate": 1 }],
         "targetingStrategy": "position-based"
       }
     },

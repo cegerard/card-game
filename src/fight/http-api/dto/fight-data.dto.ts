@@ -9,7 +9,10 @@ import {
   IsNotEmpty,
   IsEnum,
   IsOptional,
+  Min,
 } from 'class-validator';
+import { DamageType } from '../../core/cards/@types/damage/damage-type';
+export { DamageType };
 
 export enum SpecialKind {
   ATTACK = 'ATTACK',
@@ -117,12 +120,24 @@ class SpecialDto {
   buffApplication?: BuffApplicationDto;
 }
 
+class DamageCompositionDto {
+  @IsEnum(DamageType)
+  type: DamageType;
+
+  @IsNumber()
+  @Min(0)
+  rate: number;
+}
+
 class SimpleAttackDto {
   @IsString()
   name: string;
 
-  @IsNumber()
-  damageRate: number;
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(/* istanbul ignore next */ () => DamageCompositionDto)
+  damages: DamageCompositionDto[];
 
   @IsEnum(TargetingStrategy)
   targetingStrategy: TargetingStrategy;

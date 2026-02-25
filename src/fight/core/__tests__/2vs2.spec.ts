@@ -1,4 +1,6 @@
 import { Fight } from '../fight-simulator/fight';
+import { DamageComposition } from '../cards/@types/damage/damage-composition';
+import { DamageType } from '../cards/@types/damage/damage-type';
 import { Player } from '../player';
 import { DamageReport } from '../fight-simulator/@types/damage-report';
 import { FightResult } from '../fight-simulator/@types/fight-result';
@@ -20,7 +22,7 @@ describe('with only two cards each', () => {
         criticalChance: 1,
         skills: {
           simpleAttack: {
-            damageRate: 1.0,
+            damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
           },
         },
       });
@@ -33,7 +35,7 @@ describe('with only two cards each', () => {
         agility: 0,
         skills: {
           simpleAttack: {
-            damageRate: 1.0,
+            damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
           },
         },
       });
@@ -46,7 +48,7 @@ describe('with only two cards each', () => {
         agility: 0,
         skills: {
           simpleAttack: {
-            damageRate: 1.0,
+            damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
           },
         },
       });
@@ -59,7 +61,7 @@ describe('with only two cards each', () => {
         agility: 0,
         skills: {
           simpleAttack: {
-            damageRate: 1.0,
+            damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
           },
         },
       });
@@ -110,7 +112,7 @@ describe('with only two cards each', () => {
         criticalChance: 1,
         skills: {
           simpleAttack: {
-            damageRate: 1.0,
+            damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
           },
         },
       });
@@ -123,7 +125,7 @@ describe('with only two cards each', () => {
         agility: 0,
         skills: {
           simpleAttack: {
-            damageRate: 1.0,
+            damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
           },
         },
       });
@@ -136,7 +138,7 @@ describe('with only two cards each', () => {
         agility: 0,
         skills: {
           simpleAttack: {
-            damageRate: 1.0,
+            damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
           },
         },
       });
@@ -149,7 +151,7 @@ describe('with only two cards each', () => {
         agility: 0,
         skills: {
           simpleAttack: {
-            damageRate: 1.0,
+            damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
           },
         },
       });

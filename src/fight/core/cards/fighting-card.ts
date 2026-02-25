@@ -286,6 +286,17 @@ export class FightingCard {
     return causedDamages;
   }
 
+  public applyFinalDamage(damage: number): number {
+    let causedDamages = damage;
+    if (this.frozen) {
+      const frozenState = this.frozen as CardStateFrozen;
+      causedDamages = frozenState.applyDamageRate(causedDamages);
+    }
+    this.receivedDamages += causedDamages;
+
+    return causedDamages;
+  }
+
   public addRealDamage(damage: number): number {
     this.receivedDamages += damage;
 

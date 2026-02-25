@@ -1,4 +1,6 @@
 import { Fight } from '../fight-simulator/fight';
+import { DamageComposition } from '../cards/@types/damage/damage-composition';
+import { DamageType } from '../cards/@types/damage/damage-type';
 import { Player } from '../player';
 import { PlayerByPlayerCardSelector } from '../fight-simulator/card-selectors/player-by-player';
 import { createFightingCard } from '../../../../test/helpers/fighting-card';
@@ -21,7 +23,7 @@ describe('Add Burned effect level 1', () => {
       agility: 0,
       skills: {
         simpleAttack: {
-          damageRate: 1.0,
+          damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
           effect: {
             type: 'burn',
             rate: 0.5,
@@ -48,7 +50,7 @@ describe('Add Burned effect level 1', () => {
         agility: 0,
         skills: {
           simpleAttack: {
-            damageRate: 1.0,
+            damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
           },
         },
       });
@@ -128,7 +130,7 @@ describe('Add Burned effect level 1', () => {
         agility: 0,
         skills: {
           simpleAttack: {
-            damageRate: 1.0,
+            damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
           },
         },
       });
@@ -222,7 +224,7 @@ describe('Add Burned effect level 1', () => {
         agility: 0,
         skills: {
           simpleAttack: {
-            damageRate: 1.0,
+            damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
           },
         },
       });
@@ -309,7 +311,7 @@ describe('Add Burned effect level 1', () => {
         agility: 0,
         skills: {
           simpleAttack: {
-            damageRate: 1.0,
+            damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
           },
         },
       });
@@ -390,7 +392,7 @@ describe('Add Burned effect level 2', () => {
       agility: 0,
       skills: {
         simpleAttack: {
-          damageRate: 1.0,
+          damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
           effect: {
             type: 'burn',
             rate: 0.5,
@@ -417,7 +419,7 @@ describe('Add Burned effect level 2', () => {
         agility: 0,
         skills: {
           simpleAttack: {
-            damageRate: 1.0,
+            damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
           },
         },
       });
@@ -502,7 +504,7 @@ describe('Add Burned effect level 2', () => {
         agility: 0,
         skills: {
           simpleAttack: {
-            damageRate: 1.0,
+            damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
           },
         },
       });
@@ -596,7 +598,7 @@ describe('Add Burned effect level 2', () => {
         agility: 0,
         skills: {
           simpleAttack: {
-            damageRate: 1.0,
+            damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
           },
         },
       });
@@ -682,7 +684,7 @@ describe('Add Burned effect level 2', () => {
         agility: 0,
         skills: {
           simpleAttack: {
-            damageRate: 1.0,
+            damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
           },
         },
       });
@@ -769,7 +771,7 @@ describe('Add Burned effect level 3', () => {
       agility: 0,
       skills: {
         simpleAttack: {
-          damageRate: 1.0,
+          damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
           effect: {
             type: 'burn',
             rate: 0.5,
@@ -796,7 +798,7 @@ describe('Add Burned effect level 3', () => {
         agility: 0,
         skills: {
           simpleAttack: {
-            damageRate: 1.0,
+            damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
           },
         },
       });
@@ -881,7 +883,7 @@ describe('Add Burned effect level 3', () => {
         agility: 0,
         skills: {
           simpleAttack: {
-            damageRate: 1.0,
+            damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
           },
         },
       });
@@ -966,7 +968,7 @@ describe('Add Burned effect level 3', () => {
         agility: 0,
         skills: {
           simpleAttack: {
-            damageRate: 1.0,
+            damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
           },
         },
       });
@@ -1060,7 +1062,7 @@ describe('Add Burned effect level 3', () => {
         agility: 0,
         skills: {
           simpleAttack: {
-            damageRate: 1.0,
+            damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
           },
         },
       });
@@ -1146,7 +1148,7 @@ describe('Add Burned effect level 3', () => {
         agility: 0,
         skills: {
           simpleAttack: {
-            damageRate: 1.0,
+            damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
           },
         },
       });
@@ -1232,7 +1234,7 @@ describe('Add Burned effect level 3', () => {
         agility: 0,
         skills: {
           simpleAttack: {
-            damageRate: 1.0,
+            damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
           },
         },
       });
@@ -1322,7 +1324,7 @@ describe('Trigger card attack after burn dissipation', () => {
       agility: 0,
       skills: {
         simpleAttack: {
-          damageRate: 1.0,
+          damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
         },
       },
     });

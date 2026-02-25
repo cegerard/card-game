@@ -2,6 +2,7 @@ import 'reflect-metadata';
 
 import {
   CardSelectorStrategy,
+  DamageType,
   DodgeStrategy,
   Effect,
   FightDataDto,
@@ -69,7 +70,7 @@ describe('FightController', () => {
                   special: poisonedSpecialAttack,
                   simpleAttack: {
                     name: 'Simple Attack',
-                    damageRate: 1.0,
+                    damages: [{ type: DamageType.PHYSICAL, rate: 1.0 }],
                     targetingStrategy: TargetingStrategy.POSITION_BASED,
                   },
                   others: [],
@@ -135,7 +136,7 @@ describe('FightController', () => {
                   special: burnedSpecialAttack,
                   simpleAttack: {
                     name: 'Simple Attack',
-                    damageRate: 1.0,
+                    damages: [{ type: DamageType.PHYSICAL, rate: 1.0 }],
                     targetingStrategy: TargetingStrategy.POSITION_BASED,
                   },
                   others: [],
@@ -201,7 +202,7 @@ describe('FightController', () => {
                   special: freezeSpecialAttack,
                   simpleAttack: {
                     name: 'Simple Attack',
-                    damageRate: 1.0,
+                    damages: [{ type: DamageType.PHYSICAL, rate: 1.0 }],
                     targetingStrategy: TargetingStrategy.POSITION_BASED,
                   },
                   others: [],
@@ -265,7 +266,7 @@ describe('FightController', () => {
                 special: specialHealing,
                 simpleAttack: {
                   name: 'Simple Attack',
-                  damageRate: 1.0,
+                  damages: [{ type: DamageType.PHYSICAL, rate: 1.0 }],
                   targetingStrategy: TargetingStrategy.POSITION_BASED,
                 },
                 others: [],
@@ -305,7 +306,7 @@ describe('FightController', () => {
   describe('when a player use a card with a only a simple attack', () => {
     const simpleAttack = {
       name: 'Strike',
-      damageRate: 2.0,
+      damages: [{ type: DamageType.PHYSICAL, rate: 2.0 }],
       targetingStrategy: TargetingStrategy.POSITION_BASED,
     };
 
@@ -542,7 +543,7 @@ describe('FightController', () => {
                 },
                 simpleAttack: {
                   name: 'Strike',
-                  damageRate: 2.0,
+                  damages: [{ type: DamageType.PHYSICAL, rate: 2.0 }],
                   targetingStrategy: TargetingStrategy.TARGET_ALL,
                 },
                 others: [],
@@ -603,7 +604,7 @@ describe('FightController', () => {
                 },
                 simpleAttack: {
                   name: 'Strike',
-                  damageRate: 2.0,
+                  damages: [{ type: DamageType.PHYSICAL, rate: 2.0 }],
                   targetingStrategy: TargetingStrategy.TARGET_ALL,
                 },
                 others: [],
@@ -663,7 +664,7 @@ describe('FightController', () => {
                 },
                 simpleAttack: {
                   name: 'Slice',
-                  damageRate: 2.0,
+                  damages: [{ type: DamageType.PHYSICAL, rate: 2.0 }],
                   targetingStrategy: TargetingStrategy.LINE_THREE,
                 },
                 others: [
@@ -733,7 +734,7 @@ describe('FightController', () => {
                 },
                 simpleAttack: {
                   name: 'Slice',
-                  damageRate: 2.0,
+                  damages: [{ type: DamageType.PHYSICAL, rate: 2.0 }],
                   targetingStrategy: TargetingStrategy.LINE_THREE,
                 },
                 others: [],
