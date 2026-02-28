@@ -16,7 +16,7 @@ export class SpecialAttack implements Special {
     private readonly energyNeeded: number,
     private readonly targetingStrategy: TargetingCardStrategy,
     private readonly effect?: AttackEffect,
-    private readonly buffApplication?: BuffApplication,
+    private readonly buffApplication?: BuffApplication[],
   ) {}
 
   public ready(actualEnergy: number): boolean {
@@ -83,6 +83,8 @@ export class SpecialAttack implements Special {
       return [];
     }
 
-    return this.buffApplication.applyBuff(source, context);
+    return this.buffApplication.flatMap((buff) =>
+      buff.applyBuff(source, context),
+    );
   }
 }

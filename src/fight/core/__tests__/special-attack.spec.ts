@@ -301,10 +301,14 @@ describe('Trigger card special attack with buff', () => {
         damageRate: 1.0,
         energy: 100,
         targetingStrategy: 'target-all',
-        buffType: 'attack',
-        buffRate: 0.2,
-        buffDuration: 3,
-        buffTargetingStrategy: 'all-owner-cards',
+        buffs: [
+          {
+            buffType: 'attack',
+            buffRate: 0.2,
+            buffDuration: 3,
+            buffTargetingStrategy: 'all-owner-cards',
+          },
+        ],
       },
     },
   });

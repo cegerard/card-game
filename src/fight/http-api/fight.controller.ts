@@ -111,13 +111,14 @@ export class FightController {
     if (cardData.skills.special.kind === SpecialKind.ATTACK) {
       let buffApplication;
       if (cardData.skills.special.buffApplication) {
-        buffApplication = new BuffApplication(
-          this.mapBuffType(cardData.skills.special.buffApplication.type),
-          cardData.skills.special.buffApplication.rate,
-          cardData.skills.special.buffApplication.duration,
-          buildTargetingStrategy(
-            cardData.skills.special.buffApplication.targetingStrategy,
-          ),
+        buffApplication = cardData.skills.special.buffApplication.map(
+          (b) =>
+            new BuffApplication(
+              this.mapBuffType(b.type),
+              b.rate,
+              b.duration,
+              buildTargetingStrategy(b.targetingStrategy),
+            ),
         );
       }
 

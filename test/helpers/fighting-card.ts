@@ -58,10 +58,12 @@ type FightingCardParams = {
       targetingStrategy?: string;
       kind?: string;
       effect?: effect;
-      buffType?: BuffType;
-      buffRate?: number;
-      buffDuration?: number;
-      buffTargetingStrategy?: string;
+      buffs?: {
+        buffType: BuffType;
+        buffRate: number;
+        buffDuration: number;
+        buffTargetingStrategy: string;
+      }[];
     };
     others?: (
       | {
@@ -153,10 +155,12 @@ function createSpecialAttack(params: {
   energy?: number;
   targetingStrategy?: string;
   effect?: effect;
-  buffType?: BuffType;
-  buffRate?: number;
-  buffDuration?: number;
-  buffTargetingStrategy?: string;
+  buffs?: {
+    buffType: BuffType;
+    buffRate: number;
+    buffDuration: number;
+    buffTargetingStrategy: string;
+  }[];
 }): SpecialAttack {
   const damageRate =
     params.damageRate ?? faker.number.int({ min: 2.5, max: 8.0 });
@@ -164,20 +168,18 @@ function createSpecialAttack(params: {
   const targetingStrategy = params.targetingStrategy ?? 'position-based';
   const effect = params.effect ? createEffect(params.effect) : undefined;
 
-  let buffApplication;
-  if (
-    params.buffType &&
-    params.buffRate &&
-    params.buffDuration &&
-    params.buffTargetingStrategy
-  ) {
-    buffApplication = new BuffApplication(
-      params.buffType,
-      params.buffRate,
-      params.buffDuration,
-      createTargetingStrategy(params.buffTargetingStrategy),
-    );
-  }
+  const buffApplication =
+    params.buffs && params.buffs.length > 0
+      ? params.buffs.map(
+          (b) =>
+            new BuffApplication(
+              b.buffType,
+              b.buffRate,
+              b.buffDuration,
+              createTargetingStrategy(b.buffTargetingStrategy),
+            ),
+        )
+      : undefined;
 
   return new SpecialAttack(
     damageRate,

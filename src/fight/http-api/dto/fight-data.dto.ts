@@ -115,9 +115,10 @@ class SpecialDto {
   effect?: EffectDto;
 
   @IsOptional()
-  @ValidateNested()
+  @IsArray()
+  @ValidateNested({ each: true })
   @Type(/* istanbul ignore next */ () => BuffApplicationDto)
-  buffApplication?: BuffApplicationDto;
+  buffApplication?: BuffApplicationDto[];
 }
 
 class DamageCompositionDto {
