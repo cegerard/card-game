@@ -22,6 +22,7 @@ import { SpecialAttack } from '../core/cards/skills/special-attack';
 import { SimpleAttack } from '../core/cards/skills/simple-attack';
 import { buildTargetingStrategy } from './targeting-strategy-factory';
 import { buildDodgeStrategy } from './dodge-strategy-factory';
+import { buildBuffCondition } from './buff-condition-factory';
 import { Special } from '../core/cards/skills/special';
 import { SpecialHealing } from '../core/cards/skills/special-healing';
 import { Healing } from '../core/cards/skills/healing';
@@ -111,15 +112,21 @@ export class FightController {
     if (cardData.skills.special.kind === SpecialKind.ATTACK) {
       let buffApplication;
       if (cardData.skills.special.buffApplication) {
-        buffApplication = cardData.skills.special.buffApplication.map(
-          (b) =>
-            new BuffApplication(
-              this.mapBuffType(b.type),
-              b.rate,
-              b.duration,
-              buildTargetingStrategy(b.targetingStrategy),
-            ),
-        );
+        buffApplication = cardData.skills.special.buffApplication.map((b) => {
+          const condition = b.condition
+            ? buildBuffCondition(b.condition.type, {
+                allyName: b.condition.allyName,
+              })
+            : undefined;
+          return new BuffApplication(
+            this.mapBuffType(b.type),
+            b.rate,
+            b.duration,
+            buildTargetingStrategy(b.targetingStrategy),
+            condition,
+            b.condition?.multiplier,
+          );
+        });
       }
 
       special = new SpecialAttack(

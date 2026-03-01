@@ -4,6 +4,7 @@ import { TargetingCardStrategy } from '../../../targeting-card-strategies/target
 import { Buff } from './buff';
 import { BuffType } from './type';
 import { CardInfo } from '../card-info';
+import { BuffCondition } from './buff-condition';
 
 export type BuffApplicationResult = {
   target: CardInfo;
@@ -16,12 +17,18 @@ export class BuffApplication {
     public readonly rate: number,
     public readonly duration: number,
     public readonly targetingStrategy: TargetingCardStrategy,
+    public readonly condition?: BuffCondition,
+    public readonly conditionMultiplier?: number,
   ) {}
 
   public applyBuff(
     source: FightingCard,
     context: FightingContext,
   ): BuffApplicationResult[] {
+    const effectiveRate = this.condition?.evaluate(source, context)
+      ? this.rate * this.conditionMultiplier
+      : this.rate;
+
     const buffTargets = this.targetingStrategy.targetedCards(
       source,
       context.sourcePlayer,
@@ -29,7 +36,7 @@ export class BuffApplication {
     );
 
     return buffTargets.map((target) => {
-      const buff = target.applyBuff(this.type, this.rate, this.duration);
+      const buff = target.applyBuff(this.type, effectiveRate, this.duration);
       return { target: target.identityInfo, buff };
     });
   }

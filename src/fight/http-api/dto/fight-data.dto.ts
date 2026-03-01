@@ -11,6 +11,22 @@ import {
   IsOptional,
   Min,
 } from 'class-validator';
+
+export enum BuffConditionType {
+  ALLY_PRESENCE = 'ally-presence',
+}
+
+class BuffConditionDto {
+  @IsEnum(BuffConditionType)
+  type: BuffConditionType;
+
+  @IsOptional()
+  @IsString()
+  allyName?: string;
+
+  @IsNumber()
+  multiplier: number;
+}
 import { DamageType } from '../../core/cards/@types/damage/damage-type';
 export { DamageType };
 
@@ -91,6 +107,11 @@ class BuffApplicationDto {
 
   @IsEnum(TargetingStrategy)
   targetingStrategy: TargetingStrategy;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => BuffConditionDto)
+  condition?: BuffConditionDto;
 }
 
 class SpecialDto {
