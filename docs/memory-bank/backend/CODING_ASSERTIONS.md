@@ -148,8 +148,10 @@ When implementing special skills (attacks or healing) that can optionally apply 
 - Use independent targeting strategies for primary action vs secondary effects
   - Example: Special attack targets enemies (primary), buffs target allies (secondary)
   - This dual-targeting pattern allows rich combat mechanics (damage enemies while buffing team)
+- `buffApplication` is `BuffApplication[]` (array) — supports zero, one, or multiple simultaneous buffs
 - Return unified result structure: `{ actionResults: [], buffResults: [] }`
 - Empty arrays for unused effects (e.g., `buffResults: []` when no buffs configured)
+- `BuffApplication` supports optional `condition: BuffCondition` + `conditionMultiplier`: when the condition evaluates to true at application time, the buff rate is multiplied by `conditionMultiplier`
 
 ## Comments and Documentation
 

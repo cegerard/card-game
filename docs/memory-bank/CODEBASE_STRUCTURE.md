@@ -80,6 +80,10 @@ cards/
     │   └── buff-results.ts
     ├── attack/             # Attack and effect types
     ├── buff/               # Buff/debuff types
+    │   ├── buff-application.ts  # Applies buff with optional condition + multiplier
+    │   ├── buff-condition.ts    # BuffCondition interface (id, evaluate())
+    │   └── conditions/          # Condition implementations
+    │       └── ally-presence-condition.ts  # True if named ally is alive
     ├── damage/             # Damage type definitions
     │   ├── damage-type.ts     # DamageType enum (PHYSICAL, FIRE, WATER, EARTH, AIR)
     │   ├── damage-composition.ts # Value object: type + rate pair
@@ -141,7 +145,8 @@ http-api/
 │   └── fight-data.dto.ts   # Fight request validation
 ├── dodge-strategy-factory.ts # DTO to dodge behavior mapper
 ├── targeting-strategy-factory.ts # DTO to targeting strategy mapper
-└── trigger-factory.ts      # DTO to trigger event mapper
+├── trigger-factory.ts      # DTO to trigger event mapper
+└── buff-condition-factory.ts # BuffConditionType enum → BuffCondition instance
 ```
 
 ### Tools (`src/fight/tools/`)

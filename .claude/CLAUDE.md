@@ -79,6 +79,14 @@ The fight simulation logic is organized into several key components:
 - Attack effects: poison, burn, freeze (applied on hit)
 - Status effects: Apply damage or restrictions each turn
 - Buffs/Debuffs: Temporary stat modifications with duration
+- `BuffApplication` supports optional `condition: BuffCondition` + `conditionMultiplier`; when the condition evaluates to true, the buff rate is multiplied
+- `AllyPresenceCondition`: evaluates to true if a named ally is alive in the source player's team
+
+**Damage System (`cards/damage/`)**
+
+- `DamageCalculator`: computes damage from multiple `DamageComposition` entries (type + rate pairs)
+- `ElementalMatrix`: 5x5 multiplier table — each `DamageType` (PHYSICAL, FIRE, WATER, EARTH, AIR) has an effectiveness factor against each `Element`
+- Cards have an `element` property; attackers can specify multiple damage types (e.g., 70% physical + 30% fire)
 
 **Player (`player.ts`)**
 
@@ -99,6 +107,7 @@ The fight simulation logic is organized into several key components:
 - `targeting-strategy-factory.ts`: Maps targeting strategy enums to implementations
 - `dodge-strategy-factory.ts`: Maps dodge behavior enums to implementations
 - `trigger-factory.ts`: Maps trigger event enums to implementations
+- `buff-condition-factory.ts`: Maps `BuffConditionType` enum to `BuffCondition` instances
 
 ### Module Setup (`src/fight/`)
 
@@ -134,6 +143,12 @@ The `FightModule` provides the fight simulator as an injectable dependency using
 - Energy threshold determines when special moves can be used
 - Special moves reset energy to 0 after use
 
+### Special Attack Buffs
+
+- `SpecialAttack` accepts `buffApplication: BuffApplication[]` (array) — supports zero, one, or multiple simultaneous buffs
+- Buffs use an independent targeting strategy from the primary attack (e.g., damage enemies, buff allies)
+- Each `BuffApplication` can optionally have a `BuffCondition` that multiplies the rate when evaluated to true
+
 ## Testing Strategy
 
 Tests are located alongside source files in `__tests__` directories. The codebase uses Jest with extensive unit tests covering:
@@ -143,6 +158,9 @@ Tests are located alongside source files in `__tests__` directories. The codebas
 - Targeting strategies
 - Card selectors
 - Full fight simulations (1v1, 2v2, 5v5)
+- Elemental matrix multipliers and damage calculator
+
+**Test conventions:** one `expect` per `it` block; max 10 lines per `it` block.
 
 Mock implementations (e.g., `fight-simulator-stub.ts`) are used for HTTP controller tests.
 

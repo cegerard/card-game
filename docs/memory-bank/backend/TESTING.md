@@ -117,3 +117,4 @@ E2E tests:
 - Test status effect interactions (e.g., poison + burn, freeze blocking effects)
 - Test buff/debuff duration and stacking behavior
 - Only one expectation by `it`
+- max 10 lines per `it` block.

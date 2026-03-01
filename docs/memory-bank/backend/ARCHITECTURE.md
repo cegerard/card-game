@@ -175,6 +175,7 @@ sequenceDiagram
 - **Value Objects**: Immutable types for attack effects, buffs, debuffs, damage compositions
 - **Rich Domain Model**: `FightingCard` encapsulates stats, behaviors, element, and state mutations
 - **Multi-Damage System**: `DamageCalculator` computes damage from multiple `DamageComposition` entries (type + rate), applying `ElementalMatrix` multipliers based on attacker damage types vs defender element
+- **Buff Condition System**: `BuffApplication` has optional `condition: BuffCondition` and `conditionMultiplier`. If the condition evaluates to true at buff application time, the rate is multiplied. `buff-condition-factory.ts` maps `BuffConditionType` enum → `BuffCondition` instance. First implementation: `AllyPresenceCondition` checks that a named ally is alive in the source player's team.
 - **Event-Driven**: Skills triggered by events (`turn-end`), extensible trigger system
 - **Unified Special Result**: `Special.launch()` returns `SpecialResult` containing both `actionResults` (AttackResult[] or HealingResult[]) and `buffResults` (BuffResults) for consistent handling across attack and healing specials
 - **Separation of Concerns**:
