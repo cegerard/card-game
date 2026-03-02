@@ -3,15 +3,22 @@ import { AttackEffect, EffectResult } from './attack-effect';
 import { CardStatePoisoned } from '../state/card-state-poisoned';
 import { EffectLevel } from './effect-level';
 import { FightingContext } from '../fighting-context';
+import { EffectTriggeredDebuff } from './effect-triggered-debuff';
 
 export class PoisonedAttackEffect implements AttackEffect {
   public readonly rate: number;
   public readonly level: EffectLevel;
   public readonly type = 'poisoned';
+  public readonly triggeredDebuff?: EffectTriggeredDebuff;
 
-  constructor(rate: number, level: EffectLevel) {
+  constructor(
+    rate: number,
+    level: EffectLevel,
+    triggeredDebuff?: EffectTriggeredDebuff,
+  ) {
     this.rate = rate;
     this.level = level;
+    this.triggeredDebuff = triggeredDebuff;
   }
 
   public applyEffect(
@@ -29,7 +36,12 @@ export class PoisonedAttackEffect implements AttackEffect {
     );
     defender.setState(poisonedState);
 
-    return { type: this.type, card: defender };
+    const effectResult: EffectResult = { type: this.type, card: defender };
+    const appliedDebuff = this.triggeredDebuff?.tryApply(defender);
+    if (appliedDebuff) {
+      effectResult.triggeredDebuff = { card: defender, debuff: appliedDebuff };
+    }
+    return effectResult;
   }
 
   private computePoisonedTurns() {

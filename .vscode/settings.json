@@ -15,5 +15,6 @@
     ".github/instructions": true,
     ".github/instructions/**": true,
     "docs/rules/**": true
-  }
+  },
+  "cSpell.words": ["debuff", "debuffs"]
 }

@@ -33,6 +33,8 @@ import { EffectLevel } from '../core/cards/@types/attack/effect-level';
 import { AttackEffect } from '../core/cards/@types/attack/attack-effect';
 import { BurnedAttackEffect } from '../core/cards/@types/attack/attack-burned-effect';
 import { FrozenAttackEffect } from '../core/cards/@types/attack/attack-frozen-effect';
+import { EffectTriggeredDebuff } from '../core/cards/@types/attack/effect-triggered-debuff';
+import { MathRandomizer } from '../tools/math-randomizer';
 import { BuffApplication } from '../core/cards/@types/buff/buff-application';
 import { CardSelector } from '../core/fight-simulator/card-selectors/card-selector';
 import { PlayerByPlayerCardSelector } from '../core/fight-simulator/card-selectors/player-by-player';
@@ -89,25 +91,9 @@ export class FightController {
   private convertCardDtoToCard(cardData: FightingCardDto): FightingCard {
     let special: Special;
 
-    let specialEffect: AttackEffect | undefined;
-    if (cardData.skills.special.effect?.type === Effect.POISON) {
-      specialEffect = new PoisonedAttackEffect(
-        cardData.skills.special.effect.rate,
-        cardData.skills.special.effect.level as EffectLevel,
-      );
-    }
-    if (cardData.skills.special.effect?.type === Effect.BURN) {
-      specialEffect = new BurnedAttackEffect(
-        cardData.skills.special.effect.rate,
-        cardData.skills.special.effect.level as EffectLevel,
-      );
-    }
-    if (cardData.skills.special.effect?.type === Effect.FREEZE) {
-      specialEffect = new FrozenAttackEffect(
-        cardData.skills.special.effect.rate,
-        cardData.skills.special.effect.level as EffectLevel,
-      );
-    }
+    const specialEffect = cardData.skills.special.effect
+      ? this.buildEffect(cardData.skills.special.effect)
+      : undefined;
 
     if (cardData.skills.special.kind === SpecialKind.ATTACK) {
       let buffApplication;
@@ -146,25 +132,9 @@ export class FightController {
       );
     }
 
-    let effect: AttackEffect | undefined;
-    if (cardData.skills.simpleAttack.effect?.type === Effect.POISON) {
-      effect = new PoisonedAttackEffect(
-        cardData.skills.simpleAttack.effect.rate,
-        cardData.skills.simpleAttack.effect.level as EffectLevel,
-      );
-    }
-    if (cardData.skills.simpleAttack.effect?.type === Effect.BURN) {
-      effect = new BurnedAttackEffect(
-        cardData.skills.simpleAttack.effect.rate,
-        cardData.skills.simpleAttack.effect.level as EffectLevel,
-      );
-    }
-    if (cardData.skills.simpleAttack.effect?.type === Effect.FREEZE) {
-      effect = new FrozenAttackEffect(
-        cardData.skills.simpleAttack.effect.rate,
-        cardData.skills.simpleAttack.effect.level as EffectLevel,
-      );
-    }
+    const effect = cardData.skills.simpleAttack.effect
+      ? this.buildEffect(cardData.skills.simpleAttack.effect)
+      : undefined;
 
     const damages = cardData.skills.simpleAttack.damages.map(
       (d) => new DamageComposition(d.type, d.rate),
@@ -189,6 +159,49 @@ export class FightController {
         dodge: buildDodgeStrategy(cardData.behaviors.dodge),
       },
     );
+  }
+
+  private buildEffect(effectDto: {
+    type: Effect;
+    rate: number;
+    level: number;
+    triggeredDebuff?: {
+      debuffType: BuffType;
+      debuffRate: number;
+      duration: number;
+      probability: number;
+    };
+  }): AttackEffect {
+    const triggeredDebuff = effectDto.triggeredDebuff
+      ? new EffectTriggeredDebuff(
+          effectDto.triggeredDebuff.probability,
+          this.mapBuffType(effectDto.triggeredDebuff.debuffType),
+          effectDto.triggeredDebuff.debuffRate,
+          effectDto.triggeredDebuff.duration,
+          new MathRandomizer(),
+        )
+      : undefined;
+
+    switch (effectDto.type) {
+      case Effect.POISON:
+        return new PoisonedAttackEffect(
+          effectDto.rate,
+          effectDto.level as EffectLevel,
+          triggeredDebuff,
+        );
+      case Effect.BURN:
+        return new BurnedAttackEffect(
+          effectDto.rate,
+          effectDto.level as EffectLevel,
+          triggeredDebuff,
+        );
+      case Effect.FREEZE:
+        return new FrozenAttackEffect(
+          effectDto.rate,
+          effectDto.level as EffectLevel,
+          triggeredDebuff,
+        );
+    }
   }
 
   private createOtherSkill(skillData: any): Skill {

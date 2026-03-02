@@ -84,6 +84,20 @@ export enum ElementDto {
   AIR = 'AIR',
 }
 
+class EffectTriggeredDebuffDto {
+  @IsEnum(BuffType)
+  debuffType: BuffType;
+
+  @IsNumber()
+  debuffRate: number;
+
+  @IsNumber()
+  duration: number;
+
+  @IsNumber()
+  probability: number;
+}
+
 class EffectDto {
   @IsEnum(Effect)
   type: Effect;
@@ -93,6 +107,11 @@ class EffectDto {
 
   @IsNumber()
   level: number;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => EffectTriggeredDebuffDto)
+  triggeredDebuff?: EffectTriggeredDebuffDto;
 }
 
 class BuffApplicationDto {

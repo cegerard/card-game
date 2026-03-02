@@ -3,15 +3,22 @@ import { AttackEffect, EffectResult } from './attack-effect';
 import { EffectLevel } from './effect-level';
 import { FightingContext } from '../fighting-context';
 import { CardStateBurned } from '../state/card-state-burned';
+import { EffectTriggeredDebuff } from './effect-triggered-debuff';
 
 export class BurnedAttackEffect implements AttackEffect {
   public readonly rate: number;
   public readonly level: EffectLevel;
   public readonly type = 'burned';
+  public readonly triggeredDebuff?: EffectTriggeredDebuff;
 
-  constructor(rate: number, level: EffectLevel) {
+  constructor(
+    rate: number,
+    level: EffectLevel,
+    triggeredDebuff?: EffectTriggeredDebuff,
+  ) {
     this.rate = rate;
     this.level = level;
+    this.triggeredDebuff = triggeredDebuff;
   }
 
   public applyEffect(
@@ -40,7 +47,12 @@ export class BurnedAttackEffect implements AttackEffect {
     );
     defender.setState(burnedState);
 
-    return { type: this.type, card: defender };
+    const effectResult: EffectResult = { type: this.type, card: defender };
+    const appliedDebuff = this.triggeredDebuff?.tryApply(defender);
+    if (appliedDebuff) {
+      effectResult.triggeredDebuff = { card: defender, debuff: appliedDebuff };
+    }
+    return effectResult;
   }
 
   private computeBurnedTurns(effectLevel: EffectLevel) {

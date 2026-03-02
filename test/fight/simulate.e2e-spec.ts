@@ -134,6 +134,12 @@ describe('Simulate fight', () => {
                   type: 'FREEZE',
                   rate: 0.2,
                   level: 1,
+                  triggeredDebuff: {
+                    debuffType: 'defense',
+                    debuffRate: 0.08,
+                    probability: 0,
+                    duration: 1000,
+                  },
                 },
               },
               simpleAttack: {
