@@ -65,17 +65,19 @@ export class TurnManager {
 
     if (appliedSkill?.skillKind === SkillKind.Buff) {
       const buffResults = appliedSkill.results as BuffResults;
-      steps.push({
-        kind: StepKind.Buff,
-        source: card.identityInfo,
-        buffs: buffResults.map((result: BuffResult) => ({
-          target: result.target,
-          kind: result.buff.type,
-          value: result.buff.value,
-          remainingTurns: result.buff.duration,
-        })),
-        energy: card.actualEnergy,
-      });
+      if (buffResults.length > 0) {
+        steps.push({
+          kind: StepKind.Buff,
+          source: card.identityInfo,
+          buffs: buffResults.map((result: BuffResult) => ({
+            target: result.target,
+            kind: result.buff.type,
+            value: result.buff.value,
+            remainingTurns: result.buff.duration,
+          })),
+          energy: card.actualEnergy,
+        });
+      }
     }
 
     if (appliedSkill?.skillKind === SkillKind.Debuff) {

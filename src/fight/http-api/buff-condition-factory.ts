@@ -1,10 +1,11 @@
 import { BuffConditionType } from './dto/fight-data.dto';
 import { BuffCondition } from '../core/cards/@types/buff/buff-condition';
 import { AllyPresenceCondition } from '../core/cards/@types/buff/conditions/ally-presence-condition';
+import { HealthThresholdCondition } from '../core/cards/@types/buff/conditions/health-threshold-condition';
 
 export function buildBuffCondition(
   type: BuffConditionType,
-  params: { allyName?: string },
+  params: { allyName?: string; threshold?: number; operator?: string },
 ): BuffCondition {
   switch (type) {
     case BuffConditionType.ALLY_PRESENCE:
@@ -12,5 +13,10 @@ export function buildBuffCondition(
         throw new Error('AllyPresenceCondition requires allyName');
       }
       return new AllyPresenceCondition(params.allyName);
+    case BuffConditionType.HEALTH_THRESHOLD:
+      return new HealthThresholdCondition(
+        params.threshold ?? 0.5,
+        (params.operator as 'above' | 'below') ?? 'above',
+      );
   }
 }

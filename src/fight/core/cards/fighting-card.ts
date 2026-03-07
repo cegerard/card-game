@@ -97,6 +97,10 @@ export class FightingCard {
     );
   }
 
+  public get healthRatio(): number {
+    return this.actualHealth / this.maxHealth;
+  }
+
   public get actualSpeed(): number {
     return this.speed;
   }

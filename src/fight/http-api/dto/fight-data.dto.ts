@@ -14,6 +14,7 @@ import {
 
 export enum BuffConditionType {
   ALLY_PRESENCE = 'ally-presence',
+  HEALTH_THRESHOLD = 'health-threshold',
 }
 
 class BuffConditionDto {
@@ -24,8 +25,17 @@ class BuffConditionDto {
   @IsString()
   allyName?: string;
 
+  @IsOptional()
   @IsNumber()
-  multiplier: number;
+  multiplier?: number;
+
+  @IsOptional()
+  @IsNumber()
+  threshold?: number;
+
+  @IsOptional()
+  @IsString()
+  operator?: string;
 }
 import { DamageType } from '../../core/cards/@types/damage/damage-type';
 export { DamageType };
@@ -213,6 +223,11 @@ export class OtherSkillDto {
   @IsOptional()
   @IsNumber()
   duration?: number;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => BuffConditionDto)
+  activationCondition?: BuffConditionDto;
 }
 
 class SkillsDto {

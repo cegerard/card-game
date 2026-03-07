@@ -216,12 +216,19 @@ export class FightController {
         if (!skillData.buffType || !skillData.duration) {
           throw new Error('Buff skill requires buffType and duration');
         }
+        const activationCondition = skillData.activationCondition
+          ? buildBuffCondition(skillData.activationCondition.type, {
+              threshold: skillData.activationCondition.threshold,
+              operator: skillData.activationCondition.operator,
+            })
+          : undefined;
         return new BuffSkill(
           this.mapBuffType(skillData.buffType),
           skillData.rate,
           skillData.duration,
           buildTriggerStrategy(skillData.event),
           buildTargetingStrategy(skillData.targetingStrategy),
+          activationCondition,
         );
       default:
         throw new Error(`Unknown skill kind: ${skillData.kind}`);
