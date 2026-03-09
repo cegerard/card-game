@@ -48,6 +48,7 @@ export enum SpecialKind {
 export enum SkillKind {
   HEALING = 'HEALING',
   BUFF = 'BUFF',
+  CONDITIONAL_ATTACK = 'CONDITIONAL_ATTACK',
 }
 
 export enum BuffType {
@@ -70,6 +71,7 @@ export enum DodgeStrategy {
 
 export enum TriggerEvent {
   TURN_END = 'turn-end',
+  NEXT_ACTION = 'next-action',
 }
 
 export enum TargetingStrategy {
@@ -228,6 +230,23 @@ export class OtherSkillDto {
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => BuffConditionDto)
   activationCondition?: BuffConditionDto;
+
+  // Conditional attack properties
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(/* istanbul ignore next */ () => DamageCompositionDto)
+  damages?: DamageCompositionDto[];
+
+  @IsOptional()
+  @IsNumber()
+  interval?: number;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => EffectDto)
+  effect?: EffectDto;
 }
 
 class SkillsDto {

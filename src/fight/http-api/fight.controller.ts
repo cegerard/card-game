@@ -43,6 +43,8 @@ import { Player } from '../core/player';
 import { FightSimulator } from '../core/fight-simulator/@types/fight-simulator';
 import { Skill } from '../core/cards/skills/skill';
 import { DamageComposition } from '../core/cards/@types/damage/damage-composition';
+import { ConditionalAttack } from '../core/cards/skills/conditional-attack';
+import { EveryNTurnsCondition } from '../core/cards/@types/attack/conditions/every-n-turns-condition';
 
 @Controller()
 @UsePipes(
@@ -145,15 +147,17 @@ export class FightController {
       effect,
     );
 
+    const otherSkills: Skill[] = cardData.skills.others.map((skill) =>
+      this.createOtherSkill(skill),
+    );
+
     return new FightingCard(
       cardData.name,
       cardData,
       {
         special,
         simpleAttack,
-        others: cardData.skills.others.map((skill) => {
-          return this.createOtherSkill(skill);
-        }),
+        others: otherSkills,
       },
       {
         dodge: buildDodgeStrategy(cardData.behaviors.dodge),
@@ -229,6 +233,24 @@ export class FightController {
           buildTriggerStrategy(skillData.event),
           buildTargetingStrategy(skillData.targetingStrategy),
           activationCondition,
+        );
+      case SkillKind.CONDITIONAL_ATTACK:
+        if (!skillData.damages || !skillData.interval) {
+          throw new Error('Conditional attack requires damages and interval');
+        }
+        const caDamages = skillData.damages.map(
+          (d) => new DamageComposition(d.type, d.rate),
+        );
+        const caEffect = skillData.effect
+          ? this.buildEffect(skillData.effect)
+          : undefined;
+        return new ConditionalAttack(
+          new SimpleAttack(
+            caDamages,
+            buildTargetingStrategy(skillData.targetingStrategy),
+            caEffect,
+          ),
+          new EveryNTurnsCondition(skillData.interval),
         );
       default:
         throw new Error(`Unknown skill kind: ${skillData.kind}`);

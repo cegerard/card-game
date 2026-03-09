@@ -9,6 +9,7 @@ import { HealingReport } from '../fight-simulator/@types/healing-report';
 import { HealingResult } from '../cards/@types/action-result/healing-result';
 import { FightingContext } from '../cards/@types/fighting-context';
 import { BuffReport } from '../fight-simulator/@types/buff-report';
+import { SkillKind } from '../cards/skills/skill';
 
 type SplittedSteps = {
   actionSteps: Step[];
@@ -38,10 +39,17 @@ export class ActionStage {
     const attacksReports = cards.reduce((acc: ActionReport[], card) => {
       if (card.frozenLevel > 0) return acc;
 
+      card.tickSkills();
+
       if (card.isSpecialReady()) {
         acc.push(this.launchSpecial(card));
       } else {
-        acc.push(this.launchAttack(card));
+        const skillsResults = this.launchNextActionSkills(card);
+        if (skillsResults) {
+          acc.push(skillsResults);
+        } else {
+          acc.push(this.launchAttack(card));
+        }
       }
 
       return acc;
@@ -63,30 +71,30 @@ export class ActionStage {
       statusChanges: [],
     };
 
-    card.launchAttack(this.getFightingContext(card)).forEach((damageDealt) => {
-      const defensiveCard = damageDealt.defender;
+    this.handleAttackResult(
+      card.launchAttack(this.getFightingContext(card)),
+      result,
+    );
 
-      result.attack.damages.push({
-        defender: defensiveCard.identityInfo,
-        damage: damageDealt.damage,
-        isCritical: damageDealt.isCritical,
-        dodge: damageDealt.dodge,
-        remainingHealth: defensiveCard.actualHealth,
-      });
+    return result;
+  }
 
-      if (defensiveCard.isDead()) {
-        this.notifyDeath(defensiveCard);
-        result.statusChanges.push({
-          card: defensiveCard.identityInfo,
-          status: 'dead',
-        });
-      } else if (damageDealt.effect) {
-        result.statusChanges.push({
-          status: damageDealt.effect.type,
-          card: damageDealt.effect.card.identityInfo,
-        });
-      }
-    });
+  private launchNextActionSkills(card: FightingCard): AttackReport | null {
+    const context = this.getFightingContext(card);
+    const skillResult = card.launchSkill('next-action', context);
+    if (!skillResult || skillResult.skillKind !== SkillKind.Attack) return null;
+
+    const result: AttackReport = {
+      kind: StepKind.Attack,
+      attack: {
+        attacker: card.identityInfo,
+        damages: [],
+        energy: card.increaseSpecialEnergy(),
+      },
+      statusChanges: [],
+    };
+
+    this.handleAttackResult(skillResult.results as AttackResult[], result);
 
     return result;
   }
@@ -113,31 +121,7 @@ export class ActionStage {
     const specialResults = card.launchSpecial(this.getFightingContext(card));
     const actionResults = specialResults.actionResults as AttackResult[];
 
-    actionResults.forEach((attackResult) => {
-      const targetedCard = attackResult.defender;
-      result.attack.damages.push({
-        defender: targetedCard.identityInfo,
-        damage: attackResult.damage,
-        isCritical: attackResult.isCritical,
-        dodge: attackResult.dodge,
-        remainingHealth: targetedCard.actualHealth,
-      });
-
-      if (targetedCard.isDead()) {
-        this.notifyDeath(targetedCard);
-        result.statusChanges.push({
-          card: targetedCard.identityInfo,
-          status: 'dead',
-        });
-      }
-
-      if (attackResult.effect) {
-        result.statusChanges.push({
-          status: attackResult.effect.type,
-          card: attackResult.effect.card.identityInfo,
-        });
-      }
-    });
+    this.handleAttackResult(actionResults, result);
 
     if (specialResults.buffResults.length > 0) {
       const buffReport: BuffReport = {
@@ -209,6 +193,36 @@ export class ActionStage {
       },
       { actionSteps: [], statusChangeSteps: [] },
     );
+  }
+
+  private handleAttackResult(
+    attackResults: AttackResult[],
+    report: AttackReport,
+  ): void {
+    attackResults.forEach((damageDealt) => {
+      const defensiveCard = damageDealt.defender;
+
+      report.attack.damages.push({
+        defender: defensiveCard.identityInfo,
+        damage: damageDealt.damage,
+        isCritical: damageDealt.isCritical,
+        dodge: damageDealt.dodge,
+        remainingHealth: defensiveCard.actualHealth,
+      });
+
+      if (defensiveCard.isDead()) {
+        this.notifyDeath(defensiveCard);
+        report.statusChanges.push({
+          card: defensiveCard.identityInfo,
+          status: 'dead',
+        });
+      } else if (damageDealt.effect) {
+        report.statusChanges.push({
+          status: damageDealt.effect.type,
+          card: damageDealt.effect.card.identityInfo,
+        });
+      }
+    });
   }
 
   private getFightingContext(card: FightingCard): FightingContext {

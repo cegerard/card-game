@@ -205,6 +205,12 @@ export class FightingCard {
     this.burned = undefined;
   }
 
+  public tickSkills(): void {
+    this.skills.forEach((skill) => {
+      if (skill.tick) skill.tick();
+    });
+  }
+
   public launchAttack(context: FightingContext): AttackResult[] {
     return this.simpleAttack.launch(this, context);
   }
