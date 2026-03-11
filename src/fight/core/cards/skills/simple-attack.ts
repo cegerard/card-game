@@ -5,8 +5,9 @@ import { AttackEffect, EffectResult } from '../@types/attack/attack-effect';
 import { FightingContext } from '../@types/fighting-context';
 import { FightingCard } from '../fighting-card';
 import { DamageCalculator } from '../damage/damage-calculator';
+import { AttackSkill } from './attack-skill';
 
-export class SimpleAttack {
+export class SimpleAttack implements AttackSkill {
   constructor(
     private readonly damages: DamageComposition[],
     private readonly targetingStrategy: TargetingCardStrategy,

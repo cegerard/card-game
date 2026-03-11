@@ -1,14 +1,14 @@
 import { FightingCard } from '../fighting-card';
 import { FightingContext } from '../@types/fighting-context';
 import { AttackCondition } from '../@types/attack/attack-condition';
-import { SimpleAttack } from './simple-attack';
+import { AttackSkill } from './attack-skill';
 import { Skill, SkillKind, SkillResults } from './skill';
 
 export class ConditionalAttack implements Skill {
   public id = 'conditional-attack';
 
   constructor(
-    private readonly simpleAttack: SimpleAttack,
+    private readonly attackSkill: AttackSkill,
     private readonly condition: AttackCondition,
   ) {}
 
@@ -17,7 +17,7 @@ export class ConditionalAttack implements Skill {
   }
 
   launch(source: FightingCard, context: FightingContext): SkillResults {
-    const results = this.simpleAttack.launch(source, context);
+    const results = this.attackSkill.launch(source, context);
     this.condition.reset();
     return { skillKind: SkillKind.Attack, results };
   }

@@ -45,6 +45,8 @@ import { Skill } from '../core/cards/skills/skill';
 import { DamageComposition } from '../core/cards/@types/damage/damage-composition';
 import { ConditionalAttack } from '../core/cards/skills/conditional-attack';
 import { EveryNTurnsCondition } from '../core/cards/@types/attack/conditions/every-n-turns-condition';
+import { MultipleAttack } from '../core/cards/skills/multiple-attack';
+import { AttackSkill } from '../core/cards/skills/attack-skill';
 
 @Controller()
 @UsePipes(
@@ -134,18 +136,38 @@ export class FightController {
       );
     }
 
-    const effect = cardData.skills.simpleAttack.effect
-      ? this.buildEffect(cardData.skills.simpleAttack.effect)
-      : undefined;
+    let attackSkill: AttackSkill;
 
-    const damages = cardData.skills.simpleAttack.damages.map(
-      (d) => new DamageComposition(d.type, d.rate),
-    );
-    const simpleAttack = new SimpleAttack(
-      damages,
-      buildTargetingStrategy(cardData.skills.simpleAttack.targetingStrategy),
-      effect,
-    );
+    if (cardData.skills.multipleAttack) {
+      const ma = cardData.skills.multipleAttack;
+      const maDamages = ma.damages.map(
+        (d) => new DamageComposition(d.type, d.rate),
+      );
+      const maEffect = ma.effect ? this.buildEffect(ma.effect) : undefined;
+      attackSkill = new MultipleAttack(
+        ma.hits,
+        maDamages,
+        buildTargetingStrategy(ma.targetingStrategy),
+        ma.amplifier ?? 0,
+        maEffect,
+      );
+    } else {
+      const sa = cardData.skills.simpleAttack;
+      if (!sa) {
+        throw new Error(
+          'Either simpleAttack or multipleAttack must be provided',
+        );
+      }
+      const effect = sa.effect ? this.buildEffect(sa.effect) : undefined;
+      const damages = sa.damages.map(
+        (d) => new DamageComposition(d.type, d.rate),
+      );
+      attackSkill = new SimpleAttack(
+        damages,
+        buildTargetingStrategy(sa.targetingStrategy),
+        effect,
+      );
+    }
 
     const otherSkills: Skill[] = cardData.skills.others.map((skill) =>
       this.createOtherSkill(skill),
@@ -156,7 +178,7 @@ export class FightController {
       cardData,
       {
         special,
-        simpleAttack,
+        simpleAttack: attackSkill,
         others: otherSkills,
       },
       {
@@ -244,12 +266,21 @@ export class FightController {
         const caEffect = skillData.effect
           ? this.buildEffect(skillData.effect)
           : undefined;
+        const caAttackSkill = skillData.hits
+          ? new MultipleAttack(
+              skillData.hits,
+              caDamages,
+              buildTargetingStrategy(skillData.targetingStrategy),
+              skillData.amplifier ?? 0,
+              caEffect,
+            )
+          : new SimpleAttack(
+              caDamages,
+              buildTargetingStrategy(skillData.targetingStrategy),
+              caEffect,
+            );
         return new ConditionalAttack(
-          new SimpleAttack(
-            caDamages,
-            buildTargetingStrategy(skillData.targetingStrategy),
-            caEffect,
-          ),
+          caAttackSkill,
           new EveryNTurnsCondition(skillData.interval),
         );
       default:

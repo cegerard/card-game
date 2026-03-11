@@ -3,7 +3,7 @@ import { CardInfo } from './@types/card-info';
 import { FightingContext } from './@types/fighting-context';
 import { SpecialResult } from './@types/action-result/special-result';
 import { DodgeBehavior } from './behaviors/dodge-behaviors';
-import { SimpleAttack } from './skills/simple-attack';
+import { AttackSkill } from './skills/attack-skill';
 import { Special } from './skills/special';
 import { CardState } from './@types/state/card-state';
 import { StateResult } from './@types/action-result/state-result';
@@ -42,7 +42,7 @@ export class FightingCard {
   private debuffs: Debuff[] = [];
 
   // Skills
-  private simpleAttack: SimpleAttack;
+  private simpleAttack: AttackSkill;
   private special: Special;
   private skills: Skill[];
 
@@ -66,7 +66,7 @@ export class FightingCard {
       criticalChance: number;
     },
     skills: {
-      simpleAttack: SimpleAttack;
+      simpleAttack: AttackSkill;
       special: Special;
       others: Skill[];
     },

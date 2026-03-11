@@ -201,6 +201,32 @@ class SimpleAttackDto {
   effect?: EffectDto;
 }
 
+class MultipleAttackDto {
+  @IsString()
+  name: string;
+
+  @IsNumber()
+  hits: number;
+
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(/* istanbul ignore next */ () => DamageCompositionDto)
+  damages: DamageCompositionDto[];
+
+  @IsEnum(TargetingStrategy)
+  targetingStrategy: TargetingStrategy;
+
+  @IsOptional()
+  @IsNumber()
+  amplifier?: number;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => EffectDto)
+  effect?: EffectDto;
+}
+
 export class OtherSkillDto {
   @IsEnum(SkillKind)
   kind: SkillKind;
@@ -244,6 +270,14 @@ export class OtherSkillDto {
   interval?: number;
 
   @IsOptional()
+  @IsNumber()
+  hits?: number;
+
+  @IsOptional()
+  @IsNumber()
+  amplifier?: number;
+
+  @IsOptional()
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => EffectDto)
   effect?: EffectDto;
@@ -255,10 +289,15 @@ class SkillsDto {
   @Type(/* istanbul ignore next */ () => SpecialDto)
   special: SpecialDto;
 
-  @IsNotEmpty()
+  @IsOptional()
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => SimpleAttackDto)
-  simpleAttack: SimpleAttackDto;
+  simpleAttack?: SimpleAttackDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => MultipleAttackDto)
+  multipleAttack?: MultipleAttackDto;
 
   @IsArray()
   @ValidateNested({ each: true })
