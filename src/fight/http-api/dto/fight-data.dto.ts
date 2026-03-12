@@ -225,6 +225,13 @@ class MultipleAttackDto {
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => EffectDto)
   effect?: EffectDto;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(/* istanbul ignore next */ () => DamageCompositionDto)
+  comboFinisher?: DamageCompositionDto[];
 }
 
 export class OtherSkillDto {
@@ -281,6 +288,13 @@ export class OtherSkillDto {
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => EffectDto)
   effect?: EffectDto;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(/* istanbul ignore next */ () => DamageCompositionDto)
+  comboFinisher?: DamageCompositionDto[];
 }
 
 class SkillsDto {

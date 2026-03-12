@@ -69,11 +69,14 @@ describe('MultipleAttack', () => {
   });
 
   describe('dodge on individual hit', () => {
-    let dodger: FightingCard;
     let dodgeContext: FightingContext;
 
     beforeEach(() => {
-      dodger = createFightingCard({ defense: 0, health: 10000, agility: 100 });
+      const dodger = createFightingCard({
+        defense: 0,
+        health: 10000,
+        agility: 100,
+      });
       const player2WithDodge = new Player('p2', [dodger]);
       dodgeContext = {
         sourcePlayer: player1,
@@ -109,18 +112,86 @@ describe('MultipleAttack', () => {
     });
   });
 
+  describe('combo finisher', () => {
+    const finisherDamages = [new DamageComposition(DamageType.PHYSICAL, 0.8)];
+
+    it('adds a bonus hit when all hits land', () => {
+      const multipleAttack = new MultipleAttack(
+        2,
+        damages,
+        new TargetedAll(),
+        0,
+        undefined,
+        finisherDamages,
+      );
+      const results = multipleAttack.launch(attacker, context);
+      expect(results).toHaveLength(3);
+    });
+
+    it('last hit is equal to finisher damage rate', () => {
+      const multipleAttack = new MultipleAttack(
+        2,
+        damages,
+        new TargetedAll(),
+        0,
+        undefined,
+        finisherDamages,
+      );
+      const results = multipleAttack.launch(attacker, context);
+      expect(results[2].damage).toBe(80);
+    });
+
+    describe('when a hit is dodged', () => {
+      let dodgeContext: FightingContext;
+
+      beforeEach(() => {
+        const dodger = createFightingCard({
+          defense: 0,
+          health: 10000,
+          agility: 100,
+        });
+        const player2WithDodge = new Player('p2', [dodger]);
+        dodgeContext = {
+          sourcePlayer: player1,
+          opponentPlayer: player2WithDodge,
+        };
+      });
+
+      it('does not apply combo finisher', () => {
+        const multipleAttack = new MultipleAttack(
+          2,
+          damages,
+          new TargetedAll(),
+          0,
+          undefined,
+          finisherDamages,
+        );
+        const results = multipleAttack.launch(attacker, dodgeContext);
+        expect(results).toHaveLength(2);
+      });
+    });
+
+    it('does not apply combo finisher when not configured', () => {
+      const multipleAttack = new MultipleAttack(2, damages, new TargetedAll());
+      const results = multipleAttack.launch(attacker, context);
+      expect(results).toHaveLength(2);
+    });
+  });
+
   describe('dead target skipped between hits', () => {
-    it('skips dead target on subsequent hits', () => {
+    let weakContext: FightingContext;
+
+    beforeEach(() => {
       const weakDefender = createFightingCard({
         defense: 0,
         health: 1,
         agility: 0,
       });
       const player2Weak = new Player('p2', [weakDefender]);
-      const weakContext = {
-        sourcePlayer: player1,
-        opponentPlayer: player2Weak,
-      };
+      weakContext = { sourcePlayer: player1, opponentPlayer: player2Weak };
+    });
+
+    it('skips dead target on subsequent hits', () => {
       const multipleAttack = new MultipleAttack(3, damages, new TargetedAll());
       const results = multipleAttack.launch(attacker, weakContext);
       expect(results).toHaveLength(1);

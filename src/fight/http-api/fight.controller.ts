@@ -144,12 +144,16 @@ export class FightController {
         (d) => new DamageComposition(d.type, d.rate),
       );
       const maEffect = ma.effect ? this.buildEffect(ma.effect) : undefined;
+      const maComboFinisher = ma.comboFinisher
+        ? ma.comboFinisher.map((d) => new DamageComposition(d.type, d.rate))
+        : undefined;
       attackSkill = new MultipleAttack(
         ma.hits,
         maDamages,
         buildTargetingStrategy(ma.targetingStrategy),
         ma.amplifier ?? 0,
         maEffect,
+        maComboFinisher,
       );
     } else {
       const sa = cardData.skills.simpleAttack;
@@ -266,6 +270,11 @@ export class FightController {
         const caEffect = skillData.effect
           ? this.buildEffect(skillData.effect)
           : undefined;
+        const caComboFinisher = skillData.comboFinisher
+          ? skillData.comboFinisher.map(
+              (d) => new DamageComposition(d.type, d.rate),
+            )
+          : undefined;
         const caAttackSkill = skillData.hits
           ? new MultipleAttack(
               skillData.hits,
@@ -273,6 +282,7 @@ export class FightController {
               buildTargetingStrategy(skillData.targetingStrategy),
               skillData.amplifier ?? 0,
               caEffect,
+              caComboFinisher,
             )
           : new SimpleAttack(
               caDamages,

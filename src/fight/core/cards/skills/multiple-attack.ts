@@ -14,10 +14,13 @@ export class MultipleAttack implements AttackSkill {
     private readonly targetingStrategy: TargetingCardStrategy,
     private readonly amplifier: number = 0,
     private readonly effect?: AttackEffect,
+    private readonly comboFinisher?: DamageComposition[],
   ) {}
 
   public launch(card: FightingCard, context: FightingContext): AttackResult[] {
     const results: AttackResult[] = [];
+    const hitTargets = new Set<FightingCard>();
+    const dodgedTargets = new Set<FightingCard>();
 
     for (let i = 0; i < this.hits; i++) {
       const attackPower = card.actualAttack * (1 + this.amplifier * i);
@@ -30,10 +33,12 @@ export class MultipleAttack implements AttackSkill {
       for (const defender of targets) {
         if (defender.isDead()) continue;
 
+        hitTargets.add(defender);
         const isCritical = Math.random() < card.actualCriticalChance;
         const damageMultiplier = isCritical ? 2 : 1;
 
         if (defender.dodge(card.actualAccuracy)) {
+          dodgedTargets.add(defender);
           results.push({ damage: 0, isCritical, dodge: true, defender });
           continue;
         }
@@ -56,6 +61,25 @@ export class MultipleAttack implements AttackSkill {
           dodge: false,
           defender,
           effect: effectResult,
+        });
+      }
+    }
+
+    if (this.comboFinisher) {
+      for (const defender of hitTargets) {
+        if (dodgedTargets.has(defender) || defender.isDead()) continue;
+
+        const { total } = DamageCalculator.calculateDamage(
+          this.comboFinisher,
+          card.actualAttack,
+          defender,
+        );
+        const collectedDamage = defender.applyFinalDamage(total);
+        results.push({
+          damage: collectedDamage,
+          isCritical: false,
+          dodge: false,
+          defender,
         });
       }
     }
