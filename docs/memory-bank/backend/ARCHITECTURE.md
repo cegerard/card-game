@@ -50,6 +50,7 @@ src/
     │   │   ├── fight.ts              # Main fight orchestrator
     │   │   ├── turn-manager.ts       # Turn-end effects processor
     │   │   ├── card-death-subscriber.ts  # Event listener interface
+    │   │   ├── death-skill-handler.ts    # Triggers ally-death skills; accumulates + drains steps
     │   │   ├── @types/               # Fight result types
     │   │   └── card-selectors/       # Turn order strategies
     │   │       ├── card-selector.ts
@@ -93,7 +94,8 @@ src/
     │   │   └── launcher.ts
     │   └── trigger/                  # Skill trigger events
     │       ├── trigger.ts
-    │       └── turn-end.ts
+    │       ├── turn-end.ts
+    │       └── ally-death.ts         # Matches 'ally-death:<cardId>' trigger strings
     └── tools/                        # Utility implementations
         └── math-randomizer.ts
 ```
@@ -124,6 +126,7 @@ sequenceDiagram
     participant TurnManager as TurnManager
     participant CardSelector as CardSelector
     participant Card as FightingCard
+    participant DeathHandler as DeathSkillHandler
 
     Client->>Controller: POST /fight (FightDataDto)
     Controller->>Controller: Convert DTOs to domain objects
@@ -142,6 +145,10 @@ sequenceDiagram
             Card-->>ActionStage: AttackResult[] / HealingResult[]
             ActionStage->>ActionStage: Apply damage/healing to targets
             ActionStage->>ActionStage: Check for deaths
+            ActionStage->>DeathHandler: notifyDeath(player, deadCard)
+            DeathHandler->>Card: launchSkill('ally-death:<id>') on survivors
+            ActionStage->>DeathHandler: drainSteps()
+            DeathHandler-->>ActionStage: Death-triggered skill steps
         end
         ActionStage-->>Fight: Action steps
 
@@ -151,6 +158,10 @@ sequenceDiagram
             TurnManager->>Card: launchSkill('turn-end')
             TurnManager->>Card: applyStateEffects() (poison, burn, freeze)
             TurnManager->>TurnManager: Check for deaths
+            TurnManager->>DeathHandler: notifyDeath(player, deadCard)
+            DeathHandler->>Card: launchSkill('ally-death:<id>') on survivors
+            TurnManager->>DeathHandler: drainSteps()
+            DeathHandler-->>TurnManager: Death-triggered skill steps
         end
         TurnManager-->>Fight: Turn-end steps
 
@@ -170,13 +181,13 @@ sequenceDiagram
   - Card selection strategies (`PlayerByPlayerCardSelector`, `SpeedWeightedCardSelector`)
   - Targeting strategies (position-based, all-enemies, line-three, etc.)
   - Dodge behaviors (simple, random)
-- **Observer Pattern**: `CardDeathSubscriber` interface for death notifications
+- **Observer Pattern**: `CardDeathSubscriber` interface for death notifications. `DeathSkillHandler` implements it: on each death it fires `ally-death:<cardId>` skill triggers on surviving allies, accumulates resulting steps, and exposes `drainSteps()` for callers (`ActionStage`, `TurnManager`) to collect them immediately after each death event
 - **Dependency Injection**: NestJS provider system for `FIGHT_SIMULATOR_BUILDER`
 - **Value Objects**: Immutable types for attack effects, buffs, debuffs, damage compositions
 - **Rich Domain Model**: `FightingCard` encapsulates stats, behaviors, element, and state mutations
 - **Multi-Damage System**: `DamageCalculator` computes damage from multiple `DamageComposition` entries (type + rate), applying `ElementalMatrix` multipliers based on attacker damage types vs defender element
 - **Buff Condition System**: `BuffApplication` has optional `condition: BuffCondition` and `conditionMultiplier`. If the condition evaluates to true at buff application time, the rate is multiplied. `buff-condition-factory.ts` maps `BuffConditionType` enum → `BuffCondition` instance. First implementation: `AllyPresenceCondition` checks that a named ally is alive in the source player's team.
-- **Event-Driven**: Skills triggered by events (`turn-end`), extensible trigger system
+- **Event-Driven**: Skills triggered by events (`turn-end`, `ally-death:<cardId>`), extensible trigger system. `AllyDeath` trigger matches string pattern `ally-death:<targetCardId>` enabling death-reactive abilities
 - **Unified Special Result**: `Special.launch()` returns `SpecialResult` containing both `actionResults` (AttackResult[] or HealingResult[]) and `buffResults` (BuffResults) for consistent handling across attack and healing specials
 - **Separation of Concerns**:
   - `Fight` orchestrates battle flow

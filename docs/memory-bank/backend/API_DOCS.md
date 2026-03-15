@@ -69,7 +69,8 @@ Simulates a turn-based card battle between two players.
     dodge: "simple-dodge" | "random-dodge"
   },
   image?: string,             // Optional card image
-  cardDeckIdentity?: string   // Optional identifier
+  cardDeckIdentity?: string,  // Optional identifier
+  id: string                  // Unique card identifier (used for ally-death trigger targeting)
 }
 ```
 
@@ -108,7 +109,8 @@ Simulates a turn-based card battle between two players.
   name: string,
   rate: number,
   targetingStrategy: TargetingStrategy,
-  event: "turn-end",          // When skill triggers
+  event: "turn-end" | "ally-death",  // When skill triggers
+  targetCardId?: string,      // Required when event=ally-death: id of the ally whose death triggers this skill
   buffType?: "attack" | "defense" | "agility" | "accuracy",  // Required if kind=BUFF
   duration?: number           // Required if kind=BUFF
 }
@@ -170,6 +172,7 @@ Simulates a turn-based card battle between two players.
 ### TriggerEvent
 
 - `turn-end`: Skill triggers at end of turn
+- `ally-death`: Skill triggers when a specific ally dies (requires `targetCardId` matching the dead card's `id`)
 
 ### SpecialKind
 

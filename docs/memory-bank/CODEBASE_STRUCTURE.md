@@ -104,7 +104,8 @@ fight-simulator/
 ├── fight.ts                # Main fight orchestrator
 ├── turn-manager.ts         # Turn-end effects and buff/debuff management
 ├── action_stage.ts         # Action resolution (attacks, specials, healing)
-├── card-death-subscriber.ts # Card death event handling
+├── card-death-subscriber.ts # Card death event handling interface
+├── death-skill-handler.ts  # Triggers ally-death skills on surviving cards; drainable steps
 ├── card-selectors/         # Turn order strategies
 │   ├── card-selector.ts    # Selector interface
 │   ├── player-by-player.ts # Alternating player strategy

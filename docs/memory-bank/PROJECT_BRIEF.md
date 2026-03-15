@@ -35,7 +35,7 @@ The battle simulation domain encompasses strategic turn-based combat where entit
 | Deck | Collection of fighting cards owned by a player (min 1, max 5) | Card Collection |
 | Simple Attack | Basic attack action performed when special energy is insufficient | Basic Attack, Normal Attack |
 | Special | Ultimate ability requiring energy accumulation (attack or healing variant) | Ultimate, Special Move |
-| Skill | Additional abilities triggered by events (e.g., turn-end healing/buffing) | Passive Skill, Ability |
+| Skill | Additional abilities triggered by events (e.g., turn-end healing/buffing, ally-death reactions) | Passive Skill, Ability |
 | Status Effect | Ongoing condition affecting a card (poison, burn, freeze) | Debilitating Effect, Ailment |
 | Buff | Temporary positive stat modification with duration | Stat Boost, Enhancement |
 | Debuff | Temporary negative stat modification with duration | Stat Reduction, Penalty |
@@ -70,6 +70,7 @@ The main use-cases and features of the project:
 - Determine winners based on total remaining health
 - Support multiple targeting strategies for skills (single target, all enemies, line-three, all allies, self)
 - Handle card death events and update available card pools
+- Trigger death-reactive skills on surviving allies when a specific card dies (`ally-death` event)
 - Enforce battle time limits (100 iterations max)
 
 ## User Journey maps
