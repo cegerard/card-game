@@ -26,6 +26,7 @@ describe('Simulate fight', () => {
         name: 'Player 1',
         deck: [
           {
+            id: 'axe',
             name: 'Axe',
             attack: 10,
             defense: 6,
@@ -72,6 +73,7 @@ describe('Simulate fight', () => {
             },
           },
           {
+            id: 'hammer',
             name: 'Hammer',
             attack: 10,
             defense: 6,
@@ -115,6 +117,7 @@ describe('Simulate fight', () => {
         name: 'Player 2',
         deck: [
           {
+            id: 'sword',
             name: 'Sword',
             attack: 11,
             defense: 5,
@@ -159,6 +162,7 @@ describe('Simulate fight', () => {
             },
           },
           {
+            id: 'priest',
             name: 'Priest',
             attack: 11,
             defense: 5,

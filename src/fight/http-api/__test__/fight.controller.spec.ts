@@ -58,6 +58,7 @@ describe('FightController', () => {
             name: 'Player 1',
             deck: [
               {
+                id: 'axe-01',
                 name: 'Axe',
                 attack: 10,
                 defense: 6,
@@ -124,6 +125,7 @@ describe('FightController', () => {
             name: 'Player 1',
             deck: [
               {
+                id: 'axe-01',
                 name: 'Axe',
                 attack: 10,
                 defense: 6,
@@ -190,6 +192,7 @@ describe('FightController', () => {
             name: 'Player 1',
             deck: [
               {
+                id: 'axe-01',
                 name: 'Axe',
                 attack: 10,
                 defense: 6,
@@ -254,6 +257,7 @@ describe('FightController', () => {
           name: 'Player 1',
           deck: [
             {
+              id: 'axe-01',
               name: 'Axe',
               attack: 10,
               defense: 6,
@@ -329,6 +333,7 @@ describe('FightController', () => {
             name: 'Player 1',
             deck: [
               {
+                id: 'axe-01',
                 name: 'Axe',
                 attack: 10,
                 defense: 6,
@@ -397,6 +402,7 @@ describe('FightController', () => {
             name: 'Player 1',
             deck: [
               {
+                id: 'axe-01',
                 name: 'Axe',
                 attack: 10,
                 defense: 6,
@@ -465,6 +471,7 @@ describe('FightController', () => {
             name: 'Player 1',
             deck: [
               {
+                id: 'axe-01',
                 name: 'Axe',
                 attack: 10,
                 defense: 6,
@@ -525,6 +532,7 @@ describe('FightController', () => {
           name: 'Player 1',
           deck: [
             {
+              id: 'axe-01',
               name: 'Axe',
               attack: 10,
               defense: 6,
@@ -586,6 +594,7 @@ describe('FightController', () => {
           name: 'Player 1',
           deck: [
             {
+              id: 'axe-01',
               name: 'Axe',
               attack: 10,
               defense: 6,
@@ -646,6 +655,7 @@ describe('FightController', () => {
           name: 'Player 1',
           deck: [
             {
+              id: 'axe-01',
               name: 'Axe',
               attack: 10,
               defense: 6,
@@ -716,6 +726,7 @@ describe('FightController', () => {
           name: 'Player 1',
           deck: [
             {
+              id: 'axe-01',
               name: 'Axe',
               attack: 10,
               defense: 6,

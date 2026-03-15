@@ -178,6 +178,7 @@ export class FightController {
     );
 
     return new FightingCard(
+      cardData.id,
       cardData.name,
       cardData,
       {
@@ -239,7 +240,7 @@ export class FightController {
       case SkillKind.HEALING:
         return new Healing(
           skillData.rate,
-          buildTriggerStrategy(skillData.event),
+          buildTriggerStrategy(skillData.event, skillData.targetCardId),
           buildTargetingStrategy(skillData.targetingStrategy),
         );
       case SkillKind.BUFF:
@@ -256,7 +257,7 @@ export class FightController {
           this.mapBuffType(skillData.buffType),
           skillData.rate,
           skillData.duration,
-          buildTriggerStrategy(skillData.event),
+          buildTriggerStrategy(skillData.event, skillData.targetCardId),
           buildTargetingStrategy(skillData.targetingStrategy),
           activationCondition,
         );

@@ -26,6 +26,7 @@ describe('Special Attack with Buffs (e2e)', () => {
         name: 'Player 1',
         deck: [
           {
+            id: 'attacker-with-buff',
             name: 'Attacker with Buff',
             attack: 100,
             defense: 0,
@@ -67,6 +68,7 @@ describe('Special Attack with Buffs (e2e)', () => {
         name: 'Player 2',
         deck: [
           {
+            id: 'defender',
             name: 'Defender',
             attack: 0,
             defense: 0,
@@ -182,6 +184,7 @@ describe('Special Attack with Buffs (e2e)', () => {
         name: 'Player 1',
         deck: [
           {
+            id: 'dual-buffer',
             name: 'Dual Buffer',
             attack: 100,
             defense: 100,
@@ -229,6 +232,7 @@ describe('Special Attack with Buffs (e2e)', () => {
         name: 'Player 2',
         deck: [
           {
+            id: 'dummy',
             name: 'Dummy',
             attack: 0,
             defense: 0,

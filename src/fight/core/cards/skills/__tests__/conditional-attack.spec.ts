@@ -14,6 +14,7 @@ import { FightingCard } from '../../fighting-card';
 import { SpecialAttack } from '../special-attack';
 import { SimpleDodge } from '../../behaviors/simple-dodge';
 import { Element } from '../../@types/damage/element';
+import { faker } from '@faker-js/faker';
 
 const POSITION_BASED = new TargetedFromPosition();
 
@@ -35,6 +36,7 @@ function makeCard(opts: {
   conditionalAttack?: ConditionalAttack;
 }): FightingCard {
   return new FightingCard(
+    faker.string.uuid(),
     opts.name ?? 'Card',
     {
       attack: opts.attack ?? 100,
@@ -184,6 +186,7 @@ describe('ConditionalAttack integration via Fight (interval=3)', () => {
     );
 
     attacker = new FightingCard(
+      faker.string.uuid(),
       'Attacker',
       {
         attack: ATTACK,
@@ -204,6 +207,7 @@ describe('ConditionalAttack integration via Fight (interval=3)', () => {
     );
 
     defender = new FightingCard(
+      faker.string.uuid(),
       'Defender',
       {
         attack: 0,

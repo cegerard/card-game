@@ -27,6 +27,7 @@ describe('Simulate fight with buffs', () => {
         name: 'Team Buffer',
         deck: [
           {
+            id: 'support-paladin',
             name: 'Support Paladin',
             attack: 80,
             defense: 100,
@@ -65,6 +66,7 @@ describe('Simulate fight with buffs', () => {
             },
           },
           {
+            id: 'dps-warrior',
             name: 'DPS Warrior',
             attack: 120,
             defense: 60,
@@ -108,6 +110,7 @@ describe('Simulate fight with buffs', () => {
         name: 'Standard Team',
         deck: [
           {
+            id: 'basic-fighter',
             name: 'Basic Fighter',
             attack: 90,
             defense: 70,
@@ -144,6 +147,7 @@ describe('Simulate fight with buffs', () => {
             },
           },
           {
+            id: 'archer',
             name: 'Archer',
             attack: 100,
             defense: 50,
@@ -188,6 +192,7 @@ describe('Simulate fight with buffs', () => {
               kind: 'attack',
               remainingTurns: 4,
               target: {
+                id: 'dps-warrior',
                 deckIdentity: 'Team Buffer-1',
                 name: 'DPS Warrior',
               },
@@ -197,6 +202,7 @@ describe('Simulate fight with buffs', () => {
           energy: 10,
           kind: 'buff',
           source: {
+            id: 'dps-warrior',
             deckIdentity: 'Team Buffer-1',
             name: 'DPS Warrior',
           },
@@ -211,6 +217,7 @@ describe('Simulate fight with buffs', () => {
         name: 'Invalid Team',
         deck: [
           {
+            id: 'invalid-buffer',
             name: 'Invalid Buffer',
             attack: 80,
             defense: 100,
@@ -252,6 +259,7 @@ describe('Simulate fight with buffs', () => {
         name: 'Enemy',
         deck: [
           {
+            id: 'enemy-fighter',
             name: 'Enemy Fighter',
             attack: 90,
             defense: 70,

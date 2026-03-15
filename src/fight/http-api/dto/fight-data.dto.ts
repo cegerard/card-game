@@ -72,6 +72,7 @@ export enum DodgeStrategy {
 export enum TriggerEvent {
   TURN_END = 'turn-end',
   NEXT_ACTION = 'next-action',
+  ALLY_DEATH = 'ally-death',
 }
 
 export enum TargetingStrategy {
@@ -295,6 +296,11 @@ export class OtherSkillDto {
   @ValidateNested({ each: true })
   @Type(/* istanbul ignore next */ () => DamageCompositionDto)
   comboFinisher?: DamageCompositionDto[];
+
+  // Ally death trigger property
+  @IsOptional()
+  @IsString()
+  targetCardId?: string;
 }
 
 class SkillsDto {
@@ -325,6 +331,9 @@ class BehaviorsDto {
 }
 
 export class FightingCardDto {
+  @IsString()
+  id: string;
+
   @IsString()
   name: string;
 

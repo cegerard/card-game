@@ -12,6 +12,7 @@ import { SkillKind } from '../cards/skills/skill';
 import { Player } from '../player';
 import { Step, StepKind } from './@types/step';
 import { CardDeathSubscriber } from './card-death-subscriber';
+import { DeathSkillHandler } from './death-skill-handler';
 
 export class TurnManager {
   private player1: Player;
@@ -19,6 +20,7 @@ export class TurnManager {
   private eventBroker: {
     onCardDeath: CardDeathSubscriber[];
   };
+  private deathSkillHandler: DeathSkillHandler;
 
   public constructor(
     player1: Player,
@@ -26,10 +28,12 @@ export class TurnManager {
     eventBroker: {
       onCardDeath: CardDeathSubscriber[];
     },
+    deathSkillHandler: DeathSkillHandler,
   ) {
     this.player1 = player1;
     this.player2 = player2;
     this.eventBroker = eventBroker;
+    this.deathSkillHandler = deathSkillHandler;
   }
 
   public endTurn(cards: FightingCard[]): Step[] {
@@ -40,6 +44,8 @@ export class TurnManager {
       this.processCardSkill(card, steps);
       this.processCardEffectStates(card, steps);
     });
+
+    steps.push(...this.deathSkillHandler.drainSteps());
 
     return steps;
   }

@@ -1,0 +1,94 @@
+import { FightingCard } from '../cards/fighting-card';
+import { Player } from '../player';
+import { CardDeathSubscriber } from './card-death-subscriber';
+import { Step, StepKind } from './@types/step';
+import {
+  BuffResult,
+  BuffResults,
+} from '../cards/@types/action-result/buff-results';
+import {
+  DebuffResult,
+  DebuffResults,
+} from '../cards/@types/action-result/debuff-results';
+import { SkillKind } from '../cards/skills/skill';
+
+export class DeathSkillHandler implements CardDeathSubscriber {
+  private steps: Step[] = [];
+  private player1: Player;
+  private player2: Player;
+
+  constructor(player1: Player, player2: Player) {
+    this.player1 = player1;
+    this.player2 = player2;
+  }
+
+  notifyDeath(_player: Player, deadCard: FightingCard): void {
+    const triggerId = `ally-death:${deadCard.id}`;
+    const ownerPlayer = this.player1.ownCard(deadCard)
+      ? this.player1
+      : this.player2;
+    const opponentPlayer =
+      ownerPlayer === this.player1 ? this.player2 : this.player1;
+
+    ownerPlayer.playableCards.forEach((card) => {
+      const context = {
+        sourcePlayer: ownerPlayer,
+        opponentPlayer,
+      };
+
+      const skillResult = card.launchSkill(triggerId, context);
+      if (!skillResult) return;
+
+      if (skillResult.skillKind === SkillKind.Healing) {
+        this.steps.push({
+          kind: StepKind.Healing,
+          source: card.identityInfo,
+          heal: skillResult.results.map((heal) => ({
+            target: heal.target,
+            healed: heal.healAmount,
+            remainingHealth: heal.remainingHealth,
+          })),
+          energy: card.actualEnergy,
+        });
+      }
+
+      if (skillResult.skillKind === SkillKind.Buff) {
+        const buffResults = skillResult.results as BuffResults;
+        if (buffResults.length > 0) {
+          this.steps.push({
+            kind: StepKind.Buff,
+            source: card.identityInfo,
+            buffs: buffResults.map((result: BuffResult) => ({
+              target: result.target,
+              kind: result.buff.type,
+              value: result.buff.value,
+              remainingTurns: result.buff.duration,
+            })),
+            energy: card.actualEnergy,
+          });
+        }
+      }
+
+      if (skillResult.skillKind === SkillKind.Debuff) {
+        const debuffResults = skillResult.results as DebuffResults;
+        this.steps.push({
+          kind: StepKind.Debuff,
+          source: card.identityInfo,
+          debuffs: debuffResults.map((result: DebuffResult) => ({
+            target: result.target,
+            kind: result.debuff.type,
+            value: result.debuff.value,
+            remainingTurns: result.debuff.duration,
+          })),
+          energy: card.actualEnergy,
+        });
+      }
+    });
+  }
+
+  drainSteps(): Step[] {
+    const drained = this.steps;
+    this.steps = [];
+    return drained;
+  }
+}

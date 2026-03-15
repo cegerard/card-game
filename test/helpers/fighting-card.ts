@@ -16,6 +16,7 @@ import { Healing } from '../../src/fight/core/cards/skills/healing';
 import { BuffSkill } from '../../src/fight/core/cards/skills/buff-skill';
 import { DebuffSkill } from '../../src/fight/core/cards/skills/debuff-skill';
 import { TurnEnd } from '../../src/fight/core/trigger/turn-end';
+import { AllyDeath } from '../../src/fight/core/trigger/ally-death';
 import { Trigger } from '../../src/fight/core/trigger/trigger';
 import { createEffect } from './effect';
 import {
@@ -35,6 +36,7 @@ type effect = {
 };
 
 type FightingCardParams = {
+  id?: string;
   name?: string;
   attack?: number;
   defense?: number;
@@ -70,6 +72,7 @@ type FightingCardParams = {
           effectRate: number;
           trigger: string;
           targetingStrategy: string;
+          targetCardId?: string;
         }
       | {
           buffType: BuffType;
@@ -77,6 +80,7 @@ type FightingCardParams = {
           duration: number;
           trigger: string;
           targetingStrategy: string;
+          targetCardId?: string;
         }
       | {
           debuffType: DebuffType;
@@ -84,6 +88,7 @@ type FightingCardParams = {
           duration: number;
           trigger: string;
           targetingStrategy: string;
+          targetCardId?: string;
         }
     )[];
   };
@@ -106,10 +111,15 @@ function createTargetingStrategy(strategy: string): TargetingCardStrategy {
   }
 }
 
-function createTrigger(trigger: string): Trigger {
+function createTrigger(trigger: string, targetCardId?: string): Trigger {
   switch (trigger) {
     case 'turn-end':
       return new TurnEnd();
+    case 'ally-death':
+      if (!targetCardId) {
+        throw new Error('Ally death trigger requires targetCardId');
+      }
+      return new AllyDeath(targetCardId);
     default:
       throw new Error(`Unknown trigger: ${trigger}`);
   }
@@ -212,6 +222,7 @@ function createsSkills(
         effectRate: number;
         trigger: string;
         targetingStrategy: string;
+        targetCardId?: string;
       }
     | {
         buffType: BuffType;
@@ -219,6 +230,7 @@ function createsSkills(
         duration: number;
         trigger: string;
         targetingStrategy: string;
+        targetCardId?: string;
       }
     | {
         debuffType: DebuffType;
@@ -226,6 +238,7 @@ function createsSkills(
         duration: number;
         trigger: string;
         targetingStrategy: string;
+        targetCardId?: string;
       }
   )[],
 ): Skill[] {
@@ -233,7 +246,7 @@ function createsSkills(
     if ('effectRate' in skill) {
       return new Healing(
         skill.effectRate,
-        createTrigger(skill.trigger),
+        createTrigger(skill.trigger, skill.targetCardId),
         createTargetingStrategy(skill.targetingStrategy),
       );
     } else if ('buffType' in skill) {
@@ -241,7 +254,7 @@ function createsSkills(
         skill.buffType,
         skill.buffRate,
         skill.duration,
-        createTrigger(skill.trigger),
+        createTrigger(skill.trigger, skill.targetCardId),
         createTargetingStrategy(skill.targetingStrategy),
       );
     } else {
@@ -249,14 +262,17 @@ function createsSkills(
         skill.debuffType,
         skill.debuffRate,
         skill.duration,
-        createTrigger(skill.trigger),
+        createTrigger(skill.trigger, skill.targetCardId),
         createTargetingStrategy(skill.targetingStrategy),
       );
     }
   });
 }
 
-export function createFightingCard(params: FightingCardParams): FightingCard {
+export function createFightingCard(
+  params: FightingCardParams = {},
+): FightingCard {
+  const id = params.id ?? faker.string.uuid();
   const cardName = params.name ?? faker.animal.type();
   const damage = params.attack ?? faker.number.int({ min: 100, max: 800 });
   const defense = params.defense ?? faker.number.int({ min: 100, max: 500 });
@@ -278,6 +294,7 @@ export function createFightingCard(params: FightingCardParams): FightingCard {
   }
 
   return new FightingCard(
+    id,
     cardName,
     {
       attack: damage,

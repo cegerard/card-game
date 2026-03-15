@@ -17,6 +17,7 @@ import { Element } from './@types/damage/element';
 
 export class FightingCard {
   // Info
+  public readonly id: string;
   public readonly name: string;
   private cardDeckIdentity: string = '';
 
@@ -55,6 +56,7 @@ export class FightingCard {
   private frozen?: CardState;
 
   constructor(
+    id: string,
     name: string,
     stats: {
       attack: number;
@@ -75,6 +77,7 @@ export class FightingCard {
     },
     element: Element = Element.PHYSICAL,
   ) {
+    this.id = id;
     this.name = name;
     this.attack = stats.attack;
     this.defense = stats.defense;
@@ -154,7 +157,11 @@ export class FightingCard {
   }
 
   public get identityInfo(): CardInfo {
-    return { name: this.name, deckIdentity: this.cardDeckIdentity };
+    return {
+      id: this.id,
+      name: this.name,
+      deckIdentity: this.cardDeckIdentity,
+    };
   }
 
   public get cardElement(): Element {
