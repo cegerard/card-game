@@ -1,1 +1,0 @@
-/home/cgerard/dev/card-game/.aidd/prompts/03_plan/image_extract_details.prompt.md

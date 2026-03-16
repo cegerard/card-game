@@ -1,1 +1,0 @@
-/home/cgerard/dev/card-game/.aidd/prompts/02_context/create_user_stories.prompt.md

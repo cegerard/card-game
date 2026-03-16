@@ -1,1 +1,0 @@
-/home/cgerard/dev/card-game/.aidd/prompts/08_deploy/tag.prompt.md

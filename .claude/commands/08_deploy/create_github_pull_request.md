@@ -1,1 +1,0 @@
-/home/cgerard/dev/card-game/.aidd/prompts/08_deploy/create_github_pull_request.prompt.md

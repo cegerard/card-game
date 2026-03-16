@@ -1,1 +1,0 @@
-/home/cgerard/dev/card-game/.aidd/prompts/05_review/review_functional.prompt.md

@@ -1,1 +1,0 @@
-/home/cgerard/dev/card-game/.aidd/prompts/09_refactor/performance.prompt.md

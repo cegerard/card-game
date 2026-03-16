@@ -1,1 +1,0 @@
-/home/cgerard/dev/card-game/.aidd/prompts/07_documentation/refresh_memory_bank.prompt.md

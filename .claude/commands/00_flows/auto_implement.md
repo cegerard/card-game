@@ -1,1 +1,0 @@
-/home/cgerard/dev/card-game/.aidd/prompts/00_flows/auto_implement.prompt.md

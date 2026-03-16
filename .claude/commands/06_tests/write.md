@@ -1,1 +1,0 @@
-/home/cgerard/dev/card-game/.aidd/prompts/06_tests/write.prompt.md

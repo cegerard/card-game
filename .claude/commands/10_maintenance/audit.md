@@ -1,1 +1,0 @@
-/home/cgerard/dev/card-game/.aidd/prompts/10_maintenance/audit.prompt.md

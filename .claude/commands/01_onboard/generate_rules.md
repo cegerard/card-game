@@ -1,1 +1,0 @@
-/home/cgerard/dev/card-game/.aidd/prompts/01_onboard/generate_rules.prompt.md

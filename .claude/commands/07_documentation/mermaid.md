@@ -1,1 +1,0 @@
-/home/cgerard/dev/card-game/.aidd/prompts/07_documentation/mermaid.prompt.md
