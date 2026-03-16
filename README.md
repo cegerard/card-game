@@ -26,20 +26,20 @@ POST /fight → complete fight log (JSON)
 
 ## Tech stack
 
-| Layer | Technology |
-|---|---|
-| Runtime | Node.js 20 |
-| Framework | NestJS 10 |
-| Language | TypeScript |
-| Testing | Jest 29, Supertest, @faker-js/faker |
-| Containerization | Docker (multi-stage, Node 20 Alpine) |
-| CI/CD | GitHub Actions → Heroku |
+| Layer            | Technology                           |
+| ---------------- | ------------------------------------ |
+| Runtime          | Node.js 24                           |
+| Framework        | NestJS 11                            |
+| Language         | TypeScript                           |
+| Testing          | Jest 29, Supertest, @faker-js/faker  |
+| Containerization | Docker (multi-stage, Node 24 Alpine) |
+| CI/CD            | GitHub Actions → Heroku              |
 
 ## Getting started
 
 ### Prerequisites
 
-- Node.js 20+
+- Node.js 24+
 - npm
 
 ### Installation
@@ -79,17 +79,22 @@ Simulates a complete battle between two players.
 {
   "player1": {
     "name": "Alice",
-    "deck": [ /* 1–5 FightingCardDto */ ]
+    "deck": [
+      /* 1–5 FightingCardDto */
+    ]
   },
   "player2": {
     "name": "Bob",
-    "deck": [ /* 1–5 FightingCardDto */ ]
+    "deck": [
+      /* 1–5 FightingCardDto */
+    ]
   },
   "cardSelectorStrategy": "player-by-player"
 }
 ```
 
 **`cardSelectorStrategy`** values:
+
 - `player-by-player` — cards alternate between the two players
 - `speed-weighted` — cards act based on speed stat probability
 
@@ -152,17 +157,17 @@ Simulates a complete battle between two players.
 
 **Enums**
 
-| Field | Values |
-|---|---|
-| `element` | `PHYSICAL`, `FIRE`, `WATER`, `EARTH`, `AIR` |
-| `damageCompositions[].type` | `PHYSICAL`, `FIRE`, `WATER`, `EARTH`, `AIR` |
-| `special.kind` | `ATTACK`, `HEALING` |
-| `others[].kind` | `HEALING`, `BUFF` |
-| `targetingStrategy` | `position-based`, `target-all`, `line-three`, `all-owner-cards`, `all-allies`, `self` |
-| `behaviors.dodge` | `simple-dodge`, `random-dodge` |
-| `effect.type` | `POISON`, `BURN`, `FREEZE` |
-| `effect.level` | `1`, `2`, `3` |
-| `buffApplication[].type` | `attack`, `defense`, `agility`, `accuracy` |
+| Field                       | Values                                                                                |
+| --------------------------- | ------------------------------------------------------------------------------------- |
+| `element`                   | `PHYSICAL`, `FIRE`, `WATER`, `EARTH`, `AIR`                                           |
+| `damageCompositions[].type` | `PHYSICAL`, `FIRE`, `WATER`, `EARTH`, `AIR`                                           |
+| `special.kind`              | `ATTACK`, `HEALING`                                                                   |
+| `others[].kind`             | `HEALING`, `BUFF`                                                                     |
+| `targetingStrategy`         | `position-based`, `target-all`, `line-three`, `all-owner-cards`, `all-allies`, `self` |
+| `behaviors.dodge`           | `simple-dodge`, `random-dodge`                                                        |
+| `effect.type`               | `POISON`, `BURN`, `FREEZE`                                                            |
+| `effect.level`              | `1`, `2`, `3`                                                                         |
+| `buffApplication[].type`    | `attack`, `defense`, `agility`, `accuracy`                                            |
 
 **Response**
 

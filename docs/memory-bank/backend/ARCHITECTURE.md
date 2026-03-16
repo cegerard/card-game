@@ -6,18 +6,19 @@ argument-hint: N/A
 
 # Architecture
 
-- [Language/Framework](#languageframework)
-  - [Backend](#backend)
-- [Full project structure](#full-project-structure)
-  - [Naming Conventions](#naming-conventions)
-- [Services communication](#services-communication)
-  - [Fight Simulation Flow](#fight-simulation-flow)
+- [Architecture](#architecture)
+  - [Language/Framework](#languageframework)
+    - [Backend](#backend)
+  - [Full project structure](#full-project-structure)
+    - [Naming Conventions](#naming-conventions)
+  - [Services communication](#services-communication)
+    - [Fight Simulation Flow](#fight-simulation-flow)
 
 ## Language/Framework
 
 ### Backend
 
-- **Language/Framework**: Node.js with NestJS 10 → @package.json
+- **Language/Framework**: Node.js with NestJS 11 → @package.json
 - **API Style**: REST - Single endpoint for fight simulation
 - **Architecture**: Domain-Driven Design with hexagonal architecture - Core domain logic separated from HTTP layer
 - **ORM**: None - No database, in-memory battle simulation
@@ -181,7 +182,7 @@ sequenceDiagram
   - Card selection strategies (`PlayerByPlayerCardSelector`, `SpeedWeightedCardSelector`)
   - Targeting strategies (position-based, all-enemies, line-three, etc.)
   - Dodge behaviors (simple, random)
-- **Observer Pattern**: `CardDeathSubscriber` interface for death notifications. `DeathSkillHandler` implements it: on each death it fires `ally-death:<cardId>` skill triggers on surviving allies, accumulates resulting steps, and exposes `drainSteps()` for callers (`ActionStage`, `TurnManager`) to collect them immediately after each death event
+- **Observer Pattern**: `CardDeathSubscriber` interface for death notifications. `DeathSkillHandler` implements it: on each death it fires `ally-death:<cardId>` skill triggers on surviving allies, accumulates resulting steps, and exposes `drainSteps()` for callers (`ActionStage`, `TurnManager`) to collect them immediately after each death event. Handles all three skill kinds: **Healing** → `StepKind.Healing`, **Buff** → `StepKind.Buff`, **Debuff** → `StepKind.Debuff`
 - **Dependency Injection**: NestJS provider system for `FIGHT_SIMULATOR_BUILDER`
 - **Value Objects**: Immutable types for attack effects, buffs, debuffs, damage compositions
 - **Rich Domain Model**: `FightingCard` encapsulates stats, behaviors, element, and state mutations

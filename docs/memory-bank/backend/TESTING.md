@@ -94,9 +94,10 @@ E2E tests:
 - `createFightingCard()` in `@test/helpers/fighting-card.ts`
 
   - Factory function with faker.js defaults
-  - Configurable params for all card attributes
+  - Configurable params for all card attributes, including `id`
   - Automatically creates skills and behaviors
   - Supports status effects configuration
+  - `others` skills support `targetCardId` for `ally-death` trigger; omitting it throws an error (fail-fast)
 
 - `createEffect()` in `@test/helpers/effect.ts`
   - Factory for poison, burn, freeze effects
@@ -116,5 +117,7 @@ E2E tests:
 - Verify exact fight step sequences using `toEqual()`
 - Test status effect interactions (e.g., poison + burn, freeze blocking effects)
 - Test buff/debuff duration and stacking behavior
+- For `ally-death` triggers: assert the **immediate next step** after the death step fires the skill (use `stepEntries[deathStepIndex + 1]`), not a search through all following steps — this verifies ordering, not just presence
+- Canonical `ally-death` test pattern: surviving card has a **self-targeting healing** skill; enemy kills the target ally; assert next step is a healing from the survivor
 - Only one expectation by `it`
 - max 10 lines per `it` block.

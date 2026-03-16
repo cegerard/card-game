@@ -88,14 +88,14 @@ argument-hint: N/A
 ```mermaid
 graph TB
     subgraph "Build Stage"
-        A[node:20-alpine] --> B[Install all dependencies]
+        A[node:24-alpine] --> B[Install all dependencies]
         B --> C[Copy source code]
         C --> D[npm run build]
         D --> E[TypeScript → JavaScript in /app/dist]
     end
 
     subgraph "Production Stage"
-        F[node:20-alpine] --> G[Install production deps only]
+        F[node:24-alpine] --> G[Install production deps only]
         E --> H[Copy dist/ from builder]
         G --> I[Final Image]
         H --> I
