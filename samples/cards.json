@@ -1,5 +1,6 @@
 [
   {
+    "id": "sword",
     "name": "Sword",
     "damage": 25000,
     "defense": 6000,
@@ -22,6 +23,7 @@
     "image": "https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/card-video-game-rm4un2/assets/7ys21codni89/flame_warrior.jpg"
   },
   {
+    "id": "axe",
     "name": "Axe",
     "damage": 16000,
     "defense": 12000,
@@ -44,6 +46,7 @@
     "image": "https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/card-video-game-rm4un2/assets/gakbwueo10z2/water_shield.jpg"
   },
   {
+    "id": "bow",
     "name": "Bow",
     "damage": 22000,
     "defense": 8000,
@@ -66,6 +69,7 @@
     "image": "https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/card-video-game-rm4un2/assets/j6rkn5xdyyhl/wind_archer.jpg"
   },
   {
+    "id": "dagger",
     "name": "Dagger",
     "damage": 20000,
     "defense": 9000,
@@ -88,6 +92,7 @@
     "image": "https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/card-video-game-rm4un2/assets/mccjg79l3clb/earth_dagger.jpg"
   },
   {
+    "id": "staff",
     "name": "Staff",
     "damage": 13000,
     "defense": 7000,
@@ -110,6 +115,7 @@
     "image": "https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/card-video-game-rm4un2/assets/0229zqtodew1/light_staff.jpg"
   },
   {
+    "id": "witch",
     "name": "Witch",
     "damage": 10000,
     "defense": 7000,
@@ -132,6 +138,7 @@
     "image": "https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/card-video-game-rm4un2/assets/7kn5sn3p3gtf/earth_witch.jpg"
   },
   {
+    "id": "spears",
     "name": "Spears",
     "damage": 24000,
     "defense": 9000,
@@ -154,6 +161,7 @@
     "image": "https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/card-video-game-rm4un2/assets/9rc0fpde2auy/water_spear.jpg"
   },
   {
+    "id": "crossbow",
     "name": "Crossbow",
     "damage": 26000,
     "defense": 7000,
@@ -176,6 +184,7 @@
     "image": "https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/card-video-game-rm4un2/assets/oraf3olzrns1/wind_crosbow.jpg"
   },
   {
+    "id": "sabers",
     "name": "Sabers",
     "damage": 28000,
     "defense": 8000,
@@ -196,5 +205,119 @@
       }
     },
     "image": "https://storage.googleapis.com/flutterflow-io-6f20.appspot.com/projects/card-video-game-rm4un2/assets/egqisbysg81u/fire_saber.jpg"
+  },
+  {
+    "id": "arionis",
+    "name": "Arionis",
+    "attack": 85,
+    "defense": 60,
+    "health": 550,
+    "speed": 75,
+    "agility": 55,
+    "accuracy": 80,
+    "criticalChance": 0.05,
+    "skills": {
+      "special": {
+        "kind": "ATTACK",
+        "name": "Rugissement solaire",
+        "rate": 1.5,
+        "energy": 40,
+        "targetingStrategy": "target-all",
+        "effect": {
+          "type": "BURN",
+          "rate": 0.3,
+          "level": 2,
+          "triggeredDebuff": {
+            "debuffType": "defense",
+            "debuffRate": 0.08,
+            "probability": 0.3,
+            "duration": 1000
+          }
+        },
+        "buffApplication": [
+          {
+            "type": "attack",
+            "rate": 0.05,
+            "duration": 1,
+            "targetingStrategy": "all-allies",
+            "condition": {
+              "type": "ally-presence",
+              "allyName": "Kaelion",
+              "multiplier": 2
+            }
+          },
+          {
+            "type": "defense",
+            "rate": 0.05,
+            "duration": 1,
+            "targetingStrategy": "all-allies",
+            "condition": {
+              "type": "ally-presence",
+              "allyName": "Kaelion",
+              "multiplier": 2
+            }
+          }
+        ]
+      },
+      "simpleAttack": {
+        "name": "Poings de Braise",
+        "damages": [
+          { "type": "PHYSICAL", "rate": 0.8 },
+          { "type": "FIRE", "rate": 0.4 }
+        ],
+        "targetingStrategy": "position-based",
+        "effect": {
+          "type": "BURN",
+          "rate": 0.1,
+          "level": 2,
+          "triggeredDebuff": {
+            "debuffType": "defense",
+            "debuffRate": 0.08,
+            "probability": 0.3,
+            "duration": 1000
+          }
+        }
+      },
+      "others": [
+        {
+          "kind": "BUFF",
+          "name": "Fierté du lion",
+          "buffType": "attack",
+          "rate": 0.05,
+          "duration": 1000,
+          "targetingStrategy": "self",
+          "event": "turn-end",
+          "activationCondition": {
+            "type": "health-threshold",
+            "threshold": 0.5,
+            "operator": "above"
+          }
+        },
+        {
+          "kind": "CONDITIONAL_ATTACK",
+          "name": "Griffes ardentes",
+          "targetingStrategy": "position-based",
+          "event": "next-action",
+          "rate": 0,
+          "damages": [{ "type": "PHYSICAL", "rate": 0.4 }],
+          "hits": 4,
+          "interval": 3,
+          "comboFinisher": [{ "type": "FIRE", "rate": 0.8 }]
+        },
+        {
+          "kind": "BUFF",
+          "name": "Héritage du lion",
+          "buffType": "attack",
+          "rate": 0.4,
+          "duration": 1000,
+          "targetingStrategy": "self",
+          "event": "ally-death",
+          "targetCardId": "kaelion"
+        }
+      ]
+    },
+    "behaviors": {
+      "dodge": "simple-dodge"
+    }
   }
 ]
