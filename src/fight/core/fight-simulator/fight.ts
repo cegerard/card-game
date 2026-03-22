@@ -7,6 +7,7 @@ import { Step, StepKind } from './@types/step';
 import { TurnManager } from './turn-manager';
 import { FightSimulator } from './@types/fight-simulator';
 import { DeathSkillHandler } from './death-skill-handler';
+import { EndEventProcessor } from './end-event-processor';
 
 export class Fight implements FightSimulator {
   private player1: Player;
@@ -22,7 +23,12 @@ export class Fight implements FightSimulator {
   };
 
   constructor(player1: Player, player2: Player, cardSelector: CardSelector) {
-    const deathSkillHandler = new DeathSkillHandler(player1, player2);
+    const endEventProcessor = new EndEventProcessor(player1, player2);
+    const deathSkillHandler = new DeathSkillHandler(
+      player1,
+      player2,
+      endEventProcessor,
+    );
 
     this.eventBroker = {
       onCardDeath: [cardSelector, deathSkillHandler],
@@ -36,6 +42,7 @@ export class Fight implements FightSimulator {
       player2,
       this.eventBroker,
       deathSkillHandler,
+      endEventProcessor,
     );
     this.cardSelector = cardSelector;
   }

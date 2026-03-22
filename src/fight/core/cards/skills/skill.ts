@@ -15,6 +15,7 @@ export enum SkillKind {
 export type SkillResults = {
   skillKind: SkillKind;
   results: HealingResults | BuffResults | DebuffResults | AttackResult[];
+  endEvent?: string;
 };
 
 export interface Skill {
@@ -42,4 +43,10 @@ export interface Skill {
    * Optional — only skills with stateful counters implement this.
    */
   tick?(): void;
+
+  /**
+   * Returns the end event name if the skill has a lifecycle limit and is not yet exhausted.
+   * Returns undefined if the skill has no end event or is already exhausted.
+   */
+  lifecycleEndEvent?(): string | undefined;
 }

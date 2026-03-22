@@ -13,6 +13,7 @@ import { Player } from '../player';
 import { Step, StepKind } from './@types/step';
 import { CardDeathSubscriber } from './card-death-subscriber';
 import { DeathSkillHandler } from './death-skill-handler';
+import { EndEventProcessor } from './end-event-processor';
 
 export class TurnManager {
   private player1: Player;
@@ -21,6 +22,7 @@ export class TurnManager {
     onCardDeath: CardDeathSubscriber[];
   };
   private deathSkillHandler: DeathSkillHandler;
+  private endEventProcessor: EndEventProcessor;
 
   public constructor(
     player1: Player,
@@ -29,11 +31,13 @@ export class TurnManager {
       onCardDeath: CardDeathSubscriber[];
     },
     deathSkillHandler: DeathSkillHandler,
+    endEventProcessor: EndEventProcessor,
   ) {
     this.player1 = player1;
     this.player2 = player2;
     this.eventBroker = eventBroker;
     this.deathSkillHandler = deathSkillHandler;
+    this.endEventProcessor = endEventProcessor;
   }
 
   public endTurn(cards: FightingCard[]): Step[] {
@@ -83,6 +87,15 @@ export class TurnManager {
           })),
           energy: card.actualEnergy,
         });
+      }
+
+      if (appliedSkill.endEvent) {
+        steps.push(
+          ...this.endEventProcessor.processEndEvent(
+            appliedSkill.endEvent,
+            card.identityInfo,
+          ),
+        );
       }
     }
 

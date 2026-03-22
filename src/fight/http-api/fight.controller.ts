@@ -115,6 +115,7 @@ export class FightController {
             buildTargetingStrategy(b.targetingStrategy),
             condition,
             b.condition?.multiplier,
+            b.terminationEvent,
           );
         });
       }
@@ -244,8 +245,8 @@ export class FightController {
           buildTargetingStrategy(skillData.targetingStrategy),
         );
       case SkillKind.BUFF:
-        if (!skillData.buffType || !skillData.duration) {
-          throw new Error('Buff skill requires buffType and duration');
+        if (!skillData.buffType) {
+          throw new Error('Buff skill requires buffType');
         }
         const activationCondition = skillData.activationCondition
           ? buildBuffCondition(skillData.activationCondition.type, {
@@ -253,13 +254,20 @@ export class FightController {
               operator: skillData.activationCondition.operator,
             })
           : undefined;
+        const buffDuration =
+          skillData.terminationEvent && skillData.duration === 0
+            ? Infinity
+            : (skillData.duration ?? 0);
         return new BuffSkill(
           this.mapBuffType(skillData.buffType),
           skillData.rate,
-          skillData.duration,
+          buffDuration,
           buildTriggerStrategy(skillData.event, skillData.targetCardId),
           buildTargetingStrategy(skillData.targetingStrategy),
           activationCondition,
+          skillData.activationLimit,
+          skillData.endEvent,
+          skillData.terminationEvent,
         );
       case SkillKind.CONDITIONAL_ATTACK:
         if (!skillData.damages || !skillData.interval) {

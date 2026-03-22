@@ -19,6 +19,7 @@ export class BuffApplication {
     public readonly targetingStrategy: TargetingCardStrategy,
     public readonly condition?: BuffCondition,
     public readonly conditionMultiplier?: number,
+    public readonly terminationEvent?: string,
   ) {}
 
   public applyBuff(
@@ -36,7 +37,12 @@ export class BuffApplication {
     );
 
     return buffTargets.map((target) => {
-      const buff = target.applyBuff(this.type, effectiveRate, this.duration);
+      const buff = target.applyBuff(
+        this.type,
+        effectiveRate,
+        this.duration,
+        this.terminationEvent,
+      );
       return { target: target.identityInfo, buff };
     });
   }

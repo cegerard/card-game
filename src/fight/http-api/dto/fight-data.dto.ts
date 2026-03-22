@@ -144,6 +144,11 @@ class BuffApplicationDto {
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => BuffConditionDto)
   condition?: BuffConditionDto;
+
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  terminationEvent?: string;
 }
 
 class SpecialDto {
@@ -301,6 +306,22 @@ export class OtherSkillDto {
   @IsOptional()
   @IsString()
   targetCardId?: string;
+
+  // Event-bound buff properties
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  terminationEvent?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  activationLimit?: number;
+
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  endEvent?: string;
 }
 
 class SkillsDto {

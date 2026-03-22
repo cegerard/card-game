@@ -1,8 +1,13 @@
 import { DeathSkillHandler } from '../death-skill-handler';
+import { EndEventProcessor } from '../end-event-processor';
 import { Player } from '../../player';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 import { DamageComposition } from '../../cards/@types/damage/damage-composition';
 import { DamageType } from '../../cards/@types/damage/damage-type';
+import { BuffSkill } from '../../cards/skills/buff-skill';
+import { TurnEnd } from '../../trigger/turn-end';
+import { Launcher } from '../../targeting-card-strategies/launcher';
+import { StepKind } from '../@types/step';
 
 describe('DeathSkillHandler', () => {
   describe('when an ally with a death-triggered healing skill survives', () => {
@@ -125,6 +130,79 @@ describe('DeathSkillHandler', () => {
       handler.notifyDeath(player1, player1.allCards[0]);
 
       expect(handler.drainSteps()).toHaveLength(0);
+    });
+  });
+
+  describe('when dead card has a non-exhausted lifecycle skill with endEvent', () => {
+    let handler: DeathSkillHandler;
+    let player1: Player;
+    let player2: Player;
+    let deadCard;
+    let allyCard;
+
+    beforeEach(() => {
+      deadCard = createFightingCard({
+        id: 'lion-01',
+        name: 'Lion',
+        health: 10,
+        attack: 100,
+        defense: 0,
+        criticalChance: 0,
+        skills: {
+          simpleAttack: {
+            damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
+          },
+        },
+      });
+
+      // Attach lifecycle skill to deadCard after creation
+      const lifecycleSkill = new BuffSkill(
+        'attack',
+        0.4,
+        Infinity,
+        new TurnEnd(),
+        new Launcher(),
+        undefined,
+        3,
+        'lions-end',
+        'lions-end',
+      );
+      (deadCard as any).skills = [lifecycleSkill];
+
+      allyCard = createFightingCard({
+        id: 'ally-01',
+        name: 'Ally',
+        health: 5000,
+        attack: 100,
+        defense: 0,
+        criticalChance: 0,
+      });
+      // Give the ally card an event-bound buff
+      allyCard.applyBuff('attack', 0.4, Infinity, 'lions-end');
+
+      player1 = new Player('Player 1', [deadCard, allyCard]);
+      player2 = new Player('Player 2', [createFightingCard({})]);
+      const endEventProcessor = new EndEventProcessor(player1, player2);
+      handler = new DeathSkillHandler(player1, player2, endEventProcessor);
+
+      deadCard.addRealDamage(10);
+    });
+
+    it('produces a buff_removed step after death', () => {
+      handler.notifyDeath(player1, deadCard);
+      const steps = handler.drainSteps();
+
+      expect(steps.some((s) => s.kind === StepKind.BuffRemoved)).toBe(true);
+    });
+
+    it('the buff_removed step is immediately after the death event processing', () => {
+      handler.notifyDeath(player1, deadCard);
+      const steps = handler.drainSteps();
+      const buffRemovedStep = steps.find(
+        (s) => s.kind === StepKind.BuffRemoved,
+      );
+
+      expect((buffRemovedStep as any).eventName).toBe('lions-end');
     });
   });
 });

@@ -5,6 +5,7 @@ import { HealingReport } from './healing-report';
 import { StateEffectReport } from './state-effect-report';
 import { StatusChangeReport } from './status-change-report';
 import { WinnerReport } from './winner-report';
+import { BuffRemovedReport } from './buff-removed-report';
 
 export enum StepKind {
   FightEnd = 'fight_end',
@@ -16,6 +17,7 @@ export enum StepKind {
   StateEffect = 'state_effect',
   Buff = 'buff',
   Debuff = 'debuff',
+  BuffRemoved = 'buff_removed',
 }
 
 export type Step = { kind: StepKind } & (
@@ -26,4 +28,5 @@ export type Step = { kind: StepKind } & (
   | StateEffectReport
   | BuffReport
   | DebuffReport
+  | BuffRemovedReport
 );

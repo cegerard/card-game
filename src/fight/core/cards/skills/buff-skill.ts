@@ -15,6 +15,10 @@ export class BuffSkill implements Skill {
   private readonly trigger: Trigger;
   private readonly targetingStrategy: TargetingCardStrategy;
   private readonly activationCondition?: BuffCondition;
+  private readonly activationLimit?: number;
+  private readonly endEvent?: string;
+  private readonly terminationEvent?: string;
+  private activationCount = 0;
 
   constructor(
     buffType: BuffType,
@@ -23,6 +27,9 @@ export class BuffSkill implements Skill {
     trigger: Trigger,
     targetingStrategy: TargetingCardStrategy,
     activationCondition?: BuffCondition,
+    activationLimit?: number,
+    endEvent?: string,
+    terminationEvent?: string,
   ) {
     this.buffType = buffType;
     this.buffRate = buffRate;
@@ -30,6 +37,9 @@ export class BuffSkill implements Skill {
     this.trigger = trigger;
     this.targetingStrategy = targetingStrategy;
     this.activationCondition = activationCondition;
+    this.activationLimit = activationLimit;
+    this.endEvent = endEvent;
+    this.terminationEvent = terminationEvent;
   }
 
   launch(source: FightingCard, context: FightingContext): SkillResults {
@@ -51,6 +61,7 @@ export class BuffSkill implements Skill {
         this.buffType,
         this.buffRate,
         this.duration,
+        this.terminationEvent,
       );
 
       return {
@@ -59,13 +70,33 @@ export class BuffSkill implements Skill {
       };
     });
 
+    this.activationCount++;
+
+    const isExhausted =
+      this.activationLimit !== undefined &&
+      this.activationCount >= this.activationLimit;
+
     return {
       skillKind: SkillKind.Buff,
       results: buffResults,
+      endEvent: isExhausted ? this.endEvent : undefined,
     };
   }
 
   isTriggered(triggerName: string): boolean {
+    if (this.isExhausted()) return false;
     return this.trigger.isTriggered(triggerName);
+  }
+
+  lifecycleEndEvent(): string | undefined {
+    if (this.isExhausted()) return undefined;
+    return this.endEvent;
+  }
+
+  private isExhausted(): boolean {
+    return (
+      this.activationLimit !== undefined &&
+      this.activationCount >= this.activationLimit
+    );
   }
 }

@@ -4,4 +4,5 @@ export type Buff = {
   type: BuffType;
   value: number;
   duration: number;
+  terminationEvent?: string;
 };

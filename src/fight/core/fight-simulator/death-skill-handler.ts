@@ -11,15 +11,22 @@ import {
   DebuffResults,
 } from '../cards/@types/action-result/debuff-results';
 import { SkillKind } from '../cards/skills/skill';
+import { EndEventProcessor } from './end-event-processor';
 
 export class DeathSkillHandler implements CardDeathSubscriber {
   private steps: Step[] = [];
   private player1: Player;
   private player2: Player;
+  private endEventProcessor?: EndEventProcessor;
 
-  constructor(player1: Player, player2: Player) {
+  constructor(
+    player1: Player,
+    player2: Player,
+    endEventProcessor?: EndEventProcessor,
+  ) {
     this.player1 = player1;
     this.player2 = player2;
+    this.endEventProcessor = endEventProcessor;
   }
 
   notifyDeath(_player: Player, deadCard: FightingCard): void {
@@ -29,6 +36,18 @@ export class DeathSkillHandler implements CardDeathSubscriber {
       : this.player2;
     const opponentPlayer =
       ownerPlayer === this.player1 ? this.player2 : this.player1;
+
+    if (this.endEventProcessor) {
+      const endEvents = deadCard.lifecycleEndEvents();
+      endEvents.forEach((eventName) => {
+        this.steps.push(
+          ...this.endEventProcessor.processEndEvent(
+            eventName,
+            deadCard.identityInfo,
+          ),
+        );
+      });
+    }
 
     ownerPlayer.playableCards.forEach((card) => {
       const context = {

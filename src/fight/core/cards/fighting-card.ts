@@ -340,16 +340,42 @@ export class FightingCard {
     buffType: BuffType,
     buffRate: number,
     duration: number,
+    terminationEvent?: string,
   ): Buff {
-    const buff: Buff = {
-      type: buffType,
-      value: this.computeAttributeModifierValue(buffType, buffRate),
-      duration: duration,
-    };
+    const value = this.computeAttributeModifierValue(buffType, buffRate);
+    const buff: Buff = { type: buffType, value, duration, terminationEvent };
+
+    if (terminationEvent) {
+      const existingIndex = this.buffs.findIndex(
+        (b) => b.type === buffType && b.terminationEvent === terminationEvent,
+      );
+      if (existingIndex >= 0) {
+        this.buffs[existingIndex] = buff;
+        return buff;
+      }
+    }
 
     this.buffs.push(buff);
 
     return buff;
+  }
+
+  public removeEventBoundBuffs(
+    eventName: string,
+  ): { type: BuffType; value: number }[] {
+    const removed = this.buffs
+      .filter((b) => b.terminationEvent === eventName)
+      .map((b) => ({ type: b.type, value: b.value }));
+
+    this.buffs = this.buffs.filter((b) => b.terminationEvent !== eventName);
+
+    return removed;
+  }
+
+  public lifecycleEndEvents(): string[] {
+    return this.skills
+      .map((skill) => skill.lifecycleEndEvent?.())
+      .filter((event): event is string => event !== undefined);
   }
 
   public decreaseBuffAndDebuffDuration(): void {
