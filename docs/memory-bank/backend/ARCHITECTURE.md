@@ -52,6 +52,7 @@ src/
     │   │   ├── turn-manager.ts       # Turn-end effects processor
     │   │   ├── card-death-subscriber.ts  # Event listener interface
     │   │   ├── death-skill-handler.ts    # Triggers ally-death skills; accumulates + drains steps
+    │   │   ├── end-event-processor.ts    # Removes event-bound buffs when a skill end event fires
     │   │   ├── @types/               # Fight result types
     │   │   └── card-selectors/       # Turn order strategies
     │   │       ├── card-selector.ts
@@ -188,10 +189,13 @@ sequenceDiagram
 - **Rich Domain Model**: `FightingCard` encapsulates stats, behaviors, element, and state mutations
 - **Multi-Damage System**: `DamageCalculator` computes damage from multiple `DamageComposition` entries (type + rate), applying `ElementalMatrix` multipliers based on attacker damage types vs defender element
 - **Buff Condition System**: `BuffApplication` has optional `condition: BuffCondition` and `conditionMultiplier`. If the condition evaluates to true at buff application time, the rate is multiplied. `buff-condition-factory.ts` maps `BuffConditionType` enum → `BuffCondition` instance. First implementation: `AllyPresenceCondition` checks that a named ally is alive in the source player's team.
-- **Event-Driven**: Skills triggered by events (`turn-end`, `ally-death:<cardId>`), extensible trigger system. `AllyDeath` trigger matches string pattern `ally-death:<targetCardId>` enabling death-reactive abilities
+- **Event-Driven**: Skills triggered by events (`turn-end`, `next-action`, `ally-death:<cardId>`), extensible trigger system. `AllyDeath` trigger matches string pattern `ally-death:<targetCardId>` enabling death-reactive abilities
 - **Unified Special Result**: `Special.launch()` returns `SpecialResult` containing both `actionResults` (AttackResult[] or HealingResult[]) and `buffResults` (BuffResults) for consistent handling across attack and healing specials
+- **Event-Bound Buff Termination**: `Buff` type has optional `terminationEvent?: string`. Skills have optional `activationLimit` and `endEvent`. When a skill reaches its activation limit (or its owner dies), it emits its `endEvent`. `EndEventProcessor` scans all playable cards and removes buffs matching that event name, emitting a `StepKind.BuffRemoved` step. `SkillResults` carries an optional `endEvent` field so callers know to trigger `EndEventProcessor`.
+- **Skill Lifecycle Interface**: `Skill` interface has two optional lifecycle methods: `tick?()` (advance internal state each turn) and `lifecycleEndEvent?()` (return end event name if skill is active and lifecycle-limited).
 - **Separation of Concerns**:
   - `Fight` orchestrates battle flow
   - `ActionStage` handles attack/heal resolution and extracts buff applications from special results
   - `TurnManager` handles turn-end effects
   - `CardSelector` determines turn order
+  - `EndEventProcessor` handles event-bound buff removal across all cards

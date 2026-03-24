@@ -95,24 +95,50 @@ Simulates a turn-based card battle between two players.
 ```typescript
 {
   name: string,
-  damageRate: number,
+  damages: DamageCompositionDto[],  // Min 1 entry — multi-type damage compositions
   targetingStrategy: TargetingStrategy,
   effect?: EffectDto
 }
 ```
 
+**MultipleAttackDto** (alternative to `simpleAttack`, for multi-hit attacks):
+
+```typescript
+{
+  name: string,
+  hits: number,                     // Number of hits
+  damages: DamageCompositionDto[],  // Min 1 entry
+  targetingStrategy: TargetingStrategy,
+  amplifier?: number,               // Optional damage amplifier
+  effect?: EffectDto,
+  comboFinisher?: DamageCompositionDto[]  // Optional finisher hit compositions
+}
+```
+
+**Note**: `skills.simpleAttack` and `skills.multipleAttack` are both optional — provide exactly one.
+
 **OtherSkillDto**:
 
 ```typescript
 {
-  kind: "HEALING" | "BUFF",
+  kind: "HEALING" | "BUFF" | "CONDITIONAL_ATTACK",
   name: string,
   rate: number,
   targetingStrategy: TargetingStrategy,
-  event: "turn-end" | "ally-death",  // When skill triggers
-  targetCardId?: string,      // Required when event=ally-death: id of the ally whose death triggers this skill
+  event: "turn-end" | "next-action" | "ally-death",  // When skill triggers
+  targetCardId?: string,        // Required when event=ally-death: id of the ally whose death triggers this skill
   buffType?: "attack" | "defense" | "agility" | "accuracy",  // Required if kind=BUFF
-  duration?: number           // Required if kind=BUFF
+  duration?: number,            // Required if kind=BUFF
+  terminationEvent?: string,    // Event name that removes this skill's buff when fired
+  activationLimit?: number,     // Max activations (>=1) before skill lifecycle ends
+  endEvent?: string,            // Event emitted when activation limit is reached
+  // CONDITIONAL_ATTACK fields:
+  damages?: DamageCompositionDto[],
+  hits?: number,
+  interval?: number,
+  amplifier?: number,
+  effect?: EffectDto,
+  comboFinisher?: DamageCompositionDto[]
 }
 ```
 
@@ -122,7 +148,13 @@ Simulates a turn-based card battle between two players.
 {
   type: "POISON" | "BURN" | "FREEZE",
   rate: number,               // Application chance (0-1)
-  level: 1 | 2 | 3            // Effect intensity
+  level: 1 | 2 | 3,           // Effect intensity
+  triggeredDebuff?: {         // Optional debuff applied on effect hit
+    debuffType: "attack" | "defense" | "agility" | "accuracy",
+    debuffRate: number,
+    duration: number,
+    probability: number
+  }
 }
 ```
 
@@ -130,10 +162,12 @@ Simulates a turn-based card battle between two players.
 
 ```typescript
 {
-  type?: "attack" | "defense" | "agility" | "accuracy",
-  rate?: number,          // Buff strength multiplier
-  duration?: number,      // Number of turns buff lasts
-  targetingStrategy?: TargetingStrategy  // Independent targeting for buffs
+  type: "attack" | "defense" | "agility" | "accuracy",
+  rate: number,               // Buff strength multiplier
+  duration: number,           // Number of turns buff lasts (0 = event-bound only)
+  targetingStrategy: TargetingStrategy,
+  condition?: BuffConditionDto,     // Optional conditional multiplier
+  terminationEvent?: string         // Event name that removes this buff when fired
 }
 ```
 
@@ -142,9 +176,19 @@ Simulates a turn-based card battle between two players.
 ```typescript
 {
   [stepNumber: number]: {
-    kind: "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "winner" | "fight_end",
+    kind: "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "winner" | "fight_end",
     // Additional properties vary by step kind
   }
+}
+```
+
+**`buff_removed` step** (`BuffRemovedReport`): Emitted when a skill's end event fires and removes event-bound buffs.
+```typescript
+{
+  kind: "buff_removed",
+  source: CardInfo,      // Card whose skill emitted the end event
+  eventName: string,     // The end event name that triggered removal
+  removed: { target: CardInfo, kind: BuffType, value: number }[]
 }
 ```
 
@@ -172,6 +216,7 @@ Simulates a turn-based card battle between two players.
 ### TriggerEvent
 
 - `turn-end`: Skill triggers at end of turn
+- `next-action`: Skill triggers on the next action turn
 - `ally-death`: Skill triggers when a specific ally dies (requires `targetCardId` matching the dead card's `id`)
 
 ### SpecialKind
@@ -183,6 +228,7 @@ Simulates a turn-based card battle between two players.
 
 - `HEALING`: Healing skill
 - `BUFF`: Temporary stat boost
+- `CONDITIONAL_ATTACK`: Attack skill triggered conditionally by an event
 
 ### Effect
 
@@ -232,7 +278,7 @@ See @src/fight/core/fight-simulator/@types/ for complete type definitions:
 
 - `FightResult`: Map of step numbers to `Step` objects
 - `Step`: Union type with `kind` discriminator
-- `DamageReport`, `HealingReport`, `BuffReport`, `DebuffReport`, `StateEffectReport`, `StatusChangeReport`, `WinnerReport`: Specific step types
+- `DamageReport`, `HealingReport`, `BuffReport`, `DebuffReport`, `StateEffectReport`, `StatusChangeReport`, `WinnerReport`, `BuffRemovedReport`: Specific step types
 
 ## Dependencies
 

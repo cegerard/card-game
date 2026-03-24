@@ -97,6 +97,10 @@ cards/
 
 This allows special attacks to perform their primary action (damage/healing) while optionally applying buffs to a separate set of targets using independent targeting strategies.
 
+**Buff Type**: `Buff` has an optional `terminationEvent?: string` field. A buff with this set persists until the named event fires (instead of, or in addition to, a turn duration).
+
+**Skill Lifecycle Pattern**: The `Skill` interface includes optional `tick?()` and `lifecycleEndEvent?()` methods. Skills with a finite `activationLimit` track their count via `tick()` and emit an `endEvent` string via `lifecycleEndEvent()` when exhausted. `SkillResults` carries an optional `endEvent` field so callers (`TurnManager`, `ActionStage`) can invoke `EndEventProcessor` to remove all matching event-bound buffs.
+
 #### Fight Simulator (`src/fight/core/fight-simulator/`)
 
 ```
@@ -106,6 +110,7 @@ fight-simulator/
 ├── action_stage.ts         # Action resolution (attacks, specials, healing)
 ├── card-death-subscriber.ts # Card death event handling interface
 ├── death-skill-handler.ts  # Triggers ally-death skills on surviving cards; drainable steps
+├── end-event-processor.ts  # Removes event-bound buffs when a skill end event fires; emits buff_removed steps
 ├── card-selectors/         # Turn order strategies
 │   ├── card-selector.ts    # Selector interface
 │   ├── player-by-player.ts # Alternating player strategy
@@ -117,6 +122,7 @@ fight-simulator/
     ├── attack-report.ts    # Attack details
     ├── healing-report.ts   # Healing details
     ├── buff-report.ts      # Buff application
+    ├── buff-removed-report.ts # Event-bound buff removal
     ├── debuff-report.ts    # Debuff application
     ├── state-effect-report.ts # Status effects
     ├── damage-report.ts    # Damage calculation
