@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm test:*)"
+      "Bash(npm test:*)",
+      "Bash(bash .specify/extensions/review/scripts/bash/detect-changed-files.sh --json)"
     ]
   }
 }
