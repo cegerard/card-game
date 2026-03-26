@@ -231,7 +231,7 @@
             "debuffType": "defense",
             "debuffRate": 0.08,
             "probability": 0.3,
-            "duration": 1000
+            "duration": 0
           }
         },
         "buffApplication": [
@@ -274,7 +274,7 @@
             "debuffType": "defense",
             "debuffRate": 0.08,
             "probability": 0.3,
-            "duration": 1000
+            "duration": 0
           }
         }
       },
@@ -284,7 +284,7 @@
           "name": "Fierté du lion",
           "buffType": "attack",
           "rate": 0.05,
-          "duration": 1000,
+          "duration": 0,
           "targetingStrategy": "self",
           "event": "turn-end",
           "activationCondition": {
@@ -306,13 +306,15 @@
         },
         {
           "kind": "BUFF",
-          "name": "Héritage du lion",
+
+          "name": "Héritage du lion (buff)",
           "buffType": "attack",
           "rate": 0.4,
-          "duration": 1000,
+          "duration": 0,
           "targetingStrategy": "self",
           "event": "ally-death",
-          "targetCardId": "kaelion"
+          "targetCardId": "kaelion",
+          "terminationEvent": "lion-heritage-end"
         }
       ]
     },
