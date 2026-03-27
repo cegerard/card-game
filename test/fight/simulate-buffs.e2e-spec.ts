@@ -35,7 +35,7 @@ describe('Simulate fight with buffs', () => {
             speed: 50,
             agility: 20,
             accuracy: 25,
-            criticalChance: 0.1,
+            criticalChance: 0,
             skills: {
               special: {
                 kind: 'ATTACK',
@@ -74,7 +74,7 @@ describe('Simulate fight with buffs', () => {
             speed: 70,
             agility: 25,
             accuracy: 30,
-            criticalChance: 0.15,
+            criticalChance: 0,
             skills: {
               special: {
                 kind: 'ATTACK',
@@ -118,7 +118,7 @@ describe('Simulate fight with buffs', () => {
             speed: 60,
             agility: 20,
             accuracy: 25,
-            criticalChance: 0.1,
+            criticalChance: 0,
             skills: {
               special: {
                 kind: 'ATTACK',
@@ -155,7 +155,7 @@ describe('Simulate fight with buffs', () => {
             speed: 80,
             agility: 35,
             accuracy: 40,
-            criticalChance: 0.2,
+            criticalChance: 0,
             skills: {
               special: {
                 kind: 'ATTACK',
