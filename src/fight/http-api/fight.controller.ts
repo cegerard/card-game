@@ -127,14 +127,14 @@ export class FightController {
         specialEffect,
         buffApplication,
       );
-    }
-
-    if (cardData.skills.special.kind === SpecialKind.HEALING) {
+    } else if (cardData.skills.special.kind === SpecialKind.HEALING) {
       special = new SpecialHealing(
         cardData.skills.special.rate,
         cardData.skills.special.energy,
         buildTargetingStrategy(cardData.skills.special.targetingStrategy),
       );
+    } else {
+      throw new Error(`Unknown SpecialKind: ${cardData.skills.special.kind}`);
     }
 
     let attackSkill: AttackSkill;
@@ -254,10 +254,11 @@ export class FightController {
               operator: skillData.activationCondition.operator,
             })
           : undefined;
+        // duration: 0 means infinite — either permanent (no terminationEvent)
+        // or event-bound (removed when terminationEvent fires via EndEventProcessor).
+        // The domain uses Infinity to bypass the turn-decrement filter.
         const buffDuration =
-          skillData.terminationEvent && skillData.duration === 0
-            ? Infinity
-            : (skillData.duration ?? 0);
+          skillData.duration === 0 ? Infinity : (skillData.duration ?? 0);
         return new BuffSkill(
           this.mapBuffType(skillData.buffType),
           skillData.rate,

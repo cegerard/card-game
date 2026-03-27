@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(npm test:*)",
-      "Bash(bash .specify/extensions/review/scripts/bash/detect-changed-files.sh --json)"
+      "Bash(bash .specify/extensions/review/scripts/bash/detect-changed-files.sh --json)",
+      "Bash(bash .specify/scripts/bash/setup-plan.sh --json)",
+      "Bash(node -e \":*)",
+      "Bash(npx jest:*)"
     ]
   }
 }

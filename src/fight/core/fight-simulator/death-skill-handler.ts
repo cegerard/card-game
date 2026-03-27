@@ -86,6 +86,15 @@ export class DeathSkillHandler implements CardDeathSubscriber {
             energy: card.actualEnergy,
           });
         }
+
+        if (skillResult.endEvent && this.endEventProcessor) {
+          this.steps.push(
+            ...this.endEventProcessor.processEndEvent(
+              skillResult.endEvent,
+              card.identityInfo,
+            ),
+          );
+        }
       }
 
       if (skillResult.skillKind === SkillKind.Debuff) {

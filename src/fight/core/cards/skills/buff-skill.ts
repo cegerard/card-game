@@ -20,6 +20,16 @@ export class BuffSkill implements Skill {
   private readonly terminationEvent?: string;
   private activationCount = 0;
 
+  /**
+   * @param duration - Number of turns the buff lasts. Use Infinity for buffs that
+   *   persist until an event fires (event-bound) or indefinitely (permanent).
+   * @param terminationEvent - Event name that removes this buff when fired by
+   *   EndEventProcessor. Pair with duration=Infinity for event-bound buffs.
+   * @param endEvent - Event emitted when activationLimit is reached. Must match
+   *   the terminationEvent of the buffs to remove via EndEventProcessor.
+   * @param activationLimit - Max number of times this skill fires before its
+   *   lifecycle ends and endEvent is emitted.
+   */
   constructor(
     buffType: BuffType,
     buffRate: number,
