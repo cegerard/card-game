@@ -13,8 +13,7 @@ import { AllOwnerCards } from '../../src/fight/core/targeting-card-strategies/al
 import { Launcher } from '../../src/fight/core/targeting-card-strategies/launcher';
 import { AllAllies } from '../../src/fight/core/targeting-card-strategies/all-allies';
 import { Healing } from '../../src/fight/core/cards/skills/healing';
-import { BuffSkill } from '../../src/fight/core/cards/skills/buff-skill';
-import { DebuffSkill } from '../../src/fight/core/cards/skills/debuff-skill';
+import { AlterationSkill } from '../../src/fight/core/cards/skills/alteration-skill';
 import { TurnEnd } from '../../src/fight/core/trigger/turn-end';
 import { AllyDeath } from '../../src/fight/core/trigger/ally-death';
 import { Trigger } from '../../src/fight/core/trigger/trigger';
@@ -250,7 +249,8 @@ function createsSkills(
         createTargetingStrategy(skill.targetingStrategy),
       );
     } else if ('buffType' in skill) {
-      return new BuffSkill(
+      return new AlterationSkill(
+        'buff',
         skill.buffType,
         skill.buffRate,
         skill.duration,
@@ -258,7 +258,8 @@ function createsSkills(
         createTargetingStrategy(skill.targetingStrategy),
       );
     } else {
-      return new DebuffSkill(
+      return new AlterationSkill(
+        'debuff',
         skill.debuffType,
         skill.debuffRate,
         skill.duration,

@@ -6,11 +6,25 @@ import { BuffType } from '../@types/buff/type';
 import { Skill, SkillKind, SkillResults } from './skill';
 import { BuffCondition } from '../@types/buff/buff-condition';
 
-export class BuffSkill implements Skill {
-  public id = 'buff-skill';
+/**
+ * Unified skill that applies a positive (buff) or negative (debuff) stat alteration.
+ *
+ * @param polarity - 'buff' for positive alterations, 'debuff' for negative
+ * @param duration - Number of turns the alteration lasts. Use Infinity for alterations that
+ *   persist until an event fires (event-bound) or indefinitely (permanent).
+ * @param terminationEvent - Event name that removes this buff when fired by
+ *   EndEventProcessor. Pair with duration=Infinity for event-bound buffs.
+ * @param endEvent - Event emitted when activationLimit is reached. Must match
+ *   the terminationEvent of the buffs to remove via EndEventProcessor.
+ * @param activationLimit - Max number of times this skill fires before its
+ *   lifecycle ends and endEvent is emitted.
+ */
+export class AlterationSkill implements Skill {
+  public id = 'alteration-skill';
 
-  private readonly buffType: BuffType;
-  private readonly buffRate: number;
+  private readonly polarity: 'buff' | 'debuff';
+  private readonly attributeType: BuffType;
+  private readonly rate: number;
   private readonly duration: number;
   private readonly trigger: Trigger;
   private readonly targetingStrategy: TargetingCardStrategy;
@@ -20,19 +34,10 @@ export class BuffSkill implements Skill {
   private readonly terminationEvent?: string;
   private activationCount = 0;
 
-  /**
-   * @param duration - Number of turns the buff lasts. Use Infinity for buffs that
-   *   persist until an event fires (event-bound) or indefinitely (permanent).
-   * @param terminationEvent - Event name that removes this buff when fired by
-   *   EndEventProcessor. Pair with duration=Infinity for event-bound buffs.
-   * @param endEvent - Event emitted when activationLimit is reached. Must match
-   *   the terminationEvent of the buffs to remove via EndEventProcessor.
-   * @param activationLimit - Max number of times this skill fires before its
-   *   lifecycle ends and endEvent is emitted.
-   */
   constructor(
-    buffType: BuffType,
-    buffRate: number,
+    polarity: 'buff' | 'debuff',
+    attributeType: BuffType,
+    rate: number,
     duration: number,
     trigger: Trigger,
     targetingStrategy: TargetingCardStrategy,
@@ -41,8 +46,9 @@ export class BuffSkill implements Skill {
     endEvent?: string,
     terminationEvent?: string,
   ) {
-    this.buffType = buffType;
-    this.buffRate = buffRate;
+    this.polarity = polarity;
+    this.attributeType = attributeType;
+    this.rate = rate;
     this.duration = duration;
     this.trigger = trigger;
     this.targetingStrategy = targetingStrategy;
@@ -57,7 +63,7 @@ export class BuffSkill implements Skill {
       this.activationCondition &&
       !this.activationCondition.evaluate(source, context)
     ) {
-      return { skillKind: SkillKind.Buff, results: [] };
+      return { skillKind: this.resolveSkillKind(), results: [] };
     }
 
     const targetedCards = this.targetingStrategy.targetedCards(
@@ -66,19 +72,25 @@ export class BuffSkill implements Skill {
       context.opponentPlayer,
     );
 
-    const buffResults = targetedCards.map((targetedCard) => {
-      const buff = targetedCard.applyBuff(
-        this.buffType,
-        this.buffRate,
-        this.duration,
-        this.terminationEvent,
-      );
-
-      return {
-        target: targetedCard.identityInfo,
-        buff,
-      };
-    });
+    const results =
+      this.polarity === 'buff'
+        ? targetedCards.map((targetedCard) => ({
+            target: targetedCard.identityInfo,
+            buff: targetedCard.applyBuff(
+              this.attributeType,
+              this.rate,
+              this.duration,
+              this.terminationEvent,
+            ),
+          }))
+        : targetedCards.map((targetedCard) => ({
+            target: targetedCard.identityInfo,
+            debuff: targetedCard.applyDebuff(
+              this.attributeType,
+              this.rate,
+              this.duration,
+            ),
+          }));
 
     this.activationCount++;
 
@@ -87,8 +99,8 @@ export class BuffSkill implements Skill {
       this.activationCount >= this.activationLimit;
 
     return {
-      skillKind: SkillKind.Buff,
-      results: buffResults,
+      skillKind: this.resolveSkillKind(),
+      results,
       endEvent: isExhausted ? this.endEvent : undefined,
     };
   }
@@ -101,6 +113,10 @@ export class BuffSkill implements Skill {
   lifecycleEndEvent(): string | undefined {
     if (this.isExhausted()) return undefined;
     return this.endEvent;
+  }
+
+  private resolveSkillKind(): SkillKind {
+    return this.polarity === 'buff' ? SkillKind.Buff : SkillKind.Debuff;
   }
 
   private isExhausted(): boolean {

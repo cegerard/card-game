@@ -26,7 +26,7 @@ import { buildBuffCondition } from './buff-condition-factory';
 import { Special } from '../core/cards/skills/special';
 import { SpecialHealing } from '../core/cards/skills/special-healing';
 import { Healing } from '../core/cards/skills/healing';
-import { BuffSkill } from '../core/cards/skills/buff-skill';
+import { AlterationSkill } from '../core/cards/skills/alteration-skill';
 import { buildTriggerStrategy } from './trigger-factory';
 import { PoisonedAttackEffect } from '../core/cards/@types/attack/attack-poisoned-effect';
 import { EffectLevel } from '../core/cards/@types/attack/effect-level';
@@ -259,7 +259,8 @@ export class FightController {
         // The domain uses Infinity to bypass the turn-decrement filter.
         const buffDuration =
           skillData.duration === 0 ? Infinity : (skillData.duration ?? 0);
-        return new BuffSkill(
+        return new AlterationSkill(
+          'buff',
           this.mapBuffType(skillData.buffType),
           skillData.rate,
           buffDuration,
@@ -269,6 +270,18 @@ export class FightController {
           skillData.activationLimit,
           skillData.endEvent,
           skillData.terminationEvent,
+        );
+      case SkillKind.DEBUFF:
+        if (!skillData.buffType) {
+          throw new Error('Debuff skill requires buffType');
+        }
+        return new AlterationSkill(
+          'debuff',
+          this.mapBuffType(skillData.buffType),
+          skillData.rate,
+          skillData.duration ?? 0,
+          buildTriggerStrategy(skillData.event, skillData.targetCardId),
+          buildTargetingStrategy(skillData.targetingStrategy),
         );
       case SkillKind.CONDITIONAL_ATTACK:
         if (!skillData.damages || !skillData.interval) {
