@@ -48,6 +48,7 @@ export enum SpecialKind {
 export enum SkillKind {
   HEALING = 'HEALING',
   BUFF = 'BUFF',
+  DEBUFF = 'DEBUFF',
   CONDITIONAL_ATTACK = 'CONDITIONAL_ATTACK',
 }
 

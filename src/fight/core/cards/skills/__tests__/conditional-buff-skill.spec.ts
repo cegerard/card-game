@@ -1,4 +1,4 @@
-import { BuffSkill } from '../buff-skill';
+import { AlterationSkill } from '../alteration-skill';
 import { SkillKind } from '../skill';
 import { createFightingCard } from '../../../../../../test/helpers/fighting-card';
 import { Player } from '../../../player';
@@ -6,7 +6,7 @@ import { TurnEnd } from '../../../trigger/turn-end';
 import { Launcher } from '../../../targeting-card-strategies/launcher';
 import { HealthThresholdCondition } from '../../@types/buff/conditions/health-threshold-condition';
 
-describe('BuffSkill with activationCondition', () => {
+describe('AlterationSkill with activationCondition', () => {
   const trigger = new TurnEnd();
   const targetingStrategy = new Launcher();
 
@@ -22,7 +22,8 @@ describe('BuffSkill with activationCondition', () => {
 
     beforeEach(() => {
       const condition = new HealthThresholdCondition(0.5, 'above');
-      const skill = new BuffSkill(
+      const skill = new AlterationSkill(
+        'buff',
         'attack',
         0.1,
         2,
@@ -44,7 +45,8 @@ describe('BuffSkill with activationCondition', () => {
 
     beforeEach(() => {
       const condition = new HealthThresholdCondition(0.5, 'above');
-      const skill = new BuffSkill(
+      const skill = new AlterationSkill(
+        'buff',
         'attack',
         0.1,
         2,
@@ -70,7 +72,14 @@ describe('BuffSkill with activationCondition', () => {
     let results;
 
     beforeEach(() => {
-      const skill = new BuffSkill('attack', 0.1, 2, trigger, targetingStrategy);
+      const skill = new AlterationSkill(
+        'buff',
+        'attack',
+        0.1,
+        2,
+        trigger,
+        targetingStrategy,
+      );
       const source = createFightingCard({ health: 100 });
       source.addRealDamage(99);
       results = skill.launch(source, makeContext(source));

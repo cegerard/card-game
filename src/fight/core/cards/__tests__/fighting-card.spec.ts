@@ -1,7 +1,7 @@
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 import { TurnEnd } from '../../trigger/turn-end';
 import { Launcher } from '../../targeting-card-strategies/launcher';
-import { BuffSkill } from '../skills/buff-skill';
+import { AlterationSkill } from '../skills/alteration-skill';
 import { Player } from '../../player';
 
 describe('FightingCard.applyBuff()', () => {
@@ -113,7 +113,8 @@ describe('FightingCard.lifecycleEndEvents()', () => {
     let card;
 
     beforeEach(() => {
-      const skill = new BuffSkill(
+      const skill = new AlterationSkill(
+        'buff',
         'attack',
         0.4,
         Infinity,
@@ -139,7 +140,8 @@ describe('FightingCard.lifecycleEndEvents()', () => {
     let skill;
 
     beforeEach(() => {
-      skill = new BuffSkill(
+      skill = new AlterationSkill(
+        'buff',
         'attack',
         0.4,
         Infinity,
