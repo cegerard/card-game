@@ -275,13 +275,19 @@ export class FightController {
         if (!skillData.buffType) {
           throw new Error('Debuff skill requires buffType');
         }
+        const debuffDuration =
+          skillData.duration === 0 ? Infinity : (skillData.duration ?? 0);
         return new AlterationSkill(
           'debuff',
           this.mapBuffType(skillData.buffType),
           skillData.rate,
-          skillData.duration ?? 0,
+          debuffDuration,
           buildTriggerStrategy(skillData.event, skillData.targetCardId),
           buildTargetingStrategy(skillData.targetingStrategy),
+          undefined,
+          skillData.activationLimit,
+          skillData.endEvent,
+          skillData.terminationEvent,
         );
       case SkillKind.CONDITIONAL_ATTACK:
         if (!skillData.damages || !skillData.interval) {
