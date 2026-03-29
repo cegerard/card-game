@@ -245,10 +245,11 @@ export class FightController {
           buildTargetingStrategy(skillData.targetingStrategy),
         );
       case SkillKind.BUFF:
+      case SkillKind.DEBUFF:
         if (!skillData.buffType) {
-          throw new Error('Buff skill requires buffType');
+          throw new Error('Alteration skill requires buffType');
         }
-        const activationCondition = skillData.activationCondition
+        const alterationCondition = skillData.activationCondition
           ? buildBuffCondition(skillData.activationCondition.type, {
               threshold: skillData.activationCondition.threshold,
               operator: skillData.activationCondition.operator,
@@ -257,34 +258,16 @@ export class FightController {
         // duration: 0 means infinite — either permanent (no terminationEvent)
         // or event-bound (removed when terminationEvent fires via EndEventProcessor).
         // The domain uses Infinity to bypass the turn-decrement filter.
-        const buffDuration =
+        const alterationDuration =
           skillData.duration === 0 ? Infinity : (skillData.duration ?? 0);
         return new AlterationSkill(
-          'buff',
+          skillData.kind === SkillKind.BUFF ? 'buff' : 'debuff',
           this.mapBuffType(skillData.buffType),
           skillData.rate,
-          buffDuration,
+          alterationDuration,
           buildTriggerStrategy(skillData.event, skillData.targetCardId),
           buildTargetingStrategy(skillData.targetingStrategy),
-          activationCondition,
-          skillData.activationLimit,
-          skillData.endEvent,
-          skillData.terminationEvent,
-        );
-      case SkillKind.DEBUFF:
-        if (!skillData.buffType) {
-          throw new Error('Debuff skill requires buffType');
-        }
-        const debuffDuration =
-          skillData.duration === 0 ? Infinity : (skillData.duration ?? 0);
-        return new AlterationSkill(
-          'debuff',
-          this.mapBuffType(skillData.buffType),
-          skillData.rate,
-          debuffDuration,
-          buildTriggerStrategy(skillData.event, skillData.targetCardId),
-          buildTargetingStrategy(skillData.targetingStrategy),
-          undefined,
+          alterationCondition,
           skillData.activationLimit,
           skillData.endEvent,
           skillData.terminationEvent,
