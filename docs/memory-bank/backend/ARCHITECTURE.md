@@ -149,8 +149,9 @@ sequenceDiagram
             ActionStage->>ActionStage: Check for deaths
             ActionStage->>DeathHandler: notifyDeath(player, deadCard)
             DeathHandler->>Card: launchSkill('ally-death:<id>') on survivors
+            DeathHandler->>DeathHandler: processEndEvent() via EndEventProcessor (if skill emits endEvent)
             ActionStage->>DeathHandler: drainSteps()
-            DeathHandler-->>ActionStage: Death-triggered skill steps
+            DeathHandler-->>ActionStage: Death-triggered skill steps + buff_removed steps
         end
         ActionStage-->>Fight: Action steps
 
@@ -162,8 +163,9 @@ sequenceDiagram
             TurnManager->>TurnManager: Check for deaths
             TurnManager->>DeathHandler: notifyDeath(player, deadCard)
             DeathHandler->>Card: launchSkill('ally-death:<id>') on survivors
+            DeathHandler->>DeathHandler: processEndEvent() via EndEventProcessor (if skill emits endEvent)
             TurnManager->>DeathHandler: drainSteps()
-            DeathHandler-->>TurnManager: Death-triggered skill steps
+            DeathHandler-->>TurnManager: Death-triggered skill steps + buff_removed steps
         end
         TurnManager-->>Fight: Turn-end steps
 
@@ -183,7 +185,7 @@ sequenceDiagram
   - Card selection strategies (`PlayerByPlayerCardSelector`, `SpeedWeightedCardSelector`)
   - Targeting strategies (position-based, all-enemies, line-three, etc.)
   - Dodge behaviors (simple, random)
-- **Observer Pattern**: `CardDeathSubscriber` interface for death notifications. `DeathSkillHandler` implements it: on each death it fires `ally-death:<cardId>` skill triggers on surviving allies, accumulates resulting steps, and exposes `drainSteps()` for callers (`ActionStage`, `TurnManager`) to collect them immediately after each death event. Handles all three skill kinds: **Healing** → `StepKind.Healing`, **Buff** → `StepKind.Buff`, **Debuff** → `StepKind.Debuff`
+- **Observer Pattern**: `CardDeathSubscriber` interface for death notifications. `DeathSkillHandler` implements it: on each death it fires `ally-death:<cardId>` skill triggers on surviving allies, accumulates resulting steps, and exposes `drainSteps()` for callers (`ActionStage`, `TurnManager`) to collect them immediately after each death event. Handles all three skill kinds: **Healing** → `StepKind.Healing`, **Buff** → `StepKind.Buff`, **Debuff** → `StepKind.Debuff`. Also processes `endEvent` from skill results via `EndEventProcessor`, emitting `buff_removed` steps inline
 - **Dependency Injection**: NestJS provider system for `FIGHT_SIMULATOR_BUILDER`
 - **Value Objects**: Immutable types for attack effects, buffs, debuffs, damage compositions
 - **Rich Domain Model**: `FightingCard` encapsulates stats, behaviors, element, and state mutations

@@ -128,7 +128,7 @@ Simulates a turn-based card battle between two players.
   event: "turn-end" | "next-action" | "ally-death",  // When skill triggers
   targetCardId?: string,        // Required when event=ally-death: id of the ally whose death triggers this skill
   buffType?: "attack" | "defense" | "agility" | "accuracy",  // Required if kind=BUFF
-  duration?: number,            // Required if kind=BUFF
+  duration?: number,            // Required if kind=BUFF (0 = infinite: permanent or event-bound)
   terminationEvent?: string,    // Event name that removes this skill's buff when fired
   activationLimit?: number,     // Max activations (>=1) before skill lifecycle ends
   endEvent?: string,            // Event emitted when activation limit is reached
@@ -164,7 +164,7 @@ Simulates a turn-based card battle between two players.
 {
   type: "attack" | "defense" | "agility" | "accuracy",
   rate: number,               // Buff strength multiplier
-  duration: number,           // Number of turns buff lasts (0 = event-bound only)
+  duration: number,           // Number of turns buff lasts (0 = infinite: permanent if no terminationEvent, event-bound if terminationEvent is set)
   targetingStrategy: TargetingStrategy,
   condition?: BuffConditionDto,     // Optional conditional multiplier
   terminationEvent?: string         // Event name that removes this buff when fired
