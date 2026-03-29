@@ -72,6 +72,7 @@ type FightingCardParams = {
           trigger: string;
           targetingStrategy: string;
           targetCardId?: string;
+          powerId?: string;
         }
       | {
           buffType: BuffType;
@@ -80,6 +81,10 @@ type FightingCardParams = {
           trigger: string;
           targetingStrategy: string;
           targetCardId?: string;
+          activationLimit?: number;
+          endEvent?: string;
+          terminationEvent?: string;
+          powerId?: string;
         }
       | {
           debuffType: DebuffType;
@@ -88,6 +93,7 @@ type FightingCardParams = {
           trigger: string;
           targetingStrategy: string;
           targetCardId?: string;
+          powerId?: string;
         }
     )[];
   };
@@ -222,6 +228,7 @@ function createsSkills(
         trigger: string;
         targetingStrategy: string;
         targetCardId?: string;
+        powerId?: string;
       }
     | {
         buffType: BuffType;
@@ -230,6 +237,10 @@ function createsSkills(
         trigger: string;
         targetingStrategy: string;
         targetCardId?: string;
+        activationLimit?: number;
+        endEvent?: string;
+        terminationEvent?: string;
+        powerId?: string;
       }
     | {
         debuffType: DebuffType;
@@ -238,6 +249,7 @@ function createsSkills(
         trigger: string;
         targetingStrategy: string;
         targetCardId?: string;
+        powerId?: string;
       }
   )[],
 ): Skill[] {
@@ -247,6 +259,7 @@ function createsSkills(
         skill.effectRate,
         createTrigger(skill.trigger, skill.targetCardId),
         createTargetingStrategy(skill.targetingStrategy),
+        skill.powerId,
       );
     } else if ('buffType' in skill) {
       return new AlterationSkill(
@@ -256,6 +269,11 @@ function createsSkills(
         skill.duration,
         createTrigger(skill.trigger, skill.targetCardId),
         createTargetingStrategy(skill.targetingStrategy),
+        undefined,
+        skill.activationLimit,
+        skill.endEvent,
+        skill.terminationEvent,
+        skill.powerId,
       );
     } else {
       return new AlterationSkill(
@@ -265,6 +283,11 @@ function createsSkills(
         skill.duration,
         createTrigger(skill.trigger, skill.targetCardId),
         createTargetingStrategy(skill.targetingStrategy),
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        skill.powerId,
       );
     }
   });

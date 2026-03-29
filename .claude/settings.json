@@ -5,7 +5,11 @@
       "Bash(bash .specify/extensions/review/scripts/bash/detect-changed-files.sh --json)",
       "Bash(bash .specify/scripts/bash/setup-plan.sh --json)",
       "Bash(node -e \":*)",
-      "Bash(npx jest:*)"
+      "Bash(npx jest:*)",
+      "Bash(bash .specify/scripts/bash/check-prerequisites.sh --json --paths-only)",
+      "Bash(.specify/scripts/bash/create-new-feature.sh \"Je souhaite ajouter un pouvoir qui regroupe plusieurs compétences. Par exemple que le pouvoir ce déclenche il va mettre en buff sur le lanceur, déclencher une attaque avec une effet particulier \\(par exemple brulure\\), changer les modes de ciblage d toute les attaque du personnage. Mais lorsque le pouvoir prend fin, l''ensemble des effets \\(buff, brulure et ciblage\\) doivent disparaitre.\" --json --short-name \"composite-power\" \"Composite multi-effect power with unified lifecycle\")",
+      "Bash(.specify/scripts/bash/create-new-feature.sh \"Ajouter un pouvoir composite qui regroupe plusieurs competences. Par exemple quand le pouvoir se declenche il va mettre un buff sur le lanceur, declencher une attaque avec un effet particulier \\(par exemple brulure\\), changer les modes de ciblage de toutes les attaques du personnage. Mais lorsque le pouvoir prend fin, tous les effets \\(buff, brulure et ciblage\\) doivent disparaitre.\" --json --short-name \"composite-power\" \"Composite multi-effect power with unified lifecycle\")",
+      "Bash(.specify/scripts/bash/check-prerequisites.sh --json)"
     ]
   }
 }

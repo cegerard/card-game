@@ -1,8 +1,9 @@
 # card-game Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-03-22
+Auto-generated from all feature plans. Last updated: 2026-03-29
 
 ## Active Technologies
+- N/A (stateless in-memory simulator) (003-composite-power)
 
 - TypeScript on Node.js 24 + NestJS 11, class-validator, class-transformer (002-event-bound-buff)
 
@@ -23,6 +24,7 @@ npm test && npm run lint
 TypeScript on Node.js 24: Follow standard conventions
 
 ## Recent Changes
+- 003-composite-power: Added TypeScript on Node.js 24 + NestJS 11, class-validator, class-transformer
 
 - 002-event-bound-buff: Added TypeScript on Node.js 24 + NestJS 11, class-validator, class-transformer
 

@@ -14,4 +14,5 @@ export type DebuffReport = {
   source: CardInfo;
   debuffs: Debuff[];
   energy: number;
+  powerId?: string;
 };

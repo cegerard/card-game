@@ -121,17 +121,18 @@ Simulates a turn-based card battle between two players.
 
 ```typescript
 {
-  kind: "HEALING" | "BUFF" | "CONDITIONAL_ATTACK",
+  kind: "HEALING" | "BUFF" | "CONDITIONAL_ATTACK" | "TARGETING_OVERRIDE",
   name: string,
-  rate: number,
+  rate?: number,                // Optional — not required for TARGETING_OVERRIDE
   targetingStrategy: TargetingStrategy,
   event: "turn-end" | "next-action" | "ally-death",  // When skill triggers
   targetCardId?: string,        // Required when event=ally-death: id of the ally whose death triggers this skill
   buffType?: "attack" | "defense" | "agility" | "accuracy",  // Required if kind=BUFF
   duration?: number,            // Required if kind=BUFF (0 = infinite: permanent or event-bound)
-  terminationEvent?: string,    // Event name that removes this skill's buff when fired
+  terminationEvent?: string,    // Event name that removes this skill's buff/targeting override when fired
   activationLimit?: number,     // Max activations (>=1) before skill lifecycle ends
   endEvent?: string,            // Event emitted when activation limit is reached
+  powerId?: string,             // Groups multiple skills as a composite power (must share same event + terminationEvent)
   // CONDITIONAL_ATTACK fields:
   damages?: DamageCompositionDto[],
   hits?: number,
@@ -176,7 +177,7 @@ Simulates a turn-based card battle between two players.
 ```typescript
 {
   [stepNumber: number]: {
-    kind: "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "winner" | "fight_end",
+    kind: "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "targeting_override" | "targeting_reverted" | "winner" | "fight_end",
     // Additional properties vary by step kind
   }
 }
@@ -188,9 +189,32 @@ Simulates a turn-based card battle between two players.
   kind: "buff_removed",
   source: CardInfo,      // Card whose skill emitted the end event
   eventName: string,     // The end event name that triggered removal
-  removed: { target: CardInfo, kind: BuffType, value: number }[]
+  removed: { target: CardInfo, kind: BuffType, value: number }[],
+  powerId?: string       // Present if the skill that emitted the end event belongs to a composite power
 }
 ```
+
+**`targeting_override` step** (`TargetingOverrideReport`): Emitted when a targeting override skill activates.
+```typescript
+{
+  kind: "targeting_override",
+  source: CardInfo,                // Card whose skill pushed the override
+  targetingStrategyId: string,     // ID of the new targeting strategy
+  powerId?: string                 // Present if skill belongs to a composite power
+}
+```
+
+**`targeting_reverted` step** (`TargetingRevertedReport`): Emitted when a targeting override is removed via end event.
+```typescript
+{
+  kind: "targeting_reverted",
+  source: CardInfo,                // Card whose override was reverted
+  restoredStrategyId: string,      // ID of the restored targeting strategy
+  powerId?: string                 // Present if triggered by a composite power end event
+}
+```
+
+**Note on `powerId`**: The `powerId` field appears on `buff`, `debuff`, `healing`, `buff_removed`, `targeting_override`, and `targeting_reverted` step kinds when the originating skill belongs to a composite power group.
 
 ## Enums
 
@@ -229,6 +253,7 @@ Simulates a turn-based card battle between two players.
 - `HEALING`: Healing skill
 - `BUFF`: Temporary stat boost
 - `CONDITIONAL_ATTACK`: Attack skill triggered conditionally by an event
+- `TARGETING_OVERRIDE`: Overrides the card's attack targeting strategy (requires `terminationEvent`)
 
 ### Effect
 
@@ -278,7 +303,7 @@ See @src/fight/core/fight-simulator/@types/ for complete type definitions:
 
 - `FightResult`: Map of step numbers to `Step` objects
 - `Step`: Union type with `kind` discriminator
-- `DamageReport`, `HealingReport`, `BuffReport`, `DebuffReport`, `StateEffectReport`, `StatusChangeReport`, `WinnerReport`, `BuffRemovedReport`: Specific step types
+- `DamageReport`, `HealingReport`, `BuffReport`, `DebuffReport`, `StateEffectReport`, `StatusChangeReport`, `WinnerReport`, `BuffRemovedReport`, `TargetingOverrideReport`, `TargetingRevertedReport`: Specific step types
 
 ## Dependencies
 

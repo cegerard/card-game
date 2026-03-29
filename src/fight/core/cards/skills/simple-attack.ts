@@ -14,10 +14,30 @@ export class SimpleAttack implements AttackSkill {
     private readonly effect?: AttackEffect,
   ) {}
 
+  public get targetingId(): string {
+    return this.targetingStrategy.id;
+  }
+
   public launch(card: FightingCard, context: FightingContext): AttackResult[] {
+    return this.executeAttack(card, context, this.targetingStrategy);
+  }
+
+  public launchWithTargeting(
+    card: FightingCard,
+    context: FightingContext,
+    targetingStrategy: TargetingCardStrategy,
+  ): AttackResult[] {
+    return this.executeAttack(card, context, targetingStrategy);
+  }
+
+  private executeAttack(
+    card: FightingCard,
+    context: FightingContext,
+    targeting: TargetingCardStrategy,
+  ): AttackResult[] {
     const isCritical = Math.random() < card.actualCriticalChance;
     const damageMultiplier = isCritical ? 2 : 1;
-    const defensiveCards = this.targetingStrategy.targetedCards(
+    const defensiveCards = targeting.targetedCards(
       card,
       context.sourcePlayer,
       context.opponentPlayer,

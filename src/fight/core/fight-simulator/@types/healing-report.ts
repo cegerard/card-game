@@ -12,4 +12,5 @@ export type HealingReport = {
   source: CardInfo;
   heal: Healing[];
   energy: number;
+  powerId?: string;
 };

@@ -32,6 +32,7 @@ export class AlterationSkill implements Skill {
   private readonly activationLimit?: number;
   private readonly endEvent?: string;
   private readonly terminationEvent?: string;
+  private readonly powerId?: string;
   private activationCount = 0;
 
   constructor(
@@ -45,6 +46,7 @@ export class AlterationSkill implements Skill {
     activationLimit?: number,
     endEvent?: string,
     terminationEvent?: string,
+    powerId?: string,
   ) {
     this.polarity = polarity;
     this.attributeType = attributeType;
@@ -56,6 +58,7 @@ export class AlterationSkill implements Skill {
     this.activationLimit = activationLimit;
     this.endEvent = endEvent;
     this.terminationEvent = terminationEvent;
+    this.powerId = powerId;
   }
 
   launch(source: FightingCard, context: FightingContext): SkillResults {
@@ -63,7 +66,11 @@ export class AlterationSkill implements Skill {
       this.activationCondition &&
       !this.activationCondition.evaluate(source, context)
     ) {
-      return { skillKind: this.resolveSkillKind(), results: [] };
+      return {
+        skillKind: this.resolveSkillKind(),
+        results: [],
+        powerId: this.powerId,
+      };
     }
 
     const targetedCards = this.targetingStrategy.targetedCards(
@@ -81,6 +88,7 @@ export class AlterationSkill implements Skill {
               this.rate,
               this.duration,
               this.terminationEvent,
+              this.powerId,
             ),
           }))
         : targetedCards.map((targetedCard) => ({
@@ -102,6 +110,7 @@ export class AlterationSkill implements Skill {
       skillKind: this.resolveSkillKind(),
       results,
       endEvent: isExhausted ? this.endEvent : undefined,
+      powerId: this.powerId,
     };
   }
 

@@ -7,4 +7,5 @@ export type BuffRemovedReport = {
   source: CardInfo;
   eventName: string;
   removed: { target: CardInfo; kind: BuffType; value: number }[];
+  powerId?: string;
 };

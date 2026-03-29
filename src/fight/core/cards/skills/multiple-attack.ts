@@ -17,14 +17,34 @@ export class MultipleAttack implements AttackSkill {
     private readonly comboFinisher?: DamageComposition[],
   ) {}
 
+  public get targetingId(): string {
+    return this.targetingStrategy.id;
+  }
+
+  public launchWithTargeting(
+    card: FightingCard,
+    context: FightingContext,
+    targetingStrategy: TargetingCardStrategy,
+  ): AttackResult[] {
+    return this.executeAttack(card, context, targetingStrategy);
+  }
+
   public launch(card: FightingCard, context: FightingContext): AttackResult[] {
+    return this.executeAttack(card, context, this.targetingStrategy);
+  }
+
+  private executeAttack(
+    card: FightingCard,
+    context: FightingContext,
+    targeting: TargetingCardStrategy,
+  ): AttackResult[] {
     const results: AttackResult[] = [];
     const hitTargets = new Set<FightingCard>();
     const dodgedTargets = new Set<FightingCard>();
 
     for (let i = 0; i < this.hits; i++) {
       const attackPower = card.actualAttack * (1 + this.amplifier * i);
-      const targets = this.targetingStrategy.targetedCards(
+      const targets = targeting.targetedCards(
         card,
         context.sourcePlayer,
         context.opponentPlayer,

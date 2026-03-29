@@ -10,15 +10,18 @@ export class Healing implements Skill {
   private readonly effectRate: number;
   private readonly trigger: Trigger;
   private readonly targetingStrategy: TargetingCardStrategy;
+  private readonly powerId?: string;
 
   constructor(
     effectRate: number,
     trigger: Trigger,
     targetingStrategy: TargetingCardStrategy,
+    powerId?: string,
   ) {
     this.effectRate = effectRate;
     this.trigger = trigger;
     this.targetingStrategy = targetingStrategy;
+    this.powerId = powerId;
   }
 
   launch(source: FightingCard, context: FightingContext): SkillResults {
@@ -39,6 +42,7 @@ export class Healing implements Skill {
     return {
       skillKind: SkillKind.Healing,
       results: healingResults,
+      powerId: this.powerId,
     };
   }
 

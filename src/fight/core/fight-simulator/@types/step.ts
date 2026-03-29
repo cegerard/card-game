@@ -6,6 +6,10 @@ import { StateEffectReport } from './state-effect-report';
 import { StatusChangeReport } from './status-change-report';
 import { WinnerReport } from './winner-report';
 import { BuffRemovedReport } from './buff-removed-report';
+import {
+  TargetingOverrideReport,
+  TargetingRevertedReport,
+} from './targeting-override-report';
 
 export enum StepKind {
   FightEnd = 'fight_end',
@@ -18,6 +22,8 @@ export enum StepKind {
   Buff = 'buff',
   Debuff = 'debuff',
   BuffRemoved = 'buff_removed',
+  TargetingOverride = 'targeting_override',
+  TargetingReverted = 'targeting_reverted',
 }
 
 export type Step = { kind: StepKind } & (
@@ -29,4 +35,6 @@ export type Step = { kind: StepKind } & (
   | BuffReport
   | DebuffReport
   | BuffRemovedReport
+  | TargetingOverrideReport
+  | TargetingRevertedReport
 );

@@ -6,6 +6,7 @@ import {
   UsePipes,
   ValidationPipe,
   Inject,
+  BadRequestException,
 } from '@nestjs/common';
 import { FightResult } from '../core/fight-simulator/@types/fight-result';
 import {
@@ -13,9 +14,11 @@ import {
   Effect,
   FightDataDto,
   FightingCardDto,
+  OtherSkillDto,
   SpecialKind,
   SkillKind,
   BuffType,
+  TriggerEvent,
 } from './dto/fight-data.dto';
 import { FightingCard } from '../core/cards/fighting-card';
 import { SpecialAttack } from '../core/cards/skills/special-attack';
@@ -42,6 +45,7 @@ import { SpeedWeightedCardSelector } from '../core/fight-simulator/card-selector
 import { Player } from '../core/player';
 import { FightSimulator } from '../core/fight-simulator/@types/fight-simulator';
 import { Skill } from '../core/cards/skills/skill';
+import { TargetingOverrideSkill } from '../core/cards/skills/targeting-override';
 import { DamageComposition } from '../core/cards/@types/damage/damage-composition';
 import { ConditionalAttack } from '../core/cards/skills/conditional-attack';
 import { EveryNTurnsCondition } from '../core/cards/@types/attack/conditions/every-n-turns-condition';
@@ -174,6 +178,8 @@ export class FightController {
       );
     }
 
+    this.validatePowerIdConsistency(cardData.skills.others);
+
     const otherSkills: Skill[] = cardData.skills.others.map((skill) =>
       this.createOtherSkill(skill),
     );
@@ -243,6 +249,7 @@ export class FightController {
           skillData.rate,
           buildTriggerStrategy(skillData.event, skillData.targetCardId),
           buildTargetingStrategy(skillData.targetingStrategy),
+          skillData.powerId,
         );
       case SkillKind.BUFF:
       case SkillKind.DEBUFF:
@@ -271,6 +278,7 @@ export class FightController {
           skillData.activationLimit,
           skillData.endEvent,
           skillData.terminationEvent,
+          skillData.powerId,
         );
       case SkillKind.CONDITIONAL_ATTACK:
         if (!skillData.damages || !skillData.interval) {
@@ -305,6 +313,16 @@ export class FightController {
           caAttackSkill,
           new EveryNTurnsCondition(skillData.interval),
         );
+      case SkillKind.TARGETING_OVERRIDE:
+        if (!skillData.terminationEvent) {
+          throw new Error('Targeting override skill requires terminationEvent');
+        }
+        return new TargetingOverrideSkill(
+          buildTargetingStrategy(skillData.targetingStrategy),
+          skillData.terminationEvent,
+          buildTriggerStrategy(skillData.event, skillData.targetCardId),
+          skillData.powerId,
+        );
       default:
         throw new Error(`Unknown skill kind: ${skillData.kind}`);
     }
@@ -321,6 +339,38 @@ export class FightController {
     };
 
     return BUFF_TYPE_MAP[buffType];
+  }
+
+  private validatePowerIdConsistency(skills: OtherSkillDto[]): void {
+    const groups = new Map<
+      string,
+      { event: TriggerEvent; terminationEvent?: string }
+    >();
+
+    for (const skill of skills) {
+      if (!skill.powerId) continue;
+
+      const existing = groups.get(skill.powerId);
+      if (!existing) {
+        groups.set(skill.powerId, {
+          event: skill.event,
+          terminationEvent: skill.terminationEvent,
+        });
+        continue;
+      }
+
+      if (existing.event !== skill.event) {
+        throw new BadRequestException(
+          `Skills with powerId '${skill.powerId}' must share the same event. Found '${existing.event}' and '${skill.event}'.`,
+        );
+      }
+
+      if (existing.terminationEvent !== skill.terminationEvent) {
+        throw new BadRequestException(
+          `Skills with powerId '${skill.powerId}' must share the same terminationEvent. Found '${existing.terminationEvent}' and '${skill.terminationEvent}'.`,
+        );
+      }
+    }
   }
 
   private getSelectorStrategy(

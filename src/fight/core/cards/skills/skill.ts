@@ -10,12 +10,14 @@ export enum SkillKind {
   Buff = 'buff',
   Debuff = 'debuff',
   Attack = 'attack',
+  TargetingOverride = 'targeting_override',
 }
 
 export type SkillResults = {
   skillKind: SkillKind;
   results: HealingResults | BuffResults | DebuffResults | AttackResult[];
   endEvent?: string;
+  powerId?: string;
 };
 
 export interface Skill {

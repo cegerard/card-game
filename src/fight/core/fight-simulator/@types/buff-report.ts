@@ -14,4 +14,5 @@ export type BuffReport = {
   source: CardInfo;
   buffs: Buff[];
   energy: number;
+  powerId?: string;
 };

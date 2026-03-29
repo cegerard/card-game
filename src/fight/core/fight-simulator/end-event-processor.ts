@@ -8,7 +8,12 @@ export class EndEventProcessor {
     private readonly player2: Player,
   ) {}
 
-  public processEndEvent(eventName: string, source: CardInfo): Step[] {
+  public processEndEvent(
+    eventName: string,
+    source: CardInfo,
+    powerId?: string,
+  ): Step[] {
+    const steps: Step[] = [];
     const allCards = [
       ...this.player1.playableCards,
       ...this.player2.playableCards,
@@ -23,15 +28,30 @@ export class EndEventProcessor {
       }));
     });
 
-    if (removed.length === 0) return [];
-
-    return [
-      {
+    if (removed.length > 0) {
+      steps.push({
         kind: StepKind.BuffRemoved,
         source,
         eventName,
         removed,
-      },
-    ];
+        powerId,
+      });
+    }
+
+    for (const card of allCards) {
+      const removedOverrides = card.restoreAttackTargeting(eventName);
+      for (const override of removedOverrides) {
+        steps.push({
+          kind: StepKind.TargetingReverted,
+          source: card.identityInfo,
+          eventName,
+          revertedStrategy: override.strategy.id,
+          restoredStrategy: card.attackTargetingId,
+          powerId: override.powerId,
+        });
+      }
+    }
+
+    return steps;
   }
 }

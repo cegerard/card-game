@@ -12,6 +12,7 @@ import {
 } from '../cards/@types/action-result/debuff-results';
 import { SkillKind } from '../cards/skills/skill';
 import { EndEventProcessor } from './end-event-processor';
+import { TargetingOverrideReport } from './@types/targeting-override-report';
 
 export class DeathSkillHandler implements CardDeathSubscriber {
   private steps: Step[] = [];
@@ -55,61 +56,72 @@ export class DeathSkillHandler implements CardDeathSubscriber {
         opponentPlayer,
       };
 
-      const skillResult = card.launchSkill(triggerId, context);
-      if (!skillResult) return;
+      const skillResults = card.launchSkills(triggerId, context);
 
-      if (skillResult.skillKind === SkillKind.Healing) {
-        this.steps.push({
-          kind: StepKind.Healing,
-          source: card.identityInfo,
-          heal: skillResult.results.map((heal) => ({
-            target: heal.target,
-            healed: heal.healAmount,
-            remainingHealth: heal.remainingHealth,
-          })),
-          energy: card.actualEnergy,
-        });
-      }
-
-      if (skillResult.skillKind === SkillKind.Buff) {
-        const buffResults = skillResult.results as BuffResults;
-        if (buffResults.length > 0) {
+      for (const skillResult of skillResults) {
+        if (skillResult.skillKind === SkillKind.Healing) {
           this.steps.push({
-            kind: StepKind.Buff,
+            kind: StepKind.Healing,
             source: card.identityInfo,
-            buffs: buffResults.map((result: BuffResult) => ({
-              target: result.target,
-              kind: result.buff.type,
-              value: result.buff.value,
-              remainingTurns: result.buff.duration,
+            heal: skillResult.results.map((heal) => ({
+              target: heal.target,
+              healed: heal.healAmount,
+              remainingHealth: heal.remainingHealth,
             })),
             energy: card.actualEnergy,
+            powerId: skillResult.powerId,
           });
         }
 
-        if (skillResult.endEvent && this.endEventProcessor) {
-          this.steps.push(
-            ...this.endEventProcessor.processEndEvent(
-              skillResult.endEvent,
-              card.identityInfo,
-            ),
-          );
-        }
-      }
+        if (skillResult.skillKind === SkillKind.Buff) {
+          const buffResults = skillResult.results as BuffResults;
+          if (buffResults.length > 0) {
+            this.steps.push({
+              kind: StepKind.Buff,
+              source: card.identityInfo,
+              buffs: buffResults.map((result: BuffResult) => ({
+                target: result.target,
+                kind: result.buff.type,
+                value: result.buff.value,
+                remainingTurns: result.buff.duration,
+              })),
+              energy: card.actualEnergy,
+              powerId: skillResult.powerId,
+            });
+          }
 
-      if (skillResult.skillKind === SkillKind.Debuff) {
-        const debuffResults = skillResult.results as DebuffResults;
-        this.steps.push({
-          kind: StepKind.Debuff,
-          source: card.identityInfo,
-          debuffs: debuffResults.map((result: DebuffResult) => ({
-            target: result.target,
-            kind: result.debuff.type,
-            value: result.debuff.value,
-            remainingTurns: result.debuff.duration,
-          })),
-          energy: card.actualEnergy,
-        });
+          if (skillResult.endEvent && this.endEventProcessor) {
+            this.steps.push(
+              ...this.endEventProcessor.processEndEvent(
+                skillResult.endEvent,
+                card.identityInfo,
+                skillResult.powerId,
+              ),
+            );
+          }
+        }
+
+        if (skillResult.skillKind === SkillKind.Debuff) {
+          const debuffResults = skillResult.results as DebuffResults;
+          this.steps.push({
+            kind: StepKind.Debuff,
+            source: card.identityInfo,
+            debuffs: debuffResults.map((result: DebuffResult) => ({
+              target: result.target,
+              kind: result.debuff.type,
+              value: result.debuff.value,
+              remainingTurns: result.debuff.duration,
+            })),
+            energy: card.actualEnergy,
+            powerId: skillResult.powerId,
+          });
+        }
+
+        if (skillResult.skillKind === SkillKind.TargetingOverride) {
+          const reports =
+            skillResult.results as unknown as TargetingOverrideReport[];
+          reports.forEach((report) => this.steps.push(report));
+        }
       }
     });
   }

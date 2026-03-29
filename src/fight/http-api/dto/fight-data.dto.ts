@@ -50,6 +50,7 @@ export enum SkillKind {
   BUFF = 'BUFF',
   DEBUFF = 'DEBUFF',
   CONDITIONAL_ATTACK = 'CONDITIONAL_ATTACK',
+  TARGETING_OVERRIDE = 'TARGETING_OVERRIDE',
 }
 
 export enum BuffType {
@@ -248,8 +249,9 @@ export class OtherSkillDto {
   @IsString()
   name: string;
 
+  @IsOptional()
   @IsNumber()
-  rate: number;
+  rate?: number;
 
   @IsEnum(TargetingStrategy)
   targetingStrategy: TargetingStrategy;
@@ -323,6 +325,11 @@ export class OtherSkillDto {
   @IsString()
   @IsNotEmpty()
   endEvent?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  powerId?: string;
 }
 
 class SkillsDto {

@@ -14,6 +14,13 @@ import { Debuff } from './@types/buff/debuff';
 import { Skill, SkillResults } from './skills/skill';
 import { BuffType, DebuffType } from './@types/buff/type';
 import { Element } from './@types/damage/element';
+import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
+
+export type TargetingOverrideEntry = {
+  strategy: TargetingCardStrategy;
+  terminationEvent: string;
+  powerId?: string;
+};
 
 export class FightingCard {
   // Info
@@ -49,6 +56,9 @@ export class FightingCard {
 
   // Behaviors
   private dodgeBehavior: DodgeBehavior;
+
+  // Targeting overrides
+  private targetingOverrides: TargetingOverrideEntry[] = [];
 
   // Status
   private poisoned?: CardState;
@@ -218,7 +228,42 @@ export class FightingCard {
     });
   }
 
+  public get attackTargetingId(): string {
+    if (this.targetingOverrides.length > 0) {
+      return this.targetingOverrides[this.targetingOverrides.length - 1]
+        .strategy.id;
+    }
+    return this.simpleAttack.targetingId;
+  }
+
+  public overrideAttackTargeting(
+    strategy: TargetingCardStrategy,
+    terminationEvent: string,
+    powerId?: string,
+  ): void {
+    this.targetingOverrides.push({ strategy, terminationEvent, powerId });
+  }
+
+  public restoreAttackTargeting(eventName: string): TargetingOverrideEntry[] {
+    const removed = this.targetingOverrides.filter(
+      (o) => o.terminationEvent === eventName,
+    );
+    this.targetingOverrides = this.targetingOverrides.filter(
+      (o) => o.terminationEvent !== eventName,
+    );
+    return removed;
+  }
+
   public launchAttack(context: FightingContext): AttackResult[] {
+    if (this.targetingOverrides.length > 0) {
+      const override =
+        this.targetingOverrides[this.targetingOverrides.length - 1];
+      return this.simpleAttack.launchWithTargeting(
+        this,
+        context,
+        override.strategy,
+      );
+    }
     return this.simpleAttack.launch(this, context);
   }
 
@@ -226,15 +271,13 @@ export class FightingCard {
     return this.special.launch(this, context);
   }
 
-  public launchSkill(
+  public launchSkills(
     trigger: string,
     context: FightingContext,
-  ): SkillResults | null {
-    const skill = this.skills.find((s) => s.isTriggered(trigger));
-
-    if (!skill) return null;
-
-    return skill.launch(this, context);
+  ): SkillResults[] {
+    return this.skills
+      .filter((s) => s.isTriggered(trigger))
+      .map((skill) => skill.launch(this, context));
   }
 
   public applyStateEffects(): StateResult[] {
@@ -341,9 +384,16 @@ export class FightingCard {
     buffRate: number,
     duration: number,
     terminationEvent?: string,
+    powerId?: string,
   ): Buff {
     const value = this.computeAttributeModifierValue(buffType, buffRate);
-    const buff: Buff = { type: buffType, value, duration, terminationEvent };
+    const buff: Buff = {
+      type: buffType,
+      value,
+      duration,
+      terminationEvent,
+      powerId,
+    };
 
     if (terminationEvent) {
       const existingIndex = this.buffs.findIndex(

@@ -81,8 +81,11 @@ export class ActionStage {
 
   private launchNextActionSkills(card: FightingCard): AttackReport | null {
     const context = this.getFightingContext(card);
-    const skillResult = card.launchSkill('next-action', context);
-    if (!skillResult || skillResult.skillKind !== SkillKind.Attack) return null;
+    const skillResults = card.launchSkills('next-action', context);
+    const attackSkill = skillResults.find(
+      (r) => r.skillKind === SkillKind.Attack,
+    );
+    if (!attackSkill) return null;
 
     const result: AttackReport = {
       kind: StepKind.Attack,
@@ -94,7 +97,7 @@ export class ActionStage {
       statusChanges: [],
     };
 
-    this.handleAttackResult(skillResult.results as AttackResult[], result);
+    this.handleAttackResult(attackSkill.results as AttackResult[], result);
 
     return result;
   }

@@ -5,4 +5,5 @@ export type Buff = {
   value: number;
   duration: number;
   terminationEvent?: string;
+  powerId?: string;
 };
