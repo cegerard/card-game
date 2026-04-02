@@ -8,9 +8,9 @@ updates:
   # Enable version updates for npm
   - package-ecosystem: "npm"
     directory: "/"
-    # Check for updates once a week
+    # Check for updates every day
     schedule:
-      interval: "weekly"
+      interval: "daily"
 
   # Enable version updates for Docker
   - package-ecosystem: "docker"
