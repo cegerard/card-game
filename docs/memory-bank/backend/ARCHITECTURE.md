@@ -194,10 +194,11 @@ sequenceDiagram
 - **Event-Driven**: Skills triggered by events (`turn-end`, `next-action`, `ally-death:<cardId>`), extensible trigger system. `AllyDeath` trigger matches string pattern `ally-death:<targetCardId>` enabling death-reactive abilities
 - **Unified Special Result**: `Special.launch()` returns `SpecialResult` containing both `actionResults` (AttackResult[] or HealingResult[]) and `buffResults` (BuffResults) for consistent handling across attack and healing specials
 - **Event-Bound Buff Termination**: `Buff` type has optional `terminationEvent?: string`. Skills have optional `activationLimit` and `endEvent`. When a skill reaches its activation limit (or its owner dies), it emits its `endEvent`. `EndEventProcessor` scans all playable cards and removes buffs matching that event name, emitting a `StepKind.BuffRemoved` step. `SkillResults` carries an optional `endEvent` field so callers know to trigger `EndEventProcessor`.
+- **Event-Bound Effect Termination**: `CardState` (poison, burn, freeze) has optional `terminationEvent?: string`. When `EndEventProcessor` fires an end event, it also scans all living cards for status effects matching that event and removes them, emitting a `StepKind.EffectRemoved` step. The `terminationEvent` flows from `EffectDto` → `AttackEffect` → `CardState`.
 - **Skill Lifecycle Interface**: `Skill` interface has two optional lifecycle methods: `tick?()` (advance internal state each turn) and `lifecycleEndEvent?()` (return end event name if skill is active and lifecycle-limited).
 - **Separation of Concerns**:
   - `Fight` orchestrates battle flow
   - `ActionStage` handles attack/heal resolution and extracts buff applications from special results
   - `TurnManager` handles turn-end effects
   - `CardSelector` determines turn order
-  - `EndEventProcessor` handles event-bound buff removal across all cards
+  - `EndEventProcessor` handles event-bound buff and effect removal across all cards

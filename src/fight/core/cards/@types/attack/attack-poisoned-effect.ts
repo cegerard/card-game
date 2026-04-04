@@ -10,15 +10,18 @@ export class PoisonedAttackEffect implements AttackEffect {
   public readonly level: EffectLevel;
   public readonly type = 'poisoned';
   public readonly triggeredDebuff?: EffectTriggeredDebuff;
+  public readonly terminationEvent?: string;
 
   constructor(
     rate: number,
     level: EffectLevel,
     triggeredDebuff?: EffectTriggeredDebuff,
+    terminationEvent?: string,
   ) {
     this.rate = rate;
     this.level = level;
     this.triggeredDebuff = triggeredDebuff;
+    this.terminationEvent = terminationEvent;
   }
 
   public applyEffect(
@@ -33,6 +36,7 @@ export class PoisonedAttackEffect implements AttackEffect {
       this.level,
       this.computePoisonedTurns(),
       card.actualAttack * this.rate,
+      this.terminationEvent,
     );
     defender.setState(poisonedState);
 

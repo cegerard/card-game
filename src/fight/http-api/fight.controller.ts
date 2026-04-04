@@ -209,6 +209,7 @@ export class FightController {
       duration: number;
       probability: number;
     };
+    terminationEvent?: string;
   }): AttackEffect {
     const triggeredDebuff = effectDto.triggeredDebuff
       ? new EffectTriggeredDebuff(
@@ -226,18 +227,21 @@ export class FightController {
           effectDto.rate,
           effectDto.level as EffectLevel,
           triggeredDebuff,
+          effectDto.terminationEvent,
         );
       case Effect.BURN:
         return new BurnedAttackEffect(
           effectDto.rate,
           effectDto.level as EffectLevel,
           triggeredDebuff,
+          effectDto.terminationEvent,
         );
       case Effect.FREEZE:
         return new FrozenAttackEffect(
           effectDto.rate,
           effectDto.level as EffectLevel,
           triggeredDebuff,
+          effectDto.terminationEvent,
         );
     }
   }

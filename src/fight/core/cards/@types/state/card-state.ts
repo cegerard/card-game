@@ -6,6 +6,7 @@ export interface CardState {
   type: string;
   level: EffectLevel;
   remainingTurns: number;
+  terminationEvent?: string;
 
   applyState(card: FightingCard): StateResult;
 }

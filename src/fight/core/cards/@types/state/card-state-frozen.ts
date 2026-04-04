@@ -8,11 +8,18 @@ export class CardStateFrozen implements CardState {
   public readonly level: EffectLevel;
   public remainingTurns: number;
   private damageRate: number;
+  public readonly terminationEvent?: string;
 
-  constructor(level: EffectLevel, remainingTurns: number, damageRate: number) {
+  constructor(
+    level: EffectLevel,
+    remainingTurns: number,
+    damageRate: number,
+    terminationEvent?: string,
+  ) {
     this.level = level;
     this.remainingTurns = remainingTurns;
     this.damageRate = damageRate;
+    this.terminationEvent = terminationEvent;
   }
 
   public applyState(card: FightingCard): StateResult {

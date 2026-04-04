@@ -410,6 +410,29 @@ export class FightingCard {
     return buff;
   }
 
+  public removeEventBoundEffects(
+    eventName: string,
+  ): { type: string; card: CardInfo }[] {
+    const removed: { type: string; card: CardInfo }[] = [];
+
+    if (this.poisoned?.terminationEvent === eventName) {
+      removed.push({ type: this.poisoned.type, card: this.identityInfo });
+      this.poisoned = undefined;
+    }
+
+    if (this.burned?.terminationEvent === eventName) {
+      removed.push({ type: this.burned.type, card: this.identityInfo });
+      this.burned = undefined;
+    }
+
+    if (this.frozen?.terminationEvent === eventName) {
+      removed.push({ type: this.frozen.type, card: this.identityInfo });
+      this.frozen = undefined;
+    }
+
+    return removed;
+  }
+
   public removeEventBoundBuffs(
     eventName: string,
   ): { type: BuffType; value: number }[] {

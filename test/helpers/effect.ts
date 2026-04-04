@@ -10,6 +10,7 @@ export function createEffect(params: {
   rate: number;
   level: EffectLevel;
   type: string;
+  terminationEvent?: string;
 }): AttackEffect {
   const effectRate = params.rate ?? faker.number.float({ min: 0.1, max: 0.5 });
   const effectLevel =
@@ -17,11 +18,26 @@ export function createEffect(params: {
 
   switch (params.type) {
     case 'poison':
-      return new PoisonedAttackEffect(effectRate, effectLevel);
+      return new PoisonedAttackEffect(
+        effectRate,
+        effectLevel,
+        undefined,
+        params.terminationEvent,
+      );
     case 'burn':
-      return new BurnedAttackEffect(effectRate, effectLevel);
+      return new BurnedAttackEffect(
+        effectRate,
+        effectLevel,
+        undefined,
+        params.terminationEvent,
+      );
     case 'freeze':
-      return new FrozenAttackEffect(effectRate, effectLevel);
+      return new FrozenAttackEffect(
+        effectRate,
+        effectLevel,
+        undefined,
+        params.terminationEvent,
+      );
     default:
       throw new Error(`Unknown effect type: ${params.type}`);
   }

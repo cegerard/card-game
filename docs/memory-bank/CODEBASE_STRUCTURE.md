@@ -123,6 +123,7 @@ fight-simulator/
     ├── healing-report.ts   # Healing details
     ├── buff-report.ts      # Buff application
     ├── buff-removed-report.ts # Event-bound buff removal
+    ├── effect-removed-report.ts # Event-bound effect removal
     ├── debuff-report.ts    # Debuff application
     ├── state-effect-report.ts # Status effects
     ├── damage-report.ts    # Damage calculation

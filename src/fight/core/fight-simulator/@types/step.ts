@@ -10,6 +10,7 @@ import {
   TargetingOverrideReport,
   TargetingRevertedReport,
 } from './targeting-override-report';
+import { EffectRemovedReport } from './effect-removed-report';
 
 export enum StepKind {
   FightEnd = 'fight_end',
@@ -24,6 +25,7 @@ export enum StepKind {
   BuffRemoved = 'buff_removed',
   TargetingOverride = 'targeting_override',
   TargetingReverted = 'targeting_reverted',
+  EffectRemoved = 'effect_removed',
 }
 
 export type Step = { kind: StepKind } & (
@@ -37,4 +39,5 @@ export type Step = { kind: StepKind } & (
   | BuffRemovedReport
   | TargetingOverrideReport
   | TargetingRevertedReport
+  | EffectRemovedReport
 );
