@@ -520,6 +520,72 @@ describe('FightController', () => {
         fightSimulatorStub.validatePlayer1FirstCard(validation);
       });
     });
+
+    describe('and the simple attack effect has a terminationEvent', () => {
+      beforeEach(() => {
+        const effect = {
+          type: Effect.BURN,
+          rate: 0.3,
+          level: 1,
+          terminationEvent: 'fire-shield-end',
+        };
+
+        fightData = {
+          cardSelectorStrategy: CardSelectorStrategy.PLAYER_BY_PLAYER,
+          player1: {
+            name: 'Player 1',
+            deck: [
+              {
+                id: 'axe-01',
+                name: 'Axe',
+                attack: 10,
+                defense: 6,
+                health: 100,
+                speed: 3,
+                agility: 25,
+                accuracy: 15,
+                criticalChance: 0.05,
+                skills: {
+                  special: {
+                    name: 'No Special Attack',
+                    kind: SpecialKind.ATTACK,
+                    rate: 0,
+                    energy: 0,
+                    targetingStrategy: TargetingStrategy.POSITION_BASED,
+                  },
+                  simpleAttack: {
+                    ...simpleAttack,
+                    effect,
+                  },
+                  others: [],
+                },
+                behaviors: {
+                  dodge: DodgeStrategy.SIMPLE_DODGE,
+                },
+              },
+            ],
+          },
+          player2: {
+            name: 'Player 2',
+            deck: [],
+          },
+        };
+
+        fightController.startFight(fightData);
+      });
+
+      it('maps terminationEvent to the attack effect', () => {
+        const validation = (card: FightingCard) => {
+          const jsonCard = JSON.parse(JSON.stringify(card));
+
+          expect(jsonCard.simpleAttack.effect.terminationEvent).toBe(
+            'fire-shield-end',
+          );
+        };
+
+        fightSimulatorStub.validatePlayer1FirstCard(validation);
+      });
+    });
   });
 
   describe('when a player use a card with a simple dodge strategy', () => {

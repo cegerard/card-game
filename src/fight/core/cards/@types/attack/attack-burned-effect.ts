@@ -10,15 +10,18 @@ export class BurnedAttackEffect implements AttackEffect {
   public readonly level: EffectLevel;
   public readonly type = 'burned';
   public readonly triggeredDebuff?: EffectTriggeredDebuff;
+  public readonly terminationEvent?: string;
 
   constructor(
     rate: number,
     level: EffectLevel,
     triggeredDebuff?: EffectTriggeredDebuff,
+    terminationEvent?: string,
   ) {
     this.rate = rate;
     this.level = level;
     this.triggeredDebuff = triggeredDebuff;
+    this.terminationEvent = terminationEvent;
   }
 
   public applyEffect(
@@ -44,6 +47,7 @@ export class BurnedAttackEffect implements AttackEffect {
       effectLevel,
       this.computeBurnedTurns(effectLevel),
       card.actualAttack * this.rate,
+      this.terminationEvent,
     );
     defender.setState(burnedState);
 

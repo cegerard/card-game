@@ -155,7 +155,8 @@ Simulates a turn-based card battle between two players.
     debuffRate: number,
     duration: number,
     probability: number
-  }
+  },
+  terminationEvent?: string   // Event name that removes this effect when fired
 }
 ```
 
@@ -177,7 +178,7 @@ Simulates a turn-based card battle between two players.
 ```typescript
 {
   [stepNumber: number]: {
-    kind: "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "targeting_override" | "targeting_reverted" | "winner" | "fight_end",
+    kind: "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "effect_removed" | "targeting_override" | "targeting_reverted" | "winner" | "fight_end",
     // Additional properties vary by step kind
   }
 }
@@ -191,6 +192,16 @@ Simulates a turn-based card battle between two players.
   eventName: string,     // The end event name that triggered removal
   removed: { target: CardInfo, kind: BuffType, value: number }[],
   powerId?: string       // Present if the skill that emitted the end event belongs to a composite power
+}
+```
+
+**`effect_removed` step** (`EffectRemovedReport`): Emitted when an end event fires and removes event-bound status effects (poison, burn, freeze).
+```typescript
+{
+  kind: "effect_removed",
+  source: CardInfo,      // Card whose skill emitted the end event
+  eventName: string,     // The end event name that triggered removal
+  removed: { target: CardInfo, effectType: string }[]
 }
 ```
 
@@ -303,7 +314,7 @@ See @src/fight/core/fight-simulator/@types/ for complete type definitions:
 
 - `FightResult`: Map of step numbers to `Step` objects
 - `Step`: Union type with `kind` discriminator
-- `DamageReport`, `HealingReport`, `BuffReport`, `DebuffReport`, `StateEffectReport`, `StatusChangeReport`, `WinnerReport`, `BuffRemovedReport`, `TargetingOverrideReport`, `TargetingRevertedReport`: Specific step types
+- `DamageReport`, `HealingReport`, `BuffReport`, `DebuffReport`, `StateEffectReport`, `StatusChangeReport`, `WinnerReport`, `BuffRemovedReport`, `EffectRemovedReport`, `TargetingOverrideReport`, `TargetingRevertedReport`: Specific step types
 
 ## Dependencies
 

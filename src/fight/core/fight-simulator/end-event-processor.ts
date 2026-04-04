@@ -38,6 +38,22 @@ export class EndEventProcessor {
       });
     }
 
+    const removedEffects = allCards.flatMap((card) => {
+      return card.removeEventBoundEffects(eventName).map((e) => ({
+        target: e.card,
+        effectType: e.type,
+      }));
+    });
+
+    if (removedEffects.length > 0) {
+      steps.push({
+        kind: StepKind.EffectRemoved,
+        source,
+        eventName,
+        removed: removedEffects,
+      });
+    }
+
     for (const card of allCards) {
       const removedOverrides = card.restoreAttackTargeting(eventName);
       for (const override of removedOverrides) {

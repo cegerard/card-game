@@ -127,6 +127,11 @@ class EffectDto {
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => EffectTriggeredDebuffDto)
   triggeredDebuff?: EffectTriggeredDebuffDto;
+
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  terminationEvent?: string;
 }
 
 class BuffApplicationDto {

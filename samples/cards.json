@@ -91,15 +91,29 @@
           "name": "Griffes ardentes",
           "targetingStrategy": "position-based",
           "event": "next-action",
-          "rate": 0,
           "damages": [{ "type": "PHYSICAL", "rate": 0.4 }],
           "hits": 4,
           "interval": 3,
           "comboFinisher": [{ "type": "FIRE", "rate": 0.8 }]
         },
         {
+          "kind": "CONDITIONAL_ATTACK",
+          "name": "Explosion massive",
+          "targetingStrategy": "target-all",
+          "event": "ally-death",
+          "targetCardId": "kaelion",
+          "damages": [{ "type": "FIRE", "rate": 1.0 }],
+          "effect": {
+            "type": "BURN",
+            "rate": 0.3,
+            "level": 3,
+            "terminationEvent": "lion-heritage-end" // validate
+          },
+          "powerId": "lion-heritage"
+        },
+        {
           "kind": "BUFF",
-          "name": "Héritage du lion",
+          "name": "Buff Héroïque",
           "buffType": "attack",
           "rate": 0.4,
           "duration": 0,
@@ -108,7 +122,17 @@
           "targetCardId": "kaelion",
           "terminationEvent": "lion-heritage-end",
           "activationLimit": 1,
-          "endEvent": "lion-heritage-end"
+          "powerId": "lion-heritage"
+        },
+        {
+          "kind": "TARGETING_OVERRIDE",
+          "name": "Vengeance",
+          "targetingStrategy": "TODO", // validate
+          "event": "ally-death",
+          "targetCardId": "kaelion",
+
+          "terminationEvent": "lion-heritage-end",
+          "powerId": "lion-heritage"
         }
       ]
     },

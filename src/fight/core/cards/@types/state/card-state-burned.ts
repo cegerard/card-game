@@ -8,11 +8,18 @@ export class CardStateBurned implements CardState {
   public readonly level: EffectLevel;
   public remainingTurns: number;
   public damageValue: number;
+  public readonly terminationEvent?: string;
 
-  constructor(level: EffectLevel, remainingTurns: number, damageValue: number) {
+  constructor(
+    level: EffectLevel,
+    remainingTurns: number,
+    damageValue: number,
+    terminationEvent?: string,
+  ) {
     this.level = level;
     this.remainingTurns = remainingTurns;
     this.damageValue = damageValue;
+    this.terminationEvent = terminationEvent;
   }
 
   public applyState(card: FightingCard): StateResult {
