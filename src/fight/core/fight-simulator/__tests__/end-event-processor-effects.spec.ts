@@ -54,19 +54,21 @@ describe('EndEventProcessor.processEndEvent() with effects', () => {
   });
 
   describe('when multiple cards have event-bound effects', () => {
-    it('aggregates all removed effects into one step', () => {
+    let processor: EndEventProcessor;
+
+    beforeEach(() => {
       const card1 = createFightingCard({});
       const card2 = createFightingCard({});
       card1.setState(new CardStateBurned(1, 3, 50, 'purge'));
       card2.setState(new CardStatePoisoned(1, 3, 30, 'purge'));
       const player1 = new Player('P1', [card1]);
       const player2 = new Player('P2', [card2]);
-      const processor = new EndEventProcessor(player1, player2);
+      processor = new EndEventProcessor(player1, player2);
+    });
 
+    it('aggregates all removed effects into one step', () => {
       const steps = processor.processEndEvent('purge', source);
-      const effectStep = steps.find(
-        (s) => s.kind === StepKind.EffectRemoved,
-      ) as any;
+      const effectStep = steps.find((s) => s.kind === StepKind.EffectRemoved) as any;
 
       expect(effectStep.removed).toHaveLength(2);
     });
