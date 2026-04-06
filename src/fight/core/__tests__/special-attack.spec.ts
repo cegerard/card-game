@@ -278,65 +278,62 @@ describe('Trigger card special attack with poison effect', () => {
 });
 
 describe('Trigger card special attack with buff', () => {
-  const defender = createFightingCard({
-    attack: 100,
-    defense: 0,
-    health: 50,
-    speed: 1,
-    criticalChance: 0,
-    agility: 25,
-  });
-
-  const attacker = createFightingCard({
-    attack: 50,
-    defense: 0,
-    health: 100,
-    speed: 100,
-    criticalChance: 0,
-    accuracy: 25,
-    agility: 25,
-    skills: {
-      special: {
-        kind: 'specialAttack',
-        damageRate: 1.0,
-        energy: 100,
-        targetingStrategy: 'target-all',
-        buffs: [
-          {
-            buffType: 'attack',
-            buffRate: 0.2,
-            buffDuration: 3,
-            buffTargetingStrategy: 'all-owner-cards',
-          },
-        ],
-      },
-    },
-  });
-
-  const player1 = new Player('Player 1', [attacker]);
-  const player2 = new Player('Player 2', [defender]);
-  const fight = new Fight(
-    player1,
-    player2,
-    new PlayerByPlayerCardSelector(player1, player2),
-  );
+  let attacker: ReturnType<typeof createFightingCard>;
+  let defender: ReturnType<typeof createFightingCard>;
+  let result: ReturnType<Fight['start']>;
 
   beforeEach(() => {
-    attacker.increaseSpecialEnergy();
-    attacker.increaseSpecialEnergy();
-    attacker.increaseSpecialEnergy();
-    attacker.increaseSpecialEnergy();
-    attacker.increaseSpecialEnergy();
-    attacker.increaseSpecialEnergy();
-    attacker.increaseSpecialEnergy();
-    attacker.increaseSpecialEnergy();
-    attacker.increaseSpecialEnergy();
-    attacker.increaseSpecialEnergy();
+    defender = createFightingCard({
+      attack: 100,
+      defense: 0,
+      health: 50,
+      speed: 1,
+      criticalChance: 0,
+      agility: 25,
+    });
+
+    attacker = createFightingCard({
+      attack: 50,
+      defense: 0,
+      health: 100,
+      speed: 100,
+      criticalChance: 0,
+      accuracy: 25,
+      agility: 25,
+      skills: {
+        special: {
+          kind: 'specialAttack',
+          damageRate: 1.0,
+          energy: 100,
+          targetingStrategy: 'target-all',
+          buffs: [
+            {
+              buffType: 'attack',
+              buffRate: 0.2,
+              buffDuration: 3,
+              buffTargetingStrategy: 'all-owner-cards',
+            },
+          ],
+        },
+      },
+    });
+
+    for (let i = 0; i < 10; i++) {
+      attacker.increaseSpecialEnergy();
+    }
+
+    const player1 = new Player('Player 1', [attacker]);
+    const player2 = new Player('Player 2', [defender]);
+    const fight = new Fight(
+      player1,
+      player2,
+      new PlayerByPlayerCardSelector(player1, player2),
+    );
+
+    result = fight.start();
   });
 
-  it('apply buffs to targeted cards after special attack', () => {
-    const result = fight.start();
-
+  it('applies special_attack as first action', () => {
     expect(result[1]).toEqual({
       attacker: attacker.identityInfo,
       damages: [
@@ -351,7 +348,9 @@ describe('Trigger card special attack with buff', () => {
       energy: 0,
       kind: 'special_attack',
     });
+  });
 
+  it('applies buff as second step', () => {
     expect(result[2]).toEqual({
       kind: 'buff',
       source: attacker.identityInfo,
@@ -365,13 +364,17 @@ describe('Trigger card special attack with buff', () => {
       ],
       energy: 0,
     });
+  });
 
+  it('marks defender as dead', () => {
     expect(result[3]).toEqual({
       card: defender.identityInfo,
       kind: 'status_change',
       status: 'dead',
     });
+  });
 
+  it('ends fight with Player 1 winning', () => {
     expect(result[4]).toEqual({
       kind: 'fight_end',
       winner: 'Player 1',

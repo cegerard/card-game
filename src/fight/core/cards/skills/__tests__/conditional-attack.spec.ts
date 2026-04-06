@@ -236,12 +236,16 @@ describe('ConditionalAttack integration via Fight (interval=3)', () => {
     );
   });
 
-  it('fires simple attack on attacker turns 1 and 2 (steps 1 and 3)', () => {
+  it('fires simple attack on attacker turn 1 (step 1)', () => {
     const result = fight.start();
     expect(result[1]).toMatchObject({
       kind: 'attack',
       damages: [{ damage: 100 }],
     });
+  });
+
+  it('fires simple attack on attacker turn 2 (step 3)', () => {
+    const result = fight.start();
     expect(result[3]).toMatchObject({
       kind: 'attack',
       damages: [{ damage: 100 }],

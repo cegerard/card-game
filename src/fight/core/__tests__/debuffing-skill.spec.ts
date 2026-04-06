@@ -68,9 +68,7 @@ describe('Debuffing-skill', () => {
       );
     });
 
-    it('applies attack debuff to opponent when triggered at turn end', () => {
-      const initialAttack = card2.actualAttack;
-
+    it('records attack and debuff steps in fight result', () => {
       const fightResult = fight.start();
 
       expect(fightResult).toMatchObject({
@@ -91,6 +89,12 @@ describe('Debuffing-skill', () => {
           ],
         }),
       });
+    });
+
+    it('reduces opponent attack stat after debuff is applied', () => {
+      const initialAttack = card2.actualAttack;
+
+      fight.start();
 
       expect(card2.actualAttack).toBe(initialAttack - 36 * 2);
     });
