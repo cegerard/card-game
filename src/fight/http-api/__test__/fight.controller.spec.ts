@@ -213,6 +213,66 @@ describe('FightController', () => {
       });
     });
 
+    describe('and the special attack effect has a terminationEvent', () => {
+      beforeEach(() => {
+        const effect = {
+          type: Effect.BURN,
+          rate: 0.3,
+          level: 1,
+          terminationEvent: 'fire-shield-end',
+        };
+
+        fightData = {
+          cardSelectorStrategy: CardSelectorStrategy.PLAYER_BY_PLAYER,
+          player1: {
+            name: 'Player 1',
+            deck: [
+              {
+                id: 'axe-01',
+                name: 'Axe',
+                attack: 10,
+                defense: 6,
+                health: 100,
+                speed: 3,
+                agility: 25,
+                accuracy: 15,
+                criticalChance: 0.05,
+                skills: {
+                  special: {
+                    ...specialAttack,
+                    effect,
+                  },
+                  simpleAttack: {
+                    name: 'Simple Attack',
+                    damages: [{ type: DamageType.PHYSICAL, rate: 1.0 }],
+                    targetingStrategy: TargetingStrategy.POSITION_BASED,
+                  },
+                  others: [],
+                },
+                behaviors: {
+                  dodge: DodgeStrategy.SIMPLE_DODGE,
+                },
+              },
+            ],
+          },
+          player2: {
+            name: 'Player 2',
+            deck: [],
+          },
+        };
+
+        fightController.startFight(fightData);
+      });
+
+      it('maps terminationEvent to the special attack effect', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).special.effect.terminationEvent).toBe(
+            'fire-shield-end',
+          );
+        });
+      });
+    });
+
     describe('and the special attack has a freeze effect', () => {
       beforeEach(() => {
         const effect = {
