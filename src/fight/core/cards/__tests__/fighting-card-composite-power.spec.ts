@@ -73,7 +73,9 @@ describe('FightingCard composite power', () => {
   });
 
   describe('skills with different powerIds activate independently', () => {
-    it('returns results with their respective powerIds', () => {
+    let results;
+
+    beforeEach(() => {
       const card = createFightingCard({
         id: 'card-1',
         attack: 100,
@@ -103,9 +105,14 @@ describe('FightingCard composite power', () => {
       const player2 = new Player('p2', [createFightingCard()]);
       const ctx = { sourcePlayer: player1, opponentPlayer: player2 };
 
-      const results = card.launchSkills('turn-end', ctx);
+      results = card.launchSkills('turn-end', ctx);
+    });
 
+    it('carries power-a id on first result', () => {
       expect(results[0].powerId).toBe('power-a');
+    });
+
+    it('carries power-b id on second result', () => {
       expect(results[1].powerId).toBe('power-b');
     });
   });

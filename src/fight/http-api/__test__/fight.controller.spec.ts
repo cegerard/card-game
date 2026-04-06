@@ -91,18 +91,34 @@ describe('FightController', () => {
         fightController.startFight(fightData);
       });
 
-      it('creates a fighting card with a poisoned special attack effect', () => {
-        const validation = (card: FightingCard) => {
-          const jsonCard = JSON.parse(JSON.stringify(card));
+      it('creates a fighting card with a special defined', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).special).toBeDefined();
+        });
+      });
 
-          expect(jsonCard.special).toBeDefined();
-          expect(jsonCard.special.effect).toBeDefined();
-          expect(jsonCard.special.effect.type).toBe('poisoned');
-          expect(jsonCard.special.effect.rate).toBe(0.5);
-          expect(jsonCard.special.effect.level).toBe(2);
-        };
+      it('creates a fighting card with a special effect defined', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).special.effect).toBeDefined();
+        });
+      });
 
-        fightSimulatorStub.validatePlayer1FirstCard(validation);
+      it('creates a fighting card with a poisoned special attack effect type', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).special.effect.type).toBe('poisoned');
+        });
+      });
+
+      it('creates a fighting card with a poisoned special attack effect rate', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).special.effect.rate).toBe(0.5);
+        });
+      });
+
+      it('creates a fighting card with a poisoned special attack effect level', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).special.effect.level).toBe(2);
+        });
       });
     });
 
@@ -158,18 +174,34 @@ describe('FightController', () => {
         fightController.startFight(fightData);
       });
 
-      it('creates a fighting card with a burned special attack effect', () => {
-        const validation = (card: FightingCard) => {
-          const jsonCard = JSON.parse(JSON.stringify(card));
+      it('creates a fighting card with a special defined', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).special).toBeDefined();
+        });
+      });
 
-          expect(jsonCard.special).toBeDefined();
-          expect(jsonCard.special.effect).toBeDefined();
-          expect(jsonCard.special.effect.type).toBe('burned');
-          expect(jsonCard.special.effect.rate).toBe(0.2);
-          expect(jsonCard.special.effect.level).toBe(3);
-        };
+      it('creates a fighting card with a special effect defined', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).special.effect).toBeDefined();
+        });
+      });
 
-        fightSimulatorStub.validatePlayer1FirstCard(validation);
+      it('creates a fighting card with a burned special attack effect type', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).special.effect.type).toBe('burned');
+        });
+      });
+
+      it('creates a fighting card with a burned special attack effect rate', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).special.effect.rate).toBe(0.2);
+        });
+      });
+
+      it('creates a fighting card with a burned special attack effect level', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).special.effect.level).toBe(3);
+        });
       });
     });
 
@@ -225,18 +257,34 @@ describe('FightController', () => {
         fightController.startFight(fightData);
       });
 
-      it('creates a fighting card with a freeze special attack effect', () => {
-        const validation = (card: FightingCard) => {
-          const jsonCard = JSON.parse(JSON.stringify(card));
+      it('creates a fighting card with a special defined', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).special).toBeDefined();
+        });
+      });
 
-          expect(jsonCard.special).toBeDefined();
-          expect(jsonCard.special.effect).toBeDefined();
-          expect(jsonCard.special.effect.type).toBe('frozen');
-          expect(jsonCard.special.effect.rate).toBe(0.2);
-          expect(jsonCard.special.effect.level).toBe(2);
-        };
+      it('creates a fighting card with a special effect defined', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).special.effect).toBeDefined();
+        });
+      });
 
-        fightSimulatorStub.validatePlayer1FirstCard(validation);
+      it('creates a fighting card with a freeze special attack effect type', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).special.effect.type).toBe('frozen');
+        });
+      });
+
+      it('creates a fighting card with a freeze special attack effect rate', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).special.effect.rate).toBe(0.2);
+        });
+      });
+
+      it('creates a fighting card with a freeze special attack effect level', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).special.effect.level).toBe(2);
+        });
       });
     });
   });
@@ -368,18 +416,34 @@ describe('FightController', () => {
         fightController.startFight(fightData);
       });
 
-      it('creates a fighting card with a poisoned simple attack effect', () => {
-        const validation = (card: FightingCard) => {
-          const jsonCard = JSON.parse(JSON.stringify(card));
+      it('creates a fighting card with a simple attack defined', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).simpleAttack).toBeDefined();
+        });
+      });
 
-          expect(jsonCard.simpleAttack).toBeDefined();
-          expect(jsonCard.simpleAttack.effect).toBeDefined();
-          expect(jsonCard.simpleAttack.effect.type).toBe('poisoned');
-          expect(jsonCard.simpleAttack.effect.rate).toBe(0.5);
-          expect(jsonCard.simpleAttack.effect.level).toBe(2);
-        };
+      it('creates a fighting card with a simple attack effect defined', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).simpleAttack.effect).toBeDefined();
+        });
+      });
 
-        fightSimulatorStub.validatePlayer1FirstCard(validation);
+      it('creates a fighting card with a poisoned simple attack effect type', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).simpleAttack.effect.type).toBe('poisoned');
+        });
+      });
+
+      it('creates a fighting card with a poisoned simple attack effect rate', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).simpleAttack.effect.rate).toBe(0.5);
+        });
+      });
+
+      it('creates a fighting card with a poisoned simple attack effect level', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).simpleAttack.effect.level).toBe(2);
+        });
       });
     });
 
@@ -437,18 +501,34 @@ describe('FightController', () => {
         fightController.startFight(fightData);
       });
 
-      it('creates a fighting card with a burned special attack effect', () => {
-        const validation = (card: FightingCard) => {
-          const jsonCard = JSON.parse(JSON.stringify(card));
+      it('creates a fighting card with a simple attack defined', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).simpleAttack).toBeDefined();
+        });
+      });
 
-          expect(jsonCard.simpleAttack).toBeDefined();
-          expect(jsonCard.simpleAttack.effect).toBeDefined();
-          expect(jsonCard.simpleAttack.effect.type).toBe('burned');
-          expect(jsonCard.simpleAttack.effect.rate).toBe(0.2);
-          expect(jsonCard.simpleAttack.effect.level).toBe(3);
-        };
+      it('creates a fighting card with a simple attack effect defined', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).simpleAttack.effect).toBeDefined();
+        });
+      });
 
-        fightSimulatorStub.validatePlayer1FirstCard(validation);
+      it('creates a fighting card with a burned simple attack effect type', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).simpleAttack.effect.type).toBe('burned');
+        });
+      });
+
+      it('creates a fighting card with a burned simple attack effect rate', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).simpleAttack.effect.rate).toBe(0.2);
+        });
+      });
+
+      it('creates a fighting card with a burned simple attack effect level', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).simpleAttack.effect.level).toBe(3);
+        });
       });
     });
 
@@ -506,18 +586,34 @@ describe('FightController', () => {
         fightController.startFight(fightData);
       });
 
-      it('creates a fighting card with a freeze simple attack effect', () => {
-        const validation = (card: FightingCard) => {
-          const jsonCard = JSON.parse(JSON.stringify(card));
+      it('creates a fighting card with a simple attack defined', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).simpleAttack).toBeDefined();
+        });
+      });
 
-          expect(jsonCard.simpleAttack).toBeDefined();
-          expect(jsonCard.simpleAttack.effect).toBeDefined();
-          expect(jsonCard.simpleAttack.effect.type).toBe('frozen');
-          expect(jsonCard.simpleAttack.effect.rate).toBe(0.2);
-          expect(jsonCard.simpleAttack.effect.level).toBe(2);
-        };
+      it('creates a fighting card with a simple attack effect defined', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).simpleAttack.effect).toBeDefined();
+        });
+      });
 
-        fightSimulatorStub.validatePlayer1FirstCard(validation);
+      it('creates a fighting card with a freeze simple attack effect type', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).simpleAttack.effect.type).toBe('frozen');
+        });
+      });
+
+      it('creates a fighting card with a freeze simple attack effect rate', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).simpleAttack.effect.rate).toBe(0.2);
+        });
+      });
+
+      it('creates a fighting card with a freeze simple attack effect level', () => {
+        fightSimulatorStub.validatePlayer1FirstCard((card) => {
+          expect(JSON.parse(JSON.stringify(card)).simpleAttack.effect.level).toBe(2);
+        });
       });
     });
 
