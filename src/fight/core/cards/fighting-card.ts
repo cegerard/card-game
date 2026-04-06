@@ -6,6 +6,7 @@ import { DodgeBehavior } from './behaviors/dodge-behaviors';
 import { AttackSkill } from './skills/attack-skill';
 import { Special } from './skills/special';
 import { CardState } from './@types/state/card-state';
+import { StateEffectType } from './@types/state/state-effect-type';
 import { StateResult } from './@types/action-result/state-result';
 import { CardStateFrozen } from './@types/state/card-state-frozen';
 import { EffectLevel } from './@types/attack/effect-level';
@@ -412,8 +413,8 @@ export class FightingCard {
 
   public removeEventBoundEffects(
     eventName: string,
-  ): { type: string; card: CardInfo }[] {
-    const removed: { type: string; card: CardInfo }[] = [];
+  ): { type: StateEffectType; card: CardInfo }[] {
+    const removed: { type: StateEffectType; card: CardInfo }[] = [];
 
     if (this.poisoned?.terminationEvent === eventName) {
       removed.push({ type: this.poisoned.type, card: this.identityInfo });
