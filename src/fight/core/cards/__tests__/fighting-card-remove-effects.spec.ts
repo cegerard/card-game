@@ -64,6 +64,26 @@ describe('FightingCard.removeEventBoundEffects()', () => {
     });
   });
 
+  describe('when card has effects with a different terminationEvent', () => {
+    it('does not remove effects', () => {
+      const card = createFightingCard({});
+      card.setState(new CardStatePoisoned(1, 3, 50, 'other-event'));
+
+      card.removeEventBoundEffects('cleanse');
+
+      expect(card.poisonLevel).toBe(1);
+    });
+
+    it('returns empty array', () => {
+      const card = createFightingCard({});
+      card.setState(new CardStatePoisoned(1, 3, 50, 'other-event'));
+
+      const removed = card.removeEventBoundEffects('cleanse');
+
+      expect(removed).toHaveLength(0);
+    });
+  });
+
   describe('when card has effects without terminationEvent', () => {
     it('does not remove effects', () => {
       const card = createFightingCard({});
