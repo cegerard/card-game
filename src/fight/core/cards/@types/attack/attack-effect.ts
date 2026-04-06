@@ -16,6 +16,7 @@ export interface AttackEffect {
   level: EffectLevel;
   type: string;
   triggeredDebuff?: EffectTriggeredDebuff;
+  terminationEvent?: string;
 
   applyEffect(
     defender: FightingCard,
