@@ -113,17 +113,16 @@ describe('FightingCard.lifecycleEndEvents()', () => {
     let card;
 
     beforeEach(() => {
-      const skill = new AlterationSkill(
-        'buff',
-        'attack',
-        0.4,
-        Infinity,
-        new TurnEnd(),
-        new Launcher(),
-        undefined,
-        3,
-        'lions-end',
-      );
+      const skill = new AlterationSkill({
+        polarity: 'buff',
+        attributeType: 'attack',
+        rate: 0.4,
+        duration: Infinity,
+        trigger: new TurnEnd(),
+        targetingStrategy: new Launcher(),
+        activationLimit: 3,
+        endEvent: 'lions-end',
+      });
       card = createFightingCard({});
       (card as any).skills = [skill];
     });
@@ -140,17 +139,16 @@ describe('FightingCard.lifecycleEndEvents()', () => {
     let skill;
 
     beforeEach(() => {
-      skill = new AlterationSkill(
-        'buff',
-        'attack',
-        0.4,
-        Infinity,
-        new TurnEnd(),
-        new Launcher(),
-        undefined,
-        1,
-        'lions-end',
-      );
+      skill = new AlterationSkill({
+        polarity: 'buff',
+        attributeType: 'attack',
+        rate: 0.4,
+        duration: Infinity,
+        trigger: new TurnEnd(),
+        targetingStrategy: new Launcher(),
+        activationLimit: 1,
+        endEvent: 'lions-end',
+      });
       card = createFightingCard({});
       (card as any).skills = [skill];
       // exhaust by launching once

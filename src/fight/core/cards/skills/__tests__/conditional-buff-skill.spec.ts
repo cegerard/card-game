@@ -22,15 +22,15 @@ describe('AlterationSkill with activationCondition', () => {
 
     beforeEach(() => {
       const condition = new HealthThresholdCondition(0.5, 'above');
-      const skill = new AlterationSkill(
-        'buff',
-        'attack',
-        0.1,
-        2,
+      const skill = new AlterationSkill({
+        polarity: 'buff',
+        attributeType: 'attack',
+        rate: 0.1,
+        duration: 2,
         trigger,
         targetingStrategy,
-        condition,
-      );
+        activationCondition: condition,
+      });
       const source = createFightingCard({ health: 100 });
       results = skill.launch(source, makeContext(source));
     });
@@ -45,15 +45,15 @@ describe('AlterationSkill with activationCondition', () => {
 
     beforeEach(() => {
       const condition = new HealthThresholdCondition(0.5, 'above');
-      const skill = new AlterationSkill(
-        'buff',
-        'attack',
-        0.1,
-        2,
+      const skill = new AlterationSkill({
+        polarity: 'buff',
+        attributeType: 'attack',
+        rate: 0.1,
+        duration: 2,
         trigger,
         targetingStrategy,
-        condition,
-      );
+        activationCondition: condition,
+      });
       const source = createFightingCard({ health: 100 });
       source.addRealDamage(60);
       results = skill.launch(source, makeContext(source));
@@ -72,14 +72,14 @@ describe('AlterationSkill with activationCondition', () => {
     let results;
 
     beforeEach(() => {
-      const skill = new AlterationSkill(
-        'buff',
-        'attack',
-        0.1,
-        2,
+      const skill = new AlterationSkill({
+        polarity: 'buff',
+        attributeType: 'attack',
+        rate: 0.1,
+        duration: 2,
         trigger,
         targetingStrategy,
-      );
+      });
       const source = createFightingCard({ health: 100 });
       source.addRealDamage(99);
       results = skill.launch(source, makeContext(source));
