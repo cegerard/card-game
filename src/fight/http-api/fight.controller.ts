@@ -347,7 +347,9 @@ export class FightController {
       [BuffType.ACCURACY]: 'accuracy' as const,
     };
 
-    return BUFF_TYPE_MAP[buffType];
+    const result = BUFF_TYPE_MAP[buffType];
+    if (!result) throw new Error(`Unknown buff type: ${buffType}`);
+    return result;
   }
 
   private validatePowerIdConsistency(skills: OtherSkillDto[]): void {
@@ -398,6 +400,11 @@ export class FightController {
       ),
     };
 
-    return STRATEGY_MAP[cardSelectorStrategy];
+    const result = STRATEGY_MAP[cardSelectorStrategy];
+    if (!result)
+      throw new Error(
+        `Unknown card selector strategy: ${cardSelectorStrategy}`,
+      );
+    return result;
   }
 }

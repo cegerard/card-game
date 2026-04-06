@@ -1150,4 +1150,79 @@ describe('FightController', () => {
       );
     });
   });
+
+  describe('error handling for unknown enum values', () => {
+    const baseCard = {
+      id: 'card-1',
+      name: 'Card',
+      attack: 100,
+      defense: 50,
+      health: 1000,
+      speed: 100,
+      agility: 10,
+      accuracy: 50,
+      criticalChance: 0,
+      skills: {
+        special: {
+          kind: SpecialKind.ATTACK,
+          name: 'Special',
+          rate: 2,
+          energy: 9999,
+          targetingStrategy: TargetingStrategy.POSITION_BASED,
+        },
+        simpleAttack: {
+          name: 'Attack',
+          damages: [{ type: DamageType.PHYSICAL, rate: 1.0 }],
+          targetingStrategy: TargetingStrategy.POSITION_BASED,
+        },
+        others: [],
+      },
+      behaviors: { dodge: DodgeStrategy.SIMPLE_DODGE },
+    };
+
+    it('throws when mapBuffType receives an unknown buff type', () => {
+      const data: FightDataDto = {
+        cardSelectorStrategy: CardSelectorStrategy.PLAYER_BY_PLAYER,
+        player1: {
+          name: 'P1',
+          deck: [
+            {
+              ...baseCard,
+              skills: {
+                ...baseCard.skills,
+                others: [
+                  {
+                    kind: SkillKind.BUFF,
+                    name: 'Buff',
+                    rate: 0.2,
+                    targetingStrategy: TargetingStrategy.SELF,
+                    event: TriggerEvent.TURN_END,
+                    buffType: 'unknown-buff' as any,
+                    duration: 1,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        player2: { name: 'P2', deck: [] },
+      };
+
+      expect(() => fightController.startFight(data)).toThrow(
+        /Unknown buff type/,
+      );
+    });
+
+    it('throws when getSelectorStrategy receives an unknown card selector strategy', () => {
+      const data: FightDataDto = {
+        cardSelectorStrategy: 'unknown-strategy' as any,
+        player1: { name: 'P1', deck: [baseCard] },
+        player2: { name: 'P2', deck: [] },
+      };
+
+      expect(() => fightController.startFight(data)).toThrow(
+        /Unknown card selector strategy/,
+      );
+    });
+  });
 });
