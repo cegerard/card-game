@@ -156,18 +156,17 @@ describe('DeathSkillHandler', () => {
       });
 
       // Attach lifecycle skill to deadCard after creation
-      const lifecycleSkill = new AlterationSkill(
-        'buff',
-        'attack',
-        0.4,
-        Infinity,
-        new TurnEnd(),
-        new Launcher(),
-        undefined,
-        3,
-        'lions-end',
-        'lions-end',
-      );
+      const lifecycleSkill = new AlterationSkill({
+        polarity: 'buff',
+        attributeType: 'attack',
+        rate: 0.4,
+        duration: Infinity,
+        trigger: new TurnEnd(),
+        targetingStrategy: new Launcher(),
+        activationLimit: 3,
+        endEvent: 'lions-end',
+        terminationEvent: 'lions-end',
+      });
       (deadCard as any).skills = [lifecycleSkill];
 
       allyCard = createFightingCard({

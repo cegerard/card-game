@@ -262,33 +262,28 @@ function createsSkills(
         skill.powerId,
       );
     } else if ('buffType' in skill) {
-      return new AlterationSkill(
-        'buff',
-        skill.buffType,
-        skill.buffRate,
-        skill.duration,
-        createTrigger(skill.trigger, skill.targetCardId),
-        createTargetingStrategy(skill.targetingStrategy),
-        undefined,
-        skill.activationLimit,
-        skill.endEvent,
-        skill.terminationEvent,
-        skill.powerId,
-      );
+      return new AlterationSkill({
+        polarity: 'buff',
+        attributeType: skill.buffType,
+        rate: skill.buffRate,
+        duration: skill.duration,
+        trigger: createTrigger(skill.trigger, skill.targetCardId),
+        targetingStrategy: createTargetingStrategy(skill.targetingStrategy),
+        activationLimit: skill.activationLimit,
+        endEvent: skill.endEvent,
+        terminationEvent: skill.terminationEvent,
+        powerId: skill.powerId,
+      });
     } else {
-      return new AlterationSkill(
-        'debuff',
-        skill.debuffType,
-        skill.debuffRate,
-        skill.duration,
-        createTrigger(skill.trigger, skill.targetCardId),
-        createTargetingStrategy(skill.targetingStrategy),
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        skill.powerId,
-      );
+      return new AlterationSkill({
+        polarity: 'debuff',
+        attributeType: skill.debuffType,
+        rate: skill.debuffRate,
+        duration: skill.duration,
+        trigger: createTrigger(skill.trigger, skill.targetCardId),
+        targetingStrategy: createTargetingStrategy(skill.targetingStrategy),
+        powerId: skill.powerId,
+      });
     }
   });
 }

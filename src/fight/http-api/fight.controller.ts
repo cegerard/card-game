@@ -271,19 +271,24 @@ export class FightController {
         // The domain uses Infinity to bypass the turn-decrement filter.
         const alterationDuration =
           skillData.duration === 0 ? Infinity : (skillData.duration ?? 0);
-        return new AlterationSkill(
-          skillData.kind === SkillKind.BUFF ? 'buff' : 'debuff',
-          this.mapBuffType(skillData.buffType),
-          skillData.rate,
-          alterationDuration,
-          buildTriggerStrategy(skillData.event, skillData.targetCardId),
-          buildTargetingStrategy(skillData.targetingStrategy),
-          alterationCondition,
-          skillData.activationLimit,
-          skillData.endEvent,
-          skillData.terminationEvent,
-          skillData.powerId,
-        );
+        return new AlterationSkill({
+          polarity: skillData.kind === SkillKind.BUFF ? 'buff' : 'debuff',
+          attributeType: this.mapBuffType(skillData.buffType),
+          rate: skillData.rate,
+          duration: alterationDuration,
+          trigger: buildTriggerStrategy(
+            skillData.event,
+            skillData.targetCardId,
+          ),
+          targetingStrategy: buildTargetingStrategy(
+            skillData.targetingStrategy,
+          ),
+          activationCondition: alterationCondition,
+          activationLimit: skillData.activationLimit,
+          endEvent: skillData.endEvent,
+          terminationEvent: skillData.terminationEvent,
+          powerId: skillData.powerId,
+        });
       case SkillKind.CONDITIONAL_ATTACK:
         if (!skillData.damages || !skillData.interval) {
           throw new Error('Conditional attack requires damages and interval');

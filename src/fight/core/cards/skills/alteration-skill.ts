@@ -6,21 +6,21 @@ import { BuffType } from '../@types/buff/type';
 import { Skill, SkillKind, SkillResults } from './skill';
 import { BuffCondition } from '../@types/buff/buff-condition';
 
-/**
- * Unified skill that applies a positive (buff) or negative (debuff) stat alteration.
- *
- * @param polarity - 'buff' for positive alterations, 'debuff' for negative
- * @param duration - Number of turns the alteration lasts. Use Infinity for alterations that
- *   persist until an event fires (event-bound) or indefinitely (permanent). Infinity bypasses
- *   the turn-decrement filter. The HTTP layer translates DTO duration=0 to Infinity before
- *   constructing this skill.
- * @param terminationEvent - Event name that removes this buff when fired by
- *   EndEventProcessor. Pair with duration=Infinity for event-bound buffs.
- * @param endEvent - Event emitted when activationLimit is reached. Must match
- *   the terminationEvent of the buffs to remove via EndEventProcessor.
- * @param activationLimit - Max number of times this skill fires before its
- *   lifecycle ends and endEvent is emitted.
- */
+export interface AlterationSkillOptions {
+  polarity: 'buff' | 'debuff';
+  attributeType: BuffType;
+  rate: number;
+  /** Number of turns the alteration lasts. Use Infinity for event-bound or permanent buffs. */
+  duration: number;
+  trigger: Trigger;
+  targetingStrategy: TargetingCardStrategy;
+  activationCondition?: BuffCondition;
+  activationLimit?: number;
+  endEvent?: string;
+  terminationEvent?: string;
+  powerId?: string;
+}
+
 export class AlterationSkill implements Skill {
   public id = 'alteration-skill';
 
@@ -37,19 +37,19 @@ export class AlterationSkill implements Skill {
   private readonly powerId?: string;
   private activationCount = 0;
 
-  constructor(
-    polarity: 'buff' | 'debuff',
-    attributeType: BuffType,
-    rate: number,
-    duration: number,
-    trigger: Trigger,
-    targetingStrategy: TargetingCardStrategy,
-    activationCondition?: BuffCondition,
-    activationLimit?: number,
-    endEvent?: string,
-    terminationEvent?: string,
-    powerId?: string,
-  ) {
+  constructor({
+    polarity,
+    attributeType,
+    rate,
+    duration,
+    trigger,
+    targetingStrategy,
+    activationCondition,
+    activationLimit,
+    endEvent,
+    terminationEvent,
+    powerId,
+  }: AlterationSkillOptions) {
     this.polarity = polarity;
     this.attributeType = attributeType;
     this.rate = rate;

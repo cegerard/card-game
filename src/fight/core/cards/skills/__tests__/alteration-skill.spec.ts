@@ -18,27 +18,27 @@ describe('AlterationSkill lifecycle', () => {
 
   describe('when activationLimit is not set', () => {
     it('is always triggered', () => {
-      const skill = new AlterationSkill(
-        'buff',
-        'attack',
-        0.1,
-        2,
+      const skill = new AlterationSkill({
+        polarity: 'buff',
+        attributeType: 'attack',
+        rate: 0.1,
+        duration: 2,
         trigger,
-        targeting,
-      );
+        targetingStrategy: targeting,
+      });
       expect(skill.isTriggered('turn-end')).toBe(true);
     });
 
     it('never returns endEvent', () => {
       const source = createFightingCard({ health: 100 });
-      const skill = new AlterationSkill(
-        'buff',
-        'attack',
-        0.1,
-        2,
+      const skill = new AlterationSkill({
+        polarity: 'buff',
+        attributeType: 'attack',
+        rate: 0.1,
+        duration: 2,
         trigger,
-        targeting,
-      );
+        targetingStrategy: targeting,
+      });
       const result = skill.launch(source, makeContext(source));
 
       expect(result.endEvent).toBeUndefined();
@@ -49,17 +49,16 @@ describe('AlterationSkill lifecycle', () => {
     let skill;
 
     beforeEach(() => {
-      skill = new AlterationSkill(
-        'buff',
-        'attack',
-        0.1,
-        2,
+      skill = new AlterationSkill({
+        polarity: 'buff',
+        attributeType: 'attack',
+        rate: 0.1,
+        duration: 2,
         trigger,
-        targeting,
-        undefined,
-        3,
-        'test-end',
-      );
+        targetingStrategy: targeting,
+        activationLimit: 3,
+        endEvent: 'test-end',
+      });
     });
 
     it('increments activationCount on each launch', () => {
@@ -126,14 +125,14 @@ describe('AlterationSkill lifecycle', () => {
   describe('debuff polarity', () => {
     it('returns skillKind Debuff', () => {
       const source = createFightingCard({ health: 100 });
-      const skill = new AlterationSkill(
-        'debuff',
-        'attack',
-        0.1,
-        2,
+      const skill = new AlterationSkill({
+        polarity: 'debuff',
+        attributeType: 'attack',
+        rate: 0.1,
+        duration: 2,
         trigger,
-        targeting,
-      );
+        targetingStrategy: targeting,
+      });
       const result = skill.launch(source, makeContext(source));
 
       expect(result.skillKind).toBe(SkillKind.Debuff);
@@ -142,14 +141,14 @@ describe('AlterationSkill lifecycle', () => {
     it('applies debuff to target', () => {
       const source = createFightingCard({ attack: 100, health: 100 });
       const initialAttack = source.actualAttack;
-      const skill = new AlterationSkill(
-        'debuff',
-        'attack',
-        0.1,
-        2,
+      const skill = new AlterationSkill({
+        polarity: 'debuff',
+        attributeType: 'attack',
+        rate: 0.1,
+        duration: 2,
         trigger,
-        targeting,
-      );
+        targetingStrategy: targeting,
+      });
       skill.launch(source, makeContext(source));
 
       expect(source.actualAttack).toBe(initialAttack - 10);
