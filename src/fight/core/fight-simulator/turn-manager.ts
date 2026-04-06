@@ -121,8 +121,7 @@ export class TurnManager {
       }
 
       if (appliedSkill.skillKind === SkillKind.TargetingOverride) {
-        const reports =
-          appliedSkill.results as unknown as TargetingOverrideReport[];
+        const reports = appliedSkill.results as TargetingOverrideReport[];
         reports.forEach((report) => steps.push(report));
       }
     }
