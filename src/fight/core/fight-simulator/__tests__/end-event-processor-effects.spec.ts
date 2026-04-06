@@ -68,7 +68,9 @@ describe('EndEventProcessor.processEndEvent() with effects', () => {
 
     it('aggregates all removed effects into one step', () => {
       const steps = processor.processEndEvent('purge', source);
-      const effectStep = steps.find((s) => s.kind === StepKind.EffectRemoved) as any;
+      const effectStep = steps.find(
+        (s) => s.kind === StepKind.EffectRemoved,
+      ) as any;
 
       expect(effectStep.removed).toHaveLength(2);
     });

@@ -35,7 +35,7 @@ export class TargetingOverrideSkill implements Skill {
 
     return {
       skillKind: SkillKind.TargetingOverride,
-      results: [report] as any,
+      results: [report],
       powerId: this.powerId,
     };
   }

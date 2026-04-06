@@ -4,6 +4,7 @@ import { BuffResults } from '../@types/action-result/buff-results';
 import { DebuffResults } from '../@types/action-result/debuff-results';
 import { AttackResult } from '../@types/action-result/attack-result';
 import { FightingContext } from '../@types/fighting-context';
+import { TargetingOverrideReport } from '../../fight-simulator/@types/targeting-override-report';
 
 export enum SkillKind {
   Healing = 'healing',
@@ -15,7 +16,12 @@ export enum SkillKind {
 
 export type SkillResults = {
   skillKind: SkillKind;
-  results: HealingResults | BuffResults | DebuffResults | AttackResult[];
+  results:
+    | HealingResults
+    | BuffResults
+    | DebuffResults
+    | AttackResult[]
+    | TargetingOverrideReport[];
   endEvent?: string;
   powerId?: string;
 };
