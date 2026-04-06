@@ -266,9 +266,9 @@ describe('FightController', () => {
 
       it('maps terminationEvent to the special attack effect', () => {
         fightSimulatorStub.validatePlayer1FirstCard((card) => {
-          expect(JSON.parse(JSON.stringify(card)).special.effect.terminationEvent).toBe(
-            'fire-shield-end',
-          );
+          expect(
+            JSON.parse(JSON.stringify(card)).special.effect.terminationEvent,
+          ).toBe('fire-shield-end');
         });
       });
     });

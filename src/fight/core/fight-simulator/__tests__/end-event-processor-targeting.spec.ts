@@ -92,4 +92,42 @@ describe('EndEventProcessor targeting revert', () => {
       ).toHaveLength(0);
     });
   });
+
+  describe('when the override is on a player2 card', () => {
+    it('emits a TargetingReverted step for player2 card', () => {
+      const card = createFightingCard({
+        id: 'p2-card',
+        skills: { simpleAttack: { targetingStrategy: 'position-based' } },
+      });
+      card.overrideAttackTargeting(new TargetedAll(), 'rage-end', 'rage-power');
+      const player1 = new Player('P1', [createFightingCard()]);
+      const player2 = new Player('P2', [card]);
+      const processor = new EndEventProcessor(player1, player2);
+
+      const steps = processor.processEndEvent('rage-end', source, 'rage-power');
+      const revertStep = steps.find(
+        (s) => s.kind === StepKind.TargetingReverted,
+      ) as TargetingRevertedReport;
+
+      expect(revertStep).toBeDefined();
+    });
+
+    it('restores to the original strategy on the player2 card', () => {
+      const card = createFightingCard({
+        id: 'p2-card',
+        skills: { simpleAttack: { targetingStrategy: 'position-based' } },
+      });
+      card.overrideAttackTargeting(new TargetedAll(), 'rage-end', 'rage-power');
+      const player1 = new Player('P1', [createFightingCard()]);
+      const player2 = new Player('P2', [card]);
+      const processor = new EndEventProcessor(player1, player2);
+
+      const steps = processor.processEndEvent('rage-end', source, 'rage-power');
+      const revertStep = steps.find(
+        (s) => s.kind === StepKind.TargetingReverted,
+      ) as TargetingRevertedReport;
+
+      expect(revertStep.restoredStrategy).toBe('from-position');
+    });
+  });
 });

@@ -2,6 +2,7 @@ import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 import { Player } from '../../player';
 import { FightingContext } from '../@types/fighting-context';
 import { TargetedAll } from '../../targeting-card-strategies/targeted-all';
+import { Launcher } from '../../targeting-card-strategies/launcher';
 
 describe('FightingCard targeting override', () => {
   let context: FightingContext;
@@ -91,6 +92,65 @@ describe('FightingCard targeting override', () => {
       });
 
       expect(card.attackTargetingId).toBe('from-position');
+    });
+  });
+
+  describe('stacking multiple overrides', () => {
+    it('uses the last stacked override as the active targeting strategy', () => {
+      const card = createFightingCard({
+        id: 'card-1',
+        attack: 100,
+        criticalChance: 0,
+      });
+      const player1 = new Player('p1', [card]);
+      const player2 = new Player('p2', [enemy1, enemy2]);
+      context = { sourcePlayer: player1, opponentPlayer: player2 };
+
+      card.overrideAttackTargeting(new TargetedAll(), 'first-end');
+      card.overrideAttackTargeting(new Launcher(), 'second-end');
+
+      expect(card.attackTargetingId).toBe('launcher');
+    });
+
+    it('falls back to the first override after removing the second', () => {
+      const card = createFightingCard({
+        id: 'card-1',
+        attack: 100,
+        criticalChance: 0,
+      });
+
+      card.overrideAttackTargeting(new TargetedAll(), 'first-end');
+      card.overrideAttackTargeting(new Launcher(), 'second-end');
+      card.restoreAttackTargeting('second-end');
+
+      expect(card.attackTargetingId).toBe('all');
+    });
+
+    it('falls back to original strategy after removing all overrides', () => {
+      const card = createFightingCard({
+        id: 'card-1',
+        skills: { simpleAttack: { targetingStrategy: 'position-based' } },
+      });
+
+      card.overrideAttackTargeting(new TargetedAll(), 'first-end');
+      card.overrideAttackTargeting(new Launcher(), 'second-end');
+      card.restoreAttackTargeting('first-end');
+      card.restoreAttackTargeting('second-end');
+
+      expect(card.attackTargetingId).toBe('from-position');
+    });
+
+    it('removing an override by unknown event leaves stack unchanged', () => {
+      const card = createFightingCard({
+        id: 'card-1',
+        attack: 100,
+        criticalChance: 0,
+      });
+
+      card.overrideAttackTargeting(new TargetedAll(), 'first-end');
+      card.restoreAttackTargeting('unknown-event');
+
+      expect(card.attackTargetingId).toBe('all');
     });
   });
 });
