@@ -143,20 +143,22 @@ describe('Buffing-skill', () => {
     });
   });
 
-  it('remove expired buffs and restore original stats', () => {
+  it('increases attack after fight with buff skill', () => {
     const initialAttack = card1.actualAttack;
 
     fight.start();
 
-    // Attack be buffed
     expect(card1.actualAttack).toBe(initialAttack + 2 * 50);
+  });
 
-    // Expire the buff
+  it('restores attack after buff expires', () => {
+    const initialAttack = card1.actualAttack;
+
+    fight.start();
     card1.decreaseBuffAndDebuffDuration();
     card1.decreaseBuffAndDebuffDuration();
     card1.decreaseBuffAndDebuffDuration();
 
-    // Attack return to original value
     expect(card1.actualAttack).toBe(initialAttack);
   });
 });

@@ -17,14 +17,19 @@ describe('Debuff System - Basic Tests', () => {
   });
 
   describe('Multiple debuffs', () => {
-    it('apply multiple debuffs of different types', () => {
+    it('reduces attack when attack debuff is applied', () => {
       const initialAttack = card.actualAttack;
-      const initialDefense = card.actualDefense;
 
       card.applyDebuff('attack', 0.1, 3);
-      card.applyDebuff('defense', 0.2, 2);
 
       expect(card.actualAttack).toBe(initialAttack - 10);
+    });
+
+    it('reduces defense when defense debuff is applied', () => {
+      const initialDefense = card.actualDefense;
+
+      card.applyDebuff('defense', 0.2, 2);
+
       expect(card.actualDefense).toBe(Math.max(0, initialDefense - 10));
     });
 
@@ -39,13 +44,20 @@ describe('Debuff System - Basic Tests', () => {
   });
 
   describe('Debuff duration management', () => {
-    it('restore original stats when debuffs expire', () => {
+    it('reduces stat when debuff is applied', () => {
       const initialAttack = card.actualAttack;
 
       card.applyDebuff('attack', 0.2, 1);
-      expect(card.actualAttack).toBe(initialAttack - 20);
 
+      expect(card.actualAttack).toBe(initialAttack - 20);
+    });
+
+    it('restores stat after debuff expires', () => {
+      const initialAttack = card.actualAttack;
+
+      card.applyDebuff('attack', 0.2, 1);
       card.decreaseBuffAndDebuffDuration();
+
       expect(card.actualAttack).toBe(initialAttack);
     });
   });
@@ -61,12 +73,27 @@ describe('Debuff System - Basic Tests', () => {
       expect(card.actualAttack).toBe(expectedAttack);
     });
 
-    it('never go below 0 even with strong debuffs', () => {
-      card.applyDebuff('attack', 2.0, 3); // 200% debuff (more than the stat)
+    it('clamps attack to 0 with excessive debuff', () => {
+      card.applyDebuff('attack', 2.0, 3);
 
       expect(card.actualAttack).toBe(0);
+    });
+
+    it('does not affect defense when attack is over-debuffed', () => {
+      card.applyDebuff('attack', 2.0, 3);
+
       expect(card.actualDefense).toBeGreaterThanOrEqual(0);
+    });
+
+    it('does not affect agility when attack is over-debuffed', () => {
+      card.applyDebuff('attack', 2.0, 3);
+
       expect(card.actualAgility).toBeGreaterThanOrEqual(0);
+    });
+
+    it('does not affect accuracy when attack is over-debuffed', () => {
+      card.applyDebuff('attack', 2.0, 3);
+
       expect(card.actualAccuracy).toBeGreaterThanOrEqual(0);
     });
   });

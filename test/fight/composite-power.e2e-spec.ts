@@ -164,16 +164,36 @@ describe('Composite Power — targeting override and revert', () => {
     expect(revertStep[1].eventName).toBe('fury-end');
   });
 
-  it('all composite power step types carry powerId', () => {
+  it('buff step carries powerId', () => {
     const powerStepKinds = stepEntries
       .filter(([, s]) => s.powerId === 'fury-power')
       .map(([, s]) => s.kind);
-    const uniqueKinds = [...new Set(powerStepKinds)];
 
-    expect(uniqueKinds).toContain('buff');
-    expect(uniqueKinds).toContain('targeting_override');
-    expect(uniqueKinds).toContain('buff_removed');
-    expect(uniqueKinds).toContain('targeting_reverted');
+    expect(powerStepKinds).toContain('buff');
+  });
+
+  it('targeting_override step carries powerId', () => {
+    const powerStepKinds = stepEntries
+      .filter(([, s]) => s.powerId === 'fury-power')
+      .map(([, s]) => s.kind);
+
+    expect(powerStepKinds).toContain('targeting_override');
+  });
+
+  it('buff_removed step carries powerId', () => {
+    const powerStepKinds = stepEntries
+      .filter(([, s]) => s.powerId === 'fury-power')
+      .map(([, s]) => s.kind);
+
+    expect(powerStepKinds).toContain('buff_removed');
+  });
+
+  it('targeting_reverted step carries powerId', () => {
+    const powerStepKinds = stepEntries
+      .filter(([, s]) => s.powerId === 'fury-power')
+      .map(([, s]) => s.kind);
+
+    expect(powerStepKinds).toContain('targeting_reverted');
   });
 });
 

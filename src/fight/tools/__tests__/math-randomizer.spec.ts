@@ -8,10 +8,15 @@ describe('math randomizer', () => {
     describe('when max is strictly higher than min', () => {
       const min = faker.number.int(10);
       const max = faker.number.int({ min, max: 100 });
-      it('returns the int value', () => {
+      it('returns a value greater than or equal to min', () => {
         const randomValue = randomizer.random_int_between(min, max);
 
         expect(randomValue).toBeGreaterThanOrEqual(min);
+      });
+
+      it('returns a value less than or equal to max', () => {
+        const randomValue = randomizer.random_int_between(min, max);
+
         expect(randomValue).toBeLessThanOrEqual(max);
       });
     });
