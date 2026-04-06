@@ -11,7 +11,9 @@ import { BuffCondition } from '../@types/buff/buff-condition';
  *
  * @param polarity - 'buff' for positive alterations, 'debuff' for negative
  * @param duration - Number of turns the alteration lasts. Use Infinity for alterations that
- *   persist until an event fires (event-bound) or indefinitely (permanent).
+ *   persist until an event fires (event-bound) or indefinitely (permanent). Infinity bypasses
+ *   the turn-decrement filter. The HTTP layer translates DTO duration=0 to Infinity before
+ *   constructing this skill.
  * @param terminationEvent - Event name that removes this buff when fired by
  *   EndEventProcessor. Pair with duration=Infinity for event-bound buffs.
  * @param endEvent - Event emitted when activationLimit is reached. Must match
