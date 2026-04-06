@@ -9,8 +9,11 @@ import { HealingReport } from '../@types/healing-report';
 
 describe('TurnManager composite power', () => {
   describe('grouped buff+healing skills with powerId', () => {
-    it('produces a buff step with powerId', () => {
-      const card = createFightingCard({
+    let card: ReturnType<typeof createFightingCard>;
+    let turnManager: TurnManager;
+
+    beforeEach(() => {
+      card = createFightingCard({
         id: 'card-1',
         attack: 100,
         health: 5000,
@@ -41,14 +44,16 @@ describe('TurnManager composite power', () => {
         player2,
         endEventProcessor,
       );
-      const turnManager = new TurnManager(
+      turnManager = new TurnManager(
         player1,
         player2,
         { onCardDeath: [deathSkillHandler] },
         deathSkillHandler,
         endEventProcessor,
       );
+    });
 
+    it('produces a buff step with powerId', () => {
       const steps = turnManager.endTurn([card]);
       const buffStep = steps.find(
         (s) => s.kind === StepKind.Buff,
@@ -58,46 +63,7 @@ describe('TurnManager composite power', () => {
     });
 
     it('produces a healing step with powerId', () => {
-      const card = createFightingCard({
-        id: 'card-1',
-        attack: 100,
-        health: 5000,
-        skills: {
-          others: [
-            {
-              buffType: 'attack',
-              buffRate: 0.2,
-              duration: 3,
-              trigger: 'turn-end',
-              targetingStrategy: 'self',
-              powerId: 'rage',
-            },
-            {
-              effectRate: 0.1,
-              trigger: 'turn-end',
-              targetingStrategy: 'self',
-              powerId: 'rage',
-            },
-          ],
-        },
-      });
       card.addRealDamage(100);
-      const player1 = new Player('p1', [card]);
-      const player2 = new Player('p2', [createFightingCard()]);
-      const endEventProcessor = new EndEventProcessor(player1, player2);
-      const deathSkillHandler = new DeathSkillHandler(
-        player1,
-        player2,
-        endEventProcessor,
-      );
-      const turnManager = new TurnManager(
-        player1,
-        player2,
-        { onCardDeath: [deathSkillHandler] },
-        deathSkillHandler,
-        endEventProcessor,
-      );
-
       const steps = turnManager.endTurn([card]);
       const healingStep = steps.find(
         (s) => s.kind === StepKind.Healing,
