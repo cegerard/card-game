@@ -1,11 +1,12 @@
-# Implementation Plan: Targeted Card Strategy
+# Implementation Plan: Targeted Card Strategy — Dynamic Resolution
 
-**Branch**: `005-targeted-card-strategy` | **Date**: 2026-04-06 | **Spec**: [spec.md](spec.md)
+**Branch**: `005-targeted-card-strategy` | **Date**: 2026-04-07 | **Spec**: [spec.md](spec.md)
 **Input**: Feature specification from `/specs/005-targeted-card-strategy/spec.md`
+**Revision**: v2 — replaces static `targetedCardId` approach with dynamic target resolution at trigger time.
 
 ## Summary
 
-Add a new `targeted-card` targeting strategy that locks onto a specific enemy card by ID. The strategy returns that card as the sole target while alive, or an empty list when dead. It is restricted to targeting override skills only — validation rejects it in any other context (simple attack, special, other skill targeting).
+Refactor the `targeted-card` targeting strategy so the target is resolved **dynamically at trigger time** instead of being hardcoded in the DTO. The first resolution mode is "target the killer of the ally" — when an `ally-death` event fires, the card that dealt the lethal blow becomes the lock-on target. This requires propagating the killer's identity through the death notification chain and constructing the `TargetedCard` strategy lazily inside `TargetingOverrideSkill.launch()`.
 
 ## Technical Context
 
@@ -25,13 +26,13 @@ Add a new `targeted-card` targeting strategy that locks onto a specific enemy ca
 
 | Principle | Status | Notes |
 |-----------|--------|-------|
-| I. Domain Isolation | PASS | New strategy class in `src/fight/core/targeting-card-strategies/`. Factory mapping in HTTP layer. |
-| II. Test-First Development | PASS | Unit tests for strategy, validation tests for DTO restriction, E2E test for full flow. |
-| III. Simplicity | PASS | Single new class (~15 lines), one enum value, one factory entry, validation guard. No abstractions. |
-| IV. Fail Fast | PASS | Validation rejects misconfiguration at DTO boundary. Strategy returns empty array for dead/missing targets (consistent with existing strategies). |
-| V. Clean Code | PASS | Follows existing strategy pattern exactly. No duplication. |
+| I. Domain Isolation | PASS | All changes in `src/fight/core/`. Controller only passes a resolution mode string, no domain logic in HTTP layer. |
+| II. Test-First Development | PASS | Unit tests for strategy, death-context propagation, E2E for full flow. TDD cycle. |
+| III. Simplicity | PASS | Minimal changes: add one optional field to `FightingContext`, one optional param to `notifyDeath`, strategy factory in `TargetingOverrideSkill`. No new abstractions. |
+| IV. Fail Fast | PASS | Throw if resolution mode is unknown. DTO validation rejects `targeted-card` outside TARGETING_OVERRIDE. |
+| V. Clean Code | PASS | Follows existing patterns. No duplication. |
 
-**Post-design re-check**: All gates still PASS. No complexity violations.
+**Post-design re-check**: All gates still PASS.
 
 ## Project Structure
 
@@ -53,22 +54,32 @@ specs/005-targeted-card-strategy/
 ```text
 src/fight/
 ├── core/
+│   ├── cards/
+│   │   └── @types/
+│   │       └── fighting-context.ts           # MODIFIED: add optional killerCard
+│   ├── fight-simulator/
+│   │   ├── card-death-subscriber.ts          # MODIFIED: add optional killerCard param
+│   │   ├── death-skill-handler.ts            # MODIFIED: propagate killerCard into context
+│   │   ├── action_stage.ts                   # MODIFIED: pass attacker as killerCard on death
+│   │   └── turn-manager.ts                   # NO CHANGE (state-effect deaths have no killer)
+│   ├── cards/skills/
+│   │   └── targeting-override.ts             # MODIFIED: accept strategy factory, build lazily
 │   └── targeting-card-strategies/
-│       └── targeted-card.ts              # NEW: TargetedCard strategy class
+│       └── targeted-card.ts                  # NO CHANGE (already correct)
 ├── http-api/
 │   ├── dto/
-│   │   └── fight-data.dto.ts             # MODIFIED: Add TARGETED_CARD enum, validation
-│   └── targeting-strategy-factory.ts     # MODIFIED: Add factory mapping
+│   │   └── fight-data.dto.ts                 # MODIFIED: remove targetedCardId field
+│   └── fight.controller.ts                   # MODIFIED: pass resolution mode, not instance
 └── (no other files affected)
 
 src/fight/core/__tests__/
-└── targeted-card.spec.ts                 # NEW: Unit tests
+└── targeted-card.spec.ts                     # MODIFIED: add killer-context tests
 
 test/fight/
-└── targeted-card-strategy.e2e-spec.ts    # NEW: E2E test
+└── targeted-card-strategy.e2e-spec.ts        # MODIFIED: update E2E tests
 ```
 
-**Structure Decision**: Follows existing single-project hexagonal layout. New strategy class mirrors existing strategies in `targeting-card-strategies/`. Tests colocated per convention.
+**Structure Decision**: Follows existing single-project hexagonal layout. No new files created — only modifications to existing ones.
 
 ## Complexity Tracking
 

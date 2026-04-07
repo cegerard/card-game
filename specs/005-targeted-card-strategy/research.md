@@ -1,41 +1,62 @@
-# Research: Targeted Card Strategy
+# Research: Targeted Card Strategy — Dynamic Resolution (v2)
 
-## R1: How do existing targeting strategies resolve targets?
+## R1: Where is the killer identity available when a card dies?
 
-**Decision**: Follow the established `TargetingCardStrategy` interface pattern — implement `targetedCards()` returning `FightingCard[]`.
+**Decision**: The killer is the attacking card — available in `ActionStage` methods (`launchAttack`, `launchSpecial`, `launchNextActionSkills`) that call `handleAttackResult`. The attacker `FightingCard` reference is in scope when `notifyDeath` is called inside `handleAttackResult`.
 
-**Rationale**: All six existing strategies implement this interface. Returning an empty array signals "no valid target" and is already handled by `SimpleAttack.executeAttack()` (the `.map()` over an empty array produces no attack results). No special handling needed.
+**Rationale**: In `ActionStage.handleAttackResult()`, each `AttackResult` contains the `defender` that took damage. When `defender.isDead()`, we call `this.notifyDeath(defensiveCard)`. The attacker is known from the calling method's context (it's the `card` parameter in `launchAttack`/`computeSpecialAttackResult`/`launchNextActionSkills`). We just need to pass it through.
 
-**Alternatives considered**: None. The interface is fixed and all strategies conform to it.
-
-## R2: How does the targeting override mechanism pass context to the strategy?
-
-**Decision**: The `TargetedCard` strategy receives the target card ID at construction time (in the controller when building the `TargetingOverrideSkill`). It looks up the card from the defending player's deck at call time.
-
-**Rationale**: The `TargetingOverrideSkill` is constructed with a `TargetingCardStrategy` instance in the controller. The controller has access to the DTO's `targetCardId` field. At execution time, the strategy receives `attackingPlayer` and `defendingPlayer` — it searches the defending player's `allCards` for the matching ID.
+For `TurnManager.processCardEffectStates()` — deaths from status effects (poison, burn, freeze) have no killer. This is correct: a state-effect death should not trigger a "target the killer" override, since there's no attacker. The `killerCard` parameter should be optional.
 
 **Alternatives considered**:
-- Passing the card reference directly: Rejected because at DTO-to-domain conversion time, the opposing player's cards may not be fully constructed yet, and holding a direct reference creates coupling.
-- Resolving the ID at override activation time: Unnecessary complexity — the strategy can resolve it each call, which also correctly handles the "card is now dead" case.
+- Storing the last attacker on the card itself: Creates coupling and mutable state — rejected per Constitution V.
+- Tracking kill attribution separately in a service: Over-engineering — rejected per Constitution III.
 
-## R3: How to restrict the strategy to targeting overrides only?
+## R2: How to propagate killer identity to skills?
 
-**Decision**: Add a `TARGETED_CARD` value to the `TargetingStrategy` enum but do NOT add it to the `STRATEGY_MAP` in `targeting-strategy-factory.ts`. Instead, handle it specially in the `TARGETING_OVERRIDE` case of `createOtherSkill()`. Use custom DTO validation to reject `TARGETED_CARD` in `SimpleAttackDto.targetingStrategy`, `MultipleAttackDto.targetingStrategy`, `SpecialDto.targetingStrategy`, `BuffApplicationDto.targetingStrategy`, and non-override `OtherSkillDto.targetingStrategy`.
+**Decision**: Add an optional `killerCard?: FightingCard` field to `FightingContext`. The `DeathSkillHandler.notifyDeath()` already builds a `FightingContext` for `card.launchSkills()` — add the killer there.
 
-**Rationale**: The `TargetedCard` strategy requires a `targetCardId` parameter that only exists on `OtherSkillDto`. The cleanest approach is validation at the DTO layer — use a custom validator or conditional enum validation to reject `targeted-card` in contexts where it makes no sense. This is consistent with Constitution Principle IV (Fail Fast — validate at system boundaries).
+**Rationale**: `FightingContext` is the existing context object passed to `Skill.launch()`. Adding a field there flows naturally through the existing interface without changing method signatures on `Skill`, `FightingCard.launchSkills()`, or any other skill implementation. Only `TargetingOverrideSkill` will use it — others ignore it.
 
-**Alternatives considered**:
-- Runtime throw in `buildTargetingStrategy()`: Would defer the error to battle execution time rather than input validation — violates Fail Fast.
-- Separate enum for override-only strategies: Over-engineering for a single value — violates Simplicity.
-
-## R4: What `targetCardId` field to use?
-
-**Decision**: Reuse the existing `targetCardId` field on `OtherSkillDto`. For `TARGETING_OVERRIDE` skills using `targeted-card` strategy, the `targetCardId` serves double duty: it identifies both the ally-death trigger target AND the card to lock onto. However, for non-ally-death triggers, a new interpretation is needed — the `targetCardId` identifies the enemy card to target.
-
-**Rationale**: Looking at the samples file, the `TARGETING_OVERRIDE` with `targeted-card` uses `ally-death` as its trigger event and already has a `targetCardId` for the ally whose death triggers the override. The enemy card to lock onto needs a separate field.
-
-**Revised Decision**: Add a `targetedCardId` field to `OtherSkillDto` — this is the ID of the enemy card the strategy targets. The existing `targetCardId` remains for ally-death trigger configuration. This keeps the two concepts (trigger target vs attack target) clearly separated.
+The chain: `ActionStage.handleAttackResult` → `notifyDeath(deadCard, killerCard)` → `CardDeathSubscriber.notifyDeath(player, deadCard, killerCard)` → `DeathSkillHandler` builds context with `killerCard` → `card.launchSkills(trigger, context)` → `TargetingOverrideSkill.launch(source, context)` reads `context.killerCard`.
 
 **Alternatives considered**:
-- Reusing `targetCardId` for both: Creates ambiguity when the trigger event is `ally-death` — which card does it refer to? Better to have explicit fields.
-- Adding targetedCardId to the TargetingStrategy enum value: Enums can't carry data in TypeScript.
+- Passing killerCard as a separate parameter on `Skill.launch()`: Breaks the interface for all 6+ skill implementations that don't need it. Rejected per Constitution III (minimal change).
+- Creating a separate `DeathContext` type: Unnecessary specialization — `FightingContext` is already the carrier. Rejected per Constitution III.
+
+## R3: How should TargetingOverrideSkill resolve the strategy dynamically?
+
+**Decision**: `TargetingOverrideSkill` accepts either a pre-built `TargetingCardStrategy` (existing behavior for non-targeted-card overrides) or a strategy resolver function `(context: FightingContext) => TargetingCardStrategy`. In `launch()`, if a resolver is present, it calls it with the context to produce the strategy.
+
+**Rationale**: This is the minimal change that supports both static strategies (like `target-all` overrides that already work) and dynamic resolution (like `targeted-card` that needs the killer's ID). The resolver is a plain function — no new class, interface, or abstraction.
+
+Concretely: the controller passes `(ctx) => new TargetedCard(ctx.killerCard.id)` as the resolver when `targetingStrategy` is `targeted-card`.
+
+**Alternatives considered**:
+- Always using a resolver (wrapping static strategies): Adds indirection to all existing overrides for no benefit. Rejected per Constitution III.
+- Adding a `TargetResolutionMode` enum and switch in the skill: Creates coupling between the skill and specific resolution strategies. Rejected per Constitution I.
+
+## R4: What happens to `targetedCardId` in the DTO?
+
+**Decision**: Remove `targetedCardId` from `OtherSkillDto`. The target is no longer configured statically — it comes from the trigger context (killer identity). The DTO validation for `TARGETING_OVERRIDE` + `targeted-card` no longer needs a `targetedCardId` field.
+
+**Rationale**: The `targetedCardId` field was designed for static resolution. With dynamic resolution, the target is determined at runtime. Keeping the field would be misleading and unused.
+
+The `TargetedCardIdRequiredConstraint` validator should be removed since the field no longer exists.
+
+**Alternatives considered**:
+- Keeping `targetedCardId` as optional for future static-targeting use cases: YAGNI — rejected per Constitution III. Can be re-added if needed.
+
+## R5: What if killerCard is undefined when a targeted-card override triggers?
+
+**Decision**: If `context.killerCard` is undefined when the resolver runs, throw an error. This is a programming error — a `targeted-card` strategy triggered without a killer context means the trigger event doesn't support killer resolution (e.g., `turn-end` trigger, which makes no sense for "target the killer").
+
+**Rationale**: Fail fast per Constitution IV. In practice, `targeted-card` overrides will use `ally-death` triggers where the killer is always known (from combat). State-effect deaths (no killer) don't trigger ally-death skills through `ActionStage.handleAttackResult` — they go through `TurnManager.processCardEffectStates`, which passes no killer, but only for the card itself (state effects kill the affected card, not an ally).
+
+Wait — correction: state-effect deaths DO fire ally-death triggers via `TurnManager.notifyDeath()`. If an ally dies from poison and a surviving ally has a `targeted-card` override triggered by that death, there's no killer. In this case, the resolver should return a no-op strategy (empty targets) rather than throwing — the override activates but has no target. This is consistent with the spec's edge case: "targeted card ID does not exist → strategy returns no targets."
+
+**Revised Decision**: If `context.killerCard` is undefined, construct a `TargetedCard` with an impossible ID (e.g., empty string), which will always return `[]` from `targetedCards()`. This silently produces "no target" without crashing.
+
+**Alternatives considered**:
+- Throwing an error: Too aggressive — state-effect deaths are a valid scenario where no killer exists.
+- Not activating the override at all: The override skill still activates (the trigger matched), but the strategy simply has no valid target. This is more consistent.

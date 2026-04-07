@@ -1,24 +1,31 @@
-# Quickstart: Targeted Card Strategy
+# Quickstart: Targeted Card Strategy — Dynamic Resolution (v2)
 
 ## What This Feature Does
 
-Adds a `targeted-card` targeting strategy that locks a card's attacks onto a specific enemy card by ID. When the target dies, attacks produce no damage. The strategy is only usable through targeting override skills.
+Adds a `targeted-card` targeting strategy that dynamically locks onto a specific enemy card at trigger time. The first resolution mode is "target the killer" — when an ally dies in combat, the card that dealt the lethal blow becomes the lock-on target. The strategy is only usable through targeting override skills.
+
+## Key Change from v1
+
+v1 used a static `targetedCardId` in the DTO. v2 resolves the target **dynamically at trigger time** by propagating the killer's identity through the death notification chain.
 
 ## Key Files to Read First
 
-1. [targeting-card-strategy.ts](../../src/fight/core/targeting-card-strategies/targeting-card-strategy.ts) — Interface to implement
-2. [targeted-from-position.ts](../../src/fight/core/targeting-card-strategies/targeted-from-position.ts) — Reference implementation (similar pattern)
-3. [targeting-override.ts](../../src/fight/core/cards/skills/targeting-override.ts) — How overrides use strategies
-4. [fight-data.dto.ts](../../src/fight/http-api/dto/fight-data.dto.ts) — DTO enums and validation
-5. [fight.controller.ts](../../src/fight/http-api/fight.controller.ts) — `createOtherSkill()` TARGETING_OVERRIDE case
+1. [fighting-context.ts](../../src/fight/core/cards/@types/fighting-context.ts) — Context type to extend with `killerCard`
+2. [card-death-subscriber.ts](../../src/fight/core/fight-simulator/card-death-subscriber.ts) — Interface to extend with killer param
+3. [action_stage.ts](../../src/fight/core/card-action/action_stage.ts) — Where killer is available on death
+4. [death-skill-handler.ts](../../src/fight/core/fight-simulator/death-skill-handler.ts) — Where killer flows into skill context
+5. [targeting-override.ts](../../src/fight/core/cards/skills/targeting-override.ts) — Where strategy is built lazily
+6. [targeted-card.ts](../../src/fight/core/targeting-card-strategies/targeted-card.ts) — Unchanged strategy class
 
 ## Implementation Steps (High Level)
 
-1. **Domain**: Create `TargetedCard` class implementing `TargetingCardStrategy`
-2. **DTO**: Add `TARGETED_CARD` enum value, add `targetedCardId` field to `OtherSkillDto`
-3. **Validation**: Reject `targeted-card` in all non-override targeting contexts
-4. **Controller**: Construct `TargetedCard` in `TARGETING_OVERRIDE` case when strategy is `targeted-card`
-5. **Tests**: Unit tests for strategy, validation tests, E2E test
+1. **FightingContext**: Add optional `killerCard?: FightingCard`
+2. **CardDeathSubscriber**: Add optional `killerCard` param to `notifyDeath`
+3. **ActionStage**: Pass attacker as `killerCard` when defender dies
+4. **DeathSkillHandler**: Include `killerCard` in the context passed to skills
+5. **TargetingOverrideSkill**: Accept optional resolver, call it in `launch()` to build strategy dynamically
+6. **Controller**: Pass resolver `(ctx) => new TargetedCard(ctx.killerCard?.id ?? '')` for `targeted-card`
+7. **DTO**: Remove `targetedCardId` field and its validator
 
 ## How to Verify
 
@@ -31,4 +38,16 @@ npm run build         # Builds successfully
 
 ## Sample Configuration
 
-See [samples/cards.json](../../samples/cards.json) — the Arionis card has a `TARGETING_OVERRIDE` skill with `"targetingStrategy": "TODO"` that should use `"targeted-card"` with a `targetedCardId`.
+```json
+{
+  "kind": "TARGETING_OVERRIDE",
+  "name": "Vengeance",
+  "targetingStrategy": "targeted-card",
+  "event": "ally-death",
+  "targetCardId": "kaelion",
+  "terminationEvent": "lion-heritage-end",
+  "powerId": "lion-heritage"
+}
+```
+
+No `targetedCardId` needed — the target is the card that killed "kaelion".

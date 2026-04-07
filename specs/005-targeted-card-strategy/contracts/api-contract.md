@@ -1,34 +1,18 @@
-# API Contract: Targeted Card Strategy
+# API Contract: Targeted Card Strategy — Dynamic Resolution (v2)
 
 ## Changes to POST /fight
 
 ### TargetingStrategy Enum
 
-Add new value:
+No change from v1 — `TARGETED_CARD = 'targeted-card'` remains in the enum.
 
-```typescript
-enum TargetingStrategy {
-  // ... existing values ...
-  TARGETED_CARD = 'targeted-card',
-}
+### OtherSkillDto — Removed Field
+
+```diff
+- targetedCardId?: string   // REMOVED — target resolved dynamically at trigger time
 ```
 
-**Restriction**: `targeted-card` is only valid in `OtherSkillDto` when `kind` is `TARGETING_OVERRIDE`. Using it in any other targeting strategy field returns **400 Bad Request**.
-
-### OtherSkillDto — New Field
-
-```typescript
-{
-  kind: "TARGETING_OVERRIDE",
-  name: string,
-  targetingStrategy: "targeted-card",
-  event: "ally-death" | "turn-end" | "next-action",
-  targetCardId?: string,          // existing: for ally-death trigger
-  targetedCardId: string,         // NEW: ID of enemy card to lock onto
-  terminationEvent: string,       // required for TARGETING_OVERRIDE
-  powerId?: string
-}
-```
+The `targetedCardId` field is removed. The target is determined by the game engine at trigger time (e.g., the card that killed the ally).
 
 ### Validation Rules
 
@@ -41,6 +25,8 @@ enum TargetingStrategy {
 | `OtherSkillDto.targetingStrategy` (non-TARGETING_OVERRIDE) | NO | 400 — same |
 | `OtherSkillDto.targetingStrategy` (TARGETING_OVERRIDE) | YES | — |
 
+**Removed validation**: `TargetedCardIdRequiredConstraint` is removed since `targetedCardId` no longer exists.
+
 ### Example: Targeting Override with Targeted Card
 
 ```json
@@ -50,19 +36,21 @@ enum TargetingStrategy {
   "targetingStrategy": "targeted-card",
   "event": "ally-death",
   "targetCardId": "kaelion",
-  "targetedCardId": "enemy-card-id",
   "terminationEvent": "lion-heritage-end",
   "powerId": "lion-heritage"
 }
 ```
 
+Note: No `targetedCardId` — the target is resolved dynamically (killer of the ally).
+
 ### Behavioral Contract
 
 When `targeted-card` override is active:
-- **Target alive**: Attack hits only that specific card (regardless of position)
+- **Target alive**: Attack hits only the dynamically resolved target card
 - **Target dead or not found**: Attack produces empty damages array (card effectively skips attack)
 - **Override reverted** (via termination event): Card resumes original targeting strategy
+- **Triggered by state-effect death** (no killer): Override activates but with no valid target — card skips attacks until override is reverted
 
 ### Response — No New Step Kinds
 
-No new step kinds are introduced. Existing `targeting_override` and `targeting_reverted` steps cover the lifecycle. The attack step will simply have an empty `damages` array when the targeted card is dead.
+No changes to response format. Existing `targeting_override` and `targeting_reverted` steps cover the lifecycle.

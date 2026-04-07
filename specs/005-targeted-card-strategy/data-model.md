@@ -1,45 +1,58 @@
-# Data Model: Targeted Card Strategy
-
-## New Entity
-
-### TargetedCard (Domain)
-
-**Location**: `src/fight/core/targeting-card-strategies/targeted-card.ts`
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | `string` (readonly) | `'targeted-card'` — strategy identifier |
-| `targetCardId` | `string` (readonly, constructor) | ID of the enemy card to target |
-
-**Interface**: Implements `TargetingCardStrategy`
-
-**Behavior**:
-- `targetedCards(attackingCard, attackingPlayer, defendingPlayer)`:
-  - Finds the card with matching `targetCardId` in `defendingPlayer.allCards`
-  - If found AND alive → returns `[card]`
-  - If not found OR dead → returns `[]`
-
-**Validation rules**: None at domain level — validated at DTO boundary.
+# Data Model: Targeted Card Strategy — Dynamic Resolution (v2)
 
 ## Modified Entities
 
-### TargetingStrategy Enum (DTO)
+### FightingContext (Domain Type)
 
-**Location**: `src/fight/http-api/dto/fight-data.dto.ts`
+**Location**: `src/fight/core/cards/@types/fighting-context.ts`
 
-| Change | Value |
-|--------|-------|
-| Add | `TARGETED_CARD = 'targeted-card'` |
+| Change | Field | Type | Description |
+|--------|-------|------|-------------|
+| Add | `killerCard` | `FightingCard` (optional) | The card that dealt the lethal blow. Present on `ally-death` triggered by combat damage. Absent for state-effect deaths. |
 
-**Validation**: `targeted-card` is only valid when used in `OtherSkillDto` with `kind: TARGETING_OVERRIDE`. Rejected in `SimpleAttackDto`, `MultipleAttackDto`, `SpecialDto`, and `BuffApplicationDto` targeting strategy fields.
+### CardDeathSubscriber (Interface)
+
+**Location**: `src/fight/core/fight-simulator/card-death-subscriber.ts`
+
+| Change | Description |
+|--------|-------------|
+| Modify | `notifyDeath(player, card, killerCard?)` — add optional `killerCard: FightingCard` parameter |
+
+### ActionStage (Fight Simulator)
+
+**Location**: `src/fight/core/card-action/action_stage.ts`
+
+| Change | Method | Description |
+|--------|--------|-------------|
+| Modify | `handleAttackResult()` | Accept attacker card, pass it to `notifyDeath` when defender dies |
+| Modify | `notifyDeath()` | Accept optional `killerCard` and forward to subscribers |
+| Modify | `launchAttack()`, `computeSpecialAttackResult()`, `launchNextActionSkills()` | Pass the attacking card to `handleAttackResult` |
+
+### DeathSkillHandler (Fight Simulator)
+
+**Location**: `src/fight/core/fight-simulator/death-skill-handler.ts`
+
+| Change | Method | Description |
+|--------|--------|-------------|
+| Modify | `notifyDeath()` | Accept optional `killerCard`, include it in `FightingContext` passed to `card.launchSkills()` |
+
+### TargetingOverrideSkill (Skill)
+
+**Location**: `src/fight/core/cards/skills/targeting-override.ts`
+
+| Change | Description |
+|--------|-------------|
+| Modify constructor | Accept optional `strategyResolver: (context: FightingContext) => TargetingCardStrategy` as alternative to static `targetingStrategy` |
+| Modify `launch()` | If resolver is present, call it with context to produce the strategy. Otherwise, use the static strategy (existing behavior). |
 
 ### OtherSkillDto (DTO)
 
 **Location**: `src/fight/http-api/dto/fight-data.dto.ts`
 
-| Change | Field | Type | Description |
-|--------|-------|------|-------------|
-| Add | `targetedCardId` | `string` (optional) | ID of the enemy card to target. Required when `kind=TARGETING_OVERRIDE` and `targetingStrategy=targeted-card`. |
+| Change | Field | Description |
+|--------|-------|-------------|
+| Remove | `targetedCardId` | No longer needed — target resolved dynamically |
+| Remove | `TargetedCardIdRequiredConstraint` | Validator for removed field |
 
 ### FightController (HTTP Layer)
 
@@ -47,16 +60,39 @@
 
 | Change | Method | Description |
 |--------|--------|-------------|
-| Modify | `createOtherSkill()` | In `TARGETING_OVERRIDE` case: when `targetingStrategy` is `targeted-card`, construct `TargetedCard(targetedCardId)` directly instead of using `buildTargetingStrategy()`. |
+| Modify | `createOtherSkill()` | When `targetingStrategy=targeted-card`, pass a resolver function `(ctx) => new TargetedCard(ctx.killerCard?.id ?? '')` instead of a static instance |
 
-### targeting-strategy-factory (HTTP Layer)
+## Unchanged Entities
 
-**Location**: `src/fight/http-api/targeting-strategy-factory.ts`
+### TargetedCard (Domain Strategy)
 
-| Change | Description |
-|--------|-------------|
-| No change | `targeted-card` is NOT added to `STRATEGY_MAP`. It requires a parameter (`targetCardId`) that generic strategies don't need, so it's constructed directly in the controller. |
+**Location**: `src/fight/core/targeting-card-strategies/targeted-card.ts`
+
+No changes. Already correctly:
+- Takes `targetCardId` in constructor
+- Returns `[card]` if alive, `[]` if dead or not found
+- Empty string ID will always return `[]` (no card matches)
+
+### TurnManager
+
+**Location**: `src/fight/core/fight-simulator/turn-manager.ts`
+
+`notifyDeath()` signature changes but `killerCard` is **not passed** — state-effect deaths have no killer. The parameter is optional, so no behavioral change.
 
 ## State Transitions
 
-No state transitions — `TargetedCard` is stateless. It evaluates the target's alive/dead status on each call.
+```
+[ally-death event with killer]
+  → DeathSkillHandler.notifyDeath(player, deadCard, killerCard)
+    → context = { sourcePlayer, opponentPlayer, killerCard }
+      → card.launchSkills('ally-death:X', context)
+        → TargetingOverrideSkill.launch(source, context)
+          → resolver(context) → new TargetedCard(killerCard.id)
+            → source.overrideAttackTargeting(strategy)
+
+[ally-death event without killer (state-effect)]
+  → DeathSkillHandler.notifyDeath(player, deadCard, undefined)
+    → context = { sourcePlayer, opponentPlayer, killerCard: undefined }
+      → TargetingOverrideSkill.launch(source, context)
+        → resolver(context) → new TargetedCard('') → always returns []
+```

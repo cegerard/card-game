@@ -1,11 +1,11 @@
-# Tasks: Targeted Card Strategy
+# Tasks: Targeted Card Strategy — Dynamic Resolution (v2)
 
 **Input**: Design documents from `/specs/005-targeted-card-strategy/`
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/api-contract.md
 
 **Tests**: Included per constitution principle II (Test-First Development).
 
-**Organization**: Tasks grouped by user story. All three stories are P1 but have natural ordering: US1 (core behavior) -> US2 (dead target behavior) -> US3 (validation restriction).
+**Organization**: Tasks grouped by user story. This is a v2 refactoring: the killer identity must flow through the death chain before any dynamic resolution works. Foundational phase is critical.
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -23,87 +23,81 @@
 
 ---
 
-## Phase 2: Foundational (DTO Enum & Field)
+## Phase 2: Foundational (Killer Propagation Chain)
 
-**Purpose**: Add the `TARGETED_CARD` enum value and `targetedCardId` field to the DTO layer. These are shared prerequisites for all user stories.
+**Purpose**: Propagate the killer card identity through the death notification chain. This is the prerequisite for dynamic target resolution.
 
 **CRITICAL**: No user story work can begin until this phase is complete.
 
-- [x] T001 Add `TARGETED_CARD = 'targeted-card'` to the `TargetingStrategy` enum in `src/fight/http-api/dto/fight-data.dto.ts`
-- [x] T002 Add optional `targetedCardId` string field to `OtherSkillDto` with `@IsOptional()` and `@IsString()` validators in `src/fight/http-api/dto/fight-data.dto.ts`
+- [ ] T001 Add optional `killerCard?: FightingCard` field to `FightingContext` type in `src/fight/core/cards/@types/fighting-context.ts`
+- [ ] T002 Add optional `killerCard?: FightingCard` parameter to `notifyDeath` in `CardDeathSubscriber` interface in `src/fight/core/fight-simulator/card-death-subscriber.ts`
+- [ ] T003 Update `ActionStage.handleAttackResult()` to accept an `attackerCard` parameter and pass it as `killerCard` to `notifyDeath()` when a defender dies — in `src/fight/core/card-action/action_stage.ts`
+- [ ] T004 Update `ActionStage.notifyDeath()` to accept and forward optional `killerCard` to subscribers — in `src/fight/core/card-action/action_stage.ts`
+- [ ] T005 Update `ActionStage.launchAttack()`, `computeSpecialAttackResult()`, and `launchNextActionSkills()` to pass the attacking card to `handleAttackResult()` — in `src/fight/core/card-action/action_stage.ts`
+- [ ] T006 Update `DeathSkillHandler.notifyDeath()` to accept optional `killerCard` and include it in the `FightingContext` passed to `card.launchSkills()` — in `src/fight/core/fight-simulator/death-skill-handler.ts`
+- [ ] T007 Update `TurnManager.notifyDeath()` to match the new `CardDeathSubscriber` signature (pass `undefined` as `killerCard`) — in `src/fight/core/fight-simulator/turn-manager.ts`
 
-**Checkpoint**: DTO layer has the new enum value and field. No behavioral changes yet.
+**Checkpoint**: Killer identity flows through the death chain. All existing tests still pass (optional parameter, no behavioral change yet).
 
 ---
 
-## Phase 3: User Story 1 — Target a specific enemy card via targeting override (Priority: P1)
+## Phase 3: User Story 1 — Dynamic target resolution via killer identity (Priority: P1)
 
-**Goal**: A card with an active `targeted-card` override hits the designated target while the target is alive.
+**Goal**: When a `targeted-card` override triggers on ally-death, it dynamically targets the card that killed the ally.
 
-**Independent Test**: Configure a targeting override skill with the `targeted-card` strategy, trigger it, verify the card attacks only the designated target.
+**Independent Test**: Configure a targeting override skill with `targeted-card`, trigger it via ally-death (combat kill), verify the card attacks only the killer.
 
 ### Tests for User Story 1
 
 > **Write these tests FIRST, ensure they FAIL before implementation**
 
-- [x] T003 [US1] Write unit test: `TargetedCard.targetedCards()` returns `[targetCard]` when target is alive in defending player's deck — in `src/fight/core/__tests__/targeted-card.spec.ts`
-- [x] T004 [US1] Write unit test: `TargetedCard.id` returns `'targeted-card'` — in `src/fight/core/__tests__/targeted-card.spec.ts`
+- [ ] T008 [US1] Write unit test: `TargetingOverrideSkill` with a resolver builds the strategy from context at launch time — in `src/fight/core/__tests__/targeted-card.spec.ts`
+- [ ] T009 [US1] Write unit test: `TargetingOverrideSkill` with a resolver receiving `killerCard` in context produces a `TargetedCard` targeting the killer — in `src/fight/core/__tests__/targeted-card.spec.ts`
 
 ### Implementation for User Story 1
 
-- [x] T005 [US1] Create `TargetedCard` class implementing `TargetingCardStrategy` with `targetCardId` constructor param and `targetedCards()` method that finds the card in `defendingPlayer.allCards` — in `src/fight/core/targeting-card-strategies/targeted-card.ts`
-- [x] T006 [US1] Wire `TargetedCard` construction in the `TARGETING_OVERRIDE` case of `createOtherSkill()`: when `targetingStrategy` is `targeted-card`, construct `new TargetedCard(targetedCardId)` instead of using `buildTargetingStrategy()` — in `src/fight/http-api/fight.controller.ts`
+- [ ] T010 [US1] Modify `TargetingOverrideSkill` constructor to accept an optional `strategyResolver: (context: FightingContext) => TargetingCardStrategy` — in `src/fight/core/cards/skills/targeting-override.ts`
+- [ ] T011 [US1] Modify `TargetingOverrideSkill.launch()` to call the resolver with context when present, falling back to static strategy otherwise — in `src/fight/core/cards/skills/targeting-override.ts`
+- [ ] T012 [US1] Update controller `TARGETING_OVERRIDE` case: when `targetingStrategy` is `targeted-card`, pass a resolver `(ctx) => new TargetedCard(ctx.killerCard?.id ?? '')` instead of a static `TargetedCard` instance — in `src/fight/http-api/fight.controller.ts`
 
-**Checkpoint**: Unit tests for US1 pass. A card with targeted-card override hits the designated alive target.
+**Checkpoint**: Unit tests for US1 pass. A card with targeted-card override dynamically resolves the killer as its target.
 
 ---
 
-## Phase 4: User Story 2 — Stop targeting when the designated card dies (Priority: P1)
+## Phase 4: User Story 2 — No target when killer is absent or dead (Priority: P1)
 
-**Goal**: When the targeted card is dead or not found, the strategy returns an empty target list.
+**Goal**: When the killer card dies or when the death was caused by a state-effect (no killer), the strategy returns an empty target list.
 
-**Independent Test**: Kill the targeted card mid-battle and verify the strategy returns `[]` on subsequent calls.
+**Independent Test**: Trigger a targeted-card override from a state-effect death (no killer) and verify empty targets. Kill the resolved target mid-battle and verify empty targets.
 
 ### Tests for User Story 2
 
 > **Write these tests FIRST, ensure they FAIL before implementation**
 
-- [x] T007 [US2] Write unit test: `TargetedCard.targetedCards()` returns `[]` when target card is dead — in `src/fight/core/__tests__/targeted-card.spec.ts`
-- [x] T008 [US2] Write unit test: `TargetedCard.targetedCards()` returns `[]` when target card ID does not exist in defending player's deck — in `src/fight/core/__tests__/targeted-card.spec.ts`
+- [ ] T013 [US2] Write unit test: resolver with `killerCard: undefined` produces a `TargetedCard('')` that returns `[]` — in `src/fight/core/__tests__/targeted-card.spec.ts`
 
 ### Implementation for User Story 2
 
-- [x] T009 [US2] Ensure `TargetedCard.targetedCards()` checks `isDead()` on the found card and returns `[]` if dead or not found — in `src/fight/core/targeting-card-strategies/targeted-card.ts`
+*(No additional implementation needed — already handled by the resolver fallback `ctx.killerCard?.id ?? ''` from T012 and the existing `TargetedCard` behavior for dead/missing targets.)*
 
-**Checkpoint**: Unit tests for US2 pass. Dead/missing targets produce empty results.
+**Checkpoint**: Unit tests for US2 pass. No-killer scenario returns empty targets.
 
 ---
 
-## Phase 5: User Story 3 — Restrict strategy usage to targeting overrides only (Priority: P1)
+## Phase 5: User Story 3 — DTO cleanup and validation (Priority: P1)
 
-**Goal**: The `targeted-card` strategy is rejected by validation when used outside of a `TARGETING_OVERRIDE` skill context.
-
-**Independent Test**: Send battle configurations using `targeted-card` in simple attack, special, buff application, and non-override other skill targeting — all should return 400.
+**Goal**: Remove the now-unused `targetedCardId` field from the DTO and its validator. Validation that rejects `targeted-card` outside TARGETING_OVERRIDE remains unchanged.
 
 ### Tests for User Story 3
 
-> **Write these tests FIRST, ensure they FAIL before implementation**
-
-- [x] T010 [P] [US3] Write E2E test: `targeted-card` in `SimpleAttackDto.targetingStrategy` returns 400 — in `test/fight/targeted-card-strategy.e2e-spec.ts`
-- [x] T011 [P] [US3] Write E2E test: `targeted-card` in `SpecialDto.targetingStrategy` returns 400 — in `test/fight/targeted-card-strategy.e2e-spec.ts`
-- [x] T012 [P] [US3] Write E2E test: `targeted-card` in `BuffApplicationDto.targetingStrategy` returns 400 — in `test/fight/targeted-card-strategy.e2e-spec.ts`
-- [x] T013 [P] [US3] Write E2E test: `targeted-card` in non-TARGETING_OVERRIDE `OtherSkillDto` returns 400 — in `test/fight/targeted-card-strategy.e2e-spec.ts`
-- [x] T014 [P] [US3] Write E2E test: `targeted-card` in `TARGETING_OVERRIDE` `OtherSkillDto` with valid `targetedCardId` is accepted (200) — in `test/fight/targeted-card-strategy.e2e-spec.ts`
+- [ ] T014 [US3] Update E2E test: `TARGETING_OVERRIDE` with `targeted-card` no longer sends `targetedCardId` and still returns 200 — in `test/fight/targeted-card-strategy.e2e-spec.ts`
 
 ### Implementation for User Story 3
 
-- [x] T015 [US3] Add custom validation to reject `TARGETED_CARD` in `SimpleAttackDto.targetingStrategy` and `MultipleAttackDto.targetingStrategy` — in `src/fight/http-api/dto/fight-data.dto.ts`
-- [x] T016 [US3] Add custom validation to reject `TARGETED_CARD` in `SpecialDto.targetingStrategy` — in `src/fight/http-api/dto/fight-data.dto.ts`
-- [x] T017 [US3] Add custom validation to reject `TARGETED_CARD` in `BuffApplicationDto.targetingStrategy` — in `src/fight/http-api/dto/fight-data.dto.ts`
-- [x] T018 [US3] Add custom validation to reject `TARGETED_CARD` in `OtherSkillDto.targetingStrategy` when `kind` is not `TARGETING_OVERRIDE` — in `src/fight/http-api/dto/fight-data.dto.ts`
-- [x] T019 [US3] Add validation requiring `targetedCardId` when `kind=TARGETING_OVERRIDE` and `targetingStrategy=targeted-card` — in `src/fight/http-api/dto/fight-data.dto.ts`
+- [ ] T015 [US3] Remove `targetedCardId` field and its decorators from `OtherSkillDto` — in `src/fight/http-api/dto/fight-data.dto.ts`
+- [ ] T016 [US3] Remove `TargetedCardIdRequiredConstraint` validator class and its `@Validate` decorator from `OtherSkillDto` — in `src/fight/http-api/dto/fight-data.dto.ts`
 
-**Checkpoint**: All validation E2E tests pass. Misconfigured strategies are rejected at the DTO boundary.
+**Checkpoint**: DTO is clean. All validation E2E tests pass.
 
 ---
 
@@ -111,9 +105,9 @@
 
 **Purpose**: Full integration verification and sample data update.
 
-- [x] T020 [P] Write E2E test: full battle flow with `targeted-card` override — card attacks designated target, target dies, card skips attacks, override reverts — in `test/fight/targeted-card-strategy.e2e-spec.ts`
-- [x] T021 [P] Update sample card configuration to use `targeted-card` strategy with `targetedCardId` — in `samples/cards.json`
-- [x] T022 Run quality checklist: `npm run format && npm run lint && npm run test:cov && npm run build`
+- [ ] T017 Update E2E test: full battle flow with `targeted-card` override — card attacks the killer of its ally, not a hardcoded target — in `test/fight/targeted-card-strategy.e2e-spec.ts`
+- [ ] T018 [P] Update sample card configuration to remove `targetedCardId` from targeted-card override — in `samples/cards.json`
+- [ ] T019 Run quality checklist: `npm run format && npm run lint && npm run test:cov && npm run build`
 
 ---
 
@@ -122,62 +116,50 @@
 ### Phase Dependencies
 
 - **Foundational (Phase 2)**: No dependencies — can start immediately
-- **US1 (Phase 3)**: Depends on Phase 2 (enum + field must exist)
-- **US2 (Phase 4)**: Depends on Phase 3 (strategy class must exist to add dead-check behavior)
-- **US3 (Phase 5)**: Depends on Phase 2 (enum must exist for validation). Can run in parallel with US1/US2 since it only touches DTO validation.
+- **US1 (Phase 3)**: Depends on Phase 2 (killer must flow through death chain before resolver can use it)
+- **US2 (Phase 4)**: Depends on Phase 3 (resolver must exist to test the no-killer edge case)
+- **US3 (Phase 5)**: Depends on Phase 2 only (DTO cleanup is independent of domain changes). Can run in parallel with US1/US2.
 - **Polish (Phase 6)**: Depends on Phases 3, 4, and 5
 
 ### User Story Dependencies
 
-- **US1 (Phase 3)**: Foundational -> US1 (core strategy class + controller wiring)
-- **US2 (Phase 4)**: US1 -> US2 (extends the same class with dead-target behavior)
-- **US3 (Phase 5)**: Foundational -> US3 (DTO validation only, independent of domain class)
+- **US1 (Phase 3)**: Foundational → US1 (resolver + controller wiring)
+- **US2 (Phase 4)**: US1 → US2 (tests the same resolver with undefined killer)
+- **US3 (Phase 5)**: Foundational → US3 (DTO cleanup, independent of domain)
 
-### Within Each User Story
+### Within Each Phase
 
 - Tests MUST be written and FAIL before implementation
-- Domain class before controller wiring (US1)
-- Validation rules before integration tests (US3)
+- T001–T007 are sequential (same files, progressive changes)
+- T003–T005 touch the same file (`action_stage.ts`) — sequential
+- T015–T016 touch the same file (`fight-data.dto.ts`) — sequential
 
 ### Parallel Opportunities
 
-- **Phase 2**: T001 and T002 touch the same file — sequential
-- **Phase 3**: T003/T004 (tests) parallel, then T005/T006 sequential
-- **Phase 4**: T007/T008 (tests) parallel, then T009
-- **Phase 5**: T010–T014 (E2E tests) all parallel. T015–T019 touch the same file — sequential
-- **Phase 6**: T020 and T021 parallel
-
----
-
-## Parallel Example: User Story 3
-
-```bash
-# Launch all E2E tests for US3 together:
-Task: T010 "E2E test: targeted-card in SimpleAttackDto returns 400"
-Task: T011 "E2E test: targeted-card in SpecialDto returns 400"
-Task: T012 "E2E test: targeted-card in BuffApplicationDto returns 400"
-Task: T013 "E2E test: targeted-card in non-override OtherSkillDto returns 400"
-Task: T014 "E2E test: targeted-card in TARGETING_OVERRIDE is accepted"
-```
+- **Phase 2**: T001 and T002 touch different files — parallel. T003–T005 same file — sequential.
+- **Phase 3**: T008/T009 (tests) parallel. T010/T011 same file — sequential.
+- **Phase 5**: Can run in parallel with Phase 3 (different files)
+- **Phase 6**: T017 and T018 parallel
 
 ---
 
 ## Implementation Strategy
 
-### MVP First (User Story 1 + 2)
+### MVP First (User Story 1)
 
-1. Complete Phase 2: Foundational (enum + field)
-2. Complete Phase 3: US1 (core targeting behavior)
-3. Complete Phase 4: US2 (dead target handling)
-4. **STOP and VALIDATE**: Run unit tests — strategy works correctly
-5. Ready for manual testing via API
+1. Complete Phase 2: Foundational (killer propagation)
+2. Complete Phase 3: US1 (dynamic resolution)
+3. **STOP and VALIDATE**: Run unit tests — killer-based targeting works
+4. Ready for manual testing via API
 
 ### Incremental Delivery
 
-1. Foundational -> US1 + US2 -> Core targeting works (MVP)
-2. Add US3 -> Validation rejects misconfiguration (safety layer)
-3. Polish -> Full integration test + samples updated
+1. Foundational → killer flows through death chain (no behavioral change)
+2. US1 → dynamic resolution works (core feature)
+3. US2 → edge case (no killer) verified
+4. US3 → DTO cleanup (API contract simplified)
+5. Polish → full integration test + samples updated
 
 ### Single Developer Strategy
 
-Execute sequentially: Phase 2 -> Phase 3 -> Phase 4 -> Phase 5 -> Phase 6. US3 (validation) can be interleaved with US1/US2 since it touches different files.
+Execute sequentially: Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6. US3 can be interleaved with US1/US2 since it touches different files.
