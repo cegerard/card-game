@@ -29,8 +29,8 @@
 
 **CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T001 Add `TARGETED_CARD = 'targeted-card'` to the `TargetingStrategy` enum in `src/fight/http-api/dto/fight-data.dto.ts`
-- [ ] T002 Add optional `targetedCardId` string field to `OtherSkillDto` with `@IsOptional()` and `@IsString()` validators in `src/fight/http-api/dto/fight-data.dto.ts`
+- [x] T001 Add `TARGETED_CARD = 'targeted-card'` to the `TargetingStrategy` enum in `src/fight/http-api/dto/fight-data.dto.ts`
+- [x] T002 Add optional `targetedCardId` string field to `OtherSkillDto` with `@IsOptional()` and `@IsString()` validators in `src/fight/http-api/dto/fight-data.dto.ts`
 
 **Checkpoint**: DTO layer has the new enum value and field. No behavioral changes yet.
 
@@ -46,13 +46,13 @@
 
 > **Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T003 [US1] Write unit test: `TargetedCard.targetedCards()` returns `[targetCard]` when target is alive in defending player's deck — in `src/fight/core/__tests__/targeted-card.spec.ts`
-- [ ] T004 [US1] Write unit test: `TargetedCard.id` returns `'targeted-card'` — in `src/fight/core/__tests__/targeted-card.spec.ts`
+- [x] T003 [US1] Write unit test: `TargetedCard.targetedCards()` returns `[targetCard]` when target is alive in defending player's deck — in `src/fight/core/__tests__/targeted-card.spec.ts`
+- [x] T004 [US1] Write unit test: `TargetedCard.id` returns `'targeted-card'` — in `src/fight/core/__tests__/targeted-card.spec.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T005 [US1] Create `TargetedCard` class implementing `TargetingCardStrategy` with `targetCardId` constructor param and `targetedCards()` method that finds the card in `defendingPlayer.allCards` — in `src/fight/core/targeting-card-strategies/targeted-card.ts`
-- [ ] T006 [US1] Wire `TargetedCard` construction in the `TARGETING_OVERRIDE` case of `createOtherSkill()`: when `targetingStrategy` is `targeted-card`, construct `new TargetedCard(targetedCardId)` instead of using `buildTargetingStrategy()` — in `src/fight/http-api/fight.controller.ts`
+- [x] T005 [US1] Create `TargetedCard` class implementing `TargetingCardStrategy` with `targetCardId` constructor param and `targetedCards()` method that finds the card in `defendingPlayer.allCards` — in `src/fight/core/targeting-card-strategies/targeted-card.ts`
+- [x] T006 [US1] Wire `TargetedCard` construction in the `TARGETING_OVERRIDE` case of `createOtherSkill()`: when `targetingStrategy` is `targeted-card`, construct `new TargetedCard(targetedCardId)` instead of using `buildTargetingStrategy()` — in `src/fight/http-api/fight.controller.ts`
 
 **Checkpoint**: Unit tests for US1 pass. A card with targeted-card override hits the designated alive target.
 
@@ -68,12 +68,12 @@
 
 > **Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T007 [US2] Write unit test: `TargetedCard.targetedCards()` returns `[]` when target card is dead — in `src/fight/core/__tests__/targeted-card.spec.ts`
-- [ ] T008 [US2] Write unit test: `TargetedCard.targetedCards()` returns `[]` when target card ID does not exist in defending player's deck — in `src/fight/core/__tests__/targeted-card.spec.ts`
+- [x] T007 [US2] Write unit test: `TargetedCard.targetedCards()` returns `[]` when target card is dead — in `src/fight/core/__tests__/targeted-card.spec.ts`
+- [x] T008 [US2] Write unit test: `TargetedCard.targetedCards()` returns `[]` when target card ID does not exist in defending player's deck — in `src/fight/core/__tests__/targeted-card.spec.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T009 [US2] Ensure `TargetedCard.targetedCards()` checks `isDead()` on the found card and returns `[]` if dead or not found — in `src/fight/core/targeting-card-strategies/targeted-card.ts`
+- [x] T009 [US2] Ensure `TargetedCard.targetedCards()` checks `isDead()` on the found card and returns `[]` if dead or not found — in `src/fight/core/targeting-card-strategies/targeted-card.ts`
 
 **Checkpoint**: Unit tests for US2 pass. Dead/missing targets produce empty results.
 
@@ -89,19 +89,19 @@
 
 > **Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T010 [P] [US3] Write E2E test: `targeted-card` in `SimpleAttackDto.targetingStrategy` returns 400 — in `test/fight/targeted-card-strategy.e2e-spec.ts`
-- [ ] T011 [P] [US3] Write E2E test: `targeted-card` in `SpecialDto.targetingStrategy` returns 400 — in `test/fight/targeted-card-strategy.e2e-spec.ts`
-- [ ] T012 [P] [US3] Write E2E test: `targeted-card` in `BuffApplicationDto.targetingStrategy` returns 400 — in `test/fight/targeted-card-strategy.e2e-spec.ts`
-- [ ] T013 [P] [US3] Write E2E test: `targeted-card` in non-TARGETING_OVERRIDE `OtherSkillDto` returns 400 — in `test/fight/targeted-card-strategy.e2e-spec.ts`
-- [ ] T014 [P] [US3] Write E2E test: `targeted-card` in `TARGETING_OVERRIDE` `OtherSkillDto` with valid `targetedCardId` is accepted (200) — in `test/fight/targeted-card-strategy.e2e-spec.ts`
+- [x] T010 [P] [US3] Write E2E test: `targeted-card` in `SimpleAttackDto.targetingStrategy` returns 400 — in `test/fight/targeted-card-strategy.e2e-spec.ts`
+- [x] T011 [P] [US3] Write E2E test: `targeted-card` in `SpecialDto.targetingStrategy` returns 400 — in `test/fight/targeted-card-strategy.e2e-spec.ts`
+- [x] T012 [P] [US3] Write E2E test: `targeted-card` in `BuffApplicationDto.targetingStrategy` returns 400 — in `test/fight/targeted-card-strategy.e2e-spec.ts`
+- [x] T013 [P] [US3] Write E2E test: `targeted-card` in non-TARGETING_OVERRIDE `OtherSkillDto` returns 400 — in `test/fight/targeted-card-strategy.e2e-spec.ts`
+- [x] T014 [P] [US3] Write E2E test: `targeted-card` in `TARGETING_OVERRIDE` `OtherSkillDto` with valid `targetedCardId` is accepted (200) — in `test/fight/targeted-card-strategy.e2e-spec.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T015 [US3] Add custom validation to reject `TARGETED_CARD` in `SimpleAttackDto.targetingStrategy` and `MultipleAttackDto.targetingStrategy` — in `src/fight/http-api/dto/fight-data.dto.ts`
-- [ ] T016 [US3] Add custom validation to reject `TARGETED_CARD` in `SpecialDto.targetingStrategy` — in `src/fight/http-api/dto/fight-data.dto.ts`
-- [ ] T017 [US3] Add custom validation to reject `TARGETED_CARD` in `BuffApplicationDto.targetingStrategy` — in `src/fight/http-api/dto/fight-data.dto.ts`
-- [ ] T018 [US3] Add custom validation to reject `TARGETED_CARD` in `OtherSkillDto.targetingStrategy` when `kind` is not `TARGETING_OVERRIDE` — in `src/fight/http-api/dto/fight-data.dto.ts`
-- [ ] T019 [US3] Add validation requiring `targetedCardId` when `kind=TARGETING_OVERRIDE` and `targetingStrategy=targeted-card` — in `src/fight/http-api/dto/fight-data.dto.ts`
+- [x] T015 [US3] Add custom validation to reject `TARGETED_CARD` in `SimpleAttackDto.targetingStrategy` and `MultipleAttackDto.targetingStrategy` — in `src/fight/http-api/dto/fight-data.dto.ts`
+- [x] T016 [US3] Add custom validation to reject `TARGETED_CARD` in `SpecialDto.targetingStrategy` — in `src/fight/http-api/dto/fight-data.dto.ts`
+- [x] T017 [US3] Add custom validation to reject `TARGETED_CARD` in `BuffApplicationDto.targetingStrategy` — in `src/fight/http-api/dto/fight-data.dto.ts`
+- [x] T018 [US3] Add custom validation to reject `TARGETED_CARD` in `OtherSkillDto.targetingStrategy` when `kind` is not `TARGETING_OVERRIDE` — in `src/fight/http-api/dto/fight-data.dto.ts`
+- [x] T019 [US3] Add validation requiring `targetedCardId` when `kind=TARGETING_OVERRIDE` and `targetingStrategy=targeted-card` — in `src/fight/http-api/dto/fight-data.dto.ts`
 
 **Checkpoint**: All validation E2E tests pass. Misconfigured strategies are rejected at the DTO boundary.
 
@@ -111,9 +111,9 @@
 
 **Purpose**: Full integration verification and sample data update.
 
-- [ ] T020 [P] Write E2E test: full battle flow with `targeted-card` override — card attacks designated target, target dies, card skips attacks, override reverts — in `test/fight/targeted-card-strategy.e2e-spec.ts`
-- [ ] T021 [P] Update sample card configuration to use `targeted-card` strategy with `targetedCardId` — in `samples/cards.json`
-- [ ] T022 Run quality checklist: `npm run format && npm run lint && npm run test:cov && npm run build`
+- [x] T020 [P] Write E2E test: full battle flow with `targeted-card` override — card attacks designated target, target dies, card skips attacks, override reverts — in `test/fight/targeted-card-strategy.e2e-spec.ts`
+- [x] T021 [P] Update sample card configuration to use `targeted-card` strategy with `targetedCardId` — in `samples/cards.json`
+- [x] T022 Run quality checklist: `npm run format && npm run lint && npm run test:cov && npm run build`
 
 ---
 

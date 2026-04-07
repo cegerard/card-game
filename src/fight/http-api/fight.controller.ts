@@ -19,6 +19,7 @@ import {
   SkillKind,
   BuffType,
   TriggerEvent,
+  TargetingStrategy,
 } from './dto/fight-data.dto';
 import { FightingCard } from '../core/cards/fighting-card';
 import { SpecialAttack } from '../core/cards/skills/special-attack';
@@ -51,6 +52,7 @@ import { ConditionalAttack } from '../core/cards/skills/conditional-attack';
 import { EveryNTurnsCondition } from '../core/cards/@types/attack/conditions/every-n-turns-condition';
 import { MultipleAttack } from '../core/cards/skills/multiple-attack';
 import { AttackSkill } from '../core/cards/skills/attack-skill';
+import { TargetedCard } from '../core/targeting-card-strategies/targeted-card';
 
 @Controller()
 @UsePipes(
@@ -326,8 +328,12 @@ export class FightController {
         if (!skillData.terminationEvent) {
           throw new Error('Targeting override skill requires terminationEvent');
         }
+        const overrideStrategy =
+          skillData.targetingStrategy === TargetingStrategy.TARGETED_CARD
+            ? new TargetedCard(skillData.targetedCardId)
+            : buildTargetingStrategy(skillData.targetingStrategy);
         return new TargetingOverrideSkill(
-          buildTargetingStrategy(skillData.targetingStrategy),
+          overrideStrategy,
           skillData.terminationEvent,
           buildTriggerStrategy(skillData.event, skillData.targetCardId),
           skillData.powerId,
