@@ -304,7 +304,6 @@ export class FightingCard {
     this.poisoned = this.poisoned?.remainingTurns ? this.poisoned : undefined;
     this.burned = this.burned?.remainingTurns ? this.burned : undefined;
 
-    // remove undefined states results
     return stateResults.filter((result) => result !== undefined);
   }
 
