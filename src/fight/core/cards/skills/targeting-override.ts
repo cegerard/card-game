@@ -14,13 +14,20 @@ export class TargetingOverrideSkill implements Skill {
     private readonly terminationEvent: string,
     private readonly trigger: Trigger,
     private readonly powerId?: string,
+    private readonly strategyResolver?: (
+      context: FightingContext,
+    ) => TargetingCardStrategy,
   ) {}
 
-  launch(source: FightingCard, _context: FightingContext): SkillResults {
+  launch(source: FightingCard, context: FightingContext): SkillResults {
     const previousStrategy = source.attackTargetingId;
 
+    const strategy = this.strategyResolver
+      ? this.strategyResolver(context)
+      : this.targetingStrategy;
+
     source.overrideAttackTargeting(
-      this.targetingStrategy,
+      strategy,
       this.terminationEvent,
       this.powerId,
     );
@@ -29,7 +36,7 @@ export class TargetingOverrideSkill implements Skill {
       kind: StepKind.TargetingOverride,
       source: source.identityInfo,
       previousStrategy,
-      newStrategy: this.targetingStrategy.id,
+      newStrategy: strategy.id,
       powerId: this.powerId,
     };
 

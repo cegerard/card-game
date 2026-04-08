@@ -10,6 +10,11 @@ import {
   IsEnum,
   IsOptional,
   Min,
+  IsNotIn,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+  ValidationArguments,
+  Validate,
 } from 'class-validator';
 
 export enum BuffConditionType {
@@ -84,6 +89,7 @@ export enum TargetingStrategy {
   ALL_OWNER_CARD = 'all-owner-cards',
   ALL_ALLIES = 'all-allies',
   SELF = 'self',
+  TARGETED_CARD = 'targeted-card',
 }
 
 export enum CardSelectorStrategy {
@@ -145,6 +151,10 @@ class BuffApplicationDto {
   duration: number;
 
   @IsEnum(TargetingStrategy)
+  @IsNotIn([TargetingStrategy.TARGETED_CARD], {
+    message:
+      'targeted-card strategy can only be used with targeting override skills',
+  })
   targetingStrategy: TargetingStrategy;
 
   @IsOptional()
@@ -172,6 +182,10 @@ class SpecialDto {
   energy: number;
 
   @IsEnum(TargetingStrategy)
+  @IsNotIn([TargetingStrategy.TARGETED_CARD], {
+    message:
+      'targeted-card strategy can only be used with targeting override skills',
+  })
   targetingStrategy: TargetingStrategy;
 
   @IsOptional()
@@ -206,6 +220,10 @@ class SimpleAttackDto {
   damages: DamageCompositionDto[];
 
   @IsEnum(TargetingStrategy)
+  @IsNotIn([TargetingStrategy.TARGETED_CARD], {
+    message:
+      'targeted-card strategy can only be used with targeting override skills',
+  })
   targetingStrategy: TargetingStrategy;
 
   @IsOptional()
@@ -228,6 +246,10 @@ class MultipleAttackDto {
   damages: DamageCompositionDto[];
 
   @IsEnum(TargetingStrategy)
+  @IsNotIn([TargetingStrategy.TARGETED_CARD], {
+    message:
+      'targeted-card strategy can only be used with targeting override skills',
+  })
   targetingStrategy: TargetingStrategy;
 
   @IsOptional()
@@ -247,8 +269,24 @@ class MultipleAttackDto {
   comboFinisher?: DamageCompositionDto[];
 }
 
+@ValidatorConstraint({ name: 'targetedCardOnlyForOverride', async: false })
+class TargetedCardOnlyForOverrideConstraint implements ValidatorConstraintInterface {
+  validate(_value: any, args: ValidationArguments) {
+    const obj = args.object as OtherSkillDto;
+    if (obj.targetingStrategy === TargetingStrategy.TARGETED_CARD) {
+      return obj.kind === SkillKind.TARGETING_OVERRIDE;
+    }
+    return true;
+  }
+
+  defaultMessage() {
+    return 'targeted-card strategy can only be used with targeting override skills';
+  }
+}
+
 export class OtherSkillDto {
   @IsEnum(SkillKind)
+  @Validate(TargetedCardOnlyForOverrideConstraint)
   kind: SkillKind;
 
   @IsString()

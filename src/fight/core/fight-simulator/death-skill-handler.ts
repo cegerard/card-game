@@ -30,7 +30,11 @@ export class DeathSkillHandler implements CardDeathSubscriber {
     this.endEventProcessor = endEventProcessor;
   }
 
-  notifyDeath(_player: Player, deadCard: FightingCard): void {
+  notifyDeath(
+    _player: Player,
+    deadCard: FightingCard,
+    killerCard?: FightingCard,
+  ): void {
     const triggerId = `ally-death:${deadCard.id}`;
     const ownerPlayer = this.player1.ownCard(deadCard)
       ? this.player1
@@ -54,6 +58,7 @@ export class DeathSkillHandler implements CardDeathSubscriber {
       const context = {
         sourcePlayer: ownerPlayer,
         opponentPlayer,
+        killerCard,
       };
 
       const skillResults = card.launchSkills(triggerId, context);
