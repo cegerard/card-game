@@ -328,12 +328,17 @@ export class FightController {
         if (!skillData.terminationEvent) {
           throw new Error('Targeting override skill requires terminationEvent');
         }
-        const overrideStrategy =
-          skillData.targetingStrategy === TargetingStrategy.TARGETED_CARD
-            ? new TargetedCard(skillData.targetedCardId)
-            : buildTargetingStrategy(skillData.targetingStrategy);
+        if (skillData.targetingStrategy === TargetingStrategy.TARGETED_CARD) {
+          return new TargetingOverrideSkill(
+            undefined,
+            skillData.terminationEvent,
+            buildTriggerStrategy(skillData.event, skillData.targetCardId),
+            skillData.powerId,
+            (ctx) => new TargetedCard(ctx.killerCard?.id ?? ''),
+          );
+        }
         return new TargetingOverrideSkill(
-          overrideStrategy,
+          buildTargetingStrategy(skillData.targetingStrategy),
           skillData.terminationEvent,
           buildTriggerStrategy(skillData.event, skillData.targetCardId),
           skillData.powerId,

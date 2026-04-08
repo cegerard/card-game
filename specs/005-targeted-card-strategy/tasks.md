@@ -29,13 +29,13 @@
 
 **CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T001 Add optional `killerCard?: FightingCard` field to `FightingContext` type in `src/fight/core/cards/@types/fighting-context.ts`
-- [ ] T002 Add optional `killerCard?: FightingCard` parameter to `notifyDeath` in `CardDeathSubscriber` interface in `src/fight/core/fight-simulator/card-death-subscriber.ts`
-- [ ] T003 Update `ActionStage.handleAttackResult()` to accept an `attackerCard` parameter and pass it as `killerCard` to `notifyDeath()` when a defender dies — in `src/fight/core/card-action/action_stage.ts`
-- [ ] T004 Update `ActionStage.notifyDeath()` to accept and forward optional `killerCard` to subscribers — in `src/fight/core/card-action/action_stage.ts`
-- [ ] T005 Update `ActionStage.launchAttack()`, `computeSpecialAttackResult()`, and `launchNextActionSkills()` to pass the attacking card to `handleAttackResult()` — in `src/fight/core/card-action/action_stage.ts`
-- [ ] T006 Update `DeathSkillHandler.notifyDeath()` to accept optional `killerCard` and include it in the `FightingContext` passed to `card.launchSkills()` — in `src/fight/core/fight-simulator/death-skill-handler.ts`
-- [ ] T007 Update `TurnManager.notifyDeath()` to match the new `CardDeathSubscriber` signature (pass `undefined` as `killerCard`) — in `src/fight/core/fight-simulator/turn-manager.ts`
+- [X] T001 Add optional `killerCard?: FightingCard` field to `FightingContext` type in `src/fight/core/cards/@types/fighting-context.ts`
+- [X] T002 Add optional `killerCard?: FightingCard` parameter to `notifyDeath` in `CardDeathSubscriber` interface in `src/fight/core/fight-simulator/card-death-subscriber.ts`
+- [X] T003 Update `ActionStage.handleAttackResult()` to accept an `attackerCard` parameter and pass it as `killerCard` to `notifyDeath()` when a defender dies — in `src/fight/core/card-action/action_stage.ts`
+- [X] T004 Update `ActionStage.notifyDeath()` to accept and forward optional `killerCard` to subscribers — in `src/fight/core/card-action/action_stage.ts`
+- [X] T005 Update `ActionStage.launchAttack()`, `computeSpecialAttackResult()`, and `launchNextActionSkills()` to pass the attacking card to `handleAttackResult()` — in `src/fight/core/card-action/action_stage.ts`
+- [X] T006 Update `DeathSkillHandler.notifyDeath()` to accept optional `killerCard` and include it in the `FightingContext` passed to `card.launchSkills()` — in `src/fight/core/fight-simulator/death-skill-handler.ts`
+- [X] T007 Update `TurnManager.notifyDeath()` to match the new `CardDeathSubscriber` signature (pass `undefined` as `killerCard`) — in `src/fight/core/fight-simulator/turn-manager.ts`
 
 **Checkpoint**: Killer identity flows through the death chain. All existing tests still pass (optional parameter, no behavioral change yet).
 
@@ -51,14 +51,14 @@
 
 > **Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T008 [US1] Write unit test: `TargetingOverrideSkill` with a resolver builds the strategy from context at launch time — in `src/fight/core/__tests__/targeted-card.spec.ts`
-- [ ] T009 [US1] Write unit test: `TargetingOverrideSkill` with a resolver receiving `killerCard` in context produces a `TargetedCard` targeting the killer — in `src/fight/core/__tests__/targeted-card.spec.ts`
+- [X] T008 [US1] Write unit test: `TargetingOverrideSkill` with a resolver builds the strategy from context at launch time — in `src/fight/core/__tests__/targeted-card.spec.ts`
+- [X] T009 [US1] Write unit test: `TargetingOverrideSkill` with a resolver receiving `killerCard` in context produces a `TargetedCard` targeting the killer — in `src/fight/core/__tests__/targeted-card.spec.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T010 [US1] Modify `TargetingOverrideSkill` constructor to accept an optional `strategyResolver: (context: FightingContext) => TargetingCardStrategy` — in `src/fight/core/cards/skills/targeting-override.ts`
-- [ ] T011 [US1] Modify `TargetingOverrideSkill.launch()` to call the resolver with context when present, falling back to static strategy otherwise — in `src/fight/core/cards/skills/targeting-override.ts`
-- [ ] T012 [US1] Update controller `TARGETING_OVERRIDE` case: when `targetingStrategy` is `targeted-card`, pass a resolver `(ctx) => new TargetedCard(ctx.killerCard?.id ?? '')` instead of a static `TargetedCard` instance — in `src/fight/http-api/fight.controller.ts`
+- [X] T010 [US1] Modify `TargetingOverrideSkill` constructor to accept an optional `strategyResolver: (context: FightingContext) => TargetingCardStrategy` — in `src/fight/core/cards/skills/targeting-override.ts`
+- [X] T011 [US1] Modify `TargetingOverrideSkill.launch()` to call the resolver with context when present, falling back to static strategy otherwise — in `src/fight/core/cards/skills/targeting-override.ts`
+- [X] T012 [US1] Update controller `TARGETING_OVERRIDE` case: when `targetingStrategy` is `targeted-card`, pass a resolver `(ctx) => new TargetedCard(ctx.killerCard?.id ?? '')` instead of a static `TargetedCard` instance — in `src/fight/http-api/fight.controller.ts`
 
 **Checkpoint**: Unit tests for US1 pass. A card with targeted-card override dynamically resolves the killer as its target.
 
@@ -74,7 +74,7 @@
 
 > **Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T013 [US2] Write unit test: resolver with `killerCard: undefined` produces a `TargetedCard('')` that returns `[]` — in `src/fight/core/__tests__/targeted-card.spec.ts`
+- [X] T013 [US2] Write unit test: resolver with `killerCard: undefined` produces a `TargetedCard('')` that returns `[]` — in `src/fight/core/__tests__/targeted-card.spec.ts`
 
 ### Implementation for User Story 2
 
@@ -90,12 +90,12 @@
 
 ### Tests for User Story 3
 
-- [ ] T014 [US3] Update E2E test: `TARGETING_OVERRIDE` with `targeted-card` no longer sends `targetedCardId` and still returns 200 — in `test/fight/targeted-card-strategy.e2e-spec.ts`
+- [X] T014 [US3] Update E2E test: `TARGETING_OVERRIDE` with `targeted-card` no longer sends `targetedCardId` and still returns 200 — in `test/fight/targeted-card-strategy.e2e-spec.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T015 [US3] Remove `targetedCardId` field and its decorators from `OtherSkillDto` — in `src/fight/http-api/dto/fight-data.dto.ts`
-- [ ] T016 [US3] Remove `TargetedCardIdRequiredConstraint` validator class and its `@Validate` decorator from `OtherSkillDto` — in `src/fight/http-api/dto/fight-data.dto.ts`
+- [X] T015 [US3] Remove `targetedCardId` field and its decorators from `OtherSkillDto` — in `src/fight/http-api/dto/fight-data.dto.ts`
+- [X] T016 [US3] Remove `TargetedCardIdRequiredConstraint` validator class and its `@Validate` decorator from `OtherSkillDto` — in `src/fight/http-api/dto/fight-data.dto.ts`
 
 **Checkpoint**: DTO is clean. All validation E2E tests pass.
 
@@ -105,9 +105,9 @@
 
 **Purpose**: Full integration verification and sample data update.
 
-- [ ] T017 Update E2E test: full battle flow with `targeted-card` override — card attacks the killer of its ally, not a hardcoded target — in `test/fight/targeted-card-strategy.e2e-spec.ts`
-- [ ] T018 [P] Update sample card configuration to remove `targetedCardId` from targeted-card override — in `samples/cards.json`
-- [ ] T019 Run quality checklist: `npm run format && npm run lint && npm run test:cov && npm run build`
+- [X] T017 Update E2E test: full battle flow with `targeted-card` override — card attacks the killer of its ally, not a hardcoded target — in `test/fight/targeted-card-strategy.e2e-spec.ts`
+- [X] T018 [P] Update sample card configuration to remove `targetedCardId` from targeted-card override — in `samples/cards.json`
+- [X] T019 Run quality checklist: `npm run format && npm run lint && npm run test:cov && npm run build`
 
 ---
 

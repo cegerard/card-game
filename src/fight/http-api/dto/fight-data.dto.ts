@@ -284,31 +284,9 @@ class TargetedCardOnlyForOverrideConstraint implements ValidatorConstraintInterf
   }
 }
 
-@ValidatorConstraint({
-  name: 'targetedCardIdRequired',
-  async: false,
-})
-class TargetedCardIdRequiredConstraint implements ValidatorConstraintInterface {
-  validate(_value: any, args: ValidationArguments) {
-    const obj = args.object as OtherSkillDto;
-    if (
-      obj.kind === SkillKind.TARGETING_OVERRIDE &&
-      obj.targetingStrategy === TargetingStrategy.TARGETED_CARD
-    ) {
-      return !!obj.targetedCardId;
-    }
-    return true;
-  }
-
-  defaultMessage() {
-    return 'targetedCardId is required when using targeted-card strategy with targeting override';
-  }
-}
-
 export class OtherSkillDto {
   @IsEnum(SkillKind)
   @Validate(TargetedCardOnlyForOverrideConstraint)
-  @Validate(TargetedCardIdRequiredConstraint)
   kind: SkillKind;
 
   @IsString()
@@ -374,11 +352,6 @@ export class OtherSkillDto {
   @IsOptional()
   @IsString()
   targetCardId?: string;
-
-  // Targeted card strategy property — required when kind=TARGETING_OVERRIDE and targetingStrategy=targeted-card
-  @IsOptional()
-  @IsString()
-  targetedCardId?: string;
 
   // Event-bound buff properties
   @IsOptional()

@@ -74,6 +74,7 @@ export class ActionStage {
     this.handleAttackResult(
       card.launchAttack(this.getFightingContext(card)),
       result,
+      card,
     );
 
     return result;
@@ -97,7 +98,11 @@ export class ActionStage {
       statusChanges: [],
     };
 
-    this.handleAttackResult(attackSkill.results as AttackResult[], result);
+    this.handleAttackResult(
+      attackSkill.results as AttackResult[],
+      result,
+      card,
+    );
 
     return result;
   }
@@ -124,7 +129,7 @@ export class ActionStage {
     const specialResults = card.launchSpecial(this.getFightingContext(card));
     const actionResults = specialResults.actionResults as AttackResult[];
 
-    this.handleAttackResult(actionResults, result);
+    this.handleAttackResult(actionResults, result, card);
 
     if (specialResults.buffResults.length > 0) {
       const buffReport: BuffReport = {
@@ -201,6 +206,7 @@ export class ActionStage {
   private handleAttackResult(
     attackResults: AttackResult[],
     report: AttackReport,
+    attackerCard?: FightingCard,
   ): void {
     attackResults.forEach((damageDealt) => {
       const defensiveCard = damageDealt.defender;
@@ -214,7 +220,7 @@ export class ActionStage {
       });
 
       if (defensiveCard.isDead()) {
-        this.notifyDeath(defensiveCard);
+        this.notifyDeath(defensiveCard, attackerCard);
         report.statusChanges.push({
           card: defensiveCard.identityInfo,
           status: 'dead',
@@ -236,11 +242,11 @@ export class ActionStage {
     };
   }
 
-  private notifyDeath(card: FightingCard): void {
+  private notifyDeath(card: FightingCard, killerCard?: FightingCard): void {
     const player = this.player1.ownCard(card) ? this.player1 : this.player2;
 
     this.eventBroker.onCardDeath.forEach((subscriber) =>
-      subscriber.notifyDeath(player, card),
+      subscriber.notifyDeath(player, card, killerCard),
     );
   }
 }

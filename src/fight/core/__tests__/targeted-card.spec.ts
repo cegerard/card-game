@@ -1,6 +1,11 @@
 import { TargetedCard } from '../targeting-card-strategies/targeted-card';
 import { createFightingCard } from '../../../../test/helpers/fighting-card';
 import { Player } from '../player';
+import { TargetingOverrideSkill } from '../cards/skills/targeting-override';
+import { TurnEnd } from '../trigger/turn-end';
+import { SkillKind } from '../cards/skills/skill';
+import { FightingContext } from '../cards/@types/fighting-context';
+import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
 
 describe('TargetedCard', () => {
   describe('id', () => {
@@ -68,6 +73,86 @@ describe('TargetedCard', () => {
       );
 
       expect(result).toEqual([]);
+    });
+  });
+});
+
+describe('TargetingOverrideSkill with resolver', () => {
+  describe('launch with strategyResolver', () => {
+    it('builds the strategy from context at launch time', () => {
+      const resolver = jest.fn(
+        (_ctx: FightingContext): TargetingCardStrategy =>
+          new TargetedCard('enemy-1'),
+      );
+      const source = createFightingCard({ id: 'avenger' });
+      const sourcePlayer = new Player('P1', [source]);
+      const opponentPlayer = new Player('P2', [
+        createFightingCard({ id: 'enemy-1' }),
+      ]);
+      const context: FightingContext = { sourcePlayer, opponentPlayer };
+
+      const skill = new TargetingOverrideSkill(
+        undefined,
+        'end-event',
+        new TurnEnd(),
+        undefined,
+        resolver,
+      );
+
+      skill.launch(source, context);
+
+      expect(resolver).toHaveBeenCalledWith(context);
+    });
+
+    it('produces a TargetedCard with empty targets when killerCard is undefined', () => {
+      const resolver = (ctx: FightingContext): TargetingCardStrategy =>
+        new TargetedCard(ctx.killerCard?.id ?? '');
+      const source = createFightingCard({ id: 'avenger' });
+      const enemy = createFightingCard({ id: 'enemy-1' });
+      const sourcePlayer = new Player('P1', [source]);
+      const opponentPlayer = new Player('P2', [enemy]);
+      const context: FightingContext = { sourcePlayer, opponentPlayer };
+
+      const skill = new TargetingOverrideSkill(
+        undefined,
+        'end-event',
+        new TurnEnd(),
+        undefined,
+        resolver,
+      );
+
+      skill.launch(source, context);
+
+      const resolvedTargets = source.launchAttack(context);
+
+      expect(resolvedTargets).toEqual([]);
+    });
+
+    it('produces a TargetedCard targeting the killer when killerCard is in context', () => {
+      const killer = createFightingCard({ id: 'killer-card' });
+      const resolver = (ctx: FightingContext): TargetingCardStrategy =>
+        new TargetedCard(ctx.killerCard?.id ?? '');
+      const source = createFightingCard({ id: 'avenger' });
+      const sourcePlayer = new Player('P1', [source]);
+      const opponentPlayer = new Player('P2', [killer]);
+      const context: FightingContext = {
+        sourcePlayer,
+        opponentPlayer,
+        killerCard: killer,
+      };
+
+      const skill = new TargetingOverrideSkill(
+        undefined,
+        'end-event',
+        new TurnEnd(),
+        undefined,
+        resolver,
+      );
+
+      const result = skill.launch(source, context);
+
+      expect(result.skillKind).toBe(SkillKind.TargetingOverride);
+      expect(source.attackTargetingId).toBe('targeted-card');
     });
   });
 });

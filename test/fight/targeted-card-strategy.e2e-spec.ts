@@ -190,7 +190,7 @@ describe('Targeted Card Strategy — Validation (US3)', () => {
       .expect(400);
   });
 
-  it('accepts targeted-card in TARGETING_OVERRIDE OtherSkillDto with valid targetedCardId (200)', async () => {
+  it('accepts targeted-card in TARGETING_OVERRIDE OtherSkillDto without targetedCardId (200)', async () => {
     const card = buildMinimalCard({
       id: 'attacker',
       skills: {
@@ -212,7 +212,6 @@ describe('Targeted Card Strategy — Validation (US3)', () => {
             name: 'Vengeance',
             targetingStrategy: 'targeted-card',
             event: 'turn-end',
-            targetedCardId: 'enemy-1',
             terminationEvent: 'end-event',
           },
         ],
@@ -303,7 +302,6 @@ function buildTargetedCardBattlePayload() {
                 targetingStrategy: 'targeted-card',
                 event: 'ally-death',
                 targetCardId: 'protector',
-                targetedCardId: 'target-enemy',
                 terminationEvent: 'vengeance-end',
                 powerId: 'vengeance',
               },

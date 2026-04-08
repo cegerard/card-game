@@ -107,7 +107,7 @@
             "type": "BURN",
             "rate": 0.3,
             "level": 3,
-            "terminationEvent": "lion-heritage-end" // validate
+            "terminationEvent": "lion-heritage-end"
           },
           "powerId": "lion-heritage"
         },
@@ -127,10 +127,9 @@
         {
           "kind": "TARGETING_OVERRIDE",
           "name": "Vengeance",
-          "targetingStrategy": "TODO", // validate
+          "targetingStrategy": "targeted-card",
           "event": "ally-death",
           "targetCardId": "kaelion",
-
           "terminationEvent": "lion-heritage-end",
           "powerId": "lion-heritage"
         }
