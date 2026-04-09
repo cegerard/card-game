@@ -133,6 +133,10 @@ Simulates a turn-based card battle between two players.
   activationLimit?: number,     // Max activations (>=1) before skill lifecycle ends
   endEvent?: string,            // Event emitted when activation limit is reached
   powerId?: string,             // Groups multiple skills as a composite power (must share same event + terminationEvent)
+  // DORMANT trigger fields (required when event="dormant"):
+  activationEvent?: TriggerEvent, // Event that activates the dormant skill (e.g., "ally-death")
+  activationTargetCardId?: string, // Card ID for the activation event trigger
+  replacementEvent?: TriggerEvent, // Event to use after activation (e.g., "enemy-death"). Target card ID resolved dynamically from killer card at activation time
   // CONDITIONAL_ATTACK fields:
   damages?: DamageCompositionDto[],
   hits?: number,
@@ -253,6 +257,8 @@ Simulates a turn-based card battle between two players.
 - `turn-end`: Skill triggers at end of turn
 - `next-action`: Skill triggers on the next action turn
 - `ally-death`: Skill triggers when a specific ally dies (requires `targetCardId` matching the dead card's `id`)
+- `enemy-death`: Skill triggers when a specific enemy dies (requires `targetCardId` matching the dead card's `id`)
+- `dormant`: Skill starts inactive; requires `activationEvent`, `activationTargetCardId`, and `replacementEvent` to define when and how the trigger activates mid-battle. The replacement trigger's target card ID is resolved dynamically at activation time from the killer card's ID
 
 ### SpecialKind
 

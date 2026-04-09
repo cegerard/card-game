@@ -277,7 +277,7 @@ export class FightingCard {
     context: FightingContext,
   ): SkillResults[] {
     return this.skills
-      .filter((s) => s.isTriggered(trigger))
+      .filter((s) => s.isTriggered(trigger, context))
       .map((skill) => skill.launch(this, context));
   }
 

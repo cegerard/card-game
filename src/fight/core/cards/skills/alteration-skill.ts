@@ -116,9 +116,9 @@ export class AlterationSkill implements Skill {
     };
   }
 
-  isTriggered(triggerName: string): boolean {
+  isTriggered(triggerName: string, context?: FightingContext): boolean {
     if (this.isExhausted()) return false;
-    return this.trigger.isTriggered(triggerName);
+    return this.trigger.isTriggered(triggerName, context);
   }
 
   lifecycleEndEvent(): string | undefined {
