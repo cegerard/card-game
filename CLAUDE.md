@@ -1,6 +1,6 @@
 # card-game Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-04-07
+Auto-generated from all feature plans. Last updated: 2026-04-08
 
 ## Active Technologies
 
@@ -25,10 +25,10 @@ npm test && npm run lint
 TypeScript on Node.js 24: Follow standard conventions
 
 ## Recent Changes
+- 006-dynamic-skill-trigger: Added TypeScript on Node.js 24 + NestJS 11, class-validator, class-transformer
 
 - 005-targeted-card-strategy: Added TypeScript on Node.js 24 + NestJS 11, class-validator, class-transformer
 - 004-event-bound-effect-termination: Added TypeScript on Node.js 24 + NestJS 11, class-validator, class-transformer
-- 003-composite-power: Added TypeScript on Node.js 24 + NestJS 11, class-validator, class-transformer
 
 <!-- MANUAL ADDITIONS START -->
 

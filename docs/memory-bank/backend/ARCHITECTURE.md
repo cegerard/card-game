@@ -97,7 +97,9 @@ src/
     │   └── trigger/                  # Skill trigger events
     │       ├── trigger.ts
     │       ├── turn-end.ts
-    │       └── ally-death.ts         # Matches 'ally-death:<cardId>' trigger strings
+    │       ├── ally-death.ts         # Matches 'ally-death:<cardId>' trigger strings
+    │       ├── enemy-death.ts        # Matches 'enemy-death:<cardId>' trigger strings
+    │       └── dynamic-trigger.ts    # Dormant→active trigger wrapper (composes activation + replacement triggers)
     └── tools/                        # Utility implementations
         └── math-randomizer.ts
 ```
@@ -185,13 +187,14 @@ sequenceDiagram
   - Card selection strategies (`PlayerByPlayerCardSelector`, `SpeedWeightedCardSelector`)
   - Targeting strategies (position-based, all-enemies, line-three, etc.)
   - Dodge behaviors (simple, random)
-- **Observer Pattern**: `CardDeathSubscriber` interface for death notifications. `DeathSkillHandler` implements it: on each death it fires `ally-death:<cardId>` skill triggers on surviving allies, accumulates resulting steps, and exposes `drainSteps()` for callers (`ActionStage`, `TurnManager`) to collect them immediately after each death event. Handles all three skill kinds: **Healing** → `StepKind.Healing`, **Buff** → `StepKind.Buff`, **Debuff** → `StepKind.Debuff`. Also processes `endEvent` from skill results via `EndEventProcessor`, emitting `buff_removed` steps inline
+- **Observer Pattern**: `CardDeathSubscriber` interface for death notifications. `DeathSkillHandler` implements it: on each death it fires `ally-death:<cardId>` skill triggers on the dead card's team's surviving cards AND `enemy-death:<cardId>` triggers on the opponent team's surviving cards. Accumulates resulting steps and exposes `drainSteps()` for callers (`ActionStage`, `TurnManager`) to collect them immediately after each death event. Handles all three skill kinds: **Healing** → `StepKind.Healing`, **Buff** → `StepKind.Buff`, **Debuff** → `StepKind.Debuff`. Also processes `endEvent` from skill results via `EndEventProcessor`, emitting `buff_removed` steps inline
 - **Dependency Injection**: NestJS provider system for `FIGHT_SIMULATOR_BUILDER`
 - **Value Objects**: Immutable types for attack effects, buffs, debuffs, damage compositions
 - **Rich Domain Model**: `FightingCard` encapsulates stats, behaviors, element, and state mutations
 - **Multi-Damage System**: `DamageCalculator` computes damage from multiple `DamageComposition` entries (type + rate), applying `ElementalMatrix` multipliers based on attacker damage types vs defender element
 - **Buff Condition System**: `BuffApplication` has optional `condition: BuffCondition` and `conditionMultiplier`. If the condition evaluates to true at buff application time, the rate is multiplied. `buff-condition-factory.ts` maps `BuffConditionType` enum → `BuffCondition` instance. First implementation: `AllyPresenceCondition` checks that a named ally is alive in the source player's team.
-- **Event-Driven**: Skills triggered by events (`turn-end`, `next-action`, `ally-death:<cardId>`), extensible trigger system. `AllyDeath` trigger matches string pattern `ally-death:<targetCardId>` enabling death-reactive abilities
+- **Event-Driven**: Skills triggered by events (`turn-end`, `next-action`, `ally-death:<cardId>`, `enemy-death:<cardId>`), extensible trigger system. `AllyDeath` trigger matches string pattern `ally-death:<targetCardId>` enabling death-reactive abilities on the dead card's team. `EnemyDeath` trigger matches `enemy-death:<targetCardId>` enabling reactions on the opponent's team when a card dies
+- **Dynamic Trigger**: `DynamicTrigger` wraps an activation trigger and a replacement trigger. Starts dormant (all `isTriggered()` return false). When the activation event is observed, flips to active and delegates to the replacement trigger. Enables skills that start inactive and become triggered mid-battle (e.g., healing skill dormant until an ally dies, then triggers on enemy death)
 - **Unified Special Result**: `Special.launch()` returns `SpecialResult` containing both `actionResults` (AttackResult[] or HealingResult[]) and `buffResults` (BuffResults) for consistent handling across attack and healing specials
 - **Event-Bound Buff Termination**: `Buff` type has optional `terminationEvent?: string`. Skills have optional `activationLimit` and `endEvent`. When a skill reaches its activation limit (or its owner dies), it emits its `endEvent`. `EndEventProcessor` scans all playable cards and removes buffs matching that event name, emitting a `StepKind.BuffRemoved` step. `SkillResults` carries an optional `endEvent` field so callers know to trigger `EndEventProcessor`.
 - **Event-Bound Effect Termination**: `CardState` (poison, burn, freeze) has optional `terminationEvent?: string`. When `EndEventProcessor` fires an end event, it also scans all living cards for status effects matching that event and removes them, emitting a `StepKind.EffectRemoved` step. The `terminationEvent` flows from `EffectDto` → `AttackEffect` → `CardState`.

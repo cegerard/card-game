@@ -248,12 +248,28 @@ export class FightController {
     }
   }
 
+  private buildTriggerForSkill(skillData: any) {
+    const dormantConfig =
+      skillData.event === TriggerEvent.DORMANT
+        ? {
+            activationEvent: skillData.activationEvent,
+            activationTargetCardId: skillData.activationTargetCardId,
+            replacementEvent: skillData.replacementEvent,
+          }
+        : undefined;
+    return buildTriggerStrategy(
+      skillData.event,
+      skillData.targetCardId,
+      dormantConfig,
+    );
+  }
+
   private createOtherSkill(skillData: any): Skill {
     switch (skillData.kind) {
       case SkillKind.HEALING:
         return new Healing(
           skillData.rate,
-          buildTriggerStrategy(skillData.event, skillData.targetCardId),
+          this.buildTriggerForSkill(skillData),
           buildTargetingStrategy(skillData.targetingStrategy),
           skillData.powerId,
         );
@@ -278,10 +294,7 @@ export class FightController {
           attributeType: this.mapBuffType(skillData.buffType),
           rate: skillData.rate,
           duration: alterationDuration,
-          trigger: buildTriggerStrategy(
-            skillData.event,
-            skillData.targetCardId,
-          ),
+          trigger: this.buildTriggerForSkill(skillData),
           targetingStrategy: buildTargetingStrategy(
             skillData.targetingStrategy,
           ),
@@ -332,7 +345,7 @@ export class FightController {
           return new TargetingOverrideSkill(
             undefined,
             skillData.terminationEvent,
-            buildTriggerStrategy(skillData.event, skillData.targetCardId),
+            this.buildTriggerForSkill(skillData),
             skillData.powerId,
             (ctx) => new TargetedCard(ctx.killerCard?.id ?? ''),
           );
@@ -340,7 +353,7 @@ export class FightController {
         return new TargetingOverrideSkill(
           buildTargetingStrategy(skillData.targetingStrategy),
           skillData.terminationEvent,
-          buildTriggerStrategy(skillData.event, skillData.targetCardId),
+          this.buildTriggerForSkill(skillData),
           skillData.powerId,
         );
       default:

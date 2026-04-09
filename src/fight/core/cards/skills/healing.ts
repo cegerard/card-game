@@ -46,7 +46,7 @@ export class Healing implements Skill {
     };
   }
 
-  isTriggered(triggerName: string): boolean {
-    return this.trigger.isTriggered(triggerName);
+  isTriggered(triggerName: string, context?: FightingContext): boolean {
+    return this.trigger.isTriggered(triggerName, context);
   }
 }

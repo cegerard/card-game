@@ -80,6 +80,8 @@ export enum TriggerEvent {
   TURN_END = 'turn-end',
   NEXT_ACTION = 'next-action',
   ALLY_DEATH = 'ally-death',
+  ENEMY_DEATH = 'enemy-death',
+  DORMANT = 'dormant',
 }
 
 export enum TargetingStrategy {
@@ -373,6 +375,20 @@ export class OtherSkillDto {
   @IsString()
   @IsNotEmpty()
   powerId?: string;
+
+  // Dormant trigger properties
+  @IsOptional()
+  @IsEnum(TriggerEvent)
+  activationEvent?: TriggerEvent;
+
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  activationTargetCardId?: string;
+
+  @IsOptional()
+  @IsEnum(TriggerEvent)
+  replacementEvent?: TriggerEvent;
 }
 
 class SkillsDto {
