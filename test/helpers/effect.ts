@@ -1,4 +1,4 @@
-import { faker } from '@faker-js/faker/.';
+import { faker } from '@faker-js/faker';
 
 import { PoisonedAttackEffect } from '../../src/fight/core/cards/@types/attack/attack-poisoned-effect';
 import { BurnedAttackEffect } from '../../src/fight/core/cards/@types/attack/attack-burned-effect';
