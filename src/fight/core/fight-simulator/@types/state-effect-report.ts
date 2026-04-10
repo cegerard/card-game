@@ -1,4 +1,4 @@
-import { CardInfo } from 'src/fight/core/cards/@types/card-info';
+import { CardInfo } from '../../cards/@types/card-info';
 
 export type StateEffectReport = {
   type: string;

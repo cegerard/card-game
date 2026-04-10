@@ -1,8 +1,8 @@
-import { FightSimulator } from 'src/fight/core/fight-simulator/@types/fight-simulator';
+import { FightSimulator } from '../../core/fight-simulator/@types/fight-simulator';
 import { FightingCard } from '../../core/cards/fighting-card';
 import { FightResult } from '../../core/fight-simulator/@types/fight-result';
-import { Player } from 'src/fight/core/player';
-import { CardSelector } from 'src/fight/core/fight-simulator/card-selectors/card-selector';
+import { Player } from '../../core/player';
+import { CardSelector } from '../../core/fight-simulator/card-selectors/card-selector';
 
 export class FightSimulatorStub implements FightSimulator {
   constructor(
