@@ -14,8 +14,8 @@ import {
 import { FightController } from '../fight.controller';
 import { FightingCard } from '../../core/cards/fighting-card';
 import { FightSimulatorStub } from './fight-simulator-stub';
-import { Player } from 'src/fight/core/player';
-import { CardSelector } from 'src/fight/core/fight-simulator/card-selectors/card-selector';
+import { Player } from '../../core/player';
+import { CardSelector } from '../../core/fight-simulator/card-selectors/card-selector';
 
 describe('FightController', () => {
   let fightSimulatorStub: FightSimulatorStub;
