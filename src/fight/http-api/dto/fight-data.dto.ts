@@ -9,6 +9,8 @@ import {
   IsNotEmpty,
   IsEnum,
   IsOptional,
+  IsDefined,
+  ValidateIf,
   Min,
   IsNotIn,
   ValidatorConstraint,
@@ -376,17 +378,20 @@ export class OtherSkillDto {
   @IsNotEmpty()
   powerId?: string;
 
-  // Dormant trigger properties
-  @IsOptional()
+  // Dormant trigger properties (required when event=dormant)
+  @ValidateIf((o) => o.event === TriggerEvent.DORMANT)
+  @IsDefined()
   @IsEnum(TriggerEvent)
   activationEvent?: TriggerEvent;
 
-  @IsOptional()
+  @ValidateIf((o) => o.event === TriggerEvent.DORMANT)
+  @IsDefined()
   @IsString()
   @IsNotEmpty()
   activationTargetCardId?: string;
 
-  @IsOptional()
+  @ValidateIf((o) => o.event === TriggerEvent.DORMANT)
+  @IsDefined()
   @IsEnum(TriggerEvent)
   replacementEvent?: TriggerEvent;
 }
