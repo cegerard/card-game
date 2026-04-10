@@ -21,9 +21,9 @@ export class DynamicTrigger implements Trigger {
       if (this.activationTrigger.isTriggered(triggerId)) {
         const killerCardId = context?.killerCard?.id;
         if (!killerCardId) {
-          throw new Error(
-            'Dynamic trigger activation requires killerCard in context',
-          );
+          // Activation event observed without a killer (e.g. status-effect death).
+          // Cannot build a replacement trigger keyed on the killer; stay dormant.
+          return false;
         }
         this.replacementTrigger = this.buildReplacementTrigger(killerCardId);
         this.activated = true;

@@ -78,10 +78,14 @@ describe('DynamicTrigger', () => {
   });
 
   describe('activation without killerCard context', () => {
-    it('throws an error', () => {
-      expect(() => trigger.isTriggered('ally-death:warrior-01')).toThrow(
-        'Dynamic trigger activation requires killerCard in context',
-      );
+    it('stays dormant on activation event', () => {
+      expect(trigger.isTriggered('ally-death:warrior-01')).toBe(false);
+    });
+
+    it('does not delegate to a replacement trigger afterwards', () => {
+      trigger.isTriggered('ally-death:warrior-01');
+
+      expect(trigger.isTriggered('enemy-death:goblin-03')).toBe(false);
     });
   });
 
