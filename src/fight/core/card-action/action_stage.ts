@@ -112,7 +112,11 @@ export class ActionStage {
       return this.computeSpecialAttackResult(card);
     }
 
-    return this.computeSpecialHealingResult(card);
+    if (card.specialKind() === 'specialHealing') {
+      return this.computeSpecialHealingResult(card);
+    }
+
+    throw new Error(`Unknown special kind: ${card.specialKind()}`);
   }
 
   private computeSpecialAttackResult(card: FightingCard): AttackReport {
