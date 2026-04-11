@@ -106,18 +106,20 @@ export class TurnManager {
 
       if (appliedSkill.skillKind === SkillKind.Debuff) {
         const debuffResults = appliedSkill.results as DebuffResults;
-        steps.push({
-          kind: StepKind.Debuff,
-          source: card.identityInfo,
-          debuffs: debuffResults.map((result: DebuffResult) => ({
-            target: result.target,
-            kind: result.debuff.type,
-            value: result.debuff.value,
-            remainingTurns: result.debuff.duration,
-          })),
-          energy: card.actualEnergy,
-          powerId: appliedSkill.powerId,
-        });
+        if (debuffResults.length > 0) {
+          steps.push({
+            kind: StepKind.Debuff,
+            source: card.identityInfo,
+            debuffs: debuffResults.map((result: DebuffResult) => ({
+              target: result.target,
+              kind: result.debuff.type,
+              value: result.debuff.value,
+              remainingTurns: result.debuff.duration,
+            })),
+            energy: card.actualEnergy,
+            powerId: appliedSkill.powerId,
+          });
+        }
       }
 
       if (appliedSkill.skillKind === SkillKind.TargetingOverride) {
