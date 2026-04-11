@@ -163,7 +163,7 @@ describe('Add Poison effect level 1', () => {
         },
         2: {
           kind: 'status_change',
-          status: 'poisoned',
+          status: 'poison',
           card: card2.identityInfo,
         },
         3: {
@@ -364,7 +364,7 @@ describe('Add Poison effect level 2', () => {
         },
         2: {
           kind: 'status_change',
-          status: 'poisoned',
+          status: 'poison',
           card: card2.identityInfo,
         },
         3: {
@@ -449,7 +449,7 @@ describe('Add Poison effect level 2', () => {
         },
         2: {
           kind: 'status_change',
-          status: 'poisoned',
+          status: 'poison',
           card: card2.identityInfo,
         },
         3: {
@@ -649,7 +649,7 @@ describe('Add Poison effect level 3', () => {
         },
         2: {
           kind: 'status_change',
-          status: 'poisoned',
+          status: 'poison',
           card: card2.identityInfo,
         },
         3: {
@@ -734,7 +734,7 @@ describe('Add Poison effect level 3', () => {
         },
         2: {
           kind: 'status_change',
-          status: 'poisoned',
+          status: 'poison',
           card: card2.identityInfo,
         },
         3: {
@@ -820,7 +820,7 @@ describe('Add Poison effect level 3', () => {
         },
         2: {
           kind: 'status_change',
-          status: 'poisoned',
+          status: 'poison',
           card: card2.identityInfo,
         },
         3: {

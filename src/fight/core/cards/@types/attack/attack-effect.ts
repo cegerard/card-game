@@ -3,10 +3,10 @@ import { EffectLevel } from './effect-level';
 import { FightingContext } from '../fighting-context';
 import { Debuff } from '../buff/debuff';
 import { EffectTriggeredDebuff } from './effect-triggered-debuff';
+import { StateEffectType } from '../state/state-effect-type';
 
-type EffectType = 'poisoned' | 'burned' | 'frozen';
 export type EffectResult = {
-  type: EffectType;
+  type: StateEffectType;
   card: FightingCard;
   triggeredDebuff?: { card: FightingCard; debuff: Debuff };
 };

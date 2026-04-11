@@ -1,10 +1,10 @@
 import { faker } from '@faker-js/faker';
 
-import { PoisonedAttackEffect } from '../../src/fight/core/cards/@types/attack/attack-poisoned-effect';
-import { BurnedAttackEffect } from '../../src/fight/core/cards/@types/attack/attack-burned-effect';
+import { PoisonAttackEffect } from '../../src/fight/core/cards/@types/attack/attack-poison-effect';
+import { BurnAttackEffect } from '../../src/fight/core/cards/@types/attack/attack-burn-effect';
 import { AttackEffect } from '../../src/fight/core/cards/@types/attack/attack-effect';
 import { EffectLevel } from '../../src/fight/core/cards/@types/attack/effect-level';
-import { FrozenAttackEffect } from '../../src/fight/core/cards/@types/attack/attack-frozen-effect';
+import { FreezeAttackEffect } from '../../src/fight/core/cards/@types/attack/attack-freeze-effect';
 
 export function createEffect(params: {
   rate: number;
@@ -18,21 +18,21 @@ export function createEffect(params: {
 
   switch (params.type) {
     case 'poison':
-      return new PoisonedAttackEffect(
+      return new PoisonAttackEffect(
         effectRate,
         effectLevel,
         undefined,
         params.terminationEvent,
       );
     case 'burn':
-      return new BurnedAttackEffect(
+      return new BurnAttackEffect(
         effectRate,
         effectLevel,
         undefined,
         params.terminationEvent,
       );
     case 'freeze':
-      return new FrozenAttackEffect(
+      return new FreezeAttackEffect(
         effectRate,
         effectLevel,
         undefined,

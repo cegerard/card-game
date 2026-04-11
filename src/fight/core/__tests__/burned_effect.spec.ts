@@ -163,7 +163,7 @@ describe('Add Burned effect level 1', () => {
         },
         2: {
           kind: 'status_change',
-          status: 'burned',
+          status: 'burn',
           card: card2.identityInfo,
         },
         3: {
@@ -451,7 +451,7 @@ describe('Add Burned effect level 2', () => {
         },
         2: {
           kind: 'status_change',
-          status: 'burned',
+          status: 'burn',
           card: card2.identityInfo,
         },
         3: {
@@ -537,7 +537,7 @@ describe('Add Burned effect level 2', () => {
         },
         2: {
           kind: 'status_change',
-          status: 'burned',
+          status: 'burn',
           card: card2.identityInfo,
         },
         3: {
@@ -631,7 +631,7 @@ describe('Add Burned effect level 2', () => {
         },
         2: {
           kind: 'status_change',
-          status: 'burned',
+          status: 'burn',
           card: card2.identityInfo,
         },
         3: {
@@ -830,7 +830,7 @@ describe('Add Burned effect level 3', () => {
         },
         2: {
           kind: 'status_change',
-          status: 'burned',
+          status: 'burn',
           card: card2.identityInfo,
         },
         3: {
@@ -915,7 +915,7 @@ describe('Add Burned effect level 3', () => {
         },
         2: {
           kind: 'status_change',
-          status: 'burned',
+          status: 'burn',
           card: card2.identityInfo,
         },
         3: {
@@ -1001,7 +1001,7 @@ describe('Add Burned effect level 3', () => {
         },
         2: {
           kind: 'status_change',
-          status: 'burned',
+          status: 'burn',
           card: card2.identityInfo,
         },
         3: {
@@ -1095,7 +1095,7 @@ describe('Add Burned effect level 3', () => {
         },
         2: {
           kind: 'status_change',
-          status: 'burned',
+          status: 'burn',
           card: card2.identityInfo,
         },
         3: {
@@ -1181,7 +1181,7 @@ describe('Add Burned effect level 3', () => {
         },
         2: {
           kind: 'status_change',
-          status: 'burned',
+          status: 'burn',
           card: card2.identityInfo,
         },
         3: {
