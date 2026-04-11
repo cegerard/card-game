@@ -56,7 +56,7 @@ function makeCard(special: Special): FightingCard {
 
 describe('ActionStage', () => {
   describe('launchSpecial', () => {
-    it('throws when special kind is unknown', () => {
+    describe('when launching an unknown special kind', () => {
       const attacker = makeCard(new UnknownSpecial());
       const defender = makeCard(new SpecialAttack(1, 999, POSITION_BASED));
       const player1 = new Player('Player 1', [attacker]);
@@ -65,9 +65,11 @@ describe('ActionStage', () => {
         onCardDeath: [],
       });
 
-      expect(() => actionStage.computeNextAction([attacker])).toThrow(
-        'Unknown special kind: unknownKind',
-      );
+      it('throws', () => {
+        expect(() => actionStage.computeNextAction([attacker])).toThrow(
+          'Unknown special kind: unknownKind',
+        );
+      });
     });
   });
 });
