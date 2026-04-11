@@ -465,11 +465,13 @@ export class FightingCard {
     debuffType: DebuffType,
     debuffRate: number,
     duration: number,
+    powerId?: string,
   ): Debuff {
     const debuff: Debuff = {
       type: debuffType,
       value: this.computeAttributeModifierValue(debuffType, debuffRate),
       duration: duration,
+      powerId,
     };
 
     this.debuffs.push(debuff);
