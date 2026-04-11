@@ -7,4 +7,5 @@ export type EffectRemovedReport = {
   source: CardInfo;
   eventName: string;
   removed: { target: CardInfo; effectType: StateEffectType }[];
+  powerId?: string;
 };

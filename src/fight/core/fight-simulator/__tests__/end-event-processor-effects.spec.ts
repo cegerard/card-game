@@ -51,6 +51,24 @@ describe('EndEventProcessor.processEndEvent() with effects', () => {
 
       expect(effectStep.removed[0].effectType).toBe('burn');
     });
+
+    it('includes powerId when provided', () => {
+      const steps = processor.processEndEvent('fire-end', source, 'power-abc');
+      const effectStep = steps.find(
+        (s) => s.kind === StepKind.EffectRemoved,
+      ) as any;
+
+      expect(effectStep.powerId).toBe('power-abc');
+    });
+
+    it('omits powerId when not provided', () => {
+      const steps = processor.processEndEvent('fire-end', source);
+      const effectStep = steps.find(
+        (s) => s.kind === StepKind.EffectRemoved,
+      ) as any;
+
+      expect(effectStep.powerId).toBeUndefined();
+    });
   });
 
   describe('when multiple cards have event-bound effects', () => {

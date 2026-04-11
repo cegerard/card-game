@@ -67,7 +67,10 @@ describe('Dormant trigger DTO validation', () => {
       },
     ]);
 
-    return request(app.getHttpServer()).post('/fight').send(payload).expect(400);
+    return request(app.getHttpServer())
+      .post('/fight')
+      .send(payload)
+      .expect(400);
   });
 
   it('returns 400 when event=dormant and activationTargetCardId is missing', () => {
@@ -83,7 +86,10 @@ describe('Dormant trigger DTO validation', () => {
       },
     ]);
 
-    return request(app.getHttpServer()).post('/fight').send(payload).expect(400);
+    return request(app.getHttpServer())
+      .post('/fight')
+      .send(payload)
+      .expect(400);
   });
 
   it('returns 400 when event=dormant and replacementEvent is missing', () => {
@@ -99,6 +105,9 @@ describe('Dormant trigger DTO validation', () => {
       },
     ]);
 
-    return request(app.getHttpServer()).post('/fight').send(payload).expect(400);
+    return request(app.getHttpServer())
+      .post('/fight')
+      .send(payload)
+      .expect(400);
   });
 });

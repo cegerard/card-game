@@ -51,6 +51,7 @@ export class EndEventProcessor {
         source,
         eventName,
         removed: removedEffects,
+        powerId,
       });
     }
 
