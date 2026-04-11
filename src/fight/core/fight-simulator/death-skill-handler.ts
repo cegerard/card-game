@@ -1,19 +1,11 @@
 import { FightingCard } from '../cards/fighting-card';
 import { Player } from '../player';
 import { CardDeathSubscriber } from './card-death-subscriber';
-import { Step, StepKind } from './@types/step';
-import {
-  BuffResult,
-  BuffResults,
-} from '../cards/@types/action-result/buff-results';
-import {
-  DebuffResult,
-  DebuffResults,
-} from '../cards/@types/action-result/debuff-results';
-import { SkillKind, SkillResults } from '../cards/skills/skill';
+import { Step } from './@types/step';
+import { SkillResults } from '../cards/skills/skill';
 import { EndEventProcessor } from './end-event-processor';
-import { TargetingOverrideReport } from './@types/targeting-override-report';
 import { FightingContext } from '../cards/@types/fighting-context';
+import { skillResultsToSteps } from './skill-results-to-steps';
 
 export class DeathSkillHandler implements CardDeathSubscriber {
   private steps: Step[] = [];
@@ -102,72 +94,8 @@ export class DeathSkillHandler implements CardDeathSubscriber {
     card: FightingCard,
     skillResults: SkillResults[],
   ): void {
-    for (const skillResult of skillResults) {
-      if (skillResult.skillKind === SkillKind.Healing) {
-        this.steps.push({
-          kind: StepKind.Healing,
-          source: card.identityInfo,
-          heal: skillResult.results.map((heal) => ({
-            target: heal.target,
-            healed: heal.healAmount,
-            remainingHealth: heal.remainingHealth,
-          })),
-          energy: card.actualEnergy,
-          powerId: skillResult.powerId,
-        });
-      }
-
-      if (skillResult.skillKind === SkillKind.Buff) {
-        const buffResults = skillResult.results as BuffResults;
-        if (buffResults.length > 0) {
-          this.steps.push({
-            kind: StepKind.Buff,
-            source: card.identityInfo,
-            buffs: buffResults.map((result: BuffResult) => ({
-              target: result.target,
-              kind: result.buff.type,
-              value: result.buff.value,
-              remainingTurns: result.buff.duration,
-            })),
-            energy: card.actualEnergy,
-            powerId: skillResult.powerId,
-          });
-        }
-
-        if (skillResult.endEvent && this.endEventProcessor) {
-          this.steps.push(
-            ...this.endEventProcessor.processEndEvent(
-              skillResult.endEvent,
-              card.identityInfo,
-              skillResult.powerId,
-            ),
-          );
-        }
-      }
-
-      if (skillResult.skillKind === SkillKind.Debuff) {
-        const debuffResults = skillResult.results as DebuffResults;
-        if (debuffResults.length > 0) {
-          this.steps.push({
-            kind: StepKind.Debuff,
-            source: card.identityInfo,
-            debuffs: debuffResults.map((result: DebuffResult) => ({
-              target: result.target,
-              kind: result.debuff.type,
-              value: result.debuff.value,
-              remainingTurns: result.debuff.duration,
-            })),
-            energy: card.actualEnergy,
-            powerId: skillResult.powerId,
-          });
-        }
-      }
-
-      if (skillResult.skillKind === SkillKind.TargetingOverride) {
-        const reports =
-          skillResult.results as unknown as TargetingOverrideReport[];
-        reports.forEach((report) => this.steps.push(report));
-      }
-    }
+    this.steps.push(
+      ...skillResultsToSteps(card, skillResults, this.endEventProcessor),
+    );
   }
 }
