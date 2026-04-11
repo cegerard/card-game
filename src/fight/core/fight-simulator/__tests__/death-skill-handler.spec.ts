@@ -6,6 +6,7 @@ import { DamageComposition } from '../../cards/@types/damage/damage-composition'
 import { DamageType } from '../../cards/@types/damage/damage-type';
 import { AlterationSkill } from '../../cards/skills/alteration-skill';
 import { TurnEnd } from '../../trigger/turn-end';
+import { AllyDeath } from '../../trigger/ally-death';
 import { Launcher } from '../../targeting-card-strategies/launcher';
 import { StepKind } from '../@types/step';
 
@@ -203,6 +204,53 @@ describe('DeathSkillHandler', () => {
       );
 
       expect((buffRemovedStep as any).eventName).toBe('lions-end');
+    });
+  });
+
+  describe('when an ally-death-triggered debuff skill produces empty results', () => {
+    const deadCardId = 'warrior-02';
+    let handler: DeathSkillHandler;
+    let player1: Player;
+    let deadCard;
+
+    beforeEach(() => {
+      deadCard = createFightingCard({
+        id: deadCardId,
+        name: 'Warrior',
+        health: 10,
+        criticalChance: 0,
+      });
+
+      const survivingCard = createFightingCard({
+        id: 'debuffer-01',
+        name: 'Debuffer',
+        health: 5000,
+        criticalChance: 0,
+      });
+
+      const debuffSkill = new AlterationSkill({
+        polarity: 'debuff',
+        attributeType: 'attack',
+        rate: 0.2,
+        duration: 2,
+        trigger: new AllyDeath(deadCardId),
+        targetingStrategy: new Launcher(),
+        activationCondition: { id: 'never', evaluate: () => false },
+      });
+      (survivingCard as any).skills = [debuffSkill];
+
+      player1 = new Player('Player 1', [deadCard, survivingCard]);
+      const player2 = new Player('Player 2', [createFightingCard({})]);
+      handler = new DeathSkillHandler(player1, player2);
+
+      deadCard.addRealDamage(10);
+    });
+
+    it('does not emit a debuff step', () => {
+      handler.notifyDeath(player1, deadCard);
+      const steps = handler.drainSteps();
+
+      expect(steps.find((s) => s.kind === StepKind.Debuff)).toBeUndefined();
     });
   });
 });

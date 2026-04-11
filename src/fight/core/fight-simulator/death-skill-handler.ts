@@ -147,18 +147,20 @@ export class DeathSkillHandler implements CardDeathSubscriber {
 
       if (skillResult.skillKind === SkillKind.Debuff) {
         const debuffResults = skillResult.results as DebuffResults;
-        this.steps.push({
-          kind: StepKind.Debuff,
-          source: card.identityInfo,
-          debuffs: debuffResults.map((result: DebuffResult) => ({
-            target: result.target,
-            kind: result.debuff.type,
-            value: result.debuff.value,
-            remainingTurns: result.debuff.duration,
-          })),
-          energy: card.actualEnergy,
-          powerId: skillResult.powerId,
-        });
+        if (debuffResults.length > 0) {
+          this.steps.push({
+            kind: StepKind.Debuff,
+            source: card.identityInfo,
+            debuffs: debuffResults.map((result: DebuffResult) => ({
+              target: result.target,
+              kind: result.debuff.type,
+              value: result.debuff.value,
+              remainingTurns: result.debuff.duration,
+            })),
+            energy: card.actualEnergy,
+            powerId: skillResult.powerId,
+          });
+        }
       }
 
       if (skillResult.skillKind === SkillKind.TargetingOverride) {
