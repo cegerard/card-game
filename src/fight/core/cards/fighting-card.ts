@@ -414,19 +414,20 @@ export class FightingCard {
     eventName: string,
   ): { type: StateEffectType; card: CardInfo }[] {
     const removed: { type: StateEffectType; card: CardInfo }[] = [];
+    const card = this.identityInfo;
 
     if (this.poisoned?.terminationEvent === eventName) {
-      removed.push({ type: this.poisoned.type, card: this.identityInfo });
+      removed.push({ type: this.poisoned.type, card });
       this.poisoned = undefined;
     }
 
     if (this.burned?.terminationEvent === eventName) {
-      removed.push({ type: this.burned.type, card: this.identityInfo });
+      removed.push({ type: this.burned.type, card });
       this.burned = undefined;
     }
 
     if (this.frozen?.terminationEvent === eventName) {
-      removed.push({ type: this.frozen.type, card: this.identityInfo });
+      removed.push({ type: this.frozen.type, card });
       this.frozen = undefined;
     }
 
