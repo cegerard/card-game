@@ -7,8 +7,8 @@ import { EffectLevel } from '../../src/fight/core/cards/@types/attack/effect-lev
 import { FreezeAttackEffect } from '../../src/fight/core/cards/@types/attack/attack-freeze-effect';
 
 export function createEffect(params: {
-  rate: number;
-  level: EffectLevel;
+  rate?: number;
+  level?: EffectLevel;
   type: string;
   terminationEvent?: string;
 }): AttackEffect {
