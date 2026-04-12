@@ -9,7 +9,7 @@ import { HealingReport } from '../fight-simulator/@types/healing-report';
 import { HealingResult } from '../cards/@types/action-result/healing-result';
 import { FightingContext } from '../cards/@types/fighting-context';
 import { BuffReport } from '../fight-simulator/@types/buff-report';
-import { SkillKind } from '../cards/skills/skill';
+import { AttackSkillResults, SkillKind } from '../cards/skills/skill';
 
 type SplittedSteps = {
   actionSteps: Step[];
@@ -84,7 +84,7 @@ export class ActionStage {
     const context = this.getFightingContext(card);
     const skillResults = card.launchSkills('next-action', context);
     const attackSkill = skillResults.find(
-      (r) => r.skillKind === SkillKind.Attack,
+      (r): r is AttackSkillResults => r.skillKind === SkillKind.Attack,
     );
     if (!attackSkill) return null;
 
@@ -98,11 +98,7 @@ export class ActionStage {
       statusChanges: [],
     };
 
-    this.handleAttackResult(
-      attackSkill.results as AttackResult[],
-      result,
-      card,
-    );
+    this.handleAttackResult(attackSkill.results, result, card);
 
     return result;
   }
