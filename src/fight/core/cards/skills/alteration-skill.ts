@@ -97,7 +97,12 @@ export class AlterationSkill implements Skill {
           this.powerId,
         ),
       }));
-      return { skillKind: SkillKind.Buff, results, endEvent, powerId: this.powerId };
+      return {
+        skillKind: SkillKind.Buff,
+        results,
+        endEvent,
+        powerId: this.powerId,
+      };
     }
 
     const results = targetedCards.map((targetedCard) => ({
@@ -109,7 +114,12 @@ export class AlterationSkill implements Skill {
         this.powerId,
       ),
     }));
-    return { skillKind: SkillKind.Debuff, results, endEvent, powerId: this.powerId };
+    return {
+      skillKind: SkillKind.Debuff,
+      results,
+      endEvent,
+      powerId: this.powerId,
+    };
   }
 
   isTriggered(triggerName: string, context?: FightingContext): boolean {
