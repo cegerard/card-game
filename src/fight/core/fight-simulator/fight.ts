@@ -1,5 +1,5 @@
 import { FightResult } from './@types/fight-result';
-import { ActionStage } from '../card-action/action_stage';
+import { ActionStage } from '../card-action/action-stage';
 import { Player } from '../player';
 import { CardSelector } from './card-selectors/card-selector';
 import { CardDeathSubscriber } from './card-death-subscriber';

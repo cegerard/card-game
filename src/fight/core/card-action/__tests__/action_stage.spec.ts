@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 
-import { ActionStage } from '../action_stage';
+import { ActionStage } from '../action-stage';
 import { Player } from '../../player';
 import { FightingCard } from '../../cards/fighting-card';
 import { Special } from '../../cards/skills/special';

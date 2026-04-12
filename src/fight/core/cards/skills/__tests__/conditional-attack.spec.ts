@@ -6,7 +6,7 @@ import { TargetedFromPosition } from '../../../targeting-card-strategies/targete
 import { Player } from '../../../player';
 import { DamageComposition } from '../../@types/damage/damage-composition';
 import { DamageType } from '../../@types/damage/damage-type';
-import { ActionStage } from '../../../card-action/action_stage';
+import { ActionStage } from '../../../card-action/action-stage';
 import { Fight } from '../../../fight-simulator/fight';
 import { PlayerByPlayerCardSelector } from '../../../fight-simulator/card-selectors/player-by-player';
 import { CardStateFrozen } from '../../@types/state/card-state-frozen';
