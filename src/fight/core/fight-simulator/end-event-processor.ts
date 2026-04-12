@@ -8,6 +8,20 @@ export class EndEventProcessor {
     private readonly player2: Player,
   ) {}
 
+  /**
+   * Processes an end event across all living cards in three sweeps:
+   * 1. **Buff removal** – removes all buffs whose `terminationEvent` matches `eventName`
+   *    and emits a single `buff_removed` step listing every removed buff.
+   * 2. **Effect removal** – removes all status effects (poison, burn, freeze) whose
+   *    `terminationEvent` matches `eventName` and emits a single `effect_removed` step.
+   * 3. **Targeting revert** – restores any targeting overrides whose `terminationEvent`
+   *    matches `eventName` and emits one `targeting_reverted` step per reverted override.
+   *
+   * @param eventName - The end-event name to match against bound buffs, effects, and targeting overrides.
+   * @param source - Identity of the card whose skill emitted the end event.
+   * @param powerId - Optional composite-power identifier forwarded to each emitted step.
+   * @returns Ordered list of steps produced by the three sweeps (may be empty).
+   */
   public processEndEvent(
     eventName: string,
     source: CardInfo,
