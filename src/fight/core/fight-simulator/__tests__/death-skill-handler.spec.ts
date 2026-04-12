@@ -207,6 +207,50 @@ describe('DeathSkillHandler', () => {
     });
   });
 
+  describe('when an ally-death-triggered buff skill produces empty results', () => {
+    const deadCardId = 'warrior-buff-empty';
+    let handler: DeathSkillHandler;
+    let player1: Player;
+    let deadCard;
+
+    beforeEach(() => {
+      deadCard = createFightingCard({
+        id: deadCardId,
+        health: 10,
+        criticalChance: 0,
+      });
+
+      const bufferCard = createFightingCard({
+        id: 'buffer-empty-01',
+        health: 5000,
+        criticalChance: 0,
+      });
+      const buffSkill = new AlterationSkill({
+        polarity: 'buff',
+        attributeType: 'attack',
+        rate: 0.3,
+        duration: 2,
+        trigger: new AllyDeath(deadCardId),
+        targetingStrategy: new Launcher(),
+        activationCondition: { id: 'never', evaluate: () => false },
+      });
+      (bufferCard as any).skills = [buffSkill];
+
+      player1 = new Player('Player 1', [deadCard, bufferCard]);
+      const player2 = new Player('Player 2', [createFightingCard({})]);
+      handler = new DeathSkillHandler(player1, player2);
+
+      deadCard.addRealDamage(10);
+    });
+
+    it('does not emit a buff step', () => {
+      handler.notifyDeath(player1, deadCard);
+      const steps = handler.drainSteps();
+
+      expect(steps.find((s) => s.kind === StepKind.Buff)).toBeUndefined();
+    });
+  });
+
   describe('when an ally-death-triggered debuff skill produces empty results', () => {
     const deadCardId = 'warrior-02';
     let handler: DeathSkillHandler;
@@ -251,6 +295,59 @@ describe('DeathSkillHandler', () => {
       const steps = handler.drainSteps();
 
       expect(steps.find((s) => s.kind === StepKind.Debuff)).toBeUndefined();
+    });
+  });
+
+  describe('when player2 card dies and has an ally-death buff skill', () => {
+    const deadCardId = 'p2-dead-01';
+
+    let handler: DeathSkillHandler;
+    let player2: Player;
+    let deadCard;
+
+    beforeEach(() => {
+      deadCard = createFightingCard({
+        id: deadCardId,
+        health: 10,
+        criticalChance: 0,
+      });
+
+      const p2Survivor = createFightingCard({
+        id: 'p2-alive-01',
+        health: 5000,
+        criticalChance: 0,
+      });
+      const allyDeathBuffSkill = new AlterationSkill({
+        polarity: 'buff',
+        attributeType: 'attack',
+        rate: 0.3,
+        duration: 2,
+        trigger: new AllyDeath(deadCardId),
+        targetingStrategy: new Launcher(),
+      });
+      (p2Survivor as any).skills = [allyDeathBuffSkill];
+
+      const player1 = new Player('Player 1', [
+        createFightingCard({ criticalChance: 0 }),
+      ]);
+      player2 = new Player('Player 2', [deadCard, p2Survivor]);
+      handler = new DeathSkillHandler(player1, player2);
+
+      deadCard.addRealDamage(10);
+    });
+
+    it('produces steps after ally-death triggers on player2 surviving cards', () => {
+      handler.notifyDeath(player2, deadCard);
+      const steps = handler.drainSteps();
+
+      expect(steps.length).toBeGreaterThan(0);
+    });
+
+    it('produces a buff step', () => {
+      handler.notifyDeath(player2, deadCard);
+      const steps = handler.drainSteps();
+
+      expect(steps[0].kind).toBe(StepKind.Buff);
     });
   });
 });
