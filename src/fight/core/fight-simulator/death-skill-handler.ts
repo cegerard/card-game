@@ -7,6 +7,23 @@ import { EndEventProcessor } from './end-event-processor';
 import { FightingContext } from '../cards/@types/fighting-context';
 import { skillResultsToSteps } from './skill-results-to-steps';
 
+/**
+ * Handles the cascade of effects that must fire immediately after a card dies.
+ *
+ * Ordering inside `notifyDeath` (must be preserved):
+ * 1. **Lifecycle end-events** – the dead card's skills may have emitted end-events
+ *    (e.g. an activation-limited buff skill that expires on death). These are
+ *    processed first so that any event-bound buffs/effects they cancel are already
+ *    gone before surviving cards react.
+ * 2. **Ally-death triggers** – skills on the dead card's own team that listen for
+ *    `ally-death:<deadCard.id>` are fired next.
+ * 3. **Enemy-death triggers** – skills on the opposing team that listen for
+ *    `enemy-death:<deadCard.id>` are fired last.
+ *
+ * All resulting steps are accumulated internally. Callers must call `drainSteps()`
+ * immediately after each `notifyDeath` invocation to collect them, because the
+ * buffer is cleared on every drain.
+ */
 export class DeathSkillHandler implements CardDeathSubscriber {
   private steps: Step[] = [];
   private player1: Player;
@@ -23,6 +40,16 @@ export class DeathSkillHandler implements CardDeathSubscriber {
     this.endEventProcessor = endEventProcessor;
   }
 
+  /**
+   * Reacts to a card death by running the three-phase cascade described on the
+   * class. Steps produced by each phase are appended to the internal buffer in
+   * order; retrieve them with `drainSteps()`.
+   *
+   * @param _player - Unused; the owning player is resolved from `deadCard` directly.
+   * @param deadCard - The card that just died.
+   * @param killerCard - The card responsible for the kill (forwarded to triggered
+   *   skills so they can, for example, target the killer via a `DynamicTrigger`).
+   */
   notifyDeath(
     _player: Player,
     deadCard: FightingCard,
@@ -65,6 +92,11 @@ export class DeathSkillHandler implements CardDeathSubscriber {
     );
   }
 
+  /**
+   * Returns all steps accumulated since the last drain and resets the buffer.
+   * Must be called after every `notifyDeath` invocation; subsequent deaths
+   * start accumulating into a fresh buffer.
+   */
   drainSteps(): Step[] {
     const drained = this.steps;
     this.steps = [];
