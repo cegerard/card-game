@@ -281,7 +281,6 @@ const LIONS_INHERITANCE_PAYLOAD = {
 
 describe("Lion's Inheritance scenario (event-bound buff)", () => {
   let app: INestApplication;
-  let steps: any[];
   let stepEntries: [string, any][];
 
   beforeEach(async () => {
@@ -298,7 +297,6 @@ describe("Lion's Inheritance scenario (event-bound buff)", () => {
       .send(LIONS_INHERITANCE_PAYLOAD)
       .expect(200);
 
-    steps = Object.values(response.body) as any[];
     stepEntries = Object.entries(response.body) as [string, any][];
   });
 
@@ -307,7 +305,9 @@ describe("Lion's Inheritance scenario (event-bound buff)", () => {
   });
 
   it('produces buff_removed step on 3rd activation', () => {
-    const buffRemovedIdx = stepEntries.findIndex(([, s]) => s.kind === 'buff_removed');
+    const buffRemovedIdx = stepEntries.findIndex(
+      ([, s]) => s.kind === 'buff_removed',
+    );
     const buffRemovedStep = stepEntries[buffRemovedIdx]?.[1];
     expect(buffRemovedStep).toBeDefined();
     expect(buffRemovedStep.eventName).toBe('lions-inheritance-end');
