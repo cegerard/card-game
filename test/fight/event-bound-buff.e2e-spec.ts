@@ -307,7 +307,8 @@ describe("Lion's Inheritance scenario (event-bound buff)", () => {
   });
 
   it('produces buff_removed step on 3rd activation', () => {
-    const buffRemovedStep = steps.find((s) => s.kind === 'buff_removed');
+    const buffRemovedIdx = stepEntries.findIndex(([, s]) => s.kind === 'buff_removed');
+    const buffRemovedStep = stepEntries[buffRemovedIdx]?.[1];
     expect(buffRemovedStep).toBeDefined();
     expect(buffRemovedStep.eventName).toBe('lions-inheritance-end');
     expect(buffRemovedStep.removed).toHaveLength(1);

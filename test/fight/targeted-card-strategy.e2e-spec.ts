@@ -29,14 +29,14 @@ describe('Targeted Card Strategy — Full Battle Flow', () => {
   });
 
   it('produces a targeting_override step after ally dies', () => {
-    const overrideStep = stepEntries.find(
+    const overrideIdx = stepEntries.findIndex(
       ([, s]) =>
         s.kind === 'targeting_override' &&
         s.source?.name === 'Avenger' &&
         s.newStrategy === 'targeted-card',
     );
 
-    expect(overrideStep).toBeDefined();
+    expect(overrideIdx).toBeGreaterThan(-1);
   });
 
   it('avenger attacks target enemy after override activates', () => {
@@ -44,16 +44,15 @@ describe('Targeted Card Strategy — Full Battle Flow', () => {
       ([, s]) =>
         s.kind === 'targeting_override' && s.source?.name === 'Avenger',
     );
-    const attackAfterOverride = stepEntries
-      .slice(overrideIdx + 1)
-      .find(
-        ([, s]) =>
-          s.kind === 'attack' &&
-          s.attacker?.name === 'Avenger' &&
-          s.damages?.length > 0,
-      );
+    const slicedEntries = stepEntries.slice(overrideIdx + 1);
+    const attackRelIdx = slicedEntries.findIndex(
+      ([, s]) =>
+        s.kind === 'attack' &&
+        s.attacker?.name === 'Avenger' &&
+        s.damages?.length > 0,
+    );
 
-    expect(attackAfterOverride[1].damages[0].defender.name).toBe('Target');
+    expect(slicedEntries[attackRelIdx][1].damages[0].defender.name).toBe('Target');
   });
 });
 

@@ -5,7 +5,8 @@ import { AppModule } from '../../src/app.module';
 
 describe('Event-bound effect termination', () => {
   let app: INestApplication;
-  let steps: any[];
+  let stepEntries: [string, any][];
+  let buffRemovedIdx: number;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -21,29 +22,24 @@ describe('Event-bound effect termination', () => {
       .send(buildPayload())
       .expect(200);
 
-    steps = Object.values(response.body) as any[];
+    stepEntries = Object.entries(response.body) as [string, any][];
+    buffRemovedIdx = stepEntries.findIndex(([, s]) => s.kind === 'buff_removed');
   });
 
   afterEach(async () => {
     await app.close();
   });
 
-  it('produces an effect_removed step', () => {
-    const effectRemovedStep = steps.find((s) => s.kind === 'effect_removed');
-
-    expect(effectRemovedStep).toBeDefined();
+  it('effect_removed step immediately follows buff_removed', () => {
+    expect(stepEntries[buffRemovedIdx + 1][1].kind).toBe('effect_removed');
   });
 
   it('effect_removed step contains the event name', () => {
-    const effectRemovedStep = steps.find((s) => s.kind === 'effect_removed');
-
-    expect(effectRemovedStep?.eventName).toBe('fire-aura-end');
+    expect(stepEntries[buffRemovedIdx + 1][1].eventName).toBe('fire-aura-end');
   });
 
   it('effect_removed step contains the removed burn effect', () => {
-    const effectRemovedStep = steps.find((s) => s.kind === 'effect_removed');
-
-    expect(effectRemovedStep?.removed[0].effectType).toBe('burn');
+    expect(stepEntries[buffRemovedIdx + 1][1].removed[0].effectType).toBe('burn');
   });
 });
 

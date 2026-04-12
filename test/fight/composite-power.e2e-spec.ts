@@ -29,22 +29,22 @@ describe('Composite Power — grouped skills activate together', () => {
   });
 
   it('produces a buff step with powerId from composite power', () => {
-    const buffStep = stepEntries.find(
+    const buffIdx = stepEntries.findIndex(
       ([, s]) => s.kind === 'buff' && s.powerId === 'rage-power',
     );
 
-    expect(buffStep).toBeDefined();
+    expect(buffIdx).toBeGreaterThan(-1);
   });
 
   it('produces a healing step with powerId from composite power', () => {
-    const healingStep = stepEntries.find(
+    const healingIdx = stepEntries.findIndex(
       ([, s]) =>
         s.kind === 'healing' &&
         s.powerId === 'rage-power' &&
         s.source?.name === 'Rager',
     );
 
-    expect(healingStep).toBeDefined();
+    expect(healingIdx).toBeGreaterThan(-1);
   });
 
   it('buff and healing steps from same power appear on the same turn', () => {
@@ -88,19 +88,19 @@ describe('Composite Power — expiration removes all grouped buffs', () => {
   });
 
   it('produces a buff_removed step with powerId after activationLimit', () => {
-    const buffRemovedStep = stepEntries.find(
+    const buffRemovedIdx = stepEntries.findIndex(
       ([, s]) => s.kind === 'buff_removed' && s.powerId === 'rage-power',
     );
 
-    expect(buffRemovedStep).toBeDefined();
+    expect(buffRemovedIdx).toBeGreaterThan(-1);
   });
 
   it('buff_removed step has eventName matching endEvent', () => {
-    const buffRemovedStep = stepEntries.find(
+    const buffRemovedIdx = stepEntries.findIndex(
       ([, s]) => s.kind === 'buff_removed' && s.powerId === 'rage-power',
     );
 
-    expect(buffRemovedStep[1].eventName).toBe('rage-end');
+    expect(stepEntries[buffRemovedIdx][1].eventName).toBe('rage-end');
   });
 
   it('no rage-power buff steps appear after buff_removed', () => {
@@ -141,27 +141,27 @@ describe('Composite Power — targeting override and revert', () => {
   });
 
   it('produces a targeting_override step with powerId', () => {
-    const overrideStep = stepEntries.find(
+    const overrideIdx = stepEntries.findIndex(
       ([, s]) => s.kind === 'targeting_override' && s.powerId === 'fury-power',
     );
 
-    expect(overrideStep).toBeDefined();
+    expect(overrideIdx).toBeGreaterThan(-1);
   });
 
   it('produces a targeting_reverted step after expiration', () => {
-    const revertStep = stepEntries.find(
+    const revertIdx = stepEntries.findIndex(
       ([, s]) => s.kind === 'targeting_reverted' && s.powerId === 'fury-power',
     );
 
-    expect(revertStep).toBeDefined();
+    expect(revertIdx).toBeGreaterThan(-1);
   });
 
   it('targeting_reverted step has correct event name', () => {
-    const revertStep = stepEntries.find(
+    const revertIdx = stepEntries.findIndex(
       ([, s]) => s.kind === 'targeting_reverted' && s.powerId === 'fury-power',
     );
 
-    expect(revertStep[1].eventName).toBe('fury-end');
+    expect(stepEntries[revertIdx][1].eventName).toBe('fury-end');
   });
 
   it('buff step carries powerId', () => {
