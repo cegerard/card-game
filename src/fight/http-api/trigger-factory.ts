@@ -31,7 +31,11 @@ function buildSimpleTrigger(
   if (event === TriggerEvent.ALLY_DEATH || event === TriggerEvent.ENEMY_DEATH) {
     return buildDeathTrigger(event, targetCardId);
   }
-  return STRATEGY_MAP[event];
+  const trigger = STRATEGY_MAP[event];
+  if (!trigger) {
+    throw new Error(`Unknown trigger event: ${event}`);
+  }
+  return trigger;
 }
 
 function buildReplacementTriggerFactory(
