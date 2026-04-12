@@ -493,6 +493,8 @@ export class FightingCard {
         return rate * this.agility;
       case 'accuracy':
         return rate * this.accuracy;
+      default:
+        throw new Error(`Unknown attribute type: ${type}`);
     }
   }
 }
