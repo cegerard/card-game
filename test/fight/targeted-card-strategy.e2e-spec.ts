@@ -52,7 +52,9 @@ describe('Targeted Card Strategy — Full Battle Flow', () => {
         s.damages?.length > 0,
     );
 
-    expect(slicedEntries[attackRelIdx][1].damages[0].defender.name).toBe('Target');
+    expect(slicedEntries[attackRelIdx][1].damages[0].defender.name).toBe(
+      'Target',
+    );
   });
 });
 

@@ -23,7 +23,9 @@ describe('Event-bound effect termination', () => {
       .expect(200);
 
     stepEntries = Object.entries(response.body) as [string, any][];
-    buffRemovedIdx = stepEntries.findIndex(([, s]) => s.kind === 'buff_removed');
+    buffRemovedIdx = stepEntries.findIndex(
+      ([, s]) => s.kind === 'buff_removed',
+    );
   });
 
   afterEach(async () => {
@@ -39,7 +41,9 @@ describe('Event-bound effect termination', () => {
   });
 
   it('effect_removed step contains the removed burn effect', () => {
-    expect(stepEntries[buffRemovedIdx + 1][1].removed[0].effectType).toBe('burn');
+    expect(stepEntries[buffRemovedIdx + 1][1].removed[0].effectType).toBe(
+      'burn',
+    );
   });
 });
 
