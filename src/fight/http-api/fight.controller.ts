@@ -264,7 +264,7 @@ export class FightController {
     );
   }
 
-  private createOtherSkill(skillData: any): Skill {
+  private createOtherSkill(skillData: OtherSkillDto): Skill {
     switch (skillData.kind) {
       case SkillKind.HEALING:
         return new Healing(
