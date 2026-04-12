@@ -50,16 +50,16 @@ export function skillResultsToSteps(
           powerId: skillResult.powerId,
         });
       }
+    }
 
-      if (skillResult.endEvent && endEventProcessor) {
-        steps.push(
-          ...endEventProcessor.processEndEvent(
-            skillResult.endEvent,
-            card.identityInfo,
-            skillResult.powerId,
-          ),
-        );
-      }
+    if (skillResult.endEvent && endEventProcessor) {
+      steps.push(
+        ...endEventProcessor.processEndEvent(
+          skillResult.endEvent,
+          card.identityInfo,
+          skillResult.powerId,
+        ),
+      );
     }
 
     if (skillResult.skillKind === SkillKind.Debuff) {
