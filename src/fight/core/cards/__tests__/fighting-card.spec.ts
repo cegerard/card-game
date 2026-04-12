@@ -4,6 +4,36 @@ import { Launcher } from '../../targeting-card-strategies/launcher';
 import { AlterationSkill } from '../skills/alteration-skill';
 import { Player } from '../../player';
 
+describe('FightingCard.computeAttributeModifierValue()', () => {
+  describe('when an unknown buff/debuff type is provided', () => {
+    it('throws an error for unknown type in applyBuff', () => {
+      const card = createFightingCard({
+        attack: 100,
+        defense: 0,
+        accuracy: 0,
+        agility: 0,
+      });
+
+      expect(() => card.applyBuff('unknown' as any, 0.1, 2)).toThrow(
+        'Unknown attribute type: unknown',
+      );
+    });
+
+    it('throws an error for unknown type in applyDebuff', () => {
+      const card = createFightingCard({
+        attack: 100,
+        defense: 0,
+        accuracy: 0,
+        agility: 0,
+      });
+
+      expect(() => card.applyDebuff('unknown' as any, 0.1, 2)).toThrow(
+        'Unknown attribute type: unknown',
+      );
+    });
+  });
+});
+
 describe('FightingCard.applyBuff()', () => {
   describe('when applying a duration-only buff', () => {
     it('stacks on top of existing buff of same type', () => {
