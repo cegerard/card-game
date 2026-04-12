@@ -14,17 +14,42 @@ export enum SkillKind {
   TargetingOverride = 'targeting_override',
 }
 
-export type SkillResults = {
-  skillKind: SkillKind;
-  results:
-    | HealingResults
-    | BuffResults
-    | DebuffResults
-    | AttackResult[]
-    | TargetingOverrideReport[];
+type BaseSkillResults = {
   endEvent?: string;
   powerId?: string;
 };
+
+export type HealingSkillResults = BaseSkillResults & {
+  skillKind: SkillKind.Healing;
+  results: HealingResults;
+};
+
+export type BuffSkillResults = BaseSkillResults & {
+  skillKind: SkillKind.Buff;
+  results: BuffResults;
+};
+
+export type DebuffSkillResults = BaseSkillResults & {
+  skillKind: SkillKind.Debuff;
+  results: DebuffResults;
+};
+
+export type AttackSkillResults = BaseSkillResults & {
+  skillKind: SkillKind.Attack;
+  results: AttackResult[];
+};
+
+export type TargetingOverrideSkillResults = BaseSkillResults & {
+  skillKind: SkillKind.TargetingOverride;
+  results: TargetingOverrideReport[];
+};
+
+export type SkillResults =
+  | HealingSkillResults
+  | BuffSkillResults
+  | DebuffSkillResults
+  | AttackSkillResults
+  | TargetingOverrideSkillResults;
 
 export interface Skill {
   id: string;

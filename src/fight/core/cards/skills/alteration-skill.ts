@@ -68,11 +68,9 @@ export class AlterationSkill implements Skill {
       this.activationCondition &&
       !this.activationCondition.evaluate(source, context)
     ) {
-      return {
-        skillKind: this.resolveSkillKind(),
-        results: [],
-        powerId: this.powerId,
-      };
+      return this.polarity === 'buff'
+        ? { skillKind: SkillKind.Buff, results: [], powerId: this.powerId }
+        : { skillKind: SkillKind.Debuff, results: [], powerId: this.powerId };
     }
 
     const targetedCards = this.targetingStrategy.targetedCards(
@@ -81,40 +79,37 @@ export class AlterationSkill implements Skill {
       context.opponentPlayer,
     );
 
-    const results =
-      this.polarity === 'buff'
-        ? targetedCards.map((targetedCard) => ({
-            target: targetedCard.identityInfo,
-            buff: targetedCard.applyBuff(
-              this.attributeType,
-              this.rate,
-              this.duration,
-              this.terminationEvent,
-              this.powerId,
-            ),
-          }))
-        : targetedCards.map((targetedCard) => ({
-            target: targetedCard.identityInfo,
-            debuff: targetedCard.applyDebuff(
-              this.attributeType,
-              this.rate,
-              this.duration,
-              this.powerId,
-            ),
-          }));
-
     this.activationCount++;
 
     const isExhausted =
       this.activationLimit !== undefined &&
       this.activationCount >= this.activationLimit;
+    const endEvent = isExhausted ? this.endEvent : undefined;
 
-    return {
-      skillKind: this.resolveSkillKind(),
-      results,
-      endEvent: isExhausted ? this.endEvent : undefined,
-      powerId: this.powerId,
-    };
+    if (this.polarity === 'buff') {
+      const results = targetedCards.map((targetedCard) => ({
+        target: targetedCard.identityInfo,
+        buff: targetedCard.applyBuff(
+          this.attributeType,
+          this.rate,
+          this.duration,
+          this.terminationEvent,
+          this.powerId,
+        ),
+      }));
+      return { skillKind: SkillKind.Buff, results, endEvent, powerId: this.powerId };
+    }
+
+    const results = targetedCards.map((targetedCard) => ({
+      target: targetedCard.identityInfo,
+      debuff: targetedCard.applyDebuff(
+        this.attributeType,
+        this.rate,
+        this.duration,
+        this.powerId,
+      ),
+    }));
+    return { skillKind: SkillKind.Debuff, results, endEvent, powerId: this.powerId };
   }
 
   isTriggered(triggerName: string, context?: FightingContext): boolean {
@@ -125,10 +120,6 @@ export class AlterationSkill implements Skill {
   lifecycleEndEvent(): string | undefined {
     if (this.isExhausted()) return undefined;
     return this.endEvent;
-  }
-
-  private resolveSkillKind(): SkillKind {
-    return this.polarity === 'buff' ? SkillKind.Buff : SkillKind.Debuff;
   }
 
   private isExhausted(): boolean {
