@@ -32,11 +32,11 @@ import { SpecialHealing } from '../core/cards/skills/special-healing';
 import { Healing } from '../core/cards/skills/healing';
 import { AlterationSkill } from '../core/cards/skills/alteration-skill';
 import { buildTriggerStrategy } from './trigger-factory';
-import { PoisonedAttackEffect } from '../core/cards/@types/attack/attack-poisoned-effect';
+import { PoisonAttackEffect } from '../core/cards/@types/attack/attack-poison-effect';
 import { EffectLevel } from '../core/cards/@types/attack/effect-level';
 import { AttackEffect } from '../core/cards/@types/attack/attack-effect';
-import { BurnedAttackEffect } from '../core/cards/@types/attack/attack-burned-effect';
-import { FrozenAttackEffect } from '../core/cards/@types/attack/attack-frozen-effect';
+import { BurnAttackEffect } from '../core/cards/@types/attack/attack-burn-effect';
+import { FreezeAttackEffect } from '../core/cards/@types/attack/attack-freeze-effect';
 import { EffectTriggeredDebuff } from '../core/cards/@types/attack/effect-triggered-debuff';
 import { MathRandomizer } from '../tools/math-randomizer';
 import { BuffApplication } from '../core/cards/@types/buff/buff-application';
@@ -225,21 +225,21 @@ export class FightController {
 
     switch (effectDto.type) {
       case Effect.POISON:
-        return new PoisonedAttackEffect(
+        return new PoisonAttackEffect(
           effectDto.rate,
           effectDto.level as EffectLevel,
           triggeredDebuff,
           effectDto.terminationEvent,
         );
       case Effect.BURN:
-        return new BurnedAttackEffect(
+        return new BurnAttackEffect(
           effectDto.rate,
           effectDto.level as EffectLevel,
           triggeredDebuff,
           effectDto.terminationEvent,
         );
       case Effect.FREEZE:
-        return new FrozenAttackEffect(
+        return new FreezeAttackEffect(
           effectDto.rate,
           effectDto.level as EffectLevel,
           triggeredDebuff,

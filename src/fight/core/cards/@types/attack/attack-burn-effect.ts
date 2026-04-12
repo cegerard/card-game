@@ -5,10 +5,10 @@ import { FightingContext } from '../fighting-context';
 import { CardStateBurned } from '../state/card-state-burned';
 import { EffectTriggeredDebuff } from './effect-triggered-debuff';
 
-export class BurnedAttackEffect implements AttackEffect {
+export class BurnAttackEffect implements AttackEffect {
   public readonly rate: number;
   public readonly level: EffectLevel;
-  public readonly type = 'burned';
+  public readonly type = 'burn' as const;
   public readonly triggeredDebuff?: EffectTriggeredDebuff;
   public readonly terminationEvent?: string;
 

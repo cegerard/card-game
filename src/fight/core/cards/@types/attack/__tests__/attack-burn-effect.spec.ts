@@ -1,24 +1,24 @@
-import { FrozenAttackEffect } from '../attack-frozen-effect';
+import { BurnAttackEffect } from '../attack-burn-effect';
 import { EffectTriggeredDebuff } from '../effect-triggered-debuff';
-import { CardStateFrozen } from '../../state/card-state-frozen';
+import { CardStateBurned } from '../../state/card-state-burned';
 import { RandomizerFake } from '../../../../../../../test/helpers/randomizer-fake';
 import { createFightingCard } from '../../../../../../../test/helpers/fighting-card';
 import { EffectResult } from '../attack-effect';
 
 function makeCards() {
   const attacker = createFightingCard({ attack: 200 });
-  const defender = createFightingCard({ agility: 50 });
+  const defender = createFightingCard({ defense: 100 });
   return { attacker, defender };
 }
 
-describe('FrozenAttackEffect with triggeredDebuff', () => {
+describe('BurnAttackEffect with triggeredDebuff', () => {
   const randomizer = new RandomizerFake();
 
   afterEach(() => {
     randomizer.reset();
   });
 
-  describe('when freeze is applied and roll succeeds', () => {
+  describe('when burn is applied and roll succeeds', () => {
     let result: EffectResult;
 
     beforeEach(() => {
@@ -26,12 +26,12 @@ describe('FrozenAttackEffect with triggeredDebuff', () => {
       const { attacker, defender } = makeCards();
       const triggered = new EffectTriggeredDebuff(
         1.0,
-        'agility',
+        'defense',
         0.1,
         2,
         randomizer,
       );
-      const effect = new FrozenAttackEffect(0.2, 1, triggered);
+      const effect = new BurnAttackEffect(0.2, 1, triggered);
       result = effect.applyEffect(defender, attacker, null);
     });
 
@@ -39,28 +39,28 @@ describe('FrozenAttackEffect with triggeredDebuff', () => {
       expect(result.triggeredDebuff).toEqual({
         card: expect.anything(),
         debuff: expect.objectContaining({
-          type: 'agility',
-          value: 5,
+          type: 'defense',
+          value: 10,
           duration: 2,
         }),
       });
     });
   });
 
-  describe('when frozen level is already high enough (effect skipped)', () => {
+  describe('when burn level is already high enough (effect skipped)', () => {
     let result: EffectResult;
 
     beforeEach(() => {
       const { attacker, defender } = makeCards();
-      defender.setState(new CardStateFrozen(2, 3, 0.1));
+      defender.setState(new CardStateBurned(2, 3, 10));
       const triggered = new EffectTriggeredDebuff(
         1.0,
-        'agility',
+        'defense',
         0.1,
         2,
         randomizer,
       );
-      const effect = new FrozenAttackEffect(0.2, 1, triggered);
+      const effect = new BurnAttackEffect(0.2, 1, triggered);
       result = effect.applyEffect(defender, attacker, null);
     });
 

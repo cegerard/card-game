@@ -5,10 +5,10 @@ import { EffectLevel } from './effect-level';
 import { FightingContext } from '../fighting-context';
 import { EffectTriggeredDebuff } from './effect-triggered-debuff';
 
-export class PoisonedAttackEffect implements AttackEffect {
+export class PoisonAttackEffect implements AttackEffect {
   public readonly rate: number;
   public readonly level: EffectLevel;
-  public readonly type = 'poisoned';
+  public readonly type = 'poison' as const;
   public readonly triggeredDebuff?: EffectTriggeredDebuff;
   public readonly terminationEvent?: string;
 

@@ -163,7 +163,7 @@ describe('Add frozen effect level 1', () => {
         },
         2: {
           kind: 'status_change',
-          status: 'frozen',
+          status: 'freeze',
           card: card2.identityInfo,
         },
         3: {
@@ -443,7 +443,7 @@ describe('Add frozen effect level 2', () => {
         },
         2: {
           kind: 'status_change',
-          status: 'frozen',
+          status: 'freeze',
           card: card2.identityInfo,
         },
         3: {
@@ -529,7 +529,7 @@ describe('Add frozen effect level 2', () => {
         },
         2: {
           kind: 'status_change',
-          status: 'frozen',
+          status: 'freeze',
           card: card2.identityInfo,
         },
         3: {
@@ -615,7 +615,7 @@ describe('Add frozen effect level 2', () => {
         },
         2: {
           kind: 'status_change',
-          status: 'frozen',
+          status: 'freeze',
           card: card2.identityInfo,
         },
         3: {
@@ -814,7 +814,7 @@ describe('Add frozen effect level 3', () => {
         },
         2: {
           kind: 'status_change',
-          status: 'frozen',
+          status: 'freeze',
           card: card2.identityInfo,
         },
         3: {
@@ -899,7 +899,7 @@ describe('Add frozen effect level 3', () => {
         },
         2: {
           kind: 'status_change',
-          status: 'frozen',
+          status: 'freeze',
           card: card2.identityInfo,
         },
         3: {
@@ -985,7 +985,7 @@ describe('Add frozen effect level 3', () => {
         },
         2: {
           kind: 'status_change',
-          status: 'frozen',
+          status: 'freeze',
           card: card2.identityInfo,
         },
         3: {
@@ -1071,7 +1071,7 @@ describe('Add frozen effect level 3', () => {
         },
         2: {
           kind: 'status_change',
-          status: 'frozen',
+          status: 'freeze',
           card: card2.identityInfo,
         },
         3: {
@@ -1157,7 +1157,7 @@ describe('Add frozen effect level 3', () => {
         },
         2: {
           kind: 'status_change',
-          status: 'frozen',
+          status: 'freeze',
           card: card2.identityInfo,
         },
         3: {

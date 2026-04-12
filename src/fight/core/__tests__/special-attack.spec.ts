@@ -239,7 +239,7 @@ describe('Trigger card special attack with poison effect', () => {
       },
       2: {
         kind: 'status_change',
-        status: 'poisoned',
+        status: 'poison',
         card: card2.identityInfo,
       },
       3: {

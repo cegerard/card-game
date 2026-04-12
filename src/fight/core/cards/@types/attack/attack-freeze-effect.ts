@@ -5,10 +5,10 @@ import { AttackEffect, EffectResult } from './attack-effect';
 import { EffectLevel } from './effect-level';
 import { EffectTriggeredDebuff } from './effect-triggered-debuff';
 
-export class FrozenAttackEffect implements AttackEffect {
+export class FreezeAttackEffect implements AttackEffect {
   public readonly rate: number;
   public readonly level: EffectLevel;
-  public readonly type = 'frozen';
+  public readonly type = 'freeze' as const;
   public readonly triggeredDebuff?: EffectTriggeredDebuff;
   public readonly terminationEvent?: string;
 
