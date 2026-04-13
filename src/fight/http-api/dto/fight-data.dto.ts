@@ -296,7 +296,14 @@ export class OtherSkillDto {
   @IsString()
   name: string;
 
-  @IsOptional()
+  // Required for HEALING, BUFF, DEBUFF; not applicable to CONDITIONAL_ATTACK or TARGETING_OVERRIDE
+  @ValidateIf(
+    (o) =>
+      o.kind === SkillKind.HEALING ||
+      o.kind === SkillKind.BUFF ||
+      o.kind === SkillKind.DEBUFF,
+  )
+  @IsDefined()
   @IsNumber()
   rate?: number;
 
@@ -306,12 +313,14 @@ export class OtherSkillDto {
   @IsEnum(TriggerEvent)
   event: TriggerEvent;
 
-  // Buff property
-  @IsOptional()
+  // Required for BUFF and DEBUFF kinds
+  @ValidateIf((o) => o.kind === SkillKind.BUFF || o.kind === SkillKind.DEBUFF)
+  @IsDefined()
   @IsEnum(BuffType)
   buffType?: BuffType;
 
-  @IsOptional()
+  @ValidateIf((o) => o.kind === SkillKind.BUFF || o.kind === SkillKind.DEBUFF)
+  @IsDefined()
   @IsNumber()
   duration?: number;
 
@@ -320,15 +329,17 @@ export class OtherSkillDto {
   @Type(/* istanbul ignore next */ () => BuffConditionDto)
   activationCondition?: BuffConditionDto;
 
-  // Conditional attack properties
-  @IsOptional()
+  // Required for CONDITIONAL_ATTACK kind
+  @ValidateIf((o) => o.kind === SkillKind.CONDITIONAL_ATTACK)
+  @IsDefined()
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
   @Type(/* istanbul ignore next */ () => DamageCompositionDto)
   damages?: DamageCompositionDto[];
 
-  @IsOptional()
+  @ValidateIf((o) => o.kind === SkillKind.CONDITIONAL_ATTACK)
+  @IsDefined()
   @IsNumber()
   interval?: number;
 
@@ -352,8 +363,13 @@ export class OtherSkillDto {
   @Type(/* istanbul ignore next */ () => DamageCompositionDto)
   comboFinisher?: DamageCompositionDto[];
 
-  // Ally death trigger property
-  @IsOptional()
+  // Required when event is ally-death or enemy-death
+  @ValidateIf(
+    (o) =>
+      o.event === TriggerEvent.ALLY_DEATH ||
+      o.event === TriggerEvent.ENEMY_DEATH,
+  )
+  @IsDefined()
   @IsString()
   targetCardId?: string;
 
@@ -378,7 +394,7 @@ export class OtherSkillDto {
   @IsNotEmpty()
   powerId?: string;
 
-  // Dormant trigger properties (required when event=dormant)
+  // Required when event=dormant
   @ValidateIf((o) => o.event === TriggerEvent.DORMANT)
   @IsDefined()
   @IsEnum(TriggerEvent)
