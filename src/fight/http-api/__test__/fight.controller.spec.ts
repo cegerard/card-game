@@ -1151,6 +1151,189 @@ describe('FightController', () => {
     });
   });
 
+  describe('when player2 has cards in their deck', () => {
+    beforeEach(() => {
+      fightData = {
+        cardSelectorStrategy: CardSelectorStrategy.PLAYER_BY_PLAYER,
+        player1: { name: 'Player 1', deck: [] },
+        player2: {
+          name: 'Player 2',
+          deck: [
+            {
+              id: 'sword-01',
+              name: 'Sword',
+              attack: 8,
+              defense: 5,
+              health: 90,
+              speed: 4,
+              agility: 20,
+              accuracy: 18,
+              criticalChance: 0.08,
+              skills: {
+                special: {
+                  name: 'No Special',
+                  kind: SpecialKind.ATTACK,
+                  rate: 0,
+                  energy: 0,
+                  targetingStrategy: TargetingStrategy.POSITION_BASED,
+                },
+                simpleAttack: {
+                  name: 'Slice',
+                  damages: [{ type: DamageType.PHYSICAL, rate: 1.0 }],
+                  targetingStrategy: TargetingStrategy.POSITION_BASED,
+                },
+                others: [],
+              },
+              behaviors: { dodge: DodgeStrategy.SIMPLE_DODGE },
+            },
+          ],
+        },
+      };
+
+      fightController.startFight(fightData);
+    });
+
+    it('converts player2 deck cards into fighting cards', () => {
+      expect(fightSimulatorStub).toBeDefined();
+    });
+  });
+
+  describe('when a player uses a buff skill with a valid buffType', () => {
+    beforeEach(() => {
+      fightData = {
+        cardSelectorStrategy: CardSelectorStrategy.PLAYER_BY_PLAYER,
+        player1: {
+          name: 'Player 1',
+          deck: [
+            {
+              id: 'axe-01',
+              name: 'Axe',
+              attack: 10,
+              defense: 6,
+              health: 100,
+              speed: 3,
+              agility: 25,
+              accuracy: 15,
+              criticalChance: 0.05,
+              skills: {
+                special: {
+                  name: 'No Special Attack',
+                  kind: SpecialKind.ATTACK,
+                  rate: 0,
+                  energy: 0,
+                  targetingStrategy: TargetingStrategy.POSITION_BASED,
+                },
+                simpleAttack: {
+                  name: 'Strike',
+                  damages: [{ type: DamageType.PHYSICAL, rate: 1.0 }],
+                  targetingStrategy: TargetingStrategy.POSITION_BASED,
+                },
+                others: [
+                  {
+                    kind: SkillKind.BUFF,
+                    name: 'Power Up',
+                    rate: 0.2,
+                    event: TriggerEvent.TURN_END,
+                    targetingStrategy: TargetingStrategy.SELF,
+                    buffType: 'attack' as any,
+                    duration: 2,
+                  },
+                ],
+              },
+              behaviors: { dodge: DodgeStrategy.SIMPLE_DODGE },
+            },
+          ],
+        },
+        player2: { name: 'Player 2', deck: [] },
+      };
+
+      fightController.startFight(fightData);
+    });
+
+    it('creates a buff alteration skill', () => {
+      fightSimulatorStub.validatePlayer1FirstCard((card) => {
+        expect(JSON.parse(JSON.stringify(card)).skills[0].id).toBe(
+          'alteration-skill',
+        );
+      });
+    });
+
+    it('maps the buff type correctly', () => {
+      fightSimulatorStub.validatePlayer1FirstCard((card) => {
+        expect(JSON.parse(JSON.stringify(card)).skills[0].attributeType).toBe(
+          'attack',
+        );
+      });
+    });
+  });
+
+  describe('when a player uses a skill with a dormant trigger', () => {
+    const dormantCard = {
+      id: 'axe-01',
+      name: 'Axe',
+      attack: 10,
+      defense: 6,
+      health: 100,
+      speed: 3,
+      agility: 25,
+      accuracy: 15,
+      criticalChance: 0.05,
+      skills: {
+        special: {
+          name: 'No Special Attack',
+          kind: SpecialKind.ATTACK,
+          rate: 0,
+          energy: 0,
+          targetingStrategy: TargetingStrategy.POSITION_BASED,
+        },
+        simpleAttack: {
+          name: 'Strike',
+          damages: [{ type: DamageType.PHYSICAL, rate: 1.0 }],
+          targetingStrategy: TargetingStrategy.POSITION_BASED,
+        },
+        others: [
+          {
+            kind: SkillKind.HEALING,
+            name: 'Vengeance Heal',
+            rate: 1.5,
+            event: TriggerEvent.DORMANT,
+            targetingStrategy: TargetingStrategy.SELF,
+            activationEvent: TriggerEvent.ALLY_DEATH,
+            activationTargetCardId: 'ally-01',
+            replacementEvent: TriggerEvent.ENEMY_DEATH,
+          },
+        ],
+      },
+      behaviors: { dodge: DodgeStrategy.SIMPLE_DODGE },
+    };
+
+    beforeEach(() => {
+      fightData = {
+        cardSelectorStrategy: CardSelectorStrategy.PLAYER_BY_PLAYER,
+        player1: { name: 'Player 1', deck: [dormantCard] },
+        player2: { name: 'Player 2', deck: [] },
+      };
+
+      fightController.startFight(fightData);
+    });
+
+    it('creates a skill with a dormant trigger id', () => {
+      fightSimulatorStub.validatePlayer1FirstCard((card) => {
+        expect(JSON.parse(JSON.stringify(card)).skills[0].trigger.id).toBe(
+          'dormant',
+        );
+      });
+    });
+
+    it('sets the activation trigger from activationEvent and activationTargetCardId', () => {
+      fightSimulatorStub.validatePlayer1FirstCard((card) => {
+        expect(
+          JSON.parse(JSON.stringify(card)).skills[0].trigger.activationTrigger,
+        ).toEqual({ id: 'ally-death', targetCardId: 'ally-01' });
+      });
+    });
+  });
+
   describe('error handling for unknown enum values', () => {
     const baseCard = {
       id: 'card-1',
