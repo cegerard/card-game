@@ -1,6 +1,6 @@
 import { BuffReport } from './buff-report';
 import { DebuffReport } from './debuff-report';
-import { DamageReport } from './damage-report';
+import { AttackStepReport, SpecialAttackStepReport } from './damage-report';
 import { HealingReport } from './healing-report';
 import { StateEffectReport } from './state-effect-report';
 import { StatusChangeReport } from './status-change-report';
@@ -29,12 +29,12 @@ export enum StepKind {
 }
 
 export type Step =
-  | ({ kind: StepKind.StatusChange } & StatusChangeReport)
-  | ({ kind: StepKind.Attack } & DamageReport)
-  | ({ kind: StepKind.SpecialAttack } & DamageReport)
+  | StatusChangeReport
+  | AttackStepReport
+  | SpecialAttackStepReport
   | HealingReport
-  | ({ kind: StepKind.FightEnd } & WinnerReport)
-  | ({ kind: StepKind.StateEffect } & StateEffectReport)
+  | WinnerReport
+  | StateEffectReport
   | BuffReport
   | DebuffReport
   | BuffRemovedReport
