@@ -28,16 +28,16 @@ export enum StepKind {
   EffectRemoved = 'effect_removed',
 }
 
-export type Step = { kind: StepKind } & (
-  | StatusChangeReport
-  | DamageReport
+export type Step =
+  | ({ kind: StepKind.StatusChange } & StatusChangeReport)
+  | ({ kind: StepKind.Attack } & DamageReport)
+  | ({ kind: StepKind.SpecialAttack } & DamageReport)
   | HealingReport
-  | WinnerReport
-  | StateEffectReport
+  | ({ kind: StepKind.FightEnd } & WinnerReport)
+  | ({ kind: StepKind.StateEffect } & StateEffectReport)
   | BuffReport
   | DebuffReport
   | BuffRemovedReport
   | TargetingOverrideReport
   | TargetingRevertedReport
-  | EffectRemovedReport
-);
+  | EffectRemovedReport;

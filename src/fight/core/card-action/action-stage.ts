@@ -179,7 +179,7 @@ export class ActionStage {
           acc.actionSteps.push({
             kind: report.kind,
             ...report.attack,
-          });
+          } as Step);
 
           if (report.buffReport) {
             acc.actionSteps.push(report.buffReport);
