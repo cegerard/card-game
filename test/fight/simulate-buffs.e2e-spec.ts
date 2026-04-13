@@ -294,6 +294,6 @@ describe('Simulate fight with buffs', () => {
     return request(app.getHttpServer())
       .post('/fight')
       .send(invalidBuffData)
-      .expect(500); // Should return 500 Internal Server Error due to validation error
+      .expect(400);
   });
 });
