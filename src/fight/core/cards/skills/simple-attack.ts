@@ -19,7 +19,7 @@ export class SimpleAttack implements AttackSkill {
   }
 
   public launch(card: FightingCard, context: FightingContext): AttackResult[] {
-    return this.executeAttack(card, context, this.targetingStrategy);
+    return this.launchWithTargeting(card, context, this.targetingStrategy);
   }
 
   public launchWithTargeting(
