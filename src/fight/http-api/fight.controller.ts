@@ -248,7 +248,7 @@ export class FightController {
     }
   }
 
-  private buildTriggerForSkill(skillData: any) {
+  private buildTriggerForSkill(skillData: OtherSkillDto) {
     const dormantConfig =
       skillData.event === TriggerEvent.DORMANT
         ? {

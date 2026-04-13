@@ -16,4 +16,6 @@ export type DamageReport = {
 };
 
 export type AttackStepReport = { kind: StepKind.Attack } & DamageReport;
-export type SpecialAttackStepReport = { kind: StepKind.SpecialAttack } & DamageReport;
+export type SpecialAttackStepReport = {
+  kind: StepKind.SpecialAttack;
+} & DamageReport;
