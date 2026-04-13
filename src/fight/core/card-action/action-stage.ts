@@ -179,17 +179,14 @@ export class ActionStage {
           acc.actionSteps.push({
             kind: report.kind,
             ...report.attack,
-          });
+          } as Step);
 
           if (report.buffReport) {
             acc.actionSteps.push(report.buffReport);
           }
 
           report.statusChanges.forEach((statusChange) => {
-            acc.statusChangeSteps.push({
-              kind: StepKind.StatusChange,
-              ...statusChange,
-            });
+            acc.statusChangeSteps.push(statusChange);
           });
         }
 
@@ -222,11 +219,13 @@ export class ActionStage {
       if (defensiveCard.isDead()) {
         this.notifyDeath(defensiveCard, attackerCard);
         report.statusChanges.push({
+          kind: StepKind.StatusChange,
           card: defensiveCard.identityInfo,
           status: 'dead',
         });
       } else if (damageDealt.effect) {
         report.statusChanges.push({
+          kind: StepKind.StatusChange,
           status: damageDealt.effect.type,
           card: damageDealt.effect.card.identityInfo,
         });
