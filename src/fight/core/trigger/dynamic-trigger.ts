@@ -2,36 +2,40 @@ import { FightingContext } from '../cards/@types/fighting-context';
 import { ActivatableTrigger } from './activatable-trigger';
 import { Trigger } from './trigger';
 
+type DynamicTriggerState =
+  | { kind: 'dormant'; activation: Trigger }
+  | { kind: 'active'; replacement: Trigger };
+
 export class DynamicTrigger implements ActivatableTrigger {
   public id = 'dormant';
-  private activated = false;
-  private activationTrigger: Trigger;
+  private state: DynamicTriggerState;
   private buildReplacementTrigger: (cardId: string) => Trigger;
-  private replacementTrigger?: Trigger;
 
   constructor(
     activationTrigger: Trigger,
     buildReplacementTrigger: (cardId: string) => Trigger,
   ) {
-    this.activationTrigger = activationTrigger;
+    this.state = { kind: 'dormant', activation: activationTrigger };
     this.buildReplacementTrigger = buildReplacementTrigger;
   }
 
   activate(triggerId: string, context: FightingContext): void {
-    if (this.activated) return;
-    if (!this.activationTrigger.isTriggered(triggerId)) return;
+    if (this.state.kind === 'active') return;
+    if (!this.state.activation.isTriggered(triggerId)) return;
     const killerCardId = context?.killerCard?.id;
     if (!killerCardId) {
       // Activation event observed without a killer (e.g. status-effect death).
       // Cannot build a replacement trigger keyed on the killer; stay dormant.
       return;
     }
-    this.replacementTrigger = this.buildReplacementTrigger(killerCardId);
-    this.activated = true;
+    this.state = {
+      kind: 'active',
+      replacement: this.buildReplacementTrigger(killerCardId),
+    };
   }
 
   isTriggered(triggerId: string): boolean {
-    if (!this.activated) return false;
-    return this.replacementTrigger!.isTriggered(triggerId);
+    if (this.state.kind !== 'active') return false;
+    return this.state.replacement.isTriggered(triggerId);
   }
 }
