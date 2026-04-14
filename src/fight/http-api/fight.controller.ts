@@ -32,6 +32,7 @@ import { SpecialHealing } from '../core/cards/skills/special-healing';
 import { Healing } from '../core/cards/skills/healing';
 import { AlterationSkill } from '../core/cards/skills/alteration-skill';
 import { buildTriggerStrategy } from './trigger-factory';
+import { Trigger } from '../core/trigger/trigger';
 import { PoisonAttackEffect } from '../core/cards/@types/attack/attack-poison-effect';
 import { EffectLevel } from '../core/cards/@types/attack/effect-level';
 import { AttackEffect } from '../core/cards/@types/attack/attack-effect';
@@ -248,7 +249,7 @@ export class FightController {
     }
   }
 
-  private buildTriggerForSkill(skillData: OtherSkillDto) {
+  private buildTriggerForSkill(skillData: OtherSkillDto): Trigger {
     const dormantConfig =
       skillData.event === TriggerEvent.DORMANT
         ? {
