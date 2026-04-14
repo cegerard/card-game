@@ -4,7 +4,6 @@ import { DamageType } from '../cards/@types/damage/damage-type';
 import { Player } from '../player';
 import { PlayerByPlayerCardSelector } from '../fight-simulator/card-selectors/player-by-player';
 import { createFightingCard } from '../../../../test/helpers/fighting-card';
-import { FightingCard } from '../cards/fighting-card';
 import { Healing } from '../cards/skills/healing';
 import { DynamicTrigger } from '../trigger/dynamic-trigger';
 import { AllyDeath } from '../trigger/ally-death';
@@ -15,16 +14,23 @@ describe('Dynamic trigger integration', () => {
   const allyId = 'warrior-01';
   const enemyId = 'enemy-01';
 
+  const buildDormantHealingSkill = (targetAllyId: string) =>
+    new Healing(
+      0.5,
+      new DynamicTrigger(
+        new AllyDeath(targetAllyId),
+        (cardId) => new EnemyDeath(cardId),
+      ),
+      new Launcher(),
+    );
+
   describe('when ally dies and dormant skill activates on enemy death', () => {
-    let allyCard: FightingCard;
-    let healerCard: FightingCard;
-    let enemyCard1: FightingCard;
-    let enemyCard2: FightingCard;
-    let player1: Player;
-    let player2: Player;
+    let stepEntries: [string, any][];
+    let allyDeathIndex: number;
+    let enemyDeathIndex: number;
 
     beforeEach(() => {
-      allyCard = createFightingCard({
+      const allyCard = createFightingCard({
         id: allyId,
         name: 'Warrior',
         attack: 10,
@@ -42,7 +48,7 @@ describe('Dynamic trigger integration', () => {
         },
       });
 
-      healerCard = createFightingCard({
+      const healerCard = createFightingCard({
         id: 'healer-01',
         name: 'Healer',
         attack: 500,
@@ -59,20 +65,9 @@ describe('Dynamic trigger integration', () => {
           },
         },
       });
+      (healerCard as any).skills = [buildDormantHealingSkill(allyId)];
 
-      // Attach dormant healing skill manually
-      const dormantTrigger = new DynamicTrigger(
-        new AllyDeath(allyId),
-        (cardId) => new EnemyDeath(cardId),
-      );
-      const dormantHealingSkill = new Healing(
-        0.5,
-        dormantTrigger,
-        new Launcher(),
-      );
-      (healerCard as any).skills = [dormantHealingSkill];
-
-      enemyCard1 = createFightingCard({
+      const enemyCard1 = createFightingCard({
         id: enemyId,
         name: 'Enemy1',
         attack: 100,
@@ -90,7 +85,7 @@ describe('Dynamic trigger integration', () => {
         },
       });
 
-      enemyCard2 = createFightingCard({
+      const enemyCard2 = createFightingCard({
         id: 'enemy-02',
         name: 'Enemy2',
         attack: 100,
@@ -108,48 +103,48 @@ describe('Dynamic trigger integration', () => {
         },
       });
 
-      player1 = new Player('Player 1', [allyCard, healerCard]);
-      player2 = new Player('Player 2', [enemyCard1, enemyCard2]);
-    });
-
-    it('produces a healing step after enemy dies once dormant skill is activated', () => {
+      const player1 = new Player('Player 1', [allyCard, healerCard]);
+      const player2 = new Player('Player 2', [enemyCard1, enemyCard2]);
       const fight = new Fight(
         player1,
         player2,
         new PlayerByPlayerCardSelector(player1, player2),
       );
-
-      const result = fight.start();
-      const stepEntries = Object.entries(result) as [string, any][];
-
-      const allyDeathIndex = stepEntries.findIndex(
+      stepEntries = Object.entries(fight.start()) as [string, any][];
+      allyDeathIndex = stepEntries.findIndex(
         ([_, s]) =>
           s.kind === 'status_change' &&
           s.card?.name === 'Warrior' &&
           s.status === 'dead',
       );
-
-      expect(allyDeathIndex).toBeGreaterThan(-1);
-
-      const enemyDeathIndex = stepEntries.findIndex(
+      enemyDeathIndex = stepEntries.findIndex(
         ([_, s]) =>
           s.kind === 'status_change' &&
           s.card?.name === 'Enemy1' &&
           s.status === 'dead',
       );
+    });
 
+    it('ally death step is present', () => {
+      expect(allyDeathIndex).toBeGreaterThan(-1);
+    });
+
+    it('enemy death occurs after ally death', () => {
       expect(enemyDeathIndex).toBeGreaterThan(allyDeathIndex);
+    });
 
+    it('healer performs healing after enemy dies', () => {
       const healingAfterEnemyDeath = stepEntries
         .slice(enemyDeathIndex + 1)
         .find(([_, s]) => s.kind === 'healing' && s.source?.name === 'Healer');
-
       expect(healingAfterEnemyDeath).toBeDefined();
     });
   });
 
   describe('when ally never dies', () => {
-    it('dormant skill never fires', () => {
+    let stepEntries: [string, any][];
+
+    beforeEach(() => {
       const allyCard = createFightingCard({
         id: allyId,
         name: 'Warrior',
@@ -185,14 +180,7 @@ describe('Dynamic trigger integration', () => {
           },
         },
       });
-
-      const dormantTrigger = new DynamicTrigger(
-        new AllyDeath(allyId),
-        (cardId) => new EnemyDeath(cardId),
-      );
-      (healerCard as any).skills = [
-        new Healing(0.5, dormantTrigger, new Launcher()),
-      ];
+      (healerCard as any).skills = [buildDormantHealingSkill(allyId)];
 
       const enemyCard = createFightingCard({
         id: enemyId,
@@ -214,26 +202,26 @@ describe('Dynamic trigger integration', () => {
 
       const player1 = new Player('Player 1', [allyCard, healerCard]);
       const player2 = new Player('Player 2', [enemyCard]);
-
       const fight = new Fight(
         player1,
         player2,
         new PlayerByPlayerCardSelector(player1, player2),
       );
+      stepEntries = Object.entries(fight.start()) as [string, any][];
+    });
 
-      const result = fight.start();
-      const stepEntries = Object.entries(result) as [string, any][];
-
+    it('dormant skill never fires', () => {
       const healingFromHealer = stepEntries.filter(
         ([_, s]) => s.kind === 'healing' && s.source?.name === 'Healer',
       );
-
       expect(healingFromHealer).toHaveLength(0);
     });
   });
 
   describe('when a different ally dies', () => {
-    it('dormant skill stays dormant', () => {
+    let stepEntries: [string, any][];
+
+    beforeEach(() => {
       const otherAlly = createFightingCard({
         id: 'other-ally',
         name: 'OtherAlly',
@@ -269,14 +257,7 @@ describe('Dynamic trigger integration', () => {
           },
         },
       });
-
-      const dormantTrigger = new DynamicTrigger(
-        new AllyDeath(allyId),
-        (cardId) => new EnemyDeath(cardId),
-      );
-      (healerCard as any).skills = [
-        new Healing(0.5, dormantTrigger, new Launcher()),
-      ];
+      (healerCard as any).skills = [buildDormantHealingSkill(allyId)];
 
       const enemyCard = createFightingCard({
         id: enemyId,
@@ -298,26 +279,26 @@ describe('Dynamic trigger integration', () => {
 
       const player1 = new Player('Player 1', [otherAlly, healerCard]);
       const player2 = new Player('Player 2', [enemyCard]);
-
       const fight = new Fight(
         player1,
         player2,
         new PlayerByPlayerCardSelector(player1, player2),
       );
+      stepEntries = Object.entries(fight.start()) as [string, any][];
+    });
 
-      const result = fight.start();
-      const stepEntries = Object.entries(result) as [string, any][];
-
+    it('dormant skill stays dormant', () => {
       const healingFromHealer = stepEntries.filter(
         ([_, s]) => s.kind === 'healing' && s.source?.name === 'Healer',
       );
-
       expect(healingFromHealer).toHaveLength(0);
     });
   });
 
   describe('when skill owner dies before activation', () => {
-    it('skill never activates', () => {
+    let stepEntries: [string, any][];
+
+    beforeEach(() => {
       const allyCard = createFightingCard({
         id: allyId,
         name: 'Warrior',
@@ -353,14 +334,7 @@ describe('Dynamic trigger integration', () => {
           },
         },
       });
-
-      const dormantTrigger = new DynamicTrigger(
-        new AllyDeath(allyId),
-        (cardId) => new EnemyDeath(cardId),
-      );
-      (healerCard as any).skills = [
-        new Healing(0.5, dormantTrigger, new Launcher()),
-      ];
+      (healerCard as any).skills = [buildDormantHealingSkill(allyId)];
 
       const enemyCard = createFightingCard({
         id: enemyId,
@@ -382,20 +356,18 @@ describe('Dynamic trigger integration', () => {
 
       const player1 = new Player('Player 1', [allyCard, healerCard]);
       const player2 = new Player('Player 2', [enemyCard]);
-
       const fight = new Fight(
         player1,
         player2,
         new PlayerByPlayerCardSelector(player1, player2),
       );
+      stepEntries = Object.entries(fight.start()) as [string, any][];
+    });
 
-      const result = fight.start();
-      const stepEntries = Object.entries(result) as [string, any][];
-
+    it('skill never activates', () => {
       const healingFromHealer = stepEntries.filter(
         ([_, s]) => s.kind === 'healing' && s.source?.name === 'Healer',
       );
-
       expect(healingFromHealer).toHaveLength(0);
     });
   });
