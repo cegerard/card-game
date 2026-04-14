@@ -394,7 +394,6 @@ export class OtherSkillDto {
   @IsNotEmpty()
   powerId?: string;
 
-  // Required when event=dormant
   @ValidateIf((o) => o.event === TriggerEvent.DORMANT)
   @IsDefined()
   @IsEnum(TriggerEvent)
