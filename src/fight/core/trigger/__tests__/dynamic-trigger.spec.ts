@@ -39,15 +39,16 @@ describe('DynamicTrigger', () => {
 
     it('does not fire on activation event', () => {
       const context = createMinimalContext('goblin-03');
+      trigger.activate('ally-death:warrior-01', context);
 
-      expect(trigger.isTriggered('ally-death:warrior-01', context)).toBe(false);
+      expect(trigger.isTriggered('ally-death:warrior-01')).toBe(false);
     });
   });
 
   describe('after activation event is observed', () => {
     beforeEach(() => {
       const context = createMinimalContext('goblin-03');
-      trigger.isTriggered('ally-death:warrior-01', context);
+      trigger.activate('ally-death:warrior-01', context);
     });
 
     it('matches the replacement trigger built from killer card id', () => {
@@ -70,8 +71,8 @@ describe('DynamicTrigger', () => {
   describe('activation is idempotent', () => {
     it('calling activation event multiple times still delegates to replacement', () => {
       const context = createMinimalContext('goblin-03');
-      trigger.isTriggered('ally-death:warrior-01', context);
-      trigger.isTriggered('ally-death:warrior-01', context);
+      trigger.activate('ally-death:warrior-01', context);
+      trigger.activate('ally-death:warrior-01', context);
 
       expect(trigger.isTriggered('enemy-death:goblin-03')).toBe(true);
     });
@@ -79,11 +80,15 @@ describe('DynamicTrigger', () => {
 
   describe('activation without killerCard context', () => {
     it('stays dormant on activation event', () => {
+      const context = { killerCard: undefined } as any;
+      trigger.activate('ally-death:warrior-01', context);
+
       expect(trigger.isTriggered('ally-death:warrior-01')).toBe(false);
     });
 
     it('does not delegate to a replacement trigger afterwards', () => {
-      trigger.isTriggered('ally-death:warrior-01');
+      const context = { killerCard: undefined } as any;
+      trigger.activate('ally-death:warrior-01', context);
 
       expect(trigger.isTriggered('enemy-death:goblin-03')).toBe(false);
     });
@@ -97,7 +102,7 @@ describe('DynamicTrigger', () => {
       );
       const context = createMinimalContext('any-card');
 
-      dynamicWithTurnEnd.isTriggered('ally-death:warrior-01', context);
+      dynamicWithTurnEnd.activate('ally-death:warrior-01', context);
 
       expect(dynamicWithTurnEnd.isTriggered('turn-end')).toBe(true);
     });

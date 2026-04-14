@@ -1,6 +1,7 @@
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 import { FightingCard } from '../fighting-card';
 import { Trigger } from '../../trigger/trigger';
+import { ActivatableTrigger } from '../../trigger/activatable-trigger';
 import { FightingContext } from '../@types/fighting-context';
 import { Skill, SkillKind, SkillResults } from './skill';
 import { TargetingOverrideReport } from '../../fight-simulator/@types/targeting-override-report';
@@ -47,7 +48,13 @@ export class TargetingOverrideSkill implements Skill {
     };
   }
 
-  isTriggered(triggerName: string, context?: FightingContext): boolean {
-    return this.trigger.isTriggered(triggerName, context);
+  isTriggered(triggerName: string): boolean {
+    return this.trigger.isTriggered(triggerName);
+  }
+
+  activate(triggerId: string, context: FightingContext): void {
+    if ('activate' in this.trigger) {
+      (this.trigger as ActivatableTrigger).activate(triggerId, context);
+    }
   }
 }

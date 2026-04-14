@@ -1,6 +1,7 @@
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 import { FightingCard } from '../fighting-card';
 import { Trigger } from '../../trigger/trigger';
+import { ActivatableTrigger } from '../../trigger/activatable-trigger';
 import { FightingContext } from '../@types/fighting-context';
 import { BuffType } from '../@types/buff/type';
 import { Skill, SkillKind, SkillResults } from './skill';
@@ -122,9 +123,15 @@ export class AlterationSkill implements Skill {
     };
   }
 
-  isTriggered(triggerName: string, context?: FightingContext): boolean {
+  isTriggered(triggerName: string): boolean {
     if (this.isExhausted()) return false;
-    return this.trigger.isTriggered(triggerName, context);
+    return this.trigger.isTriggered(triggerName);
+  }
+
+  activate(triggerId: string, context: FightingContext): void {
+    if ('activate' in this.trigger) {
+      (this.trigger as ActivatableTrigger).activate(triggerId, context);
+    }
   }
 
   lifecycleEndEvent(): string | undefined {

@@ -2,6 +2,7 @@ import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting
 import { FightingCard } from '../fighting-card';
 import { Skill, SkillKind, SkillResults } from './skill';
 import { Trigger } from '../../trigger/trigger';
+import { ActivatableTrigger } from '../../trigger/activatable-trigger';
 import { FightingContext } from '../@types/fighting-context';
 
 export class Healing implements Skill {
@@ -46,7 +47,13 @@ export class Healing implements Skill {
     };
   }
 
-  isTriggered(triggerName: string, context?: FightingContext): boolean {
-    return this.trigger.isTriggered(triggerName, context);
+  isTriggered(triggerName: string): boolean {
+    return this.trigger.isTriggered(triggerName);
+  }
+
+  activate(triggerId: string, context: FightingContext): void {
+    if ('activate' in this.trigger) {
+      (this.trigger as ActivatableTrigger).activate(triggerId, context);
+    }
   }
 }
