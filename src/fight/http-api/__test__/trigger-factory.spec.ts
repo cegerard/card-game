@@ -89,8 +89,8 @@ describe('buildTriggerStrategy', () => {
         activationEvent: TriggerEvent.ALLY_DEATH,
         activationTargetCardId: 'card-1',
         replacementEvent: TriggerEvent.ENEMY_DEATH,
-      });
-      trigger.isTriggered('ally-death:card-1', {
+      }) as DynamicTrigger;
+      trigger.activate('ally-death:card-1', {
         killerCard: { id: 'killer-1' },
       } as any);
 
@@ -102,8 +102,8 @@ describe('buildTriggerStrategy', () => {
         activationEvent: TriggerEvent.ALLY_DEATH,
         activationTargetCardId: 'card-1',
         replacementEvent: TriggerEvent.TURN_END,
-      });
-      trigger.isTriggered('ally-death:card-1', {
+      }) as DynamicTrigger;
+      trigger.activate('ally-death:card-1', {
         killerCard: { id: 'killer-1' },
       } as any);
 

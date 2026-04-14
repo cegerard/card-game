@@ -276,8 +276,9 @@ export class FightingCard {
     trigger: string,
     context: FightingContext,
   ): SkillResults[] {
+    this.skills.forEach((s) => s.activate?.(trigger, context));
     return this.skills
-      .filter((s) => s.isTriggered(trigger, context))
+      .filter((s) => s.isTriggered(trigger))
       .map((skill) => skill.launch(this, context));
   }
 

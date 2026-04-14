@@ -67,10 +67,19 @@ export interface Skill {
    * Checks if the skill is triggered.
    *
    * @param triggerName - The name of the trigger to check.
-   * @param context - Optional fighting context (used by DynamicTrigger for activation).
    * @returns True if the skill is triggered, false otherwise
    */
-  isTriggered(triggerName: string, context?: FightingContext): boolean;
+  isTriggered(triggerName: string): boolean;
+
+  /**
+   * Activates dynamic triggers by observing events with context.
+   * Called before isTriggered to allow stateful triggers to transition.
+   * Optional — only skills wrapping ActivatableTrigger implement this.
+   *
+   * @param triggerId - The name of the trigger event observed.
+   * @param context - The fighting context providing killer card info.
+   */
+  activate?(triggerId: string, context: FightingContext): void;
 
   /**
    * Advances internal state (e.g., turn counter). Called each action turn.
