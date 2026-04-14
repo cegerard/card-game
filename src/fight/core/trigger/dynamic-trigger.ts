@@ -28,6 +28,7 @@ export class DynamicTrigger implements ActivatableTrigger {
       // Cannot build a replacement trigger keyed on the killer; stay dormant.
       return;
     }
+    // Activation consumes this event; replacement only matches subsequent events.
     this.state = {
       kind: 'active',
       replacement: this.buildReplacementTrigger(killerCardId),
