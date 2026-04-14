@@ -124,43 +124,19 @@ export class FightingCard {
   }
 
   public get actualAccuracy(): number {
-    const accuracyBuffs = this.buffs
-      .filter((buff) => buff.type === 'accuracy')
-      .reduce((sum, buff) => sum + buff.value, 0);
-    const accuracyDebuffs = this.debuffs
-      .filter((debuff) => debuff.type === 'accuracy')
-      .reduce((sum, debuff) => sum + debuff.value, 0);
-    return Math.max(0, this.accuracy + accuracyBuffs - accuracyDebuffs);
+    return this.computeActualStat(this.accuracy, 'accuracy');
   }
 
   public get actualAttack(): number {
-    const attackBuffs = this.buffs
-      .filter((buff) => buff.type === 'attack')
-      .reduce((sum, buff) => sum + buff.value, 0);
-    const attackDebuffs = this.debuffs
-      .filter((debuff) => debuff.type === 'attack')
-      .reduce((sum, debuff) => sum + debuff.value, 0);
-    return Math.max(0, this.attack + attackBuffs - attackDebuffs);
+    return this.computeActualStat(this.attack, 'attack');
   }
 
   public get actualDefense(): number {
-    const defenseBuffs = this.buffs
-      .filter((buff) => buff.type === 'defense')
-      .reduce((sum, buff) => sum + buff.value, 0);
-    const defenseDebuffs = this.debuffs
-      .filter((debuff) => debuff.type === 'defense')
-      .reduce((sum, debuff) => sum + debuff.value, 0);
-    return Math.max(0, this.defense + defenseBuffs - defenseDebuffs);
+    return this.computeActualStat(this.defense, 'defense');
   }
 
   public get actualAgility(): number {
-    const agilityBuffs = this.buffs
-      .filter((buff) => buff.type === 'agility')
-      .reduce((sum, buff) => sum + buff.value, 0);
-    const agilityDebuffs = this.debuffs
-      .filter((debuff) => debuff.type === 'agility')
-      .reduce((sum, debuff) => sum + debuff.value, 0);
-    return Math.max(0, this.agility + agilityBuffs - agilityDebuffs);
+    return this.computeActualStat(this.agility, 'agility');
   }
 
   public get actualEnergy(): number {
@@ -479,6 +455,16 @@ export class FightingCard {
     this.debuffs.push(debuff);
 
     return debuff;
+  }
+
+  private computeActualStat(base: number, type: BuffType | DebuffType): number {
+    const buffsSum = this.buffs
+      .filter((buff) => buff.type === type)
+      .reduce((sum, buff) => sum + buff.value, 0);
+    const debuffsSum = this.debuffs
+      .filter((debuff) => debuff.type === type)
+      .reduce((sum, debuff) => sum + debuff.value, 0);
+    return Math.max(0, base + buffsSum - debuffsSum);
   }
 
   private computeAttributeModifierValue(
