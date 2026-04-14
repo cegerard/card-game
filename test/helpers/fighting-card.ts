@@ -25,6 +25,7 @@ import {
   DebuffType,
 } from '../../src/fight/core/cards/@types/buff/type';
 import { Skill } from '../../src/fight/core/cards/skills/skill';
+import { TargetingOverrideSkill } from '../../src/fight/core/cards/skills/targeting-override';
 import { BuffApplication } from '../../src/fight/core/cards/@types/buff/buff-application';
 import { Element } from '../../src/fight/core/cards/@types/damage/element';
 import { DamageComposition } from '../../src/fight/core/cards/@types/damage/damage-composition';
@@ -94,6 +95,14 @@ type FightingCardParams = {
           duration: number;
           trigger: string;
           targetingStrategy: string;
+          targetCardId?: string;
+          powerId?: string;
+        }
+      | {
+          kind: 'TARGETING_OVERRIDE';
+          targetingStrategy: string;
+          terminationEvent: string;
+          trigger: string;
           targetCardId?: string;
           powerId?: string;
         }
@@ -278,6 +287,14 @@ function createsSkills(
         targetCardId?: string;
         powerId?: string;
       }
+    | {
+        kind: 'TARGETING_OVERRIDE';
+        targetingStrategy: string;
+        terminationEvent: string;
+        trigger: string;
+        targetCardId?: string;
+        powerId?: string;
+      }
   )[],
 ): Skill[] {
   return params.map((skill) => {
@@ -301,7 +318,7 @@ function createsSkills(
         terminationEvent: skill.terminationEvent,
         powerId: skill.powerId,
       });
-    } else {
+    } else if ('debuffType' in skill) {
       return new AlterationSkill({
         polarity: 'debuff',
         attributeType: skill.debuffType,
@@ -311,6 +328,13 @@ function createsSkills(
         targetingStrategy: createTargetingStrategy(skill.targetingStrategy),
         powerId: skill.powerId,
       });
+    } else {
+      return new TargetingOverrideSkill(
+        createTargetingStrategy(skill.targetingStrategy),
+        skill.terminationEvent,
+        createTrigger(skill.trigger, skill.targetCardId),
+        skill.powerId,
+      );
     }
   });
 }
