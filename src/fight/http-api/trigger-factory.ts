@@ -38,18 +38,6 @@ function buildSimpleTrigger(
   return trigger;
 }
 
-function buildReplacementTriggerFactory(
-  replacementEvent: TriggerEvent,
-): (cardId: string) => Trigger {
-  if (
-    replacementEvent === TriggerEvent.ALLY_DEATH ||
-    replacementEvent === TriggerEvent.ENEMY_DEATH
-  ) {
-    return (cardId: string) => buildDeathTrigger(replacementEvent, cardId);
-  }
-  return () => buildSimpleTrigger(replacementEvent);
-}
-
 export function buildTriggerStrategy(
   triggerEvent: TriggerEvent,
   targetCardId?: string,
@@ -69,10 +57,9 @@ export function buildTriggerStrategy(
       dormantConfig.activationEvent,
       dormantConfig.activationTargetCardId,
     );
-    const replacementFactory = buildReplacementTriggerFactory(
-      dormantConfig.replacementEvent,
+    return new DynamicTrigger(activationTrigger, (cardId) =>
+      buildSimpleTrigger(dormantConfig.replacementEvent, cardId),
     );
-    return new DynamicTrigger(activationTrigger, replacementFactory);
   }
 
   return buildSimpleTrigger(triggerEvent, targetCardId);
