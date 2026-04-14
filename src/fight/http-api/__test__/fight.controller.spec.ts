@@ -1328,7 +1328,7 @@ describe('FightController', () => {
     it('sets the activation trigger from activationEvent and activationTargetCardId', () => {
       fightSimulatorStub.validatePlayer1FirstCard((card) => {
         expect(
-          JSON.parse(JSON.stringify(card)).skills[0].trigger.activationTrigger,
+          JSON.parse(JSON.stringify(card)).skills[0].trigger.state.activation,
         ).toEqual({ id: 'ally-death', targetCardId: 'ally-01' });
       });
     });
