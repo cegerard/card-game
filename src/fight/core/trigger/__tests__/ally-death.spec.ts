@@ -1,10 +1,10 @@
-import { AllyDeath } from '../ally-death';
+import { DeathTrigger } from '../death-trigger';
 
-describe('AllyDeath', () => {
-  let trigger: AllyDeath;
+describe('DeathTrigger (ally-death)', () => {
+  let trigger: DeathTrigger;
 
   beforeEach(() => {
-    trigger = new AllyDeath('warrior-01');
+    trigger = new DeathTrigger('ally-death', 'warrior-01');
   });
 
   it('has id ally-death', () => {

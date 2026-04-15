@@ -4,8 +4,7 @@ import { TriggerEvent } from '../dto/fight-data.dto';
 import { buildTriggerStrategy } from '../trigger-factory';
 import { TurnEnd } from '../../core/trigger/turn-end';
 import { NextAction } from '../../core/trigger/next-action';
-import { AllyDeath } from '../../core/trigger/ally-death';
-import { EnemyDeath } from '../../core/trigger/enemy-death';
+import { DeathTrigger } from '../../core/trigger/death-trigger';
 import { DynamicTrigger } from '../../core/trigger/dynamic-trigger';
 
 describe('buildTriggerStrategy', () => {
@@ -22,16 +21,16 @@ describe('buildTriggerStrategy', () => {
       );
     });
 
-    it('returns AllyDeath for ally-death event with targetCardId', () => {
+    it('returns DeathTrigger for ally-death event with targetCardId', () => {
       expect(
         buildTriggerStrategy(TriggerEvent.ALLY_DEATH, 'card-1'),
-      ).toBeInstanceOf(AllyDeath);
+      ).toBeInstanceOf(DeathTrigger);
     });
 
-    it('returns EnemyDeath for enemy-death event with targetCardId', () => {
+    it('returns DeathTrigger for enemy-death event with targetCardId', () => {
       expect(
         buildTriggerStrategy(TriggerEvent.ENEMY_DEATH, 'card-1'),
-      ).toBeInstanceOf(EnemyDeath);
+      ).toBeInstanceOf(DeathTrigger);
     });
   });
 

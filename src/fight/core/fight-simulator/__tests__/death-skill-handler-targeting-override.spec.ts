@@ -4,7 +4,7 @@ import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 import { DamageComposition } from '../../cards/@types/damage/damage-composition';
 import { DamageType } from '../../cards/@types/damage/damage-type';
 import { TargetingOverrideSkill } from '../../cards/skills/targeting-override';
-import { AllyDeath } from '../../trigger/ally-death';
+import { DeathTrigger } from '../../trigger/death-trigger';
 import { TargetedAll } from '../../targeting-card-strategies/targeted-all';
 import { StepKind } from '../@types/step';
 
@@ -35,7 +35,7 @@ describe('DeathSkillHandler with TargetingOverride skill', () => {
     const overrideSkill = new TargetingOverrideSkill(
       new TargetedAll(),
       'rage-end',
-      new AllyDeath(deadCardId),
+      new DeathTrigger('ally-death', deadCardId),
       'rage-power',
     );
     (survivingCard as any).skills = [overrideSkill];

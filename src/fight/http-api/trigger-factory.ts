@@ -1,7 +1,6 @@
 import { TurnEnd } from '../core/trigger/turn-end';
 import { NextAction } from '../core/trigger/next-action';
-import { AllyDeath } from '../core/trigger/ally-death';
-import { EnemyDeath } from '../core/trigger/enemy-death';
+import { DeathTrigger } from '../core/trigger/death-trigger';
 import { DynamicTrigger } from '../core/trigger/dynamic-trigger';
 import { Trigger } from '../core/trigger/trigger';
 import { TriggerEvent } from './dto/fight-data.dto';
@@ -18,10 +17,7 @@ function buildDeathTrigger(
   if (!targetCardId) {
     throw new Error(`${event} trigger requires targetCardId`);
   }
-  if (event === TriggerEvent.ALLY_DEATH) {
-    return new AllyDeath(targetCardId);
-  }
-  return new EnemyDeath(targetCardId);
+  return new DeathTrigger(event as 'ally-death' | 'enemy-death', targetCardId);
 }
 
 function buildSimpleTrigger(
