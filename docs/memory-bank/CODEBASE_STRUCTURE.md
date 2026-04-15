@@ -58,13 +58,17 @@ cards/
 ├── fighting-card.ts        # Main card entity with stats and state
 ├── skills/                 # Card abilities
 │   ├── simple-attack.ts    # Basic attack action
+│   ├── multiple-attack.ts  # Multi-hit attack
+│   ├── attack-skill.ts     # Base attack skill
+│   ├── alteration-skill.ts # Stat alteration skill
 │   ├── special.ts          # Ultimate abilities base class
 │   ├── special-attack.ts   # Offensive ultimate (supports optional buff application)
 │   ├── special-healing.ts  # Healing ultimate
 │   ├── skill.ts            # Event-triggered abilities
 │   ├── healing.ts          # Healing skill
-│   ├── buff-skill.ts       # Buff application skill
-│   └── debuff-skill.ts     # Debuff application skill
+│   ├── conditional-attack.ts  # Attack triggered conditionally by event
+│   ├── targeting-override.ts  # Overrides card attack targeting strategy
+│   └── power-id-consistency.ts  # Domain validation for composite power groups
 ├── behaviors/              # Card behavior patterns
 │   ├── dodge-behaviors.ts  # Dodge behavior interface
 │   ├── simple-dodge.ts     # Standard dodge implementation

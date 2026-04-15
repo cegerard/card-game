@@ -72,13 +72,17 @@ src/
     │   │   │   └── damage/           # Damage types (DamageType, DamageComposition, Element)
     │   │   ├── skills/               # Card abilities
     │   │   │   ├── simple-attack.ts
+    │   │   │   ├── multiple-attack.ts    # Multi-hit attack
+    │   │   │   ├── attack-skill.ts       # Base attack skill
+    │   │   │   ├── alteration-skill.ts   # Stat alteration skill
     │   │   │   ├── special.ts        # Abstract special skill
     │   │   │   ├── special-attack.ts
     │   │   │   ├── special-healing.ts
     │   │   │   ├── skill.ts          # Event-triggered skill interface
     │   │   │   ├── healing.ts
-    │   │   │   ├── buff-skill.ts
-    │   │   │   └── debuff-skill.ts
+    │   │   │   ├── conditional-attack.ts # Attack triggered conditionally by event
+    │   │   │   ├── targeting-override.ts # Overrides card attack targeting strategy
+    │   │   │   └── power-id-consistency.ts # Domain validation: skills with same powerId must share event + terminationEvent
     │   │   ├── behaviors/            # Card behaviors
     │   │   │   ├── dodge-behaviors.ts
     │   │   │   ├── simple-dodge.ts
@@ -96,9 +100,9 @@ src/
     │   │   └── launcher.ts
     │   └── trigger/                  # Skill trigger events
     │       ├── trigger.ts
+    │       ├── activatable-trigger.ts  # Interface extending Trigger with activate(triggerId, context)
     │       ├── turn-end.ts
-    │       ├── ally-death.ts         # Matches 'ally-death:<cardId>' trigger strings
-    │       ├── enemy-death.ts        # Matches 'enemy-death:<cardId>' trigger strings
+    │       ├── death-trigger.ts      # Parameterized trigger matching 'ally-death:<cardId>' or 'enemy-death:<cardId>'
     │       └── dynamic-trigger.ts    # Dormant→active trigger wrapper (composes activation + replacement triggers)
     └── tools/                        # Utility implementations
         └── math-randomizer.ts
@@ -193,7 +197,7 @@ sequenceDiagram
 - **Rich Domain Model**: `FightingCard` encapsulates stats, behaviors, element, and state mutations
 - **Multi-Damage System**: `DamageCalculator` computes damage from multiple `DamageComposition` entries (type + rate), applying `ElementalMatrix` multipliers based on attacker damage types vs defender element
 - **Buff Condition System**: `BuffApplication` has optional `condition: BuffCondition` and `conditionMultiplier`. If the condition evaluates to true at buff application time, the rate is multiplied. `buff-condition-factory.ts` maps `BuffConditionType` enum → `BuffCondition` instance. First implementation: `AllyPresenceCondition` checks that a named ally is alive in the source player's team.
-- **Event-Driven**: Skills triggered by events (`turn-end`, `next-action`, `ally-death:<cardId>`, `enemy-death:<cardId>`), extensible trigger system. `AllyDeath` trigger matches string pattern `ally-death:<targetCardId>` enabling death-reactive abilities on the dead card's team. `EnemyDeath` trigger matches `enemy-death:<targetCardId>` enabling reactions on the opponent's team when a card dies
+- **Event-Driven**: Skills triggered by events (`turn-end`, `next-action`, `ally-death:<cardId>`, `enemy-death:<cardId>`), extensible trigger system. `DeathTrigger` is a single parameterized class replacing the former `AllyDeath`/`EnemyDeath` classes — instantiated with a `DeathPrefix` (`'ally-death'` or `'enemy-death'`) and a `targetCardId`, matching the pattern `<prefix>:<targetCardId>`
 - **Dynamic Trigger**: `DynamicTrigger` wraps an activation trigger and a replacement trigger. Starts dormant (all `isTriggered()` return false). When the activation event is observed, flips to active and delegates to the replacement trigger. Enables skills that start inactive and become triggered mid-battle (e.g., healing skill dormant until an ally dies, then triggers on enemy death)
 - **Unified Special Result**: `Special.launch()` returns `SpecialResult` containing both `actionResults` (AttackResult[] or HealingResult[]) and `buffResults` (BuffResults) for consistent handling across attack and healing specials
 - **Event-Bound Buff Termination**: `Buff` type has optional `terminationEvent?: string`. Skills have optional `activationLimit` and `endEvent`. When a skill reaches its activation limit (or its owner dies), it emits its `endEvent`. `EndEventProcessor` scans all playable cards and removes buffs matching that event name, emitting a `StepKind.BuffRemoved` step. `SkillResults` carries an optional `endEvent` field so callers know to trigger `EndEventProcessor`.
