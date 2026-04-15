@@ -6,8 +6,7 @@ import { PlayerByPlayerCardSelector } from '../fight-simulator/card-selectors/pl
 import { createFightingCard } from '../../../../test/helpers/fighting-card';
 import { Healing } from '../cards/skills/healing';
 import { DynamicTrigger } from '../trigger/dynamic-trigger';
-import { AllyDeath } from '../trigger/ally-death';
-import { EnemyDeath } from '../trigger/enemy-death';
+import { DeathTrigger } from '../trigger/death-trigger';
 import { Launcher } from '../targeting-card-strategies/launcher';
 
 describe('Dynamic trigger integration', () => {
@@ -18,8 +17,8 @@ describe('Dynamic trigger integration', () => {
     new Healing(
       0.5,
       new DynamicTrigger(
-        new AllyDeath(targetAllyId),
-        (cardId) => new EnemyDeath(cardId),
+        new DeathTrigger('ally-death', targetAllyId),
+        (cardId) => new DeathTrigger('enemy-death', cardId),
       ),
       new Launcher(),
     );

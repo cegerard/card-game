@@ -6,7 +6,7 @@ import { DamageComposition } from '../../cards/@types/damage/damage-composition'
 import { DamageType } from '../../cards/@types/damage/damage-type';
 import { AlterationSkill } from '../../cards/skills/alteration-skill';
 import { TurnEnd } from '../../trigger/turn-end';
-import { AllyDeath } from '../../trigger/ally-death';
+import { DeathTrigger } from '../../trigger/death-trigger';
 import { Launcher } from '../../targeting-card-strategies/launcher';
 import { StepKind } from '../@types/step';
 
@@ -230,7 +230,7 @@ describe('DeathSkillHandler', () => {
         attributeType: 'attack',
         rate: 0.3,
         duration: 2,
-        trigger: new AllyDeath(deadCardId),
+        trigger: new DeathTrigger('ally-death', deadCardId),
         targetingStrategy: new Launcher(),
         activationCondition: { id: 'never', evaluate: () => false },
       });
@@ -277,7 +277,7 @@ describe('DeathSkillHandler', () => {
         attributeType: 'attack',
         rate: 0.2,
         duration: 2,
-        trigger: new AllyDeath(deadCardId),
+        trigger: new DeathTrigger('ally-death', deadCardId),
         targetingStrategy: new Launcher(),
         activationCondition: { id: 'never', evaluate: () => false },
       });
@@ -322,7 +322,7 @@ describe('DeathSkillHandler', () => {
         attributeType: 'attack',
         rate: 0.3,
         duration: 2,
-        trigger: new AllyDeath(deadCardId),
+        trigger: new DeathTrigger('ally-death', deadCardId),
         targetingStrategy: new Launcher(),
       });
       (p2Survivor as any).skills = [allyDeathBuffSkill];

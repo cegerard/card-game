@@ -1,6 +1,5 @@
 import { DynamicTrigger } from '../dynamic-trigger';
-import { AllyDeath } from '../ally-death';
-import { EnemyDeath } from '../enemy-death';
+import { DeathTrigger } from '../death-trigger';
 import { TurnEnd } from '../turn-end';
 import { FightingContext } from '../../cards/@types/fighting-context';
 import { FightingCard } from '../../cards/fighting-card';
@@ -19,8 +18,8 @@ describe('DynamicTrigger', () => {
 
   beforeEach(() => {
     trigger = new DynamicTrigger(
-      new AllyDeath('warrior-01'),
-      (cardId) => new EnemyDeath(cardId),
+      new DeathTrigger('ally-death', 'warrior-01'),
+      (cardId) => new DeathTrigger('enemy-death', cardId),
     );
   });
 
@@ -101,7 +100,7 @@ describe('DynamicTrigger', () => {
   describe('with turn-end as replacement trigger', () => {
     it('works with non-death replacement triggers', () => {
       const dynamicWithTurnEnd = new DynamicTrigger(
-        new AllyDeath('warrior-01'),
+        new DeathTrigger('ally-death', 'warrior-01'),
         () => new TurnEnd(),
       );
       const context = createMinimalContext('any-card');

@@ -16,8 +16,7 @@ import { Healing } from '../../src/fight/core/cards/skills/healing';
 import { AlterationSkill } from '../../src/fight/core/cards/skills/alteration-skill';
 import { TurnEnd } from '../../src/fight/core/trigger/turn-end';
 import { NextAction } from '../../src/fight/core/trigger/next-action';
-import { AllyDeath } from '../../src/fight/core/trigger/ally-death';
-import { EnemyDeath } from '../../src/fight/core/trigger/enemy-death';
+import { DeathTrigger } from '../../src/fight/core/trigger/death-trigger';
 import { DynamicTrigger } from '../../src/fight/core/trigger/dynamic-trigger';
 import { Trigger } from '../../src/fight/core/trigger/trigger';
 import { createEffect } from './effect';
@@ -173,12 +172,12 @@ function createTrigger(
       if (!targetCardId) {
         throw new Error('Ally death trigger requires targetCardId');
       }
-      return new AllyDeath(targetCardId);
+      return new DeathTrigger('ally-death', targetCardId);
     case 'enemy-death':
       if (!targetCardId) {
         throw new Error('Enemy death trigger requires targetCardId');
       }
-      return new EnemyDeath(targetCardId);
+      return new DeathTrigger('enemy-death', targetCardId);
     default:
       throw new Error(`Unknown trigger: ${trigger}`);
   }
