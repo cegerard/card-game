@@ -1,7 +1,4 @@
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
-import { TurnEnd } from '../../trigger/turn-end';
-import { Launcher } from '../../targeting-card-strategies/launcher';
-import { AlterationSkill } from '../skills/alteration-skill';
 import { Player } from '../../player';
 
 describe('FightingCard.computeAttributeModifierValue()', () => {
@@ -143,18 +140,21 @@ describe('FightingCard.lifecycleEndEvents()', () => {
     let card;
 
     beforeEach(() => {
-      const skill = new AlterationSkill({
-        polarity: 'buff',
-        attributeType: 'attack',
-        rate: 0.4,
-        duration: Infinity,
-        trigger: new TurnEnd(),
-        targetingStrategy: new Launcher(),
-        activationLimit: 3,
-        endEvent: 'lions-end',
+      card = createFightingCard({
+        skills: {
+          others: [
+            {
+              buffType: 'attack' as const,
+              buffRate: 0.4,
+              duration: Infinity,
+              trigger: 'turn-end',
+              targetingStrategy: 'self',
+              activationLimit: 3,
+              endEvent: 'lions-end',
+            },
+          ],
+        },
       });
-      card = createFightingCard({});
-      (card as any).skills = [skill];
     });
 
     it('returns the endEvent strings of non-exhausted skills', () => {
@@ -166,27 +166,29 @@ describe('FightingCard.lifecycleEndEvents()', () => {
 
   describe('when the lifecycle skill is exhausted', () => {
     let card;
-    let skill;
 
     beforeEach(() => {
-      skill = new AlterationSkill({
-        polarity: 'buff',
-        attributeType: 'attack',
-        rate: 0.4,
-        duration: Infinity,
-        trigger: new TurnEnd(),
-        targetingStrategy: new Launcher(),
-        activationLimit: 1,
-        endEvent: 'lions-end',
+      card = createFightingCard({
+        skills: {
+          others: [
+            {
+              buffType: 'attack' as const,
+              buffRate: 0.4,
+              duration: Infinity,
+              trigger: 'turn-end',
+              targetingStrategy: 'self',
+              activationLimit: 1,
+              endEvent: 'lions-end',
+            },
+          ],
+        },
       });
-      card = createFightingCard({});
-      (card as any).skills = [skill];
       // exhaust by launching once
       const context = {
         sourcePlayer: new Player('p1', [card]),
         opponentPlayer: new Player('p2', []),
       };
-      skill.launch(card, context);
+      card.launchSkills('turn-end', context);
     });
 
     it('does not return the endEvent after exhaustion', () => {
@@ -198,8 +200,7 @@ describe('FightingCard.lifecycleEndEvents()', () => {
 
   describe('when card has no lifecycle skills', () => {
     it('returns empty array', () => {
-      const card = createFightingCard({});
-      (card as any).skills = [];
+      const card = createFightingCard({ skills: { others: [] } });
 
       expect(card.lifecycleEndEvents()).toHaveLength(0);
     });

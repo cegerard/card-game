@@ -15,6 +15,7 @@ import { AllAllies } from '../../src/fight/core/targeting-card-strategies/all-al
 import { Healing } from '../../src/fight/core/cards/skills/healing';
 import { AlterationSkill } from '../../src/fight/core/cards/skills/alteration-skill';
 import { TurnEnd } from '../../src/fight/core/trigger/turn-end';
+import { NextAction } from '../../src/fight/core/trigger/next-action';
 import { AllyDeath } from '../../src/fight/core/trigger/ally-death';
 import { EnemyDeath } from '../../src/fight/core/trigger/enemy-death';
 import { DynamicTrigger } from '../../src/fight/core/trigger/dynamic-trigger';
@@ -27,6 +28,7 @@ import {
 import { Skill } from '../../src/fight/core/cards/skills/skill';
 import { TargetingOverrideSkill } from '../../src/fight/core/cards/skills/targeting-override';
 import { BuffApplication } from '../../src/fight/core/cards/@types/buff/buff-application';
+import { BuffCondition } from '../../src/fight/core/cards/@types/buff/buff-condition';
 import { Element } from '../../src/fight/core/cards/@types/damage/element';
 import { DamageComposition } from '../../src/fight/core/cards/@types/damage/damage-composition';
 import { DamageType } from '../../src/fight/core/cards/@types/damage/damage-type';
@@ -75,6 +77,9 @@ type FightingCardParams = {
           trigger: string;
           targetingStrategy: string;
           targetCardId?: string;
+          activationEvent?: string;
+          activationTargetCardId?: string;
+          replacementEvent?: string;
           powerId?: string;
         }
       | {
@@ -87,6 +92,10 @@ type FightingCardParams = {
           activationLimit?: number;
           endEvent?: string;
           terminationEvent?: string;
+          activationCondition?: BuffCondition;
+          activationEvent?: string;
+          activationTargetCardId?: string;
+          replacementEvent?: string;
           powerId?: string;
         }
       | {
@@ -96,6 +105,10 @@ type FightingCardParams = {
           trigger: string;
           targetingStrategy: string;
           targetCardId?: string;
+          activationCondition?: BuffCondition;
+          activationEvent?: string;
+          activationTargetCardId?: string;
+          replacementEvent?: string;
           powerId?: string;
         }
       | {
@@ -104,6 +117,9 @@ type FightingCardParams = {
           terminationEvent: string;
           trigger: string;
           targetCardId?: string;
+          activationEvent?: string;
+          activationTargetCardId?: string;
+          replacementEvent?: string;
           powerId?: string;
         }
     )[];
@@ -151,6 +167,8 @@ function createTrigger(
   switch (trigger) {
     case 'turn-end':
       return new TurnEnd();
+    case 'next-action':
+      return new NextAction();
     case 'ally-death':
       if (!targetCardId) {
         throw new Error('Ally death trigger requires targetCardId');
@@ -257,6 +275,25 @@ function createSpecialHealing(params: {
   );
 }
 
+function dormantConfig(skill: {
+  activationEvent?: string;
+  activationTargetCardId?: string;
+  replacementEvent?: string;
+}) {
+  if (
+    skill.activationEvent &&
+    skill.activationTargetCardId &&
+    skill.replacementEvent
+  ) {
+    return {
+      activationEvent: skill.activationEvent,
+      activationTargetCardId: skill.activationTargetCardId,
+      replacementEvent: skill.replacementEvent,
+    };
+  }
+  return undefined;
+}
+
 function createsSkills(
   params: (
     | {
@@ -264,6 +301,9 @@ function createsSkills(
         trigger: string;
         targetingStrategy: string;
         targetCardId?: string;
+        activationEvent?: string;
+        activationTargetCardId?: string;
+        replacementEvent?: string;
         powerId?: string;
       }
     | {
@@ -276,6 +316,10 @@ function createsSkills(
         activationLimit?: number;
         endEvent?: string;
         terminationEvent?: string;
+        activationCondition?: BuffCondition;
+        activationEvent?: string;
+        activationTargetCardId?: string;
+        replacementEvent?: string;
         powerId?: string;
       }
     | {
@@ -285,6 +329,10 @@ function createsSkills(
         trigger: string;
         targetingStrategy: string;
         targetCardId?: string;
+        activationCondition?: BuffCondition;
+        activationEvent?: string;
+        activationTargetCardId?: string;
+        replacementEvent?: string;
         powerId?: string;
       }
     | {
@@ -293,15 +341,19 @@ function createsSkills(
         terminationEvent: string;
         trigger: string;
         targetCardId?: string;
+        activationEvent?: string;
+        activationTargetCardId?: string;
+        replacementEvent?: string;
         powerId?: string;
       }
   )[],
 ): Skill[] {
   return params.map((skill) => {
+    const config = dormantConfig(skill);
     if ('effectRate' in skill) {
       return new Healing(
         skill.effectRate,
-        createTrigger(skill.trigger, skill.targetCardId),
+        createTrigger(skill.trigger, skill.targetCardId, config),
         createTargetingStrategy(skill.targetingStrategy),
         skill.powerId,
       );
@@ -311,11 +363,12 @@ function createsSkills(
         attributeType: skill.buffType,
         rate: skill.buffRate,
         duration: skill.duration,
-        trigger: createTrigger(skill.trigger, skill.targetCardId),
+        trigger: createTrigger(skill.trigger, skill.targetCardId, config),
         targetingStrategy: createTargetingStrategy(skill.targetingStrategy),
         activationLimit: skill.activationLimit,
         endEvent: skill.endEvent,
         terminationEvent: skill.terminationEvent,
+        activationCondition: skill.activationCondition,
         powerId: skill.powerId,
       });
     } else if ('debuffType' in skill) {
@@ -324,15 +377,16 @@ function createsSkills(
         attributeType: skill.debuffType,
         rate: skill.debuffRate,
         duration: skill.duration,
-        trigger: createTrigger(skill.trigger, skill.targetCardId),
+        trigger: createTrigger(skill.trigger, skill.targetCardId, config),
         targetingStrategy: createTargetingStrategy(skill.targetingStrategy),
+        activationCondition: skill.activationCondition,
         powerId: skill.powerId,
       });
     } else {
       return new TargetingOverrideSkill(
         createTargetingStrategy(skill.targetingStrategy),
         skill.terminationEvent,
-        createTrigger(skill.trigger, skill.targetCardId),
+        createTrigger(skill.trigger, skill.targetCardId, config),
         skill.powerId,
       );
     }
