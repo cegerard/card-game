@@ -1,11 +1,11 @@
 import { FightingCard } from '../cards/fighting-card';
-import { Player } from '../player';
 import { CardDeathSubscriber } from './card-death-subscriber';
 import { Step } from './@types/step';
 import { SkillResults } from '../cards/skills/skill';
 import { EndEventProcessor } from './end-event-processor';
 import { FightingContext } from '../cards/@types/fighting-context';
 import { skillResultsToSteps } from './skill-results-to-steps';
+import { Player } from '../player';
 
 /**
  * Handles the cascade of effects that must fire immediately after a card dies.
@@ -45,16 +45,11 @@ export class DeathSkillHandler implements CardDeathSubscriber {
    * class. Steps produced by each phase are appended to the internal buffer in
    * order; retrieve them with `drainSteps()`.
    *
-   * @param _player - Unused; the owning player is resolved from `deadCard` directly.
    * @param deadCard - The card that just died.
    * @param killerCard - The card responsible for the kill (forwarded to triggered
    *   skills so they can, for example, target the killer via a `DynamicTrigger`).
    */
-  notifyDeath(
-    _player: Player,
-    deadCard: FightingCard,
-    killerCard?: FightingCard,
-  ): void {
+  notifyDeath(deadCard: FightingCard, killerCard?: FightingCard): void {
     const ownerPlayer = this.player1.ownCard(deadCard)
       ? this.player1
       : this.player2;

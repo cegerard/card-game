@@ -47,7 +47,8 @@ export class PlayerByPlayerCardSelector implements CardSelector {
     return [player1NextCard, player2NextCard];
   }
 
-  public notifyDeath(player: Player, card: FightingCard): void {
+  public notifyDeath(card: FightingCard): void {
+    const player = this.player1.ownCard(card) ? this.player1 : this.player2;
     this.updateAlreadyPlayedCard(player, card);
   }
 

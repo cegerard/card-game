@@ -76,14 +76,14 @@ describe('DeathSkillHandler', () => {
     });
 
     it('produces a healing step', () => {
-      handler.notifyDeath(player1, player1.allCards[0]);
+      handler.notifyDeath(player1.allCards[0]);
       const steps = handler.drainSteps();
 
       expect(steps[0].kind).toBe('healing');
     });
 
     it('drains steps only once', () => {
-      handler.notifyDeath(player1, player1.allCards[0]);
+      handler.notifyDeath(player1.allCards[0]);
       handler.drainSteps();
 
       expect(handler.drainSteps()).toHaveLength(0);
@@ -128,7 +128,7 @@ describe('DeathSkillHandler', () => {
     });
 
     it('produces no steps', () => {
-      handler.notifyDeath(player1, player1.allCards[0]);
+      handler.notifyDeath(player1.allCards[0]);
 
       expect(handler.drainSteps()).toHaveLength(0);
     });
@@ -190,14 +190,14 @@ describe('DeathSkillHandler', () => {
     });
 
     it('produces a buff_removed step after death', () => {
-      handler.notifyDeath(player1, deadCard);
+      handler.notifyDeath(deadCard);
       const steps = handler.drainSteps();
 
       expect(steps.some((s) => s.kind === StepKind.BuffRemoved)).toBe(true);
     });
 
     it('the buff_removed step is immediately after the death event processing', () => {
-      handler.notifyDeath(player1, deadCard);
+      handler.notifyDeath(deadCard);
       const steps = handler.drainSteps();
       const buffRemovedStep = steps.find(
         (s) => s.kind === StepKind.BuffRemoved,
@@ -244,7 +244,7 @@ describe('DeathSkillHandler', () => {
     });
 
     it('does not emit a buff step', () => {
-      handler.notifyDeath(player1, deadCard);
+      handler.notifyDeath(deadCard);
       const steps = handler.drainSteps();
 
       expect(steps.find((s) => s.kind === StepKind.Buff)).toBeUndefined();
@@ -291,7 +291,7 @@ describe('DeathSkillHandler', () => {
     });
 
     it('does not emit a debuff step', () => {
-      handler.notifyDeath(player1, deadCard);
+      handler.notifyDeath(deadCard);
       const steps = handler.drainSteps();
 
       expect(steps.find((s) => s.kind === StepKind.Debuff)).toBeUndefined();
@@ -337,14 +337,14 @@ describe('DeathSkillHandler', () => {
     });
 
     it('produces steps after ally-death triggers on player2 surviving cards', () => {
-      handler.notifyDeath(player2, deadCard);
+      handler.notifyDeath(deadCard);
       const steps = handler.drainSteps();
 
       expect(steps.length).toBeGreaterThan(0);
     });
 
     it('produces a buff step', () => {
-      handler.notifyDeath(player2, deadCard);
+      handler.notifyDeath(deadCard);
       const steps = handler.drainSteps();
 
       expect(steps[0].kind).toBe(StepKind.Buff);

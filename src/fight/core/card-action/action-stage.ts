@@ -242,10 +242,8 @@ export class ActionStage {
   }
 
   private notifyDeath(card: FightingCard, killerCard?: FightingCard): void {
-    const player = this.player1.ownCard(card) ? this.player1 : this.player2;
-
     this.eventBroker.onCardDeath.forEach((subscriber) =>
-      subscriber.notifyDeath(player, card, killerCard),
+      subscriber.notifyDeath(card, killerCard),
     );
   }
 }
