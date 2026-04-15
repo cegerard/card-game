@@ -51,6 +51,10 @@ describe('DynamicTrigger', () => {
       trigger.activate('ally-death:warrior-01', context);
     });
 
+    it('has id of the replacement trigger', () => {
+      expect(trigger.id).toBe('enemy-death');
+    });
+
     it('matches the replacement trigger built from killer card id', () => {
       expect(trigger.isTriggered('enemy-death:goblin-03')).toBe(true);
     });

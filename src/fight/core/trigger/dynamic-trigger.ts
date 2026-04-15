@@ -7,9 +7,15 @@ type DynamicTriggerState =
   | { kind: 'active'; replacement: Trigger };
 
 export class DynamicTrigger implements ActivatableTrigger {
-  public id = 'dormant';
   private state: DynamicTriggerState;
   private buildReplacementTrigger: (cardId: string) => Trigger;
+
+  get id(): string {
+    if (this.state.kind === 'active') {
+      return this.state.replacement.id;
+    }
+    return 'dormant';
+  }
 
   constructor(
     activationTrigger: Trigger,
