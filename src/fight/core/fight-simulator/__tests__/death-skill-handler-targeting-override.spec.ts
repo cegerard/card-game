@@ -50,28 +50,28 @@ describe('DeathSkillHandler with TargetingOverride skill', () => {
   });
 
   it('produces a targeting_override step', () => {
-    handler.notifyDeath(player1, player1.allCards[0]);
+    handler.notifyDeath(player1.allCards[0]);
     const steps = handler.drainSteps();
 
     expect(steps[0].kind).toBe(StepKind.TargetingOverride);
   });
 
   it('the step contains the new targeting strategy', () => {
-    handler.notifyDeath(player1, player1.allCards[0]);
+    handler.notifyDeath(player1.allCards[0]);
     const steps = handler.drainSteps();
 
     expect((steps[0] as any).newStrategy).toBe('all');
   });
 
   it('the step contains the source card identity', () => {
-    handler.notifyDeath(player1, player1.allCards[0]);
+    handler.notifyDeath(player1.allCards[0]);
     const steps = handler.drainSteps();
 
     expect((steps[0] as any).source.id).toBe('rager-01');
   });
 
   it('the step propagates the powerId', () => {
-    handler.notifyDeath(player1, player1.allCards[0]);
+    handler.notifyDeath(player1.allCards[0]);
     const steps = handler.drainSteps();
 
     expect((steps[0] as any).powerId).toBe('rage-power');

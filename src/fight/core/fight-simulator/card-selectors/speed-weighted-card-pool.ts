@@ -23,7 +23,7 @@ export class SpeedWeightedCardSelector implements CardSelector {
     return [this.cardPool.pop()!];
   }
 
-  public notifyDeath(_player: Player, card: FightingCard): void {
+  public notifyDeath(card: FightingCard): void {
     this.cardPool = this.cardPool.filter((c) => c !== card);
   }
 
