@@ -53,6 +53,7 @@ import { EveryNTurnsCondition } from '../core/cards/@types/attack/conditions/eve
 import { MultipleAttack } from '../core/cards/skills/multiple-attack';
 import { AttackSkill } from '../core/cards/skills/attack-skill';
 import { TargetedCard } from '../core/targeting-card-strategies/targeted-card';
+import { validatePowerIdConsistency } from '../core/cards/skills/power-id-consistency';
 
 @Controller()
 @UsePipes(
@@ -180,7 +181,17 @@ export class FightController {
       );
     }
 
-    this.validatePowerIdConsistency(cardData.skills.others);
+    try {
+      validatePowerIdConsistency(
+        cardData.skills.others.map((s) => ({
+          powerId: s.powerId,
+          event: s.event,
+          terminationEvent: s.terminationEvent,
+        })),
+      );
+    } catch (e) {
+      throw new BadRequestException((e as Error).message);
+    }
 
     const otherSkills: Skill[] = cardData.skills.others.map((skill) =>
       this.createOtherSkill(skill),
@@ -374,38 +385,6 @@ export class FightController {
     const result = BUFF_TYPE_MAP[buffType];
     if (!result) throw new Error(`Unknown buff type: ${buffType}`);
     return result;
-  }
-
-  private validatePowerIdConsistency(skills: OtherSkillDto[]): void {
-    const groups = new Map<
-      string,
-      { event: TriggerEvent; terminationEvent?: string }
-    >();
-
-    for (const skill of skills) {
-      if (!skill.powerId) continue;
-
-      const existing = groups.get(skill.powerId);
-      if (!existing) {
-        groups.set(skill.powerId, {
-          event: skill.event,
-          terminationEvent: skill.terminationEvent,
-        });
-        continue;
-      }
-
-      if (existing.event !== skill.event) {
-        throw new BadRequestException(
-          `Skills with powerId '${skill.powerId}' must share the same event. Found '${existing.event}' and '${skill.event}'.`,
-        );
-      }
-
-      if (existing.terminationEvent !== skill.terminationEvent) {
-        throw new BadRequestException(
-          `Skills with powerId '${skill.powerId}' must share the same terminationEvent. Found '${existing.terminationEvent}' and '${skill.terminationEvent}'.`,
-        );
-      }
-    }
   }
 
   private getSelectorStrategy(
