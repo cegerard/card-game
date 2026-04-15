@@ -359,7 +359,14 @@ export class FightController {
             skillData.terminationEvent,
             this.buildTriggerForSkill(skillData),
             skillData.powerId,
-            (ctx) => new TargetedCard(ctx.killerCard?.id ?? ''),
+            (ctx) => {
+              if (!ctx.killerCard) {
+                throw new Error(
+                  'killerCard is missing in targeting context for TARGETED_CARD strategy in TARGETING_OVERRIDE skill',
+                );
+              }
+              return new TargetedCard(ctx.killerCard.id);
+            },
           );
         }
         return new TargetingOverrideSkill(
