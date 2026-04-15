@@ -1319,9 +1319,7 @@ describe('FightController', () => {
 
     it('creates a skill with a dormant trigger id', () => {
       fightSimulatorStub.validatePlayer1FirstCard((card) => {
-        expect(JSON.parse(JSON.stringify(card)).skills[0].trigger.id).toBe(
-          'dormant',
-        );
+        expect((card as any).skills[0].trigger.id).toBe('dormant');
       });
     });
 
