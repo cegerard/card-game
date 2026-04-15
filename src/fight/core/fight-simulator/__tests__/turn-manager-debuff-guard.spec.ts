@@ -4,9 +4,6 @@ import { TurnManager } from '../turn-manager';
 import { DeathSkillHandler } from '../death-skill-handler';
 import { EndEventProcessor } from '../end-event-processor';
 import { StepKind } from '../@types/step';
-import { AlterationSkill } from '../../cards/skills/alteration-skill';
-import { TurnEnd } from '../../trigger/turn-end';
-import { Launcher } from '../../targeting-card-strategies/launcher';
 
 describe('TurnManager debuff guard', () => {
   describe('when a debuff skill produces empty results', () => {
@@ -14,18 +11,23 @@ describe('TurnManager debuff guard', () => {
     let turnManager: TurnManager;
 
     beforeEach(() => {
-      card = createFightingCard({ id: 'card-1', attack: 100, health: 5000 });
-
-      const debuffSkill = new AlterationSkill({
-        polarity: 'debuff',
-        attributeType: 'attack',
-        rate: 0.2,
-        duration: 2,
-        trigger: new TurnEnd(),
-        targetingStrategy: new Launcher(),
-        activationCondition: { id: 'never', evaluate: () => false },
+      card = createFightingCard({
+        id: 'card-1',
+        attack: 100,
+        health: 5000,
+        skills: {
+          others: [
+            {
+              debuffType: 'attack' as const,
+              debuffRate: 0.2,
+              duration: 2,
+              trigger: 'turn-end',
+              targetingStrategy: 'self',
+              activationCondition: { id: 'never', evaluate: () => false },
+            },
+          ],
+        },
       });
-      (card as any).skills = [debuffSkill];
 
       const player1 = new Player('p1', [card]);
       const player2 = new Player('p2', [createFightingCard()]);
