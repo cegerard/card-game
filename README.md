@@ -15,12 +15,18 @@ POST /fight → complete fight log (JSON)
 - Multi-card decks (1–5 cards per player)
 - Two turn-order strategies: player-by-player or speed-weighted
 - Simple attacks with multi-type damage (e.g. 70% physical + 30% fire)
+- Multi-hit attacks with optional combo finisher and amplifier
 - Special abilities (attack or healing variants) triggered by energy accumulation
 - Elemental matrix: 5 elements × 5 damage types, affecting damage multipliers
-- Status effects applied on hit: poison, burn, freeze (3 intensity levels)
+- Status effects applied on hit: poison, burn, freeze (3 intensity levels), with optional triggered debuff on hit
 - Buffs and debuffs with duration tracking, including conditional buff multipliers
-- Passive skills triggered at turn end (healing, buffs)
-- Multiple targeting strategies: position-based, all enemies, line-of-three, all allies, self
+- Event-bound buff and effect termination: buffs/effects tied to a named event are removed when the event fires
+- Passive skills triggered at turn end, on next action, or on death events (ally-death, enemy-death)
+- Conditional attack skills triggered by events, with interval and hit configuration
+- Targeting override skills that redirect a card's attack to a specific target, removed by end event
+- Dormant trigger: skills start inactive and activate mid-battle when a trigger event fires
+- Composite powers (powerId): group multiple skills to share lifecycle and termination
+- Multiple targeting strategies: position-based, all enemies, line-of-three, all allies, self, targeted-card
 - Dodge behaviors: simple (agility-based) or random
 - Battle time limit of 100 iterations with winner decided on remaining health
 
@@ -102,6 +108,7 @@ Simulates a complete battle between two players.
 
 ```json
 {
+  "id": "sword-1",
   "name": "Sword",
   "attack": 25000,
   "defense": 6000,
@@ -130,12 +137,11 @@ Simulates a complete battle between two players.
     },
     "simpleAttack": {
       "name": "Quick Slash",
-      "damageRate": 1,
-      "targetingStrategy": "position-based",
-      "damageCompositions": [
+      "damages": [
         { "type": "PHYSICAL", "rate": 0.7 },
         { "type": "FIRE", "rate": 0.3 }
-      ]
+      ],
+      "targetingStrategy": "position-based"
     },
     "others": [
       {
@@ -155,27 +161,75 @@ Simulates a complete battle between two players.
 }
 ```
 
+Note: provide exactly one of `simpleAttack` or `multipleAttack` in `skills`.
+
+**`multipleAttack`** (alternative to `simpleAttack`):
+
+```json
+{
+  "name": "Rapid Flurry",
+  "hits": 3,
+  "damages": [{ "type": "PHYSICAL", "rate": 1.0 }],
+  "targetingStrategy": "position-based",
+  "amplifier": 1.1,
+  "comboFinisher": [{ "type": "FIRE", "rate": 2.0 }]
+}
+```
+
 **Enums**
 
-| Field                       | Values                                                                                |
-| --------------------------- | ------------------------------------------------------------------------------------- |
-| `element`                   | `PHYSICAL`, `FIRE`, `WATER`, `EARTH`, `AIR`                                           |
-| `damageCompositions[].type` | `PHYSICAL`, `FIRE`, `WATER`, `EARTH`, `AIR`                                           |
-| `special.kind`              | `ATTACK`, `HEALING`                                                                   |
-| `others[].kind`             | `HEALING`, `BUFF`                                                                     |
-| `targetingStrategy`         | `position-based`, `target-all`, `line-three`, `all-owner-cards`, `all-allies`, `self` |
-| `behaviors.dodge`           | `simple-dodge`, `random-dodge`                                                        |
-| `effect.type`               | `POISON`, `BURN`, `FREEZE`                                                            |
-| `effect.level`              | `1`, `2`, `3`                                                                         |
-| `buffApplication[].type`    | `attack`, `defense`, `agility`, `accuracy`                                            |
+| Field                       | Values                                                                                              |
+| --------------------------- | --------------------------------------------------------------------------------------------------- |
+| `element`                   | `PHYSICAL`, `FIRE`, `WATER`, `EARTH`, `AIR`                                                         |
+| `damages[].type`            | `PHYSICAL`, `FIRE`, `WATER`, `EARTH`, `AIR`                                                         |
+| `special.kind`              | `ATTACK`, `HEALING`                                                                                 |
+| `others[].kind`             | `HEALING`, `BUFF`, `DEBUFF`, `CONDITIONAL_ATTACK`, `TARGETING_OVERRIDE`                             |
+| `others[].event`            | `turn-end`, `next-action`, `ally-death`, `enemy-death`, `dormant`                                   |
+| `targetingStrategy`         | `position-based`, `target-all`, `line-three`, `all-owner-cards`, `all-allies`, `self`, `targeted-card` |
+| `behaviors.dodge`           | `simple-dodge`, `random-dodge`                                                                      |
+| `effect.type`               | `POISON`, `BURN`, `FREEZE`                                                                          |
+| `effect.level`              | `1`, `2`, `3`                                                                                       |
+| `buffApplication[].type`    | `attack`, `defense`, `agility`, `accuracy`                                                          |
+
+**`others[].event` notes:**
+
+- `ally-death` / `enemy-death` — requires `targetCardId` matching the card `id` whose death triggers the skill
+- `dormant` — requires `activationEvent`, `activationTargetCardId`, and `replacementEvent`; the skill starts inactive and activates when the activation event fires
+
+**`others[]` optional fields:**
+
+| Field                    | Applies to                                    | Description                                                               |
+| ------------------------ | --------------------------------------------- | ------------------------------------------------------------------------- |
+| `terminationEvent`       | `BUFF`, `DEBUFF`, `TARGETING_OVERRIDE`        | Named event that removes this skill's effect when fired                   |
+| `activationLimit`        | any                                           | Max activations before lifecycle ends (≥ 1)                               |
+| `endEvent`               | any                                           | Event emitted when activation limit is reached                            |
+| `powerId`                | any                                           | Groups multiple skills as a composite power (must share event + terminationEvent) |
+| `activationCondition`    | any                                           | Condition that must be met for the skill to activate                      |
 
 **Response**
 
 A `FightResult` object: a map of step number to step detail. Each step has a `kind` field:
 
 ```
-attack | special_attack | healing | status_change | state_effect | buff | debuff | winner | fight_end
+attack | special_attack | healing | status_change | state_effect | buff | debuff |
+buff_removed | effect_removed | targeting_override | targeting_reverted | winner | fight_end
 ```
+
+| Step kind            | Description                                                                            |
+| -------------------- | -------------------------------------------------------------------------------------- |
+| `attack`             | A card performs a basic attack                                                         |
+| `special_attack`     | A card uses its special ability                                                        |
+| `healing`            | A card heals itself or an ally                                                         |
+| `status_change`      | A status effect (poison/burn/freeze) is applied to a card                              |
+| `state_effect`       | A status effect deals damage at turn end                                               |
+| `buff`               | A buff is applied to a card                                                            |
+| `debuff`             | A debuff is applied to a card                                                          |
+| `buff_removed`       | An event-bound buff is removed when its termination event fires                        |
+| `effect_removed`     | An event-bound status effect is removed when its termination event fires               |
+| `targeting_override` | A targeting override skill activates, redirecting the card's attacks                   |
+| `targeting_reverted` | A targeting override is removed when its termination event fires                       |
+| `winner`             | Battle result with winning player                                                      |
+| `fight_end`          | Battle ended (time limit reached or all cards defeated)                                |
 
 **Error responses**
 
@@ -196,15 +250,18 @@ src/
     │   ├── player.ts
     │   ├── cards/
     │   │   ├── fighting-card.ts     # Card entity (stats, state, buffs, skills)
-    │   │   ├── skills/              # SimpleAttack, Special, Skill (buff/heal)
+    │   │   ├── skills/              # SimpleAttack, MultipleAttack, Special, Skill (buff/heal/conditional/override)
     │   │   ├── behaviors/           # Dodge strategies
     │   │   └── damage/              # DamageCalculator + ElementalMatrix
     │   ├── fight-simulator/
     │   │   ├── fight.ts             # Main orchestrator
     │   │   ├── action_stage.ts      # Attack/special/heal resolution
     │   │   ├── turn-manager.ts      # Turn-end effects, buff duration
+    │   │   ├── death-skill-handler.ts  # Fires ally/enemy-death skills on card death
+    │   │   ├── end-event-processor.ts  # Removes event-bound buffs/effects when end event fires
     │   │   └── card-selectors/      # Turn order strategies
-    │   └── targeting-card-strategies/
+    │   ├── targeting-card-strategies/
+    │   └── trigger/                 # Trigger system (turn-end, death, dynamic/dormant)
     └── http-api/                    # HTTP adapter
         ├── fight.controller.ts      # POST /fight
         ├── dto/                     # Validated request DTOs
@@ -216,16 +273,19 @@ src/
 1. The controller validates the request, converts DTOs to domain objects, and builds a `Fight` instance.
 2. `Fight.start()` loops until a winner is found or 100 iterations are reached:
    - `CardSelector.nextCards()` picks which cards act this turn.
-   - `ActionStage` resolves each non-frozen card's action (special if energy is ready, otherwise simple attack) and applies damage/healing to targets.
-   - `TurnManager` processes turn-end: decrements buff/debuff durations, triggers passive skills, applies status effect damage (poison, burn, freeze).
-3. The winner is the player with the highest total remaining health.
+   - `ActionStage` resolves each non-frozen card's action (special if energy is ready, otherwise simple/multiple attack) and applies damage/healing to targets. Card deaths trigger `DeathSkillHandler`, which fires `ally-death` and `enemy-death` skills on surviving cards.
+   - `TurnManager` processes turn-end: decrements buff/debuff durations, triggers passive skills, applies status effect damage (poison, burn, freeze). Deaths here also go through `DeathSkillHandler`.
+3. `EndEventProcessor` removes event-bound buffs and status effects whenever a skill lifecycle ends.
+4. The winner is the player with the highest total remaining health.
 
 ### Key design patterns
 
 - **Strategy** — card selection, targeting, dodge behavior
 - **Factory** — DTO-to-domain conversion, NestJS injectable fight builder
-- **Observer** — `CardDeathSubscriber` for card death events
+- **Observer** — `CardDeathSubscriber` for card death events (`DeathSkillHandler`)
 - **Rich domain model** — `FightingCard` encapsulates all stat computation via `actual*` getters
+- **Event-driven skills** — triggered by `turn-end`, `next-action`, `ally-death:<id>`, `enemy-death:<id>`
+- **Dynamic trigger** — `DynamicTrigger` wraps a dormant skill that activates mid-battle on a specified event
 
 ## Testing
 
@@ -253,8 +313,10 @@ npm run test -- src/fight/core/__tests__/my-test.spec.ts
 ## Code quality
 
 ```bash
-npm run lint      # ESLint with auto-fix
 npm run format    # Prettier
+npm run lint      # ESLint with auto-fix
+npm run test:cov  # Tests with coverage
+npm run build     # Compile TypeScript
 ```
 
 - ESLint with `@typescript-eslint/recommended`
