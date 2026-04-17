@@ -14,7 +14,7 @@ export class TargetedFromPosition implements TargetingCardStrategy {
     const defendingCards = defendingPlayer.allCards;
     const targetedCard = defendingCards[attackingCardPosition];
 
-    if (targetedCard.isDead()) {
+    if (!targetedCard || targetedCard.isDead()) {
       // check if there is a card alive after the dead card and go back to the first alive card
       const nextCard =
         defendingCards

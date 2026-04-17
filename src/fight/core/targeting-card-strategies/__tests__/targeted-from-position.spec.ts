@@ -111,6 +111,33 @@ describe('Targeted From Position Targeting Strategy', () => {
     });
   });
 
+  describe('when attacker position exceeds defending deck size', () => {
+    let attackingPlayer: Player;
+    let targets: FightingCard[];
+
+    beforeEach(() => {
+      attackingPlayer = new Player('Attacking Player', [
+        createFightingCard({ name: 'Other Card' }),
+        sourceCard,
+      ]);
+
+      defendingPlayer = new Player('Defending Player', [
+        createFightingCard({ name: 'Only Card' }),
+      ]);
+
+      targets = strategy.targetedCards(
+        sourceCard,
+        attackingPlayer,
+        defendingPlayer,
+      );
+    });
+
+    it('targets the first alive card in the defending deck', () => {
+      const targetsNames = targets.map((target) => target.name);
+      expect(targetsNames).toEqual(['Only Card']);
+    });
+  });
+
   describe('when all cards are dead', () => {
     let attackingPlayer: Player;
     let targets: FightingCard[];
