@@ -103,6 +103,8 @@
           "event": "ally-death",
           "targetCardId": "kaelion",
           "damages": [{ "type": "FIRE", "rate": 1.0 }],
+          "interval": 1,
+          "terminationEvent": "lion-heritage-end",
           "effect": {
             "type": "BURN",
             "rate": 0.3,
@@ -135,8 +137,6 @@
         }
       ]
     },
-    "behaviors": {
-      "dodge": "simple-dodge"
-    }
+    "behaviors": { "dodge": "simple-dodge" }
   }
 ]
