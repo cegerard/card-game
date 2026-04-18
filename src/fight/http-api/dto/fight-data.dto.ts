@@ -341,6 +341,7 @@ export class OtherSkillDto {
   @ValidateIf((o) => o.kind === SkillKind.CONDITIONAL_ATTACK)
   @IsDefined()
   @IsNumber()
+  @Min(1)
   interval?: number;
 
   @IsOptional()

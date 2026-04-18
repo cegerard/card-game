@@ -317,9 +317,6 @@ export class FightController {
           powerId: skillData.powerId,
         });
       case SkillKind.CONDITIONAL_ATTACK:
-        if (!skillData.damages || skillData.interval == undefined) {
-          throw new Error('Conditional attack requires damages and interval');
-        }
         const caDamages = skillData.damages.map(
           (d) => new DamageComposition(d.type, d.rate),
         );
