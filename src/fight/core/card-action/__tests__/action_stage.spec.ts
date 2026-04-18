@@ -13,6 +13,7 @@ import { DamageComposition } from '../../cards/@types/damage/damage-composition'
 import { DamageType } from '../../cards/@types/damage/damage-type';
 import { FightingContext } from '../../cards/@types/fighting-context';
 import { SpecialResult } from '../../cards/@types/action-result/special-result';
+import { DeathSkillHandler } from '../../fight-simulator/death-skill-handler';
 
 class UnknownSpecial implements Special {
   ready(): boolean {
@@ -61,9 +62,12 @@ describe('ActionStage', () => {
       const defender = makeCard(new SpecialAttack(1, 999, POSITION_BASED));
       const player1 = new Player('Player 1', [attacker]);
       const player2 = new Player('Player 2', [defender]);
-      const actionStage = new ActionStage(player1, player2, {
-        onCardDeath: [],
-      });
+      const actionStage = new ActionStage(
+        player1,
+        player2,
+        { onCardDeath: [] },
+        new DeathSkillHandler(player1, player2),
+      );
 
       it('throws', () => {
         expect(() => actionStage.computeNextAction([attacker])).toThrow(

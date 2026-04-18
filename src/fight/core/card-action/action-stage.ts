@@ -10,6 +10,7 @@ import { HealingResult } from '../cards/@types/action-result/healing-result';
 import { FightingContext } from '../cards/@types/fighting-context';
 import { BuffReport } from '../fight-simulator/@types/buff-report';
 import { AttackSkillResults, SkillKind } from '../cards/skills/skill';
+import { DeathSkillHandler } from '../fight-simulator/death-skill-handler';
 
 type SplittedSteps = {
   actionSteps: Step[];
@@ -22,6 +23,7 @@ export class ActionStage {
   private eventBroker: {
     onCardDeath: CardDeathSubscriber[];
   };
+  private deathSkillHandler: DeathSkillHandler;
 
   public constructor(
     player1: Player,
@@ -29,10 +31,12 @@ export class ActionStage {
     eventBroker: {
       onCardDeath: CardDeathSubscriber[];
     },
+    deathSkillHandler: DeathSkillHandler,
   ) {
     this.player1 = player1;
     this.player2 = player2;
     this.eventBroker = eventBroker;
+    this.deathSkillHandler = deathSkillHandler;
   }
 
   public computeNextAction(cards: FightingCard[]): Step[] {
@@ -213,7 +217,7 @@ export class ActionStage {
         damage: damageDealt.damage,
         isCritical: damageDealt.isCritical,
         dodge: damageDealt.dodge,
-        remainingHealth: defensiveCard.actualHealth,
+        remainingHealth: damageDealt.remainingHealth ?? defensiveCard.actualHealth,
       });
 
       if (defensiveCard.isDead()) {
@@ -223,6 +227,7 @@ export class ActionStage {
           card: defensiveCard.identityInfo,
           status: 'dead',
         });
+        report.statusChanges.push(...this.deathSkillHandler.drainSteps());
       } else if (damageDealt.effect) {
         report.statusChanges.push({
           kind: StepKind.StatusChange,

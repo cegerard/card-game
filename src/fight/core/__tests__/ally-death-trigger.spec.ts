@@ -122,4 +122,98 @@ describe('Ally death trigger', () => {
       });
     });
   });
+
+  describe('when the killer has a turn-end buff skill', () => {
+    const deadCardId = 'warrior-02';
+    let fight: Fight;
+
+    beforeEach(() => {
+      const deadCard = createFightingCard({
+        id: deadCardId,
+        name: 'Victim',
+        attack: 1,
+        defense: 0,
+        health: 1,
+        speed: 1,
+        agility: 0,
+        accuracy: 100,
+        criticalChance: 0,
+        skills: {
+          simpleAttack: {
+            damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
+            targetingStrategy: 'position-based',
+          },
+          special: { kind: 'specialAttack', targetingStrategy: 'position-based' },
+        },
+      });
+
+      const survivor = createFightingCard({
+        name: 'Survivor',
+        attack: 1,
+        defense: 0,
+        health: 5000,
+        speed: 1,
+        agility: 0,
+        accuracy: 100,
+        criticalChance: 0,
+        skills: {
+          simpleAttack: {
+            damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
+            targetingStrategy: 'position-based',
+          },
+          special: { kind: 'specialAttack', targetingStrategy: 'position-based' },
+          others: [
+            {
+              effectRate: 0.5,
+              trigger: 'ally-death',
+              targetCardId: deadCardId,
+              targetingStrategy: 'self',
+            },
+          ],
+        },
+      });
+
+      const enemy = createFightingCard({
+        name: 'Enemy',
+        attack: 9999,
+        defense: 0,
+        health: 5000,
+        speed: 100,
+        agility: 0,
+        accuracy: 100,
+        criticalChance: 0,
+        skills: {
+          simpleAttack: {
+            damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
+            targetingStrategy: 'position-based',
+          },
+          special: { kind: 'specialAttack', targetingStrategy: 'position-based' },
+          others: [
+            {
+              buffType: 'attack' as const,
+              buffRate: 0.1,
+              duration: 3,
+              trigger: 'turn-end',
+              targetingStrategy: 'self',
+            },
+          ],
+        },
+      });
+
+      const player1 = new Player('Player 1', [deadCard, survivor]);
+      const player2 = new Player('Player 2', [enemy]);
+      fight = new Fight(player1, player2, new PlayerByPlayerCardSelector(player1, player2));
+    });
+
+    it('ally-death healing step appears before the killer turn-end buff step', () => {
+      const result = fight.start();
+      const stepEntries = Object.entries(result) as [string, any][];
+
+      const deathStepIndex = stepEntries.findIndex(
+        ([_, s]) => s.kind === 'status_change' && s.status === 'dead' && s.card?.name === 'Victim',
+      );
+
+      expect(stepEntries[deathStepIndex + 1][1]).toMatchObject({ kind: 'healing', source: { name: 'Survivor' } });
+    });
+  });
 });
