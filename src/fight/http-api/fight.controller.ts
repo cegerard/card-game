@@ -317,7 +317,7 @@ export class FightController {
           powerId: skillData.powerId,
         });
       case SkillKind.CONDITIONAL_ATTACK:
-        if (!skillData.damages || !skillData.interval) {
+        if (!skillData.damages || skillData.interval == undefined) {
           throw new Error('Conditional attack requires damages and interval');
         }
         const caDamages = skillData.damages.map(
@@ -348,6 +348,7 @@ export class FightController {
         return new ConditionalAttack(
           caAttackSkill,
           new EveryNTurnsCondition(skillData.interval),
+          this.buildTriggerForSkill(skillData),
         );
       case SkillKind.TARGETING_OVERRIDE:
         if (!skillData.terminationEvent) {

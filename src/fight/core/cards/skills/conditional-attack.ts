@@ -3,6 +3,7 @@ import { FightingContext } from '../@types/fighting-context';
 import { AttackCondition } from '../@types/attack/attack-condition';
 import { AttackSkill } from './attack-skill';
 import { Skill, SkillKind, SkillResults } from './skill';
+import { Trigger } from '../../trigger/trigger';
 
 export class ConditionalAttack implements Skill {
   public id = 'conditional-attack';
@@ -10,10 +11,13 @@ export class ConditionalAttack implements Skill {
   constructor(
     private readonly attackSkill: AttackSkill,
     private readonly condition: AttackCondition,
+    private readonly trigger: Trigger,
   ) {}
 
   isTriggered(triggerName: string): boolean {
-    return triggerName === 'next-action' && this.condition.isTriggered();
+    return (
+      this.trigger.isTriggered(triggerName) && this.condition.isTriggered()
+    );
   }
 
   launch(source: FightingCard, context: FightingContext): SkillResults {

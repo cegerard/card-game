@@ -15,6 +15,8 @@ import { SpecialAttack } from '../special-attack';
 import { SimpleDodge } from '../../behaviors/simple-dodge';
 import { Element } from '../../@types/damage/element';
 import { faker } from '@faker-js/faker';
+import { NextAction } from '../../../trigger/next-action';
+import { DeathTrigger } from '../../../trigger/death-trigger';
 
 const POSITION_BASED = new TargetedFromPosition();
 
@@ -92,7 +94,11 @@ describe('ConditionalAttack', () => {
 
   beforeEach(() => {
     condition = new EveryNTurnsCondition(2);
-    conditionalAttack = new ConditionalAttack(makeSimpleAttack(), condition);
+    conditionalAttack = new ConditionalAttack(
+      makeSimpleAttack(),
+      condition,
+      new NextAction(),
+    );
   });
 
   describe('isTriggered', () => {
@@ -111,6 +117,24 @@ describe('ConditionalAttack', () => {
       condition.tick();
       condition.tick();
       expect(conditionalAttack.isTriggered('next-action')).toBe(true);
+    });
+
+    it('returns true for ally-death trigger when condition is already met', () => {
+      const allyDeathAttack = new ConditionalAttack(
+        makeSimpleAttack(),
+        new EveryNTurnsCondition(0),
+        new DeathTrigger('ally-death', 'kaelion'),
+      );
+      expect(allyDeathAttack.isTriggered('ally-death:kaelion')).toBe(true);
+    });
+
+    it('returns false for ally-death trigger when card id does not match', () => {
+      const allyDeathAttack = new ConditionalAttack(
+        makeSimpleAttack(),
+        new EveryNTurnsCondition(0),
+        new DeathTrigger('ally-death', 'kaelion'),
+      );
+      expect(allyDeathAttack.isTriggered('ally-death:other')).toBe(false);
     });
   });
 
@@ -153,7 +177,11 @@ describe('ConditionalAttack', () => {
 describe('FightingCard.tickSkills', () => {
   it('ticks ConditionalAttack skills, advancing their condition', () => {
     const condition = new EveryNTurnsCondition(1);
-    const ca = new ConditionalAttack(makeSimpleAttack(), condition);
+    const ca = new ConditionalAttack(
+      makeSimpleAttack(),
+      condition,
+      new NextAction(),
+    );
     const card = makeCard({ conditionalAttack: ca });
 
     card.tickSkills();
@@ -183,6 +211,7 @@ describe('ConditionalAttack integration via Fight (interval=3)', () => {
         POSITION_BASED,
       ),
       new EveryNTurnsCondition(3),
+      new NextAction(),
     );
 
     attacker = new FightingCard(
@@ -285,6 +314,7 @@ describe('Frozen card skips tick', () => {
         POSITION_BASED,
       ),
       new EveryNTurnsCondition(2),
+      new NextAction(),
     );
     attacker = makeCard({
       name: 'Attacker',

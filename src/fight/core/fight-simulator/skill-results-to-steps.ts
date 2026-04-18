@@ -2,6 +2,7 @@ import { FightingCard } from '../cards/fighting-card';
 import { SkillKind, SkillResults } from '../cards/skills/skill';
 import { Step, StepKind } from './@types/step';
 import { EndEventProcessor } from './end-event-processor';
+import { StatusChangeReport, status } from './@types/status-change-report';
 
 export function skillResultsToSteps(
   card: FightingCard,
@@ -57,6 +58,46 @@ export function skillResultsToSteps(
           });
         }
         break;
+      case SkillKind.Attack: {
+        steps.push({
+          kind: StepKind.Attack,
+          attacker: card.identityInfo,
+          damages: skillResult.results.map((r) => ({
+            defender: r.defender.identityInfo,
+            damage: r.damage,
+            isCritical: r.isCritical,
+            dodge: r.dodge,
+            remainingHealth: r.defender.actualHealth,
+          })),
+          energy: card.actualEnergy,
+        });
+
+        const statusChanges: StatusChangeReport[] = skillResult.results.flatMap(
+          (r): StatusChangeReport[] => {
+            if (r.defender.isDead()) {
+              return [
+                {
+                  kind: StepKind.StatusChange,
+                  card: r.defender.identityInfo,
+                  status: 'dead',
+                },
+              ];
+            }
+            if (r.effect) {
+              return [
+                {
+                  kind: StepKind.StatusChange,
+                  status: r.effect.type as status,
+                  card: r.effect.card.identityInfo,
+                },
+              ];
+            }
+            return [];
+          },
+        );
+        steps.push(...statusChanges);
+        break;
+      }
       case SkillKind.TargetingOverride:
         skillResult.results.forEach((report) => steps.push(report));
         break;
