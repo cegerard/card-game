@@ -5,6 +5,7 @@ import { DebuffResults } from '../@types/action-result/debuff-results';
 import { AttackResult } from '../@types/action-result/attack-result';
 import { FightingContext } from '../@types/fighting-context';
 import { TargetingOverrideReport } from '../../fight-simulator/@types/targeting-override-report';
+import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 
 export enum SkillKind {
   Healing = 'healing',
@@ -59,9 +60,14 @@ export interface Skill {
    *
    * @param source - The card that is using the skill.
    * @param context - The fighting context.
+   * @param targetingStrategy - The override strategy to use instead of the skill's default strategy, if applicable
    * @returns The result of the skill.
    */
-  launch(source: FightingCard, context: FightingContext): SkillResults;
+  launch(
+    source: FightingCard,
+    context: FightingContext,
+    targetingStrategy?: TargetingCardStrategy,
+  ): SkillResults;
 
   /**
    * Checks if the skill is triggered.

@@ -1,6 +1,7 @@
 import { FightingContext } from '../@types/fighting-context';
 import { SpecialResult } from '../@types/action-result/special-result';
 import { FightingCard } from '../fighting-card';
+import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 
 /**
  * Interface representing a special skill in the card game.
@@ -19,9 +20,14 @@ export interface Special {
    *
    * @param source - The card that is using the special skill.
    * @param context - The context of the fight.
+   * @param targetingStrategy - The override strategy to use instead of the skill's default strategy, if applicable
    * @returns The result of the special skill attack.
    */
-  launch(source: FightingCard, context: FightingContext): SpecialResult;
+  launch(
+    source: FightingCard,
+    context: FightingContext,
+    targetingStrategy?: TargetingCardStrategy,
+  ): SpecialResult;
 
   /**
    * Increases the current energy level.

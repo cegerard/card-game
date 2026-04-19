@@ -2,6 +2,7 @@ import { createFightingCard } from '../../../../../../test/helpers/fighting-card
 import { Player } from '../../../player';
 import { FightingContext } from '../../@types/fighting-context';
 import { TargetedAll } from '../../../targeting-card-strategies/targeted-all';
+import { TargetedFromPosition } from '../../../targeting-card-strategies/targeted-from-position';
 import { TurnEnd } from '../../../trigger/turn-end';
 import { TargetingOverrideSkill } from '../targeting-override';
 import { SkillKind } from '../skill';
@@ -79,6 +80,50 @@ describe('TargetingOverrideSkill', () => {
     );
 
     expect(skill.isTriggered('next-action')).toBe(false);
+  });
+
+  describe('position-based restriction', () => {
+    it('applies override when simpleAttack uses position-based targeting', () => {
+      const extra = createFightingCard();
+      const player2 = new Player('p2', [createFightingCard(), extra]);
+      context = {
+        sourcePlayer: new Player('p1', [card]),
+        opponentPlayer: player2,
+      };
+
+      const skill = new TargetingOverrideSkill(
+        new TargetedAll(),
+        'power-end',
+        new TurnEnd(),
+      );
+      skill.launch(card, context);
+      const results = card.launchAttack(context);
+
+      expect(results).toHaveLength(2);
+    });
+
+    it('does not apply override when simpleAttack uses non-position-based targeting', () => {
+      const cardWithTargetAll = createFightingCard({
+        skills: { simpleAttack: { targetingStrategy: 'target-all' } },
+      });
+      const extra = createFightingCard();
+      const player1 = new Player('p1', [cardWithTargetAll]);
+      const player2 = new Player('p2', [createFightingCard(), extra]);
+      const ctx: FightingContext = {
+        sourcePlayer: player1,
+        opponentPlayer: player2,
+      };
+
+      const skill = new TargetingOverrideSkill(
+        new TargetedFromPosition(),
+        'power-end',
+        new TurnEnd(),
+      );
+      skill.launch(cardWithTargetAll, ctx);
+      const results = cardWithTargetAll.launchAttack(ctx);
+
+      expect(results).toHaveLength(2);
+    });
   });
 
   describe('with strategyResolver returning null (no killerCard)', () => {

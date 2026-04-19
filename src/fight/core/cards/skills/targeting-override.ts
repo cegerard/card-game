@@ -20,7 +20,11 @@ export class TargetingOverrideSkill implements Skill {
     ) => TargetingCardStrategy,
   ) {}
 
-  launch(source: FightingCard, context: FightingContext): SkillResults {
+  launch(
+    source: FightingCard,
+    context: FightingContext,
+    _targetingOverride?: TargetingCardStrategy,
+  ): SkillResults {
     const previousStrategy = source.attackTargetingId;
 
     const strategy = this.strategyResolver

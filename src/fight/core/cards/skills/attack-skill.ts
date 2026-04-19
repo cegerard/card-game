@@ -12,24 +12,12 @@ export interface AttackSkill {
    *
    * @param card - The attacking card
    * @param context - The current fighting context (source and opponent players)
+   * @param targetingStrategy - The override strategy to use instead of the skill's default strategy, if applicable
    * @returns Array of attack results, one per targeted defender
    */
-  launch(card: FightingCard, context: FightingContext): AttackResult[];
-
-  /**
-   * Executes the attack using an externally-supplied targeting strategy, bypassing
-   * the skill's own default strategy. Called when a targeting override is active on
-   * the card (e.g. from a `TARGETING_OVERRIDE` skill), allowing the card's attack
-   * target selection to be changed dynamically mid-battle.
-   *
-   * @param card - The attacking card
-   * @param context - The current fighting context (source and opponent players)
-   * @param targetingStrategy - The override strategy to use instead of the skill's default
-   * @returns Array of attack results, one per targeted defender
-   */
-  launchWithTargeting(
+  launch(
     card: FightingCard,
     context: FightingContext,
-    targetingStrategy: TargetingCardStrategy,
+    targetingStrategy?: TargetingCardStrategy,
   ): AttackResult[];
 }

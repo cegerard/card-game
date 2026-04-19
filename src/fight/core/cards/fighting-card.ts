@@ -213,6 +213,12 @@ export class FightingCard {
     return this.simpleAttack.targetingId;
   }
 
+  private get currentTargetingOverride(): TargetingCardStrategy | undefined {
+    if (this.targetingOverrides.length === 0) return;
+
+    return this.targetingOverrides[this.targetingOverrides.length - 1].strategy;
+  }
+
   public overrideAttackTargeting(
     strategy: TargetingCardStrategy,
     terminationEvent: string,
@@ -232,20 +238,15 @@ export class FightingCard {
   }
 
   public launchAttack(context: FightingContext): AttackResult[] {
-    if (this.targetingOverrides.length > 0) {
-      const override =
-        this.targetingOverrides[this.targetingOverrides.length - 1];
-      return this.simpleAttack.launchWithTargeting(
-        this,
-        context,
-        override.strategy,
-      );
-    }
-    return this.simpleAttack.launch(this, context);
+    return this.simpleAttack.launch(
+      this,
+      context,
+      this.currentTargetingOverride,
+    );
   }
 
   public launchSpecial(context: FightingContext): SpecialResult {
-    return this.special.launch(this, context);
+    return this.special.launch(this, context, this.currentTargetingOverride);
   }
 
   public launchSkills(
@@ -255,7 +256,9 @@ export class FightingCard {
     this.skills.forEach((s) => s.activate?.(trigger, context));
     return this.skills
       .filter((s) => s.isTriggered(trigger))
-      .map((skill) => skill.launch(this, context));
+      .map((skill) =>
+        skill.launch(this, context, this.currentTargetingOverride),
+      );
   }
 
   public applyStateEffects(): StateResult[] {

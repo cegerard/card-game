@@ -64,7 +64,11 @@ export class AlterationSkill implements Skill {
     this.powerId = powerId;
   }
 
-  launch(source: FightingCard, context: FightingContext): SkillResults {
+  launch(
+    source: FightingCard,
+    context: FightingContext,
+    _targetingOverride?: TargetingCardStrategy,
+  ): SkillResults {
     if (
       this.activationCondition &&
       !this.activationCondition.evaluate(source, context)

@@ -23,9 +23,17 @@ export class SpecialAttack implements Special {
     return actualEnergy >= this.energyNeeded;
   }
 
-  public launch(source: FightingCard, context: FightingContext): SpecialResult {
+  public launch(
+    source: FightingCard,
+    context: FightingContext,
+    targetingStrategy?: TargetingCardStrategy,
+  ): SpecialResult {
     const isCritical = Math.random() < source.actualCriticalChance;
-    const targetedCards = this.targetingStrategy.targetedCards(
+    const targeting =
+      targetingStrategy && this.targetingStrategy.id === 'from-position'
+        ? targetingStrategy
+        : this.targetingStrategy;
+    const targetedCards = targeting.targetedCards(
       source,
       context.sourcePlayer,
       context.opponentPlayer,

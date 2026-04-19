@@ -17,7 +17,11 @@ export class SpecialHealing implements Special {
     return actualEnergy >= this.energyNeeded;
   }
 
-  public launch(source: FightingCard, context: FightingContext): SpecialResult {
+  public launch(
+    source: FightingCard,
+    context: FightingContext,
+    _targetingStrategy?: TargetingCardStrategy,
+  ): SpecialResult {
     const targetedCards = this.targetingStrategy.targetedCards(
       source,
       context.sourcePlayer,

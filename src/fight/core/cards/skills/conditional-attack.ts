@@ -4,6 +4,7 @@ import { AttackCondition } from '../@types/attack/attack-condition';
 import { AttackSkill } from './attack-skill';
 import { Skill, SkillKind, SkillResults } from './skill';
 import { Trigger } from '../../trigger/trigger';
+import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 
 export class ConditionalAttack implements Skill {
   public id = 'conditional-attack';
@@ -20,8 +21,12 @@ export class ConditionalAttack implements Skill {
     );
   }
 
-  launch(source: FightingCard, context: FightingContext): SkillResults {
-    const results = this.attackSkill.launch(source, context);
+  launch(
+    source: FightingCard,
+    context: FightingContext,
+    targetingStrategy?: TargetingCardStrategy,
+  ): SkillResults {
+    const results = this.attackSkill.launch(source, context, targetingStrategy);
     this.condition.reset();
     return { skillKind: SkillKind.Attack, results };
   }

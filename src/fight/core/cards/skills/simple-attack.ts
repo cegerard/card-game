@@ -18,16 +18,16 @@ export class SimpleAttack implements AttackSkill {
     return this.targetingStrategy.id;
   }
 
-  public launch(card: FightingCard, context: FightingContext): AttackResult[] {
-    return this.launchWithTargeting(card, context, this.targetingStrategy);
-  }
-
-  public launchWithTargeting(
+  public launch(
     card: FightingCard,
     context: FightingContext,
-    targetingStrategy: TargetingCardStrategy,
+    targetingStrategy?: TargetingCardStrategy,
   ): AttackResult[] {
-    return this.executeAttack(card, context, targetingStrategy);
+    const targeting =
+      targetingStrategy && this.targetingStrategy.id === 'from-position'
+        ? targetingStrategy
+        : this.targetingStrategy;
+    return this.executeAttack(card, context, targeting);
   }
 
   private executeAttack(

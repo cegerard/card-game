@@ -21,16 +21,16 @@ export class MultipleAttack implements AttackSkill {
     return this.targetingStrategy.id;
   }
 
-  public launchWithTargeting(
+  public launch(
     card: FightingCard,
     context: FightingContext,
-    targetingStrategy: TargetingCardStrategy,
+    targetingStrategy?: TargetingCardStrategy,
   ): AttackResult[] {
-    return this.executeAttack(card, context, targetingStrategy);
-  }
-
-  public launch(card: FightingCard, context: FightingContext): AttackResult[] {
-    return this.launchWithTargeting(card, context, this.targetingStrategy);
+    const targeting =
+      targetingStrategy && this.targetingStrategy.id === 'from-position'
+        ? targetingStrategy
+        : this.targetingStrategy;
+    return this.executeAttack(card, context, targeting);
   }
 
   private executeAttack(

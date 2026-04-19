@@ -134,6 +134,20 @@
           "targetCardId": "kaelion",
           "terminationEvent": "lion-heritage-end",
           "powerId": "lion-heritage"
+        },
+        {
+          "kind": "BUFF",
+          "name": "Fin de la vengeance",
+          "buffType": "attack",
+          "rate": 0,
+          "duration": 0,
+          "targetingStrategy": "self",
+          "event": "dormant",
+          "activationEvent": "ally-death",
+          "activationTargetCardId": "kaelion",
+          "replacementEvent": "enemy-death",
+          "activationLimit": 1,
+          "endEvent": "lion-heritage-end"
         }
       ]
     },

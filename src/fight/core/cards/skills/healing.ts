@@ -25,7 +25,11 @@ export class Healing implements Skill {
     this.powerId = powerId;
   }
 
-  launch(source: FightingCard, context: FightingContext): SkillResults {
+  launch(
+    source: FightingCard,
+    context: FightingContext,
+    _targetingOverride?: TargetingCardStrategy,
+  ): SkillResults {
     const targetedCards = this.targetingStrategy.targetedCards(
       source,
       context.sourcePlayer,

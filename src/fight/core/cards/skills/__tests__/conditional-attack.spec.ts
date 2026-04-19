@@ -18,6 +18,8 @@ import { Element } from '../../@types/damage/element';
 import { faker } from '@faker-js/faker';
 import { NextAction } from '../../../trigger/next-action';
 import { DeathTrigger } from '../../../trigger/death-trigger';
+import { TargetedCard } from '../../../targeting-card-strategies/targeted-card';
+import { TargetedAll } from '../../../targeting-card-strategies/targeted-all';
 
 const POSITION_BASED = new TargetedFromPosition();
 
@@ -297,6 +299,90 @@ describe('ConditionalAttack integration via Fight (interval=3)', () => {
       card: defender.identityInfo,
       status: 'dead',
     });
+  });
+});
+
+describe('ConditionalAttack respects targeting override', () => {
+  it('uses override strategy when attack is position-based', () => {
+    const attacker = makeCard({ attack: 100 });
+    const target1 = makeCard({ health: 1000, defense: 0, agility: 0 });
+    const target2 = makeCard({ health: 1000, defense: 0, agility: 0 });
+    const player1 = new Player('p1', [attacker]);
+    const player2 = new Player('p2', [target1, target2]);
+    const context = { sourcePlayer: player1, opponentPlayer: player2 };
+
+    const override = new TargetedCard(target2.id);
+    const condition = new EveryNTurnsCondition(0);
+    const ca = new ConditionalAttack(
+      makeSimpleAttack(),
+      condition,
+      new NextAction(),
+    );
+    condition.tick();
+    const result = ca.launch(attacker, context, override);
+
+    expect((result.results as { defender: FightingCard }[])[0].defender).toBe(
+      target2,
+    );
+  });
+
+  it('ignores override when attack uses non-position-based targeting', () => {
+    const attacker = makeCard({ attack: 100 });
+    const target1 = makeCard({ health: 1000, defense: 0, agility: 0 });
+    const target2 = makeCard({ health: 1000, defense: 0, agility: 0 });
+    const player1 = new Player('p1', [attacker]);
+    const player2 = new Player('p2', [target1, target2]);
+    const context = { sourcePlayer: player1, opponentPlayer: player2 };
+
+    const override = new TargetedCard(target2.id);
+    const targetAllAttack = new SimpleAttack(
+      [new DamageComposition(DamageType.PHYSICAL, 1.0)],
+      new TargetedAll(),
+    );
+    const condition = new EveryNTurnsCondition(0);
+    const ca = new ConditionalAttack(
+      targetAllAttack,
+      condition,
+      new NextAction(),
+    );
+    condition.tick();
+    const result = ca.launch(attacker, context, override);
+
+    expect((result.results as { defender: FightingCard }[]).length).toBe(2);
+  });
+});
+
+describe('SpecialAttack respects targeting override', () => {
+  it('uses override strategy when special uses position-based targeting', () => {
+    const attacker = makeCard({ attack: 100 });
+    const target1 = makeCard({ health: 1000, defense: 0, agility: 0 });
+    const target2 = makeCard({ health: 1000, defense: 0, agility: 0 });
+    const player1 = new Player('p1', [attacker]);
+    const player2 = new Player('p2', [target1, target2]);
+    const context = { sourcePlayer: player1, opponentPlayer: player2 };
+
+    const override = new TargetedCard(target2.id);
+    const special = new SpecialAttack(1, 0, POSITION_BASED);
+    const result = special.launch(attacker, context, override);
+
+    expect(
+      (result.actionResults[0] as { defender: FightingCard }).defender,
+    ).toBe(target2);
+  });
+
+  it('ignores override when special uses non-position-based targeting', () => {
+    const attacker = makeCard({ attack: 100 });
+    const target1 = makeCard({ health: 1000, defense: 0, agility: 0 });
+    const target2 = makeCard({ health: 1000, defense: 0, agility: 0 });
+    const player1 = new Player('p1', [attacker]);
+    const player2 = new Player('p2', [target1, target2]);
+    const context = { sourcePlayer: player1, opponentPlayer: player2 };
+
+    const override = new TargetedCard(target2.id);
+    const special = new SpecialAttack(1, 0, new TargetedAll());
+    const result = special.launch(attacker, context, override);
+
+    expect(result.actionResults.length).toBe(2);
   });
 });
 
