@@ -59,7 +59,7 @@ export class MultipleAttack implements AttackSkill {
 
         if (defender.dodge(card.actualAccuracy)) {
           dodgedTargets.add(defender);
-          results.push({ damage: 0, isCritical, dodge: true, defender });
+          results.push({ damage: 0, isCritical, dodge: true, defender, remainingHealth: defender.actualHealth });
           continue;
         }
 
@@ -80,6 +80,7 @@ export class MultipleAttack implements AttackSkill {
           isCritical,
           dodge: false,
           defender,
+          remainingHealth: defender.actualHealth,
           effect: effectResult,
         });
       }
@@ -100,6 +101,7 @@ export class MultipleAttack implements AttackSkill {
           isCritical: false,
           dodge: false,
           defender,
+          remainingHealth: defender.actualHealth,
         });
       }
     }

@@ -178,6 +178,28 @@ describe('MultipleAttack', () => {
     });
   });
 
+  describe('remainingHealth per hit', () => {
+    it('each hit captures health after that hit, not the final health', () => {
+      const multipleAttack = new MultipleAttack(3, damages, new TargetedAll());
+      const results = multipleAttack.launch(attacker, context);
+      expect(results[0].remainingHealth).toBe(results[1].remainingHealth! + 100);
+    });
+
+    it('zero-damage hits report unchanged health', () => {
+      const zeroDamages = [new DamageComposition(DamageType.PHYSICAL, 0.0)];
+      const multipleAttack = new MultipleAttack(3, zeroDamages, new TargetedAll());
+      const results = multipleAttack.launch(attacker, context);
+      expect(results[0].remainingHealth).toBe(results[1].remainingHealth);
+    });
+
+    it('combo finisher captures health after finisher damage', () => {
+      const finisher = [new DamageComposition(DamageType.PHYSICAL, 0.5)];
+      const multipleAttack = new MultipleAttack(1, damages, new TargetedAll(), 0, undefined, finisher);
+      const results = multipleAttack.launch(attacker, context);
+      expect(results[1].remainingHealth).toBe(results[0].remainingHealth! - 50);
+    });
+  });
+
   describe('dead target skipped between hits', () => {
     let weakContext: FightingContext;
 
