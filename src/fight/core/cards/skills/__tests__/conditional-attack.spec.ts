@@ -332,7 +332,12 @@ describe('Frozen card skips tick', () => {
 
     const player1 = new Player('p1', [attacker]);
     const player2 = new Player('p2', [defender]);
-    actionStage = new ActionStage(player1, player2, { onCardDeath: [] }, new DeathSkillHandler(player1, player2));
+    actionStage = new ActionStage(
+      player1,
+      player2,
+      { onCardDeath: [] },
+      new DeathSkillHandler(player1, player2),
+    );
 
     attacker.setState(new CardStateFrozen(1, 5, 0));
   });

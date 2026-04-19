@@ -80,4 +80,35 @@ describe('TargetingOverrideSkill', () => {
 
     expect(skill.isTriggered('next-action')).toBe(false);
   });
+
+  describe('with strategyResolver returning null (no killerCard)', () => {
+    it('returns empty results without applying override', () => {
+      const skill = new TargetingOverrideSkill(
+        undefined,
+        'power-end',
+        new TurnEnd(),
+        undefined,
+        () => null,
+      );
+
+      const result = skill.launch(card, context);
+
+      expect(result.results).toHaveLength(0);
+    });
+
+    it('does not override the card targeting strategy', () => {
+      const originalStrategyId = card.attackTargetingId;
+      const skill = new TargetingOverrideSkill(
+        undefined,
+        'power-end',
+        new TurnEnd(),
+        undefined,
+        () => null,
+      );
+
+      skill.launch(card, context);
+
+      expect(card.attackTargetingId).toBe(originalStrategyId);
+    });
+  });
 });

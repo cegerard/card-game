@@ -14,6 +14,10 @@ import { DamageType } from '../../cards/@types/damage/damage-type';
 import { FightingContext } from '../../cards/@types/fighting-context';
 import { SpecialResult } from '../../cards/@types/action-result/special-result';
 import { DeathSkillHandler } from '../../fight-simulator/death-skill-handler';
+import { BurnAttackEffect } from '../../cards/@types/attack/attack-burn-effect';
+import { EffectTriggeredDebuff } from '../../cards/@types/attack/effect-triggered-debuff';
+import { RandomizerFake } from '../../../../../test/helpers/randomizer-fake';
+import { StepKind } from '../../fight-simulator/@types/step';
 
 class UnknownSpecial implements Special {
   ready(): boolean {
@@ -36,7 +40,10 @@ const SIMPLE_ATTACK = new SimpleAttack(
   POSITION_BASED,
 );
 
-function makeCard(special: Special): FightingCard {
+function makeCard(
+  special: Special,
+  simpleAttack = SIMPLE_ATTACK,
+): FightingCard {
   return new FightingCard(
     faker.string.uuid(),
     'Card',
@@ -49,13 +56,45 @@ function makeCard(special: Special): FightingCard {
       accuracy: 9999,
       criticalChance: 0,
     },
-    { simpleAttack: SIMPLE_ATTACK, special, others: [] },
+    { simpleAttack, special, others: [] },
     { dodge: new SimpleDodge() },
     Element.PHYSICAL,
   );
 }
 
 describe('ActionStage', () => {
+  describe('handleAttackResult with triggeredDebuff', () => {
+    describe('when a simple attack applies a burn effect with triggered debuff', () => {
+      const randomizer = new RandomizerFake().setNextRandomValue(0);
+      const burnEffect = new BurnAttackEffect(
+        0.1,
+        1,
+        new EffectTriggeredDebuff(1.0, 'defense', 0.1, 2, randomizer),
+      );
+      const attackWithBurn = new SimpleAttack(
+        [new DamageComposition(DamageType.PHYSICAL, 1)],
+        POSITION_BASED,
+        burnEffect,
+      );
+      const HIGH_ENERGY_SPECIAL = new SpecialAttack(1, 999, POSITION_BASED);
+      const attacker = makeCard(HIGH_ENERGY_SPECIAL, attackWithBurn);
+      const defender = makeCard(HIGH_ENERGY_SPECIAL);
+      const player1 = new Player('Player 1', [attacker]);
+      const player2 = new Player('Player 2', [defender]);
+      const actionStage = new ActionStage(
+        player1,
+        player2,
+        { onCardDeath: [] },
+        new DeathSkillHandler(player1, player2),
+      );
+      const steps = actionStage.computeNextAction([attacker]);
+
+      it('emits a debuff step after the status_change step', () => {
+        expect(steps.find((s) => s.kind === StepKind.Debuff)).toBeDefined();
+      });
+    });
+  });
+
   describe('launchSpecial', () => {
     describe('when launching an unknown special kind', () => {
       const attacker = makeCard(new UnknownSpecial());

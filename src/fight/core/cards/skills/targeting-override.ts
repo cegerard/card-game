@@ -27,6 +27,14 @@ export class TargetingOverrideSkill implements Skill {
       ? this.strategyResolver(context)
       : this.targetingStrategy;
 
+    if (!strategy) {
+      return {
+        skillKind: SkillKind.TargetingOverride,
+        results: [],
+        powerId: this.powerId,
+      };
+    }
+
     source.overrideAttackTargeting(
       strategy,
       this.terminationEvent,

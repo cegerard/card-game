@@ -217,7 +217,8 @@ export class ActionStage {
         damage: damageDealt.damage,
         isCritical: damageDealt.isCritical,
         dodge: damageDealt.dodge,
-        remainingHealth: damageDealt.remainingHealth ?? defensiveCard.actualHealth,
+        remainingHealth:
+          damageDealt.remainingHealth ?? defensiveCard.actualHealth,
       });
 
       if (defensiveCard.isDead()) {
@@ -234,6 +235,23 @@ export class ActionStage {
           status: damageDealt.effect.type,
           card: damageDealt.effect.card.identityInfo,
         });
+        if (damageDealt.effect.triggeredDebuff) {
+          const { card: debuffTarget, debuff } =
+            damageDealt.effect.triggeredDebuff;
+          report.statusChanges.push({
+            kind: StepKind.Debuff,
+            source: attackerCard.identityInfo,
+            debuffs: [
+              {
+                target: debuffTarget.identityInfo,
+                kind: debuff.type,
+                value: debuff.value,
+                remainingTurns: debuff.duration,
+              },
+            ],
+            energy: attackerCard.actualEnergy,
+          });
+        }
       }
     });
   }

@@ -143,7 +143,10 @@ describe('Ally death trigger', () => {
             damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
             targetingStrategy: 'position-based',
           },
-          special: { kind: 'specialAttack', targetingStrategy: 'position-based' },
+          special: {
+            kind: 'specialAttack',
+            targetingStrategy: 'position-based',
+          },
         },
       });
 
@@ -161,7 +164,10 @@ describe('Ally death trigger', () => {
             damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
             targetingStrategy: 'position-based',
           },
-          special: { kind: 'specialAttack', targetingStrategy: 'position-based' },
+          special: {
+            kind: 'specialAttack',
+            targetingStrategy: 'position-based',
+          },
           others: [
             {
               effectRate: 0.5,
@@ -187,7 +193,10 @@ describe('Ally death trigger', () => {
             damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
             targetingStrategy: 'position-based',
           },
-          special: { kind: 'specialAttack', targetingStrategy: 'position-based' },
+          special: {
+            kind: 'specialAttack',
+            targetingStrategy: 'position-based',
+          },
           others: [
             {
               buffType: 'attack' as const,
@@ -202,7 +211,11 @@ describe('Ally death trigger', () => {
 
       const player1 = new Player('Player 1', [deadCard, survivor]);
       const player2 = new Player('Player 2', [enemy]);
-      fight = new Fight(player1, player2, new PlayerByPlayerCardSelector(player1, player2));
+      fight = new Fight(
+        player1,
+        player2,
+        new PlayerByPlayerCardSelector(player1, player2),
+      );
     });
 
     it('ally-death healing step appears before the killer turn-end buff step', () => {
@@ -210,10 +223,16 @@ describe('Ally death trigger', () => {
       const stepEntries = Object.entries(result) as [string, any][];
 
       const deathStepIndex = stepEntries.findIndex(
-        ([_, s]) => s.kind === 'status_change' && s.status === 'dead' && s.card?.name === 'Victim',
+        ([_, s]) =>
+          s.kind === 'status_change' &&
+          s.status === 'dead' &&
+          s.card?.name === 'Victim',
       );
 
-      expect(stepEntries[deathStepIndex + 1][1]).toMatchObject({ kind: 'healing', source: { name: 'Survivor' } });
+      expect(stepEntries[deathStepIndex + 1][1]).toMatchObject({
+        kind: 'healing',
+        source: { name: 'Survivor' },
+      });
     });
   });
 });
