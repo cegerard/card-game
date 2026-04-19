@@ -969,6 +969,7 @@ describe('FightController', () => {
           effectRate: 1,
           trigger: { id: 'turn-end' },
           targetingStrategy: { id: 'all-allies' },
+          activationCount: 0,
         });
       };
 

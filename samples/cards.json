@@ -136,11 +136,9 @@
           "powerId": "lion-heritage"
         },
         {
-          "kind": "BUFF",
+          "kind": "HEALING",
           "name": "Fin de la vengeance",
-          "buffType": "attack",
-          "rate": 0,
-          "duration": 0,
+          "rate": 0.33,
           "targetingStrategy": "self",
           "event": "dormant",
           "activationEvent": "ally-death",

@@ -12,17 +12,24 @@ export class Healing implements Skill {
   private readonly trigger: Trigger;
   private readonly targetingStrategy: TargetingCardStrategy;
   private readonly powerId?: string;
+  private readonly activationLimit?: number;
+  private readonly endEvent?: string;
+  private activationCount = 0;
 
   constructor(
     effectRate: number,
     trigger: Trigger,
     targetingStrategy: TargetingCardStrategy,
     powerId?: string,
+    activationLimit?: number,
+    endEvent?: string,
   ) {
     this.effectRate = effectRate;
     this.trigger = trigger;
     this.targetingStrategy = targetingStrategy;
     this.powerId = powerId;
+    this.activationLimit = activationLimit;
+    this.endEvent = endEvent;
   }
 
   launch(
@@ -36,22 +43,28 @@ export class Healing implements Skill {
       context.opponentPlayer,
     );
 
-    const healingResults = targetedCards.map((targetedCard) => {
-      return {
-        target: targetedCard.identityInfo,
-        healAmount: targetedCard.heal(source.actualAttack * this.effectRate),
-        remainingHealth: targetedCard.actualHealth,
-      };
-    });
+    this.activationCount++;
+    const isExhausted =
+      this.activationLimit !== undefined &&
+      this.activationCount >= this.activationLimit;
+    const endEvent = isExhausted ? this.endEvent : undefined;
+
+    const healingResults = targetedCards.map((targetedCard) => ({
+      target: targetedCard.identityInfo,
+      healAmount: targetedCard.heal(source.actualAttack * this.effectRate),
+      remainingHealth: targetedCard.actualHealth,
+    }));
 
     return {
       skillKind: SkillKind.Healing,
       results: healingResults,
+      endEvent,
       powerId: this.powerId,
     };
   }
 
   isTriggered(triggerName: string): boolean {
+    if (this.isExhaustedCheck()) return false;
     return this.trigger.isTriggered(triggerName);
   }
 
@@ -59,5 +72,17 @@ export class Healing implements Skill {
     if ('activate' in this.trigger) {
       (this.trigger as ActivatableTrigger).activate(triggerId, context);
     }
+  }
+
+  lifecycleEndEvent(): string | undefined {
+    if (this.isExhaustedCheck()) return undefined;
+    return this.endEvent;
+  }
+
+  private isExhaustedCheck(): boolean {
+    return (
+      this.activationLimit !== undefined &&
+      this.activationCount >= this.activationLimit
+    );
   }
 }

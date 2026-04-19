@@ -284,6 +284,8 @@ export class FightController {
           this.buildTriggerForSkill(skillData),
           buildTargetingStrategy(skillData.targetingStrategy),
           skillData.powerId,
+          skillData.activationLimit,
+          skillData.endEvent,
         );
       case SkillKind.BUFF:
       case SkillKind.DEBUFF:
