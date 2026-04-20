@@ -36,6 +36,7 @@ export class TurnManager {
     const steps: Step[] = [];
 
     cards.forEach((card) => {
+      if (card.isDead()) return;
       card.decreaseBuffAndDebuffDuration();
       this.processCardSkill(card, steps);
       this.processCardEffectStates(card, steps);

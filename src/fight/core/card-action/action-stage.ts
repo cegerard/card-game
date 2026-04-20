@@ -209,6 +209,8 @@ export class ActionStage {
     report: AttackReport,
     attackerCard?: FightingCard,
   ): void {
+    const reportedDeaths = new Set<FightingCard>();
+
     attackResults.forEach((damageDealt) => {
       const defensiveCard = damageDealt.defender;
 
@@ -221,7 +223,8 @@ export class ActionStage {
           damageDealt.remainingHealth ?? defensiveCard.actualHealth,
       });
 
-      if (defensiveCard.isDead()) {
+      if (defensiveCard.isDead() && !reportedDeaths.has(defensiveCard)) {
+        reportedDeaths.add(defensiveCard);
         this.notifyDeath(defensiveCard, attackerCard);
         report.statusChanges.push({
           kind: StepKind.StatusChange,
@@ -229,7 +232,7 @@ export class ActionStage {
           status: 'dead',
         });
         report.statusChanges.push(...this.deathSkillHandler.drainSteps());
-      } else if (damageDealt.effect) {
+      } else if (!defensiveCard.isDead() && damageDealt.effect) {
         report.statusChanges.push({
           kind: StepKind.StatusChange,
           status: damageDealt.effect.type,

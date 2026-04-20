@@ -294,6 +294,7 @@ export class FightController {
         }
         const alterationCondition = skillData.activationCondition
           ? buildBuffCondition(skillData.activationCondition.type, {
+              allyName: skillData.activationCondition.allyName,
               threshold: skillData.activationCondition.threshold,
               operator: skillData.activationCondition.operator,
             })
