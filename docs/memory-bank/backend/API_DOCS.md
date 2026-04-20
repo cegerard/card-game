@@ -214,7 +214,8 @@ Simulates a turn-based card battle between two players.
 {
   kind: "targeting_override",
   source: CardInfo,                // Card whose skill pushed the override
-  targetingStrategyId: string,     // ID of the new targeting strategy
+  previousStrategy: string,        // ID of the strategy before override
+  newStrategy: string,             // ID of the new targeting strategy
   powerId?: string                 // Present if skill belongs to a composite power
 }
 ```
@@ -224,7 +225,9 @@ Simulates a turn-based card battle between two players.
 {
   kind: "targeting_reverted",
   source: CardInfo,                // Card whose override was reverted
-  restoredStrategyId: string,      // ID of the restored targeting strategy
+  eventName: string,               // The end event name that triggered the revert
+  revertedStrategy: string,        // ID of the strategy that was removed
+  restoredStrategy: string,        // ID of the strategy restored
   powerId?: string                 // Present if triggered by a composite power end event
 }
 ```
