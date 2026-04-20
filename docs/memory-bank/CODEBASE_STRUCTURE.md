@@ -79,7 +79,7 @@ cards/
 └── @types/                 # Type definitions
     ├── action-result/      # Action outcome types
     │   ├── special-result.ts # Unified result: { actionResults, buffResults }
-    │   ├── attack-result.ts
+    │   ├── attack-result.ts  # Includes remainingHealth snapshot at damage time
     │   ├── healing-result.ts
     │   └── buff-results.ts
     ├── attack/             # Attack and effect types

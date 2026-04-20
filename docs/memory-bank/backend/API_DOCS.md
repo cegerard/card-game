@@ -130,8 +130,8 @@ Simulates a turn-based card battle between two players.
   buffType?: "attack" | "defense" | "agility" | "accuracy",  // Required if kind=BUFF
   duration?: number,            // Required if kind=BUFF (0 = infinite: permanent or event-bound)
   terminationEvent?: string,    // Event name that removes this skill's buff/targeting override when fired
-  activationLimit?: number,     // Max activations (>=1) before skill lifecycle ends
-  endEvent?: string,            // Event emitted when activation limit is reached
+  activationLimit?: number,     // Max activations (>=1) before skill lifecycle ends — supported for HEALING and TARGETING_OVERRIDE kinds
+  endEvent?: string,            // Event emitted when activation limit is reached — supported for HEALING and TARGETING_OVERRIDE kinds
   powerId?: string,             // Groups multiple skills as a composite power (must share same event + terminationEvent)
   // DORMANT trigger fields (required when event="dormant"):
   activationEvent?: TriggerEvent, // Event that activates the dormant skill (e.g., "ally-death")
