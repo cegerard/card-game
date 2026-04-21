@@ -8,6 +8,7 @@ import { SpecialAttack } from '../../cards/skills/special-attack';
 import { SimpleAttack } from '../../cards/skills/simple-attack';
 import { SimpleDodge } from '../../cards/behaviors/simple-dodge';
 import { TargetedFromPosition } from '../../targeting-card-strategies/targeted-from-position';
+import { Launcher } from '../../targeting-card-strategies/launcher';
 import { Element } from '../../cards/@types/damage/element';
 import { DamageComposition } from '../../cards/@types/damage/damage-composition';
 import { DamageType } from '../../cards/@types/damage/damage-type';
@@ -18,6 +19,8 @@ import { BurnAttackEffect } from '../../cards/@types/attack/attack-burn-effect';
 import { EffectTriggeredDebuff } from '../../cards/@types/attack/effect-triggered-debuff';
 import { RandomizerFake } from '../../../../../test/helpers/randomizer-fake';
 import { StepKind } from '../../fight-simulator/@types/step';
+import { BuffApplication } from '../../cards/@types/buff/buff-application';
+import { BuffReport } from '../../fight-simulator/@types/buff-report';
 
 class UnknownSpecial implements Special {
   name = 'unknown';
@@ -104,6 +107,38 @@ describe('ActionStage', () => {
   });
 
   describe('launchSpecial', () => {
+    describe('when special attack applies a buff', () => {
+      const skillName = 'Power Surge';
+      const specialWithBuff = new SpecialAttack(
+        skillName,
+        1,
+        0,
+        POSITION_BASED,
+        undefined,
+        [new BuffApplication('attack', 1.2, 2, new Launcher())],
+      );
+      const attacker = makeCard(specialWithBuff);
+      const defender = makeCard(
+        new SpecialAttack('special', 1, 999, POSITION_BASED),
+      );
+      const player1 = new Player('Player 1', [attacker]);
+      const player2 = new Player('Player 2', [defender]);
+      const actionStage = new ActionStage(
+        player1,
+        player2,
+        { onCardDeath: [] },
+        new DeathSkillHandler(player1, player2),
+      );
+      const steps = actionStage.computeNextAction([attacker]);
+      const buffStep = steps.find(
+        (s) => s.kind === StepKind.Buff,
+      ) as BuffReport;
+
+      it('emits a buff step with the skill name', () => {
+        expect(buffStep?.name).toBe(skillName);
+      });
+    });
+
     describe('when launching an unknown special kind', () => {
       const attacker = makeCard(new UnknownSpecial());
       const defender = makeCard(

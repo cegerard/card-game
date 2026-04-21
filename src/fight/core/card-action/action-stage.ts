@@ -137,6 +137,7 @@ export class ActionStage {
     if (specialResults.buffResults.length > 0) {
       const buffReport: BuffReport = {
         kind: StepKind.Buff,
+        name: specialResults.name,
         source: card.identityInfo,
         buffs: specialResults.buffResults.map((buffResult) => ({
           target: buffResult.target,
