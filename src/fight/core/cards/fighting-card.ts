@@ -209,10 +209,6 @@ export class FightingCard {
     return this.simpleAttack.name;
   }
 
-  public get specialName(): string {
-    return this.special.name;
-  }
-
   public get attackTargetingId(): string {
     if (this.targetingOverrides.length > 0) {
       return this.targetingOverrides[this.targetingOverrides.length - 1]

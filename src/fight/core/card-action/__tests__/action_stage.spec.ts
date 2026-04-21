@@ -25,7 +25,7 @@ class UnknownSpecial implements Special {
     return true;
   }
   launch(_source: FightingCard, _context: FightingContext): SpecialResult {
-    return { actionResults: [], buffResults: [] };
+    return { name: 'unknown', actionResults: [], buffResults: [] };
   }
   increaseEnergy(actualEnergy: number): number {
     return actualEnergy;

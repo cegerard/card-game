@@ -68,6 +68,7 @@ export class SpecialAttack implements Special {
     const buffResults = this.applyBuffs(source, context);
 
     return {
+      name: this.name,
       actionResults: attackResults,
       buffResults,
     };

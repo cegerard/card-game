@@ -122,18 +122,17 @@ export class ActionStage {
   }
 
   private computeSpecialAttackResult(card: FightingCard): AttackReport {
+    const specialResults = card.launchSpecial(this.getFightingContext(card));
     const result: AttackReport = {
       kind: StepKind.SpecialAttack,
       attack: {
-        name: card.specialName,
+        name: specialResults.name,
         attacker: card.identityInfo,
         damages: [],
         energy: card.resetSpecialEnergy(),
       },
       statusChanges: [],
     };
-
-    const specialResults = card.launchSpecial(this.getFightingContext(card));
     const actionResults = specialResults.actionResults as AttackResult[];
 
     this.handleAttackResult(actionResults, result, card);
@@ -158,15 +157,14 @@ export class ActionStage {
   }
 
   private computeSpecialHealingResult(card: FightingCard): ActionReport {
+    const specialResults = card.launchSpecial(this.getFightingContext(card));
     const result: HealingReport = {
       kind: StepKind.Healing,
-      name: card.specialName,
+      name: specialResults.name,
       source: card.identityInfo,
       energy: card.resetSpecialEnergy(),
       heal: [],
     };
-
-    const specialResults = card.launchSpecial(this.getFightingContext(card));
     const healingResults = specialResults.actionResults as HealingResult[];
 
     healingResults.forEach((healingResult) => {

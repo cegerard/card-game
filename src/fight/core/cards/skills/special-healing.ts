@@ -35,7 +35,7 @@ export class SpecialHealing implements Special {
       return { healed, target };
     });
 
-    return { actionResults, buffResults: [] };
+    return { name: this.name, actionResults, buffResults: [] };
   }
 
   public increaseEnergy(actualEnergy: number): number {
