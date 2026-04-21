@@ -10,6 +10,7 @@ export type Damage = {
 };
 
 export type DamageReport = {
+  name?: string;
   attacker: CardInfo;
   damages: Damage[];
   energy: number;

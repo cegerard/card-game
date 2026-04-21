@@ -92,6 +92,7 @@ describe('TargetingOverrideSkill with resolver', () => {
       const context: FightingContext = { sourcePlayer, opponentPlayer };
 
       const skill = new TargetingOverrideSkill(
+        'override',
         undefined,
         'end-event',
         new TurnEnd(),
@@ -114,6 +115,7 @@ describe('TargetingOverrideSkill with resolver', () => {
       const context: FightingContext = { sourcePlayer, opponentPlayer };
 
       const skill = new TargetingOverrideSkill(
+        'override',
         undefined,
         'end-event',
         new TurnEnd(),
@@ -142,6 +144,7 @@ describe('TargetingOverrideSkill with resolver', () => {
       };
 
       const skill = new TargetingOverrideSkill(
+        'override',
         undefined,
         'end-event',
         new TurnEnd(),

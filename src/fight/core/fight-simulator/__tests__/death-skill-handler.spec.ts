@@ -158,6 +158,7 @@ describe('DeathSkillHandler', () => {
 
       // Attach lifecycle skill to deadCard after creation
       const lifecycleSkill = new AlterationSkill({
+        name: 'skill',
         polarity: 'buff',
         attributeType: 'attack',
         rate: 0.4,
@@ -226,6 +227,7 @@ describe('DeathSkillHandler', () => {
         criticalChance: 0,
       });
       const buffSkill = new AlterationSkill({
+        name: 'skill',
         polarity: 'buff',
         attributeType: 'attack',
         rate: 0.3,
@@ -273,6 +275,7 @@ describe('DeathSkillHandler', () => {
       });
 
       const debuffSkill = new AlterationSkill({
+        name: 'skill',
         polarity: 'debuff',
         attributeType: 'attack',
         rate: 0.2,
@@ -318,6 +321,7 @@ describe('DeathSkillHandler', () => {
         criticalChance: 0,
       });
       const allyDeathBuffSkill = new AlterationSkill({
+        name: 'skill',
         polarity: 'buff',
         attributeType: 'attack',
         rate: 0.3,

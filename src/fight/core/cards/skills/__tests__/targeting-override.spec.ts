@@ -26,6 +26,7 @@ describe('TargetingOverrideSkill', () => {
 
   it('calls overrideAttackTargeting on the source card', () => {
     const skill = new TargetingOverrideSkill(
+      'override',
       new TargetedAll(),
       'power-end',
       new TurnEnd(),
@@ -39,6 +40,7 @@ describe('TargetingOverrideSkill', () => {
 
   it('returns SkillResults with TargetingOverride kind', () => {
     const skill = new TargetingOverrideSkill(
+      'override',
       new TargetedAll(),
       'power-end',
       new TurnEnd(),
@@ -51,6 +53,7 @@ describe('TargetingOverrideSkill', () => {
 
   it('propagates powerId in SkillResults', () => {
     const skill = new TargetingOverrideSkill(
+      'override',
       new TargetedAll(),
       'power-end',
       new TurnEnd(),
@@ -64,6 +67,7 @@ describe('TargetingOverrideSkill', () => {
 
   it('is triggered by matching trigger', () => {
     const skill = new TargetingOverrideSkill(
+      'override',
       new TargetedAll(),
       'power-end',
       new TurnEnd(),
@@ -74,6 +78,7 @@ describe('TargetingOverrideSkill', () => {
 
   it('is not triggered by non-matching trigger', () => {
     const skill = new TargetingOverrideSkill(
+      'override',
       new TargetedAll(),
       'power-end',
       new TurnEnd(),
@@ -92,6 +97,7 @@ describe('TargetingOverrideSkill', () => {
       };
 
       const skill = new TargetingOverrideSkill(
+        'override',
         new TargetedAll(),
         'power-end',
         new TurnEnd(),
@@ -115,6 +121,7 @@ describe('TargetingOverrideSkill', () => {
       };
 
       const skill = new TargetingOverrideSkill(
+        'override',
         new TargetedFromPosition(),
         'power-end',
         new TurnEnd(),
@@ -129,6 +136,7 @@ describe('TargetingOverrideSkill', () => {
   describe('with strategyResolver returning null (no killerCard)', () => {
     it('returns empty results without applying override', () => {
       const skill = new TargetingOverrideSkill(
+        'override',
         undefined,
         'power-end',
         new TurnEnd(),
@@ -144,6 +152,7 @@ describe('TargetingOverrideSkill', () => {
     it('does not override the card targeting strategy', () => {
       const originalStrategyId = card.attackTargetingId;
       const skill = new TargetingOverrideSkill(
+        'override',
         undefined,
         'power-end',
         new TurnEnd(),

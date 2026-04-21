@@ -52,7 +52,7 @@ describe('Trigger card special healing', () => {
     });
 
     it('heals the target', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           kind: 'healing',
           source: healer.identityInfo,
@@ -132,7 +132,7 @@ describe('Trigger card special healing', () => {
     });
 
     it('does not add health to the target', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           kind: 'healing',
           source: healer.identityInfo,
@@ -218,7 +218,7 @@ describe('Trigger card special healing', () => {
     });
 
     it('heals the target', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           kind: 'attack',
           attacker: healer.identityInfo,

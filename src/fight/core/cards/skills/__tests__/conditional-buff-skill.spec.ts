@@ -23,6 +23,7 @@ describe('AlterationSkill with activationCondition', () => {
     beforeEach(() => {
       const condition = new HealthThresholdCondition(0.5, 'above');
       const skill = new AlterationSkill({
+        name: 'skill',
         polarity: 'buff',
         attributeType: 'attack',
         rate: 0.1,
@@ -46,6 +47,7 @@ describe('AlterationSkill with activationCondition', () => {
     beforeEach(() => {
       const condition = new HealthThresholdCondition(0.5, 'above');
       const skill = new AlterationSkill({
+        name: 'skill',
         polarity: 'buff',
         attributeType: 'attack',
         rate: 0.1,
@@ -73,6 +75,7 @@ describe('AlterationSkill with activationCondition', () => {
 
     beforeEach(() => {
       const skill = new AlterationSkill({
+        name: 'skill',
         polarity: 'buff',
         attributeType: 'attack',
         rate: 0.1,

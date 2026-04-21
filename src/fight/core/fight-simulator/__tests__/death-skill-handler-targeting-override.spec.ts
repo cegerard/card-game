@@ -33,6 +33,7 @@ describe('DeathSkillHandler with TargetingOverride skill', () => {
     });
 
     const overrideSkill = new TargetingOverrideSkill(
+      'override',
       new TargetedAll(),
       'rage-end',
       new DeathTrigger('ally-death', deadCardId),

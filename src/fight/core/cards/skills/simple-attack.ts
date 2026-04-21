@@ -9,10 +9,15 @@ import { AttackSkill } from './attack-skill';
 
 export class SimpleAttack implements AttackSkill {
   constructor(
+    private readonly _name: string,
     private readonly damages: DamageComposition[],
     private readonly targetingStrategy: TargetingCardStrategy,
     private readonly effect?: AttackEffect,
   ) {}
+
+  public get name(): string {
+    return this._name;
+  }
 
   public get targetingId(): string {
     return this.targetingStrategy.id;

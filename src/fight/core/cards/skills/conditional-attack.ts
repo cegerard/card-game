@@ -10,6 +10,7 @@ export class ConditionalAttack implements Skill {
   public id = 'conditional-attack';
 
   constructor(
+    public readonly name: string,
     private readonly attackSkill: AttackSkill,
     private readonly condition: AttackCondition,
     private readonly trigger: Trigger,
@@ -28,7 +29,7 @@ export class ConditionalAttack implements Skill {
   ): SkillResults {
     const results = this.attackSkill.launch(source, context, targetingStrategy);
     this.condition.reset();
-    return { skillKind: SkillKind.Attack, results };
+    return { skillKind: SkillKind.Attack, results, name: this.name };
   }
 
   tick(): void {

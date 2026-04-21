@@ -9,6 +9,7 @@ import { AttackSkill } from './attack-skill';
 
 export class MultipleAttack implements AttackSkill {
   constructor(
+    private readonly _name: string,
     private readonly hits: number,
     private readonly damages: DamageComposition[],
     private readonly targetingStrategy: TargetingCardStrategy,
@@ -16,6 +17,10 @@ export class MultipleAttack implements AttackSkill {
     private readonly effect?: AttackEffect,
     private readonly comboFinisher?: DamageComposition[],
   ) {}
+
+  public get name(): string {
+    return this._name;
+  }
 
   public get targetingId(): string {
     return this.targetingStrategy.id;

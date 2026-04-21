@@ -16,6 +16,7 @@ export enum SkillKind {
 }
 
 type BaseSkillResults = {
+  name?: string;
   endEvent?: string;
   powerId?: string;
 };
@@ -54,6 +55,7 @@ export type SkillResults =
 
 export interface Skill {
   id: string;
+  name: string;
 
   /**
    * Launches the skill.

@@ -8,6 +8,7 @@ import { Skill, SkillKind, SkillResults } from './skill';
 import { BuffCondition } from '../@types/buff/buff-condition';
 
 export interface AlterationSkillOptions {
+  name: string;
   polarity: 'buff' | 'debuff';
   attributeType: BuffType;
   rate: number;
@@ -25,6 +26,7 @@ export interface AlterationSkillOptions {
 export class AlterationSkill implements Skill {
   public id = 'alteration-skill';
 
+  public readonly name: string;
   private readonly polarity: 'buff' | 'debuff';
   private readonly attributeType: BuffType;
   private readonly rate: number;
@@ -39,6 +41,7 @@ export class AlterationSkill implements Skill {
   private activationCount = 0;
 
   constructor({
+    name,
     polarity,
     attributeType,
     rate,
@@ -51,6 +54,7 @@ export class AlterationSkill implements Skill {
     terminationEvent,
     powerId,
   }: AlterationSkillOptions) {
+    this.name = name;
     this.polarity = polarity;
     this.attributeType = attributeType;
     this.rate = rate;
@@ -74,8 +78,18 @@ export class AlterationSkill implements Skill {
       !this.activationCondition.evaluate(source, context)
     ) {
       return this.polarity === 'buff'
-        ? { skillKind: SkillKind.Buff, results: [], powerId: this.powerId }
-        : { skillKind: SkillKind.Debuff, results: [], powerId: this.powerId };
+        ? {
+            skillKind: SkillKind.Buff,
+            results: [],
+            name: this.name,
+            powerId: this.powerId,
+          }
+        : {
+            skillKind: SkillKind.Debuff,
+            results: [],
+            name: this.name,
+            powerId: this.powerId,
+          };
     }
 
     const targetedCards = this.targetingStrategy.targetedCards(
@@ -105,6 +119,7 @@ export class AlterationSkill implements Skill {
       return {
         skillKind: SkillKind.Buff,
         results,
+        name: this.name,
         endEvent,
         powerId: this.powerId,
       };
@@ -122,6 +137,7 @@ export class AlterationSkill implements Skill {
     return {
       skillKind: SkillKind.Debuff,
       results,
+      name: this.name,
       endEvent,
       powerId: this.powerId,
     };

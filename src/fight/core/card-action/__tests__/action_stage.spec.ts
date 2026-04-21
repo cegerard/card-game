@@ -20,6 +20,7 @@ import { RandomizerFake } from '../../../../../test/helpers/randomizer-fake';
 import { StepKind } from '../../fight-simulator/@types/step';
 
 class UnknownSpecial implements Special {
+  name = 'unknown';
   ready(): boolean {
     return true;
   }
@@ -36,6 +37,7 @@ class UnknownSpecial implements Special {
 
 const POSITION_BASED = new TargetedFromPosition();
 const SIMPLE_ATTACK = new SimpleAttack(
+  'attack',
   [new DamageComposition(DamageType.PHYSICAL, 1)],
   POSITION_BASED,
 );
@@ -72,11 +74,17 @@ describe('ActionStage', () => {
         new EffectTriggeredDebuff(1.0, 'defense', 0.1, 2, randomizer),
       );
       const attackWithBurn = new SimpleAttack(
+        'attack',
         [new DamageComposition(DamageType.PHYSICAL, 1)],
         POSITION_BASED,
         burnEffect,
       );
-      const HIGH_ENERGY_SPECIAL = new SpecialAttack(1, 999, POSITION_BASED);
+      const HIGH_ENERGY_SPECIAL = new SpecialAttack(
+        'special',
+        1,
+        999,
+        POSITION_BASED,
+      );
       const attacker = makeCard(HIGH_ENERGY_SPECIAL, attackWithBurn);
       const defender = makeCard(HIGH_ENERGY_SPECIAL);
       const player1 = new Player('Player 1', [attacker]);
@@ -98,7 +106,9 @@ describe('ActionStage', () => {
   describe('launchSpecial', () => {
     describe('when launching an unknown special kind', () => {
       const attacker = makeCard(new UnknownSpecial());
-      const defender = makeCard(new SpecialAttack(1, 999, POSITION_BASED));
+      const defender = makeCard(
+        new SpecialAttack('special', 1, 999, POSITION_BASED),
+      );
       const player1 = new Player('Player 1', [attacker]);
       const player2 = new Player('Player 2', [defender]);
       const actionStage = new ActionStage(

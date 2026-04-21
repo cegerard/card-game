@@ -184,6 +184,7 @@ function createTrigger(
 }
 
 function createSimpleAttack(params: {
+  name?: string;
   damages?: DamageComposition[];
   targetingStrategy?: string;
   effect?: effect;
@@ -198,6 +199,7 @@ function createSimpleAttack(params: {
   const effect = params.effect ? createEffect(params.effect) : undefined;
 
   return new SimpleAttack(
+    params.name ?? faker.word.noun(),
     damages,
     createTargetingStrategy(targetingStrategy),
     effect,
@@ -205,6 +207,7 @@ function createSimpleAttack(params: {
 }
 
 function createSpecial(params: {
+  name?: string;
   kind?: string;
   damageRate?: number;
   energy?: number;
@@ -219,6 +222,7 @@ function createSpecial(params: {
 }
 
 function createSpecialAttack(params: {
+  name?: string;
   damageRate?: number;
   energy?: number;
   targetingStrategy?: string;
@@ -250,6 +254,7 @@ function createSpecialAttack(params: {
       : undefined;
 
   return new SpecialAttack(
+    params.name ?? faker.word.noun(),
     damageRate,
     energy,
     createTargetingStrategy(targetingStrategy),
@@ -259,6 +264,7 @@ function createSpecialAttack(params: {
 }
 
 function createSpecialHealing(params: {
+  name?: string;
   damageRate?: number;
   energy?: number;
   targetingStrategy?: string;
@@ -268,6 +274,7 @@ function createSpecialHealing(params: {
   const targetingStrategy = params.targetingStrategy ?? 'position-based';
 
   return new SpecialHealing(
+    params.name ?? faker.word.noun(),
     rate,
     energy,
     createTargetingStrategy(targetingStrategy),
@@ -351,6 +358,7 @@ function createsSkills(
     const config = dormantConfig(skill);
     if ('effectRate' in skill) {
       return new Healing(
+        faker.word.noun(),
         skill.effectRate,
         createTrigger(skill.trigger, skill.targetCardId, config),
         createTargetingStrategy(skill.targetingStrategy),
@@ -358,6 +366,7 @@ function createsSkills(
       );
     } else if ('buffType' in skill) {
       return new AlterationSkill({
+        name: faker.word.noun(),
         polarity: 'buff',
         attributeType: skill.buffType,
         rate: skill.buffRate,
@@ -372,6 +381,7 @@ function createsSkills(
       });
     } else if ('debuffType' in skill) {
       return new AlterationSkill({
+        name: faker.word.noun(),
         polarity: 'debuff',
         attributeType: skill.debuffType,
         rate: skill.debuffRate,
@@ -383,6 +393,7 @@ function createsSkills(
       });
     } else {
       return new TargetingOverrideSkill(
+        faker.word.noun(),
         createTargetingStrategy(skill.targetingStrategy),
         skill.terminationEvent,
         createTrigger(skill.trigger, skill.targetCardId, config),
@@ -429,8 +440,14 @@ export function createFightingCard(
       accuracy,
     },
     {
-      simpleAttack: createSimpleAttack(params.skills?.simpleAttack ?? {}),
-      special: createSpecial(specialParams),
+      simpleAttack: createSimpleAttack({
+        name: params.skills?.simpleAttack?.name,
+        ...params.skills?.simpleAttack,
+      }),
+      special: createSpecial({
+        name: params.skills?.special?.name,
+        ...specialParams,
+      }),
       others: createsSkills(params.skills?.others ?? []),
     },
     {

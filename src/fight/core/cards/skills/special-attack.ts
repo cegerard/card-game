@@ -12,6 +12,7 @@ const DEFAULT_DAMAGE_RATE = 1;
 
 export class SpecialAttack implements Special {
   constructor(
+    readonly name: string,
     private readonly damageRate: number,
     private readonly energyNeeded: number,
     private readonly targetingStrategy: TargetingCardStrategy,

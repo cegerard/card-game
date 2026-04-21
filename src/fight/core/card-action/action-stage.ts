@@ -68,6 +68,7 @@ export class ActionStage {
     const result: AttackReport = {
       kind: StepKind.Attack,
       attack: {
+        name: card.attackName,
         attacker: card.identityInfo,
         damages: [],
         energy: card.increaseSpecialEnergy(),
@@ -95,6 +96,7 @@ export class ActionStage {
     const result: AttackReport = {
       kind: StepKind.Attack,
       attack: {
+        name: attackSkill.name,
         attacker: card.identityInfo,
         damages: [],
         energy: card.increaseSpecialEnergy(),
@@ -123,6 +125,7 @@ export class ActionStage {
     const result: AttackReport = {
       kind: StepKind.SpecialAttack,
       attack: {
+        name: card.specialName,
         attacker: card.identityInfo,
         damages: [],
         energy: card.resetSpecialEnergy(),
@@ -157,6 +160,7 @@ export class ActionStage {
   private computeSpecialHealingResult(card: FightingCard): ActionReport {
     const result: HealingReport = {
       kind: StepKind.Healing,
+      name: card.specialName,
       source: card.identityInfo,
       energy: card.resetSpecialEnergy(),
       heal: [],

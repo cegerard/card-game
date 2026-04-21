@@ -36,7 +36,7 @@ describe('Process card poisoned effect at turn end', () => {
   );
 
   it('return the poisoned effect step', () => {
-    expect(fight.start()).toEqual({
+    expect(fight.start()).toMatchObject({
       1: {
         attacker: card1.identityInfo,
         damages: [

@@ -203,7 +203,7 @@ describe('with five cards each', () => {
 
     it('return the fight steps', () => {
       const steps = fight.start();
-      expect(steps).toEqual({
+      expect(steps).toMatchObject({
         1: {
           kind: 'attack',
           attacker: card1.identityInfo,

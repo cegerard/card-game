@@ -3,6 +3,7 @@ import { StepKind } from './step';
 
 export type TargetingOverrideReport = {
   kind: StepKind.TargetingOverride;
+  name?: string;
   source: CardInfo;
   previousStrategy: string;
   newStrategy: string;

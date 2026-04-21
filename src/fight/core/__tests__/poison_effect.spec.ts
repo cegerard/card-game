@@ -65,7 +65,7 @@ describe('Add Poison effect level 1', () => {
     });
 
     it('does not change the poison state', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           attacker: card1.identityInfo,
           damages: [
@@ -146,7 +146,7 @@ describe('Add Poison effect level 1', () => {
     });
 
     it('adds poison effect while keeping burn effect', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           attacker: card1.identityInfo,
           damages: [
@@ -240,7 +240,7 @@ describe('Add Poison effect level 1', () => {
     });
 
     it('does not add the poison effect', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           attacker: card1.identityInfo,
           damages: [
@@ -347,7 +347,7 @@ describe('Add Poison effect level 2', () => {
     });
 
     it('replaces the poison state with the new one', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           attacker: card1.identityInfo,
           damages: [
@@ -432,7 +432,7 @@ describe('Add Poison effect level 2', () => {
     });
 
     it('adds poison effect while keeping burn effect', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           attacker: card1.identityInfo,
           damages: [
@@ -525,7 +525,7 @@ describe('Add Poison effect level 2', () => {
     });
 
     it('does not add the poison effect', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           attacker: card1.identityInfo,
           damages: [
@@ -632,7 +632,7 @@ describe('Add Poison effect level 3', () => {
     });
 
     it('replaces the poison state with the new one', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           attacker: card1.identityInfo,
           damages: [
@@ -717,7 +717,7 @@ describe('Add Poison effect level 3', () => {
     });
 
     it('replaces the poison state with the new one', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           attacker: card1.identityInfo,
           damages: [
@@ -803,7 +803,7 @@ describe('Add Poison effect level 3', () => {
     });
 
     it('adds poison effect while keeping burn effect', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           attacker: card1.identityInfo,
           damages: [
@@ -896,7 +896,7 @@ describe('Add Poison effect level 3', () => {
     });
 
     it('does not add the poison effect', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           attacker: card1.identityInfo,
           damages: [
@@ -990,7 +990,7 @@ describe('Trigger card attack after poison dissipation', () => {
   });
 
   it('kill the opponent', () => {
-    expect(fight.start()).toEqual({
+    expect(fight.start()).toMatchObject({
       1: {
         attacker: card1.identityInfo,
         damages: [

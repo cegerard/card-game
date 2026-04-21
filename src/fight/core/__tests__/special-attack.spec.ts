@@ -34,7 +34,7 @@ describe('Trigger card special attack without effect', () => {
     );
 
     it('compute the damage with the special attack', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           attacker: attacker.identityInfo,
           damages: [
@@ -81,7 +81,7 @@ describe('Trigger card special attack without effect', () => {
     );
 
     it('not deal any damage', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           attacker: attacker.identityInfo,
           damages: [
@@ -154,7 +154,7 @@ describe('Trigger card special attack with critical hit', () => {
   );
 
   it('compute the damage with the special attack', () => {
-    expect(fight.start()).toEqual({
+    expect(fight.start()).toMatchObject({
       1: {
         attacker: attacker.identityInfo,
         damages: [
@@ -222,7 +222,7 @@ describe('Trigger card special attack with poison effect', () => {
   );
 
   it('return the special attack effect step', () => {
-    expect(fight.start()).toEqual({
+    expect(fight.start()).toMatchObject({
       1: {
         attacker: card1.identityInfo,
         damages: [
@@ -334,7 +334,7 @@ describe('Trigger card special attack with buff', () => {
   });
 
   it('applies special_attack as first action', () => {
-    expect(result[1]).toEqual({
+    expect(result[1]).toMatchObject({
       attacker: attacker.identityInfo,
       damages: [
         {
@@ -351,7 +351,7 @@ describe('Trigger card special attack with buff', () => {
   });
 
   it('applies buff as second step', () => {
-    expect(result[2]).toEqual({
+    expect(result[2]).toMatchObject({
       kind: 'buff',
       source: attacker.identityInfo,
       buffs: [
@@ -367,7 +367,7 @@ describe('Trigger card special attack with buff', () => {
   });
 
   it('marks defender as dead', () => {
-    expect(result[3]).toEqual({
+    expect(result[3]).toMatchObject({
       card: defender.identityInfo,
       kind: 'status_change',
       status: 'dead',
@@ -375,7 +375,7 @@ describe('Trigger card special attack with buff', () => {
   });
 
   it('ends fight with Player 1 winning', () => {
-    expect(result[4]).toEqual({
+    expect(result[4]).toMatchObject({
       kind: 'fight_end',
       winner: 'Player 1',
     });

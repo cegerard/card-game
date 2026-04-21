@@ -7,6 +7,8 @@ import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting
  * Interface representing a special skill in the card game.
  */
 export interface Special {
+  name: string;
+
   /**
    * Determines if the special skill is ready to be used based on the current energy level.
    *

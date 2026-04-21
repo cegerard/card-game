@@ -4,6 +4,7 @@ import { FightingCard } from '../fighting-card';
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 
 export interface AttackSkill {
+  name: string;
   targetingId: string;
 
   /**

@@ -8,6 +8,7 @@ const ENERGY_INCREASE_FACTOR = 10;
 
 export class SpecialHealing implements Special {
   constructor(
+    readonly name: string,
     private readonly rate: number,
     private readonly energyNeeded: number,
     private readonly targetingStrategy: TargetingCardStrategy,
