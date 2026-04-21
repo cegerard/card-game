@@ -18,7 +18,6 @@ export enum StepKind {
   Attack = 'attack',
   SpecialAttack = 'special_attack',
   Healing = 'healing',
-  Winner = 'winner',
   StateEffect = 'state_effect',
   Buff = 'buff',
   Debuff = 'debuff',
