@@ -201,6 +201,7 @@ describe('Simulate fight with buffs', () => {
           ],
           energy: 10,
           kind: 'buff',
+          name: 'Battle Fury',
           source: {
             id: 'dps-warrior',
             deckIdentity: 'Team Buffer-1',
