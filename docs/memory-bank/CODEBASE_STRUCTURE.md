@@ -78,8 +78,9 @@ cards/
 │   └── elemental-matrix.ts    # Element effectiveness multipliers (5x5 matrix)
 └── @types/                 # Type definitions
     ├── action-result/      # Action outcome types
-    │   ├── special-result.ts # Unified result: { actionResults, buffResults }
-    │   ├── attack-result.ts  # Includes remainingHealth snapshot at damage time
+    │   ├── special-result.ts        # Unified result: { name, actionResults, buffResults }
+    │   ├── attack-result.ts         # Includes remainingHealth snapshot at damage time
+    │   ├── named-attack-result.ts   # { name: string; results: AttackResult[] }
     │   ├── healing-result.ts
     │   └── buff-results.ts
     ├── attack/             # Attack and effect types
@@ -96,6 +97,7 @@ cards/
 ```
 
 **Special Skills Pattern**: Both `SpecialAttack` and `SpecialHealing` implement the `Special` interface with a unified return type `SpecialResult` containing:
+- `name`: Skill name (required)
 - `actionResults`: Array of `AttackResult[]` or `HealingResult[]`
 - `buffResults`: Array of buff applications (can be empty)
 

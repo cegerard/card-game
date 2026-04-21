@@ -188,6 +188,53 @@ Simulates a turn-based card battle between two players.
 }
 ```
 
+**`attack` / `special_attack` step** (`DamageReport`): Emitted when a card attacks.
+```typescript
+{
+  kind: "attack" | "special_attack",
+  name?: string,         // Skill name that triggered the attack
+  attacker: CardInfo,
+  damages: { defender: CardInfo, damage: number, isCritical: boolean, dodge: boolean, remainingHealth: number }[],
+  energy: number
+}
+```
+
+**`healing` step** (`HealingReport`): Emitted when a card heals.
+```typescript
+{
+  kind: "healing",
+  name?: string,         // Skill name that triggered the healing
+  source: CardInfo,
+  heal: { target: CardInfo, healed: number, remainingHealth: number }[],
+  energy: number,
+  powerId?: string
+}
+```
+
+**`buff` step** (`BuffReport`): Emitted when a buff is applied.
+```typescript
+{
+  kind: "buff",
+  name?: string,         // Skill name that applied the buff
+  source: CardInfo,
+  buffs: { target: CardInfo, kind: BuffType, value: number, remainingTurns: number }[],
+  energy: number,
+  powerId?: string
+}
+```
+
+**`debuff` step** (`DebuffReport`): Emitted when a debuff is applied.
+```typescript
+{
+  kind: "debuff",
+  name?: string,         // Skill name that applied the debuff
+  source: CardInfo,
+  debuffs: { target: CardInfo, kind: DebuffType, value: number, remainingTurns: number }[],
+  energy: number,
+  powerId?: string
+}
+```
+
 **`buff_removed` step** (`BuffRemovedReport`): Emitted when a skill's end event fires and removes event-bound buffs.
 ```typescript
 {
@@ -213,6 +260,7 @@ Simulates a turn-based card battle between two players.
 ```typescript
 {
   kind: "targeting_override",
+  name?: string,                   // Skill name that pushed the override
   source: CardInfo,                // Card whose skill pushed the override
   previousStrategy: string,        // ID of the strategy before override
   newStrategy: string,             // ID of the new targeting strategy
@@ -231,6 +279,8 @@ Simulates a turn-based card battle between two players.
   powerId?: string                 // Present if triggered by a composite power end event
 }
 ```
+
+**Note on `name`**: The `name?` field appears on `attack`, `special_attack`, `healing`, `buff`, `debuff`, and `targeting_override` step kinds, carrying the name of the skill that generated the step.
 
 **Note on `powerId`**: The `powerId` field appears on `buff`, `debuff`, `healing`, `buff_removed`, `targeting_override`, and `targeting_reverted` step kinds when the originating skill belongs to a composite power group.
 
