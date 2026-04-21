@@ -152,8 +152,8 @@ Simulates a turn-based card battle between two players.
 ```typescript
 {
   type: "POISON" | "BURN" | "FREEZE",
-  rate: number,               // Application chance (0-1)
-  level: 1 | 2 | 3,           // Effect intensity
+  rate: number,               // Damage coefficient per tick: damage = attacker.attack * rate
+  level: 1 | 2 | 3,           // Duration in ticks: level 1 = 1 tick, level 2 = 3 ticks, level 3 = 5 ticks
   triggeredDebuff?: {         // Optional debuff applied on effect hit
     debuffType: "attack" | "defense" | "agility" | "accuracy",
     debuffRate: number,
@@ -182,7 +182,7 @@ Simulates a turn-based card battle between two players.
 ```typescript
 {
   [stepNumber: number]: {
-    kind: "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "effect_removed" | "targeting_override" | "targeting_reverted" | "winner" | "fight_end",
+    kind: "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "effect_removed" | "targeting_override" | "targeting_reverted" | "fight_end",
     // Additional properties vary by step kind
   }
 }
