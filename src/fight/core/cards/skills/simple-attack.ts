@@ -1,23 +1,19 @@
 import { DamageComposition } from '../@types/damage/damage-composition';
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
-import { AttackResult } from '../@types/action-result/attack-result';
 import { AttackEffect, EffectResult } from '../@types/attack/attack-effect';
 import { FightingContext } from '../@types/fighting-context';
 import { FightingCard } from '../fighting-card';
 import { DamageCalculator } from '../damage/damage-calculator';
 import { AttackSkill } from './attack-skill';
+import { NamedAttackResult } from '../@types/action-result/named-attack-result';
 
 export class SimpleAttack implements AttackSkill {
   constructor(
-    private readonly _name: string,
+    public readonly name: string,
     private readonly damages: DamageComposition[],
     private readonly targetingStrategy: TargetingCardStrategy,
     private readonly effect?: AttackEffect,
   ) {}
-
-  public get name(): string {
-    return this._name;
-  }
 
   public get targetingId(): string {
     return this.targetingStrategy.id;
@@ -27,7 +23,7 @@ export class SimpleAttack implements AttackSkill {
     card: FightingCard,
     context: FightingContext,
     targetingStrategy?: TargetingCardStrategy,
-  ): AttackResult[] {
+  ): NamedAttackResult {
     const targeting =
       targetingStrategy && this.targetingStrategy.id === 'from-position'
         ? targetingStrategy
@@ -39,7 +35,7 @@ export class SimpleAttack implements AttackSkill {
     card: FightingCard,
     context: FightingContext,
     targeting: TargetingCardStrategy,
-  ): AttackResult[] {
+  ): NamedAttackResult {
     const isCritical = Math.random() < card.actualCriticalChance;
     const damageMultiplier = isCritical ? 2 : 1;
     const defensiveCards = targeting.targetedCards(
@@ -48,30 +44,33 @@ export class SimpleAttack implements AttackSkill {
       context.opponentPlayer,
     );
 
-    return defensiveCards.map((defender) => {
-      if (defender.dodge(card.actualAccuracy)) {
-        return { damage: 0, isCritical, dodge: true, defender: defender };
-      }
+    return {
+      name: this.name,
+      results: defensiveCards.map((defender) => {
+        if (defender.dodge(card.actualAccuracy)) {
+          return { damage: 0, isCritical, dodge: true, defender: defender };
+        }
 
-      const { total } = DamageCalculator.calculateDamage(
-        this.damages,
-        card.actualAttack * damageMultiplier,
-        defender,
-      );
-      const collectedDamage = defender.applyFinalDamage(total);
+        const { total } = DamageCalculator.calculateDamage(
+          this.damages,
+          card.actualAttack * damageMultiplier,
+          defender,
+        );
+        const collectedDamage = defender.applyFinalDamage(total);
 
-      let effectResult: EffectResult;
-      if (this.effect) {
-        effectResult = this.effect.applyEffect(defender, card, context);
-      }
+        let effectResult: EffectResult;
+        if (this.effect) {
+          effectResult = this.effect.applyEffect(defender, card, context);
+        }
 
-      return {
-        damage: collectedDamage,
-        isCritical,
-        dodge: false,
-        defender,
-        effect: effectResult,
-      };
-    });
+        return {
+          damage: collectedDamage,
+          isCritical,
+          dodge: false,
+          defender,
+          effect: effectResult,
+        };
+      }),
+    };
   }
 }

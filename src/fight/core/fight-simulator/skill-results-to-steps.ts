@@ -103,7 +103,12 @@ export function skillResultsToSteps(
         break;
       }
       case SkillKind.TargetingOverride:
-        skillResult.results.forEach((report) => steps.push(report));
+        skillResult.results.forEach((report) =>
+          steps.push({
+            name: skillResult.name,
+            ...report,
+          }),
+        );
         break;
     }
 

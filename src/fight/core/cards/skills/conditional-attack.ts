@@ -27,9 +27,18 @@ export class ConditionalAttack implements Skill {
     context: FightingContext,
     targetingStrategy?: TargetingCardStrategy,
   ): SkillResults {
-    const results = this.attackSkill.launch(source, context, targetingStrategy);
+    const attackResults = this.attackSkill.launch(
+      source,
+      context,
+      targetingStrategy,
+    );
     this.condition.reset();
-    return { skillKind: SkillKind.Attack, results, name: this.name };
+
+    return {
+      skillKind: SkillKind.Attack,
+      results: attackResults.results,
+      name: this.name,
+    };
   }
 
   tick(): void {

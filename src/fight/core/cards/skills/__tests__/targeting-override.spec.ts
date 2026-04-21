@@ -6,10 +6,11 @@ import { TargetedFromPosition } from '../../../targeting-card-strategies/targete
 import { TurnEnd } from '../../../trigger/turn-end';
 import { TargetingOverrideSkill } from '../targeting-override';
 import { SkillKind } from '../skill';
+import { FightingCard } from '../../fighting-card';
 
 describe('TargetingOverrideSkill', () => {
   let context: FightingContext;
-  let card;
+  let card: FightingCard;
 
   beforeEach(() => {
     card = createFightingCard({
@@ -33,9 +34,9 @@ describe('TargetingOverrideSkill', () => {
     );
 
     skill.launch(card, context);
-    const results = card.launchAttack(context);
+    const attack = card.launchAttack(context);
 
-    expect(results).toHaveLength(1);
+    expect(attack.results).toHaveLength(1);
   });
 
   it('returns SkillResults with TargetingOverride kind', () => {
@@ -103,9 +104,9 @@ describe('TargetingOverrideSkill', () => {
         new TurnEnd(),
       );
       skill.launch(card, context);
-      const results = card.launchAttack(context);
+      const attack = card.launchAttack(context);
 
-      expect(results).toHaveLength(2);
+      expect(attack.results).toHaveLength(2);
     });
 
     it('does not apply override when simpleAttack uses non-position-based targeting', () => {
@@ -127,9 +128,9 @@ describe('TargetingOverrideSkill', () => {
         new TurnEnd(),
       );
       skill.launch(cardWithTargetAll, ctx);
-      const results = cardWithTargetAll.launchAttack(ctx);
+      const attack = cardWithTargetAll.launchAttack(ctx);
 
-      expect(results).toHaveLength(2);
+      expect(attack.results).toHaveLength(2);
     });
   });
 

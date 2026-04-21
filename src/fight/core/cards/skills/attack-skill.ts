@@ -1,7 +1,7 @@
-import { AttackResult } from '../@types/action-result/attack-result';
 import { FightingContext } from '../@types/fighting-context';
 import { FightingCard } from '../fighting-card';
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
+import { NamedAttackResult } from '../@types/action-result/named-attack-result';
 
 export interface AttackSkill {
   name: string;
@@ -14,11 +14,11 @@ export interface AttackSkill {
    * @param card - The attacking card
    * @param context - The current fighting context (source and opponent players)
    * @param targetingStrategy - The override strategy to use instead of the skill's default strategy, if applicable
-   * @returns Array of attack results, one per targeted defender
+   * @returns The result of the attack, including damage dealt, whether it was a critical hit, and whether it was dodged
    */
   launch(
     card: FightingCard,
     context: FightingContext,
     targetingStrategy?: TargetingCardStrategy,
-  ): AttackResult[];
+  ): NamedAttackResult;
 }

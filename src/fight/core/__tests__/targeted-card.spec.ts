@@ -127,7 +127,7 @@ describe('TargetingOverrideSkill with resolver', () => {
 
       const resolvedTargets = source.launchAttack(context);
 
-      expect(resolvedTargets).toEqual([]);
+      expect(resolvedTargets.results).toHaveLength(0);
     });
 
     it('produces a TargetedCard targeting the killer when killerCard is in context', () => {

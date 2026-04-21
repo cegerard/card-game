@@ -38,8 +38,8 @@ describe('MultipleAttack', () => {
         damages,
         new TargetedAll(),
       );
-      const results = multipleAttack.launch(attacker, context);
-      expect(results).toHaveLength(3);
+      const attack = multipleAttack.launch(attacker, context);
+      expect(attack.results).toHaveLength(3);
     });
 
     it('all hits use base attack power', () => {
@@ -49,8 +49,8 @@ describe('MultipleAttack', () => {
         damages,
         new TargetedAll(),
       );
-      const results = multipleAttack.launch(attacker, context);
-      expect(results.every((r) => r.damage === 100)).toBe(true);
+      const attack = multipleAttack.launch(attacker, context);
+      expect(attack.results.every((r) => r.damage === 100)).toBe(true);
     });
   });
 
@@ -63,8 +63,10 @@ describe('MultipleAttack', () => {
         new TargetedAll(),
         0.5,
       );
-      const results = multipleAttack.launch(attacker, context);
-      expect(results[1].damage).toBeGreaterThan(results[0].damage);
+      const attack = multipleAttack.launch(attacker, context);
+      expect(attack.results[1].damage).toBeGreaterThan(
+        attack.results[0].damage,
+      );
     });
 
     it('second hit damage equals base times (1 + amplifier)', () => {
@@ -75,8 +77,8 @@ describe('MultipleAttack', () => {
         new TargetedAll(),
         0.5,
       );
-      const results = multipleAttack.launch(attacker, context);
-      expect(results[1].damage).toBe(results[0].damage * 1.5);
+      const attack = multipleAttack.launch(attacker, context);
+      expect(attack.results[1].damage).toBe(attack.results[0].damage * 1.5);
     });
   });
 
@@ -103,8 +105,8 @@ describe('MultipleAttack', () => {
         damages,
         new TargetedAll(),
       );
-      const results = multipleAttack.launch(attacker, dodgeContext);
-      expect(results.every((r) => r.dodge)).toBe(true);
+      const attack = multipleAttack.launch(attacker, dodgeContext);
+      expect(attack.results.every((r) => r.dodge)).toBe(true);
     });
 
     it('dodged hits have damage 0', () => {
@@ -114,8 +116,8 @@ describe('MultipleAttack', () => {
         damages,
         new TargetedAll(),
       );
-      const results = multipleAttack.launch(attacker, dodgeContext);
-      expect(results.every((r) => r.damage === 0)).toBe(true);
+      const attack = multipleAttack.launch(attacker, dodgeContext);
+      expect(attack.results.every((r) => r.damage === 0)).toBe(true);
     });
   });
 
@@ -130,8 +132,8 @@ describe('MultipleAttack', () => {
         0,
         effect,
       );
-      const results = multipleAttack.launch(attacker, context);
-      expect(results[0].effect).toBeDefined();
+      const attack = multipleAttack.launch(attacker, context);
+      expect(attack.results[0].effect).toBeDefined();
     });
   });
 
@@ -148,8 +150,8 @@ describe('MultipleAttack', () => {
         undefined,
         finisherDamages,
       );
-      const results = multipleAttack.launch(attacker, context);
-      expect(results).toHaveLength(3);
+      const attack = multipleAttack.launch(attacker, context);
+      expect(attack.results).toHaveLength(3);
     });
 
     it('last hit is equal to finisher damage rate', () => {
@@ -162,8 +164,8 @@ describe('MultipleAttack', () => {
         undefined,
         finisherDamages,
       );
-      const results = multipleAttack.launch(attacker, context);
-      expect(results[2].damage).toBe(80);
+      const attack = multipleAttack.launch(attacker, context);
+      expect(attack.results[2].damage).toBe(80);
     });
 
     describe('when a hit is dodged', () => {
@@ -192,8 +194,8 @@ describe('MultipleAttack', () => {
           undefined,
           finisherDamages,
         );
-        const results = multipleAttack.launch(attacker, dodgeContext);
-        expect(results).toHaveLength(2);
+        const attack = multipleAttack.launch(attacker, dodgeContext);
+        expect(attack.results).toHaveLength(2);
       });
     });
 
@@ -204,8 +206,8 @@ describe('MultipleAttack', () => {
         damages,
         new TargetedAll(),
       );
-      const results = multipleAttack.launch(attacker, context);
-      expect(results).toHaveLength(2);
+      const attack = multipleAttack.launch(attacker, context);
+      expect(attack.results).toHaveLength(2);
     });
   });
 
@@ -217,9 +219,9 @@ describe('MultipleAttack', () => {
         damages,
         new TargetedAll(),
       );
-      const results = multipleAttack.launch(attacker, context);
-      expect(results[0].remainingHealth).toBe(
-        results[1].remainingHealth! + 100,
+      const attack = multipleAttack.launch(attacker, context);
+      expect(attack.results[0].remainingHealth).toBe(
+        attack.results[1].remainingHealth! + 100,
       );
     });
 
@@ -231,8 +233,10 @@ describe('MultipleAttack', () => {
         zeroDamages,
         new TargetedAll(),
       );
-      const results = multipleAttack.launch(attacker, context);
-      expect(results[0].remainingHealth).toBe(results[1].remainingHealth);
+      const attack = multipleAttack.launch(attacker, context);
+      expect(attack.results[0].remainingHealth).toBe(
+        attack.results[1].remainingHealth,
+      );
     });
 
     it('combo finisher captures health after finisher damage', () => {
@@ -246,8 +250,10 @@ describe('MultipleAttack', () => {
         undefined,
         finisher,
       );
-      const results = multipleAttack.launch(attacker, context);
-      expect(results[1].remainingHealth).toBe(results[0].remainingHealth! - 50);
+      const attack = multipleAttack.launch(attacker, context);
+      expect(attack.results[1].remainingHealth).toBe(
+        attack.results[0].remainingHealth! - 50,
+      );
     });
   });
 
@@ -271,8 +277,8 @@ describe('MultipleAttack', () => {
         damages,
         new TargetedAll(),
       );
-      const results = multipleAttack.launch(attacker, weakContext);
-      expect(results).toHaveLength(1);
+      const attack = multipleAttack.launch(attacker, weakContext);
+      expect(attack.results).toHaveLength(1);
     });
   });
 });

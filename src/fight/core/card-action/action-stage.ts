@@ -65,10 +65,11 @@ export class ActionStage {
   }
 
   private launchAttack(card: FightingCard): AttackReport {
-    const result: AttackReport = {
+    const attackResults = card.launchAttack(this.getFightingContext(card));
+    const report: AttackReport = {
       kind: StepKind.Attack,
       attack: {
-        name: card.attackName,
+        name: attackResults.name,
         attacker: card.identityInfo,
         damages: [],
         energy: card.increaseSpecialEnergy(),
@@ -76,13 +77,9 @@ export class ActionStage {
       statusChanges: [],
     };
 
-    this.handleAttackResult(
-      card.launchAttack(this.getFightingContext(card)),
-      result,
-      card,
-    );
+    this.handleAttackResult(attackResults.results, report, card);
 
-    return result;
+    return report;
   }
 
   private launchNextActionSkills(card: FightingCard): AttackReport | null {
