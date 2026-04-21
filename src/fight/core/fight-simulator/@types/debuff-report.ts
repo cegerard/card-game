@@ -11,6 +11,7 @@ type Debuff = {
 
 export type DebuffReport = {
   kind: StepKind.Debuff;
+  name?: string;
   source: CardInfo;
   debuffs: Debuff[];
   energy: number;

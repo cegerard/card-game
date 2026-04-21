@@ -11,6 +11,7 @@ export class TargetingOverrideSkill implements Skill {
   public id = 'targeting-override';
 
   constructor(
+    public readonly name: string,
     private readonly targetingStrategy: TargetingCardStrategy,
     private readonly terminationEvent: string,
     private readonly trigger: Trigger,
@@ -35,6 +36,7 @@ export class TargetingOverrideSkill implements Skill {
       return {
         skillKind: SkillKind.TargetingOverride,
         results: [],
+        name: this.name,
         powerId: this.powerId,
       };
     }
@@ -50,12 +52,14 @@ export class TargetingOverrideSkill implements Skill {
       source: source.identityInfo,
       previousStrategy,
       newStrategy: strategy.id,
+      name: this.name,
       powerId: this.powerId,
     };
 
     return {
       skillKind: SkillKind.TargetingOverride,
       results: [report],
+      name: this.name,
       powerId: this.powerId,
     };
   }

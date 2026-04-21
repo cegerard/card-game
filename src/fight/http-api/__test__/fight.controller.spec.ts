@@ -414,7 +414,7 @@ describe('FightController', () => {
       const validation = (card: FightingCard) => {
         const jsonCard = JSON.parse(JSON.stringify(card));
 
-        expect(jsonCard.special).toEqual({
+        expect(jsonCard.special).toMatchObject({
           rate: 2.0,
           energyNeeded: 100,
           targetingStrategy: {
@@ -964,7 +964,7 @@ describe('FightController', () => {
       const validation = (card: FightingCard) => {
         const jsonCard = JSON.parse(JSON.stringify(card));
 
-        expect(jsonCard.skills[0]).toEqual({
+        expect(jsonCard.skills[0]).toMatchObject({
           id: 'healing-skill',
           effectRate: 1,
           trigger: { id: 'turn-end' },

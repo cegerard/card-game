@@ -15,6 +15,7 @@ describe('Dynamic trigger integration', () => {
 
   const buildDormantHealingSkill = (targetAllyId: string) =>
     new Healing(
+      'healing',
       0.5,
       new DynamicTrigger(
         new DeathTrigger('ally-death', targetAllyId),

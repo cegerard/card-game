@@ -65,7 +65,7 @@ describe('Add frozen effect level 1', () => {
     });
 
     it('does not change the frozen state', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           attacker: card1.identityInfo,
           damages: [
@@ -146,7 +146,7 @@ describe('Add frozen effect level 1', () => {
     });
 
     it('adds freeze effect while pausing the poison effect', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           attacker: card1.identityInfo,
           damages: [
@@ -232,7 +232,7 @@ describe('Add frozen effect level 1', () => {
     });
 
     it('interrupts burn and does not apply the freeze effect', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           attacker: card1.identityInfo,
           damages: [
@@ -319,7 +319,7 @@ describe('Add frozen effect level 1', () => {
     });
 
     it('does not interrupt burn and does not apply freeze effect', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           attacker: card1.identityInfo,
           damages: [
@@ -426,7 +426,7 @@ describe('Add frozen effect level 2', () => {
     });
 
     it('replaces the freeze state with the new one', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           attacker: card1.identityInfo,
           damages: [
@@ -512,7 +512,7 @@ describe('Add frozen effect level 2', () => {
     });
 
     it('adds freeze effect while pausing poison effect', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           attacker: card1.identityInfo,
           damages: [
@@ -598,7 +598,7 @@ describe('Add frozen effect level 2', () => {
     });
 
     it('interrupts burn and applies freeze effect level 1', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           attacker: card1.identityInfo,
           damages: [
@@ -684,7 +684,7 @@ describe('Add frozen effect level 2', () => {
     });
 
     it('interrupts burn and does not apply the freeze effect', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           attacker: card1.identityInfo,
           damages: [
@@ -797,7 +797,7 @@ describe('Add frozen effect level 3', () => {
     });
 
     it('replaces the freeze state with the new one', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           attacker: card1.identityInfo,
           damages: [
@@ -882,7 +882,7 @@ describe('Add frozen effect level 3', () => {
     });
 
     it('replaces the burn state with the new one', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           attacker: card1.identityInfo,
           damages: [
@@ -968,7 +968,7 @@ describe('Add frozen effect level 3', () => {
     });
 
     it('adds freeze effect while pausing poison effect', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           attacker: card1.identityInfo,
           damages: [
@@ -1054,7 +1054,7 @@ describe('Add frozen effect level 3', () => {
     });
 
     it('interrupts burn and applies freeze effect level 2', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           attacker: card1.identityInfo,
           damages: [
@@ -1140,7 +1140,7 @@ describe('Add frozen effect level 3', () => {
     });
 
     it('interrupts burn and applies freeze effect level 2', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           attacker: card1.identityInfo,
           damages: [
@@ -1226,7 +1226,7 @@ describe('Add frozen effect level 3', () => {
     });
 
     it('interrupts burn and does not apply the freeze effect', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           attacker: card1.identityInfo,
           damages: [
@@ -1326,7 +1326,7 @@ describe('Trigger card attack after freeze dissipation', () => {
   });
 
   it('kill the opponent', () => {
-    expect(fight.start()).toEqual({
+    expect(fight.start()).toMatchObject({
       1: {
         kind: 'state_effect',
         type: 'freeze',

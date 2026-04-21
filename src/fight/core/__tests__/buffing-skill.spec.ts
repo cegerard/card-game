@@ -62,7 +62,7 @@ describe('Buffing-skill', () => {
   });
 
   it('apply attack buff to self when triggered at turn end', () => {
-    expect(fight.start()).toEqual({
+    expect(fight.start()).toMatchObject({
       1: {
         attacker: card1.identityInfo,
         damages: [

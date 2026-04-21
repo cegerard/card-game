@@ -1,4 +1,3 @@
-import { AttackResult } from './@types/action-result/attack-result';
 import { CardInfo } from './@types/card-info';
 import { FightingContext } from './@types/fighting-context';
 import { SpecialResult } from './@types/action-result/special-result';
@@ -16,6 +15,7 @@ import { Skill, SkillResults } from './skills/skill';
 import { BuffType, DebuffType } from './@types/buff/type';
 import { Element } from './@types/damage/element';
 import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
+import { NamedAttackResult } from './@types/action-result/named-attack-result';
 
 export type TargetingOverrideEntry = {
   strategy: TargetingCardStrategy;
@@ -237,7 +237,7 @@ export class FightingCard {
     return removed;
   }
 
-  public launchAttack(context: FightingContext): AttackResult[] {
+  public launchAttack(context: FightingContext): NamedAttackResult {
     return this.simpleAttack.launch(
       this,
       context,

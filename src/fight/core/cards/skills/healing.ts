@@ -8,6 +8,7 @@ import { FightingContext } from '../@types/fighting-context';
 export class Healing implements Skill {
   public id = 'healing-skill';
 
+  public readonly name: string;
   private readonly effectRate: number;
   private readonly trigger: Trigger;
   private readonly targetingStrategy: TargetingCardStrategy;
@@ -17,6 +18,7 @@ export class Healing implements Skill {
   private activationCount = 0;
 
   constructor(
+    name: string,
     effectRate: number,
     trigger: Trigger,
     targetingStrategy: TargetingCardStrategy,
@@ -24,6 +26,7 @@ export class Healing implements Skill {
     activationLimit?: number,
     endEvent?: string,
   ) {
+    this.name = name;
     this.effectRate = effectRate;
     this.trigger = trigger;
     this.targetingStrategy = targetingStrategy;
@@ -58,6 +61,7 @@ export class Healing implements Skill {
     return {
       skillKind: SkillKind.Healing,
       results: healingResults,
+      name: this.name,
       endEvent,
       powerId: this.powerId,
     };

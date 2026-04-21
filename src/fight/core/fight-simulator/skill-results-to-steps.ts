@@ -16,6 +16,7 @@ export function skillResultsToSteps(
       case SkillKind.Healing:
         steps.push({
           kind: StepKind.Healing,
+          name: skillResult.name,
           source: card.identityInfo,
           heal: skillResult.results.map((heal) => ({
             target: heal.target,
@@ -30,6 +31,7 @@ export function skillResultsToSteps(
         if (skillResult.results.length > 0) {
           steps.push({
             kind: StepKind.Buff,
+            name: skillResult.name,
             source: card.identityInfo,
             buffs: skillResult.results.map((result) => ({
               target: result.target,
@@ -46,6 +48,7 @@ export function skillResultsToSteps(
         if (skillResult.results.length > 0) {
           steps.push({
             kind: StepKind.Debuff,
+            name: skillResult.name,
             source: card.identityInfo,
             debuffs: skillResult.results.map((result) => ({
               target: result.target,
@@ -61,6 +64,7 @@ export function skillResultsToSteps(
       case SkillKind.Attack: {
         steps.push({
           kind: StepKind.Attack,
+          name: skillResult.name,
           attacker: card.identityInfo,
           damages: skillResult.results.map((r) => ({
             defender: r.defender.identityInfo,
@@ -99,7 +103,12 @@ export function skillResultsToSteps(
         break;
       }
       case SkillKind.TargetingOverride:
-        skillResult.results.forEach((report) => steps.push(report));
+        skillResult.results.forEach((report) =>
+          steps.push({
+            name: skillResult.name,
+            ...report,
+          }),
+        );
         break;
     }
 

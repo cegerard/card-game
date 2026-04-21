@@ -9,6 +9,7 @@ type Healing = {
 
 export type HealingReport = {
   kind: StepKind.Healing;
+  name?: string;
   source: CardInfo;
   heal: Healing[];
   energy: number;

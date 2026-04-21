@@ -19,6 +19,7 @@ describe('Healing with activationLimit and endEvent', () => {
 
   it('emits endEvent when activationLimit is reached', () => {
     const skill = new Healing(
+      'healing',
       0,
       new TurnEnd(),
       new Launcher(),
@@ -34,6 +35,7 @@ describe('Healing with activationLimit and endEvent', () => {
 
   it('does not emit endEvent before activationLimit is reached', () => {
     const skill = new Healing(
+      'healing',
       0,
       new TurnEnd(),
       new Launcher(),
@@ -49,6 +51,7 @@ describe('Healing with activationLimit and endEvent', () => {
 
   it('stops triggering after activationLimit is exhausted', () => {
     const skill = new Healing(
+      'healing',
       0,
       new TurnEnd(),
       new Launcher(),
@@ -63,6 +66,7 @@ describe('Healing with activationLimit and endEvent', () => {
 
   it('returns lifecycleEndEvent before exhaustion', () => {
     const skill = new Healing(
+      'healing',
       0,
       new TurnEnd(),
       new Launcher(),
@@ -76,6 +80,7 @@ describe('Healing with activationLimit and endEvent', () => {
 
   it('returns undefined from lifecycleEndEvent after exhaustion', () => {
     const skill = new Healing(
+      'healing',
       0,
       new TurnEnd(),
       new Launcher(),
@@ -99,7 +104,7 @@ describe('Healing.isTriggered', () => {
         return true;
       },
     };
-    const skill = new Healing(1.0, stubTrigger, new Launcher());
+    const skill = new Healing('healing', 1.0, stubTrigger, new Launcher());
 
     beforeEach(() => {
       capturedTriggerId = undefined;

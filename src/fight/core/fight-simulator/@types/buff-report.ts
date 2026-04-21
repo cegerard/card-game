@@ -11,6 +11,7 @@ type Buff = {
 
 export type BuffReport = {
   kind: StepKind.Buff;
+  name?: string;
   source: CardInfo;
   buffs: Buff[];
   energy: number;

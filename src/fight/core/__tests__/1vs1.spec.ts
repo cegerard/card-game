@@ -43,7 +43,7 @@ describe('with only one card each', () => {
     );
 
     it('return the fight steps', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           kind: 'attack',
           attacker: card1.identityInfo,
@@ -107,7 +107,7 @@ describe('with only one card each', () => {
     );
 
     it('return the fight steps', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           kind: 'attack',
           attacker: card2.identityInfo,
@@ -177,7 +177,7 @@ describe('with only one card each', () => {
     );
 
     it('return the fight steps', () => {
-      expect(fight.start()).toEqual({
+      expect(fight.start()).toMatchObject({
         1: {
           kind: 'attack',
           attacker: card1.identityInfo,

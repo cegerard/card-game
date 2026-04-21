@@ -19,6 +19,7 @@ describe('skillResultsToSteps: endEvent on non-Buff skills', () => {
       buffedCard = createFightingCard({ id: 'ally', health: 5000 });
 
       const debuffSkill = new AlterationSkill({
+        name: 'skill',
         polarity: 'debuff',
         attributeType: 'attack',
         rate: 0.2,

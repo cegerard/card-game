@@ -65,9 +65,11 @@ export class ActionStage {
   }
 
   private launchAttack(card: FightingCard): AttackReport {
-    const result: AttackReport = {
+    const attackResults = card.launchAttack(this.getFightingContext(card));
+    const report: AttackReport = {
       kind: StepKind.Attack,
       attack: {
+        name: attackResults.name,
         attacker: card.identityInfo,
         damages: [],
         energy: card.increaseSpecialEnergy(),
@@ -75,13 +77,9 @@ export class ActionStage {
       statusChanges: [],
     };
 
-    this.handleAttackResult(
-      card.launchAttack(this.getFightingContext(card)),
-      result,
-      card,
-    );
+    this.handleAttackResult(attackResults.results, report, card);
 
-    return result;
+    return report;
   }
 
   private launchNextActionSkills(card: FightingCard): AttackReport | null {
@@ -95,6 +93,7 @@ export class ActionStage {
     const result: AttackReport = {
       kind: StepKind.Attack,
       attack: {
+        name: attackSkill.name,
         attacker: card.identityInfo,
         damages: [],
         energy: card.increaseSpecialEnergy(),
@@ -120,17 +119,17 @@ export class ActionStage {
   }
 
   private computeSpecialAttackResult(card: FightingCard): AttackReport {
+    const specialResults = card.launchSpecial(this.getFightingContext(card));
     const result: AttackReport = {
       kind: StepKind.SpecialAttack,
       attack: {
+        name: specialResults.name,
         attacker: card.identityInfo,
         damages: [],
         energy: card.resetSpecialEnergy(),
       },
       statusChanges: [],
     };
-
-    const specialResults = card.launchSpecial(this.getFightingContext(card));
     const actionResults = specialResults.actionResults as AttackResult[];
 
     this.handleAttackResult(actionResults, result, card);
@@ -155,14 +154,14 @@ export class ActionStage {
   }
 
   private computeSpecialHealingResult(card: FightingCard): ActionReport {
+    const specialResults = card.launchSpecial(this.getFightingContext(card));
     const result: HealingReport = {
       kind: StepKind.Healing,
+      name: specialResults.name,
       source: card.identityInfo,
       energy: card.resetSpecialEnergy(),
       heal: [],
     };
-
-    const specialResults = card.launchSpecial(this.getFightingContext(card));
     const healingResults = specialResults.actionResults as HealingResult[];
 
     healingResults.forEach((healingResult) => {

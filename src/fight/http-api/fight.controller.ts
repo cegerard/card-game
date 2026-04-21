@@ -129,6 +129,7 @@ export class FightController {
       }
 
       special = new SpecialAttack(
+        cardData.skills.special.name,
         cardData.skills.special.rate,
         cardData.skills.special.energy,
         buildTargetingStrategy(cardData.skills.special.targetingStrategy),
@@ -137,6 +138,7 @@ export class FightController {
       );
     } else if (cardData.skills.special.kind === SpecialKind.HEALING) {
       special = new SpecialHealing(
+        cardData.skills.special.name,
         cardData.skills.special.rate,
         cardData.skills.special.energy,
         buildTargetingStrategy(cardData.skills.special.targetingStrategy),
@@ -157,6 +159,7 @@ export class FightController {
         ? ma.comboFinisher.map((d) => new DamageComposition(d.type, d.rate))
         : undefined;
       attackSkill = new MultipleAttack(
+        ma.name,
         ma.hits,
         maDamages,
         buildTargetingStrategy(ma.targetingStrategy),
@@ -176,6 +179,7 @@ export class FightController {
         (d) => new DamageComposition(d.type, d.rate),
       );
       attackSkill = new SimpleAttack(
+        sa.name,
         damages,
         buildTargetingStrategy(sa.targetingStrategy),
         effect,
@@ -280,6 +284,7 @@ export class FightController {
     switch (skillData.kind) {
       case SkillKind.HEALING:
         return new Healing(
+          skillData.name,
           skillData.rate,
           this.buildTriggerForSkill(skillData),
           buildTargetingStrategy(skillData.targetingStrategy),
@@ -305,6 +310,7 @@ export class FightController {
         const alterationDuration =
           skillData.duration === 0 ? Infinity : (skillData.duration ?? 0);
         return new AlterationSkill({
+          name: skillData.name,
           polarity: skillData.kind === SkillKind.BUFF ? 'buff' : 'debuff',
           attributeType: this.mapBuffType(skillData.buffType),
           rate: skillData.rate,
@@ -333,6 +339,7 @@ export class FightController {
           : undefined;
         const caAttackSkill = skillData.hits
           ? new MultipleAttack(
+              skillData.name,
               skillData.hits,
               caDamages,
               buildTargetingStrategy(skillData.targetingStrategy),
@@ -341,11 +348,13 @@ export class FightController {
               caComboFinisher,
             )
           : new SimpleAttack(
+              skillData.name,
               caDamages,
               buildTargetingStrategy(skillData.targetingStrategy),
               caEffect,
             );
         return new ConditionalAttack(
+          skillData.name,
           caAttackSkill,
           new EveryNTurnsCondition(skillData.interval),
           this.buildTriggerForSkill(skillData),
@@ -356,6 +365,7 @@ export class FightController {
         }
         if (skillData.targetingStrategy === TargetingStrategy.TARGETED_CARD) {
           return new TargetingOverrideSkill(
+            skillData.name,
             undefined,
             skillData.terminationEvent,
             this.buildTriggerForSkill(skillData),
@@ -367,6 +377,7 @@ export class FightController {
           );
         }
         return new TargetingOverrideSkill(
+          skillData.name,
           buildTargetingStrategy(skillData.targetingStrategy),
           skillData.terminationEvent,
           this.buildTriggerForSkill(skillData),

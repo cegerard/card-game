@@ -6,10 +6,11 @@ import { TargetedFromPosition } from '../../../targeting-card-strategies/targete
 import { TurnEnd } from '../../../trigger/turn-end';
 import { TargetingOverrideSkill } from '../targeting-override';
 import { SkillKind } from '../skill';
+import { FightingCard } from '../../fighting-card';
 
 describe('TargetingOverrideSkill', () => {
   let context: FightingContext;
-  let card;
+  let card: FightingCard;
 
   beforeEach(() => {
     card = createFightingCard({
@@ -26,19 +27,21 @@ describe('TargetingOverrideSkill', () => {
 
   it('calls overrideAttackTargeting on the source card', () => {
     const skill = new TargetingOverrideSkill(
+      'override',
       new TargetedAll(),
       'power-end',
       new TurnEnd(),
     );
 
     skill.launch(card, context);
-    const results = card.launchAttack(context);
+    const attack = card.launchAttack(context);
 
-    expect(results).toHaveLength(1);
+    expect(attack.results).toHaveLength(1);
   });
 
   it('returns SkillResults with TargetingOverride kind', () => {
     const skill = new TargetingOverrideSkill(
+      'override',
       new TargetedAll(),
       'power-end',
       new TurnEnd(),
@@ -51,6 +54,7 @@ describe('TargetingOverrideSkill', () => {
 
   it('propagates powerId in SkillResults', () => {
     const skill = new TargetingOverrideSkill(
+      'override',
       new TargetedAll(),
       'power-end',
       new TurnEnd(),
@@ -64,6 +68,7 @@ describe('TargetingOverrideSkill', () => {
 
   it('is triggered by matching trigger', () => {
     const skill = new TargetingOverrideSkill(
+      'override',
       new TargetedAll(),
       'power-end',
       new TurnEnd(),
@@ -74,6 +79,7 @@ describe('TargetingOverrideSkill', () => {
 
   it('is not triggered by non-matching trigger', () => {
     const skill = new TargetingOverrideSkill(
+      'override',
       new TargetedAll(),
       'power-end',
       new TurnEnd(),
@@ -92,14 +98,15 @@ describe('TargetingOverrideSkill', () => {
       };
 
       const skill = new TargetingOverrideSkill(
+        'override',
         new TargetedAll(),
         'power-end',
         new TurnEnd(),
       );
       skill.launch(card, context);
-      const results = card.launchAttack(context);
+      const attack = card.launchAttack(context);
 
-      expect(results).toHaveLength(2);
+      expect(attack.results).toHaveLength(2);
     });
 
     it('does not apply override when simpleAttack uses non-position-based targeting', () => {
@@ -115,20 +122,22 @@ describe('TargetingOverrideSkill', () => {
       };
 
       const skill = new TargetingOverrideSkill(
+        'override',
         new TargetedFromPosition(),
         'power-end',
         new TurnEnd(),
       );
       skill.launch(cardWithTargetAll, ctx);
-      const results = cardWithTargetAll.launchAttack(ctx);
+      const attack = cardWithTargetAll.launchAttack(ctx);
 
-      expect(results).toHaveLength(2);
+      expect(attack.results).toHaveLength(2);
     });
   });
 
   describe('with strategyResolver returning null (no killerCard)', () => {
     it('returns empty results without applying override', () => {
       const skill = new TargetingOverrideSkill(
+        'override',
         undefined,
         'power-end',
         new TurnEnd(),
@@ -144,6 +153,7 @@ describe('TargetingOverrideSkill', () => {
     it('does not override the card targeting strategy', () => {
       const originalStrategyId = card.attackTargetingId;
       const skill = new TargetingOverrideSkill(
+        'override',
         undefined,
         'power-end',
         new TurnEnd(),

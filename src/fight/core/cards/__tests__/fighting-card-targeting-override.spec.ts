@@ -3,11 +3,12 @@ import { Player } from '../../player';
 import { FightingContext } from '../@types/fighting-context';
 import { TargetedAll } from '../../targeting-card-strategies/targeted-all';
 import { Launcher } from '../../targeting-card-strategies/launcher';
+import { FightingCard } from '../fighting-card';
 
 describe('FightingCard targeting override', () => {
   let context: FightingContext;
-  let enemy1;
-  let enemy2;
+  let enemy1: FightingCard;
+  let enemy2: FightingCard;
 
   beforeEach(() => {
     enemy1 = createFightingCard({
@@ -39,9 +40,9 @@ describe('FightingCard targeting override', () => {
       context = { sourcePlayer: player1, opponentPlayer: player2 };
 
       card.overrideAttackTargeting(new TargetedAll(), 'power-end');
-      const results = card.launchAttack(context);
+      const attack = card.launchAttack(context);
 
-      expect(results).toHaveLength(2);
+      expect(attack.results).toHaveLength(2);
     });
   });
 
@@ -63,9 +64,9 @@ describe('FightingCard targeting override', () => {
 
       card.overrideAttackTargeting(new TargetedAll(), 'power-end');
       card.restoreAttackTargeting('power-end');
-      const results = card.launchAttack(context);
+      const attack = card.launchAttack(context);
 
-      expect(results).toHaveLength(1);
+      expect(attack.results).toHaveLength(1);
     });
 
     it('returns the removed overrides', () => {

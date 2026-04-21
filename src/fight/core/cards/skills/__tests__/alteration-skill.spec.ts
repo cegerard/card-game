@@ -19,6 +19,7 @@ describe('AlterationSkill lifecycle', () => {
   describe('when activationLimit is not set', () => {
     it('is always triggered', () => {
       const skill = new AlterationSkill({
+        name: 'skill',
         polarity: 'buff',
         attributeType: 'attack',
         rate: 0.1,
@@ -32,6 +33,7 @@ describe('AlterationSkill lifecycle', () => {
     it('never returns endEvent', () => {
       const source = createFightingCard({ health: 100 });
       const skill = new AlterationSkill({
+        name: 'skill',
         polarity: 'buff',
         attributeType: 'attack',
         rate: 0.1,
@@ -50,6 +52,7 @@ describe('AlterationSkill lifecycle', () => {
 
     beforeEach(() => {
       skill = new AlterationSkill({
+        name: 'skill',
         polarity: 'buff',
         attributeType: 'attack',
         rate: 0.1,
@@ -126,6 +129,7 @@ describe('AlterationSkill lifecycle', () => {
     it('returns skillKind Debuff', () => {
       const source = createFightingCard({ health: 100 });
       const skill = new AlterationSkill({
+        name: 'skill',
         polarity: 'debuff',
         attributeType: 'attack',
         rate: 0.1,
@@ -142,6 +146,7 @@ describe('AlterationSkill lifecycle', () => {
       const source = createFightingCard({ attack: 100, health: 100 });
       const initialAttack = source.actualAttack;
       const skill = new AlterationSkill({
+        name: 'skill',
         polarity: 'debuff',
         attributeType: 'attack',
         rate: 0.1,

@@ -6,9 +6,11 @@ import { FightingContext } from '../@types/fighting-context';
 import { FightingCard } from '../fighting-card';
 import { DamageCalculator } from '../damage/damage-calculator';
 import { AttackSkill } from './attack-skill';
+import { NamedAttackResult } from '../@types/action-result/named-attack-result';
 
 export class MultipleAttack implements AttackSkill {
   constructor(
+    public readonly name: string,
     private readonly hits: number,
     private readonly damages: DamageComposition[],
     private readonly targetingStrategy: TargetingCardStrategy,
@@ -25,7 +27,7 @@ export class MultipleAttack implements AttackSkill {
     card: FightingCard,
     context: FightingContext,
     targetingStrategy?: TargetingCardStrategy,
-  ): AttackResult[] {
+  ): NamedAttackResult {
     const targeting =
       targetingStrategy && this.targetingStrategy.id === 'from-position'
         ? targetingStrategy
@@ -37,8 +39,11 @@ export class MultipleAttack implements AttackSkill {
     card: FightingCard,
     context: FightingContext,
     targeting: TargetingCardStrategy,
-  ): AttackResult[] {
-    const results: AttackResult[] = [];
+  ): NamedAttackResult {
+    const results: NamedAttackResult = {
+      name: this.name,
+      results: [] as AttackResult[],
+    };
     const hitTargets = new Set<FightingCard>();
     const dodgedTargets = new Set<FightingCard>();
 
@@ -59,7 +64,7 @@ export class MultipleAttack implements AttackSkill {
 
         if (defender.dodge(card.actualAccuracy)) {
           dodgedTargets.add(defender);
-          results.push({
+          results.results.push({
             damage: 0,
             isCritical,
             dodge: true,
@@ -81,7 +86,7 @@ export class MultipleAttack implements AttackSkill {
           effectResult = this.effect.applyEffect(defender, card, context);
         }
 
-        results.push({
+        results.results.push({
           damage: collectedDamage,
           isCritical,
           dodge: false,
@@ -102,7 +107,7 @@ export class MultipleAttack implements AttackSkill {
           defender,
         );
         const collectedDamage = defender.applyFinalDamage(total);
-        results.push({
+        results.results.push({
           damage: collectedDamage,
           isCritical: false,
           dodge: false,

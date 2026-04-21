@@ -8,6 +8,7 @@ const ENERGY_INCREASE_FACTOR = 10;
 
 export class SpecialHealing implements Special {
   constructor(
+    readonly name: string,
     private readonly rate: number,
     private readonly energyNeeded: number,
     private readonly targetingStrategy: TargetingCardStrategy,
@@ -34,7 +35,7 @@ export class SpecialHealing implements Special {
       return { healed, target };
     });
 
-    return { actionResults, buffResults: [] };
+    return { name: this.name, actionResults, buffResults: [] };
   }
 
   public increaseEnergy(actualEnergy: number): number {

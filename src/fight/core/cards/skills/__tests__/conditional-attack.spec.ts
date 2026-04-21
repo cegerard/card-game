@@ -25,6 +25,7 @@ const POSITION_BASED = new TargetedFromPosition();
 
 function makeSimpleAttack(rate = 1.0): SimpleAttack {
   return new SimpleAttack(
+    'attack',
     [new DamageComposition(DamageType.PHYSICAL, rate)],
     POSITION_BASED,
   );
@@ -54,7 +55,7 @@ function makeCard(opts: {
     },
     {
       simpleAttack: makeSimpleAttack(1.0),
-      special: new SpecialAttack(1, 999, POSITION_BASED),
+      special: new SpecialAttack('special', 1, 999, POSITION_BASED),
       others: opts.conditionalAttack ? [opts.conditionalAttack] : [],
     },
     { dodge: new SimpleDodge() },
@@ -98,6 +99,7 @@ describe('ConditionalAttack', () => {
   beforeEach(() => {
     condition = new EveryNTurnsCondition(2);
     conditionalAttack = new ConditionalAttack(
+      'attack',
       makeSimpleAttack(),
       condition,
       new NextAction(),
@@ -124,6 +126,7 @@ describe('ConditionalAttack', () => {
 
     it('returns true for ally-death trigger when condition is already met', () => {
       const allyDeathAttack = new ConditionalAttack(
+        'attack',
         makeSimpleAttack(),
         new EveryNTurnsCondition(0),
         new DeathTrigger('ally-death', 'kaelion'),
@@ -133,6 +136,7 @@ describe('ConditionalAttack', () => {
 
     it('returns false for ally-death trigger when card id does not match', () => {
       const allyDeathAttack = new ConditionalAttack(
+        'attack',
         makeSimpleAttack(),
         new EveryNTurnsCondition(0),
         new DeathTrigger('ally-death', 'kaelion'),
@@ -181,6 +185,7 @@ describe('FightingCard.tickSkills', () => {
   it('ticks ConditionalAttack skills, advancing their condition', () => {
     const condition = new EveryNTurnsCondition(1);
     const ca = new ConditionalAttack(
+      'attack',
       makeSimpleAttack(),
       condition,
       new NextAction(),
@@ -209,7 +214,9 @@ describe('ConditionalAttack integration via Fight (interval=3)', () => {
 
   beforeEach(() => {
     const ca = new ConditionalAttack(
+      'conditional-attack',
       new SimpleAttack(
+        'attack',
         [new DamageComposition(DamageType.PHYSICAL, CONDITIONAL_RATE)],
         POSITION_BASED,
       ),
@@ -231,7 +238,7 @@ describe('ConditionalAttack integration via Fight (interval=3)', () => {
       },
       {
         simpleAttack: makeSimpleAttack(1.0),
-        special: new SpecialAttack(1, 999, POSITION_BASED),
+        special: new SpecialAttack('special', 1, 999, POSITION_BASED),
         others: [ca],
       },
       { dodge: new SimpleDodge() },
@@ -252,7 +259,7 @@ describe('ConditionalAttack integration via Fight (interval=3)', () => {
       },
       {
         simpleAttack: makeSimpleAttack(1.0),
-        special: new SpecialAttack(1, 999, POSITION_BASED),
+        special: new SpecialAttack('special', 1, 999, POSITION_BASED),
         others: [],
       },
       { dodge: new SimpleDodge() },
@@ -314,6 +321,7 @@ describe('ConditionalAttack respects targeting override', () => {
     const override = new TargetedCard(target2.id);
     const condition = new EveryNTurnsCondition(0);
     const ca = new ConditionalAttack(
+      'attack',
       makeSimpleAttack(),
       condition,
       new NextAction(),
@@ -336,11 +344,13 @@ describe('ConditionalAttack respects targeting override', () => {
 
     const override = new TargetedCard(target2.id);
     const targetAllAttack = new SimpleAttack(
+      'attack',
       [new DamageComposition(DamageType.PHYSICAL, 1.0)],
       new TargetedAll(),
     );
     const condition = new EveryNTurnsCondition(0);
     const ca = new ConditionalAttack(
+      'attack',
       targetAllAttack,
       condition,
       new NextAction(),
@@ -362,7 +372,7 @@ describe('SpecialAttack respects targeting override', () => {
     const context = { sourcePlayer: player1, opponentPlayer: player2 };
 
     const override = new TargetedCard(target2.id);
-    const special = new SpecialAttack(1, 0, POSITION_BASED);
+    const special = new SpecialAttack('special', 1, 0, POSITION_BASED);
     const result = special.launch(attacker, context, override);
 
     expect(
@@ -379,7 +389,7 @@ describe('SpecialAttack respects targeting override', () => {
     const context = { sourcePlayer: player1, opponentPlayer: player2 };
 
     const override = new TargetedCard(target2.id);
-    const special = new SpecialAttack(1, 0, new TargetedAll());
+    const special = new SpecialAttack('special', 1, 0, new TargetedAll());
     const result = special.launch(attacker, context, override);
 
     expect(result.actionResults.length).toBe(2);
@@ -396,7 +406,9 @@ describe('Frozen card skips tick', () => {
 
   beforeEach(() => {
     const ca = new ConditionalAttack(
+      'conditional-attack',
       new SimpleAttack(
+        'attack',
         [new DamageComposition(DamageType.PHYSICAL, 3.0)],
         POSITION_BASED,
       ),
