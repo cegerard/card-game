@@ -157,6 +157,79 @@ describe('Trigger an attack without effect', () => {
   });
 });
 
+describe('Trigger an attack with damage kind', () => {
+  let attacker: FightingCard;
+  let defender: FightingCard;
+  let player1: Player;
+  let player2: Player;
+  let fight: Fight;
+
+  beforeEach(() => {
+    attacker = createFightingCard({
+      attack: 100,
+      criticalChance: 0,
+      speed: 100,
+      agility: 0,
+      skills: {
+        simpleAttack: {
+          damages: [new DamageComposition(DamageType.FIRE, 1.0)],
+        },
+      },
+    });
+    defender = createFightingCard({
+      attack: 0,
+      defense: 0,
+      health: 100,
+      speed: 0,
+      agility: 0,
+      skills: {
+        simpleAttack: {
+          damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
+        },
+      },
+    });
+    player1 = new Player('Player 1', [attacker]);
+    player2 = new Player('Player 2', [defender]);
+    fight = new Fight(
+      player1,
+      player2,
+      new PlayerByPlayerCardSelector(player1, player2),
+    );
+  });
+
+  it('includes kind in damage entry', () => {
+    expect(fight.start()).toMatchObject({
+      1: { damages: [{ kind: [DamageType.FIRE] }] },
+    });
+  });
+
+  it('includes kind for multi-type damage', () => {
+    const multiAttacker = createFightingCard({
+      attack: 100,
+      criticalChance: 0,
+      speed: 100,
+      agility: 0,
+      skills: {
+        simpleAttack: {
+          damages: [
+            new DamageComposition(DamageType.PHYSICAL, 0.7),
+            new DamageComposition(DamageType.FIRE, 0.3),
+          ],
+        },
+      },
+    });
+    const p1 = new Player('P1', [multiAttacker]);
+    const p2 = new Player('P2', [
+      createFightingCard({ defense: 0, health: 100, speed: 0 }),
+    ]);
+    const f = new Fight(p1, p2, new PlayerByPlayerCardSelector(p1, p2));
+
+    expect(f.start()).toMatchObject({
+      1: { damages: [{ kind: [DamageType.PHYSICAL, DamageType.FIRE] }] },
+    });
+  });
+});
+
 describe('Trigger an attack with critical hit', () => {
   let attacker: FightingCard;
   let defender: FightingCard;

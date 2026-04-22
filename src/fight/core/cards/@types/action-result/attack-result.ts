@@ -1,6 +1,7 @@
 import { FightingCard } from '../../fighting-card';
 import { EffectResult } from '../attack/attack-effect';
 import { BuffResults } from './buff-results';
+import { DamageType } from '../damage/damage-type';
 
 export type AttackResult = {
   damage: number;
@@ -10,4 +11,5 @@ export type AttackResult = {
   remainingHealth?: number;
   effect?: EffectResult;
   buffResults?: BuffResults;
+  kind?: DamageType[];
 };

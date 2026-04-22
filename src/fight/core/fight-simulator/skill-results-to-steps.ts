@@ -72,6 +72,7 @@ export function skillResultsToSteps(
             isCritical: r.isCritical,
             dodge: r.dodge,
             remainingHealth: r.defender.actualHealth,
+            kind: r.kind,
           })),
           energy: card.actualEnergy,
         });

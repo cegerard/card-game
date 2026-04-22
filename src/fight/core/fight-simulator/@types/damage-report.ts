@@ -1,4 +1,5 @@
 import { CardInfo } from '../../cards/@types/card-info';
+import { DamageType } from '../../cards/@types/damage/damage-type';
 import { StepKind } from './step';
 
 export type Damage = {
@@ -7,6 +8,7 @@ export type Damage = {
   isCritical: boolean;
   dodge: boolean;
   remainingHealth: number;
+  kind?: DamageType[];
 };
 
 export type DamageReport = {
