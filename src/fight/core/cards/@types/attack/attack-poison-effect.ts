@@ -4,6 +4,7 @@ import { CardStatePoisoned } from '../state/card-state-poisoned';
 import { EffectLevel } from './effect-level';
 import { FightingContext } from '../fighting-context';
 import { EffectTriggeredDebuff } from './effect-triggered-debuff';
+import { roundTo2 } from '../../../../tools/round';
 
 export class PoisonAttackEffect implements AttackEffect {
   public readonly rate: number;
@@ -35,7 +36,7 @@ export class PoisonAttackEffect implements AttackEffect {
     const poisonedState = new CardStatePoisoned(
       this.level,
       this.computePoisonedTurns(),
-      card.actualAttack * this.rate,
+      roundTo2(card.actualAttack * this.rate),
       this.terminationEvent,
     );
     defender.setState(poisonedState);
