@@ -135,6 +135,69 @@ describe('FightingCard.removeEventBoundBuffs()', () => {
   });
 });
 
+describe('FightingCard number precision', () => {
+  describe('applyBuff()', () => {
+    it('rounds buff value to 2 decimal places', () => {
+      const card = createFightingCard({
+        attack: 33,
+        defense: 0,
+        accuracy: 0,
+        agility: 0,
+      });
+
+      const buff = card.applyBuff('attack', 0.1, 2);
+
+      expect(buff.value).toBe(3.3);
+    });
+  });
+
+  describe('applyDebuff()', () => {
+    it('rounds debuff value to 2 decimal places', () => {
+      const card = createFightingCard({
+        attack: 33,
+        defense: 0,
+        accuracy: 0,
+        agility: 0,
+      });
+
+      const debuff = card.applyDebuff('attack', 0.1, 2);
+
+      expect(debuff.value).toBe(3.3);
+    });
+  });
+
+  describe('heal()', () => {
+    it('rounds healed amount to 2 decimal places', () => {
+      const card = createFightingCard({
+        health: 100,
+        attack: 0,
+        defense: 0,
+        accuracy: 0,
+        agility: 0,
+      });
+      card.applyFinalDamage(20);
+
+      const healed = card.heal(33 * 0.1);
+
+      expect(healed).toBe(3.3);
+    });
+
+    it('keeps actualHealth clean after floating-point healing', () => {
+      const card = createFightingCard({
+        health: 100,
+        attack: 0,
+        defense: 0,
+        accuracy: 0,
+        agility: 0,
+      });
+      card.applyFinalDamage(20);
+      card.heal(33 * 0.1);
+
+      expect(card.actualHealth).toBe(83.3);
+    });
+  });
+});
+
 describe('FightingCard.lifecycleEndEvents()', () => {
   describe('when card has a lifecycle-limited buff skill with endEvent', () => {
     let card;

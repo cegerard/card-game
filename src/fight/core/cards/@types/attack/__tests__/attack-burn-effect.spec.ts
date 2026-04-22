@@ -11,6 +11,19 @@ function makeCards() {
   return { attacker, defender };
 }
 
+describe('BurnAttackEffect number precision', () => {
+  it('rounds damage value to 2 decimal places', () => {
+    const attacker = createFightingCard({ attack: 33 });
+    const defender = createFightingCard({ health: 100 });
+    const effect = new BurnAttackEffect(0.1, 1);
+    effect.applyEffect(defender, attacker, null);
+
+    const [stateResult] = defender.applyStateEffects();
+
+    expect(stateResult.damage).toBe(3.3);
+  });
+});
+
 describe('BurnAttackEffect with triggeredDebuff', () => {
   const randomizer = new RandomizerFake();
 
