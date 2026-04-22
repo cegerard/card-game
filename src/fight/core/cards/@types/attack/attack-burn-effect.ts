@@ -4,7 +4,7 @@ import { EffectLevel } from './effect-level';
 import { FightingContext } from '../fighting-context';
 import { CardStateBurned } from '../state/card-state-burned';
 import { EffectTriggeredDebuff } from './effect-triggered-debuff';
-import { roundTo2 } from '../../../../tools/round';
+import { round2 } from '../../../../tools/round';
 
 export class BurnAttackEffect implements AttackEffect {
   public readonly rate: number;
@@ -47,7 +47,7 @@ export class BurnAttackEffect implements AttackEffect {
     const burnedState = new CardStateBurned(
       effectLevel,
       this.computeBurnedTurns(effectLevel),
-      roundTo2(card.actualAttack * this.rate),
+      round2(card.actualAttack * this.rate),
       this.terminationEvent,
     );
     defender.setState(burnedState);

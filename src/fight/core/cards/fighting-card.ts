@@ -16,7 +16,7 @@ import { BuffType, DebuffType } from './@types/buff/type';
 import { Element } from './@types/damage/element';
 import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
 import { NamedAttackResult } from './@types/action-result/named-attack-result';
-import { roundTo2 } from '../../tools/round';
+import { round2 } from '../../tools/round';
 
 export type TargetingOverrideEntry = {
   strategy: TargetingCardStrategy;
@@ -345,10 +345,10 @@ export class FightingCard {
   }
 
   public heal(hpToRestore: number): number {
-    const rounded = roundTo2(hpToRestore);
-    let healed = rounded;
+    const roundedHpToRestore = round2(hpToRestore);
+    let healed = roundedHpToRestore;
 
-    if (this.actualHealth + rounded > this.maxHealth) {
+    if (this.actualHealth + roundedHpToRestore > this.maxHealth) {
       healed = this.maxHealth - this.actualHealth;
     }
 
@@ -478,13 +478,13 @@ export class FightingCard {
   ): number {
     switch (type) {
       case 'attack':
-        return roundTo2(rate * this.attack);
+        return round2(rate * this.attack);
       case 'defense':
-        return roundTo2(rate * this.defense);
+        return round2(rate * this.defense);
       case 'agility':
-        return roundTo2(rate * this.agility);
+        return round2(rate * this.agility);
       case 'accuracy':
-        return roundTo2(rate * this.accuracy);
+        return round2(rate * this.accuracy);
       default:
         throw new Error(`Unknown attribute type: ${type}`);
     }
