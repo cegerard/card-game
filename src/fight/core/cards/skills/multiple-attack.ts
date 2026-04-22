@@ -46,6 +46,7 @@ export class MultipleAttack implements AttackSkill {
     };
     const hitTargets = new Set<FightingCard>();
     const dodgedTargets = new Set<FightingCard>();
+    const kind = this.damages.map((d) => d.type);
 
     for (let i = 0; i < this.hits; i++) {
       const attackPower = card.actualAttack * (1 + this.amplifier * i);
@@ -70,6 +71,7 @@ export class MultipleAttack implements AttackSkill {
             dodge: true,
             defender,
             remainingHealth: defender.actualHealth,
+            kind,
           });
           continue;
         }
@@ -93,11 +95,13 @@ export class MultipleAttack implements AttackSkill {
           defender,
           remainingHealth: defender.actualHealth,
           effect: effectResult,
+          kind,
         });
       }
     }
 
     if (this.comboFinisher) {
+      const finisherKind = this.comboFinisher.map((d) => d.type);
       for (const defender of hitTargets) {
         if (dodgedTargets.has(defender) || defender.isDead()) continue;
 
@@ -113,6 +117,7 @@ export class MultipleAttack implements AttackSkill {
           dodge: false,
           defender,
           remainingHealth: defender.actualHealth,
+          kind: finisherKind,
         });
       }
     }

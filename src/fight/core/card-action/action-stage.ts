@@ -221,6 +221,7 @@ export class ActionStage {
         dodge: damageDealt.dodge,
         remainingHealth:
           damageDealt.remainingHealth ?? defensiveCard.actualHealth,
+        kind: damageDealt.kind,
       });
 
       if (defensiveCard.isDead() && !reportedDeaths.has(defensiveCard)) {

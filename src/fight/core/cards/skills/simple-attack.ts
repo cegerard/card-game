@@ -44,11 +44,12 @@ export class SimpleAttack implements AttackSkill {
       context.opponentPlayer,
     );
 
+    const kind = this.damages.map((d) => d.type);
     return {
       name: this.name,
       results: defensiveCards.map((defender) => {
         if (defender.dodge(card.actualAccuracy)) {
-          return { damage: 0, isCritical, dodge: true, defender: defender };
+          return { damage: 0, isCritical, dodge: true, defender, kind };
         }
 
         const { total } = DamageCalculator.calculateDamage(
@@ -69,6 +70,7 @@ export class SimpleAttack implements AttackSkill {
           dodge: false,
           defender,
           effect: effectResult,
+          kind,
         };
       }),
     };
