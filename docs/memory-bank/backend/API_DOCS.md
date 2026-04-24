@@ -158,7 +158,8 @@ Simulates a turn-based card battle between two players.
     debuffType: "attack" | "defense" | "agility" | "accuracy",
     debuffRate: number,
     duration: number,
-    probability: number
+    probability: number,
+    terminationEvent?: string  // Event name that removes this triggered debuff when fired
   },
   terminationEvent?: string   // Event name that removes this effect when fired
 }
@@ -182,7 +183,7 @@ Simulates a turn-based card battle between two players.
 ```typescript
 {
   [stepNumber: number]: {
-    kind: "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "effect_removed" | "targeting_override" | "targeting_reverted" | "fight_end",
+    kind: "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "debuff_removed" | "buff_expired" | "debuff_expired" | "effect_removed" | "targeting_override" | "targeting_reverted" | "fight_end",
     // Additional properties vary by step kind
   }
 }
@@ -246,6 +247,35 @@ Simulates a turn-based card battle between two players.
 }
 ```
 
+**`debuff_removed` step** (`DebuffRemovedReport`): Emitted when a skill's end event fires and removes event-bound debuffs.
+```typescript
+{
+  kind: "debuff_removed",
+  source: CardInfo,      // Card whose skill emitted the end event
+  eventName: string,     // The end event name that triggered removal
+  removed: { target: CardInfo, kind: DebuffType, value: number }[],
+  powerId?: string       // Present if the skill that emitted the end event belongs to a composite power
+}
+```
+
+**`buff_expired` step** (`BuffExpiredReport`): Emitted at end of turn when a buff's duration reaches 0.
+```typescript
+{
+  kind: "buff_expired",
+  card: CardInfo,        // Card whose buff expired
+  expired: { kind: BuffType, value: number }[]
+}
+```
+
+**`debuff_expired` step** (`DebuffExpiredReport`): Emitted at end of turn when a debuff's duration reaches 0.
+```typescript
+{
+  kind: "debuff_expired",
+  card: CardInfo,        // Card whose debuff expired
+  expired: { kind: DebuffType, value: number }[]
+}
+```
+
 **`effect_removed` step** (`EffectRemovedReport`): Emitted when an end event fires and removes event-bound status effects (poison, burn, freeze).
 ```typescript
 {
@@ -282,7 +312,7 @@ Simulates a turn-based card battle between two players.
 
 **Note on `name`**: The `name?` field appears on `attack`, `special_attack`, `healing`, `buff`, `debuff`, and `targeting_override` step kinds, carrying the name of the skill that generated the step.
 
-**Note on `powerId`**: The `powerId` field appears on `buff`, `debuff`, `healing`, `buff_removed`, `targeting_override`, and `targeting_reverted` step kinds when the originating skill belongs to a composite power group.
+**Note on `powerId`**: The `powerId` field appears on `buff`, `debuff`, `healing`, `buff_removed`, `debuff_removed`, `targeting_override`, and `targeting_reverted` step kinds when the originating skill belongs to a composite power group.
 
 ## Enums
 

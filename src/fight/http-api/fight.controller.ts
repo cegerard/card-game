@@ -226,6 +226,7 @@ export class FightController {
       debuffRate: number;
       duration: number;
       probability: number;
+      terminationEvent?: string;
     };
     terminationEvent?: string;
   }): AttackEffect {
@@ -236,6 +237,7 @@ export class FightController {
           effectDto.triggeredDebuff.debuffRate,
           effectDto.triggeredDebuff.duration,
           new MathRandomizer(),
+          effectDto.triggeredDebuff.terminationEvent,
         )
       : undefined;
 

@@ -8,6 +8,7 @@ export class EffectTriggeredDebuff {
   public readonly debuffType: DebuffType;
   public readonly debuffRate: number;
   public readonly duration: number;
+  public readonly terminationEvent?: string;
   private readonly randomizer: Randomizer;
 
   constructor(
@@ -16,11 +17,13 @@ export class EffectTriggeredDebuff {
     debuffRate: number,
     duration: number,
     randomizer: Randomizer,
+    terminationEvent?: string,
   ) {
     this.probability = probability;
     this.debuffType = debuffType;
     this.debuffRate = debuffRate;
     this.duration = duration;
+    this.terminationEvent = terminationEvent;
     this.randomizer = randomizer;
   }
 
@@ -28,6 +31,12 @@ export class EffectTriggeredDebuff {
     if (this.randomizer.random_int_between(0, 100) >= this.probability * 100)
       return undefined;
 
-    return target.applyDebuff(this.debuffType, this.debuffRate, this.duration);
+    return target.applyDebuff(
+      this.debuffType,
+      this.debuffRate,
+      this.duration,
+      undefined,
+      this.terminationEvent,
+    );
   }
 }

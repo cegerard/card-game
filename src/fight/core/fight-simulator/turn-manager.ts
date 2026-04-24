@@ -37,7 +37,25 @@ export class TurnManager {
 
     cards.forEach((card) => {
       if (card.isDead()) return;
-      card.decreaseBuffAndDebuffDuration();
+      const { expiredBuffs, expiredDebuffs } =
+        card.decreaseBuffAndDebuffDuration();
+      if (expiredBuffs.length > 0) {
+        steps.push({
+          kind: StepKind.BuffExpired,
+          card: card.identityInfo,
+          expired: expiredBuffs.map((b) => ({ kind: b.type, value: b.value })),
+        });
+      }
+      if (expiredDebuffs.length > 0) {
+        steps.push({
+          kind: StepKind.DebuffExpired,
+          card: card.identityInfo,
+          expired: expiredDebuffs.map((d) => ({
+            kind: d.type,
+            value: d.value,
+          })),
+        });
+      }
       this.processCardSkill(card, steps);
       this.processCardEffectStates(card, steps);
     });

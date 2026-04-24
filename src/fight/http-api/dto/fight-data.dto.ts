@@ -121,6 +121,11 @@ class EffectTriggeredDebuffDto {
 
   @IsNumber()
   probability: number;
+
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  terminationEvent?: string;
 }
 
 class EffectDto {

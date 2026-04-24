@@ -60,6 +60,50 @@ describe('EndEventProcessor.processEndEvent()', () => {
     });
   });
 
+  describe('when cards hold matching event-bound debuffs', () => {
+    let processor: EndEventProcessor;
+    let card;
+
+    beforeEach(() => {
+      card = createFightingCard({
+        attack: 100,
+        defense: 0,
+        accuracy: 0,
+        agility: 0,
+      });
+      card.applyDebuff('attack', 0.4, Infinity, undefined, 'lions-end');
+      const player1 = new Player('P1', [card]);
+      const player2 = new Player('P2', [createFightingCard({})]);
+      processor = new EndEventProcessor(player1, player2);
+    });
+
+    it('produces a DebuffRemoved step', () => {
+      const steps = processor.processEndEvent('lions-end', source);
+
+      expect(steps.some((s) => s.kind === StepKind.DebuffRemoved)).toBe(true);
+    });
+
+    it('includes the eventName in the DebuffRemoved step', () => {
+      const steps = processor.processEndEvent('lions-end', source);
+      const step = steps.find((s) => s.kind === StepKind.DebuffRemoved) as any;
+
+      expect(step.eventName).toBe('lions-end');
+    });
+
+    it('includes removed debuff info in the step', () => {
+      const steps = processor.processEndEvent('lions-end', source);
+      const step = steps.find((s) => s.kind === StepKind.DebuffRemoved) as any;
+
+      expect(step.removed).toHaveLength(1);
+    });
+
+    it('removes the debuff from the card', () => {
+      processor.processEndEvent('lions-end', source);
+
+      expect(card.actualAttack).toBe(100);
+    });
+  });
+
   describe('when buffs span multiple cards', () => {
     it('produces one step aggregating all removed buffs', () => {
       const card1 = createFightingCard({

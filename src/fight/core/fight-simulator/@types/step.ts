@@ -6,6 +6,9 @@ import { StateEffectReport } from './state-effect-report';
 import { StatusChangeReport } from './status-change-report';
 import { WinnerReport } from './winner-report';
 import { BuffRemovedReport } from './buff-removed-report';
+import { DebuffRemovedReport } from './debuff-removed-report';
+import { BuffExpiredReport } from './buff-expired-report';
+import { DebuffExpiredReport } from './debuff-expired-report';
 import {
   TargetingOverrideReport,
   TargetingRevertedReport,
@@ -22,6 +25,9 @@ export enum StepKind {
   Buff = 'buff',
   Debuff = 'debuff',
   BuffRemoved = 'buff_removed',
+  DebuffRemoved = 'debuff_removed',
+  BuffExpired = 'buff_expired',
+  DebuffExpired = 'debuff_expired',
   TargetingOverride = 'targeting_override',
   TargetingReverted = 'targeting_reverted',
   EffectRemoved = 'effect_removed',
@@ -37,6 +43,9 @@ export type Step =
   | BuffReport
   | DebuffReport
   | BuffRemovedReport
+  | DebuffRemovedReport
+  | BuffExpiredReport
+  | DebuffExpiredReport
   | TargetingOverrideReport
   | TargetingRevertedReport
   | EffectRemovedReport;

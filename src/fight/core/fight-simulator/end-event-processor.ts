@@ -33,7 +33,7 @@ export class EndEventProcessor {
       ...this.player2.playableCards,
     ];
 
-    const removed = allCards.flatMap((card) => {
+    const removedBuffs = allCards.flatMap((card) => {
       const removedBuffs = card.removeEventBoundBuffs(eventName);
       return removedBuffs.map((b) => ({
         target: card.identityInfo,
@@ -42,12 +42,31 @@ export class EndEventProcessor {
       }));
     });
 
-    if (removed.length > 0) {
+    if (removedBuffs.length > 0) {
       steps.push({
         kind: StepKind.BuffRemoved,
         source,
         eventName,
-        removed,
+        removed: removedBuffs,
+        powerId,
+      });
+    }
+
+    const removedDebuffs = allCards.flatMap((card) => {
+      const debuffs = card.removeEventBoundDebuffs(eventName);
+      return debuffs.map((d) => ({
+        target: card.identityInfo,
+        kind: d.type,
+        value: d.value,
+      }));
+    });
+
+    if (removedDebuffs.length > 0) {
+      steps.push({
+        kind: StepKind.DebuffRemoved,
+        source,
+        eventName,
+        removed: removedDebuffs,
         powerId,
       });
     }

@@ -434,14 +434,25 @@ export class FightingCard {
       .filter((event): event is string => event !== undefined);
   }
 
-  public decreaseBuffAndDebuffDuration(): void {
-    this.buffs = this.buffs
-      .map((buff) => ({ ...buff, duration: buff.duration - 1 }))
-      .filter((buff) => buff.duration > 0);
+  public decreaseBuffAndDebuffDuration(): {
+    expiredBuffs: Buff[];
+    expiredDebuffs: Debuff[];
+  } {
+    const decremented = this.buffs.map((b) => ({
+      ...b,
+      duration: b.duration - 1,
+    }));
+    const expiredBuffs = decremented.filter((b) => b.duration <= 0);
+    this.buffs = decremented.filter((b) => b.duration > 0);
 
-    this.debuffs = this.debuffs
-      .map((debuff) => ({ ...debuff, duration: debuff.duration - 1 }))
-      .filter((debuff) => debuff.duration > 0);
+    const decrementedDebuffs = this.debuffs.map((d) => ({
+      ...d,
+      duration: d.duration - 1,
+    }));
+    const expiredDebuffs = decrementedDebuffs.filter((d) => d.duration <= 0);
+    this.debuffs = decrementedDebuffs.filter((d) => d.duration > 0);
+
+    return { expiredBuffs, expiredDebuffs };
   }
 
   public applyDebuff(
@@ -449,17 +460,31 @@ export class FightingCard {
     debuffRate: number,
     duration: number,
     powerId?: string,
+    terminationEvent?: string,
   ): Debuff {
     const debuff: Debuff = {
       type: debuffType,
       value: this.computeAttributeModifierValue(debuffType, debuffRate),
       duration: duration,
+      terminationEvent,
       powerId,
     };
 
     this.debuffs.push(debuff);
 
     return debuff;
+  }
+
+  public removeEventBoundDebuffs(
+    eventName: string,
+  ): { type: DebuffType; value: number }[] {
+    const removed = this.debuffs
+      .filter((d) => d.terminationEvent === eventName)
+      .map((d) => ({ type: d.type, value: d.value }));
+
+    this.debuffs = this.debuffs.filter((d) => d.terminationEvent !== eventName);
+
+    return removed;
   }
 
   private computeActualStat(base: number, type: BuffType | DebuffType): number {

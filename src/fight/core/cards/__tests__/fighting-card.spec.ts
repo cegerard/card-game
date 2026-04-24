@@ -135,6 +135,142 @@ describe('FightingCard.removeEventBoundBuffs()', () => {
   });
 });
 
+describe('FightingCard.removeEventBoundDebuffs()', () => {
+  describe('when matching event-bound debuffs exist', () => {
+    let card;
+
+    beforeEach(() => {
+      card = createFightingCard({
+        attack: 100,
+        defense: 0,
+        accuracy: 0,
+        agility: 0,
+      });
+      card.applyDebuff('attack', 0.4, Infinity, undefined, 'lions-end');
+    });
+
+    it('returns the list of removed debuffs', () => {
+      const removed = card.removeEventBoundDebuffs('lions-end');
+
+      expect(removed).toHaveLength(1);
+    });
+
+    it('returns correct type for removed debuff', () => {
+      const removed = card.removeEventBoundDebuffs('lions-end');
+
+      expect(removed[0].type).toBe('attack');
+    });
+
+    it('removes the debuff from the card', () => {
+      card.removeEventBoundDebuffs('lions-end');
+
+      expect(card.actualAttack).toBe(100);
+    });
+  });
+
+  describe('when non-matching debuffs exist', () => {
+    let card;
+
+    beforeEach(() => {
+      card = createFightingCard({
+        attack: 100,
+        defense: 0,
+        accuracy: 0,
+        agility: 0,
+      });
+      card.applyDebuff('attack', 0.4, Infinity, undefined, 'other-event');
+    });
+
+    it('leaves non-matching debuffs in place', () => {
+      card.removeEventBoundDebuffs('lions-end');
+
+      expect(card.actualAttack).toBe(60);
+    });
+
+    it('returns empty array when no match', () => {
+      const removed = card.removeEventBoundDebuffs('lions-end');
+
+      expect(removed).toHaveLength(0);
+    });
+  });
+});
+
+describe('FightingCard.decreaseBuffAndDebuffDuration()', () => {
+  describe('when buffs expire', () => {
+    it('returns expired buffs', () => {
+      const card = createFightingCard({
+        attack: 100,
+        defense: 0,
+        accuracy: 0,
+        agility: 0,
+      });
+      card.applyBuff('attack', 0.2, 1);
+
+      const { expiredBuffs } = card.decreaseBuffAndDebuffDuration();
+
+      expect(expiredBuffs).toHaveLength(1);
+    });
+
+    it('does not return still-active buffs', () => {
+      const card = createFightingCard({
+        attack: 100,
+        defense: 0,
+        accuracy: 0,
+        agility: 0,
+      });
+      card.applyBuff('attack', 0.2, 2);
+
+      const { expiredBuffs } = card.decreaseBuffAndDebuffDuration();
+
+      expect(expiredBuffs).toHaveLength(0);
+    });
+
+    it('does not return Infinity-duration buffs', () => {
+      const card = createFightingCard({
+        attack: 100,
+        defense: 0,
+        accuracy: 0,
+        agility: 0,
+      });
+      card.applyBuff('attack', 0.2, Infinity);
+
+      const { expiredBuffs } = card.decreaseBuffAndDebuffDuration();
+
+      expect(expiredBuffs).toHaveLength(0);
+    });
+  });
+
+  describe('when debuffs expire', () => {
+    it('returns expired debuffs', () => {
+      const card = createFightingCard({
+        attack: 100,
+        defense: 0,
+        accuracy: 0,
+        agility: 0,
+      });
+      card.applyDebuff('attack', 0.2, 1);
+
+      const { expiredDebuffs } = card.decreaseBuffAndDebuffDuration();
+
+      expect(expiredDebuffs).toHaveLength(1);
+    });
+
+    it('does not return still-active debuffs', () => {
+      const card = createFightingCard({
+        attack: 100,
+        defense: 0,
+        accuracy: 0,
+        agility: 0,
+      });
+      card.applyDebuff('attack', 0.2, 2);
+
+      const { expiredDebuffs } = card.decreaseBuffAndDebuffDuration();
+
+      expect(expiredDebuffs).toHaveLength(0);
+    });
+  });
+});
+
 describe('FightingCard number precision', () => {
   describe('applyBuff()', () => {
     it('rounds buff value to 2 decimal places', () => {
