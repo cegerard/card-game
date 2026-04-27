@@ -12,9 +12,12 @@ import { parseReport } from './parser.js';
 const esc = v => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 /** Return the CSS variable name for an event's colour. */
-function eventColor(kind, subtype) {
+function eventColor(kind, subtype, ev) {
   if (kind === 'state_effect') return EVENT_COLOR[`state_effect_${subtype}`] ?? EVENT_COLOR.state_effect_burn;
-  if (kind === 'fight_end') return EVENT_COLOR.fight_end;
+  if (kind === 'fight_end') {
+    const bossWins = ev?.winner && ev.winner === app.data?.teams?.B?.name;
+    return bossWins ? '#f43f5e' : '#22c55e';
+  }
   return EVENT_COLOR[kind] ?? null;
 }
 
@@ -270,7 +273,7 @@ function updateDisplay() {
   const eventCard = document.getElementById('event-card');
   if (eventCard) {
     eventCard.innerHTML = buildEventCard(event);
-    const color = event ? (eventColor(event.kind, event.type ?? event.status) ?? null) : null;
+    const color = event ? (eventColor(event.kind, event.type ?? event.status, event) ?? null) : null;
     eventCard.style.borderColor  = color ? color + '55' : 'var(--border)';
     eventCard.style.boxShadow    = color ? `0 0 24px ${color}22` : 'none';
     eventCard.classList.toggle('event-card--empty', !event);
@@ -290,7 +293,7 @@ function updateDisplay() {
     const current = document.querySelector(`.log-item[data-step="${step}"]`);
     if (current) {
       const ev    = data.events[step - 1];
-      const color = eventColor(ev.kind, ev.type ?? ev.status) ?? 'var(--accent)';
+      const color = eventColor(ev.kind, ev.type ?? ev.status, ev) ?? 'var(--accent)';
       current.classList.add('log-item--active');
       current.style.borderColor = color;
       current.style.background  = 'var(--surface)';
@@ -604,8 +607,10 @@ function describeEvent(ev) {
       return { icon: ICON.targeting_reverted, text: `Targeting reverted — ${ev.eventName ?? ''}`, color: EVENT_COLOR.targeting_reverted };
     case 'effect_removed':
       return { icon: ICON.effect_removed, text: `Effects removed — ${ev.eventName ?? ''}`, color: EVENT_COLOR.effect_removed };
-    case 'fight_end':
-      return { icon: ev.winner ? ICON.fight_end : ICON.fight_end_loss, text: `FIGHT END — ${ev.winner ? `Winner: ${ev.winner}` : 'Draw'}`, color: EVENT_COLOR.fight_end };
+    case 'fight_end': {
+      const bossWins = ev.winner && ev.winner === app.data?.teams?.B?.name;
+      return { icon: (ev.winner && !bossWins) ? ICON.fight_end : ICON.fight_end_loss, text: `FIGHT END — ${ev.winner ? `Winner: ${ev.winner}` : 'Draw'}`, color: bossWins ? '#f43f5e' : '#22c55e' };
+    }
     default:
       return { icon: ICON.unknown, text: ev.kind ?? 'Unknown event', color: '#94a3b8' };
   }
