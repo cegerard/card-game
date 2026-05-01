@@ -1,0 +1,402 @@
+export const DEMO_DATA = {
+  1: {
+    kind: 'attack',
+    name: 'Frappe solide',
+    attacker: { id: 'kaelion', name: 'Kaelion', deckIdentity: 'Héros-0' },
+    damages: [
+      {
+        defender: {
+          id: 'boss',
+          name: 'Seigneur des Cendres',
+          deckIdentity: 'Boss-0',
+        },
+        damage: 60,
+        isCritical: false,
+        dodge: false,
+        remainingHealth: 1140,
+        kind: ['PHYSICAL'],
+      },
+    ],
+    energy: 10,
+  },
+  2: {
+    kind: 'attack',
+    name: 'Poings de Braise',
+    attacker: { id: 'arionis', name: 'Arionis', deckIdentity: 'Héros-1' },
+    damages: [
+      {
+        defender: { id: 'ennemy', name: 'Ennemy 1', deckIdentity: 'Boss-1' },
+        damage: 0,
+        isCritical: false,
+        dodge: false,
+        remainingHealth: 700,
+        kind: ['PHYSICAL', 'FIRE'],
+      },
+    ],
+    energy: 10,
+  },
+  3: {
+    kind: 'status_change',
+    status: 'burn',
+    card: { id: 'ennemy', name: 'Ennemy 1', deckIdentity: 'Boss-1' },
+  },
+  4: {
+    kind: 'buff',
+    name: 'Fierté du lion',
+    source: { id: 'arionis', name: 'Arionis', deckIdentity: 'Héros-1' },
+    buffs: [
+      {
+        target: { id: 'arionis', name: 'Arionis', deckIdentity: 'Héros-1' },
+        kind: 'attack',
+        value: 4.25,
+        remainingTurns: null,
+      },
+    ],
+    energy: 10,
+  },
+  5: {
+    kind: 'attack',
+    name: 'Écrasement',
+    attacker: {
+      id: 'boss',
+      name: 'Seigneur des Cendres',
+      deckIdentity: 'Boss-0',
+    },
+    damages: [
+      {
+        defender: { id: 'kaelion', name: 'Kaelion', deckIdentity: 'Héros-0' },
+        damage: 100,
+        isCritical: false,
+        dodge: false,
+        remainingHealth: 600,
+        kind: ['PHYSICAL', 'FIRE'],
+      },
+    ],
+    energy: 10,
+  },
+  6: {
+    kind: 'status_change',
+    status: 'poison',
+    card: { id: 'kaelion', name: 'Kaelion', deckIdentity: 'Héros-0' },
+  },
+  7: {
+    kind: 'buff',
+    name: 'Rage du boss',
+    source: {
+      id: 'boss',
+      name: 'Seigneur des Cendres',
+      deckIdentity: 'Boss-0',
+    },
+    buffs: [
+      {
+        target: {
+          id: 'boss',
+          name: 'Seigneur des Cendres',
+          deckIdentity: 'Boss-0',
+        },
+        kind: 'attack',
+        value: 18,
+        remainingTurns: 3,
+      },
+    ],
+    energy: 10,
+  },
+  8: {
+    kind: 'attack',
+    name: 'Frappe solide',
+    attacker: { id: 'ennemy', name: 'Ennemy 1', deckIdentity: 'Boss-1' },
+    damages: [
+      {
+        defender: { id: 'arionis', name: 'Arionis', deckIdentity: 'Héros-1' },
+        damage: 0,
+        isCritical: false,
+        dodge: false,
+        remainingHealth: 550,
+        kind: ['PHYSICAL'],
+      },
+    ],
+    energy: 10,
+  },
+  9: {
+    kind: 'state_effect',
+    card: { id: 'ennemy', name: 'Ennemy 1', deckIdentity: 'Boss-1' },
+    type: 'burn',
+    damage: 8.5,
+    remainingTurns: 2,
+    remainingHealth: 691.5,
+  },
+  10: {
+    kind: 'attack',
+    name: 'Poings de Braise',
+    attacker: { id: 'arionis', name: 'Arionis', deckIdentity: 'Héros-1' },
+    damages: [
+      {
+        defender: { id: 'ennemy', name: 'Ennemy 1', deckIdentity: 'Boss-1' },
+        damage: 0,
+        isCritical: false,
+        dodge: false,
+        remainingHealth: 691.5,
+        kind: ['PHYSICAL', 'FIRE'],
+      },
+    ],
+    energy: 20,
+  },
+  11: {
+    kind: 'buff',
+    name: 'Fierté du lion',
+    source: { id: 'arionis', name: 'Arionis', deckIdentity: 'Héros-1' },
+    buffs: [
+      {
+        target: { id: 'arionis', name: 'Arionis', deckIdentity: 'Héros-1' },
+        kind: 'attack',
+        value: 4.25,
+        remainingTurns: null,
+      },
+    ],
+    energy: 20,
+  },
+  12: {
+    kind: 'attack',
+    name: 'Frappe solide',
+    attacker: { id: 'kaelion', name: 'Kaelion', deckIdentity: 'Héros-0' },
+    damages: [
+      {
+        defender: {
+          id: 'boss',
+          name: 'Seigneur des Cendres',
+          deckIdentity: 'Boss-0',
+        },
+        damage: 60,
+        isCritical: false,
+        dodge: false,
+        remainingHealth: 1080,
+        kind: ['PHYSICAL'],
+      },
+    ],
+    energy: 20,
+  },
+  13: {
+    kind: 'state_effect',
+    card: { id: 'kaelion', name: 'Kaelion', deckIdentity: 'Héros-0' },
+    type: 'poison',
+    damage: 36,
+    remainingTurns: 2,
+    remainingHealth: 564,
+  },
+  18: {
+    kind: 'special_attack',
+    name: 'Rugissement solaire',
+    attacker: { id: 'arionis', name: 'Arionis', deckIdentity: 'Héros-1' },
+    damages: [
+      {
+        defender: {
+          id: 'boss',
+          name: 'Seigneur des Cendres',
+          deckIdentity: 'Boss-0',
+        },
+        damage: 153,
+        isCritical: false,
+        dodge: false,
+        remainingHealth: 927,
+      },
+      {
+        defender: { id: 'ennemy', name: 'Ennemy 1', deckIdentity: 'Boss-1' },
+        damage: 73,
+        isCritical: false,
+        dodge: false,
+        remainingHealth: 618.5,
+      },
+    ],
+    energy: 0,
+  },
+  19: {
+    kind: 'buff',
+    name: 'Rugissement solaire',
+    source: { id: 'arionis', name: 'Arionis', deckIdentity: 'Héros-1' },
+    buffs: [
+      {
+        target: { id: 'kaelion', name: 'Kaelion', deckIdentity: 'Héros-0' },
+        kind: 'attack',
+        value: 6,
+        remainingTurns: 1,
+      },
+      {
+        target: { id: 'kaelion', name: 'Kaelion', deckIdentity: 'Héros-0' },
+        kind: 'defense',
+        value: 8,
+        remainingTurns: 1,
+      },
+    ],
+    energy: 0,
+  },
+  20: {
+    kind: 'status_change',
+    status: 'burn',
+    card: { id: 'boss', name: 'Seigneur des Cendres', deckIdentity: 'Boss-0' },
+  },
+  33: {
+    kind: 'attack',
+    name: 'Griffes ardentes',
+    attacker: { id: 'arionis', name: 'Arionis', deckIdentity: 'Héros-1' },
+    damages: [
+      {
+        defender: { id: 'ennemy', name: 'Ennemy 1', deckIdentity: 'Boss-1' },
+        damage: 0,
+        isCritical: false,
+        dodge: false,
+        remainingHealth: 610,
+        kind: ['PHYSICAL'],
+      },
+      {
+        defender: { id: 'ennemy', name: 'Ennemy 1', deckIdentity: 'Boss-1' },
+        damage: 0,
+        isCritical: false,
+        dodge: false,
+        remainingHealth: 610,
+        kind: ['PHYSICAL'],
+      },
+      {
+        defender: { id: 'ennemy', name: 'Ennemy 1', deckIdentity: 'Boss-1' },
+        damage: 0,
+        isCritical: false,
+        dodge: false,
+        remainingHealth: 610,
+        kind: ['PHYSICAL'],
+      },
+      {
+        defender: { id: 'ennemy', name: 'Ennemy 1', deckIdentity: 'Boss-1' },
+        damage: 0,
+        isCritical: false,
+        dodge: false,
+        remainingHealth: 610,
+        kind: ['PHYSICAL'],
+      },
+      {
+        defender: { id: 'ennemy', name: 'Ennemy 1', deckIdentity: 'Boss-1' },
+        damage: 5,
+        isCritical: false,
+        dodge: false,
+        remainingHealth: 605,
+        kind: ['FIRE'],
+      },
+    ],
+    energy: 10,
+  },
+  39: {
+    kind: 'attack',
+    name: 'Écrasement',
+    attacker: {
+      id: 'boss',
+      name: 'Seigneur des Cendres',
+      deckIdentity: 'Boss-0',
+    },
+    damages: [
+      {
+        defender: { id: 'kaelion', name: 'Kaelion', deckIdentity: 'Héros-0' },
+        damage: 154,
+        isCritical: false,
+        dodge: false,
+        remainingHealth: 0,
+        kind: ['PHYSICAL', 'FIRE'],
+      },
+    ],
+    energy: 50,
+  },
+  40: {
+    kind: 'status_change',
+    card: { id: 'kaelion', name: 'Kaelion', deckIdentity: 'Héros-0' },
+    status: 'dead',
+  },
+  44: {
+    kind: 'buff',
+    name: 'Buff Héroïque',
+    source: { id: 'arionis', name: 'Arionis', deckIdentity: 'Héros-1' },
+    buffs: [
+      {
+        target: { id: 'arionis', name: 'Arionis', deckIdentity: 'Héros-1' },
+        kind: 'attack',
+        value: 34,
+        remainingTurns: null,
+      },
+    ],
+    energy: 20,
+    powerId: 'lion-heritage',
+  },
+  45: {
+    name: 'Vengeance',
+    kind: 'targeting_override',
+    source: { id: 'arionis', name: 'Arionis', deckIdentity: 'Héros-1' },
+    previousStrategy: 'from-position',
+    newStrategy: 'targeted-card',
+    powerId: 'lion-heritage',
+  },
+  48: {
+    kind: 'special_attack',
+    name: 'Tempête infernale',
+    attacker: {
+      id: 'boss',
+      name: 'Seigneur des Cendres',
+      deckIdentity: 'Boss-0',
+    },
+    damages: [
+      {
+        defender: { id: 'arionis', name: 'Arionis', deckIdentity: 'Héros-1' },
+        damage: 408,
+        isCritical: false,
+        dodge: false,
+        remainingHealth: 142,
+      },
+    ],
+    energy: 0,
+  },
+  49: {
+    kind: 'status_change',
+    status: 'burn',
+    card: { id: 'arionis', name: 'Arionis', deckIdentity: 'Héros-1' },
+  },
+  52: {
+    kind: 'attack',
+    name: 'Écrasement',
+    attacker: {
+      id: 'boss',
+      name: 'Seigneur des Cendres',
+      deckIdentity: 'Boss-0',
+    },
+    damages: [
+      {
+        defender: { id: 'arionis', name: 'Arionis', deckIdentity: 'Héros-1' },
+        damage: 184,
+        isCritical: false,
+        dodge: false,
+        remainingHealth: 0,
+        kind: ['PHYSICAL', 'FIRE'],
+      },
+    ],
+    energy: 10,
+  },
+  53: {
+    kind: 'status_change',
+    card: { id: 'arionis', name: 'Arionis', deckIdentity: 'Héros-1' },
+    status: 'dead',
+  },
+  54: {
+    kind: 'effect_removed',
+    source: { id: 'arionis', name: 'Arionis', deckIdentity: 'Héros-1' },
+    eventName: 'lion-heritage-end',
+    removed: [
+      {
+        target: {
+          id: 'boss',
+          name: 'Seigneur des Cendres',
+          deckIdentity: 'Boss-0',
+        },
+        effectType: 'burn',
+      },
+      {
+        target: { id: 'ennemy', name: 'Ennemy 1', deckIdentity: 'Boss-1' },
+        effectType: 'burn',
+      },
+    ],
+  },
+  56: { kind: 'fight_end', winner: 'Boss' },
+};
