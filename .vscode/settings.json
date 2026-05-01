@@ -6,15 +6,10 @@
     }
   ],
   "chat.promptFilesLocations": {
-    ".github/prompts": true,
-    ".github/prompts/**": true,
-    "docs/prompts/**": true,
-    ".aidd/prompts/**": true
+    ".github/prompts": true
   },
   "chat.instructionsFilesLocations": {
-    ".github/instructions": true,
-    ".github/instructions/**": true,
-    "docs/rules/**": true
+    ".github/instructions": true
   },
   "cSpell.words": ["debuff", "debuffs"]
 }
