@@ -8,6 +8,10 @@ export class RandomizerFake implements Randomizer {
     return this.nextRandomValue;
   }
 
+  public random(): number {
+    return this.nextRandomValue;
+  }
+
   public setNextRandomValue(value: number): RandomizerFake {
     this.nextRandomValue = value;
     return this;

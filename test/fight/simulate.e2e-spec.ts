@@ -52,11 +52,13 @@ describe('Simulate fight', () => {
                 name: 'Simple Attack',
                 damages: [{ type: 'PHYSICAL', rate: 1.0 }],
                 targetingStrategy: 'position-based',
-                effect: {
-                  type: 'BURN',
-                  rate: 0.2,
-                  level: 3,
-                },
+                effects: [
+                  {
+                    type: 'BURN',
+                    rate: 0.2,
+                    level: 3,
+                  },
+                ],
               },
               others: [
                 {
@@ -99,11 +101,13 @@ describe('Simulate fight', () => {
                 name: 'Simple Attack',
                 damages: [{ type: 'PHYSICAL', rate: 1.0 }],
                 targetingStrategy: 'position-based',
-                effect: {
-                  type: 'FREEZE',
-                  rate: 0.35,
-                  level: 2,
-                },
+                effects: [
+                  {
+                    type: 'FREEZE',
+                    rate: 0.35,
+                    level: 2,
+                  },
+                ],
               },
               others: [],
             },
@@ -149,11 +153,13 @@ describe('Simulate fight', () => {
                 name: 'Simple Attack',
                 damages: [{ type: 'PHYSICAL', rate: 1.0 }],
                 targetingStrategy: 'position-based',
-                effect: {
-                  type: 'POISON',
-                  rate: 0.5,
-                  level: 1,
-                },
+                effects: [
+                  {
+                    type: 'POISON',
+                    rate: 0.5,
+                    level: 1,
+                  },
+                ],
               },
               others: [],
             },

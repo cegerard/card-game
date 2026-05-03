@@ -75,12 +75,14 @@ function buildPayload() {
               name: 'Fire Strike',
               damages: [{ type: 'FIRE', rate: 1.0 }],
               targetingStrategy: 'position-based',
-              effect: {
-                type: 'BURN',
-                rate: 1.0,
-                level: 1,
-                terminationEvent: 'fire-aura-end',
-              },
+              effects: [
+                {
+                  type: 'BURN',
+                  rate: 1.0,
+                  level: 1,
+                  terminationEvent: 'fire-aura-end',
+                },
+              ],
             },
             others: [
               {

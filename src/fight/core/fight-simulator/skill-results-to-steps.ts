@@ -88,14 +88,12 @@ export function skillResultsToSteps(
                 },
               ];
             }
-            if (r.effect) {
-              return [
-                {
-                  kind: StepKind.StatusChange,
-                  status: r.effect.type as status,
-                  card: r.effect.card.identityInfo,
-                },
-              ];
+            if (r.effects?.length) {
+              return r.effects.map((effect) => ({
+                kind: StepKind.StatusChange as const,
+                status: effect.type as status,
+                card: effect.card.identityInfo,
+              }));
             }
             return [];
           },

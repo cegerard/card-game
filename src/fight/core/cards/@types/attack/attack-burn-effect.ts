@@ -5,6 +5,7 @@ import { FightingContext } from '../fighting-context';
 import { CardStateBurned } from '../state/card-state-burned';
 import { EffectTriggeredDebuff } from './effect-triggered-debuff';
 import { round2 } from '../../../../tools/round';
+import { Randomizer } from '../../../randomizer';
 
 export class BurnAttackEffect implements AttackEffect {
   public readonly rate: number;
@@ -12,17 +13,23 @@ export class BurnAttackEffect implements AttackEffect {
   public readonly type = 'burn' as const;
   public readonly triggeredDebuff?: EffectTriggeredDebuff;
   public readonly terminationEvent?: string;
+  public readonly probability?: number;
+  private readonly randomizer: Randomizer;
 
   constructor(
     rate: number,
     level: EffectLevel,
+    randomizer: Randomizer,
     triggeredDebuff?: EffectTriggeredDebuff,
     terminationEvent?: string,
+    probability?: number,
   ) {
     this.rate = rate;
     this.level = level;
+    this.randomizer = randomizer;
     this.triggeredDebuff = triggeredDebuff;
     this.terminationEvent = terminationEvent;
+    this.probability = probability;
   }
 
   public applyEffect(
@@ -30,6 +37,11 @@ export class BurnAttackEffect implements AttackEffect {
     card: FightingCard,
     _context: FightingContext,
   ): EffectResult {
+    if (
+      this.probability !== undefined &&
+      this.randomizer.random() >= this.probability
+    )
+      return;
     if (defender.burnLevel >= this.level) return;
     if (defender.frozenLevel > this.level) return;
 

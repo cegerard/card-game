@@ -41,7 +41,7 @@ export class ActionStage {
 
   public computeNextAction(cards: FightingCard[]): Step[] {
     const attacksReports = cards.reduce((acc: ActionReport[], card) => {
-      if (card.frozenLevel > 0) return acc;
+      if (card.frozenLevel > 0 || card.isStunted) return acc;
 
       card.tickSkills();
 
@@ -233,28 +233,29 @@ export class ActionStage {
           status: 'dead',
         });
         report.statusChanges.push(...this.deathSkillHandler.drainSteps());
-      } else if (!defensiveCard.isDead() && damageDealt.effect) {
-        report.statusChanges.push({
-          kind: StepKind.StatusChange,
-          status: damageDealt.effect.type,
-          card: damageDealt.effect.card.identityInfo,
-        });
-        if (damageDealt.effect.triggeredDebuff) {
-          const { card: debuffTarget, debuff } =
-            damageDealt.effect.triggeredDebuff;
+      } else if (!defensiveCard.isDead() && damageDealt.effects?.length) {
+        for (const effect of damageDealt.effects) {
           report.statusChanges.push({
-            kind: StepKind.Debuff,
-            source: attackerCard.identityInfo,
-            debuffs: [
-              {
-                target: debuffTarget.identityInfo,
-                kind: debuff.type,
-                value: debuff.value,
-                remainingTurns: debuff.duration,
-              },
-            ],
-            energy: attackerCard.actualEnergy,
+            kind: StepKind.StatusChange,
+            status: effect.type,
+            card: effect.card.identityInfo,
           });
+          if (effect.triggeredDebuff) {
+            const { card: debuffTarget, debuff } = effect.triggeredDebuff;
+            report.statusChanges.push({
+              kind: StepKind.Debuff,
+              source: attackerCard.identityInfo,
+              debuffs: [
+                {
+                  target: debuffTarget.identityInfo,
+                  kind: debuff.type,
+                  value: debuff.value,
+                  remainingTurns: debuff.duration,
+                },
+              ],
+              energy: attackerCard.actualEnergy,
+            });
+          }
         }
       }
     });

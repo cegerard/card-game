@@ -18,6 +18,7 @@ import { DeathSkillHandler } from '../../fight-simulator/death-skill-handler';
 import { BurnAttackEffect } from '../../cards/@types/attack/attack-burn-effect';
 import { EffectTriggeredDebuff } from '../../cards/@types/attack/effect-triggered-debuff';
 import { RandomizerFake } from '../../../../../test/helpers/randomizer-fake';
+import { MathRandomizer } from '../../../tools/math-randomizer';
 import { StepKind } from '../../fight-simulator/@types/step';
 import { BuffApplication } from '../../cards/@types/buff/buff-application';
 import { BuffReport } from '../../fight-simulator/@types/buff-report';
@@ -74,13 +75,14 @@ describe('ActionStage', () => {
       const burnEffect = new BurnAttackEffect(
         0.1,
         1,
+        new MathRandomizer(),
         new EffectTriggeredDebuff(1.0, 'defense', 0.1, 2, randomizer),
       );
       const attackWithBurn = new SimpleAttack(
         'attack',
         [new DamageComposition(DamageType.PHYSICAL, 1)],
         POSITION_BASED,
-        burnEffect,
+        [burnEffect],
       );
       const HIGH_ENERGY_SPECIAL = new SpecialAttack(
         'special',

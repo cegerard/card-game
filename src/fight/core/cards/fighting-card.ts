@@ -8,6 +8,7 @@ import { CardState } from './@types/state/card-state';
 import { StateEffectType } from './@types/state/state-effect-type';
 import { StateResult } from './@types/action-result/state-result';
 import { CardStateFrozen } from './@types/state/card-state-frozen';
+import { CardStateStunted } from './@types/state/card-state-stunted';
 import { EffectLevel } from './@types/attack/effect-level';
 import { Buff } from './@types/buff/buff';
 import { Debuff } from './@types/buff/debuff';
@@ -66,6 +67,7 @@ export class FightingCard {
   private poisoned?: CardState;
   private burned?: CardState;
   private frozen?: CardState;
+  private stunted?: CardState;
 
   constructor(
     id: string,
@@ -168,6 +170,10 @@ export class FightingCard {
     return !!this.frozen;
   }
 
+  public get isStunted(): boolean {
+    return !!this.stunted;
+  }
+
   public get burnLevel(): EffectLevel {
     return this.burned?.level ?? 0;
   }
@@ -189,6 +195,10 @@ export class FightingCard {
 
     if (newState.type === 'freeze') {
       this.frozen = newState;
+    }
+
+    if (newState.type === 'stunt') {
+      this.stunted = newState;
     }
   }
 
@@ -281,9 +291,14 @@ export class FightingCard {
       stateResults.push(this.burned.applyState(this));
     }
 
+    if (this.stunted && !this.frozen) {
+      stateResults.push(this.stunted.applyState(this));
+    }
+
     this.frozen = this.frozen?.remainingTurns ? this.frozen : undefined;
     this.poisoned = this.poisoned?.remainingTurns ? this.poisoned : undefined;
     this.burned = this.burned?.remainingTurns ? this.burned : undefined;
+    this.stunted = this.stunted?.remainingTurns ? this.stunted : undefined;
 
     return stateResults.filter((result) => result !== undefined);
   }
@@ -319,8 +334,14 @@ export class FightingCard {
   public collectsDamages(damage: number): number {
     let causedDamages = Math.max(0, damage - this.defense);
     if (this.frozen) {
-      const frozenState = this.frozen as CardStateFrozen;
-      causedDamages = frozenState.applyDamageRate(causedDamages);
+      causedDamages = (this.frozen as CardStateFrozen).applyDamageRate(
+        causedDamages,
+      );
+    }
+    if (this.stunted) {
+      causedDamages = (this.stunted as CardStateStunted).applyDamageRate(
+        causedDamages,
+      );
     }
     this.receivedDamages += causedDamages;
 
@@ -330,8 +351,14 @@ export class FightingCard {
   public applyFinalDamage(damage: number): number {
     let causedDamages = damage;
     if (this.frozen) {
-      const frozenState = this.frozen as CardStateFrozen;
-      causedDamages = frozenState.applyDamageRate(causedDamages);
+      causedDamages = (this.frozen as CardStateFrozen).applyDamageRate(
+        causedDamages,
+      );
+    }
+    if (this.stunted) {
+      causedDamages = (this.stunted as CardStateStunted).applyDamageRate(
+        causedDamages,
+      );
     }
     this.receivedDamages += causedDamages;
 
@@ -411,6 +438,11 @@ export class FightingCard {
     if (this.frozen?.terminationEvent === eventName) {
       removed.push({ type: this.frozen.type, card });
       this.frozen = undefined;
+    }
+
+    if (this.stunted?.terminationEvent === eventName) {
+      removed.push({ type: this.stunted.type, card });
+      this.stunted = undefined;
     }
 
     return removed;

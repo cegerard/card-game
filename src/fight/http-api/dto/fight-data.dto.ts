@@ -71,6 +71,7 @@ export enum Effect {
   POISON = 'POISON',
   BURN = 'BURN',
   FREEZE = 'FREEZE',
+  STUNT = 'STUNT',
 }
 
 export enum DodgeStrategy {
@@ -147,6 +148,10 @@ class EffectDto {
   @IsString()
   @IsNotEmpty()
   terminationEvent?: string;
+
+  @IsOptional()
+  @IsNumber()
+  probability?: number;
 }
 
 class BuffApplicationDto {
@@ -236,9 +241,10 @@ class SimpleAttackDto {
   targetingStrategy: TargetingStrategy;
 
   @IsOptional()
-  @ValidateNested()
+  @IsArray()
+  @ValidateNested({ each: true })
   @Type(/* istanbul ignore next */ () => EffectDto)
-  effect?: EffectDto;
+  effects?: EffectDto[];
 }
 
 class MultipleAttackDto {
@@ -266,9 +272,10 @@ class MultipleAttackDto {
   amplifier?: number;
 
   @IsOptional()
-  @ValidateNested()
+  @IsArray()
+  @ValidateNested({ each: true })
   @Type(/* istanbul ignore next */ () => EffectDto)
-  effect?: EffectDto;
+  effects?: EffectDto[];
 
   @IsOptional()
   @IsArray()
