@@ -196,13 +196,13 @@ function createSimpleAttack(params: {
     ),
   ];
   const targetingStrategy = params.targetingStrategy ?? 'position-based';
-  const effect = params.effect ? createEffect(params.effect) : undefined;
+  const effects = params.effect ? [createEffect(params.effect)] : undefined;
 
   return new SimpleAttack(
     params.name ?? faker.word.noun(),
     damages,
     createTargetingStrategy(targetingStrategy),
-    effect,
+    effects,
   );
 }
 

@@ -130,10 +130,10 @@ describe('MultipleAttack', () => {
         damages,
         new TargetedAll(),
         0,
-        effect,
+        [effect],
       );
       const attack = multipleAttack.launch(attacker, context);
-      expect(attack.results[0].effect).toBeDefined();
+      expect(attack.results[0].effects?.[0]).toBeDefined();
     });
   });
 

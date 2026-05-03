@@ -38,6 +38,7 @@ import { EffectLevel } from '../core/cards/@types/attack/effect-level';
 import { AttackEffect } from '../core/cards/@types/attack/attack-effect';
 import { BurnAttackEffect } from '../core/cards/@types/attack/attack-burn-effect';
 import { FreezeAttackEffect } from '../core/cards/@types/attack/attack-freeze-effect';
+import { StuntAttackEffect } from '../core/cards/@types/attack/attack-stunt-effect';
 import { EffectTriggeredDebuff } from '../core/cards/@types/attack/effect-triggered-debuff';
 import { MathRandomizer } from '../tools/math-randomizer';
 import { BuffApplication } from '../core/cards/@types/buff/buff-application';
@@ -154,7 +155,7 @@ export class FightController {
       const maDamages = ma.damages.map(
         (d) => new DamageComposition(d.type, d.rate),
       );
-      const maEffect = ma.effect ? this.buildEffect(ma.effect) : undefined;
+      const maEffects = this.buildEffects(ma.effects);
       const maComboFinisher = ma.comboFinisher
         ? ma.comboFinisher.map((d) => new DamageComposition(d.type, d.rate))
         : undefined;
@@ -164,7 +165,7 @@ export class FightController {
         maDamages,
         buildTargetingStrategy(ma.targetingStrategy),
         ma.amplifier ?? 0,
-        maEffect,
+        maEffects,
         maComboFinisher,
       );
     } else {
@@ -174,7 +175,7 @@ export class FightController {
           'Either simpleAttack or multipleAttack must be provided',
         );
       }
-      const effect = sa.effect ? this.buildEffect(sa.effect) : undefined;
+      const saEffects = this.buildEffects(sa.effects);
       const damages = sa.damages.map(
         (d) => new DamageComposition(d.type, d.rate),
       );
@@ -182,7 +183,7 @@ export class FightController {
         sa.name,
         damages,
         buildTargetingStrategy(sa.targetingStrategy),
-        effect,
+        saEffects,
       );
     }
 
@@ -217,6 +218,26 @@ export class FightController {
     );
   }
 
+  private buildEffects(
+    effectDtos?: {
+      type: Effect;
+      rate: number;
+      level: number;
+      triggeredDebuff?: {
+        debuffType: BuffType;
+        debuffRate: number;
+        duration: number;
+        probability: number;
+        terminationEvent?: string;
+      };
+      terminationEvent?: string;
+      probability?: number;
+    }[],
+  ): AttackEffect[] | undefined {
+    if (!effectDtos?.length) return undefined;
+    return effectDtos.map((dto) => this.buildEffect(dto));
+  }
+
   private buildEffect(effectDto: {
     type: Effect;
     rate: number;
@@ -229,6 +250,7 @@ export class FightController {
       terminationEvent?: string;
     };
     terminationEvent?: string;
+    probability?: number;
   }): AttackEffect {
     const triggeredDebuff = effectDto.triggeredDebuff
       ? new EffectTriggeredDebuff(
@@ -246,21 +268,35 @@ export class FightController {
         return new PoisonAttackEffect(
           effectDto.rate,
           effectDto.level as EffectLevel,
+          new MathRandomizer(),
           triggeredDebuff,
           effectDto.terminationEvent,
+          effectDto.probability,
         );
       case Effect.BURN:
         return new BurnAttackEffect(
           effectDto.rate,
           effectDto.level as EffectLevel,
+          new MathRandomizer(),
           triggeredDebuff,
           effectDto.terminationEvent,
+          effectDto.probability,
         );
       case Effect.FREEZE:
         return new FreezeAttackEffect(
           effectDto.rate,
           effectDto.level as EffectLevel,
+          new MathRandomizer(),
           triggeredDebuff,
+          effectDto.terminationEvent,
+          effectDto.probability,
+        );
+      case Effect.STUNT:
+        return new StuntAttackEffect(
+          effectDto.rate,
+          effectDto.level as EffectLevel,
+          new MathRandomizer(),
+          effectDto.probability,
           effectDto.terminationEvent,
         );
     }
@@ -331,8 +367,8 @@ export class FightController {
         const caDamages = skillData.damages.map(
           (d) => new DamageComposition(d.type, d.rate),
         );
-        const caEffect = skillData.effect
-          ? this.buildEffect(skillData.effect)
+        const caEffects = skillData.effect
+          ? [this.buildEffect(skillData.effect)]
           : undefined;
         const caComboFinisher = skillData.comboFinisher
           ? skillData.comboFinisher.map(
@@ -346,14 +382,14 @@ export class FightController {
               caDamages,
               buildTargetingStrategy(skillData.targetingStrategy),
               skillData.amplifier ?? 0,
-              caEffect,
+              caEffects,
               caComboFinisher,
             )
           : new SimpleAttack(
               skillData.name,
               caDamages,
               buildTargetingStrategy(skillData.targetingStrategy),
-              caEffect,
+              caEffects,
             );
         return new ConditionalAttack(
           skillData.name,

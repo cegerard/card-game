@@ -9,7 +9,7 @@ export type AttackResult = {
   dodge: boolean;
   defender: FightingCard;
   remainingHealth?: number;
-  effect?: EffectResult;
+  effects?: EffectResult[];
   buffResults?: BuffResults;
   kind?: DamageType[];
 };

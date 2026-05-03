@@ -5,6 +5,8 @@ import { BurnAttackEffect } from '../../src/fight/core/cards/@types/attack/attac
 import { AttackEffect } from '../../src/fight/core/cards/@types/attack/attack-effect';
 import { EffectLevel } from '../../src/fight/core/cards/@types/attack/effect-level';
 import { FreezeAttackEffect } from '../../src/fight/core/cards/@types/attack/attack-freeze-effect';
+import { StuntAttackEffect } from '../../src/fight/core/cards/@types/attack/attack-stunt-effect';
+import { MathRandomizer } from '../../src/fight/tools/math-randomizer';
 
 export function createEffect(params: {
   rate?: number;
@@ -21,6 +23,7 @@ export function createEffect(params: {
       return new PoisonAttackEffect(
         effectRate,
         effectLevel,
+        new MathRandomizer(),
         undefined,
         params.terminationEvent,
       );
@@ -28,6 +31,7 @@ export function createEffect(params: {
       return new BurnAttackEffect(
         effectRate,
         effectLevel,
+        new MathRandomizer(),
         undefined,
         params.terminationEvent,
       );
@@ -35,6 +39,15 @@ export function createEffect(params: {
       return new FreezeAttackEffect(
         effectRate,
         effectLevel,
+        new MathRandomizer(),
+        undefined,
+        params.terminationEvent,
+      );
+    case 'stunt':
+      return new StuntAttackEffect(
+        effectRate,
+        effectLevel,
+        new MathRandomizer(),
         undefined,
         params.terminationEvent,
       );

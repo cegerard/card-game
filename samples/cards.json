@@ -150,5 +150,43 @@
       ]
     },
     "behaviors": { "dodge": "simple-dodge" }
+  },
+  {
+    "id": "kaelion",
+    "name": "Kaelion",
+    "attack": 85,
+    "defense": 50,
+    "health": 430,
+    "speed": 80,
+    "agility": 60,
+    "accuracy": 85,
+    "criticalChance": 0.08,
+    "skills": {
+      "simpleAttack": {
+        "name": "Flamme Terreuse",
+        "targetingStrategy": "position-based",
+        "damages": [
+          { "type": "PHYSICAL", "rate": 0.8 },
+          { "type": "FIRE", "rate": 0.2 },
+          { "type": "EARTH", "rate": 0.1 }
+        ],
+        "effects": [
+          {
+            "type": "BURN",
+            "rate": 0.1,
+            "level": 2,
+            "probability": 0.5
+          },
+          {
+            "type": "STUNT",
+            "rate": 0.0,
+            "level": 1,
+            "probability": 0.2
+          }
+        ]
+      },
+      "others": []
+    },
+    "behaviors": { "dodge": "simple-dodge" }
   }
 ]

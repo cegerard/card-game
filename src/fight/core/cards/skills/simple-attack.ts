@@ -12,7 +12,7 @@ export class SimpleAttack implements AttackSkill {
     public readonly name: string,
     private readonly damages: DamageComposition[],
     private readonly targetingStrategy: TargetingCardStrategy,
-    private readonly effect?: AttackEffect,
+    private readonly effects?: AttackEffect[],
   ) {}
 
   public get targetingId(): string {
@@ -59,17 +59,16 @@ export class SimpleAttack implements AttackSkill {
         );
         const collectedDamage = defender.applyFinalDamage(total);
 
-        let effectResult: EffectResult;
-        if (this.effect) {
-          effectResult = this.effect.applyEffect(defender, card, context);
-        }
+        const effects = this.effects
+          ?.map((e) => e.applyEffect(defender, card, context))
+          .filter((r): r is EffectResult => r != null);
 
         return {
           damage: collectedDamage,
           isCritical,
           dodge: false,
           defender,
-          effect: effectResult,
+          effects: effects?.length ? effects : undefined,
           kind,
         };
       }),

@@ -444,7 +444,7 @@ describe('FightController', () => {
 
         const poisonedSimpleAttack = {
           ...simpleAttack,
-          effect,
+          effects: [effect],
         };
 
         fightData = {
@@ -497,7 +497,7 @@ describe('FightController', () => {
       it('creates a fighting card with a simple attack effect defined', () => {
         fightSimulatorStub.validatePlayer1FirstCard((card) => {
           expect(
-            JSON.parse(JSON.stringify(card)).simpleAttack.effect,
+            JSON.parse(JSON.stringify(card)).simpleAttack.effects[0],
           ).toBeDefined();
         });
       });
@@ -505,7 +505,7 @@ describe('FightController', () => {
       it('creates a fighting card with a poisoned simple attack effect type', () => {
         fightSimulatorStub.validatePlayer1FirstCard((card) => {
           expect(
-            JSON.parse(JSON.stringify(card)).simpleAttack.effect.type,
+            JSON.parse(JSON.stringify(card)).simpleAttack.effects[0].type,
           ).toBe('poison');
         });
       });
@@ -513,7 +513,7 @@ describe('FightController', () => {
       it('creates a fighting card with a poisoned simple attack effect rate', () => {
         fightSimulatorStub.validatePlayer1FirstCard((card) => {
           expect(
-            JSON.parse(JSON.stringify(card)).simpleAttack.effect.rate,
+            JSON.parse(JSON.stringify(card)).simpleAttack.effects[0].rate,
           ).toBe(0.5);
         });
       });
@@ -521,7 +521,7 @@ describe('FightController', () => {
       it('creates a fighting card with a poisoned simple attack effect level', () => {
         fightSimulatorStub.validatePlayer1FirstCard((card) => {
           expect(
-            JSON.parse(JSON.stringify(card)).simpleAttack.effect.level,
+            JSON.parse(JSON.stringify(card)).simpleAttack.effects[0].level,
           ).toBe(2);
         });
       });
@@ -537,7 +537,7 @@ describe('FightController', () => {
 
         const burnedSimpleAttack = {
           ...simpleAttack,
-          effect,
+          effects: [effect],
         };
 
         fightData = {
@@ -590,7 +590,7 @@ describe('FightController', () => {
       it('creates a fighting card with a simple attack effect defined', () => {
         fightSimulatorStub.validatePlayer1FirstCard((card) => {
           expect(
-            JSON.parse(JSON.stringify(card)).simpleAttack.effect,
+            JSON.parse(JSON.stringify(card)).simpleAttack.effects[0],
           ).toBeDefined();
         });
       });
@@ -598,7 +598,7 @@ describe('FightController', () => {
       it('creates a fighting card with a burned simple attack effect type', () => {
         fightSimulatorStub.validatePlayer1FirstCard((card) => {
           expect(
-            JSON.parse(JSON.stringify(card)).simpleAttack.effect.type,
+            JSON.parse(JSON.stringify(card)).simpleAttack.effects[0].type,
           ).toBe('burn');
         });
       });
@@ -606,7 +606,7 @@ describe('FightController', () => {
       it('creates a fighting card with a burned simple attack effect rate', () => {
         fightSimulatorStub.validatePlayer1FirstCard((card) => {
           expect(
-            JSON.parse(JSON.stringify(card)).simpleAttack.effect.rate,
+            JSON.parse(JSON.stringify(card)).simpleAttack.effects[0].rate,
           ).toBe(0.2);
         });
       });
@@ -614,7 +614,7 @@ describe('FightController', () => {
       it('creates a fighting card with a burned simple attack effect level', () => {
         fightSimulatorStub.validatePlayer1FirstCard((card) => {
           expect(
-            JSON.parse(JSON.stringify(card)).simpleAttack.effect.level,
+            JSON.parse(JSON.stringify(card)).simpleAttack.effects[0].level,
           ).toBe(3);
         });
       });
@@ -630,7 +630,7 @@ describe('FightController', () => {
 
         const freezeSimpleAttack = {
           ...simpleAttack,
-          effect,
+          effects: [effect],
         };
 
         fightData = {
@@ -683,7 +683,7 @@ describe('FightController', () => {
       it('creates a fighting card with a simple attack effect defined', () => {
         fightSimulatorStub.validatePlayer1FirstCard((card) => {
           expect(
-            JSON.parse(JSON.stringify(card)).simpleAttack.effect,
+            JSON.parse(JSON.stringify(card)).simpleAttack.effects[0],
           ).toBeDefined();
         });
       });
@@ -691,7 +691,7 @@ describe('FightController', () => {
       it('creates a fighting card with a freeze simple attack effect type', () => {
         fightSimulatorStub.validatePlayer1FirstCard((card) => {
           expect(
-            JSON.parse(JSON.stringify(card)).simpleAttack.effect.type,
+            JSON.parse(JSON.stringify(card)).simpleAttack.effects[0].type,
           ).toBe('freeze');
         });
       });
@@ -699,7 +699,7 @@ describe('FightController', () => {
       it('creates a fighting card with a freeze simple attack effect rate', () => {
         fightSimulatorStub.validatePlayer1FirstCard((card) => {
           expect(
-            JSON.parse(JSON.stringify(card)).simpleAttack.effect.rate,
+            JSON.parse(JSON.stringify(card)).simpleAttack.effects[0].rate,
           ).toBe(0.2);
         });
       });
@@ -707,7 +707,7 @@ describe('FightController', () => {
       it('creates a fighting card with a freeze simple attack effect level', () => {
         fightSimulatorStub.validatePlayer1FirstCard((card) => {
           expect(
-            JSON.parse(JSON.stringify(card)).simpleAttack.effect.level,
+            JSON.parse(JSON.stringify(card)).simpleAttack.effects[0].level,
           ).toBe(2);
         });
       });
@@ -747,7 +747,7 @@ describe('FightController', () => {
                   },
                   simpleAttack: {
                     ...simpleAttack,
-                    effect,
+                    effects: [effect],
                   },
                   others: [],
                 },
@@ -770,7 +770,7 @@ describe('FightController', () => {
         const validation = (card: FightingCard) => {
           const jsonCard = JSON.parse(JSON.stringify(card));
 
-          expect(jsonCard.simpleAttack.effect.terminationEvent).toBe(
+          expect(jsonCard.simpleAttack.effects[0].terminationEvent).toBe(
             'fire-shield-end',
           );
         };

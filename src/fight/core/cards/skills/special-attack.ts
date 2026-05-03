@@ -61,7 +61,7 @@ export class SpecialAttack implements Special {
         isCritical,
         dodge: false,
         defender: target,
-        effect: effectResult,
+        effects: effectResult ? [effectResult] : undefined,
       };
     });
 

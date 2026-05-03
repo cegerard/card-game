@@ -17,6 +17,7 @@ export interface AttackEffect {
   type: string;
   triggeredDebuff?: EffectTriggeredDebuff;
   terminationEvent?: string;
+  probability?: number;
 
   applyEffect(
     defender: FightingCard,

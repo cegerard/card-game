@@ -2,6 +2,7 @@ import { PoisonAttackEffect } from '../attack-poison-effect';
 import { EffectTriggeredDebuff } from '../effect-triggered-debuff';
 import { CardStateFrozen } from '../../state/card-state-frozen';
 import { RandomizerFake } from '../../../../../../../test/helpers/randomizer-fake';
+import { MathRandomizer } from '../../../../../tools/math-randomizer';
 import { createFightingCard } from '../../../../../../../test/helpers/fighting-card';
 import { EffectResult } from '../attack-effect';
 
@@ -15,7 +16,7 @@ describe('PoisonAttackEffect number precision', () => {
   it('rounds damage value to 2 decimal places', () => {
     const attacker = createFightingCard({ attack: 33 });
     const defender = createFightingCard({ health: 100 });
-    const effect = new PoisonAttackEffect(0.1, 1);
+    const effect = new PoisonAttackEffect(0.1, 1, new MathRandomizer());
     effect.applyEffect(defender, attacker, null);
 
     const [stateResult] = defender.applyStateEffects();
@@ -44,7 +45,12 @@ describe('PoisonAttackEffect with triggeredDebuff', () => {
         2,
         randomizer,
       );
-      const effect = new PoisonAttackEffect(0.2, 1, triggered);
+      const effect = new PoisonAttackEffect(
+        0.2,
+        1,
+        new MathRandomizer(),
+        triggered,
+      );
       result = effect.applyEffect(defender, attacker, null);
     });
 
@@ -73,7 +79,12 @@ describe('PoisonAttackEffect with triggeredDebuff', () => {
         2,
         randomizer,
       );
-      const effect = new PoisonAttackEffect(0.2, 1, triggered);
+      const effect = new PoisonAttackEffect(
+        0.2,
+        1,
+        new MathRandomizer(),
+        triggered,
+      );
       result = effect.applyEffect(defender, attacker, null);
     });
 

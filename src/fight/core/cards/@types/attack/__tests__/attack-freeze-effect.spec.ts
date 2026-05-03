@@ -2,6 +2,7 @@ import { FreezeAttackEffect } from '../attack-freeze-effect';
 import { EffectTriggeredDebuff } from '../effect-triggered-debuff';
 import { CardStateFrozen } from '../../state/card-state-frozen';
 import { RandomizerFake } from '../../../../../../../test/helpers/randomizer-fake';
+import { MathRandomizer } from '../../../../../tools/math-randomizer';
 import { createFightingCard } from '../../../../../../../test/helpers/fighting-card';
 import { EffectResult } from '../attack-effect';
 
@@ -31,7 +32,12 @@ describe('FreezeAttackEffect with triggeredDebuff', () => {
         2,
         randomizer,
       );
-      const effect = new FreezeAttackEffect(0.2, 1, triggered);
+      const effect = new FreezeAttackEffect(
+        0.2,
+        1,
+        new MathRandomizer(),
+        triggered,
+      );
       result = effect.applyEffect(defender, attacker, null);
     });
 
@@ -60,7 +66,12 @@ describe('FreezeAttackEffect with triggeredDebuff', () => {
         2,
         randomizer,
       );
-      const effect = new FreezeAttackEffect(0.2, 1, triggered);
+      const effect = new FreezeAttackEffect(
+        0.2,
+        1,
+        new MathRandomizer(),
+        triggered,
+      );
       result = effect.applyEffect(defender, attacker, null);
     });
 

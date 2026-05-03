@@ -15,7 +15,7 @@ export class MultipleAttack implements AttackSkill {
     private readonly damages: DamageComposition[],
     private readonly targetingStrategy: TargetingCardStrategy,
     private readonly amplifier: number = 0,
-    private readonly effect?: AttackEffect,
+    private readonly effects?: AttackEffect[],
     private readonly comboFinisher?: DamageComposition[],
   ) {}
 
@@ -83,10 +83,9 @@ export class MultipleAttack implements AttackSkill {
         );
         const collectedDamage = defender.applyFinalDamage(total);
 
-        let effectResult: EffectResult;
-        if (this.effect) {
-          effectResult = this.effect.applyEffect(defender, card, context);
-        }
+        const effects = this.effects
+          ?.map((e) => e.applyEffect(defender, card, context))
+          .filter((r): r is EffectResult => r != null);
 
         results.results.push({
           damage: collectedDamage,
@@ -94,7 +93,7 @@ export class MultipleAttack implements AttackSkill {
           dodge: false,
           defender,
           remainingHealth: defender.actualHealth,
-          effect: effectResult,
+          effects: effects?.length ? effects : undefined,
           kind,
         });
       }
