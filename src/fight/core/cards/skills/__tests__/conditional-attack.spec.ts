@@ -55,7 +55,12 @@ function makeCard(opts: {
     },
     {
       simpleAttack: makeSimpleAttack(1.0),
-      special: new SpecialAttack('special', 1, 999, POSITION_BASED),
+      special: new SpecialAttack(
+        'special',
+        [new DamageComposition(DamageType.PHYSICAL, 1)],
+        999,
+        POSITION_BASED,
+      ),
       others: opts.conditionalAttack ? [opts.conditionalAttack] : [],
     },
     { dodge: new SimpleDodge() },
@@ -238,7 +243,12 @@ describe('ConditionalAttack integration via Fight (interval=3)', () => {
       },
       {
         simpleAttack: makeSimpleAttack(1.0),
-        special: new SpecialAttack('special', 1, 999, POSITION_BASED),
+        special: new SpecialAttack(
+          'special',
+          [new DamageComposition(DamageType.PHYSICAL, 1)],
+          999,
+          POSITION_BASED,
+        ),
         others: [ca],
       },
       { dodge: new SimpleDodge() },
@@ -259,7 +269,12 @@ describe('ConditionalAttack integration via Fight (interval=3)', () => {
       },
       {
         simpleAttack: makeSimpleAttack(1.0),
-        special: new SpecialAttack('special', 1, 999, POSITION_BASED),
+        special: new SpecialAttack(
+          'special',
+          [new DamageComposition(DamageType.PHYSICAL, 1)],
+          999,
+          POSITION_BASED,
+        ),
         others: [],
       },
       { dodge: new SimpleDodge() },
@@ -372,7 +387,12 @@ describe('SpecialAttack respects targeting override', () => {
     const context = { sourcePlayer: player1, opponentPlayer: player2 };
 
     const override = new TargetedCard(target2.id);
-    const special = new SpecialAttack('special', 1, 0, POSITION_BASED);
+    const special = new SpecialAttack(
+      'special',
+      [new DamageComposition(DamageType.PHYSICAL, 1)],
+      0,
+      POSITION_BASED,
+    );
     const result = special.launch(attacker, context, override);
 
     expect(
@@ -389,7 +409,12 @@ describe('SpecialAttack respects targeting override', () => {
     const context = { sourcePlayer: player1, opponentPlayer: player2 };
 
     const override = new TargetedCard(target2.id);
-    const special = new SpecialAttack('special', 1, 0, new TargetedAll());
+    const special = new SpecialAttack(
+      'special',
+      [new DamageComposition(DamageType.PHYSICAL, 1)],
+      0,
+      new TargetedAll(),
+    );
     const result = special.launch(attacker, context, override);
 
     expect(result.actionResults.length).toBe(2);

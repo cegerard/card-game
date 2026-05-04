@@ -5,15 +5,16 @@ import { FightingCard } from '../fighting-card';
 import { Special } from './special';
 import { AttackEffect, EffectResult } from '../@types/attack/attack-effect';
 import { BuffApplication } from '../@types/buff/buff-application';
+import { DamageComposition } from '../@types/damage/damage-composition';
+import { DamageCalculator } from '../damage/damage-calculator';
 
 const ENERGY_INCREASE_FACTOR = 10;
 const CRITICAL_RATE = 1.3;
-const DEFAULT_DAMAGE_RATE = 1;
 
 export class SpecialAttack implements Special {
   constructor(
     readonly name: string,
-    private readonly damageRate: number,
+    private readonly damages: DamageComposition[],
     private readonly energyNeeded: number,
     private readonly targetingStrategy: TargetingCardStrategy,
     private readonly effect?: AttackEffect,
@@ -30,6 +31,7 @@ export class SpecialAttack implements Special {
     targetingStrategy?: TargetingCardStrategy,
   ): SpecialResult {
     const isCritical = Math.random() < source.actualCriticalChance;
+    const damageMultiplier = isCritical ? CRITICAL_RATE : 1;
     const targeting =
       targetingStrategy && this.targetingStrategy.id === 'from-position'
         ? targetingStrategy
@@ -39,17 +41,19 @@ export class SpecialAttack implements Special {
       context.sourcePlayer,
       context.opponentPlayer,
     );
+    const kind = this.damages.map((d) => d.type);
 
     const attackResults = targetedCards.map((target) => {
       if (target.dodge(source.actualAccuracy)) {
-        return { damage: 0, isCritical, dodge: true, defender: target };
+        return { damage: 0, isCritical, dodge: true, defender: target, kind };
       }
 
-      const computedDamage = this.computeDamage(
-        source.actualAttack,
-        isCritical,
+      const { total } = DamageCalculator.calculateDamage(
+        this.damages,
+        source.actualAttack * damageMultiplier,
+        target,
       );
-      const damage = target.collectsDamages(computedDamage);
+      const damage = target.applyFinalDamage(total);
 
       let effectResult: EffectResult;
       if (this.effect) {
@@ -61,6 +65,7 @@ export class SpecialAttack implements Special {
         isCritical,
         dodge: false,
         defender: target,
+        kind,
         effects: effectResult ? [effectResult] : undefined,
       };
     });
@@ -80,12 +85,6 @@ export class SpecialAttack implements Special {
 
   public getSpecialKind(): string {
     return 'specialAttack';
-  }
-
-  private computeDamage(damage: number, isCritical: boolean): number {
-    const damageMultiplier = isCritical ? CRITICAL_RATE : DEFAULT_DAMAGE_RATE;
-
-    return Math.round(damage * this.damageRate * damageMultiplier);
   }
 
   private applyBuffs(source: FightingCard, context: FightingContext) {

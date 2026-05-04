@@ -34,7 +34,7 @@ describe('FightController', () => {
     const specialAttack = {
       kind: SpecialKind.ATTACK,
       name: 'Double Strike',
-      rate: 2.0,
+      damages: [{ type: DamageType.PHYSICAL, rate: 2.0 }],
       energy: 100,
       targetingStrategy: TargetingStrategy.TARGET_ALL,
     };
@@ -466,7 +466,7 @@ describe('FightController', () => {
                   special: {
                     name: 'No Special Attack',
                     kind: SpecialKind.ATTACK,
-                    rate: 0,
+                    damages: [{ type: DamageType.PHYSICAL, rate: 0 }],
                     energy: 0,
                     targetingStrategy: TargetingStrategy.POSITION_BASED,
                   },
@@ -559,7 +559,7 @@ describe('FightController', () => {
                   special: {
                     name: 'No Special Attack',
                     kind: SpecialKind.ATTACK,
-                    rate: 0,
+                    damages: [{ type: DamageType.PHYSICAL, rate: 0 }],
                     energy: 0,
                     targetingStrategy: TargetingStrategy.POSITION_BASED,
                   },
@@ -652,7 +652,7 @@ describe('FightController', () => {
                   special: {
                     name: 'No Special Attack',
                     kind: SpecialKind.ATTACK,
-                    rate: 0,
+                    damages: [{ type: DamageType.PHYSICAL, rate: 0 }],
                     energy: 0,
                     targetingStrategy: TargetingStrategy.POSITION_BASED,
                   },
@@ -741,7 +741,7 @@ describe('FightController', () => {
                   special: {
                     name: 'No Special Attack',
                     kind: SpecialKind.ATTACK,
-                    rate: 0,
+                    damages: [{ type: DamageType.PHYSICAL, rate: 0 }],
                     energy: 0,
                     targetingStrategy: TargetingStrategy.POSITION_BASED,
                   },
@@ -803,7 +803,7 @@ describe('FightController', () => {
                 special: {
                   name: 'No Special Attack',
                   kind: SpecialKind.ATTACK,
-                  rate: 0,
+                  damages: [{ type: DamageType.PHYSICAL, rate: 0 }],
                   energy: 0,
                   targetingStrategy: TargetingStrategy.POSITION_BASED,
                 },
@@ -865,7 +865,7 @@ describe('FightController', () => {
                 special: {
                   name: 'No Special Attack',
                   kind: SpecialKind.ATTACK,
-                  rate: 0,
+                  damages: [{ type: DamageType.PHYSICAL, rate: 0 }],
                   energy: 0,
                   targetingStrategy: TargetingStrategy.POSITION_BASED,
                 },
@@ -926,7 +926,7 @@ describe('FightController', () => {
                 special: {
                   name: 'No Special Attack',
                   kind: SpecialKind.ATTACK,
-                  rate: 0,
+                  damages: [{ type: DamageType.PHYSICAL, rate: 0 }],
                   energy: 0,
                   targetingStrategy: TargetingStrategy.ALL_OWNER_CARD,
                 },
@@ -998,7 +998,7 @@ describe('FightController', () => {
                 special: {
                   name: 'No Special Attack',
                   kind: SpecialKind.ATTACK,
-                  rate: 0,
+                  damages: [{ type: DamageType.PHYSICAL, rate: 0 }],
                   energy: 0,
                   targetingStrategy: TargetingStrategy.ALL_OWNER_CARD,
                 },
@@ -1050,7 +1050,7 @@ describe('FightController', () => {
         special: {
           kind: SpecialKind.ATTACK,
           name: 'Special',
-          rate: 2,
+          damages: [{ type: DamageType.PHYSICAL, rate: 2 }],
           energy: 9999,
           targetingStrategy: TargetingStrategy.POSITION_BASED,
         },
@@ -1174,7 +1174,7 @@ describe('FightController', () => {
                 special: {
                   name: 'No Special',
                   kind: SpecialKind.ATTACK,
-                  rate: 0,
+                  damages: [{ type: DamageType.PHYSICAL, rate: 0 }],
                   energy: 0,
                   targetingStrategy: TargetingStrategy.POSITION_BASED,
                 },
@@ -1220,7 +1220,7 @@ describe('FightController', () => {
                 special: {
                   name: 'No Special Attack',
                   kind: SpecialKind.ATTACK,
-                  rate: 0,
+                  damages: [{ type: DamageType.PHYSICAL, rate: 0 }],
                   energy: 0,
                   targetingStrategy: TargetingStrategy.POSITION_BASED,
                 },
@@ -1283,7 +1283,7 @@ describe('FightController', () => {
         special: {
           name: 'No Special Attack',
           kind: SpecialKind.ATTACK,
-          rate: 0,
+          damages: [{ type: DamageType.PHYSICAL, rate: 0 }],
           energy: 0,
           targetingStrategy: TargetingStrategy.POSITION_BASED,
         },
@@ -1348,7 +1348,7 @@ describe('FightController', () => {
         special: {
           kind: SpecialKind.ATTACK,
           name: 'Special',
-          rate: 2,
+          damages: [{ type: DamageType.PHYSICAL, rate: 2 }],
           energy: 9999,
           targetingStrategy: TargetingStrategy.POSITION_BASED,
         },

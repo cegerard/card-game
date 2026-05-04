@@ -86,7 +86,7 @@ describe('ActionStage', () => {
       );
       const HIGH_ENERGY_SPECIAL = new SpecialAttack(
         'special',
-        1,
+        [new DamageComposition(DamageType.PHYSICAL, 1)],
         999,
         POSITION_BASED,
       );
@@ -113,7 +113,7 @@ describe('ActionStage', () => {
       const skillName = 'Power Surge';
       const specialWithBuff = new SpecialAttack(
         skillName,
-        1,
+        [new DamageComposition(DamageType.PHYSICAL, 1)],
         0,
         POSITION_BASED,
         undefined,
@@ -121,7 +121,12 @@ describe('ActionStage', () => {
       );
       const attacker = makeCard(specialWithBuff);
       const defender = makeCard(
-        new SpecialAttack('special', 1, 999, POSITION_BASED),
+        new SpecialAttack(
+          'special',
+          [new DamageComposition(DamageType.PHYSICAL, 1)],
+          999,
+          POSITION_BASED,
+        ),
       );
       const player1 = new Player('Player 1', [attacker]);
       const player2 = new Player('Player 2', [defender]);
@@ -144,7 +149,12 @@ describe('ActionStage', () => {
     describe('when launching an unknown special kind', () => {
       const attacker = makeCard(new UnknownSpecial());
       const defender = makeCard(
-        new SpecialAttack('special', 1, 999, POSITION_BASED),
+        new SpecialAttack(
+          'special',
+          [new DamageComposition(DamageType.PHYSICAL, 1)],
+          999,
+          POSITION_BASED,
+        ),
       );
       const player1 = new Player('Player 1', [attacker]);
       const player2 = new Player('Player 2', [defender]);

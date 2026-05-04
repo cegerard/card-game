@@ -2,6 +2,8 @@ import { Fight } from '../fight-simulator/fight';
 import { Player } from '../player';
 import { PlayerByPlayerCardSelector } from '../fight-simulator/card-selectors/player-by-player';
 import { createFightingCard } from '../../../../test/helpers/fighting-card';
+import { DamageComposition } from '../cards/@types/damage/damage-composition';
+import { DamageType } from '../cards/@types/damage/damage-type';
 
 describe('Trigger card special attack without effect', () => {
   const attackerAccuracy = 25;
@@ -14,7 +16,11 @@ describe('Trigger card special attack without effect', () => {
     speed: 100,
     defense: 0,
     skills: {
-      special: { damageRate: 1.0, energy: 0, kind: 'specialAttack' },
+      special: {
+        damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
+        energy: 0,
+        kind: 'specialAttack',
+      },
     },
   });
   const player1 = new Player('Player 1', [attacker]);
@@ -70,7 +76,11 @@ describe('Trigger card special attack without effect', () => {
       criticalChance: 0,
       agility: attackerAccuracy + 1,
       skills: {
-        special: { damageRate: 1.0, energy: 0, kind: 'specialAttack' },
+        special: {
+          damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
+          energy: 0,
+          kind: 'specialAttack',
+        },
       },
     });
     const player2 = new Player('Player 2', [defenderWithDodge]);
@@ -135,7 +145,11 @@ describe('Trigger card special attack with critical hit', () => {
     speed: 100,
     defense: 0,
     skills: {
-      special: { damageRate: 1.0, energy: 0, kind: 'specialAttack' },
+      special: {
+        damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
+        energy: 0,
+        kind: 'specialAttack',
+      },
     },
   });
   const player1 = new Player('Player 1', [attacker]);
@@ -193,7 +207,7 @@ describe('Trigger card special attack with poison effect', () => {
     skills: {
       special: {
         kind: 'specialAttack',
-        damageRate: 1.0,
+        damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
         energy: 0,
         effect: {
           type: 'poison',
@@ -303,7 +317,7 @@ describe('Trigger card special attack with buff', () => {
       skills: {
         special: {
           kind: 'specialAttack',
-          damageRate: 1.0,
+          damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
           energy: 100,
           targetingStrategy: 'target-all',
           buffs: [

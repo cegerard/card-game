@@ -13,7 +13,7 @@
       "special": {
         "kind": "ATTACK",
         "name": "Rugissement solaire",
-        "rate": 1.5,
+        "damages": [{ "type": "PHYSICAL", "rate": 1.5 }],
         "energy": 40,
         "targetingStrategy": "target-all",
         "effect": {
@@ -184,6 +184,16 @@
             "probability": 0.2
           }
         ]
+      },
+      "special": {
+        "kind": "ATTACK",
+        "name": "Coeur de basalte",
+        "damages": [
+          { "type": "FIRE", "rate": 1.0 },
+          { "type": "EARTH", "rate": 1.0 }
+        ],
+        "energy": 50,
+        "targetingStrategy": "target-all"
       },
       "others": []
     },

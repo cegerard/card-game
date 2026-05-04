@@ -189,8 +189,16 @@ class SpecialDto {
   @IsString()
   name: string;
 
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(/* istanbul ignore next */ () => DamageCompositionDto)
+  damages?: DamageCompositionDto[];
+
+  @IsOptional()
   @IsNumber()
-  rate: number;
+  rate?: number;
 
   @IsNumber()
   energy: number;

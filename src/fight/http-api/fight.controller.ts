@@ -129,9 +129,18 @@ export class FightController {
         });
       }
 
+      const rawDamages = cardData.skills.special.damages;
+      if (!rawDamages || rawDamages.length === 0) {
+        throw new Error(
+          'Special attack requires at least one damage composition',
+        );
+      }
+      const specialDamages = rawDamages.map(
+        (d) => new DamageComposition(d.type, d.rate),
+      );
       special = new SpecialAttack(
         cardData.skills.special.name,
-        cardData.skills.special.rate,
+        specialDamages,
         cardData.skills.special.energy,
         buildTargetingStrategy(cardData.skills.special.targetingStrategy),
         specialEffect,

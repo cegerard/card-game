@@ -42,7 +42,7 @@ describe('Trigger card special healing', () => {
       });
       player2 = new Player('player2', [target]);
 
-      target.collectsDamages(400);
+      target.applyFinalDamage(400);
 
       fight = new Fight(
         player1,

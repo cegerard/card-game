@@ -58,6 +58,7 @@ type FightingCardParams = {
     };
     special?: {
       name?: string;
+      damages?: DamageComposition[];
       damageRate?: number;
       energy?: number;
       targetingStrategy?: string;
@@ -209,6 +210,7 @@ function createSimpleAttack(params: {
 function createSpecial(params: {
   name?: string;
   kind?: string;
+  damages?: DamageComposition[];
   damageRate?: number;
   energy?: number;
   targetingStrategy?: string;
@@ -223,7 +225,7 @@ function createSpecial(params: {
 
 function createSpecialAttack(params: {
   name?: string;
-  damageRate?: number;
+  damages?: DamageComposition[];
   energy?: number;
   targetingStrategy?: string;
   effect?: effect;
@@ -234,8 +236,12 @@ function createSpecialAttack(params: {
     buffTargetingStrategy: string;
   }[];
 }): SpecialAttack {
-  const damageRate =
-    params.damageRate ?? faker.number.int({ min: 2.5, max: 8.0 });
+  const damages = params.damages ?? [
+    new DamageComposition(
+      DamageType.PHYSICAL,
+      faker.number.float({ min: 2.5, max: 8.0 }),
+    ),
+  ];
   const energy = params.energy ?? faker.number.int({ min: 30, max: 100 });
   const targetingStrategy = params.targetingStrategy ?? 'position-based';
   const effect = params.effect ? createEffect(params.effect) : undefined;
@@ -255,7 +261,7 @@ function createSpecialAttack(params: {
 
   return new SpecialAttack(
     params.name ?? faker.word.noun(),
-    damageRate,
+    damages,
     energy,
     createTargetingStrategy(targetingStrategy),
     effect,

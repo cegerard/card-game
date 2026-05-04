@@ -125,7 +125,7 @@ describe('Trigger-healing-skill', () => {
 
   describe('and the card is not full health', () => {
     beforeEach(() => {
-      card1.collectsDamages(150);
+      card1.applyFinalDamage(50);
     });
 
     it('heal as much as he can', () => {
@@ -171,7 +171,7 @@ describe('Trigger-healing-skill', () => {
 
   describe('and the healing is more than the card max health', () => {
     beforeEach(() => {
-      card1.collectsDamages(110);
+      card1.applyFinalDamage(10);
     });
 
     it('heal to the max health', () => {

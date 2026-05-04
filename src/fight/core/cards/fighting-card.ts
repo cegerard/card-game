@@ -331,23 +331,6 @@ export class FightingCard {
     return this.special.getSpecialKind();
   }
 
-  public collectsDamages(damage: number): number {
-    let causedDamages = Math.max(0, damage - this.defense);
-    if (this.frozen) {
-      causedDamages = (this.frozen as CardStateFrozen).applyDamageRate(
-        causedDamages,
-      );
-    }
-    if (this.stunted) {
-      causedDamages = (this.stunted as CardStateStunted).applyDamageRate(
-        causedDamages,
-      );
-    }
-    this.receivedDamages += causedDamages;
-
-    return causedDamages;
-  }
-
   public applyFinalDamage(damage: number): number {
     let causedDamages = damage;
     if (this.frozen) {
