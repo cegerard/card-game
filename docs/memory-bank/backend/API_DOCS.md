@@ -97,7 +97,7 @@ Simulates a turn-based card battle between two players.
   name: string,
   damages: DamageCompositionDto[],  // Min 1 entry — multi-type damage compositions
   targetingStrategy: TargetingStrategy,
-  effect?: EffectDto
+  effects?: EffectDto[]             // Optional array of status effects (poison, burn, freeze, stunt)
 }
 ```
 
@@ -110,7 +110,7 @@ Simulates a turn-based card battle between two players.
   damages: DamageCompositionDto[],  // Min 1 entry
   targetingStrategy: TargetingStrategy,
   amplifier?: number,               // Optional damage amplifier
-  effect?: EffectDto,
+  effects?: EffectDto[],            // Optional array of status effects
   comboFinisher?: DamageCompositionDto[]  // Optional finisher hit compositions
 }
 ```
@@ -151,10 +151,11 @@ Simulates a turn-based card battle between two players.
 
 ```typescript
 {
-  type: "POISON" | "BURN" | "FREEZE",
-  rate: number,               // Damage coefficient per tick: damage = attacker.attack * rate
-  level: 1 | 2 | 3,           // Duration in ticks: level 1 = 1 tick, level 2 = 3 ticks, level 3 = 5 ticks
-  triggeredDebuff?: {         // Optional debuff applied on effect hit
+  type: "POISON" | "BURN" | "FREEZE" | "STUNT",
+  rate: number,               // Damage coefficient per tick (unused for STUNT — no damage tick)
+  level: 1 | 2 | 3,           // Duration: STUNT = 2*level-1 turns; others = level 1=1, 2=3, 3=5 ticks
+  probability?: number,       // 0-1 chance to apply effect on hit; omit for guaranteed application
+  triggeredDebuff?: {         // Optional debuff applied on effect hit (not supported on STUNT)
     debuffType: "attack" | "defense" | "agility" | "accuracy",
     debuffRate: number,
     duration: number,
@@ -276,7 +277,16 @@ Simulates a turn-based card battle between two players.
 }
 ```
 
-**`effect_removed` step** (`EffectRemovedReport`): Emitted when an end event fires and removes event-bound status effects (poison, burn, freeze).
+**`status_change` step** (`StatusChangeReport`): Emitted after an attack when a status effect is applied or the card dies.
+```typescript
+{
+  kind: "status_change",
+  card: CardInfo,
+  status: "dead" | "poison" | "burn" | "freeze" | "stunt"
+}
+```
+
+**`effect_removed` step** (`EffectRemovedReport`): Emitted when an end event fires and removes event-bound status effects (poison, burn, freeze, stunt).
 ```typescript
 {
   kind: "effect_removed",
@@ -359,7 +369,8 @@ Simulates a turn-based card battle between two players.
 
 - `POISON`: Damage over time
 - `BURN`: Damage over time
-- `FREEZE`: Prevents action, increases damage taken
+- `FREEZE`: Prevents action for 1-5 turns, increases damage taken by 20%
+- `STUNT`: Prevents action for 1-5 turns (2*level-1), increases damage taken by 20%; no damage tick; does not stack with freeze (whichever is active takes precedence)
 
 ### BuffType
 

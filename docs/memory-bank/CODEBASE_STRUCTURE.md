@@ -79,11 +79,11 @@ cards/
 └── @types/                 # Type definitions
     ├── action-result/      # Action outcome types
     │   ├── special-result.ts        # Unified result: { name, actionResults, buffResults }
-    │   ├── attack-result.ts         # Includes remainingHealth snapshot at damage time
+    │   ├── attack-result.ts         # Includes remainingHealth snapshot + effects?: EffectResult[] (multi-effect array)
     │   ├── named-attack-result.ts   # { name: string; results: AttackResult[] }
     │   ├── healing-result.ts
     │   └── buff-results.ts
-    ├── attack/             # Attack and effect types
+    ├── attack/             # Attack and effect types (attack-effect.ts, attack-poison-effect.ts, attack-burn-effect.ts, attack-freeze-effect.ts, attack-stunt-effect.ts)
     ├── buff/               # Buff/debuff types
     │   ├── buff-application.ts  # Applies buff with optional condition + multiplier
     │   ├── buff-condition.ts    # BuffCondition interface (id, evaluate())
@@ -93,7 +93,7 @@ cards/
     │   ├── damage-type.ts     # DamageType enum (PHYSICAL, FIRE, WATER, EARTH, AIR)
     │   ├── damage-composition.ts # Value object: type + rate pair
     │   └── element.ts         # Element enum for card affinity
-    └── state/              # Card state types
+    └── state/              # Card state types (card-state-frozen.ts, card-state-stunted.ts)
 ```
 
 **Special Skills Pattern**: Both `SpecialAttack` and `SpecialHealing` implement the `Special` interface with a unified return type `SpecialResult` containing:
@@ -107,6 +107,10 @@ This allows special attacks to perform their primary action (damage/healing) whi
 
 **Skill Lifecycle Pattern**: The `Skill` interface includes optional `tick?()` and `lifecycleEndEvent?()` methods. Skills with a finite `activationLimit` track their count via `tick()` and emit an `endEvent` string via `lifecycleEndEvent()` when exhausted. `SkillResults` carries an optional `endEvent` field so callers (`TurnManager`, `ActionStage`) can invoke `EndEventProcessor` to remove all matching event-bound buffs.
 
+**Multi-Effect Attack Pattern**: `SimpleAttack` and `MultipleAttack` accept `effects?: AttackEffect[]`. Each effect is evaluated independently per hit; effects with `probability` roll a random check. `SpecialAttack` retains a single `effect?: AttackEffect`. `AttackResult.effects` is `EffectResult[]` to carry all applied effects per hit.
+
+**STUNT State Pattern**: `CardStateStunted` (like `CardStateFrozen`) skips action and applies +20% incoming damage via `applyDamageRate()`. No damage tick. Skip condition: `card.frozenLevel > 0 || card.isStunted`. Does not stack — `StuntAttackEffect` returns early if defender is already frozen or stunted.
+
 #### Fight Simulator (`src/fight/core/fight-simulator/`)
 
 ```
@@ -117,6 +121,7 @@ fight-simulator/
 ├── card-death-subscriber.ts # Card death event handling interface
 ├── death-skill-handler.ts  # Triggers ally-death skills on surviving cards; drainable steps
 ├── end-event-processor.ts  # Removes event-bound buffs when a skill end event fires; emits buff_removed steps
+├── skill-results-to-steps.ts # Pure fn: SkillResults[] → Step[]; shared by ActionStage, TurnManager, DeathSkillHandler
 ├── card-selectors/         # Turn order strategies
 │   ├── card-selector.ts    # Selector interface
 │   ├── player-by-player.ts # Alternating player strategy

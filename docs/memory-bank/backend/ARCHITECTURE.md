@@ -53,6 +53,7 @@ src/
     │   │   ├── card-death-subscriber.ts  # Event listener interface
     │   │   ├── death-skill-handler.ts    # Triggers ally-death skills; accumulates + drains steps
     │   │   ├── end-event-processor.ts    # Removes event-bound buffs when a skill end event fires
+    │   │   ├── skill-results-to-steps.ts # Standalone fn: SkillResults[] → Step[] (shared by ActionStage, TurnManager, DeathSkillHandler)
     │   │   ├── @types/               # Fight result types
     │   │   └── card-selectors/       # Turn order strategies
     │   │       ├── card-selector.ts
@@ -66,7 +67,7 @@ src/
     │   │   │   ├── card-info.ts
     │   │   │   ├── fighting-context.ts
     │   │   │   ├── action-result/    # Action result types
-    │   │   │   ├── attack/           # Attack effects (poison, burn, freeze)
+    │   │   │   ├── attack/           # Attack effects (poison, burn, freeze, stunt)
     │   │   │   ├── state/            # Status effect state
     │   │   │   ├── buff/             # Buff/debuff types
     │   │   │   └── damage/           # Damage types (DamageType, DamageComposition, Element)
@@ -207,9 +208,14 @@ sequenceDiagram
 - **`TargetingOverrideSkill` null-safe strategy resolution**: When the `strategyResolver` returns `null` (e.g., `killerCard` absent in context), the skill returns empty results instead of throwing. Callers must handle the no-op gracefully.
 - **`ActionStage` constructor requires `DeathSkillHandler`**: `ActionStage` now receives `DeathSkillHandler` directly so it can drain death-skill steps inline after each kill, ensuring correct step ordering within the action phase.
 - **`AttackResult.remainingHealth`**: `AttackResult` carries an explicit `remainingHealth` snapshot taken at damage-calculation time, used in reports instead of re-reading the card's current health (which may have been mutated by subsequent hits).
+- **Multi-Effect Attack System**: `SimpleAttack` and `MultipleAttack` accept `effects?: AttackEffect[]` (array, replaces former single `effect?`). `SpecialAttack` retains a single `effect?: AttackEffect`. Each effect in the array is evaluated independently; effects with `probability` set are skipped when the random roll fails.
+- **STUNT Status Effect**: `CardStateStunted` prevents the card from acting (same skip condition as freeze: `card.frozenLevel > 0 || card.isStunted`) and amplifies incoming damage by 20% via `applyDamageRate()`. No damage tick. Does not stack — `StuntAttackEffect.applyEffect()` returns early if the defender is already frozen or stunted. Duration: `2 * level - 1` turns.
+- **`AttackEffect.probability`**: Optional `0-1` field on the `AttackEffect` interface. Effect classes guard `applyEffect()` with `if (probability !== undefined && randomizer.random() >= probability) return`. Randomizer is injected via constructor, not via `FightingContext`.
+- **`skill-results-to-steps.ts`**: Standalone pure function extracted from `ActionStage`, mapping `SkillResults[]` to `Step[]` for reuse across `ActionStage`, `TurnManager`, and `DeathSkillHandler`.
 - **Separation of Concerns**:
   - `Fight` orchestrates battle flow
   - `ActionStage` handles attack/heal resolution and extracts buff applications from special results
   - `TurnManager` handles turn-end effects
   - `CardSelector` determines turn order
   - `EndEventProcessor` handles event-bound buff and effect removal across all cards
+  - `skillResultsToSteps()` converts skill results to report steps (shared utility)
