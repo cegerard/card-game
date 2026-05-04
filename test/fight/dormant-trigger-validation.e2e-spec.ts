@@ -17,7 +17,7 @@ const baseCard = (id: string, others = []) => ({
     special: {
       kind: 'ATTACK',
       name: 'Special',
-      rate: 2.0,
+      damages: [{ type: 'PHYSICAL', rate: 2.0 }],
       energy: 100,
       targetingStrategy: 'target-all',
     },

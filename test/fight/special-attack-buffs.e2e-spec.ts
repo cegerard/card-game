@@ -44,7 +44,7 @@ describe('Special Attack with Buffs (e2e)', () => {
               special: {
                 kind: 'ATTACK',
                 name: 'Buff Special',
-                rate: 1.0,
+                damages: [{ type: 'PHYSICAL', rate: 1.0 }],
                 energy: 0,
                 targetingStrategy: 'target-all',
                 buffApplication: [
@@ -86,7 +86,7 @@ describe('Special Attack with Buffs (e2e)', () => {
               special: {
                 kind: 'ATTACK',
                 name: 'Special',
-                rate: 1.0,
+                damages: [{ type: 'PHYSICAL', rate: 1.0 }],
                 energy: 100,
                 targetingStrategy: 'position-based',
               },
@@ -202,7 +202,7 @@ describe('Special Attack with Buffs (e2e)', () => {
               special: {
                 kind: 'ATTACK',
                 name: 'Dual Buff Special',
-                rate: 1.0,
+                damages: [{ type: 'PHYSICAL', rate: 1.0 }],
                 energy: 0,
                 targetingStrategy: 'target-all',
                 buffApplication: [
@@ -250,7 +250,7 @@ describe('Special Attack with Buffs (e2e)', () => {
               special: {
                 kind: 'ATTACK',
                 name: 'Special',
-                rate: 1.0,
+                damages: [{ type: 'PHYSICAL', rate: 1.0 }],
                 energy: 100,
                 targetingStrategy: 'position-based',
               },

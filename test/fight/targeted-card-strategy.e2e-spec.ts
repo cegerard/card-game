@@ -81,7 +81,7 @@ describe('Targeted Card Strategy — Validation (US3)', () => {
         special: {
           kind: 'ATTACK',
           name: 'Special',
-          rate: 2.0,
+          damages: [{ type: 'PHYSICAL', rate: 2.0 }],
           energy: 100,
           targetingStrategy: 'position-based',
         },
@@ -106,7 +106,7 @@ describe('Targeted Card Strategy — Validation (US3)', () => {
         special: {
           kind: 'ATTACK',
           name: 'Special',
-          rate: 2.0,
+          damages: [{ type: 'PHYSICAL', rate: 2.0 }],
           energy: 100,
           targetingStrategy: 'targeted-card',
         },
@@ -131,7 +131,7 @@ describe('Targeted Card Strategy — Validation (US3)', () => {
         special: {
           kind: 'ATTACK',
           name: 'Special',
-          rate: 2.0,
+          damages: [{ type: 'PHYSICAL', rate: 2.0 }],
           energy: 100,
           targetingStrategy: 'position-based',
           buffApplication: [
@@ -164,7 +164,7 @@ describe('Targeted Card Strategy — Validation (US3)', () => {
         special: {
           kind: 'ATTACK',
           name: 'Special',
-          rate: 2.0,
+          damages: [{ type: 'PHYSICAL', rate: 2.0 }],
           energy: 100,
           targetingStrategy: 'position-based',
         },
@@ -198,7 +198,7 @@ describe('Targeted Card Strategy — Validation (US3)', () => {
         special: {
           kind: 'ATTACK',
           name: 'Special',
-          rate: 2.0,
+          damages: [{ type: 'PHYSICAL', rate: 2.0 }],
           energy: 100,
           targetingStrategy: 'position-based',
         },
@@ -247,7 +247,7 @@ function buildTargetedCardBattlePayload() {
             special: {
               kind: 'ATTACK',
               name: 'Shield Bash',
-              rate: 1,
+              damages: [{ type: 'PHYSICAL', rate: 1 }],
               energy: 9999,
               targetingStrategy: 'position-based',
             },
@@ -274,7 +274,7 @@ function buildTargetedCardBattlePayload() {
             special: {
               kind: 'ATTACK',
               name: 'Vengeance Strike',
-              rate: 3,
+              damages: [{ type: 'PHYSICAL', rate: 3 }],
               energy: 9999,
               targetingStrategy: 'position-based',
             },
@@ -330,7 +330,7 @@ function buildTargetedCardBattlePayload() {
             special: {
               kind: 'ATTACK',
               name: 'Smash',
-              rate: 2,
+              damages: [{ type: 'PHYSICAL', rate: 2 }],
               energy: 9999,
               targetingStrategy: 'position-based',
             },
@@ -357,7 +357,7 @@ function buildTargetedCardBattlePayload() {
             special: {
               kind: 'ATTACK',
               name: 'Distract',
-              rate: 1,
+              damages: [{ type: 'PHYSICAL', rate: 1 }],
               energy: 9999,
               targetingStrategy: 'position-based',
             },
@@ -390,7 +390,7 @@ function buildMinimalCard(overrides: any = {}) {
       special: {
         kind: 'ATTACK',
         name: 'Special',
-        rate: 2.0,
+        damages: [{ type: 'PHYSICAL', rate: 2.0 }],
         energy: 100,
         targetingStrategy: 'position-based',
       },

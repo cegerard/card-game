@@ -88,7 +88,7 @@ function buildPayload() {
             special: {
               kind: 'ATTACK',
               name: 'Weak Strike',
-              rate: 0,
+              damages: [{ type: 'PHYSICAL', rate: 0 }],
               energy: 9999,
               targetingStrategy: 'position-based',
             },
@@ -115,7 +115,7 @@ function buildPayload() {
             special: {
               kind: 'ATTACK',
               name: 'Mega Strike',
-              rate: 2,
+              damages: [{ type: 'PHYSICAL', rate: 2 }],
               energy: 9999,
               targetingStrategy: 'target-all',
             },
@@ -158,7 +158,7 @@ function buildPayload() {
             special: {
               kind: 'ATTACK',
               name: 'Obliterate',
-              rate: 2,
+              damages: [{ type: 'PHYSICAL', rate: 2 }],
               energy: 9999,
               targetingStrategy: 'target-all',
             },

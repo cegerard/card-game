@@ -67,7 +67,7 @@ function buildPayload() {
             special: {
               kind: 'ATTACK',
               name: 'Fireball',
-              rate: 1.0,
+              damages: [{ type: 'PHYSICAL', rate: 1.0 }],
               energy: 999,
               targetingStrategy: 'position-based',
             },
@@ -120,7 +120,7 @@ function buildPayload() {
             special: {
               kind: 'ATTACK',
               name: 'Weak Hit',
-              rate: 0.01,
+              damages: [{ type: 'PHYSICAL', rate: 0.01 }],
               energy: 999,
               targetingStrategy: 'position-based',
             },

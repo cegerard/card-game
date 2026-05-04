@@ -39,7 +39,7 @@ describe('Simulate fight', () => {
               special: {
                 kind: 'ATTACK',
                 name: 'Double Strike',
-                rate: 2.0,
+                damages: [{ type: 'PHYSICAL', rate: 2.0 }],
                 energy: 100,
                 targetingStrategy: 'target-all',
                 effect: {
@@ -88,7 +88,7 @@ describe('Simulate fight', () => {
               special: {
                 kind: 'ATTACK',
                 name: 'Double Strike',
-                rate: 2.0,
+                damages: [{ type: 'PHYSICAL', rate: 2.0 }],
                 energy: 100,
                 targetingStrategy: 'all-owner-cards',
                 effect: {
@@ -134,7 +134,7 @@ describe('Simulate fight', () => {
               special: {
                 kind: 'ATTACK',
                 name: 'Double Strike',
-                rate: 2.0,
+                damages: [{ type: 'PHYSICAL', rate: 2.0 }],
                 energy: 100,
                 targetingStrategy: 'line-three',
                 effect: {

@@ -40,7 +40,7 @@ describe('Simulate fight with buffs', () => {
               special: {
                 kind: 'ATTACK',
                 name: 'Holy Strike',
-                rate: 2.0,
+                damages: [{ type: 'PHYSICAL', rate: 2.0 }],
                 energy: 40,
                 targetingStrategy: 'position-based',
               },
@@ -79,7 +79,7 @@ describe('Simulate fight with buffs', () => {
               special: {
                 kind: 'ATTACK',
                 name: 'Power Strike',
-                rate: 2.5,
+                damages: [{ type: 'PHYSICAL', rate: 2.5 }],
                 energy: 50,
                 targetingStrategy: 'position-based',
               },
@@ -123,7 +123,7 @@ describe('Simulate fight with buffs', () => {
               special: {
                 kind: 'ATTACK',
                 name: 'Heavy Strike',
-                rate: 2.0,
+                damages: [{ type: 'PHYSICAL', rate: 2.0 }],
                 energy: 45,
                 targetingStrategy: 'position-based',
               },
@@ -160,7 +160,7 @@ describe('Simulate fight with buffs', () => {
               special: {
                 kind: 'ATTACK',
                 name: 'Multi Shot',
-                rate: 1.8,
+                damages: [{ type: 'PHYSICAL', rate: 1.8 }],
                 energy: 35,
                 targetingStrategy: 'target-all',
               },
@@ -231,7 +231,7 @@ describe('Simulate fight with buffs', () => {
               special: {
                 kind: 'ATTACK',
                 name: 'Test Strike',
-                rate: 2.0,
+                damages: [{ type: 'PHYSICAL', rate: 2.0 }],
                 energy: 40,
                 targetingStrategy: 'position-based',
               },
@@ -273,7 +273,7 @@ describe('Simulate fight with buffs', () => {
               special: {
                 kind: 'ATTACK',
                 name: 'Enemy Strike',
-                rate: 2.0,
+                damages: [{ type: 'PHYSICAL', rate: 2.0 }],
                 energy: 45,
                 targetingStrategy: 'position-based',
               },

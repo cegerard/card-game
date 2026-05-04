@@ -80,7 +80,7 @@ function buildAllyDeathPayload() {
             special: {
               kind: 'ATTACK',
               name: 'Roar',
-              rate: 1.0,
+              damages: [{ type: 'PHYSICAL', rate: 1.0 }],
               energy: 999,
               targetingStrategy: 'position-based',
             },
@@ -107,7 +107,7 @@ function buildAllyDeathPayload() {
             special: {
               kind: 'ATTACK',
               name: 'Lion Roar',
-              rate: 3.0,
+              damages: [{ type: 'PHYSICAL', rate: 3.0 }],
               energy: 999,
               targetingStrategy: 'position-based',
             },
@@ -153,7 +153,7 @@ function buildAllyDeathPayload() {
             special: {
               kind: 'ATTACK',
               name: 'Smash',
-              rate: 1.0,
+              damages: [{ type: 'PHYSICAL', rate: 1.0 }],
               energy: 999,
               targetingStrategy: 'position-based',
             },
@@ -180,7 +180,7 @@ function buildAllyDeathPayload() {
             special: {
               kind: 'ATTACK',
               name: 'Poke',
-              rate: 0.1,
+              damages: [{ type: 'PHYSICAL', rate: 0.1 }],
               energy: 999,
               targetingStrategy: 'position-based',
             },
@@ -217,7 +217,7 @@ const LIONS_INHERITANCE_PAYLOAD = {
           special: {
             kind: 'ATTACK',
             name: 'Lion Roar',
-            rate: 3.0,
+            damages: [{ type: 'PHYSICAL', rate: 3.0 }],
             energy: 999,
             targetingStrategy: 'position-based',
           },
@@ -262,7 +262,7 @@ const LIONS_INHERITANCE_PAYLOAD = {
           special: {
             kind: 'ATTACK',
             name: 'Weak Hit',
-            rate: 1.0,
+            damages: [{ type: 'PHYSICAL', rate: 1.0 }],
             energy: 999,
             targetingStrategy: 'position-based',
           },

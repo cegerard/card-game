@@ -217,7 +217,7 @@ function buildTargetingOverridePayload() {
             special: {
               kind: 'ATTACK',
               name: 'Fury Burst',
-              rate: 3,
+              damages: [{ type: 'PHYSICAL', rate: 3 }],
               energy: 9999,
               targetingStrategy: 'position-based',
             },
@@ -271,7 +271,7 @@ function buildTargetingOverridePayload() {
             special: {
               kind: 'ATTACK',
               name: 'Bash',
-              rate: 2,
+              damages: [{ type: 'PHYSICAL', rate: 2 }],
               energy: 9999,
               targetingStrategy: 'position-based',
             },
@@ -309,7 +309,7 @@ function buildCompositePowerPayload() {
             special: {
               kind: 'ATTACK',
               name: 'Rage Burst',
-              rate: 3,
+              damages: [{ type: 'PHYSICAL', rate: 3 }],
               energy: 9999,
               targetingStrategy: 'position-based',
             },
@@ -364,7 +364,7 @@ function buildCompositePowerPayload() {
             special: {
               kind: 'ATTACK',
               name: 'Shield Bash',
-              rate: 2,
+              damages: [{ type: 'PHYSICAL', rate: 2 }],
               energy: 9999,
               targetingStrategy: 'position-based',
             },

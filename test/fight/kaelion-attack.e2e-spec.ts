@@ -17,7 +17,7 @@ const KAELION = {
     special: {
       kind: 'ATTACK',
       name: 'Inferno Surge',
-      rate: 2.0,
+      damages: [{ type: 'PHYSICAL', rate: 2.0 }],
       energy: 100,
       targetingStrategy: 'position-based',
     },
@@ -53,7 +53,7 @@ const DUMMY_OPPONENT = {
     special: {
       kind: 'ATTACK',
       name: 'Weak Hit',
-      rate: 0.01,
+      damages: [{ type: 'PHYSICAL', rate: 0.01 }],
       energy: 9999,
       targetingStrategy: 'position-based',
     },
