@@ -2,7 +2,7 @@ import { FightingCard } from '../../fighting-card';
 import { FightingContext } from '../fighting-context';
 import { TargetingCardStrategy } from '../../../targeting-card-strategies/targeting-card-strategy';
 import { Buff } from './buff';
-import { BuffType } from './type';
+import { AlterationType } from './alteration-type';
 import { CardInfo } from '../card-info';
 import { AlterationCondition } from './alteration-condition';
 
@@ -13,7 +13,7 @@ export type AlterationResult = {
 
 export class Alteration {
   constructor(
-    public readonly type: BuffType,
+    public readonly type: AlterationType,
     public readonly rate: number,
     public readonly duration: number,
     public readonly targetingStrategy: TargetingCardStrategy,

@@ -20,10 +20,7 @@ import { DeathTrigger } from '../../src/fight/core/trigger/death-trigger';
 import { DynamicTrigger } from '../../src/fight/core/trigger/dynamic-trigger';
 import { Trigger } from '../../src/fight/core/trigger/trigger';
 import { createEffect } from './effect';
-import {
-  BuffType,
-  DebuffType,
-} from '../../src/fight/core/cards/@types/alteration/type';
+import { AlterationType } from '../../src/fight/core/cards/@types/alteration/alteration-type';
 import { Skill } from '../../src/fight/core/cards/skills/skill';
 import { TargetingOverrideSkill } from '../../src/fight/core/cards/skills/targeting-override';
 import { Alteration } from '../../src/fight/core/cards/@types/alteration/alteration';
@@ -65,7 +62,7 @@ type FightingCardParams = {
       kind?: string;
       effect?: effect;
       buffs?: {
-        buffType: BuffType;
+        buffType: AlterationType;
         buffRate: number;
         buffDuration: number;
         buffTargetingStrategy: string;
@@ -83,7 +80,7 @@ type FightingCardParams = {
           powerId?: string;
         }
       | {
-          buffType: BuffType;
+          buffType: AlterationType;
           buffRate: number;
           duration: number;
           trigger: string;
@@ -99,7 +96,7 @@ type FightingCardParams = {
           powerId?: string;
         }
       | {
-          debuffType: DebuffType;
+          debuffType: AlterationType;
           debuffRate: number;
           duration: number;
           trigger: string;
@@ -230,7 +227,7 @@ function createSpecialAttack(params: {
   targetingStrategy?: string;
   effect?: effect;
   buffs?: {
-    buffType: BuffType;
+    buffType: AlterationType;
     buffRate: number;
     buffDuration: number;
     buffTargetingStrategy: string;
@@ -319,7 +316,7 @@ function createsSkills(
         powerId?: string;
       }
     | {
-        buffType: BuffType;
+        buffType: AlterationType;
         buffRate: number;
         duration: number;
         trigger: string;
@@ -335,7 +332,7 @@ function createsSkills(
         powerId?: string;
       }
     | {
-        debuffType: DebuffType;
+        debuffType: AlterationType;
         debuffRate: number;
         duration: number;
         trigger: string;

@@ -1,7 +1,7 @@
-import { DebuffType } from './type';
+import { AlterationType } from './alteration-type';
 
 export type Debuff = {
-  type: DebuffType;
+  type: AlterationType;
   value: number;
   duration: number;
   terminationEvent?: string;

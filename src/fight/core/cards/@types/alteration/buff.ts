@@ -1,7 +1,7 @@
-import { BuffType } from './type';
+import { AlterationType } from './alteration-type';
 
 export type Buff = {
-  type: BuffType;
+  type: AlterationType;
   value: number;
   duration: number;
   terminationEvent?: string;

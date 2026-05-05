@@ -13,7 +13,7 @@ import { EffectLevel } from './@types/attack/effect-level';
 import { Buff } from './@types/alteration/buff';
 import { Debuff } from './@types/alteration/debuff';
 import { Skill, SkillResults } from './skills/skill';
-import { BuffType, DebuffType } from './@types/alteration/type';
+import { AlterationType } from './@types/alteration/alteration-type';
 import { Element } from './@types/damage/element';
 import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
 import { NamedAttackResult } from './@types/action-result/named-attack-result';
@@ -372,7 +372,7 @@ export class FightingCard {
   }
 
   public applyBuff(
-    buffType: BuffType,
+    buffType: AlterationType,
     buffRate: number,
     duration: number,
     terminationEvent?: string,
@@ -433,7 +433,7 @@ export class FightingCard {
 
   public removeEventBoundBuffs(
     eventName: string,
-  ): { type: BuffType; value: number }[] {
+  ): { type: AlterationType; value: number }[] {
     const removed = this.buffs
       .filter((b) => b.terminationEvent === eventName)
       .map((b) => ({ type: b.type, value: b.value }));
@@ -471,7 +471,7 @@ export class FightingCard {
   }
 
   public applyDebuff(
-    debuffType: DebuffType,
+    debuffType: AlterationType,
     debuffRate: number,
     duration: number,
     powerId?: string,
@@ -492,7 +492,7 @@ export class FightingCard {
 
   public removeEventBoundDebuffs(
     eventName: string,
-  ): { type: DebuffType; value: number }[] {
+  ): { type: AlterationType; value: number }[] {
     const removed = this.debuffs
       .filter((d) => d.terminationEvent === eventName)
       .map((d) => ({ type: d.type, value: d.value }));
@@ -502,7 +502,7 @@ export class FightingCard {
     return removed;
   }
 
-  private computeActualStat(base: number, type: BuffType | DebuffType): number {
+  private computeActualStat(base: number, type: AlterationType): number {
     const buffsSum = this.buffs
       .filter((buff) => buff.type === type)
       .reduce((sum, buff) => sum + buff.value, 0);
@@ -513,7 +513,7 @@ export class FightingCard {
   }
 
   private computeAttributeModifierValue(
-    type: BuffType | DebuffType,
+    type: AlterationType,
     rate: number,
   ): number {
     switch (type) {

@@ -1,10 +1,10 @@
-import { BuffType } from '../../cards/@types/alteration/type';
+import { AlterationType } from '../../cards/@types/alteration/alteration-type';
 import { CardInfo } from '../../cards/@types/card-info';
 import { StepKind } from './step';
 
 type Buff = {
   target: CardInfo;
-  kind: BuffType;
+  kind: AlterationType;
   value: number;
   remainingTurns: number;
 };

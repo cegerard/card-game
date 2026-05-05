@@ -3,14 +3,14 @@ import { FightingCard } from '../fighting-card';
 import { Trigger } from '../../trigger/trigger';
 import { ActivatableTrigger } from '../../trigger/activatable-trigger';
 import { FightingContext } from '../@types/fighting-context';
-import { BuffType } from '../@types/alteration/type';
+import { AlterationType } from '../@types/alteration/alteration-type';
 import { Skill, SkillKind, SkillResults } from './skill';
 import { AlterationCondition } from '../@types/alteration/alteration-condition';
 
 export interface AlterationSkillOptions {
   name: string;
   polarity: 'buff' | 'debuff';
-  attributeType: BuffType;
+  attributeType: AlterationType;
   rate: number;
   /** Number of turns the alteration lasts. Use Infinity for event-bound or permanent buffs. */
   duration: number;
@@ -28,7 +28,7 @@ export class AlterationSkill implements Skill {
 
   public readonly name: string;
   private readonly polarity: 'buff' | 'debuff';
-  private readonly attributeType: BuffType;
+  private readonly attributeType: AlterationType;
   private readonly rate: number;
   private readonly duration: number;
   private readonly trigger: Trigger;

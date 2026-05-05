@@ -1,9 +1,9 @@
-import { BuffType } from '../../cards/@types/alteration/type';
+import { AlterationType } from '../../cards/@types/alteration/alteration-type';
 import { CardInfo } from '../../cards/@types/card-info';
 import { StepKind } from './step';
 
 export type BuffExpiredReport = {
   kind: StepKind.BuffExpired;
   card: CardInfo;
-  expired: { kind: BuffType; value: number }[];
+  expired: { kind: AlterationType; value: number }[];
 };
