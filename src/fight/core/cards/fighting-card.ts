@@ -10,8 +10,7 @@ import { StateResult } from './@types/action-result/state-result';
 import { CardStateFrozen } from './@types/state/card-state-frozen';
 import { CardStateStunted } from './@types/state/card-state-stunted';
 import { EffectLevel } from './@types/attack/effect-level';
-import { Buff } from './@types/alteration/buff';
-import { Debuff } from './@types/alteration/debuff';
+import { AlterationDetail } from './@types/alteration/alteration-detail';
 import { Skill, SkillResults } from './skills/skill';
 import { AlterationType } from './@types/alteration/alteration-type';
 import { Element } from './@types/damage/element';
@@ -47,10 +46,10 @@ export class FightingCard {
   private receivedHeal: number = 0;
 
   // Buffs
-  private buffs: Buff[] = [];
+  private buffs: AlterationDetail[] = [];
 
   // Debuffs
-  private debuffs: Debuff[] = [];
+  private debuffs: AlterationDetail[] = [];
 
   // Skills
   private simpleAttack: AttackSkill;
@@ -377,9 +376,9 @@ export class FightingCard {
     duration: number,
     terminationEvent?: string,
     powerId?: string,
-  ): Buff {
+  ): AlterationDetail {
     const value = this.computeAttributeModifierValue(buffType, buffRate);
-    const buff: Buff = {
+    const buff: AlterationDetail = {
       type: buffType,
       value,
       duration,
@@ -450,8 +449,8 @@ export class FightingCard {
   }
 
   public decreaseBuffAndDebuffDuration(): {
-    expiredBuffs: Buff[];
-    expiredDebuffs: Debuff[];
+    expiredBuffs: AlterationDetail[];
+    expiredDebuffs: AlterationDetail[];
   } {
     const decremented = this.buffs.map((b) => ({
       ...b,
@@ -476,8 +475,8 @@ export class FightingCard {
     duration: number,
     powerId?: string,
     terminationEvent?: string,
-  ): Debuff {
-    const debuff: Debuff = {
+  ): AlterationDetail {
+    const debuff: AlterationDetail = {
       type: debuffType,
       value: this.computeAttributeModifierValue(debuffType, debuffRate),
       duration: duration,

@@ -1,6 +1,6 @@
 import { AlterationType } from './alteration-type';
 
-export type Buff = {
+export type AlterationDetail = {
   type: AlterationType;
   value: number;
   duration: number;

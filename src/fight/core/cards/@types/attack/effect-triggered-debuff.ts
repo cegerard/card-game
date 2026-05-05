@@ -1,5 +1,5 @@
 import { FightingCard } from '../../fighting-card';
-import { Debuff } from '../alteration/debuff';
+import { AlterationDetail } from '../alteration/alteration-detail';
 import { AlterationType } from '../alteration/alteration-type';
 import { Randomizer } from '../../../../core/randomizer';
 
@@ -27,7 +27,7 @@ export class EffectTriggeredDebuff {
     this.randomizer = randomizer;
   }
 
-  public tryApply(target: FightingCard): Debuff | undefined {
+  public tryApply(target: FightingCard): AlterationDetail | undefined {
     if (this.randomizer.random_int_between(0, 100) >= this.probability * 100)
       return undefined;
 

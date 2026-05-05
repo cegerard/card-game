@@ -1,14 +1,14 @@
 import { FightingCard } from '../../fighting-card';
 import { EffectLevel } from './effect-level';
 import { FightingContext } from '../fighting-context';
-import { Debuff } from '../alteration/debuff';
+import { AlterationDetail } from '../alteration/alteration-detail';
 import { EffectTriggeredDebuff } from './effect-triggered-debuff';
 import { StateEffectType } from '../state/state-effect-type';
 
 export type EffectResult = {
   type: StateEffectType;
   card: FightingCard;
-  triggeredDebuff?: { card: FightingCard; debuff: Debuff };
+  triggeredDebuff?: { card: FightingCard; debuff: AlterationDetail };
 };
 
 export interface AttackEffect {

@@ -1,14 +1,14 @@
 import { FightingCard } from '../../fighting-card';
 import { FightingContext } from '../fighting-context';
 import { TargetingCardStrategy } from '../../../targeting-card-strategies/targeting-card-strategy';
-import { Buff } from './buff';
+import { AlterationDetail } from './alteration-detail';
 import { AlterationType } from './alteration-type';
 import { CardInfo } from '../card-info';
 import { AlterationCondition } from './alteration-condition';
 
 export type AlterationResult = {
   target: CardInfo;
-  buff: Buff;
+  buff: AlterationDetail;
 };
 
 export class Alteration {

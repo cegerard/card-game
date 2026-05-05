@@ -1,9 +1,9 @@
 import { CardInfo } from '../card-info';
-import { Buff } from '../alteration/buff';
+import { AlterationDetail } from '../alteration/alteration-detail';
 
 export type BuffResult = {
   target: CardInfo;
-  buff: Buff;
+  buff: AlterationDetail;
 };
 
 export type BuffResults = BuffResult[];
