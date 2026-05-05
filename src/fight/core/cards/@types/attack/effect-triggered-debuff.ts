@@ -1,6 +1,6 @@
 import { FightingCard } from '../../fighting-card';
-import { Debuff } from '../buff/debuff';
-import { DebuffType } from '../buff/type';
+import { Debuff } from '../alteration/debuff';
+import { DebuffType } from '../alteration/type';
 import { Randomizer } from '../../../../core/randomizer';
 
 export class EffectTriggeredDebuff {

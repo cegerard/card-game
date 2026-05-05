@@ -4,7 +4,7 @@ import { SpecialResult } from '../@types/action-result/special-result';
 import { FightingCard } from '../fighting-card';
 import { Special } from './special';
 import { AttackEffect, EffectResult } from '../@types/attack/attack-effect';
-import { BuffApplication } from '../@types/buff/buff-application';
+import { BuffApplication } from '../@types/alteration/alteration';
 import { DamageComposition } from '../@types/damage/damage-composition';
 import { DamageCalculator } from '../damage/damage-calculator';
 

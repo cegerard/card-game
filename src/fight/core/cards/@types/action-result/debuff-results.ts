@@ -1,5 +1,5 @@
 import { CardInfo } from '../card-info';
-import { Debuff } from '../buff/debuff';
+import { Debuff } from '../alteration/debuff';
 
 export type DebuffResult = {
   target: CardInfo;

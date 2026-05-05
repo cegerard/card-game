@@ -23,11 +23,11 @@ import { createEffect } from './effect';
 import {
   BuffType,
   DebuffType,
-} from '../../src/fight/core/cards/@types/buff/type';
+} from '../../src/fight/core/cards/@types/alteration/type';
 import { Skill } from '../../src/fight/core/cards/skills/skill';
 import { TargetingOverrideSkill } from '../../src/fight/core/cards/skills/targeting-override';
-import { BuffApplication } from '../../src/fight/core/cards/@types/buff/buff-application';
-import { BuffCondition } from '../../src/fight/core/cards/@types/buff/buff-condition';
+import { BuffApplication } from '../../src/fight/core/cards/@types/alteration/alteration';
+import { ConditionedAlteration } from '../../src/fight/core/cards/@types/alteration/conditioned-alteration';
 import { Element } from '../../src/fight/core/cards/@types/damage/element';
 import { DamageComposition } from '../../src/fight/core/cards/@types/damage/damage-composition';
 import { DamageType } from '../../src/fight/core/cards/@types/damage/damage-type';
@@ -92,7 +92,7 @@ type FightingCardParams = {
           activationLimit?: number;
           endEvent?: string;
           terminationEvent?: string;
-          activationCondition?: BuffCondition;
+          activationCondition?: ConditionedAlteration;
           activationEvent?: string;
           activationTargetCardId?: string;
           replacementEvent?: string;
@@ -105,7 +105,7 @@ type FightingCardParams = {
           trigger: string;
           targetingStrategy: string;
           targetCardId?: string;
-          activationCondition?: BuffCondition;
+          activationCondition?: ConditionedAlteration;
           activationEvent?: string;
           activationTargetCardId?: string;
           replacementEvent?: string;
@@ -328,7 +328,7 @@ function createsSkills(
         activationLimit?: number;
         endEvent?: string;
         terminationEvent?: string;
-        activationCondition?: BuffCondition;
+        activationCondition?: ConditionedAlteration;
         activationEvent?: string;
         activationTargetCardId?: string;
         replacementEvent?: string;
@@ -341,7 +341,7 @@ function createsSkills(
         trigger: string;
         targetingStrategy: string;
         targetCardId?: string;
-        activationCondition?: BuffCondition;
+        activationCondition?: ConditionedAlteration;
         activationEvent?: string;
         activationTargetCardId?: string;
         replacementEvent?: string;

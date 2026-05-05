@@ -3,9 +3,9 @@ import { FightingCard } from '../fighting-card';
 import { Trigger } from '../../trigger/trigger';
 import { ActivatableTrigger } from '../../trigger/activatable-trigger';
 import { FightingContext } from '../@types/fighting-context';
-import { BuffType } from '../@types/buff/type';
+import { BuffType } from '../@types/alteration/type';
 import { Skill, SkillKind, SkillResults } from './skill';
-import { BuffCondition } from '../@types/buff/buff-condition';
+import { ConditionedAlteration } from '../@types/alteration/conditioned-alteration';
 
 export interface AlterationSkillOptions {
   name: string;
@@ -16,7 +16,7 @@ export interface AlterationSkillOptions {
   duration: number;
   trigger: Trigger;
   targetingStrategy: TargetingCardStrategy;
-  activationCondition?: BuffCondition;
+  activationCondition?: ConditionedAlteration;
   activationLimit?: number;
   endEvent?: string;
   terminationEvent?: string;
@@ -33,7 +33,7 @@ export class AlterationSkill implements Skill {
   private readonly duration: number;
   private readonly trigger: Trigger;
   private readonly targetingStrategy: TargetingCardStrategy;
-  private readonly activationCondition?: BuffCondition;
+  private readonly activationCondition?: ConditionedAlteration;
   private readonly activationLimit?: number;
   private readonly endEvent?: string;
   private readonly terminationEvent?: string;

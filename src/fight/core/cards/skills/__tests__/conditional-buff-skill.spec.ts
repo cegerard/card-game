@@ -4,7 +4,7 @@ import { createFightingCard } from '../../../../../../test/helpers/fighting-card
 import { Player } from '../../../player';
 import { TurnEnd } from '../../../trigger/turn-end';
 import { Launcher } from '../../../targeting-card-strategies/launcher';
-import { HealthThresholdCondition } from '../../@types/buff/conditions/health-threshold-condition';
+import { HealthThresholdCondition } from '../../@types/alteration/conditions/health-threshold-condition';
 
 describe('AlterationSkill with activationCondition', () => {
   const trigger = new TurnEnd();

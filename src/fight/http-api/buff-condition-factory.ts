@@ -1,12 +1,12 @@
 import { BuffConditionType } from './dto/fight-data.dto';
-import { BuffCondition } from '../core/cards/@types/buff/buff-condition';
-import { AllyPresenceCondition } from '../core/cards/@types/buff/conditions/ally-presence-condition';
-import { HealthThresholdCondition } from '../core/cards/@types/buff/conditions/health-threshold-condition';
+import { ConditionedAlteration } from '../core/cards/@types/alteration/conditioned-alteration';
+import { AllyPresenceCondition } from '../core/cards/@types/alteration/conditions/ally-presence-condition';
+import { HealthThresholdCondition } from '../core/cards/@types/alteration/conditions/health-threshold-condition';
 
 export function buildBuffCondition(
   type: BuffConditionType,
   params: { allyName?: string; threshold?: number; operator?: string },
-): BuffCondition {
+): ConditionedAlteration {
   switch (type) {
     case BuffConditionType.ALLY_PRESENCE:
       if (!params.allyName) {

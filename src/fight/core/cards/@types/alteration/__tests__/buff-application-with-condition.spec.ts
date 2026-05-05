@@ -1,5 +1,5 @@
-import { BuffApplication } from '../buff-application';
-import { BuffCondition } from '../buff-condition';
+import { BuffApplication } from '../alteration';
+import { ConditionedAlteration } from '../conditioned-alteration';
 import { createFightingCard } from '../../../../../../../test/helpers/fighting-card';
 import { Player } from '../../../../player';
 import { Launcher } from '../../../../targeting-card-strategies/launcher';
@@ -17,12 +17,12 @@ function makeContext(
 }
 
 describe('BuffApplication with condition', () => {
-  const trueCondition: BuffCondition = {
+  const trueCondition: ConditionedAlteration = {
     id: 'always-true',
     evaluate: () => true,
   };
 
-  const falseCondition: BuffCondition = {
+  const falseCondition: ConditionedAlteration = {
     id: 'always-false',
     evaluate: () => false,
   };

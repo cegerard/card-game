@@ -41,7 +41,7 @@ import { FreezeAttackEffect } from '../core/cards/@types/attack/attack-freeze-ef
 import { StuntAttackEffect } from '../core/cards/@types/attack/attack-stunt-effect';
 import { EffectTriggeredDebuff } from '../core/cards/@types/attack/effect-triggered-debuff';
 import { MathRandomizer } from '../tools/math-randomizer';
-import { BuffApplication } from '../core/cards/@types/buff/buff-application';
+import { BuffApplication } from '../core/cards/@types/alteration/alteration';
 import { CardSelector } from '../core/fight-simulator/card-selectors/card-selector';
 import { PlayerByPlayerCardSelector } from '../core/fight-simulator/card-selectors/player-by-player';
 import { SpeedWeightedCardSelector } from '../core/fight-simulator/card-selectors/speed-weighted-card-pool';
@@ -437,7 +437,7 @@ export class FightController {
 
   private mapBuffType(
     buffType: BuffType,
-  ): import('../core/cards/@types/buff/type').BuffType {
+  ): import('../core/cards/@types/alteration/type').BuffType {
     const BUFF_TYPE_MAP = {
       [BuffType.ATTACK]: 'attack' as const,
       [BuffType.DEFENSE]: 'defense' as const,

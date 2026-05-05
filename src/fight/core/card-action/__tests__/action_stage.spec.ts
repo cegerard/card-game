@@ -20,7 +20,7 @@ import { EffectTriggeredDebuff } from '../../cards/@types/attack/effect-triggere
 import { RandomizerFake } from '../../../../../test/helpers/randomizer-fake';
 import { MathRandomizer } from '../../../tools/math-randomizer';
 import { StepKind } from '../../fight-simulator/@types/step';
-import { BuffApplication } from '../../cards/@types/buff/buff-application';
+import { BuffApplication } from '../../cards/@types/alteration/alteration';
 import { BuffReport } from '../../fight-simulator/@types/buff-report';
 
 class UnknownSpecial implements Special {

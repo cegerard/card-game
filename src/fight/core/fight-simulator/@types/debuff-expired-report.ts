@@ -1,4 +1,4 @@
-import { DebuffType } from '../../cards/@types/buff/type';
+import { DebuffType } from '../../cards/@types/alteration/type';
 import { CardInfo } from '../../cards/@types/card-info';
 import { StepKind } from './step';
 

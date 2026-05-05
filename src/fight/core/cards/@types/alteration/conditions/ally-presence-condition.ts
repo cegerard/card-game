@@ -1,8 +1,8 @@
 import { FightingCard } from '../../../fighting-card';
 import { FightingContext } from '../../fighting-context';
-import { BuffCondition } from '../buff-condition';
+import { ConditionedAlteration } from '../conditioned-alteration';
 
-export class AllyPresenceCondition implements BuffCondition {
+export class AllyPresenceCondition implements ConditionedAlteration {
   public readonly id = 'ally-presence';
 
   constructor(private readonly allyName: string) {}

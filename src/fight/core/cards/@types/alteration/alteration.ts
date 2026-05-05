@@ -4,7 +4,7 @@ import { TargetingCardStrategy } from '../../../targeting-card-strategies/target
 import { Buff } from './buff';
 import { BuffType } from './type';
 import { CardInfo } from '../card-info';
-import { BuffCondition } from './buff-condition';
+import { ConditionedAlteration } from './conditioned-alteration';
 
 export type BuffApplicationResult = {
   target: CardInfo;
@@ -17,7 +17,7 @@ export class BuffApplication {
     public readonly rate: number,
     public readonly duration: number,
     public readonly targetingStrategy: TargetingCardStrategy,
-    public readonly condition?: BuffCondition,
+    public readonly condition?: ConditionedAlteration,
     public readonly conditionMultiplier?: number,
     public readonly terminationEvent?: string,
   ) {}

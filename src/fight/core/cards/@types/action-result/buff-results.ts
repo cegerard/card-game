@@ -1,5 +1,5 @@
 import { CardInfo } from '../card-info';
-import { Buff } from '../buff/buff';
+import { Buff } from '../alteration/buff';
 
 export type BuffResult = {
   target: CardInfo;
