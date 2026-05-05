@@ -1,8 +1,8 @@
 import { FightingCard } from '../../../fighting-card';
 import { FightingContext } from '../../fighting-context';
-import { ConditionedAlteration } from '../conditioned-alteration';
+import { AlterationCondition } from '../alteration-condition';
 
-export class HealthThresholdCondition implements ConditionedAlteration {
+export class HealthThresholdCondition implements AlterationCondition {
   public readonly id = 'health-threshold';
 
   constructor(

@@ -4,20 +4,20 @@ import { TargetingCardStrategy } from '../../../targeting-card-strategies/target
 import { Buff } from './buff';
 import { BuffType } from './type';
 import { CardInfo } from '../card-info';
-import { ConditionedAlteration } from './conditioned-alteration';
+import { AlterationCondition } from './alteration-condition';
 
-export type BuffApplicationResult = {
+export type AlterationResult = {
   target: CardInfo;
   buff: Buff;
 };
 
-export class BuffApplication {
+export class Alteration {
   constructor(
     public readonly type: BuffType,
     public readonly rate: number,
     public readonly duration: number,
     public readonly targetingStrategy: TargetingCardStrategy,
-    public readonly condition?: ConditionedAlteration,
+    public readonly condition?: AlterationCondition,
     public readonly conditionMultiplier?: number,
     public readonly terminationEvent?: string,
   ) {}
@@ -25,7 +25,7 @@ export class BuffApplication {
   public applyBuff(
     source: FightingCard,
     context: FightingContext,
-  ): BuffApplicationResult[] {
+  ): AlterationResult[] {
     const effectiveRate = this.condition?.evaluate(source, context)
       ? this.rate * this.conditionMultiplier
       : this.rate;

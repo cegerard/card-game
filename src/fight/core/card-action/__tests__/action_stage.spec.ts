@@ -20,7 +20,7 @@ import { EffectTriggeredDebuff } from '../../cards/@types/attack/effect-triggere
 import { RandomizerFake } from '../../../../../test/helpers/randomizer-fake';
 import { MathRandomizer } from '../../../tools/math-randomizer';
 import { StepKind } from '../../fight-simulator/@types/step';
-import { BuffApplication } from '../../cards/@types/alteration/alteration';
+import { Alteration } from '../../cards/@types/alteration/alteration';
 import { BuffReport } from '../../fight-simulator/@types/buff-report';
 
 class UnknownSpecial implements Special {
@@ -117,7 +117,7 @@ describe('ActionStage', () => {
         0,
         POSITION_BASED,
         undefined,
-        [new BuffApplication('attack', 1.2, 2, new Launcher())],
+        [new Alteration('attack', 1.2, 2, new Launcher())],
       );
       const attacker = makeCard(specialWithBuff);
       const defender = makeCard(

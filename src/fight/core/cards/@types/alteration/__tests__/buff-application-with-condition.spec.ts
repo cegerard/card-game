@@ -1,5 +1,5 @@
-import { BuffApplication } from '../alteration';
-import { ConditionedAlteration } from '../conditioned-alteration';
+import { Alteration } from '../alteration';
+import { AlterationCondition } from '../alteration-condition';
 import { createFightingCard } from '../../../../../../../test/helpers/fighting-card';
 import { Player } from '../../../../player';
 import { Launcher } from '../../../../targeting-card-strategies/launcher';
@@ -17,22 +17,22 @@ function makeContext(
 }
 
 describe('BuffApplication with condition', () => {
-  const trueCondition: ConditionedAlteration = {
+  const trueCondition: AlterationCondition = {
     id: 'always-true',
     evaluate: () => true,
   };
 
-  const falseCondition: ConditionedAlteration = {
+  const falseCondition: AlterationCondition = {
     id: 'always-false',
     evaluate: () => false,
   };
 
   describe('when no condition is provided', () => {
-    let result: ReturnType<BuffApplication['applyBuff']>[0];
+    let result: ReturnType<Alteration['applyBuff']>[0];
 
     beforeEach(() => {
       const source = createFightingCard({ attack: 100 });
-      const buff = new BuffApplication('attack', 0.2, 1, new Launcher());
+      const buff = new Alteration('attack', 0.2, 1, new Launcher());
       const context = makeContext(source);
       [result] = buff.applyBuff(source, context);
     });
@@ -43,11 +43,11 @@ describe('BuffApplication with condition', () => {
   });
 
   describe('when condition evaluates to true', () => {
-    let result: ReturnType<BuffApplication['applyBuff']>[0];
+    let result: ReturnType<Alteration['applyBuff']>[0];
 
     beforeEach(() => {
       const source = createFightingCard({ attack: 100 });
-      const buff = new BuffApplication(
+      const buff = new Alteration(
         'attack',
         0.2,
         1,
@@ -65,11 +65,11 @@ describe('BuffApplication with condition', () => {
   });
 
   describe('when condition evaluates to false', () => {
-    let result: ReturnType<BuffApplication['applyBuff']>[0];
+    let result: ReturnType<Alteration['applyBuff']>[0];
 
     beforeEach(() => {
       const source = createFightingCard({ attack: 100 });
-      const buff = new BuffApplication(
+      const buff = new Alteration(
         'attack',
         0.2,
         1,

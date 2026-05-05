@@ -4,7 +4,7 @@ import { SpecialResult } from '../@types/action-result/special-result';
 import { FightingCard } from '../fighting-card';
 import { Special } from './special';
 import { AttackEffect, EffectResult } from '../@types/attack/attack-effect';
-import { BuffApplication } from '../@types/alteration/alteration';
+import { Alteration } from '../@types/alteration/alteration';
 import { DamageComposition } from '../@types/damage/damage-composition';
 import { DamageCalculator } from '../damage/damage-calculator';
 
@@ -18,7 +18,7 @@ export class SpecialAttack implements Special {
     private readonly energyNeeded: number,
     private readonly targetingStrategy: TargetingCardStrategy,
     private readonly effect?: AttackEffect,
-    private readonly buffApplication?: BuffApplication[],
+    private readonly buffApplication?: Alteration[],
   ) {}
 
   public ready(actualEnergy: number): boolean {
