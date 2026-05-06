@@ -473,8 +473,8 @@ export class FightingCard {
     debuffType: AlterationType,
     debuffRate: number,
     duration: number,
-    powerId?: string,
     terminationEvent?: string,
+    powerId?: string,
   ): AlterationDetail {
     const debuff: AlterationDetail = {
       type: debuffType,
