@@ -141,9 +141,9 @@ export class ActionStage {
         source: card.identityInfo,
         buffs: specialResults.buffResults.map((buffResult) => ({
           target: buffResult.target,
-          kind: buffResult.buff.type,
-          value: buffResult.buff.value,
-          remainingTurns: buffResult.buff.duration,
+          kind: buffResult.alteration.type,
+          value: buffResult.alteration.value,
+          remainingTurns: buffResult.alteration.duration,
         })),
         energy: 0,
       };

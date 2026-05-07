@@ -16,7 +16,7 @@ function makeContext(
   return { sourcePlayer, opponentPlayer };
 }
 
-describe('BuffApplication with condition', () => {
+describe('Alteration with condition', () => {
   const trueCondition: AlterationCondition = {
     id: 'always-true',
     evaluate: () => true,
@@ -28,22 +28,22 @@ describe('BuffApplication with condition', () => {
   };
 
   describe('when no condition is provided', () => {
-    let result: ReturnType<Alteration['applyBuff']>[0];
+    let result: ReturnType<Alteration['apply']>[0];
 
     beforeEach(() => {
       const source = createFightingCard({ attack: 100 });
       const buff = new Alteration('attack', 0.2, 1, new Launcher());
       const context = makeContext(source);
-      [result] = buff.applyBuff(source, context);
+      [result] = buff.apply(source, context);
     });
 
     it('applies base rate', () => {
-      expect(result.buff.value).toBe(20);
+      expect(result.alteration.value).toBe(20);
     });
   });
 
   describe('when condition evaluates to true', () => {
-    let result: ReturnType<Alteration['applyBuff']>[0];
+    let result: ReturnType<Alteration['apply']>[0];
 
     beforeEach(() => {
       const source = createFightingCard({ attack: 100 });
@@ -56,16 +56,16 @@ describe('BuffApplication with condition', () => {
         2,
       );
       const context = makeContext(source);
-      [result] = buff.applyBuff(source, context);
+      [result] = buff.apply(source, context);
     });
 
     it('applies multiplied rate', () => {
-      expect(result.buff.value).toBe(40);
+      expect(result.alteration.value).toBe(40);
     });
   });
 
   describe('when condition evaluates to false', () => {
-    let result: ReturnType<Alteration['applyBuff']>[0];
+    let result: ReturnType<Alteration['apply']>[0];
 
     beforeEach(() => {
       const source = createFightingCard({ attack: 100 });
@@ -78,11 +78,11 @@ describe('BuffApplication with condition', () => {
         2,
       );
       const context = makeContext(source);
-      [result] = buff.applyBuff(source, context);
+      [result] = buff.apply(source, context);
     });
 
     it('applies base rate', () => {
-      expect(result.buff.value).toBe(20);
+      expect(result.alteration.value).toBe(20);
     });
   });
 });

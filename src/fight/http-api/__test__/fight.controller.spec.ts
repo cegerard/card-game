@@ -1362,7 +1362,7 @@ describe('FightController', () => {
       behaviors: { dodge: DodgeStrategy.SIMPLE_DODGE },
     };
 
-    it('throws when mapBuffType receives an unknown buff type', () => {
+    it('throws when mapAlterationType receives an unknown buff type', () => {
       const data: FightDataDto = {
         cardSelectorStrategy: CardSelectorStrategy.PLAYER_BY_PLAYER,
         player1: {
