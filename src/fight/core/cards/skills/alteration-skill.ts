@@ -131,6 +131,7 @@ export class AlterationSkill implements Skill {
         this.attributeType,
         this.rate,
         this.duration,
+        this.terminationEvent,
         this.powerId,
       ),
     }));

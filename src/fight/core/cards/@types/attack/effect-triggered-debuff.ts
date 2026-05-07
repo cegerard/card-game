@@ -35,7 +35,6 @@ export class EffectTriggeredDebuff {
       this.debuffType,
       this.debuffRate,
       this.duration,
-      undefined,
       this.terminationEvent,
     );
   }

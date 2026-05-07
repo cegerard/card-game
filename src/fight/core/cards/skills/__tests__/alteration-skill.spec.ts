@@ -158,5 +158,22 @@ describe('AlterationSkill lifecycle', () => {
 
       expect(source.actualAttack).toBe(initialAttack - 10);
     });
+
+    it('sets terminationEvent on applied debuff', () => {
+      const source = createFightingCard({ attack: 100, health: 100 });
+      const skill = new AlterationSkill({
+        name: 'skill',
+        polarity: 'debuff',
+        attributeType: 'attack',
+        rate: 0.1,
+        duration: Infinity,
+        trigger,
+        targetingStrategy: targeting,
+        terminationEvent: 'my-end-event',
+      });
+      skill.launch(source, makeContext(source));
+
+      expect(source.removeEventBoundDebuffs('my-end-event')).toHaveLength(1);
+    });
   });
 });

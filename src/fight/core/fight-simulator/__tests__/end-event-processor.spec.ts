@@ -71,7 +71,7 @@ describe('EndEventProcessor.processEndEvent()', () => {
         accuracy: 0,
         agility: 0,
       });
-      card.applyDebuff('attack', 0.4, Infinity, undefined, 'lions-end');
+      card.applyDebuff('attack', 0.4, Infinity, 'lions-end');
       const player1 = new Player('P1', [card]);
       const player2 = new Player('P2', [createFightingCard({})]);
       processor = new EndEventProcessor(player1, player2);

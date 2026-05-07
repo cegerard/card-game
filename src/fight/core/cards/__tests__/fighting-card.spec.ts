@@ -146,7 +146,7 @@ describe('FightingCard.removeEventBoundDebuffs()', () => {
         accuracy: 0,
         agility: 0,
       });
-      card.applyDebuff('attack', 0.4, Infinity, undefined, 'lions-end');
+      card.applyDebuff('attack', 0.4, Infinity, 'lions-end');
     });
 
     it('returns the list of removed debuffs', () => {
@@ -178,7 +178,7 @@ describe('FightingCard.removeEventBoundDebuffs()', () => {
         accuracy: 0,
         agility: 0,
       });
-      card.applyDebuff('attack', 0.4, Infinity, undefined, 'other-event');
+      card.applyDebuff('attack', 0.4, Infinity, 'other-event');
     });
 
     it('leaves non-matching debuffs in place', () => {
