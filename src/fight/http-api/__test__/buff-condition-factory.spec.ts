@@ -1,16 +1,22 @@
 import 'reflect-metadata';
 
-import { BuffConditionType } from '../dto/fight-data.dto';
-import { buildBuffCondition } from '../buff-condition-factory';
+import { AlterationCondition } from '../../core/cards/@types/alteration/alteration-condition';
 import { AllyPresenceCondition } from '../../core/cards/@types/alteration/conditions/ally-presence-condition';
 import { HealthThresholdCondition } from '../../core/cards/@types/alteration/conditions/health-threshold-condition';
+import { BuffConditionType } from '../dto/fight-data.dto';
+import { buildBuffCondition } from '../buff-condition-factory';
 
 describe('buildBuffCondition', () => {
   describe('ALLY_PRESENCE', () => {
-    it('returns AllyPresenceCondition when allyName is provided', () => {
-      const condition = buildBuffCondition(BuffConditionType.ALLY_PRESENCE, {
+    let condition: AlterationCondition;
+
+    beforeEach(() => {
+      condition = buildBuffCondition(BuffConditionType.ALLY_PRESENCE, {
         allyName: 'Hero',
       });
+    });
+
+    it('returns AllyPresenceCondition when allyName is provided', () => {
       expect(condition).toBeInstanceOf(AllyPresenceCondition);
     });
 
@@ -22,28 +28,46 @@ describe('buildBuffCondition', () => {
   });
 
   describe('HEALTH_THRESHOLD', () => {
-    it('returns HealthThresholdCondition with defaults when no params provided', () => {
-      const condition = buildBuffCondition(
-        BuffConditionType.HEALTH_THRESHOLD,
-        {},
-      );
-      expect(condition).toBeInstanceOf(HealthThresholdCondition);
+    describe('with default params', () => {
+      let condition: AlterationCondition;
+
+      beforeEach(() => {
+        condition = buildBuffCondition(BuffConditionType.HEALTH_THRESHOLD, {});
+      });
+
+      it('returns HealthThresholdCondition', () => {
+        expect(condition).toBeInstanceOf(HealthThresholdCondition);
+      });
     });
 
-    it('returns HealthThresholdCondition with valid above operator', () => {
-      const condition = buildBuffCondition(BuffConditionType.HEALTH_THRESHOLD, {
-        threshold: 0.3,
-        operator: 'above',
+    describe('with above operator', () => {
+      let condition: AlterationCondition;
+
+      beforeEach(() => {
+        condition = buildBuffCondition(BuffConditionType.HEALTH_THRESHOLD, {
+          threshold: 0.3,
+          operator: 'above',
+        });
       });
-      expect(condition).toBeInstanceOf(HealthThresholdCondition);
+
+      it('returns HealthThresholdCondition', () => {
+        expect(condition).toBeInstanceOf(HealthThresholdCondition);
+      });
     });
 
-    it('returns HealthThresholdCondition with valid below operator', () => {
-      const condition = buildBuffCondition(BuffConditionType.HEALTH_THRESHOLD, {
-        threshold: 0.5,
-        operator: 'below',
+    describe('with below operator', () => {
+      let condition: AlterationCondition;
+
+      beforeEach(() => {
+        condition = buildBuffCondition(BuffConditionType.HEALTH_THRESHOLD, {
+          threshold: 0.5,
+          operator: 'below',
+        });
       });
-      expect(condition).toBeInstanceOf(HealthThresholdCondition);
+
+      it('returns HealthThresholdCondition', () => {
+        expect(condition).toBeInstanceOf(HealthThresholdCondition);
+      });
     });
 
     it('throws for an invalid operator', () => {
