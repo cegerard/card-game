@@ -13,10 +13,20 @@ export function buildBuffCondition(
         throw new Error('AllyPresenceCondition requires allyName');
       }
       return new AllyPresenceCondition(params.allyName);
-    case BuffConditionType.HEALTH_THRESHOLD:
+    case BuffConditionType.HEALTH_THRESHOLD: {
+      const validOperators = ['above', 'below'] as const;
+      if (
+        params.operator !== undefined &&
+        !validOperators.includes(params.operator as 'above' | 'below')
+      ) {
+        throw new Error(`Invalid operator: ${params.operator}`);
+      }
       return new HealthThresholdCondition(
         params.threshold ?? 0.5,
         (params.operator as 'above' | 'below') ?? 'above',
       );
+    }
+    default:
+      throw new Error(`Unknown BuffConditionType: ${type}`);
   }
 }
