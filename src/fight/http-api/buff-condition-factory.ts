@@ -3,6 +3,9 @@ import { AlterationCondition } from '../core/cards/@types/alteration/alteration-
 import { AllyPresenceCondition } from '../core/cards/@types/alteration/conditions/ally-presence-condition';
 import { HealthThresholdCondition } from '../core/cards/@types/alteration/conditions/health-threshold-condition';
 
+type ConditionOperator = 'above' | 'below';
+const VALID_OPERATORS: ConditionOperator[] = ['above', 'below'];
+
 export function buildBuffCondition(
   type: BuffConditionType,
   params: { allyName?: string; threshold?: number; operator?: string },
@@ -13,10 +16,19 @@ export function buildBuffCondition(
         throw new Error('AllyPresenceCondition requires allyName');
       }
       return new AllyPresenceCondition(params.allyName);
-    case BuffConditionType.HEALTH_THRESHOLD:
+    case BuffConditionType.HEALTH_THRESHOLD: {
+      if (
+        params.operator !== undefined &&
+        !VALID_OPERATORS.includes(params.operator as ConditionOperator)
+      ) {
+        throw new Error(`Invalid operator: ${params.operator}`);
+      }
       return new HealthThresholdCondition(
         params.threshold ?? 0.5,
-        (params.operator as 'above' | 'below') ?? 'above',
+        (params.operator as ConditionOperator) ?? 'above',
       );
+    }
+    default:
+      throw new Error(`Unknown BuffConditionType: ${type}`);
   }
 }
