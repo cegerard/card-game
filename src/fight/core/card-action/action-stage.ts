@@ -207,7 +207,7 @@ export class ActionStage {
   private handleAttackResult(
     attackResults: AttackResult[],
     report: AttackReport,
-    attackerCard?: FightingCard,
+    attackerCard: FightingCard,
   ): void {
     const reportedDeaths = new Set<FightingCard>();
 
