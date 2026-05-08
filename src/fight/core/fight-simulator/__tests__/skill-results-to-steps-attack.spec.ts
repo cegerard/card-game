@@ -1,5 +1,9 @@
 import { skillResultsToSteps } from '../skill-results-to-steps';
-import { SkillKind, AttackSkillResults, BuffSkillResults } from '../../cards/skills/skill';
+import {
+  SkillKind,
+  AttackSkillResults,
+  BuffSkillResults,
+} from '../../cards/skills/skill';
 import { StepKind } from '../@types/step';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 
@@ -128,7 +132,9 @@ describe('skillResultsToSteps: absent endEventProcessor with endEvent', () => {
   };
 
   it('does not throw when endEventProcessor is absent', () => {
-    expect(() => skillResultsToSteps(card, [buffResultWithEndEvent])).not.toThrow();
+    expect(() =>
+      skillResultsToSteps(card, [buffResultWithEndEvent]),
+    ).not.toThrow();
   });
 
   it('silently skips the endEvent when endEventProcessor is absent', () => {
