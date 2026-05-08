@@ -64,6 +64,14 @@ describe('Alteration with condition', () => {
     });
   });
 
+  describe('when condition is provided without conditionMultiplier', () => {
+    it('throws in the constructor', () => {
+      expect(
+        () => new Alteration('attack', 0.2, 1, new Launcher(), trueCondition),
+      ).toThrow();
+    });
+  });
+
   describe('when condition evaluates to false', () => {
     let result: ReturnType<Alteration['apply']>[0];
 
