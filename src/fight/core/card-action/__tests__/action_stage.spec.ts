@@ -207,6 +207,59 @@ describe('ActionStage', () => {
       });
     });
 
+    describe('EffectTriggeredDebuff with terminationEvent roundtrip', () => {
+      let defender: FightingCard;
+      let steps: ReturnType<ActionStage['computeNextAction']>;
+
+      beforeEach(() => {
+        const randomizer = new RandomizerFake().setNextRandomValue(0);
+        const burnEffect = new BurnAttackEffect(
+          0.1,
+          1,
+          new MathRandomizer(),
+          new EffectTriggeredDebuff(
+            1.0,
+            'defense',
+            0.1,
+            2,
+            randomizer,
+            'my-end-event',
+          ),
+        );
+        const attackWithBurn = new SimpleAttack(
+          'attack',
+          [new DamageComposition(DamageType.PHYSICAL, 1)],
+          POSITION_BASED,
+          [burnEffect],
+        );
+        const HIGH_ENERGY_SPECIAL = new SpecialAttack(
+          'special',
+          [new DamageComposition(DamageType.PHYSICAL, 1)],
+          999,
+          POSITION_BASED,
+        );
+        const attacker = makeCard(HIGH_ENERGY_SPECIAL, attackWithBurn);
+        defender = makeCard(HIGH_ENERGY_SPECIAL);
+        const player1 = new Player('Player 1', [attacker]);
+        const player2 = new Player('Player 2', [defender]);
+        const actionStage = new ActionStage(
+          player1,
+          player2,
+          { onCardDeath: [] },
+          new DeathSkillHandler(player1, player2),
+        );
+        steps = actionStage.computeNextAction([attacker]);
+      });
+
+      it('emits a debuff step', () => {
+        expect(steps.find((s) => s.kind === StepKind.Debuff)).toBeDefined();
+      });
+
+      it('stores terminationEvent on the applied debuff so it can be removed by event', () => {
+        expect(defender.removeEventBoundDebuffs('my-end-event')).toHaveLength(1);
+      });
+    });
+
     describe('when launching an unknown special kind', () => {
       const attacker = makeCard(new UnknownSpecial());
       const defender = makeCard(
