@@ -1,6 +1,6 @@
 import { FightingCard } from '../../fighting-card';
 import { EffectResult } from '../attack/attack-effect';
-import { BuffResults } from './buff-results';
+import { BuffResults } from './alteration-result';
 import { DamageType } from '../damage/damage-type';
 
 export type AttackResult = {
