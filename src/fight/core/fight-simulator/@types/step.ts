@@ -4,8 +4,10 @@ import { HealingReport } from './healing-report';
 import { StateEffectReport } from './state-effect-report';
 import { StatusChangeReport } from './status-change-report';
 import { WinnerReport } from './winner-report';
-import { BuffRemovedReport } from './buff-removed-report';
-import { DebuffRemovedReport } from './debuff-removed-report';
+import {
+  BuffRemovedReport,
+  DebuffRemovedReport,
+} from './alteration-removed-report';
 import {
   BuffExpiredReport,
   DebuffExpiredReport,

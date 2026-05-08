@@ -1,7 +1,7 @@
 import { EndEventProcessor } from '../end-event-processor';
 import { Player } from '../../player';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
-import { BuffRemovedReport } from '../@types/buff-removed-report';
+import { BuffRemovedReport } from '../@types/alteration-removed-report';
 
 describe('EndEventProcessor composite power', () => {
   const source = { id: 'src', name: 'Source', deckIdentity: '' };
