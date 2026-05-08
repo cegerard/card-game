@@ -146,6 +146,38 @@ describe('ActionStage', () => {
       });
     });
 
+    describe('remainingHealth snapshot in attack step', () => {
+      const HIGH_ATTACK_SPECIAL = new SpecialAttack(
+        'special',
+        [new DamageComposition(DamageType.PHYSICAL, 1)],
+        999,
+        POSITION_BASED,
+      );
+      const attacker = makeCard(HIGH_ATTACK_SPECIAL);
+      const defender = makeCard(HIGH_ATTACK_SPECIAL);
+      const player1 = new Player('Player 1', [attacker]);
+      const player2 = new Player('Player 2', [defender]);
+      const actionStage = new ActionStage(
+        player1,
+        player2,
+        { onCardDeath: [] },
+        new DeathSkillHandler(player1, player2),
+      );
+      const steps = actionStage.computeNextAction([attacker]);
+      const attackStep =
+        steps[0] as import('../../fight-simulator/@types/damage-report').DamageReport;
+
+      it('sets remainingHealth to the health after damage, not undefined', () => {
+        expect(attackStep.damages[0].remainingHealth).toBeDefined();
+      });
+
+      it('sets remainingHealth to the defender actual health after the hit', () => {
+        expect(attackStep.damages[0].remainingHealth).toBe(
+          defender.actualHealth,
+        );
+      });
+    });
+
     describe('when launching an unknown special kind', () => {
       const attacker = makeCard(new UnknownSpecial());
       const defender = makeCard(

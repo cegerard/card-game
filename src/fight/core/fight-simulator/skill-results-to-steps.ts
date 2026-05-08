@@ -71,7 +71,7 @@ export function skillResultsToSteps(
             damage: r.damage,
             isCritical: r.isCritical,
             dodge: r.dodge,
-            remainingHealth: r.defender.actualHealth,
+            remainingHealth: r.remainingHealth,
             kind: r.kind,
           })),
           energy: card.actualEnergy,

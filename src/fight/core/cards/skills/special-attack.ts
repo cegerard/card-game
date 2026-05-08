@@ -45,7 +45,14 @@ export class SpecialAttack implements Special {
 
     const attackResults = targetedCards.map((target) => {
       if (target.dodge(source.actualAccuracy)) {
-        return { damage: 0, isCritical, dodge: true, defender: target, kind };
+        return {
+          damage: 0,
+          isCritical,
+          dodge: true,
+          defender: target,
+          kind,
+          remainingHealth: target.actualHealth,
+        };
       }
 
       const { total } = DamageCalculator.calculateDamage(
@@ -66,6 +73,7 @@ export class SpecialAttack implements Special {
         dodge: false,
         defender: target,
         kind,
+        remainingHealth: target.actualHealth,
         effects: effectResult ? [effectResult] : undefined,
       };
     });

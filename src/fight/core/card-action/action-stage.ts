@@ -219,8 +219,7 @@ export class ActionStage {
         damage: damageDealt.damage,
         isCritical: damageDealt.isCritical,
         dodge: damageDealt.dodge,
-        remainingHealth:
-          damageDealt.remainingHealth ?? defensiveCard.actualHealth,
+        remainingHealth: damageDealt.remainingHealth,
         kind: damageDealt.kind,
       });
 

@@ -8,7 +8,7 @@ export type AttackResult = {
   isCritical: boolean;
   dodge: boolean;
   defender: FightingCard;
-  remainingHealth?: number;
+  remainingHealth: number;
   effects?: EffectResult[];
   buffResults?: BuffResults;
   kind?: DamageType[];
