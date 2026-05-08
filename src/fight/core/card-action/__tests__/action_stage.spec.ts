@@ -167,10 +167,6 @@ describe('ActionStage', () => {
       const attackStep =
         steps[0] as import('../../fight-simulator/@types/damage-report').DamageReport;
 
-      it('sets remainingHealth to the health after damage, not undefined', () => {
-        expect(attackStep.damages[0].remainingHealth).toBeDefined();
-      });
-
       it('sets remainingHealth to the defender actual health after the hit', () => {
         expect(attackStep.damages[0].remainingHealth).toBe(
           defender.actualHealth,
