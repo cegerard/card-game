@@ -71,36 +71,40 @@ function makeCard(
 describe('ActionStage', () => {
   describe('handleAttackResult with triggeredDebuff', () => {
     describe('when a simple attack applies a burn effect with triggered debuff', () => {
-      const randomizer = new RandomizerFake().setNextRandomValue(0);
-      const burnEffect = new BurnAttackEffect(
-        0.1,
-        1,
-        new MathRandomizer(),
-        new EffectTriggeredDebuff(1.0, 'defense', 0.1, 2, randomizer),
-      );
-      const attackWithBurn = new SimpleAttack(
-        'attack',
-        [new DamageComposition(DamageType.PHYSICAL, 1)],
-        POSITION_BASED,
-        [burnEffect],
-      );
-      const HIGH_ENERGY_SPECIAL = new SpecialAttack(
-        'special',
-        [new DamageComposition(DamageType.PHYSICAL, 1)],
-        999,
-        POSITION_BASED,
-      );
-      const attacker = makeCard(HIGH_ENERGY_SPECIAL, attackWithBurn);
-      const defender = makeCard(HIGH_ENERGY_SPECIAL);
-      const player1 = new Player('Player 1', [attacker]);
-      const player2 = new Player('Player 2', [defender]);
-      const actionStage = new ActionStage(
-        player1,
-        player2,
-        { onCardDeath: [] },
-        new DeathSkillHandler(player1, player2),
-      );
-      const steps = actionStage.computeNextAction([attacker]);
+      let steps: ReturnType<ActionStage['computeNextAction']>;
+
+      beforeEach(() => {
+        const randomizer = new RandomizerFake().setNextRandomValue(0);
+        const burnEffect = new BurnAttackEffect(
+          0.1,
+          1,
+          new MathRandomizer(),
+          new EffectTriggeredDebuff(1.0, 'defense', 0.1, 2, randomizer),
+        );
+        const attackWithBurn = new SimpleAttack(
+          'attack',
+          [new DamageComposition(DamageType.PHYSICAL, 1)],
+          POSITION_BASED,
+          [burnEffect],
+        );
+        const HIGH_ENERGY_SPECIAL = new SpecialAttack(
+          'special',
+          [new DamageComposition(DamageType.PHYSICAL, 1)],
+          999,
+          POSITION_BASED,
+        );
+        const attacker = makeCard(HIGH_ENERGY_SPECIAL, attackWithBurn);
+        const defender = makeCard(HIGH_ENERGY_SPECIAL);
+        const player1 = new Player('Player 1', [attacker]);
+        const player2 = new Player('Player 2', [defender]);
+        const actionStage = new ActionStage(
+          player1,
+          player2,
+          { onCardDeath: [] },
+          new DeathSkillHandler(player1, player2),
+        );
+        steps = actionStage.computeNextAction([attacker]);
+      });
 
       it('emits a debuff step after the status_change step', () => {
         expect(steps.find((s) => s.kind === StepKind.Debuff)).toBeDefined();
@@ -111,35 +115,37 @@ describe('ActionStage', () => {
   describe('launchSpecial', () => {
     describe('when special attack applies a buff', () => {
       const skillName = 'Power Surge';
-      const specialWithBuff = new SpecialAttack(
-        skillName,
-        [new DamageComposition(DamageType.PHYSICAL, 1)],
-        0,
-        POSITION_BASED,
-        undefined,
-        [new Alteration('attack', 1.2, 2, new Launcher())],
-      );
-      const attacker = makeCard(specialWithBuff);
-      const defender = makeCard(
-        new SpecialAttack(
-          'special',
+      let buffStep: BuffReport;
+
+      beforeEach(() => {
+        const specialWithBuff = new SpecialAttack(
+          skillName,
           [new DamageComposition(DamageType.PHYSICAL, 1)],
-          999,
+          0,
           POSITION_BASED,
-        ),
-      );
-      const player1 = new Player('Player 1', [attacker]);
-      const player2 = new Player('Player 2', [defender]);
-      const actionStage = new ActionStage(
-        player1,
-        player2,
-        { onCardDeath: [] },
-        new DeathSkillHandler(player1, player2),
-      );
-      const steps = actionStage.computeNextAction([attacker]);
-      const buffStep = steps.find(
-        (s) => s.kind === StepKind.Buff,
-      ) as BuffReport;
+          undefined,
+          [new Alteration('attack', 1.2, 2, new Launcher())],
+        );
+        const attacker = makeCard(specialWithBuff);
+        const defender = makeCard(
+          new SpecialAttack(
+            'special',
+            [new DamageComposition(DamageType.PHYSICAL, 1)],
+            999,
+            POSITION_BASED,
+          ),
+        );
+        const player1 = new Player('Player 1', [attacker]);
+        const player2 = new Player('Player 2', [defender]);
+        const actionStage = new ActionStage(
+          player1,
+          player2,
+          { onCardDeath: [] },
+          new DeathSkillHandler(player1, player2),
+        );
+        const steps = actionStage.computeNextAction([attacker]);
+        buffStep = steps.find((s) => s.kind === StepKind.Buff) as BuffReport;
+      });
 
       it('emits a buff step with the skill name', () => {
         expect(buffStep?.name).toBe(skillName);
