@@ -10,11 +10,7 @@ import { StateResult } from './@types/action-result/state-result';
 import { CardStateFrozen } from './@types/state/card-state-frozen';
 import { CardStateStunted } from './@types/state/card-state-stunted';
 import { EffectLevel } from './@types/attack/effect-level';
-import {
-  AlterationDetail,
-  Buff,
-  Debuff,
-} from './@types/alteration/alteration-detail';
+import { Buff, Debuff } from './@types/alteration/alteration-detail';
 import { Skill, SkillResults } from './skills/skill';
 import { AlterationType } from './@types/alteration/alteration-type';
 import { Element } from './@types/damage/element';
