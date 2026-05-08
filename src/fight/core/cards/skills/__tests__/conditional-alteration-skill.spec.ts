@@ -40,6 +40,10 @@ describe('AlterationSkill with activationCondition', () => {
       it('returns buff results', () => {
         expect(results.results.length).toBe(1);
       });
+
+      it('returns Buff skillKind', () => {
+        expect(results.skillKind).toBe(SkillKind.Buff);
+      });
     });
 
     describe('when activation condition is not met', () => {
