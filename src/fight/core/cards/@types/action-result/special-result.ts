@@ -1,5 +1,5 @@
 import { AttackResult } from './attack-result';
-import { BuffResults } from './buff-results';
+import { BuffResults } from './alteration-result';
 import { HealingResult } from './healing-result';
 
 export type SpecialResult = {

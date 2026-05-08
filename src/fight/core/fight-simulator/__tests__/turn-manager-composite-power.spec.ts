@@ -4,7 +4,7 @@ import { TurnManager } from '../turn-manager';
 import { DeathSkillHandler } from '../death-skill-handler';
 import { EndEventProcessor } from '../end-event-processor';
 import { StepKind } from '../@types/step';
-import { BuffReport } from '../@types/buff-report';
+import { BuffReport } from '../@types/alteration-report';
 import { HealingReport } from '../@types/healing-report';
 
 describe('TurnManager composite power', () => {

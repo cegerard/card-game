@@ -52,9 +52,9 @@ export function skillResultsToSteps(
             source: card.identityInfo,
             debuffs: skillResult.results.map((result) => ({
               target: result.target,
-              kind: result.debuff.type,
-              value: result.debuff.value,
-              remainingTurns: result.debuff.duration,
+              kind: result.alteration.type,
+              value: result.alteration.value,
+              remainingTurns: result.alteration.duration,
             })),
             energy: card.actualEnergy,
             powerId: skillResult.powerId,

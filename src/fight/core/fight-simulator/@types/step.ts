@@ -1,14 +1,17 @@
-import { BuffReport } from './buff-report';
-import { DebuffReport } from './debuff-report';
+import { BuffReport, DebuffReport } from './alteration-report';
 import { AttackStepReport, SpecialAttackStepReport } from './damage-report';
 import { HealingReport } from './healing-report';
 import { StateEffectReport } from './state-effect-report';
 import { StatusChangeReport } from './status-change-report';
 import { WinnerReport } from './winner-report';
-import { BuffRemovedReport } from './buff-removed-report';
-import { DebuffRemovedReport } from './debuff-removed-report';
-import { BuffExpiredReport } from './buff-expired-report';
-import { DebuffExpiredReport } from './debuff-expired-report';
+import {
+  BuffRemovedReport,
+  DebuffRemovedReport,
+} from './alteration-removed-report';
+import {
+  BuffExpiredReport,
+  DebuffExpiredReport,
+} from './alteration-expired-report';
 import {
   TargetingOverrideReport,
   TargetingRevertedReport,

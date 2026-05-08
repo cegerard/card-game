@@ -21,7 +21,7 @@ import { RandomizerFake } from '../../../../../test/helpers/randomizer-fake';
 import { MathRandomizer } from '../../../tools/math-randomizer';
 import { StepKind } from '../../fight-simulator/@types/step';
 import { Alteration } from '../../cards/@types/alteration/alteration';
-import { BuffReport } from '../../fight-simulator/@types/buff-report';
+import { BuffReport } from '../../fight-simulator/@types/alteration-report';
 
 class UnknownSpecial implements Special {
   name = 'unknown';

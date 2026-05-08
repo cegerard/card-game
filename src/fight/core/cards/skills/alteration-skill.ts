@@ -127,7 +127,7 @@ export class AlterationSkill implements Skill {
 
     const results = targetedCards.map((targetedCard) => ({
       target: targetedCard.identityInfo,
-      debuff: targetedCard.applyDebuff(
+      alteration: targetedCard.applyDebuff(
         this.attributeType,
         this.rate,
         this.duration,
