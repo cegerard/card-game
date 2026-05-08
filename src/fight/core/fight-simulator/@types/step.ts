@@ -1,5 +1,4 @@
-import { BuffReport } from './buff-report';
-import { DebuffReport } from './debuff-report';
+import { BuffReport, DebuffReport } from './alteration-report';
 import { AttackStepReport, SpecialAttackStepReport } from './damage-report';
 import { HealingReport } from './healing-report';
 import { StateEffectReport } from './state-effect-report';

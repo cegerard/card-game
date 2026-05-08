@@ -8,7 +8,7 @@ import { AttackResult } from '../cards/@types/action-result/attack-result';
 import { HealingReport } from '../fight-simulator/@types/healing-report';
 import { HealingResult } from '../cards/@types/action-result/healing-result';
 import { FightingContext } from '../cards/@types/fighting-context';
-import { BuffReport } from '../fight-simulator/@types/buff-report';
+import { BuffReport } from '../fight-simulator/@types/alteration-report';
 import { AttackSkillResults, SkillKind } from '../cards/skills/skill';
 import { DeathSkillHandler } from '../fight-simulator/death-skill-handler';
 
