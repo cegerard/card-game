@@ -109,6 +109,8 @@ export function skillResultsToSteps(
           }),
         );
         break;
+      default:
+        throw new Error(`Unknown SkillKind: ${(skillResult as any).skillKind}`);
     }
 
     if (skillResult.endEvent && endEventProcessor) {
