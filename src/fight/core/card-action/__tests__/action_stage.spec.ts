@@ -21,7 +21,10 @@ import { RandomizerFake } from '../../../../../test/helpers/randomizer-fake';
 import { MathRandomizer } from '../../../tools/math-randomizer';
 import { StepKind } from '../../fight-simulator/@types/step';
 import { Alteration } from '../../cards/@types/alteration/alteration';
-import { BuffReport } from '../../fight-simulator/@types/alteration-report';
+import {
+  BuffReport,
+  DebuffReport,
+} from '../../fight-simulator/@types/alteration-report';
 
 class UnknownSpecial implements Special {
   name = 'unknown';
@@ -106,8 +109,32 @@ describe('ActionStage', () => {
         steps = actionStage.computeNextAction([attacker]);
       });
 
-      it('emits a debuff step after the status_change step', () => {
-        expect(steps.find((s) => s.kind === StepKind.Debuff)).toBeDefined();
+      it('emits the debuff step immediately after the status_change step', () => {
+        const statusChangeIndex = steps.findIndex(
+          (s) => s.kind === StepKind.StatusChange,
+        );
+        expect(steps[statusChangeIndex + 1].kind).toBe(StepKind.Debuff);
+      });
+
+      it('debuff step has correct kind and value', () => {
+        const debuffStep = steps.find(
+          (s) => s.kind === StepKind.Debuff,
+        ) as DebuffReport;
+        expect(debuffStep.debuffs[0].kind).toBe('defense');
+      });
+
+      it('debuff step has correct remainingTurns', () => {
+        const debuffStep = steps.find(
+          (s) => s.kind === StepKind.Debuff,
+        ) as DebuffReport;
+        expect(debuffStep.debuffs[0].remainingTurns).toBe(2);
+      });
+
+      it('debuff step has source card info', () => {
+        const debuffStep = steps.find(
+          (s) => s.kind === StepKind.Debuff,
+        ) as DebuffReport;
+        expect(debuffStep.source).toBeDefined();
       });
     });
   });
