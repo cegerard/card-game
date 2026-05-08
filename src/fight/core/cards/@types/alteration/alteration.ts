@@ -1,15 +1,9 @@
 import { FightingCard } from '../../fighting-card';
 import { FightingContext } from '../fighting-context';
 import { TargetingCardStrategy } from '../../../targeting-card-strategies/targeting-card-strategy';
-import { Buff } from './alteration-detail';
 import { AlterationType } from './alteration-type';
-import { CardInfo } from '../card-info';
 import { AlterationCondition } from './alteration-condition';
-
-export type AlterationResult = {
-  target: CardInfo;
-  alteration: Buff;
-};
+import { BuffResult } from '../action-result/alteration-result';
 
 export class Alteration {
   constructor(
@@ -26,10 +20,7 @@ export class Alteration {
     }
   }
 
-  public apply(
-    source: FightingCard,
-    context: FightingContext,
-  ): AlterationResult[] {
+  public apply(source: FightingCard, context: FightingContext): BuffResult[] {
     const effectiveRate = this.condition?.evaluate(source, context)
       ? this.rate * this.conditionMultiplier
       : this.rate;
