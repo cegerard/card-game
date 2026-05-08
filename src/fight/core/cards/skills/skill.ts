@@ -1,6 +1,9 @@
 import { FightingCard } from '../fighting-card';
 import { HealingResults } from '../@types/action-result/healing-results';
-import { BuffResults, DebuffResults } from '../@types/action-result/alteration-result';
+import {
+  BuffResults,
+  DebuffResults,
+} from '../@types/action-result/alteration-result';
 import { AttackResult } from '../@types/action-result/attack-result';
 import { FightingContext } from '../@types/fighting-context';
 import { TargetingOverrideReport } from '../../fight-simulator/@types/targeting-override-report';
