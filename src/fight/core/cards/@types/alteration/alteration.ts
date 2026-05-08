@@ -20,7 +20,11 @@ export class Alteration {
     public readonly condition?: AlterationCondition,
     public readonly conditionMultiplier?: number,
     public readonly terminationEvent?: string,
-  ) {}
+  ) {
+    if (condition !== undefined && conditionMultiplier === undefined) {
+      throw new Error('conditionMultiplier is required when condition is set');
+    }
+  }
 
   public apply(
     source: FightingCard,
