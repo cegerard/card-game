@@ -1,7 +1,11 @@
 import { EndEventProcessor } from '../end-event-processor';
 import { Player } from '../../player';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
-import { BuffRemovedReport } from '../@types/alteration-removed-report';
+import {
+  BuffRemovedReport,
+  DebuffRemovedReport,
+} from '../@types/alteration-removed-report';
+import { StepKind } from '../@types/step';
 
 const source = { id: 'src', name: 'Source', deckIdentity: '' };
 
@@ -31,6 +35,46 @@ describe('EndEventProcessor composite power', () => {
       const step = steps[0] as BuffRemovedReport;
 
       expect(step.removed).toHaveLength(2);
+    });
+  });
+
+  describe('removes composite debuff power with powerId', () => {
+    let card: ReturnType<typeof createFightingCard>;
+    let processor: EndEventProcessor;
+
+    beforeEach(() => {
+      card = createFightingCard({ attack: 100 });
+      card.applyDebuff('attack', 0.2, Infinity, 'curse-end', 'curse-power');
+      const player1 = new Player('P1', [card]);
+      const player2 = new Player('P2', [createFightingCard()]);
+      processor = new EndEventProcessor(player1, player2);
+    });
+
+    it('emits a DebuffRemoved step', () => {
+      const steps = processor.processEndEvent('curse-end', source, 'curse-power');
+
+      expect(steps[0].kind).toBe(StepKind.DebuffRemoved);
+    });
+
+    it('includes powerId in the DebuffRemoved step', () => {
+      const steps = processor.processEndEvent('curse-end', source, 'curse-power');
+      const step = steps[0] as DebuffRemovedReport;
+
+      expect(step.powerId).toBe('curse-power');
+    });
+
+    it('includes the correct source card in the DebuffRemoved step', () => {
+      const steps = processor.processEndEvent('curse-end', source, 'curse-power');
+      const step = steps[0] as DebuffRemovedReport;
+
+      expect(step.source.id).toBe(source.id);
+    });
+
+    it('includes the removed debuff in the step', () => {
+      const steps = processor.processEndEvent('curse-end', source, 'curse-power');
+      const step = steps[0] as DebuffRemovedReport;
+
+      expect(step.removed).toHaveLength(1);
     });
   });
 
