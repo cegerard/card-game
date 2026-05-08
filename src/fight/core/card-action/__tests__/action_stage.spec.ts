@@ -256,7 +256,9 @@ describe('ActionStage', () => {
       });
 
       it('stores terminationEvent on the applied debuff so it can be removed by event', () => {
-        expect(defender.removeEventBoundDebuffs('my-end-event')).toHaveLength(1);
+        expect(defender.removeEventBoundDebuffs('my-end-event')).toHaveLength(
+          1,
+        );
       });
     });
 

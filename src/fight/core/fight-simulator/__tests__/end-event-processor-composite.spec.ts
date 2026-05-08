@@ -51,27 +51,43 @@ describe('EndEventProcessor composite power', () => {
     });
 
     it('emits a DebuffRemoved step', () => {
-      const steps = processor.processEndEvent('curse-end', source, 'curse-power');
+      const steps = processor.processEndEvent(
+        'curse-end',
+        source,
+        'curse-power',
+      );
 
       expect(steps[0].kind).toBe(StepKind.DebuffRemoved);
     });
 
     it('includes powerId in the DebuffRemoved step', () => {
-      const steps = processor.processEndEvent('curse-end', source, 'curse-power');
+      const steps = processor.processEndEvent(
+        'curse-end',
+        source,
+        'curse-power',
+      );
       const step = steps[0] as DebuffRemovedReport;
 
       expect(step.powerId).toBe('curse-power');
     });
 
     it('includes the correct source card in the DebuffRemoved step', () => {
-      const steps = processor.processEndEvent('curse-end', source, 'curse-power');
+      const steps = processor.processEndEvent(
+        'curse-end',
+        source,
+        'curse-power',
+      );
       const step = steps[0] as DebuffRemovedReport;
 
       expect(step.source.id).toBe(source.id);
     });
 
     it('includes the removed debuff in the step', () => {
-      const steps = processor.processEndEvent('curse-end', source, 'curse-power');
+      const steps = processor.processEndEvent(
+        'curse-end',
+        source,
+        'curse-power',
+      );
       const step = steps[0] as DebuffRemovedReport;
 
       expect(step.removed).toHaveLength(1);
