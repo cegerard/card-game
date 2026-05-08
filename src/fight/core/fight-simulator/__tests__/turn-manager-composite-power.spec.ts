@@ -4,7 +4,7 @@ import { TurnManager } from '../turn-manager';
 import { DeathSkillHandler } from '../death-skill-handler';
 import { EndEventProcessor } from '../end-event-processor';
 import { StepKind } from '../@types/step';
-import { BuffReport } from '../@types/alteration-report';
+import { BuffReport, DebuffReport } from '../@types/alteration-report';
 import { HealingReport } from '../@types/healing-report';
 
 describe('TurnManager composite power', () => {
@@ -70,6 +70,55 @@ describe('TurnManager composite power', () => {
       ) as HealingReport;
 
       expect(healingStep?.powerId).toBe('rage');
+    });
+  });
+
+  describe('debuff skill with powerId', () => {
+    let card: ReturnType<typeof createFightingCard>;
+    let turnManager: TurnManager;
+
+    beforeEach(() => {
+      card = createFightingCard({
+        id: 'card-1',
+        attack: 100,
+        health: 5000,
+        skills: {
+          others: [
+            {
+              debuffType: 'attack',
+              debuffRate: 0.2,
+              duration: 3,
+              trigger: 'turn-end',
+              targetingStrategy: 'self',
+              powerId: 'curse',
+            },
+          ],
+        },
+      });
+      const player1 = new Player('p1', [card]);
+      const player2 = new Player('p2', [createFightingCard()]);
+      const endEventProcessor = new EndEventProcessor(player1, player2);
+      const deathSkillHandler = new DeathSkillHandler(
+        player1,
+        player2,
+        endEventProcessor,
+      );
+      turnManager = new TurnManager(
+        player1,
+        player2,
+        { onCardDeath: [deathSkillHandler] },
+        deathSkillHandler,
+        endEventProcessor,
+      );
+    });
+
+    it('produces a debuff step with powerId', () => {
+      const steps = turnManager.endTurn([card]);
+      const debuffStep = steps.find(
+        (s) => s.kind === StepKind.Debuff,
+      ) as DebuffReport;
+
+      expect(debuffStep?.powerId).toBe('curse');
     });
   });
 });
