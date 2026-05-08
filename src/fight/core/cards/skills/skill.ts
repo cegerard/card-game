@@ -59,26 +59,12 @@ export interface Skill {
   id: string;
   name: string;
 
-  /**
-   * Launches the skill.
-   *
-   * @param source - The card that is using the skill.
-   * @param context - The fighting context.
-   * @param targetingStrategy - The override strategy to use instead of the skill's default strategy, if applicable
-   * @returns The result of the skill.
-   */
   launch(
     source: FightingCard,
     context: FightingContext,
     targetingStrategy?: TargetingCardStrategy,
   ): SkillResults;
 
-  /**
-   * Checks if the skill is triggered.
-   *
-   * @param triggerName - The name of the trigger to check.
-   * @returns True if the skill is triggered, false otherwise
-   */
   isTriggered(triggerName: string): boolean;
 
   /**
