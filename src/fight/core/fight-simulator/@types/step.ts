@@ -6,8 +6,10 @@ import { StatusChangeReport } from './status-change-report';
 import { WinnerReport } from './winner-report';
 import { BuffRemovedReport } from './buff-removed-report';
 import { DebuffRemovedReport } from './debuff-removed-report';
-import { BuffExpiredReport } from './buff-expired-report';
-import { DebuffExpiredReport } from './debuff-expired-report';
+import {
+  BuffExpiredReport,
+  DebuffExpiredReport,
+} from './alteration-expired-report';
 import {
   TargetingOverrideReport,
   TargetingRevertedReport,
