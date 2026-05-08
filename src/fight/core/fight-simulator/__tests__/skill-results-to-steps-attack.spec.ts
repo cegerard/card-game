@@ -45,6 +45,28 @@ describe('skillResultsToSteps: SkillKind.Attack branch', () => {
     expect((steps[0] as any).damages[0].remainingHealth).toBe(950);
   });
 
+  it('reports snapshot remainingHealth even when defender health changes after calculation', () => {
+    const snapshotDefender = createFightingCard({ id: 'snapshot-defender', health: 1000 });
+    const snapshotResult: AttackSkillResults = {
+      skillKind: SkillKind.Attack,
+      name: 'Slash',
+      results: [
+        {
+          damage: 200,
+          isCritical: false,
+          dodge: false,
+          defender: snapshotDefender,
+          remainingHealth: 800,
+        },
+      ],
+    };
+    snapshotDefender.addRealDamage(500);
+
+    const steps = skillResultsToSteps(card, [snapshotResult]);
+
+    expect((steps[0] as any).damages[0].remainingHealth).toBe(800);
+  });
+
   it('emits a status_change dead step when defender is dead', () => {
     const deadDefender = createFightingCard({ id: 'dead', health: 1 });
     deadDefender.addRealDamage(9999);
