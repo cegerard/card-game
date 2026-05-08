@@ -12,7 +12,7 @@ export interface AlterationSkillOptions {
   polarity: 'buff' | 'debuff';
   attributeType: AlterationType;
   rate: number;
-  /** Number of turns the alteration lasts. Use Infinity for event-bound or permanent buffs. */
+  /** Number of turns the alteration lasts. Use 0 for permanent or event-bound alterations (combined with an optional terminationEvent). */
   duration: number;
   trigger: Trigger;
   targetingStrategy: TargetingCardStrategy;
