@@ -26,7 +26,7 @@ import { SpecialAttack } from '../core/cards/skills/special-attack';
 import { SimpleAttack } from '../core/cards/skills/simple-attack';
 import { buildTargetingStrategy } from './targeting-strategy-factory';
 import { buildDodgeStrategy } from './dodge-strategy-factory';
-import { buildBuffCondition } from './buff-condition-factory';
+import { buildAlterationCondition } from './buff-condition-factory';
 import { Special } from '../core/cards/skills/special';
 import { SpecialHealing } from '../core/cards/skills/special-healing';
 import { Healing } from '../core/cards/skills/healing';
@@ -113,12 +113,12 @@ export class FightController {
       if (cardData.skills.special.buffApplication) {
         buffApplication = cardData.skills.special.buffApplication.map((b) => {
           const condition = b.condition
-            ? buildBuffCondition(b.condition.type, {
+            ? buildAlterationCondition(b.condition.type, {
                 allyName: b.condition.allyName,
               })
             : undefined;
           return new Alteration(
-            this.mapBuffType(b.type),
+            this.mapAlterationType(b.type),
             b.rate,
             b.duration,
             buildTargetingStrategy(b.targetingStrategy),
@@ -264,7 +264,7 @@ export class FightController {
     const triggeredDebuff = effectDto.triggeredDebuff
       ? new EffectTriggeredDebuff(
           effectDto.triggeredDebuff.probability,
-          this.mapBuffType(effectDto.triggeredDebuff.debuffType),
+          this.mapAlterationType(effectDto.triggeredDebuff.debuffType),
           effectDto.triggeredDebuff.debuffRate,
           effectDto.triggeredDebuff.duration,
           new MathRandomizer(),
@@ -345,7 +345,7 @@ export class FightController {
           throw new Error('Alteration skill requires buffType');
         }
         const alterationCondition = skillData.activationCondition
-          ? buildBuffCondition(skillData.activationCondition.type, {
+          ? buildAlterationCondition(skillData.activationCondition.type, {
               allyName: skillData.activationCondition.allyName,
               threshold: skillData.activationCondition.threshold,
               operator: skillData.activationCondition.operator,
@@ -359,7 +359,7 @@ export class FightController {
         return new AlterationSkill({
           name: skillData.name,
           polarity: skillData.kind === SkillKind.BUFF ? 'buff' : 'debuff',
-          attributeType: this.mapBuffType(skillData.buffType),
+          attributeType: this.mapAlterationType(skillData.buffType),
           rate: skillData.rate,
           duration: alterationDuration,
           trigger: this.buildTriggerForSkill(skillData),
@@ -435,7 +435,7 @@ export class FightController {
     }
   }
 
-  private mapBuffType(
+  private mapAlterationType(
     buffType: BuffType,
   ): import('../core/cards/@types/alteration/alteration-type').AlterationType {
     const BUFF_TYPE_MAP = {

@@ -4,14 +4,14 @@ import { AlterationCondition } from '../../core/cards/@types/alteration/alterati
 import { AllyPresenceCondition } from '../../core/cards/@types/alteration/conditions/ally-presence-condition';
 import { HealthThresholdCondition } from '../../core/cards/@types/alteration/conditions/health-threshold-condition';
 import { BuffConditionType } from '../dto/fight-data.dto';
-import { buildBuffCondition } from '../buff-condition-factory';
+import { buildAlterationCondition } from '../buff-condition-factory';
 
-describe('buildBuffCondition', () => {
+describe('buildAlterationCondition', () => {
   describe('ALLY_PRESENCE', () => {
     let condition: AlterationCondition;
 
     beforeEach(() => {
-      condition = buildBuffCondition(BuffConditionType.ALLY_PRESENCE, {
+      condition = buildAlterationCondition(BuffConditionType.ALLY_PRESENCE, {
         allyName: 'Hero',
       });
     });
@@ -22,7 +22,7 @@ describe('buildBuffCondition', () => {
 
     it('throws when allyName is missing', () => {
       expect(() =>
-        buildBuffCondition(BuffConditionType.ALLY_PRESENCE, {}),
+        buildAlterationCondition(BuffConditionType.ALLY_PRESENCE, {}),
       ).toThrow('AllyPresenceCondition requires allyName');
     });
   });
@@ -32,7 +32,10 @@ describe('buildBuffCondition', () => {
       let condition: AlterationCondition;
 
       beforeEach(() => {
-        condition = buildBuffCondition(BuffConditionType.HEALTH_THRESHOLD, {});
+        condition = buildAlterationCondition(
+          BuffConditionType.HEALTH_THRESHOLD,
+          {},
+        );
       });
 
       it('returns HealthThresholdCondition', () => {
@@ -44,10 +47,13 @@ describe('buildBuffCondition', () => {
       let condition: AlterationCondition;
 
       beforeEach(() => {
-        condition = buildBuffCondition(BuffConditionType.HEALTH_THRESHOLD, {
-          threshold: 0.3,
-          operator: 'above',
-        });
+        condition = buildAlterationCondition(
+          BuffConditionType.HEALTH_THRESHOLD,
+          {
+            threshold: 0.3,
+            operator: 'above',
+          },
+        );
       });
 
       it('returns HealthThresholdCondition', () => {
@@ -59,10 +65,13 @@ describe('buildBuffCondition', () => {
       let condition: AlterationCondition;
 
       beforeEach(() => {
-        condition = buildBuffCondition(BuffConditionType.HEALTH_THRESHOLD, {
-          threshold: 0.5,
-          operator: 'below',
-        });
+        condition = buildAlterationCondition(
+          BuffConditionType.HEALTH_THRESHOLD,
+          {
+            threshold: 0.5,
+            operator: 'below',
+          },
+        );
       });
 
       it('returns HealthThresholdCondition', () => {
@@ -72,7 +81,7 @@ describe('buildBuffCondition', () => {
 
     it('throws for an invalid operator', () => {
       expect(() =>
-        buildBuffCondition(BuffConditionType.HEALTH_THRESHOLD, {
+        buildAlterationCondition(BuffConditionType.HEALTH_THRESHOLD, {
           operator: 'greater',
         }),
       ).toThrow('Invalid operator: greater');
@@ -80,7 +89,7 @@ describe('buildBuffCondition', () => {
 
     it('throws for an empty string operator', () => {
       expect(() =>
-        buildBuffCondition(BuffConditionType.HEALTH_THRESHOLD, {
+        buildAlterationCondition(BuffConditionType.HEALTH_THRESHOLD, {
           operator: '',
         }),
       ).toThrow('Invalid operator: ');
@@ -90,7 +99,7 @@ describe('buildBuffCondition', () => {
   describe('unknown type', () => {
     it('throws for an unknown BuffConditionType', () => {
       expect(() =>
-        buildBuffCondition('UNKNOWN_TYPE' as BuffConditionType, {}),
+        buildAlterationCondition('UNKNOWN_TYPE' as BuffConditionType, {}),
       ).toThrow('Unknown BuffConditionType: UNKNOWN_TYPE');
     });
   });

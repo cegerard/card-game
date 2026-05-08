@@ -3,7 +3,7 @@ import { AlterationDetail } from '../alteration/alteration-detail';
 
 export type BuffResult = {
   target: CardInfo;
-  buff: AlterationDetail;
+  alteration: AlterationDetail;
 };
 
 export type BuffResults = BuffResult[];

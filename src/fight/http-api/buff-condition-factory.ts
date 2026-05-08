@@ -6,7 +6,7 @@ import { HealthThresholdCondition } from '../core/cards/@types/alteration/condit
 type ConditionOperator = 'above' | 'below';
 const VALID_OPERATORS: ConditionOperator[] = ['above', 'below'];
 
-export function buildBuffCondition(
+export function buildAlterationCondition(
   type: BuffConditionType,
   params: { allyName?: string; threshold?: number; operator?: string },
 ): AlterationCondition {

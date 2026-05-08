@@ -8,7 +8,7 @@ import { AlterationCondition } from './alteration-condition';
 
 export type AlterationResult = {
   target: CardInfo;
-  buff: AlterationDetail;
+  alteration: AlterationDetail;
 };
 
 export class Alteration {
@@ -22,7 +22,7 @@ export class Alteration {
     public readonly terminationEvent?: string,
   ) {}
 
-  public applyBuff(
+  public apply(
     source: FightingCard,
     context: FightingContext,
   ): AlterationResult[] {
@@ -43,7 +43,7 @@ export class Alteration {
         this.duration,
         this.terminationEvent,
       );
-      return { target: target.identityInfo, buff };
+      return { target: target.identityInfo, alteration: buff };
     });
   }
 }

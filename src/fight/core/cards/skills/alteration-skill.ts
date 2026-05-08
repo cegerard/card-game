@@ -108,7 +108,7 @@ export class AlterationSkill implements Skill {
     if (this.polarity === 'buff') {
       const results = targetedCards.map((targetedCard) => ({
         target: targetedCard.identityInfo,
-        buff: targetedCard.applyBuff(
+        alteration: targetedCard.applyBuff(
           this.attributeType,
           this.rate,
           this.duration,
