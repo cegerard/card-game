@@ -37,6 +37,35 @@ describe('EffectTriggeredDebuff', () => {
     });
   });
 
+  describe('when a terminationEvent is provided', () => {
+    let result: ReturnType<EffectTriggeredDebuff['tryApply']>;
+
+    beforeEach(() => {
+      randomizer.setNextRandomValue(0);
+      const target = createFightingCard({ defense: 200 });
+      const triggered = new EffectTriggeredDebuff(
+        1.0,
+        'defense',
+        0.1,
+        2,
+        randomizer,
+        'my-end-event',
+      );
+      result = triggered.tryApply(target);
+    });
+
+    it('returns the applied debuff with the terminationEvent', () => {
+      expect(result).toEqual({
+        polarity: 'debuff',
+        type: 'defense',
+        value: 20,
+        duration: 2,
+        terminationEvent: 'my-end-event',
+        powerId: undefined,
+      });
+    });
+  });
+
   describe('when the random roll fails', () => {
     let result: ReturnType<EffectTriggeredDebuff['tryApply']>;
 
