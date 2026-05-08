@@ -27,9 +27,12 @@ describe('EffectTriggeredDebuff', () => {
 
     it('returns the applied debuff', () => {
       expect(result).toEqual({
+        polarity: 'debuff',
         type: 'defense',
         value: 20,
         duration: 2,
+        terminationEvent: undefined,
+        powerId: undefined,
       });
     });
   });
