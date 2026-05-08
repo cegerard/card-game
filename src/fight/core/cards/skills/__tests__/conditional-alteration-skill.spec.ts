@@ -197,4 +197,125 @@ describe('AlterationSkill with activationCondition', () => {
       });
     });
   });
+
+  describe('activationLimit + activationCondition interaction', () => {
+    describe('isTriggered() after exhaustion via condition-met activations', () => {
+      it('returns false once activationLimit successful activations are reached', () => {
+        const condition = new HealthThresholdCondition(0.5, 'above');
+        const source = createFightingCard({ health: 100 });
+        const skill = new AlterationSkill({
+          name: 'skill',
+          polarity: 'buff',
+          attributeType: 'attack',
+          rate: 0.1,
+          duration: 2,
+          trigger,
+          targetingStrategy,
+          activationCondition: condition,
+          activationLimit: 2,
+          endEvent: 'skill-end',
+        });
+        const ctx = makeContext(source);
+        skill.launch(source, ctx);
+        skill.launch(source, ctx);
+
+        expect(skill.isTriggered('turn-end')).toBe(false);
+      });
+    });
+
+    describe('lifecycleEndEvent() with activationCondition', () => {
+      it('returns endEvent on the last condition-met activation', () => {
+        const condition = new HealthThresholdCondition(0.5, 'above');
+        const source = createFightingCard({ health: 100 });
+        const skill = new AlterationSkill({
+          name: 'skill',
+          polarity: 'buff',
+          attributeType: 'attack',
+          rate: 0.1,
+          duration: 2,
+          trigger,
+          targetingStrategy,
+          activationCondition: condition,
+          activationLimit: 2,
+          endEvent: 'skill-end',
+        });
+        const ctx = makeContext(source);
+        skill.launch(source, ctx);
+        const result = skill.launch(source, ctx);
+
+        expect(result.endEvent).toBe('skill-end');
+      });
+
+      it('returns undefined from lifecycleEndEvent() after exhaustion', () => {
+        const condition = new HealthThresholdCondition(0.5, 'above');
+        const source = createFightingCard({ health: 100 });
+        const skill = new AlterationSkill({
+          name: 'skill',
+          polarity: 'buff',
+          attributeType: 'attack',
+          rate: 0.1,
+          duration: 2,
+          trigger,
+          targetingStrategy,
+          activationCondition: condition,
+          activationLimit: 2,
+          endEvent: 'skill-end',
+        });
+        const ctx = makeContext(source);
+        skill.launch(source, ctx);
+        skill.launch(source, ctx);
+
+        expect(skill.lifecycleEndEvent()).toBeUndefined();
+      });
+    });
+
+    describe('condition-blocked activations do not increment activationCount', () => {
+      it('does not exhaust skill when condition is not met', () => {
+        const condition = new HealthThresholdCondition(0.5, 'above');
+        const source = createFightingCard({ health: 100 });
+        source.addRealDamage(60);
+        const skill = new AlterationSkill({
+          name: 'skill',
+          polarity: 'buff',
+          attributeType: 'attack',
+          rate: 0.1,
+          duration: 2,
+          trigger,
+          targetingStrategy,
+          activationCondition: condition,
+          activationLimit: 2,
+          endEvent: 'skill-end',
+        });
+        const ctx = makeContext(source);
+        skill.launch(source, ctx);
+        skill.launch(source, ctx);
+
+        expect(skill.isTriggered('turn-end')).toBe(true);
+      });
+
+      it('exhausts only after activationLimit condition-met activations despite earlier blocked attempts', () => {
+        const condition = new HealthThresholdCondition(0.5, 'above');
+        const lowHealthSource = createFightingCard({ health: 100 });
+        lowHealthSource.addRealDamage(60);
+        const fullHealthSource = createFightingCard({ health: 100 });
+        const skill = new AlterationSkill({
+          name: 'skill',
+          polarity: 'buff',
+          attributeType: 'attack',
+          rate: 0.1,
+          duration: 2,
+          trigger,
+          targetingStrategy,
+          activationCondition: condition,
+          activationLimit: 2,
+          endEvent: 'skill-end',
+        });
+        skill.launch(lowHealthSource, makeContext(lowHealthSource));
+        skill.launch(fullHealthSource, makeContext(fullHealthSource));
+        skill.launch(fullHealthSource, makeContext(fullHealthSource));
+
+        expect(skill.isTriggered('turn-end')).toBe(false);
+      });
+    });
+  });
 });
