@@ -31,8 +31,9 @@ export class SpecialHealing implements Special {
 
     const actionResults = targetedCards.map((target) => {
       const healed = target.heal(source.actualAttack * this.rate);
+      const remainingHealth = target.actualHealth;
 
-      return { healed, target };
+      return { healed, target, remainingHealth };
     });
 
     return { name: this.name, actionResults, buffResults: [] };
