@@ -121,14 +121,14 @@ describe('ActionStage', () => {
         const debuffStep = steps.find(
           (s) => s.kind === StepKind.Debuff,
         ) as DebuffReport;
-        expect(debuffStep.debuffs[0].kind).toBe('defense');
+        expect(debuffStep.alterations[0].kind).toBe('defense');
       });
 
       it('debuff step has correct remainingTurns', () => {
         const debuffStep = steps.find(
           (s) => s.kind === StepKind.Debuff,
         ) as DebuffReport;
-        expect(debuffStep.debuffs[0].remainingTurns).toBe(2);
+        expect(debuffStep.alterations[0].remainingTurns).toBe(2);
       });
 
       it('debuff step has source card info', () => {

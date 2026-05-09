@@ -153,7 +153,7 @@ export class ActionStage {
         kind: StepKind.Buff,
         name: specialResults.name,
         source: card.identityInfo,
-        buffs: buffs.map((buffResult) => ({
+        alterations: buffs.map((buffResult) => ({
           target: buffResult.target,
           kind: buffResult.alteration.type,
           value: buffResult.alteration.value,
@@ -169,7 +169,7 @@ export class ActionStage {
         kind: StepKind.Debuff,
         name: specialResults.name,
         source: card.identityInfo,
-        debuffs: debuffs.map((debuffResult) => ({
+        alterations: debuffs.map((debuffResult) => ({
           target: debuffResult.target,
           kind: debuffResult.alteration.type,
           value: debuffResult.alteration.value,
@@ -277,7 +277,7 @@ export class ActionStage {
             report.statusChanges.push({
               kind: StepKind.Debuff,
               source: attackerCard.identityInfo,
-              debuffs: [
+              alterations: [
                 {
                   target: debuffTarget.identityInfo,
                   kind: debuff.type,

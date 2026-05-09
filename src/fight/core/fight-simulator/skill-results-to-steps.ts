@@ -28,29 +28,16 @@ export function skillResultsToSteps(
         });
         break;
       case SkillKind.Buff:
-        if (skillResult.results.length > 0) {
-          steps.push({
-            kind: StepKind.Buff,
-            name: skillResult.name,
-            source: card.identityInfo,
-            buffs: skillResult.results.map((result) => ({
-              target: result.target,
-              kind: result.alteration.type,
-              value: result.alteration.value,
-              remainingTurns: result.alteration.duration,
-            })),
-            energy: card.actualEnergy,
-            powerId: skillResult.powerId,
-          });
-        }
-        break;
       case SkillKind.Debuff:
         if (skillResult.results.length > 0) {
           steps.push({
-            kind: StepKind.Debuff,
+            kind:
+              skillResult.skillKind === SkillKind.Buff
+                ? StepKind.Buff
+                : StepKind.Debuff,
             name: skillResult.name,
             source: card.identityInfo,
-            debuffs: skillResult.results.map((result) => ({
+            alterations: skillResult.results.map((result) => ({
               target: result.target,
               kind: result.alteration.type,
               value: result.alteration.value,
