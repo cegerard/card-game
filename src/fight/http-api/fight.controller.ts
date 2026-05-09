@@ -26,7 +26,7 @@ import { SpecialAttack } from '../core/cards/skills/special-attack';
 import { SimpleAttack } from '../core/cards/skills/simple-attack';
 import { buildTargetingStrategy } from './targeting-strategy-factory';
 import { buildDodgeStrategy } from './dodge-strategy-factory';
-import { buildAlterationCondition } from './buff-condition-factory';
+import { buildAlterationCondition } from './alteration-condition-factory';
 import { Special } from '../core/cards/skills/special';
 import { SpecialHealing } from '../core/cards/skills/special-healing';
 import { Healing } from '../core/cards/skills/healing';
