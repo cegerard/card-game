@@ -59,6 +59,10 @@ export interface Skill {
   id: string;
   name: string;
 
+  /**
+   * Executes the skill. When `targetingStrategy` is provided, it overrides
+   * the skill's own default targeting strategy for this invocation.
+   */
   launch(
     source: FightingCard,
     context: FightingContext,
