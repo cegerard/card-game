@@ -4,7 +4,7 @@ import { AlterationCondition } from '../../core/cards/@types/alteration/alterati
 import { AllyPresenceCondition } from '../../core/cards/@types/alteration/conditions/ally-presence-condition';
 import { HealthThresholdCondition } from '../../core/cards/@types/alteration/conditions/health-threshold-condition';
 import { AlterationConditionType } from '../dto/fight-data.dto';
-import { buildAlterationCondition } from '../buff-condition-factory';
+import { buildAlterationCondition } from '../alteration-condition-factory';
 
 describe('buildAlterationCondition', () => {
   describe('ALLY_PRESENCE', () => {
