@@ -197,13 +197,19 @@ describe('FightingCard.removeEventBoundDebuffs()', () => {
 
 describe('FightingCard.decreaseBuffAndDebuffDuration()', () => {
   describe('when buffs expire', () => {
-    it('returns expired buffs', () => {
-      const card = createFightingCard({
-        attack: 100,
+    const baseAttack = 100;
+    let card: ReturnType<typeof createFightingCard>;
+
+    beforeEach(() => {
+      card = createFightingCard({
+        attack: baseAttack,
         defense: 0,
         accuracy: 0,
         agility: 0,
       });
+    });
+
+    it('returns expired buffs', () => {
       card.applyBuff('attack', 0.2, 1);
 
       const { expiredBuffs } = card.decreaseBuffAndDebuffDuration();
@@ -211,13 +217,14 @@ describe('FightingCard.decreaseBuffAndDebuffDuration()', () => {
       expect(expiredBuffs).toHaveLength(1);
     });
 
+    it('restores attack stat after buff expires', () => {
+      card.applyBuff('attack', 0.2, 1);
+      card.decreaseBuffAndDebuffDuration();
+
+      expect(card.actualAttack).toBe(baseAttack);
+    });
+
     it('does not return still-active buffs', () => {
-      const card = createFightingCard({
-        attack: 100,
-        defense: 0,
-        accuracy: 0,
-        agility: 0,
-      });
       card.applyBuff('attack', 0.2, 2);
 
       const { expiredBuffs } = card.decreaseBuffAndDebuffDuration();
@@ -226,12 +233,6 @@ describe('FightingCard.decreaseBuffAndDebuffDuration()', () => {
     });
 
     it('does not return Infinity-duration buffs', () => {
-      const card = createFightingCard({
-        attack: 100,
-        defense: 0,
-        accuracy: 0,
-        agility: 0,
-      });
       card.applyBuff('attack', 0.2, Infinity);
 
       const { expiredBuffs } = card.decreaseBuffAndDebuffDuration();
@@ -241,13 +242,19 @@ describe('FightingCard.decreaseBuffAndDebuffDuration()', () => {
   });
 
   describe('when debuffs expire', () => {
-    it('returns expired debuffs', () => {
-      const card = createFightingCard({
-        attack: 100,
+    const baseAttack = 100;
+    let card: ReturnType<typeof createFightingCard>;
+
+    beforeEach(() => {
+      card = createFightingCard({
+        attack: baseAttack,
         defense: 0,
         accuracy: 0,
         agility: 0,
       });
+    });
+
+    it('returns expired debuffs', () => {
       card.applyDebuff('attack', 0.2, 1);
 
       const { expiredDebuffs } = card.decreaseBuffAndDebuffDuration();
@@ -255,13 +262,14 @@ describe('FightingCard.decreaseBuffAndDebuffDuration()', () => {
       expect(expiredDebuffs).toHaveLength(1);
     });
 
+    it('restores attack stat after debuff expires', () => {
+      card.applyDebuff('attack', 0.2, 1);
+      card.decreaseBuffAndDebuffDuration();
+
+      expect(card.actualAttack).toBe(baseAttack);
+    });
+
     it('does not return still-active debuffs', () => {
-      const card = createFightingCard({
-        attack: 100,
-        defense: 0,
-        accuracy: 0,
-        agility: 0,
-      });
       card.applyDebuff('attack', 0.2, 2);
 
       const { expiredDebuffs } = card.decreaseBuffAndDebuffDuration();
