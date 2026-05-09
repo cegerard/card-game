@@ -169,7 +169,7 @@ export class ActionStage {
       result.heal.push({
         target: healingResult.target.identityInfo,
         healed: healingResult.healed,
-        remainingHealth: healingResult.target.actualHealth,
+        remainingHealth: healingResult.remainingHealth,
       });
     });
 
