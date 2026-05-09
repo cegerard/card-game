@@ -40,10 +40,6 @@ export class AlterationSkill implements Skill {
   private readonly powerId?: string;
   private activationCount = 0;
 
-  private get skillKind() {
-    return this.polarity === 'buff' ? SkillKind.Buff : SkillKind.Debuff;
-  }
-
   constructor({
     name,
     polarity,
@@ -84,12 +80,20 @@ export class AlterationSkill implements Skill {
       this.activationCondition &&
       !this.activationCondition.evaluate(source, context)
     ) {
+      if (this.polarity === 'buff') {
+        return {
+          skillKind: SkillKind.Buff,
+          results: [],
+          name: this.name,
+          powerId: this.powerId,
+        };
+      }
       return {
-        skillKind: this.skillKind,
+        skillKind: SkillKind.Debuff,
         results: [],
         name: this.name,
         powerId: this.powerId,
-      } as SkillResults;
+      };
     }
 
     const targetedCards = this.targetingStrategy.targetedCards(
@@ -129,13 +133,22 @@ export class AlterationSkill implements Skill {
       alteration: applyAlteration(targetedCard),
     }));
 
+    if (this.polarity === 'buff') {
+      return {
+        skillKind: SkillKind.Buff,
+        results,
+        name: this.name,
+        endEvent,
+        powerId: this.powerId,
+      };
+    }
     return {
-      skillKind: this.skillKind,
+      skillKind: SkillKind.Debuff,
       results,
       name: this.name,
       endEvent,
       powerId: this.powerId,
-    } as SkillResults;
+    };
   }
 
   isTriggered(triggerName: string): boolean {
