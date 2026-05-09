@@ -9,6 +9,7 @@ export class EffectTriggeredDebuff {
   public readonly debuffRate: number;
   public readonly duration: number;
   public readonly terminationEvent?: string;
+  public readonly powerId?: string;
   private readonly randomizer: Randomizer;
 
   constructor(
@@ -18,6 +19,7 @@ export class EffectTriggeredDebuff {
     duration: number,
     randomizer: Randomizer,
     terminationEvent?: string,
+    powerId?: string,
   ) {
     if (probability < 0 || probability > 1) {
       throw new Error(`probability must be in [0, 1], got: ${probability}`);
@@ -27,6 +29,7 @@ export class EffectTriggeredDebuff {
     this.debuffRate = debuffRate;
     this.duration = duration;
     this.terminationEvent = terminationEvent;
+    this.powerId = powerId;
     this.randomizer = randomizer;
   }
 
@@ -39,6 +42,7 @@ export class EffectTriggeredDebuff {
       this.debuffRate,
       this.duration,
       this.terminationEvent,
+      this.powerId,
     );
   }
 }

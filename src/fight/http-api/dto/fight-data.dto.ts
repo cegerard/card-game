@@ -127,6 +127,11 @@ class EffectTriggeredDebuffDto {
   @IsString()
   @IsNotEmpty()
   terminationEvent?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  powerId?: string;
 }
 
 class EffectDto {

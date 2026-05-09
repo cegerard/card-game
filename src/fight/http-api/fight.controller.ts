@@ -238,6 +238,7 @@ export class FightController {
         duration: number;
         probability: number;
         terminationEvent?: string;
+        powerId?: string;
       };
       terminationEvent?: string;
       probability?: number;
@@ -257,6 +258,7 @@ export class FightController {
       duration: number;
       probability: number;
       terminationEvent?: string;
+      powerId?: string;
     };
     terminationEvent?: string;
     probability?: number;
@@ -269,6 +271,7 @@ export class FightController {
           effectDto.triggeredDebuff.duration,
           new MathRandomizer(),
           effectDto.triggeredDebuff.terminationEvent,
+          effectDto.triggeredDebuff.powerId,
         )
       : undefined;
 
