@@ -19,14 +19,14 @@ import {
   Validate,
 } from 'class-validator';
 
-export enum BuffConditionType {
+export enum AlterationConditionType {
   ALLY_PRESENCE = 'ally-presence',
   HEALTH_THRESHOLD = 'health-threshold',
 }
 
 class BuffConditionDto {
-  @IsEnum(BuffConditionType)
-  type: BuffConditionType;
+  @IsEnum(AlterationConditionType)
+  type: AlterationConditionType;
 
   @IsOptional()
   @IsString()

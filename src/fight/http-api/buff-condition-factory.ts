@@ -1,4 +1,4 @@
-import { BuffConditionType } from './dto/fight-data.dto';
+import { AlterationConditionType } from './dto/fight-data.dto';
 import { AlterationCondition } from '../core/cards/@types/alteration/alteration-condition';
 import { AllyPresenceCondition } from '../core/cards/@types/alteration/conditions/ally-presence-condition';
 import { HealthThresholdCondition } from '../core/cards/@types/alteration/conditions/health-threshold-condition';
@@ -7,16 +7,16 @@ type ConditionOperator = 'above' | 'below';
 const VALID_OPERATORS: ConditionOperator[] = ['above', 'below'];
 
 export function buildAlterationCondition(
-  type: BuffConditionType,
+  type: AlterationConditionType,
   params: { allyName?: string; threshold?: number; operator?: string },
 ): AlterationCondition {
   switch (type) {
-    case BuffConditionType.ALLY_PRESENCE:
+    case AlterationConditionType.ALLY_PRESENCE:
       if (!params.allyName) {
         throw new Error('AllyPresenceCondition requires allyName');
       }
       return new AllyPresenceCondition(params.allyName);
-    case BuffConditionType.HEALTH_THRESHOLD: {
+    case AlterationConditionType.HEALTH_THRESHOLD: {
       if (
         params.operator !== undefined &&
         !VALID_OPERATORS.includes(params.operator as ConditionOperator)
@@ -29,6 +29,6 @@ export function buildAlterationCondition(
       );
     }
     default:
-      throw new Error(`Unknown BuffConditionType: ${type}`);
+      throw new Error(`Unknown AlterationConditionType: ${type}`);
   }
 }
