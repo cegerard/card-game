@@ -1,8 +1,8 @@
 import { FightingCard } from '../fighting-card';
 import { HealingResults } from '../@types/action-result/healing-results';
 import {
-  BuffResults,
-  DebuffResults,
+  BuffResult,
+  DebuffResult,
 } from '../@types/action-result/alteration-result';
 import { AttackResult } from '../@types/action-result/attack-result';
 import { FightingContext } from '../@types/fighting-context';
@@ -30,12 +30,12 @@ export type HealingSkillResults = BaseSkillResults & {
 
 export type BuffSkillResults = BaseSkillResults & {
   skillKind: SkillKind.Buff;
-  results: BuffResults;
+  results: BuffResult[];
 };
 
 export type DebuffSkillResults = BaseSkillResults & {
   skillKind: SkillKind.Debuff;
-  results: DebuffResults;
+  results: DebuffResult[];
 };
 
 export type AttackSkillResults = BaseSkillResults & {
