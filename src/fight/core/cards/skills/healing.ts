@@ -68,7 +68,7 @@ export class Healing implements Skill {
   }
 
   isTriggered(triggerName: string): boolean {
-    if (this.isExhaustedCheck()) return false;
+    if (this.isExhausted()) return false;
     return this.trigger.isTriggered(triggerName);
   }
 
@@ -79,11 +79,11 @@ export class Healing implements Skill {
   }
 
   lifecycleEndEvent(): string | undefined {
-    if (this.isExhaustedCheck()) return undefined;
+    if (this.isExhausted()) return undefined;
     return this.endEvent;
   }
 
-  private isExhaustedCheck(): boolean {
+  private isExhausted(): boolean {
     return (
       this.activationLimit !== undefined &&
       this.activationCount >= this.activationLimit
