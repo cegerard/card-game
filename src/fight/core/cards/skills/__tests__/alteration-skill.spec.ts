@@ -5,6 +5,26 @@ import { Player } from '../../../player';
 import { TurnEnd } from '../../../trigger/turn-end';
 import { Launcher } from '../../../targeting-card-strategies/launcher';
 
+describe('AlterationSkill constructor validation', () => {
+  const trigger = new TurnEnd();
+  const targeting = new Launcher();
+
+  it('throws when polarity is invalid', () => {
+    expect(
+      () =>
+        new AlterationSkill({
+          name: 'skill',
+          polarity: 'invalid' as any,
+          attributeType: 'attack',
+          rate: 0.1,
+          duration: 2,
+          trigger,
+          targetingStrategy: targeting,
+        }),
+    ).toThrow('Invalid polarity: invalid');
+  });
+});
+
 describe('AlterationSkill lifecycle', () => {
   const trigger = new TurnEnd();
   const targeting = new Launcher();

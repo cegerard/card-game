@@ -2,6 +2,22 @@ import { EffectTriggeredDebuff } from '../effect-triggered-debuff';
 import { RandomizerFake } from '../../../../../../../test/helpers/randomizer-fake';
 import { createFightingCard } from '../../../../../../../test/helpers/fighting-card';
 
+describe('EffectTriggeredDebuff constructor validation', () => {
+  const randomizer = new RandomizerFake();
+
+  it('throws when probability is below 0', () => {
+    expect(
+      () => new EffectTriggeredDebuff(-0.1, 'defense', 0.1, 2, randomizer),
+    ).toThrow('probability must be in [0, 1], got: -0.1');
+  });
+
+  it('throws when probability is above 1', () => {
+    expect(
+      () => new EffectTriggeredDebuff(1.5, 'defense', 0.1, 2, randomizer),
+    ).toThrow('probability must be in [0, 1], got: 1.5');
+  });
+});
+
 describe('EffectTriggeredDebuff', () => {
   const randomizer = new RandomizerFake();
 

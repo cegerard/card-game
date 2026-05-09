@@ -19,6 +19,9 @@ export class EffectTriggeredDebuff {
     randomizer: Randomizer,
     terminationEvent?: string,
   ) {
+    if (probability < 0 || probability > 1) {
+      throw new Error(`probability must be in [0, 1], got: ${probability}`);
+    }
     this.probability = probability;
     this.debuffType = debuffType;
     this.debuffRate = debuffRate;
