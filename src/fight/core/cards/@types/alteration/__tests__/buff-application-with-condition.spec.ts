@@ -93,4 +93,28 @@ describe('Alteration with condition', () => {
       expect(result.alteration.value).toBe(20);
     });
   });
+
+  describe('when polarity is debuff', () => {
+    let result: ReturnType<Alteration['apply']>[0];
+
+    beforeEach(() => {
+      const source = createFightingCard({ attack: 100 });
+      const debuff = new Alteration(
+        'attack',
+        0.2,
+        1,
+        new Launcher(),
+        undefined,
+        undefined,
+        undefined,
+        'debuff',
+      );
+      const context = makeContext(source);
+      [result] = debuff.apply(source, context);
+    });
+
+    it('applies a debuff polarity', () => {
+      expect(result.alteration.polarity).toBe('debuff');
+    });
+  });
 });

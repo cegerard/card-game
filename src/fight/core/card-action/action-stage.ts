@@ -8,7 +8,14 @@ import { AttackResult } from '../cards/@types/action-result/attack-result';
 import { HealingReport } from '../fight-simulator/@types/healing-report';
 import { HealingResult } from '../cards/@types/action-result/healing-result';
 import { FightingContext } from '../cards/@types/fighting-context';
-import { BuffReport } from '../fight-simulator/@types/alteration-report';
+import {
+  BuffReport,
+  DebuffReport,
+} from '../fight-simulator/@types/alteration-report';
+import {
+  BuffResult,
+  DebuffResult,
+} from '../cards/@types/action-result/alteration-result';
 import { AttackSkillResults, SkillKind } from '../cards/skills/skill';
 import { DeathSkillHandler } from '../fight-simulator/death-skill-handler';
 
@@ -134,12 +141,19 @@ export class ActionStage {
 
     this.handleAttackResult(actionResults, result, card);
 
-    if (specialResults.buffResults.length > 0) {
+    const buffs = specialResults.alterationResults.filter(
+      (r): r is BuffResult => r.alteration.polarity === 'buff',
+    );
+    const debuffs = specialResults.alterationResults.filter(
+      (r): r is DebuffResult => r.alteration.polarity === 'debuff',
+    );
+
+    if (buffs.length > 0) {
       const buffReport: BuffReport = {
         kind: StepKind.Buff,
         name: specialResults.name,
         source: card.identityInfo,
-        buffs: specialResults.buffResults.map((buffResult) => ({
+        buffs: buffs.map((buffResult) => ({
           target: buffResult.target,
           kind: buffResult.alteration.type,
           value: buffResult.alteration.value,
@@ -147,8 +161,23 @@ export class ActionStage {
         })),
         energy: 0,
       };
-
       result.buffReport = buffReport;
+    }
+
+    if (debuffs.length > 0) {
+      const debuffReport: DebuffReport = {
+        kind: StepKind.Debuff,
+        name: specialResults.name,
+        source: card.identityInfo,
+        debuffs: debuffs.map((debuffResult) => ({
+          target: debuffResult.target,
+          kind: debuffResult.alteration.type,
+          value: debuffResult.alteration.value,
+          remainingTurns: debuffResult.alteration.duration,
+        })),
+        energy: 0,
+      };
+      result.debuffReport = debuffReport;
     }
 
     return result;
@@ -187,6 +216,10 @@ export class ActionStage {
 
           if (report.buffReport) {
             acc.actionSteps.push(report.buffReport);
+          }
+
+          if (report.debuffReport) {
+            acc.actionSteps.push(report.debuffReport);
           }
 
           report.statusChanges.forEach((statusChange) => {

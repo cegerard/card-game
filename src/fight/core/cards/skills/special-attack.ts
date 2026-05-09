@@ -7,6 +7,10 @@ import { AttackEffect, EffectResult } from '../@types/attack/attack-effect';
 import { Alteration } from '../@types/alteration/alteration';
 import { DamageComposition } from '../@types/damage/damage-composition';
 import { DamageCalculator } from '../damage/damage-calculator';
+import {
+  BuffResult,
+  DebuffResult,
+} from '../@types/action-result/alteration-result';
 
 const ENERGY_INCREASE_FACTOR = 10;
 const CRITICAL_RATE = 1.3;
@@ -78,12 +82,12 @@ export class SpecialAttack implements Special {
       };
     });
 
-    const buffResults = this.applyBuffs(source, context);
+    const alterationResults = this.applyAlterations(source, context);
 
     return {
       name: this.name,
       actionResults: attackResults,
-      buffResults,
+      alterationResults,
     };
   }
 
@@ -95,13 +99,17 @@ export class SpecialAttack implements Special {
     return 'specialAttack';
   }
 
-  private applyBuffs(source: FightingCard, context: FightingContext) {
+  private applyAlterations(
+    source: FightingCard,
+    context: FightingContext,
+  ): (BuffResult | DebuffResult)[] {
     if (!this.alterations) {
       return [];
     }
 
-    return this.alterations.flatMap((alteration) =>
-      alteration.apply(source, context),
+    return this.alterations.flatMap(
+      (alteration) =>
+        alteration.apply(source, context) as (BuffResult | DebuffResult)[],
     );
   }
 }
