@@ -58,6 +58,9 @@ export class AlterationSkill implements Skill {
     terminationEvent,
     powerId,
   }: AlterationSkillOptions) {
+    if (polarity !== 'buff' && polarity !== 'debuff') {
+      throw new Error(`Invalid polarity: ${polarity}`);
+    }
     this.name = name;
     this.polarity = polarity;
     this.attributeType = attributeType;
