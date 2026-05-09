@@ -4,7 +4,7 @@ import { Trigger } from '../../trigger/trigger';
 import { ActivatableTrigger } from '../../trigger/activatable-trigger';
 import { FightingContext } from '../@types/fighting-context';
 import { AlterationType } from '../@types/alteration/alteration-type';
-import { Skill, SkillKind, SkillResults } from './skill';
+import { BuffSkillResults, DebuffSkillResults, Skill, SkillKind, SkillResults } from './skill';
 import { AlterationCondition } from '../@types/alteration/alteration-condition';
 
 export interface AlterationSkillOptions {
@@ -97,43 +97,32 @@ export class AlterationSkill implements Skill {
       this.activationCount >= this.activationLimit;
     const endEvent = isExhausted ? this.endEvent : undefined;
 
-    if (this.polarity === 'buff') {
-      const results = targetedCards.map((targetedCard) => ({
-        target: targetedCard.identityInfo,
-        alteration: targetedCard.applyBuff(
-          this.attributeType,
-          this.rate,
-          this.duration,
-          this.terminationEvent,
-          this.powerId,
-        ),
-      }));
-      return {
-        skillKind: SkillKind.Buff,
-        results,
-        name: this.name,
-        endEvent,
-        powerId: this.powerId,
-      };
-    }
-
     const results = targetedCards.map((targetedCard) => ({
       target: targetedCard.identityInfo,
-      alteration: targetedCard.applyDebuff(
-        this.attributeType,
-        this.rate,
-        this.duration,
-        this.terminationEvent,
-        this.powerId,
-      ),
+      alteration:
+        this.polarity === 'buff'
+          ? targetedCard.applyBuff(
+              this.attributeType,
+              this.rate,
+              this.duration,
+              this.terminationEvent,
+              this.powerId,
+            )
+          : targetedCard.applyDebuff(
+              this.attributeType,
+              this.rate,
+              this.duration,
+              this.terminationEvent,
+              this.powerId,
+            ),
     }));
     return {
-      skillKind: SkillKind.Debuff,
+      skillKind: this.polarity === 'buff' ? SkillKind.Buff : SkillKind.Debuff,
       results,
       name: this.name,
       endEvent,
       powerId: this.powerId,
-    };
+    } as BuffSkillResults | DebuffSkillResults;
   }
 
   isTriggered(triggerName: string): boolean {
