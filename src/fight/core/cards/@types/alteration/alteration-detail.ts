@@ -1,7 +1,6 @@
 import { AlterationType } from './alteration-type';
 
-export type AlterationDetail = {
-  polarity: 'buff' | 'debuff';
+type AlterationDetailBase = {
   type: AlterationType;
   value: number;
   duration: number;
@@ -9,5 +8,7 @@ export type AlterationDetail = {
   powerId?: string;
 };
 
-export type Buff = AlterationDetail & { polarity: 'buff' };
-export type Debuff = AlterationDetail & { polarity: 'debuff' };
+export type Buff = AlterationDetailBase & { polarity: 'buff' };
+export type Debuff = AlterationDetailBase & { polarity: 'debuff' };
+
+export type AlterationDetail = Buff | Debuff;
