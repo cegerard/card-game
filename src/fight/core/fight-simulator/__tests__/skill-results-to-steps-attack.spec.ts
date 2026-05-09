@@ -115,6 +115,18 @@ describe('skillResultsToSteps: SkillKind.Attack branch', () => {
   });
 });
 
+describe('skillResultsToSteps: unknown SkillKind guard', () => {
+  const card = createFightingCard({ id: 'source' });
+
+  it('throws for unknown SkillKind', () => {
+    const unknownResult = { skillKind: 'unknown' as any, results: [] };
+
+    expect(() => skillResultsToSteps(card, [unknownResult])).toThrow(
+      'Unknown SkillKind: unknown',
+    );
+  });
+});
+
 describe('skillResultsToSteps: absent endEventProcessor with endEvent', () => {
   const card = createFightingCard({ id: 'source' });
 
