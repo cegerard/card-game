@@ -50,7 +50,10 @@ describe('skillResultsToSteps: SkillKind.Attack branch', () => {
   });
 
   it('reports snapshot remainingHealth even when defender health changes after calculation', () => {
-    const snapshotDefender = createFightingCard({ id: 'snapshot-defender', health: 1000 });
+    const snapshotDefender = createFightingCard({
+      id: 'snapshot-defender',
+      health: 1000,
+    });
     const snapshotResult: AttackSkillResults = {
       skillKind: SkillKind.Attack,
       name: 'Slash',

@@ -1,16 +1,5 @@
 import { CardInfo } from '../card-info';
-import {
-  AlterationDetail,
-  Buff,
-  Debuff,
-} from '../alteration/alteration-detail';
+import { Buff, Debuff } from '../alteration/alteration-detail';
 
-type AlterationResult<T extends AlterationDetail = AlterationDetail> = {
-  target: CardInfo;
-  alteration: T;
-};
-
-export type BuffResult = AlterationResult<Buff>;
-export type DebuffResult = AlterationResult<Debuff>;
-export type BuffResults = BuffResult[];
-export type DebuffResults = DebuffResult[];
+export type BuffResult = { target: CardInfo; alteration: Buff };
+export type DebuffResult = { target: CardInfo; alteration: Debuff };
