@@ -225,6 +225,12 @@ class SpecialDto {
   @ValidateNested({ each: true })
   @Type(/* istanbul ignore next */ () => BuffApplicationDto)
   buffApplication?: BuffApplicationDto[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(/* istanbul ignore next */ () => BuffApplicationDto)
+  debuffApplication?: BuffApplicationDto[];
 }
 
 class DamageCompositionDto {
