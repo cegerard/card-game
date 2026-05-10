@@ -62,6 +62,10 @@ export function buildCardPanel(card, isTeamA, isActive) {
       </div>`
     : '';
 
+  const shieldHtml = card.shield
+    ? `<div class="card-panel__shield">${ICON.shield_applied} ${card.shield.points} shield</div>`
+    : '';
+
   const hpHtml = !card.dead
     ? `
     <div class="hp-bar">
@@ -82,6 +86,7 @@ export function buildCardPanel(card, isTeamA, isActive) {
       <div class="card-panel__name" style="color:${nameColor}">${esc(card.name)}</div>
       ${card.deckIdentity ? `<div class="card-panel__identity">${esc(card.deckIdentity)}</div>` : ''}
       ${hpHtml}
+      ${shieldHtml}
       ${statusesHtml}
       ${buffsHtml}
       ${debuffsHtml}
@@ -103,11 +108,13 @@ export function buildEventCard(ev, teamBName) {
   if (ev.kind === 'attack' || ev.kind === 'special_attack') {
     contentHtml = buildAttackDetail(ev);
   } else if (ev.kind === 'buff') {
-    contentHtml = buildBuffDebuffDetail(ev, 'buff');
+    contentHtml = buildAlterationDetail(ev, 'buff');
   } else if (ev.kind === 'debuff') {
-    contentHtml = buildBuffDebuffDetail(ev, 'debuff');
+    contentHtml = buildAlterationDetail(ev, 'debuff');
   } else if (ev.kind === 'healing') {
     contentHtml = buildHealDetail(ev);
+  } else if (ev.kind === 'shield_applied') {
+    contentHtml = buildShieldAppliedDetail(ev);
   } else {
     const detail = buildGenericDetail(ev);
     if (detail)
@@ -227,14 +234,13 @@ function buildAttackDetail(ev) {
   return `<div class="attack-targets">${rows}</div>`;
 }
 
-function buildBuffDebuffDetail(ev, type) {
-  const items = type === 'buff' ? ev.buffs : ev.debuffs;
-  if (!items?.length) return '';
+function buildAlterationDetail(ev, type) {
+  if (!ev.alterations?.length) return '';
 
   const cssClass = `detail-row--${type}`;
   const sign = type === 'buff' ? '+' : '−';
 
-  const rows = items
+  const rows = ev.alterations
     .map((b) => {
       const turns = b.remainingTurns != null ? `(${b.remainingTurns}T)` : '(∞)';
       return `
@@ -243,6 +249,20 @@ function buildBuffDebuffDetail(ev, type) {
         <span>${sign}${b.value} ${turns}</span>
       </div>`;
     })
+    .join('');
+
+  return `<div class="detail-rows">${rows}</div>`;
+}
+
+function buildShieldAppliedDetail(ev) {
+  if (!ev.targets?.length) return '';
+
+  const rows = ev.targets
+    .map((t) => `
+      <div class="detail-row detail-row--buff">
+        <span>${esc(t.target?.name)}</span>
+        <span>${ICON.shield_applied} ${t.points} pts</span>
+      </div>`)
     .join('');
 
   return `<div class="detail-rows">${rows}</div>`;
@@ -286,6 +306,9 @@ function buildGenericDetail(ev) {
       return `${esc(ev.previousStrategy)} → ${esc(ev.newStrategy)}`;
     case 'targeting_reverted':
       return `${esc(ev.revertedStrategy)} → ${esc(ev.restoredStrategy)}`;
+    case 'shield_broken':
+    case 'shield_expired':
+      return esc(ev.card?.name);
     case 'fight_end':
       return ev.winner ? `Winner: ${esc(ev.winner)}` : 'Draw';
     default:
@@ -400,6 +423,24 @@ export function describeEvent(ev, teamBName) {
         icon: ICON.effect_removed,
         text: `Effects removed — ${ev.eventName ?? ''}`,
         color: EVENT_COLOR.effect_removed,
+      };
+    case 'shield_applied':
+      return {
+        icon: ICON.shield_applied,
+        text: `${ev.source?.name} — ${ev.name ?? 'Shield'}`,
+        color: EVENT_COLOR.shield_applied,
+      };
+    case 'shield_broken':
+      return {
+        icon: ICON.shield_broken,
+        text: `${ev.card?.name} — Shield broken`,
+        color: EVENT_COLOR.shield_broken,
+      };
+    case 'shield_expired':
+      return {
+        icon: ICON.shield_expired,
+        text: `${ev.card?.name} — Shield expired`,
+        color: EVENT_COLOR.shield_expired,
       };
     case 'fight_end': {
       const bossWins = ev.winner && ev.winner === teamBName;
