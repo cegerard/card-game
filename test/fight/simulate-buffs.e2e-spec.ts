@@ -187,7 +187,7 @@ describe('Simulate fight with buffs', () => {
         expect(res.body[Object.keys(res.body).length].kind).toBe('fight_end');
 
         expect(res.body[3]).toEqual({
-          buffs: [
+          alterations: [
             {
               kind: 'attack',
               remainingTurns: 4,

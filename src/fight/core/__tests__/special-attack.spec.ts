@@ -368,7 +368,7 @@ describe('Trigger card special attack with buff', () => {
     expect(result[2]).toMatchObject({
       kind: 'buff',
       source: attacker.identityInfo,
-      buffs: [
+      alterations: [
         {
           target: attacker.identityInfo,
           kind: 'attack',

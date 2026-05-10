@@ -80,7 +80,7 @@ describe('Buffing-skill', () => {
       2: {
         kind: 'buff',
         source: card1.identityInfo,
-        buffs: [
+        alterations: [
           {
             target: card1.identityInfo,
             kind: 'attack',
@@ -126,7 +126,7 @@ describe('Buffing-skill', () => {
       6: {
         kind: 'buff',
         source: card1.identityInfo,
-        buffs: [
+        alterations: [
           {
             target: card1.identityInfo,
             kind: 'attack',

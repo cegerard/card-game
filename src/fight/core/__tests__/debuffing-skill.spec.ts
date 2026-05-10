@@ -79,7 +79,7 @@ describe('Debuffing-skill', () => {
         2: expect.objectContaining({
           kind: 'debuff',
           source: card1.identityInfo,
-          debuffs: [
+          alterations: [
             {
               target: card2.identityInfo,
               kind: 'attack',
