@@ -77,7 +77,7 @@ export class SpecialAttack implements Special {
       return {
         damage: damageToHealth + shieldAbsorbed,
         shieldAbsorbed: shieldAbsorbed > 0 ? shieldAbsorbed : undefined,
-        shieldBroken: shieldAbsorbed > 0 && !target.shield ? true : undefined,
+        shieldBroken: shieldAbsorbed > 0 && !target.shielded ? true : undefined,
         isCritical,
         dodge: false,
         defender: target,

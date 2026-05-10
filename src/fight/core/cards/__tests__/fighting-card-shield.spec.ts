@@ -18,11 +18,11 @@ describe('FightingCard shield', () => {
       expect(shield.duration).toBe(2);
     });
 
-    it('exposes the shield via getter', () => {
+    it('activates the shield', () => {
       const card = createFightingCard({ health: 400 });
       card.applyShield(0.3, 1);
 
-      expect(card.shield).not.toBeNull();
+      expect(card.shielded).toBe(true);
     });
   });
 
@@ -53,17 +53,7 @@ describe('FightingCard shield', () => {
 
       card.applyFinalDamage(120);
 
-      expect(card.shield).toBeNull();
-    });
-
-    it('sets shieldBroken flag when shield is depleted by hit', () => {
-      const card = createFightingCard({ health: 400, defense: 0 });
-      card.applyShield(0.3, 1);
-
-      const { shieldAbsorbed } = card.applyFinalDamage(120);
-
-      expect(shieldAbsorbed).toBe(120);
-      expect(card.shield).toBeNull();
+      expect(card.shielded).toBe(false);
     });
 
     it('keeps partial shield when damage is below shield points', () => {
@@ -71,8 +61,9 @@ describe('FightingCard shield', () => {
       card.applyShield(0.3, 1);
 
       card.applyFinalDamage(50);
+      const { shieldAbsorbed } = card.applyFinalDamage(80);
 
-      expect(card.shield!.points).toBe(70);
+      expect(shieldAbsorbed).toBe(70);
     });
   });
 
@@ -99,13 +90,13 @@ describe('FightingCard shield', () => {
       expect(expired).not.toBeNull();
     });
 
-    it('nullifies shield after expiry', () => {
+    it('deactivates shield after expiry', () => {
       const card = createFightingCard({ health: 400 });
       card.applyShield(0.3, 1);
 
       card.decreaseShieldDuration();
 
-      expect(card.shield).toBeNull();
+      expect(card.shielded).toBe(false);
     });
   });
 

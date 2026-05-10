@@ -75,7 +75,7 @@ export class SimpleAttack implements AttackSkill {
           damage: damageToHealth + shieldAbsorbed,
           shieldAbsorbed: shieldAbsorbed > 0 ? shieldAbsorbed : undefined,
           shieldBroken:
-            shieldAbsorbed > 0 && !defender.shield ? true : undefined,
+            shieldAbsorbed > 0 && !defender.shielded ? true : undefined,
           isCritical,
           dodge: false,
           defender,

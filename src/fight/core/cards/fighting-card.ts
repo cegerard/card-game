@@ -66,7 +66,7 @@ export class FightingCard {
   private dodgeBehavior: DodgeBehavior;
 
   // Shield
-  private _shield: Shield | null = null;
+  private shield: Shield | null = null;
 
   // Targeting overrides
   private targetingOverrides: TargetingOverrideEntry[] = [];
@@ -186,8 +186,8 @@ export class FightingCard {
     return this.burned?.level ?? 0;
   }
 
-  public get shield(): Shield | null {
-    return this._shield;
+  public get shielded(): boolean {
+    return this.shield !== null;
   }
 
   public setOwnerInfo(ownerName: string, cardPositionInDeck: number): void {
@@ -365,29 +365,29 @@ export class FightingCard {
 
   public applyShield(rate: number, duration: number): Shield {
     const points = Math.round(rate * this.maxHealth);
-    this._shield = { points, duration };
-    return this._shield;
+    this.shield = { points, duration };
+    return this.shield;
   }
 
   public decreaseShieldDuration(): Shield | null {
-    if (!this._shield) return null;
+    if (!this.shield) return null;
 
-    this._shield = { ...this._shield, duration: this._shield.duration - 1 };
-    if (this._shield.duration <= 0) {
-      const expired = this._shield;
-      this._shield = null;
+    this.shield = { ...this.shield, duration: this.shield.duration - 1 };
+    if (this.shield.duration <= 0) {
+      const expired = this.shield;
+      this.shield = null;
       return expired;
     }
     return null;
   }
 
   private absorbWithShield(damage: number): number {
-    if (!this._shield) return 0;
+    if (!this.shield) return 0;
 
-    const absorbed = Math.min(this._shield.points, damage);
-    this._shield = { ...this._shield, points: this._shield.points - absorbed };
-    if (this._shield.points <= 0) {
-      this._shield = null;
+    const absorbed = Math.min(this.shield.points, damage);
+    this.shield = { ...this.shield, points: this.shield.points - absorbed };
+    if (this.shield.points <= 0) {
+      this.shield = null;
     }
     return absorbed;
   }
