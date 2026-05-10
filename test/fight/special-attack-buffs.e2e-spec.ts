@@ -134,7 +134,7 @@ describe('Special Attack with Buffs (e2e)', () => {
             name: 'Attacker with Buff',
             deckIdentity: 'Player 1-0',
           },
-          buffs: [
+          alterations: [
             {
               target: {
                 name: 'Attacker with Buff',
@@ -274,7 +274,7 @@ describe('Special Attack with Buffs (e2e)', () => {
         expect(result['2']).toMatchObject({
           kind: 'buff',
           source: { name: 'Dual Buffer' },
-          buffs: expect.arrayContaining([
+          alterations: expect.arrayContaining([
             expect.objectContaining({ kind: 'attack', value: 20 }),
             expect.objectContaining({ kind: 'defense', value: 30 }),
           ]),
