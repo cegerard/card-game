@@ -27,12 +27,13 @@
             "duration": 2
           }
         },
-        "buffApplication": [
+        "statAlterations": [
           {
             "type": "attack",
             "rate": 0.05,
             "duration": 1,
             "targetingStrategy": "all-allies",
+            "polarity": "buff",
             "condition": {
               "type": "ally-presence",
               "allyName": "Kaelion",
@@ -44,6 +45,7 @@
             "rate": 0.05,
             "duration": 1,
             "targetingStrategy": "all-allies",
+            "polarity": "buff",
             "condition": {
               "type": "ally-presence",
               "allyName": "Kaelion",
@@ -194,12 +196,13 @@
         ],
         "energy": 50,
         "targetingStrategy": "target-all",
-        "debuffApplication": [
+        "statAlterations": [
           {
             "type": "agility",
             "rate": 0.2,
             "duration": 3,
-            "targetingStrategy": "target-all"
+            "targetingStrategy": "target-all",
+            "polarity": "debuff"
           }
         ]
       },

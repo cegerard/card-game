@@ -159,7 +159,7 @@ class EffectDto {
   probability?: number;
 }
 
-class BuffApplicationDto {
+class StatAlterationDto {
   @IsEnum(BuffType)
   type: BuffType;
 
@@ -175,6 +175,9 @@ class BuffApplicationDto {
       'targeted-card strategy can only be used with targeting override skills',
   })
   targetingStrategy: TargetingStrategy;
+
+  @IsEnum(['buff', 'debuff'])
+  polarity: 'buff' | 'debuff';
 
   @IsOptional()
   @ValidateNested()
@@ -223,14 +226,8 @@ class SpecialDto {
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(/* istanbul ignore next */ () => BuffApplicationDto)
-  buffApplication?: BuffApplicationDto[];
-
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(/* istanbul ignore next */ () => BuffApplicationDto)
-  debuffApplication?: BuffApplicationDto[];
+  @Type(/* istanbul ignore next */ () => StatAlterationDto)
+  statAlterations?: StatAlterationDto[];
 }
 
 class DamageCompositionDto {

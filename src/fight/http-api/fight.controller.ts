@@ -109,37 +109,25 @@ export class FightController {
       : undefined;
 
     if (cardData.skills.special.kind === SpecialKind.ATTACK) {
-      const buildAlterations = (
-        entries: typeof cardData.skills.special.buffApplication,
-        polarity: 'buff' | 'debuff',
-      ): Alteration[] => {
-        if (!entries) return [];
-        return entries.map((b) => {
-          const condition = b.condition
-            ? buildAlterationCondition(b.condition.type, {
-                allyName: b.condition.allyName,
+      const alterations = (cardData.skills.special.statAlterations ?? []).map(
+        (a) => {
+          const condition = a.condition
+            ? buildAlterationCondition(a.condition.type, {
+                allyName: a.condition.allyName,
               })
             : undefined;
           return new Alteration(
-            this.mapAlterationType(b.type),
-            b.rate,
-            b.duration,
-            buildTargetingStrategy(b.targetingStrategy),
+            this.mapAlterationType(a.type),
+            a.rate,
+            a.duration,
+            buildTargetingStrategy(a.targetingStrategy),
             condition,
-            b.condition?.multiplier,
-            b.terminationEvent,
-            polarity,
+            a.condition?.multiplier,
+            a.terminationEvent,
+            a.polarity,
           );
-        });
-      };
-
-      const alterations = [
-        ...buildAlterations(cardData.skills.special.buffApplication, 'buff'),
-        ...buildAlterations(
-          cardData.skills.special.debuffApplication,
-          'debuff',
-        ),
-      ];
+        },
+      );
 
       const rawDamages = cardData.skills.special.damages;
       if (!rawDamages || rawDamages.length === 0) {

@@ -47,12 +47,13 @@ describe('Special Attack with Buffs (e2e)', () => {
                 damages: [{ type: 'PHYSICAL', rate: 1.0 }],
                 energy: 0,
                 targetingStrategy: 'target-all',
-                buffApplication: [
+                statAlterations: [
                   {
                     type: 'attack',
                     rate: 0.2,
                     duration: 3,
                     targetingStrategy: 'all-owner-cards',
+                    polarity: 'buff',
                   },
                 ],
               },
@@ -205,18 +206,20 @@ describe('Special Attack with Buffs (e2e)', () => {
                 damages: [{ type: 'PHYSICAL', rate: 1.0 }],
                 energy: 0,
                 targetingStrategy: 'target-all',
-                buffApplication: [
+                statAlterations: [
                   {
                     type: 'attack',
                     rate: 0.2,
                     duration: 2,
                     targetingStrategy: 'all-owner-cards',
+                    polarity: 'buff',
                   },
                   {
                     type: 'defense',
                     rate: 0.3,
                     duration: 2,
                     targetingStrategy: 'all-owner-cards',
+                    polarity: 'buff',
                   },
                 ],
               },

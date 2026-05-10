@@ -67,6 +67,12 @@ type FightingCardParams = {
         buffDuration: number;
         buffTargetingStrategy: string;
       }[];
+      debuffs?: {
+        debuffType: AlterationType;
+        debuffRate: number;
+        debuffDuration: number;
+        debuffTargetingStrategy: string;
+      }[];
     };
     others?: (
       | {
@@ -232,6 +238,12 @@ function createSpecialAttack(params: {
     buffDuration: number;
     buffTargetingStrategy: string;
   }[];
+  debuffs?: {
+    debuffType: AlterationType;
+    debuffRate: number;
+    debuffDuration: number;
+    debuffTargetingStrategy: string;
+  }[];
 }): SpecialAttack {
   const damages = params.damages ?? [
     new DamageComposition(
@@ -243,18 +255,29 @@ function createSpecialAttack(params: {
   const targetingStrategy = params.targetingStrategy ?? 'position-based';
   const effect = params.effect ? createEffect(params.effect) : undefined;
 
-  const buffApplication =
-    params.buffs && params.buffs.length > 0
-      ? params.buffs.map(
-          (b) =>
-            new Alteration(
-              b.buffType,
-              b.buffRate,
-              b.buffDuration,
-              createTargetingStrategy(b.buffTargetingStrategy),
-            ),
-        )
-      : undefined;
+  const buffs = (params.buffs ?? []).map(
+    (b) =>
+      new Alteration(
+        b.buffType,
+        b.buffRate,
+        b.buffDuration,
+        createTargetingStrategy(b.buffTargetingStrategy),
+      ),
+  );
+  const debuffs = (params.debuffs ?? []).map(
+    (d) =>
+      new Alteration(
+        d.debuffType,
+        d.debuffRate,
+        d.debuffDuration,
+        createTargetingStrategy(d.debuffTargetingStrategy),
+        undefined,
+        undefined,
+        undefined,
+        'debuff',
+      ),
+  );
+  const alterations = [...buffs, ...debuffs];
 
   return new SpecialAttack(
     params.name ?? faker.word.noun(),
@@ -262,7 +285,7 @@ function createSpecialAttack(params: {
     energy,
     createTargetingStrategy(targetingStrategy),
     effect,
-    buffApplication,
+    alterations.length > 0 ? alterations : undefined,
   );
 }
 
