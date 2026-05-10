@@ -5,6 +5,8 @@ import { DamageType } from '../damage/damage-type';
 
 export type AttackResult = {
   damage: number;
+  shieldAbsorbed?: number;
+  shieldBroken?: boolean;
   isCritical: boolean;
   dodge: boolean;
   defender: FightingCard;

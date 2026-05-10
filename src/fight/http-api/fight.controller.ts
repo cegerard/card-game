@@ -56,6 +56,7 @@ import { MultipleAttack } from '../core/cards/skills/multiple-attack';
 import { AttackSkill } from '../core/cards/skills/attack-skill';
 import { TargetedCard } from '../core/targeting-card-strategies/targeted-card';
 import { validatePowerIdConsistency } from '../core/cards/skills/power-id-consistency';
+import { ShieldApplication } from '../core/cards/@types/shield/shield-application';
 
 @Controller()
 @UsePipes(
@@ -138,6 +139,15 @@ export class FightController {
       const specialDamages = rawDamages.map(
         (d) => new DamageComposition(d.type, d.rate),
       );
+      const shieldDto = cardData.skills.special.shieldApplication;
+      const shieldApplication = shieldDto
+        ? new ShieldApplication(
+            shieldDto.rate,
+            shieldDto.duration,
+            buildTargetingStrategy(shieldDto.targetingStrategy),
+          )
+        : undefined;
+
       special = new SpecialAttack(
         cardData.skills.special.name,
         specialDamages,
@@ -145,6 +155,7 @@ export class FightController {
         buildTargetingStrategy(cardData.skills.special.targetingStrategy),
         specialEffect,
         alterations.length > 0 ? alterations : undefined,
+        shieldApplication,
       );
     } else if (cardData.skills.special.kind === SpecialKind.HEALING) {
       special = new SpecialHealing(

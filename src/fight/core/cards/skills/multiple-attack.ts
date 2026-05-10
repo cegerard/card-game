@@ -81,14 +81,18 @@ export class MultipleAttack implements AttackSkill {
           attackPower * damageMultiplier,
           defender,
         );
-        const collectedDamage = defender.applyFinalDamage(total);
+        const { damageToHealth, shieldAbsorbed } =
+          defender.applyFinalDamage(total);
 
         const effects = this.effects
           ?.map((e) => e.applyEffect(defender, card, context))
           .filter((r): r is EffectResult => r != null);
 
         results.results.push({
-          damage: collectedDamage,
+          damage: damageToHealth + shieldAbsorbed,
+          shieldAbsorbed: shieldAbsorbed > 0 ? shieldAbsorbed : undefined,
+          shieldBroken:
+            shieldAbsorbed > 0 && !defender.shielded ? true : undefined,
           isCritical,
           dodge: false,
           defender,
@@ -109,9 +113,13 @@ export class MultipleAttack implements AttackSkill {
           card.actualAttack,
           defender,
         );
-        const collectedDamage = defender.applyFinalDamage(total);
+        const { damageToHealth, shieldAbsorbed } =
+          defender.applyFinalDamage(total);
         results.results.push({
-          damage: collectedDamage,
+          damage: damageToHealth + shieldAbsorbed,
+          shieldAbsorbed: shieldAbsorbed > 0 ? shieldAbsorbed : undefined,
+          shieldBroken:
+            shieldAbsorbed > 0 && !defender.shielded ? true : undefined,
           isCritical: false,
           dodge: false,
           defender,

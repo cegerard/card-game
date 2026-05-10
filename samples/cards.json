@@ -204,7 +204,12 @@
             "targetingStrategy": "target-all",
             "polarity": "debuff"
           }
-        ]
+        ],
+        "shieldApplication": {
+          "rate": 0.3,
+          "duration": 1,
+          "targetingStrategy": "self"
+        }
       },
       "others": []
     },

@@ -28,6 +28,7 @@ import { AlterationCondition } from '../../src/fight/core/cards/@types/alteratio
 import { Element } from '../../src/fight/core/cards/@types/damage/element';
 import { DamageComposition } from '../../src/fight/core/cards/@types/damage/damage-composition';
 import { DamageType } from '../../src/fight/core/cards/@types/damage/damage-type';
+import { ShieldApplication } from '../../src/fight/core/cards/@types/shield/shield-application';
 
 type effect = {
   type: string;
@@ -73,6 +74,7 @@ type FightingCardParams = {
         debuffDuration: number;
         debuffTargetingStrategy: string;
       }[];
+      shieldApplication?: { rate: number; duration: number; targetingStrategy?: string };
     };
     others?: (
       | {
@@ -244,6 +246,11 @@ function createSpecialAttack(params: {
     debuffDuration: number;
     debuffTargetingStrategy: string;
   }[];
+  shieldApplication?: {
+    rate: number;
+    duration: number;
+    targetingStrategy?: string;
+  };
 }): SpecialAttack {
   const damages = params.damages ?? [
     new DamageComposition(
@@ -279,6 +286,16 @@ function createSpecialAttack(params: {
   );
   const alterations = [...buffs, ...debuffs];
 
+  const shieldApplication = params.shieldApplication
+    ? new ShieldApplication(
+        params.shieldApplication.rate,
+        params.shieldApplication.duration,
+        createTargetingStrategy(
+          params.shieldApplication.targetingStrategy ?? 'self',
+        ),
+      )
+    : undefined;
+
   return new SpecialAttack(
     params.name ?? faker.word.noun(),
     damages,
@@ -286,6 +303,7 @@ function createSpecialAttack(params: {
     createTargetingStrategy(targetingStrategy),
     effect,
     alterations.length > 0 ? alterations : undefined,
+    shieldApplication,
   );
 }
 
