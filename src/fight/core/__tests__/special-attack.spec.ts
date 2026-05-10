@@ -395,3 +395,93 @@ describe('Trigger card special attack with buff', () => {
     });
   });
 });
+
+describe('Trigger card special attack with debuff', () => {
+  let attacker: ReturnType<typeof createFightingCard>;
+  let defender: ReturnType<typeof createFightingCard>;
+  let result: ReturnType<Fight['start']>;
+
+  beforeEach(() => {
+    defender = createFightingCard({
+      attack: 0,
+      defense: 0,
+      health: 100,
+      speed: 1,
+      criticalChance: 0,
+      agility: 25,
+    });
+
+    attacker = createFightingCard({
+      attack: 50,
+      defense: 0,
+      health: 100,
+      speed: 100,
+      criticalChance: 0,
+      accuracy: 25,
+      agility: 25,
+      skills: {
+        special: {
+          kind: 'specialAttack',
+          damages: [new DamageComposition(DamageType.PHYSICAL, 1.0)],
+          energy: 100,
+          targetingStrategy: 'target-all',
+          debuffs: [
+            {
+              debuffType: 'agility',
+              debuffRate: 0.2,
+              debuffDuration: 3,
+              debuffTargetingStrategy: 'target-all',
+            },
+          ],
+        },
+      },
+    });
+
+    for (let i = 0; i < 10; i++) {
+      attacker.increaseSpecialEnergy();
+    }
+
+    const player1 = new Player('Player 1', [attacker]);
+    const player2 = new Player('Player 2', [defender]);
+    const fight = new Fight(
+      player1,
+      player2,
+      new PlayerByPlayerCardSelector(player1, player2),
+    );
+
+    result = fight.start();
+  });
+
+  it('applies special_attack as first action', () => {
+    expect(result[1]).toMatchObject({
+      attacker: attacker.identityInfo,
+      damages: [
+        {
+          damage: 50,
+          defender: defender.identityInfo,
+          dodge: false,
+          isCritical: false,
+          remainingHealth: 50,
+        },
+      ],
+      energy: 0,
+      kind: 'special_attack',
+    });
+  });
+
+  it('applies debuff as second step', () => {
+    expect(result[2]).toMatchObject({
+      kind: 'debuff',
+      source: attacker.identityInfo,
+      alterations: [
+        {
+          target: defender.identityInfo,
+          kind: 'agility',
+          value: 5,
+          remainingTurns: 3,
+        },
+      ],
+      energy: 0,
+    });
+  });
+});

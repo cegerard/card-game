@@ -4,7 +4,13 @@ import { Trigger } from '../../trigger/trigger';
 import { ActivatableTrigger } from '../../trigger/activatable-trigger';
 import { FightingContext } from '../@types/fighting-context';
 import { AlterationType } from '../@types/alteration/alteration-type';
-import { BuffSkillResults, DebuffSkillResults, Skill, SkillKind, SkillResults } from './skill';
+import {
+  BuffSkillResults,
+  DebuffSkillResults,
+  Skill,
+  SkillKind,
+  SkillResults,
+} from './skill';
 import { AlterationCondition } from '../@types/alteration/alteration-condition';
 
 export interface AlterationSkillOptions {
