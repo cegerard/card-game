@@ -11,6 +11,8 @@ import {
   BuffResult,
   DebuffResult,
 } from '../@types/action-result/alteration-result';
+import { ShieldApplication } from '../@types/shield/shield-application';
+import { ShieldResult } from '../@types/action-result/shield-result';
 
 const ENERGY_INCREASE_FACTOR = 10;
 const CRITICAL_RATE = 1.3;
@@ -23,6 +25,7 @@ export class SpecialAttack implements Special {
     private readonly targetingStrategy: TargetingCardStrategy,
     private readonly effect?: AttackEffect,
     private readonly alterations?: Alteration[],
+    private readonly shieldApplication?: ShieldApplication,
   ) {}
 
   public ready(actualEnergy: number): boolean {
@@ -64,7 +67,7 @@ export class SpecialAttack implements Special {
         source.actualAttack * damageMultiplier,
         target,
       );
-      const damage = target.applyFinalDamage(total);
+      const { damageToHealth, shieldAbsorbed } = target.applyFinalDamage(total);
 
       let effectResult: EffectResult;
       if (this.effect) {
@@ -72,7 +75,9 @@ export class SpecialAttack implements Special {
       }
 
       return {
-        damage,
+        damage: damageToHealth + shieldAbsorbed,
+        shieldAbsorbed: shieldAbsorbed > 0 ? shieldAbsorbed : undefined,
+        shieldBroken: shieldAbsorbed > 0 && !target.shield ? true : undefined,
         isCritical,
         dodge: false,
         defender: target,
@@ -83,11 +88,13 @@ export class SpecialAttack implements Special {
     });
 
     const alterationResults = this.applyAlterations(source, context);
+    const shieldResults = this.applyShield(source, context);
 
     return {
       name: this.name,
       actionResults: attackResults,
       alterationResults,
+      shieldResults,
     };
   }
 
@@ -111,5 +118,15 @@ export class SpecialAttack implements Special {
       (alteration) =>
         alteration.apply(source, context) as (BuffResult | DebuffResult)[],
     );
+  }
+
+  private applyShield(
+    source: FightingCard,
+    context: FightingContext,
+  ): ShieldResult[] {
+    if (!this.shieldApplication) {
+      return [];
+    }
+    return this.shieldApplication.apply(source, context);
   }
 }

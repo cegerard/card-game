@@ -190,6 +190,21 @@ class StatAlterationDto {
   terminationEvent?: string;
 }
 
+class ShieldApplicationDto {
+  @IsNumber()
+  rate: number;
+
+  @IsNumber()
+  duration: number;
+
+  @IsEnum(TargetingStrategy)
+  @IsNotIn([TargetingStrategy.TARGETED_CARD], {
+    message:
+      'targeted-card strategy can only be used with targeting override skills',
+  })
+  targetingStrategy: TargetingStrategy;
+}
+
 class SpecialDto {
   @IsEnum(SpecialKind)
   kind: SpecialKind;
@@ -228,6 +243,11 @@ class SpecialDto {
   @ValidateNested({ each: true })
   @Type(/* istanbul ignore next */ () => StatAlterationDto)
   statAlterations?: StatAlterationDto[];
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => ShieldApplicationDto)
+  shieldApplication?: ShieldApplicationDto;
 }
 
 class DamageCompositionDto {

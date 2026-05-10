@@ -18,6 +18,8 @@ import {
 } from '../cards/@types/action-result/alteration-result';
 import { AttackSkillResults, SkillKind } from '../cards/skills/skill';
 import { DeathSkillHandler } from '../fight-simulator/death-skill-handler';
+import { ShieldResult } from '../cards/@types/action-result/shield-result';
+import { ShieldAppliedReport } from '../fight-simulator/@types/shield-report';
 
 type SplittedSteps = {
   actionSteps: Step[];
@@ -180,6 +182,14 @@ export class ActionStage {
       result.debuffReport = debuffReport;
     }
 
+    if (specialResults.shieldResults.length > 0) {
+      result.shieldAppliedReport = this.buildShieldAppliedReport(
+        card,
+        specialResults.name,
+        specialResults.shieldResults,
+      );
+    }
+
     return result;
   }
 
@@ -222,6 +232,10 @@ export class ActionStage {
             acc.actionSteps.push(report.debuffReport);
           }
 
+          if (report.shieldAppliedReport) {
+            acc.actionSteps.push(report.shieldAppliedReport);
+          }
+
           report.statusChanges.forEach((statusChange) => {
             acc.statusChangeSteps.push(statusChange);
           });
@@ -256,6 +270,13 @@ export class ActionStage {
         kind: damageDealt.kind,
       });
 
+      if (damageDealt.shieldBroken) {
+        report.statusChanges.push({
+          kind: StepKind.ShieldBroken,
+          card: defensiveCard.identityInfo,
+        });
+      }
+
       if (defensiveCard.isDead() && !reportedDeaths.has(defensiveCard)) {
         reportedDeaths.add(defensiveCard);
         this.notifyDeath(defensiveCard, attackerCard);
@@ -265,28 +286,30 @@ export class ActionStage {
           status: 'dead',
         });
         report.statusChanges.push(...this.deathSkillHandler.drainSteps());
-      } else if (!defensiveCard.isDead() && damageDealt.effects?.length) {
-        for (const effect of damageDealt.effects) {
-          report.statusChanges.push({
-            kind: StepKind.StatusChange,
-            status: effect.type,
-            card: effect.card.identityInfo,
-          });
-          if (effect.triggeredDebuff) {
-            const { card: debuffTarget, debuff } = effect.triggeredDebuff;
+      } else if (!defensiveCard.isDead()) {
+        if (damageDealt.effects?.length) {
+          for (const effect of damageDealt.effects) {
             report.statusChanges.push({
-              kind: StepKind.Debuff,
-              source: attackerCard.identityInfo,
-              alterations: [
-                {
-                  target: debuffTarget.identityInfo,
-                  kind: debuff.type,
-                  value: debuff.value,
-                  remainingTurns: debuff.duration,
-                },
-              ],
-              energy: attackerCard.actualEnergy,
+              kind: StepKind.StatusChange,
+              status: effect.type,
+              card: effect.card.identityInfo,
             });
+            if (effect.triggeredDebuff) {
+              const { card: debuffTarget, debuff } = effect.triggeredDebuff;
+              report.statusChanges.push({
+                kind: StepKind.Debuff,
+                source: attackerCard.identityInfo,
+                alterations: [
+                  {
+                    target: debuffTarget.identityInfo,
+                    kind: debuff.type,
+                    value: debuff.value,
+                    remainingTurns: debuff.duration,
+                  },
+                ],
+                energy: attackerCard.actualEnergy,
+              });
+            }
           }
         }
       }
@@ -305,5 +328,21 @@ export class ActionStage {
     this.eventBroker.onCardDeath.forEach((subscriber) =>
       subscriber.notifyDeath(card, killerCard),
     );
+  }
+
+  private buildShieldAppliedReport(
+    source: FightingCard,
+    name: string,
+    shieldResults: ShieldResult[],
+  ): ShieldAppliedReport {
+    return {
+      kind: StepKind.ShieldApplied,
+      name,
+      source: source.identityInfo,
+      targets: shieldResults.map((r) => ({
+        target: r.target,
+        points: r.shield.points,
+      })),
+    };
   }
 }

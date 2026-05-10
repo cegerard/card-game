@@ -56,6 +56,10 @@ export class TurnManager {
           })),
         });
       }
+      const expiredShield = card.decreaseShieldDuration();
+      if (expiredShield) {
+        steps.push({ kind: StepKind.ShieldExpired, card: card.identityInfo });
+      }
       this.processCardSkill(card, steps);
       this.processCardEffectStates(card, steps);
     });

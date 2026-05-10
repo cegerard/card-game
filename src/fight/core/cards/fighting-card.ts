@@ -17,6 +17,12 @@ import { Element } from './@types/damage/element';
 import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
 import { NamedAttackResult } from './@types/action-result/named-attack-result';
 import { round2 } from '../../tools/round';
+import { Shield } from './@types/shield/shield';
+
+export type FinalDamageResult = {
+  damageToHealth: number;
+  shieldAbsorbed: number;
+};
 
 export type TargetingOverrideEntry = {
   strategy: TargetingCardStrategy;
@@ -58,6 +64,9 @@ export class FightingCard {
 
   // Behaviors
   private dodgeBehavior: DodgeBehavior;
+
+  // Shield
+  private _shield: Shield | null = null;
 
   // Targeting overrides
   private targetingOverrides: TargetingOverrideEntry[] = [];
@@ -175,6 +184,10 @@ export class FightingCard {
 
   public get burnLevel(): EffectLevel {
     return this.burned?.level ?? 0;
+  }
+
+  public get shield(): Shield | null {
+    return this._shield;
   }
 
   public setOwnerInfo(ownerName: string, cardPositionInDeck: number): void {
@@ -330,7 +343,7 @@ export class FightingCard {
     return this.special.getSpecialKind();
   }
 
-  public applyFinalDamage(damage: number): number {
+  public applyFinalDamage(damage: number): FinalDamageResult {
     let causedDamages = damage;
     if (this.frozen) {
       causedDamages = (this.frozen as CardStateFrozen).applyDamageRate(
@@ -342,9 +355,41 @@ export class FightingCard {
         causedDamages,
       );
     }
-    this.receivedDamages += causedDamages;
 
-    return causedDamages;
+    const shieldAbsorbed = this.absorbWithShield(causedDamages);
+    const damageToHealth = causedDamages - shieldAbsorbed;
+    this.receivedDamages += damageToHealth;
+
+    return { damageToHealth, shieldAbsorbed };
+  }
+
+  public applyShield(rate: number, duration: number): Shield {
+    const points = Math.round(rate * this.maxHealth);
+    this._shield = { points, duration };
+    return this._shield;
+  }
+
+  public decreaseShieldDuration(): Shield | null {
+    if (!this._shield) return null;
+
+    this._shield = { ...this._shield, duration: this._shield.duration - 1 };
+    if (this._shield.duration <= 0) {
+      const expired = this._shield;
+      this._shield = null;
+      return expired;
+    }
+    return null;
+  }
+
+  private absorbWithShield(damage: number): number {
+    if (!this._shield) return 0;
+
+    const absorbed = Math.min(this._shield.points, damage);
+    this._shield = { ...this._shield, points: this._shield.points - absorbed };
+    if (this._shield.points <= 0) {
+      this._shield = null;
+    }
+    return absorbed;
   }
 
   public addRealDamage(damage: number): number {

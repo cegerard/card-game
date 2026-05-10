@@ -17,6 +17,11 @@ import {
   TargetingRevertedReport,
 } from './targeting-override-report';
 import { EffectRemovedReport } from './effect-removed-report';
+import {
+  ShieldAppliedReport,
+  ShieldBrokenReport,
+  ShieldExpiredReport,
+} from './shield-report';
 
 export enum StepKind {
   FightEnd = 'fight_end',
@@ -34,6 +39,9 @@ export enum StepKind {
   TargetingOverride = 'targeting_override',
   TargetingReverted = 'targeting_reverted',
   EffectRemoved = 'effect_removed',
+  ShieldApplied = 'shield_applied',
+  ShieldBroken = 'shield_broken',
+  ShieldExpired = 'shield_expired',
 }
 
 export type Step =
@@ -51,4 +59,7 @@ export type Step =
   | DebuffExpiredReport
   | TargetingOverrideReport
   | TargetingRevertedReport
-  | EffectRemovedReport;
+  | EffectRemovedReport
+  | ShieldAppliedReport
+  | ShieldBrokenReport
+  | ShieldExpiredReport;
