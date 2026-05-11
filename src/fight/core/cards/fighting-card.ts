@@ -12,6 +12,7 @@ import { CardStateStunted } from './@types/state/card-state-stunted';
 import { EffectLevel } from './@types/attack/effect-level';
 import { Buff, Debuff } from './@types/alteration/alteration-detail';
 import { Skill, SkillResults } from './skills/skill';
+import { ReactiveSkill } from './skills/reactive-skill';
 import { AlterationType } from './@types/alteration/alteration-type';
 import { Element } from './@types/damage/element';
 import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
@@ -226,6 +227,12 @@ export class FightingCard {
     this.skills.forEach((skill) => {
       if (skill.tick) skill.tick();
     });
+  }
+
+  public getReactiveSkills(): ReactiveSkill[] {
+    return this.skills.filter(
+      (s): s is ReactiveSkill => 'onHealthChanged' in s,
+    );
   }
 
   public get attackTargetingId(): string {

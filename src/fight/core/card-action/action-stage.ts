@@ -20,6 +20,8 @@ import { AttackSkillResults, SkillKind } from '../cards/skills/skill';
 import { DeathSkillHandler } from '../fight-simulator/death-skill-handler';
 import { ShieldResult } from '../cards/@types/action-result/shield-result';
 import { ShieldAppliedReport } from '../fight-simulator/@types/shield-report';
+import { checkReactiveSkills } from '../fight-simulator/reactive-skill-checker';
+import { skillResultsToSteps } from '../fight-simulator/skill-results-to-steps';
 
 type SplittedSteps = {
   actionSteps: Step[];
@@ -312,6 +314,13 @@ export class ActionStage {
             }
           }
         }
+        const reactiveResults = checkReactiveSkills(
+          defensiveCard,
+          this.getFightingContext(defensiveCard),
+        );
+        report.statusChanges.push(
+          ...skillResultsToSteps(defensiveCard, reactiveResults),
+        );
       }
     });
   }

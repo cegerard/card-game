@@ -58,6 +58,7 @@ export enum SkillKind {
   DEBUFF = 'DEBUFF',
   CONDITIONAL_ATTACK = 'CONDITIONAL_ATTACK',
   TARGETING_OVERRIDE = 'TARGETING_OVERRIDE',
+  SHIELD = 'SHIELD',
 }
 
 export enum BuffType {
@@ -344,12 +345,13 @@ export class OtherSkillDto {
   @IsString()
   name: string;
 
-  // Required for HEALING, BUFF, DEBUFF; not applicable to CONDITIONAL_ATTACK or TARGETING_OVERRIDE
+  // Required for HEALING, BUFF, DEBUFF, SHIELD; not applicable to CONDITIONAL_ATTACK or TARGETING_OVERRIDE
   @ValidateIf(
     (o) =>
       o.kind === SkillKind.HEALING ||
       o.kind === SkillKind.BUFF ||
-      o.kind === SkillKind.DEBUFF,
+      o.kind === SkillKind.DEBUFF ||
+      o.kind === SkillKind.SHIELD,
   )
   @IsDefined()
   @IsNumber()
@@ -358,8 +360,10 @@ export class OtherSkillDto {
   @IsEnum(TargetingStrategy)
   targetingStrategy: TargetingStrategy;
 
+  @ValidateIf((o) => o.kind !== SkillKind.SHIELD)
+  @IsDefined()
   @IsEnum(TriggerEvent)
-  event: TriggerEvent;
+  event?: TriggerEvent;
 
   // Required for BUFF and DEBUFF kinds
   @ValidateIf((o) => o.kind === SkillKind.BUFF || o.kind === SkillKind.DEBUFF)
