@@ -21,9 +21,14 @@ export const ICON = {
   burn:              '🔥',
   poison:            '☠️',
   freeze:            '❄️',
+  stunt:             '💫',
   dead:              '💀',
   status_change:     '⚡',
   state_effect:      '💢',
+  /* Shield */
+  shield_applied:    '🛡️',
+  shield_broken:     '💥',
+  shield_expired:    '🔻',
   /* Targeting */
   targeting_override: '🎯',
   targeting_reverted: '🔄',
@@ -41,6 +46,7 @@ export const STATUS_ICON = {
   burn:   ICON.burn,
   poison: ICON.poison,
   freeze: ICON.freeze,
+  stunt:  ICON.stunt,
 };
 
 /** Primary colour per event kind */
@@ -61,6 +67,9 @@ export const EVENT_COLOR = {
   targeting_override: '#c084fc',
   targeting_reverted: '#c084fc',
   effect_removed:    '#94a3b8',
+  shield_applied:    '#60a5fa',
+  shield_broken:     '#f87171',
+  shield_expired:    '#94a3b8',
   fight_end:         '#22c55e',
 };
 

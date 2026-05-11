@@ -33,9 +33,9 @@ function discoverCards(events) {
       trackFirstHP(firstHP, d.defender, d.remainingHealth, d.damage);
     });
     ev.heal?.forEach(h => registerCard(meta, h.target));
-    ev.buffs?.forEach(b => registerCard(meta, b.target));
-    ev.debuffs?.forEach(b => registerCard(meta, b.target));
+    ev.alterations?.forEach(b => registerCard(meta, b.target));
     ev.removed?.forEach(r => registerCard(meta, r.target));
+    ev.targets?.forEach(t => registerCard(meta, t.target));
     if (ev.kind === 'state_effect') {
       trackFirstHP(firstHP, ev.card, ev.remainingHealth, ev.damage);
     }
@@ -123,10 +123,11 @@ function buildInitialState(cardsMeta, firstHP) {
       deckIdentity: c.deckIdentity,
       maxHP,
       hp: maxHP,
-      statuses: [],     // active status names: ['burn', 'poison', ...]
+      statuses: [],     // active status names: ['burn', 'poison', 'stunt', ...]
       stateEffects: {}, // { [type]: remainingTurns }
       buffs: [],        // { kind, value, turns, name, powerId }
       debuffs: [],      // { kind, value, turns, name, powerId }
+      shield: null,     // null | { points: number }
       dead: false,
     };
   });
@@ -182,7 +183,7 @@ function applyEvent(state, ev) {
     }
 
     case 'buff':
-      ev.buffs?.forEach(b => {
+      ev.alterations?.forEach(b => {
         const c = get(b.target?.id);
         if (!c) return;
         c.buffs = [...c.buffs, {
@@ -196,7 +197,7 @@ function applyEvent(state, ev) {
       break;
 
     case 'debuff':
-      ev.debuffs?.forEach(b => {
+      ev.alterations?.forEach(b => {
         const c = get(b.target?.id);
         if (!c) return;
         c.debuffs = [...c.debuffs, {
@@ -265,6 +266,26 @@ function applyEvent(state, ev) {
         });
       }
       break;
+
+    case 'shield_applied':
+      ev.targets?.forEach(t => {
+        const c = get(t.target?.id);
+        if (!c) return;
+        c.shield = { points: t.points };
+      });
+      break;
+
+    case 'shield_broken': {
+      const c = get(ev.card?.id);
+      if (c) c.shield = null;
+      break;
+    }
+
+    case 'shield_expired': {
+      const c = get(ev.card?.id);
+      if (c) c.shield = null;
+      break;
+    }
 
     // targeting_override / targeting_reverted don't mutate card stats
     default: break;

@@ -61,17 +61,19 @@
           { "type": "FIRE", "rate": 0.4 }
         ],
         "targetingStrategy": "position-based",
-        "effect": {
-          "type": "BURN",
-          "rate": 0.1,
-          "level": 2,
-          "triggeredDebuff": {
-            "debuffType": "defense",
-            "debuffRate": 0.08,
-            "probability": 0.3,
-            "duration": 2
+        "effects": [
+          {
+            "type": "BURN",
+            "rate": 0.1,
+            "level": 2,
+            "triggeredDebuff": {
+              "debuffType": "defense",
+              "debuffRate": 0.08,
+              "probability": 0.3,
+              "duration": 2
+            }
           }
-        }
+        ]
       },
       "others": [
         {
