@@ -74,7 +74,11 @@ type FightingCardParams = {
         debuffDuration: number;
         debuffTargetingStrategy: string;
       }[];
-      shieldApplication?: { rate: number; duration: number; targetingStrategy?: string };
+      shieldApplication?: {
+        rate: number;
+        duration: number;
+        targetingStrategy?: string;
+      };
     };
     others?: (
       | {

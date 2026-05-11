@@ -158,6 +158,7 @@ describe('Buffing-skill', () => {
     card1.decreaseBuffAndDebuffDuration();
     card1.decreaseBuffAndDebuffDuration();
     card1.decreaseBuffAndDebuffDuration();
+    card1.decreaseBuffAndDebuffDuration();
 
     expect(card1.actualAttack).toBe(initialAttack);
   });

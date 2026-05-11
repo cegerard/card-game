@@ -36,7 +36,9 @@ describe('TurnManager buff/debuff expiry steps', () => {
         agility: 0,
       });
       card.applyBuff('attack', 0.2, 1);
-      steps = buildTurnManager(card).endTurn([card]);
+      const manager = buildTurnManager(card);
+      manager.endTurn([card]);
+      steps = manager.endTurn([card]);
     });
 
     it('emits a buff_expired step', () => {
@@ -85,7 +87,9 @@ describe('TurnManager buff/debuff expiry steps', () => {
         agility: 0,
       });
       card.applyDebuff('attack', 0.2, 1);
-      steps = buildTurnManager(card).endTurn([card]);
+      const manager = buildTurnManager(card);
+      manager.endTurn([card]);
+      steps = manager.endTurn([card]);
     });
 
     it('emits a debuff_expired step', () => {

@@ -18,7 +18,7 @@ describe('Shield mechanic', () => {
       skills: {
         special: {
           damages: [new DamageComposition(DamageType.PHYSICAL, 0.1)],
-          energy: 0,
+          energy: 20,
           kind: 'specialAttack',
           shieldApplication: {
             rate: 0.3,

@@ -373,7 +373,7 @@ export class FightingCard {
     if (!this.shield) return null;
 
     this.shield = { ...this.shield, duration: this.shield.duration - 1 };
-    if (this.shield.duration <= 0) {
+    if (this.shield.duration < 0) {
       const expired = this.shield;
       this.shield = null;
       return expired;
@@ -502,15 +502,15 @@ export class FightingCard {
       ...b,
       duration: b.duration - 1,
     }));
-    const expiredBuffs = decremented.filter((b) => b.duration <= 0);
-    this.buffs = decremented.filter((b) => b.duration > 0);
+    const expiredBuffs = decremented.filter((b) => b.duration < 0);
+    this.buffs = decremented.filter((b) => b.duration >= 0);
 
     const decrementedDebuffs = this.debuffs.map((d) => ({
       ...d,
       duration: d.duration - 1,
     }));
-    const expiredDebuffs = decrementedDebuffs.filter((d) => d.duration <= 0);
-    this.debuffs = decrementedDebuffs.filter((d) => d.duration > 0);
+    const expiredDebuffs = decrementedDebuffs.filter((d) => d.duration < 0);
+    this.debuffs = decrementedDebuffs.filter((d) => d.duration >= 0);
 
     return { expiredBuffs, expiredDebuffs };
   }
