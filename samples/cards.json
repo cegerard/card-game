@@ -213,7 +213,19 @@
           "targetingStrategy": "self"
         }
       },
-      "others": []
+      "others": [
+        {
+          "kind": "CONDITIONAL_ATTACK",
+          "name": "Elan de la salamandre",
+          "targetingStrategy": "position-based",
+          "event": "next-action",
+          "interval": 3,
+          "damages": [
+            { "type": "PHYSICAL", "rate": 0.6 },
+            { "type": "FIRE", "rate": 0.6 }
+          ]
+        }
+      ]
     },
     "behaviors": { "dodge": "simple-dodge" }
   }
