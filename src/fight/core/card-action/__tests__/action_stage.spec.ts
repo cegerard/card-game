@@ -33,7 +33,12 @@ class UnknownSpecial implements Special {
     return true;
   }
   launch(_source: FightingCard, _context: FightingContext): SpecialResult {
-    return { name: 'unknown', actionResults: [], alterationResults: [], shieldResults: [] };
+    return {
+      name: 'unknown',
+      actionResults: [],
+      alterationResults: [],
+      shieldResults: [],
+    };
   }
   increaseEnergy(actualEnergy: number): number {
     return actualEnergy;

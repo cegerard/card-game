@@ -81,19 +81,28 @@ describe('FightingCard shield', () => {
       expect(card.decreaseShieldDuration()).toBeNull();
     });
 
-    it('returns expired shield when duration reaches 0', () => {
+    it('returns null after first decrement of a 1-turn shield', () => {
       const card = createFightingCard({ health: 400 });
       card.applyShield(0.3, 1);
 
+      expect(card.decreaseShieldDuration()).toBeNull();
+    });
+
+    it('returns expired shield after second decrement of a 1-turn shield', () => {
+      const card = createFightingCard({ health: 400 });
+      card.applyShield(0.3, 1);
+
+      card.decreaseShieldDuration();
       const expired = card.decreaseShieldDuration();
 
       expect(expired).not.toBeNull();
     });
 
-    it('deactivates shield after expiry', () => {
+    it('deactivates shield after second decrement of a 1-turn shield', () => {
       const card = createFightingCard({ health: 400 });
       card.applyShield(0.3, 1);
 
+      card.decreaseShieldDuration();
       card.decreaseShieldDuration();
 
       expect(card.shielded).toBe(false);

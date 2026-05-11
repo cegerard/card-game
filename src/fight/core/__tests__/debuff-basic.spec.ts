@@ -57,6 +57,7 @@ describe('Debuff System - Basic Tests', () => {
 
       card.applyDebuff('attack', 0.2, 1);
       card.decreaseBuffAndDebuffDuration();
+      card.decreaseBuffAndDebuffDuration();
 
       expect(card.actualAttack).toBe(initialAttack);
     });

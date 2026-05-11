@@ -209,16 +209,26 @@ describe('FightingCard.decreaseBuffAndDebuffDuration()', () => {
       });
     });
 
-    it('returns expired buffs', () => {
+    it('does not expire a 1-turn buff after first decrement', () => {
       card.applyBuff('attack', 0.2, 1);
 
+      const { expiredBuffs } = card.decreaseBuffAndDebuffDuration();
+
+      expect(expiredBuffs).toHaveLength(0);
+    });
+
+    it('returns expired buffs after second decrement of a 1-turn buff', () => {
+      card.applyBuff('attack', 0.2, 1);
+
+      card.decreaseBuffAndDebuffDuration();
       const { expiredBuffs } = card.decreaseBuffAndDebuffDuration();
 
       expect(expiredBuffs).toHaveLength(1);
     });
 
-    it('restores attack stat after buff expires', () => {
+    it('restores attack stat after 1-turn buff expires on second decrement', () => {
       card.applyBuff('attack', 0.2, 1);
+      card.decreaseBuffAndDebuffDuration();
       card.decreaseBuffAndDebuffDuration();
 
       expect(card.actualAttack).toBe(baseAttack);
@@ -254,16 +264,26 @@ describe('FightingCard.decreaseBuffAndDebuffDuration()', () => {
       });
     });
 
-    it('returns expired debuffs', () => {
+    it('does not expire a 1-turn debuff after first decrement', () => {
       card.applyDebuff('attack', 0.2, 1);
 
+      const { expiredDebuffs } = card.decreaseBuffAndDebuffDuration();
+
+      expect(expiredDebuffs).toHaveLength(0);
+    });
+
+    it('returns expired debuffs after second decrement of a 1-turn debuff', () => {
+      card.applyDebuff('attack', 0.2, 1);
+
+      card.decreaseBuffAndDebuffDuration();
       const { expiredDebuffs } = card.decreaseBuffAndDebuffDuration();
 
       expect(expiredDebuffs).toHaveLength(1);
     });
 
-    it('restores attack stat after debuff expires', () => {
+    it('restores attack stat after 1-turn debuff expires on second decrement', () => {
       card.applyDebuff('attack', 0.2, 1);
+      card.decreaseBuffAndDebuffDuration();
       card.decreaseBuffAndDebuffDuration();
 
       expect(card.actualAttack).toBe(baseAttack);

@@ -96,7 +96,7 @@ describe('Debuffing-skill', () => {
 
       fight.start();
 
-      expect(card2.actualAttack).toBe(initialAttack - 36 * 2);
+      expect(card2.actualAttack).toBe(initialAttack - 36 * 3);
     });
   });
 
@@ -139,7 +139,7 @@ describe('Debuffing-skill', () => {
       fight.start();
 
       // Defense should be debuff
-      expect(card2.actualDefense).toBe(initialDefense - 20); // 40% of 50
+      expect(card2.actualDefense).toBe(initialDefense - 40); // 40% of 50, 2 debuffs active
     });
   });
 
@@ -181,7 +181,7 @@ describe('Debuffing-skill', () => {
 
       fight.start();
 
-      expect(card2.actualAgility).toBe(initialAgility - 15); // 50% of 30
+      expect(card2.actualAgility).toBe(initialAgility - 30); // 50% of 30, 2 debuffs active
     });
   });
 
@@ -223,7 +223,7 @@ describe('Debuffing-skill', () => {
 
       fight.start();
 
-      expect(card2.actualAccuracy).toBe(initialAccuracy - 6); // 10% of 60
+      expect(card2.actualAccuracy).toBe(initialAccuracy - 12); // 10% of 60, 2 debuffs active
     });
   });
 
