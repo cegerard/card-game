@@ -44,7 +44,7 @@ export const DEMO_DATA = {
     kind: 'buff',
     name: 'Fierté du lion',
     source: { id: 'arionis', name: 'Arionis', deckIdentity: 'Héros-1' },
-    buffs: [
+    alterations: [
       {
         target: { id: 'arionis', name: 'Arionis', deckIdentity: 'Héros-1' },
         kind: 'attack',
@@ -87,7 +87,7 @@ export const DEMO_DATA = {
       name: 'Seigneur des Cendres',
       deckIdentity: 'Boss-0',
     },
-    buffs: [
+    alterations: [
       {
         target: {
           id: 'boss',
@@ -145,7 +145,7 @@ export const DEMO_DATA = {
     kind: 'buff',
     name: 'Fierté du lion',
     source: { id: 'arionis', name: 'Arionis', deckIdentity: 'Héros-1' },
-    buffs: [
+    alterations: [
       {
         target: { id: 'arionis', name: 'Arionis', deckIdentity: 'Héros-1' },
         kind: 'attack',
@@ -213,7 +213,7 @@ export const DEMO_DATA = {
     kind: 'buff',
     name: 'Rugissement solaire',
     source: { id: 'arionis', name: 'Arionis', deckIdentity: 'Héros-1' },
-    buffs: [
+    alterations: [
       {
         target: { id: 'kaelion', name: 'Kaelion', deckIdentity: 'Héros-0' },
         kind: 'attack',
@@ -311,7 +311,7 @@ export const DEMO_DATA = {
     kind: 'buff',
     name: 'Buff Héroïque',
     source: { id: 'arionis', name: 'Arionis', deckIdentity: 'Héros-1' },
-    buffs: [
+    alterations: [
       {
         target: { id: 'arionis', name: 'Arionis', deckIdentity: 'Héros-1' },
         kind: 'attack',
