@@ -2,12 +2,13 @@ import { FightingCard } from '../fighting-card';
 import { FightingContext } from '../@types/fighting-context';
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 import { HealthThresholdCondition } from '../@types/skill-activation-conditions/health-threshold-condition';
-import { ReactiveSkill } from './reactive-skill';
+import { HealthReactiveSkill } from './reactive-skill';
 import { SkillKind, SkillResults } from './skill';
 
-export class ShieldSkill implements ReactiveSkill {
+export class ShieldSkill implements HealthReactiveSkill {
   public readonly id = 'shield-skill';
   public readonly name: string;
+  public readonly isHealthReactive = true as const;
   private wasAboveThreshold = true;
 
   constructor(

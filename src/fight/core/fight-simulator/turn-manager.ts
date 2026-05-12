@@ -6,7 +6,7 @@ import { CardDeathSubscriber } from './card-death-subscriber';
 import { DeathSkillHandler } from './death-skill-handler';
 import { EndEventProcessor } from './end-event-processor';
 import { skillResultsToSteps } from './skill-results-to-steps';
-import { checkReactiveSkills } from './reactive-skill-checker';
+import { triggerReactiveSkills } from './reactive-skill-checker';
 
 export class TurnManager {
   private player1: Player;
@@ -101,7 +101,7 @@ export class TurnManager {
         status: 'dead',
       });
     } else if (stateEffects.length > 0) {
-      const reactiveResults = checkReactiveSkills(
+      const reactiveResults = triggerReactiveSkills(
         card,
         this.getFightingContext(card),
       );
