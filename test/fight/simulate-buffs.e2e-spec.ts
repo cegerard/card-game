@@ -51,13 +51,14 @@ describe('Simulate fight with buffs', () => {
               },
               others: [
                 {
-                  kind: 'BUFF',
+                  kind: 'ALTERATION',
                   name: 'Defense Blessing',
                   rate: 0.1,
                   targetingStrategy: 'all-allies',
                   event: 'turn-end',
                   buffType: 'defense',
                   duration: 3,
+                  polarity: 'buff',
                 },
               ],
             },
@@ -90,13 +91,14 @@ describe('Simulate fight with buffs', () => {
               },
               others: [
                 {
-                  kind: 'BUFF',
+                  kind: 'ALTERATION',
                   name: 'Battle Fury',
                   rate: 0.1,
                   targetingStrategy: 'self',
                   event: 'turn-end',
                   buffType: 'attack',
                   duration: 4,
+                  polarity: 'buff',
                 },
               ],
             },
@@ -242,7 +244,7 @@ describe('Simulate fight with buffs', () => {
               },
               others: [
                 {
-                  kind: 'BUFF',
+                  kind: 'ALTERATION',
                   name: 'Invalid Buff',
                   rate: 0,
                   targetingStrategy: 'self',

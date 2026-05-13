@@ -45,8 +45,7 @@ describe('SHIELD skill — reactive health-threshold trigger', () => {
     expect(attackIndex).toBeGreaterThan(-1);
 
     const shieldIndex = stepEntries.findIndex(
-      ([, s]) =>
-        s.kind === 'shield_applied' && s.source?.name === 'Kaelion',
+      ([, s]) => s.kind === 'shield_applied' && s.source?.name === 'Kaelion',
     );
     expect(shieldIndex).toBeGreaterThan(attackIndex);
   });

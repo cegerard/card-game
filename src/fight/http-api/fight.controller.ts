@@ -358,8 +358,7 @@ export class FightController {
           skillData.activationLimit,
           skillData.endEvent,
         );
-      case SkillKind.BUFF:
-      case SkillKind.DEBUFF:
+      case SkillKind.ALTERATION:
         if (!skillData.buffType) {
           throw new Error('Alteration skill requires buffType');
         }
@@ -377,7 +376,7 @@ export class FightController {
           skillData.duration === 0 ? Infinity : (skillData.duration ?? 0);
         return new AlterationSkill({
           name: skillData.name,
-          polarity: skillData.kind === SkillKind.BUFF ? 'buff' : 'debuff',
+          polarity: skillData.polarity ?? 'buff',
           attributeType: this.mapAlterationType(skillData.buffType),
           rate: skillData.rate,
           duration: alterationDuration,

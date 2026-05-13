@@ -77,9 +77,10 @@
       },
       "others": [
         {
-          "kind": "BUFF",
+          "kind": "ALTERATION",
           "name": "Fierté du lion",
           "buffType": "attack",
+          "polarity": "buff",
           "rate": 0.05,
           "duration": 0,
           "targetingStrategy": "self",
@@ -118,9 +119,10 @@
           "powerId": "lion-heritage"
         },
         {
-          "kind": "BUFF",
+          "kind": "ALTERATION",
           "name": "Buff Héroïque",
           "buffType": "attack",
+          "polarity": "buff",
           "rate": 0.4,
           "duration": 0,
           "targetingStrategy": "self",

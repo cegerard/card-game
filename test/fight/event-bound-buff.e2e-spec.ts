@@ -118,7 +118,7 @@ function buildAllyDeathPayload() {
             },
             others: [
               {
-                kind: 'BUFF',
+                kind: 'ALTERATION',
                 name: 'Héritage du lion',
                 rate: 0.4,
                 targetingStrategy: 'self',
@@ -126,6 +126,7 @@ function buildAllyDeathPayload() {
                 targetCardId: 'kaelion',
                 buffType: 'attack',
                 duration: 0,
+                polarity: 'buff',
                 terminationEvent: 'lion-heritage-end',
                 activationLimit: 1,
                 endEvent: 'lion-heritage-end',
@@ -228,13 +229,14 @@ const LIONS_INHERITANCE_PAYLOAD = {
           },
           others: [
             {
-              kind: 'BUFF',
+              kind: 'ALTERATION',
               name: "Lion's Inheritance",
               rate: 0.4,
               targetingStrategy: 'self',
               event: 'turn-end',
               buffType: 'attack',
               duration: 0,
+              polarity: 'buff',
               terminationEvent: 'lions-inheritance-end',
               activationLimit: 3,
               endEvent: 'lions-inheritance-end',
