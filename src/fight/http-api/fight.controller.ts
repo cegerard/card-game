@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { FightResult } from '../core/fight-simulator/@types/fight-result';
 import {
+  AlterationConditionType,
   CardSelectorStrategy,
   Effect,
   FightDataDto,
@@ -49,6 +50,8 @@ import { Player } from '../core/player';
 import { FightSimulator } from '../core/fight-simulator/@types/fight-simulator';
 import { Skill } from '../core/cards/skills/skill';
 import { TargetingOverrideSkill } from '../core/cards/skills/targeting-override';
+import { ShieldSkill } from '../core/cards/skills/shield';
+import { HealthThresholdCondition } from '../core/cards/@types/skill-activation-conditions/health-threshold-condition';
 import { DamageComposition } from '../core/cards/@types/damage/damage-composition';
 import { ConditionalAttack } from '../core/cards/skills/conditional-attack';
 import { EveryNTurnsCondition } from '../core/cards/@types/attack/conditions/every-n-turns-condition';
@@ -209,11 +212,13 @@ export class FightController {
 
     try {
       validatePowerIdConsistency(
-        cardData.skills.others.map((s) => ({
-          powerId: s.powerId,
-          event: s.event,
-          terminationEvent: s.terminationEvent,
-        })),
+        cardData.skills.others
+          .filter((s) => s.event !== undefined)
+          .map((s) => ({
+            powerId: s.powerId,
+            event: s.event as string,
+            terminationEvent: s.terminationEvent,
+          })),
       );
     } catch (e) {
       throw new BadRequestException((e as Error).message);
@@ -444,6 +449,36 @@ export class FightController {
           this.buildTriggerForSkill(skillData),
           skillData.powerId,
         );
+      case SkillKind.SHIELD: {
+        if (!skillData.activationCondition) {
+          throw new Error('SHIELD skill requires activationCondition');
+        }
+        if (
+          skillData.activationCondition.type !==
+          AlterationConditionType.HEALTH_THRESHOLD
+        ) {
+          throw new Error(
+            'SHIELD skill activationCondition must be of type health-threshold',
+          );
+        }
+        if (
+          !skillData.activationCondition.operator ||
+          skillData.activationCondition.threshold === undefined
+        ) {
+          throw new Error(
+            'SHIELD skill activationCondition requires operator and threshold',
+          );
+        }
+        return new ShieldSkill(
+          skillData.name,
+          skillData.rate,
+          buildTargetingStrategy(skillData.targetingStrategy),
+          new HealthThresholdCondition(
+            skillData.activationCondition.operator as 'below' | 'above',
+            skillData.activationCondition.threshold,
+          ),
+        );
+      }
       default:
         throw new Error(`Unknown skill kind: ${skillData.kind}`);
     }

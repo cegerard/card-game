@@ -96,6 +96,19 @@ export function skillResultsToSteps(
           }),
         );
         break;
+      case SkillKind.Shield:
+        if (skillResult.results.length > 0) {
+          steps.push({
+            kind: StepKind.ShieldApplied,
+            name: skillResult.name,
+            source: card.identityInfo,
+            targets: skillResult.results.map((r) => ({
+              target: r.target,
+              points: r.shield.points,
+            })),
+          });
+        }
+        break;
       default:
         throw new Error(`Unknown SkillKind: ${(skillResult as any).skillKind}`);
     }
