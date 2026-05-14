@@ -376,7 +376,7 @@ export class FightController {
           skillData.duration === 0 ? Infinity : (skillData.duration ?? 0);
         return new AlterationSkill({
           name: skillData.name,
-          polarity: skillData.polarity ?? 'buff',
+          polarity: skillData.polarity,
           attributeType: this.mapAlterationType(skillData.buffType),
           rate: skillData.rate,
           duration: alterationDuration,
