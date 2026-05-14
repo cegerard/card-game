@@ -224,6 +224,17 @@
             { "type": "PHYSICAL", "rate": 0.6 },
             { "type": "FIRE", "rate": 0.6 }
           ]
+        },
+        {
+          "kind": "SHIELD",
+          "name": "Résilience Pyro-Minérale",
+          "targetingStrategy": "self",
+          "rate": 0.3,
+          "activationCondition": {
+            "type": "health-threshold",
+            "operator": "below",
+            "threshold": 0.3
+          }
         }
       ]
     },
