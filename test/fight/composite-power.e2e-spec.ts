@@ -228,13 +228,14 @@ function buildTargetingOverridePayload() {
             },
             others: [
               {
-                kind: 'BUFF',
+                kind: 'ALTERATION',
                 name: 'Fury Buff',
                 rate: 0.2,
                 targetingStrategy: 'self',
                 event: 'turn-end',
                 buffType: 'attack',
                 duration: 0,
+                polarity: 'buff',
                 terminationEvent: 'fury-end',
                 activationLimit: 2,
                 endEvent: 'fury-end',
@@ -320,13 +321,14 @@ function buildCompositePowerPayload() {
             },
             others: [
               {
-                kind: 'BUFF',
+                kind: 'ALTERATION',
                 name: 'Rage Attack Boost',
                 rate: 0.25,
                 targetingStrategy: 'self',
                 event: 'turn-end',
                 buffType: 'attack',
                 duration: 0,
+                polarity: 'buff',
                 terminationEvent: 'rage-end',
                 activationLimit: 3,
                 endEvent: 'rage-end',

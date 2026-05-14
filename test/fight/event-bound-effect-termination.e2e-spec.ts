@@ -86,13 +86,14 @@ function buildPayload() {
             },
             others: [
               {
-                kind: 'BUFF',
+                kind: 'ALTERATION',
                 name: 'Fire Aura',
                 rate: 0.1,
                 targetingStrategy: 'self',
                 event: 'turn-end',
                 buffType: 'attack',
                 duration: 0,
+                polarity: 'buff',
                 terminationEvent: 'fire-aura-end',
                 activationLimit: 1,
                 endEvent: 'fire-aura-end',

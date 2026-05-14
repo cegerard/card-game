@@ -54,8 +54,7 @@ export enum SpecialKind {
 
 export enum SkillKind {
   HEALING = 'HEALING',
-  BUFF = 'BUFF',
-  DEBUFF = 'DEBUFF',
+  ALTERATION = 'ALTERATION',
   CONDITIONAL_ATTACK = 'CONDITIONAL_ATTACK',
   TARGETING_OVERRIDE = 'TARGETING_OVERRIDE',
   SHIELD = 'SHIELD',
@@ -345,12 +344,11 @@ export class OtherSkillDto {
   @IsString()
   name: string;
 
-  // Required for HEALING, BUFF, DEBUFF, SHIELD; not applicable to CONDITIONAL_ATTACK or TARGETING_OVERRIDE
+  // Required for HEALING, ALTERATION, SHIELD; not applicable to CONDITIONAL_ATTACK or TARGETING_OVERRIDE
   @ValidateIf(
     (o) =>
       o.kind === SkillKind.HEALING ||
-      o.kind === SkillKind.BUFF ||
-      o.kind === SkillKind.DEBUFF ||
+      o.kind === SkillKind.ALTERATION ||
       o.kind === SkillKind.SHIELD,
   )
   @IsDefined()
@@ -365,16 +363,21 @@ export class OtherSkillDto {
   @IsEnum(TriggerEvent)
   event?: TriggerEvent;
 
-  // Required for BUFF and DEBUFF kinds
-  @ValidateIf((o) => o.kind === SkillKind.BUFF || o.kind === SkillKind.DEBUFF)
+  // Required for ALTERATION kind
+  @ValidateIf((o) => o.kind === SkillKind.ALTERATION)
   @IsDefined()
   @IsEnum(BuffType)
   buffType?: BuffType;
 
-  @ValidateIf((o) => o.kind === SkillKind.BUFF || o.kind === SkillKind.DEBUFF)
+  @ValidateIf((o) => o.kind === SkillKind.ALTERATION)
   @IsDefined()
   @IsNumber()
   duration?: number;
+
+  @ValidateIf((o) => o.kind === SkillKind.ALTERATION)
+  @IsDefined()
+  @IsEnum(['buff', 'debuff'])
+  polarity?: 'buff' | 'debuff';
 
   @IsOptional()
   @ValidateNested()

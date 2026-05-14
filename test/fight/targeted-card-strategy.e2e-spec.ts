@@ -285,7 +285,7 @@ function buildTargetedCardBattlePayload() {
             },
             others: [
               {
-                kind: 'BUFF',
+                kind: 'ALTERATION',
                 name: 'Rage Buff',
                 rate: 0.5,
                 targetingStrategy: 'self',
@@ -293,6 +293,7 @@ function buildTargetedCardBattlePayload() {
                 targetCardId: 'protector',
                 buffType: 'attack',
                 duration: 0,
+                polarity: 'buff',
                 terminationEvent: 'vengeance-end',
                 activationLimit: 2,
                 endEvent: 'vengeance-end',

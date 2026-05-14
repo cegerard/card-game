@@ -54,14 +54,15 @@ describe('OtherSkillDto validation', () => {
     await app.close();
   });
 
-  describe('BUFF kind', () => {
+  describe('ALTERATION kind', () => {
     it('returns 400 when buffType is missing', () => {
       const payload = basePayload([
         {
-          kind: 'BUFF',
+          kind: 'ALTERATION',
           name: 'Power Up',
           rate: 1.5,
           duration: 3,
+          polarity: 'buff',
           targetingStrategy: 'self',
           event: 'turn-end',
         },
@@ -76,10 +77,11 @@ describe('OtherSkillDto validation', () => {
     it('returns 400 when duration is missing', () => {
       const payload = basePayload([
         {
-          kind: 'BUFF',
+          kind: 'ALTERATION',
           name: 'Power Up',
           rate: 1.5,
           buffType: 'attack',
+          polarity: 'buff',
           targetingStrategy: 'self',
           event: 'turn-end',
         },
@@ -94,8 +96,28 @@ describe('OtherSkillDto validation', () => {
     it('returns 400 when rate is missing', () => {
       const payload = basePayload([
         {
-          kind: 'BUFF',
+          kind: 'ALTERATION',
           name: 'Power Up',
+          buffType: 'attack',
+          duration: 3,
+          polarity: 'buff',
+          targetingStrategy: 'self',
+          event: 'turn-end',
+        },
+      ]);
+
+      return request(app.getHttpServer())
+        .post('/fight')
+        .send(payload)
+        .expect(400);
+    });
+
+    it('returns 400 when polarity is missing', () => {
+      const payload = basePayload([
+        {
+          kind: 'ALTERATION',
+          name: 'Power Up',
+          rate: 1.5,
           buffType: 'attack',
           duration: 3,
           targetingStrategy: 'self',
@@ -108,17 +130,17 @@ describe('OtherSkillDto validation', () => {
         .send(payload)
         .expect(400);
     });
-  });
 
-  describe('DEBUFF kind', () => {
-    it('returns 400 when buffType is missing', () => {
+    it('returns 200 for buff polarity', () => {
       const payload = basePayload([
         {
-          kind: 'DEBUFF',
-          name: 'Weaken',
-          rate: 0.7,
-          duration: 2,
-          targetingStrategy: 'position-based',
+          kind: 'ALTERATION',
+          name: 'Power Up',
+          rate: 1.5,
+          buffType: 'attack',
+          duration: 3,
+          polarity: 'buff',
+          targetingStrategy: 'self',
           event: 'turn-end',
         },
       ]);
@@ -126,16 +148,18 @@ describe('OtherSkillDto validation', () => {
       return request(app.getHttpServer())
         .post('/fight')
         .send(payload)
-        .expect(400);
+        .expect(200);
     });
 
-    it('returns 400 when duration is missing', () => {
+    it('returns 200 for debuff polarity', () => {
       const payload = basePayload([
         {
-          kind: 'DEBUFF',
+          kind: 'ALTERATION',
           name: 'Weaken',
           rate: 0.7,
           buffType: 'defense',
+          duration: 2,
+          polarity: 'debuff',
           targetingStrategy: 'position-based',
           event: 'turn-end',
         },
@@ -144,7 +168,7 @@ describe('OtherSkillDto validation', () => {
       return request(app.getHttpServer())
         .post('/fight')
         .send(payload)
-        .expect(400);
+        .expect(200);
     });
   });
 
