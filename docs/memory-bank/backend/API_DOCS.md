@@ -84,11 +84,22 @@ Simulates a turn-based card battle between two players.
   energy: number,             // Energy cost to use special
   targetingStrategy: TargetingStrategy,
   effect?: EffectDto,         // Optional status effect (poison, burn, freeze)
-  buffApplication?: BuffApplicationDto // Optional buff application (for special attacks)
+  buffApplication?: BuffApplicationDto,   // Optional buff application (for special attacks)
+  shieldApplication?: ShieldApplicationDto  // Optional shield application (independent targeting)
 }
 ```
 
-**Note on Buff Application**: When `buffType`, `buffRate`, `buffDuration`, and `buffTargetingStrategy` are all provided, the special attack will apply buffs after dealing damage. The buff targeting is independent from the attack targeting, allowing combos like "attack all enemies while buffing all allies".
+**ShieldApplicationDto**:
+
+```typescript
+{
+  rate: number,               // Shield points = rate * maxHealth of target
+  duration: number,           // Number of turns shield lasts
+  targetingStrategy: TargetingStrategy  // Cannot be targeted-card
+}
+```
+
+**Note on Buff/Shield Application**: Buff and shield targeting is independent from the primary attack targeting, allowing combos like "attack all enemies while shielding all allies".
 
 **SimpleAttackDto**:
 
@@ -121,12 +132,14 @@ Simulates a turn-based card battle between two players.
 
 ```typescript
 {
-  kind: "HEALING" | "BUFF" | "CONDITIONAL_ATTACK" | "TARGETING_OVERRIDE",
+  kind: "HEALING" | "BUFF" | "CONDITIONAL_ATTACK" | "TARGETING_OVERRIDE" | "SHIELD",
   name: string,
-  rate?: number,                // Optional — not required for TARGETING_OVERRIDE
+  rate?: number,                // Optional — not required for TARGETING_OVERRIDE; required for SHIELD
   targetingStrategy: TargetingStrategy,
-  event: "turn-end" | "next-action" | "ally-death",  // When skill triggers
+  event?: "turn-end" | "next-action" | "ally-death",  // When skill triggers; NOT required for SHIELD kind
   targetCardId?: string,        // Required when event=ally-death: id of the ally whose death triggers this skill
+  // SHIELD-specific fields:
+  activationCondition?: { operator: "below" | "above", threshold: number },  // Health ratio threshold (0–1) for SHIELD activation
   buffType?: "attack" | "defense" | "agility" | "accuracy",  // Required if kind=BUFF
   duration?: number,            // Required if kind=BUFF (0 = infinite: permanent or event-bound)
   terminationEvent?: string,    // Event name that removes this skill's buff/targeting override when fired
@@ -184,7 +197,7 @@ Simulates a turn-based card battle between two players.
 ```typescript
 {
   [stepNumber: number]: {
-    kind: "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "debuff_removed" | "buff_expired" | "debuff_expired" | "effect_removed" | "targeting_override" | "targeting_reverted" | "fight_end",
+    kind: "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "debuff_removed" | "buff_expired" | "debuff_expired" | "effect_removed" | "targeting_override" | "targeting_reverted" | "shield_applied" | "shield_broken" | "shield_expired" | "fight_end",
     // Additional properties vary by step kind
   }
 }
@@ -320,7 +333,33 @@ Simulates a turn-based card battle between two players.
 }
 ```
 
-**Note on `name`**: The `name?` field appears on `attack`, `special_attack`, `healing`, `buff`, `debuff`, and `targeting_override` step kinds, carrying the name of the skill that generated the step.
+**`shield_applied` step** (`ShieldAppliedReport`): Emitted when a shield is applied to one or more cards.
+```typescript
+{
+  kind: "shield_applied",
+  name?: string,             // Skill name that applied the shield
+  source: CardInfo,
+  targets: { target: CardInfo, points: number }[]
+}
+```
+
+**`shield_broken` step** (`ShieldBrokenReport`): Emitted when a shield's points are depleted mid-damage.
+```typescript
+{
+  kind: "shield_broken",
+  card: CardInfo
+}
+```
+
+**`shield_expired` step** (`ShieldExpiredReport`): Emitted at turn-end when a shield's duration reaches 0.
+```typescript
+{
+  kind: "shield_expired",
+  card: CardInfo
+}
+```
+
+**Note on `name`**: The `name?` field appears on `attack`, `special_attack`, `healing`, `buff`, `debuff`, `targeting_override`, and `shield_applied` step kinds, carrying the name of the skill that generated the step.
 
 **Note on `powerId`**: The `powerId` field appears on `buff`, `debuff`, `healing`, `buff_removed`, `debuff_removed`, `targeting_override`, and `targeting_reverted` step kinds when the originating skill belongs to a composite power group.
 
@@ -364,6 +403,7 @@ Simulates a turn-based card battle between two players.
 - `BUFF`: Temporary stat boost
 - `CONDITIONAL_ATTACK`: Attack skill triggered conditionally by an event
 - `TARGETING_OVERRIDE`: Overrides the card's attack targeting strategy (requires `terminationEvent`)
+- `SHIELD`: Health-reactive shield skill — no `event` field; triggers when card's health ratio crosses `activationCondition.threshold` downward (edge-triggered, rearms on recovery)
 
 ### Effect
 

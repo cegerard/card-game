@@ -49,11 +49,12 @@ src/
     │   ├── randomizer.ts             # Random number generation interface
     │   ├── fight-simulator/          # Fight orchestration
     │   │   ├── fight.ts              # Main fight orchestrator
-    │   │   ├── turn-manager.ts       # Turn-end effects processor
+    │   │   ├── turn-manager.ts       # Turn-end effects processor; decrements shield duration
     │   │   ├── card-death-subscriber.ts  # Event listener interface
     │   │   ├── death-skill-handler.ts    # Triggers ally-death skills; accumulates + drains steps
     │   │   ├── end-event-processor.ts    # Removes event-bound buffs when a skill end event fires
     │   │   ├── skill-results-to-steps.ts # Standalone fn: SkillResults[] → Step[] (shared by ActionStage, TurnManager, DeathSkillHandler)
+    │   │   ├── reactive-skill-checker.ts # Pure fn: fires HealthReactiveSkills after each HP change → ShieldSkillResults[]
     │   │   ├── @types/               # Fight result types
     │   │   └── card-selectors/       # Turn order strategies
     │   │       ├── card-selector.ts
@@ -62,14 +63,16 @@ src/
     │   ├── card-action/
     │   │   └── action_stage.ts       # Action resolution logic
     │   ├── cards/                    # Card domain
-    │   │   ├── fighting-card.ts      # Main card entity
+    │   │   ├── fighting-card.ts      # Main card entity (includes shield buffer, getHealthReactiveSkills())
     │   │   ├── @types/               # Card-related types
     │   │   │   ├── card-info.ts
     │   │   │   ├── fighting-context.ts
-    │   │   │   ├── action-result/    # Action result types
+    │   │   │   ├── action-result/    # Action result types (+ shield-result.ts)
     │   │   │   ├── attack/           # Attack effects (poison, burn, freeze, stunt)
     │   │   │   ├── state/            # Status effect state
-    │   │   │   ├── buff/             # Buff/debuff types
+    │   │   │   ├── alteration/       # Buff/debuff discriminated union (AlterationDetail = Buff|Debuff via polarity)
+    │   │   │   ├── shield/           # Shield value type + ShieldApplication
+    │   │   │   ├── skill-activation-conditions/  # HealthThresholdCondition
     │   │   │   └── damage/           # Damage types (DamageType, DamageComposition, Element)
     │   │   ├── skills/               # Card abilities
     │   │   │   ├── simple-attack.ts
@@ -79,10 +82,12 @@ src/
     │   │   │   ├── special.ts        # Abstract special skill
     │   │   │   ├── special-attack.ts
     │   │   │   ├── special-healing.ts
-    │   │   │   ├── skill.ts          # Event-triggered skill interface
+    │   │   │   ├── skill.ts          # Event-triggered skill interface + SkillKind enum (includes Shield)
     │   │   │   ├── healing.ts
     │   │   │   ├── conditional-attack.ts # Attack triggered conditionally by event
     │   │   │   ├── targeting-override.ts # Overrides card attack targeting strategy
+    │   │   │   ├── shield.ts         # ShieldSkill: HealthReactiveSkill, edge-triggered on health threshold
+    │   │   │   ├── reactive-skill.ts # HealthReactiveSkill interface
     │   │   │   └── power-id-consistency.ts # Domain validation: skills with same powerId must share event + terminationEvent
     │   │   ├── behaviors/            # Card behaviors
     │   │   │   ├── dodge-behaviors.ts
@@ -212,10 +217,14 @@ sequenceDiagram
 - **STUNT Status Effect**: `CardStateStunted` prevents the card from acting (same skip condition as freeze: `card.frozenLevel > 0 || card.isStunted`) and amplifies incoming damage by 20% via `applyDamageRate()`. No damage tick. Does not stack — `StuntAttackEffect.applyEffect()` returns early if the defender is already frozen or stunted. Duration: `2 * level - 1` turns.
 - **`AttackEffect.probability`**: Optional `0-1` field on the `AttackEffect` interface. Effect classes guard `applyEffect()` with `if (probability !== undefined && randomizer.random() >= probability) return`. Randomizer is injected via constructor, not via `FightingContext`.
 - **`skill-results-to-steps.ts`**: Standalone pure function extracted from `ActionStage`, mapping `SkillResults[]` to `Step[]` for reuse across `ActionStage`, `TurnManager`, and `DeathSkillHandler`.
+- **Shield Mechanic**: `FightingCard` maintains an optional shield buffer (`{ points, duration }`). `applyShield(rate, duration)` sets `points = rate * maxHealth`. All damage flows through `applyFinalDamage()` returning `{ damageToHealth, shieldAbsorbed }` — shield absorbs first. Shield breaks on depleted points → `shield_broken` step. `TurnManager.decreaseShieldDuration()` called each turn; expiry → `shield_expired` step. Specials can apply shields post-action via `shieldApplication?: ShieldApplicationDto` (independent targeting).
+- **SHIELD Skill Kind (Reactive)**: `SkillKind.Shield` with `ShieldSkill implements HealthReactiveSkill`. The `HealthReactiveSkill` interface adds `isHealthReactive: true` and `onHealthChanged(card): boolean`. `ShieldSkill` is edge-triggered: fires once when `card.healthRatio` crosses the `HealthThresholdCondition` threshold downward, rearms when health goes back above. `triggerReactiveSkills()` (`reactive-skill-checker.ts`) is a pure function called after each HP change in `ActionStage`. `OtherSkillDto.event` is optional — SHIELD kind has no event trigger.
+- **AlterationDetail Discriminated Union**: `Buff` and `Debuff` are unified under `AlterationDetail = Buff | Debuff` discriminated by `polarity: 'buff' | 'debuff'`. Located in `@types/alteration/alteration-detail.ts` (former `@types/buff/` directory removed).
 - **Separation of Concerns**:
   - `Fight` orchestrates battle flow
-  - `ActionStage` handles attack/heal resolution and extracts buff applications from special results
-  - `TurnManager` handles turn-end effects
+  - `ActionStage` handles attack/heal resolution, triggers reactive skills after each HP change
+  - `TurnManager` handles turn-end effects including shield duration
   - `CardSelector` determines turn order
   - `EndEventProcessor` handles event-bound buff and effect removal across all cards
   - `skillResultsToSteps()` converts skill results to report steps (shared utility)
+  - `triggerReactiveSkills()` fires health-reactive skills post-damage (shared utility)
