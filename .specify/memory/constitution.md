@@ -86,12 +86,12 @@ here quickly creates inconsistent behavior across combat scenarios.
 
 Every feature is complete only when ALL of the following gates pass in order:
 
-| Order | Command            | Requirement                              |
-|-------|--------------------|------------------------------------------|
-| 1     | `npm run format`   | Zero formatting violations (Prettier)    |
+| Order | Command            | Requirement                                 |
+| ----- | ------------------ | ------------------------------------------- |
+| 1     | `npm run format`   | Zero formatting violations (Prettier)       |
 | 2     | `npm run lint`     | Zero lint errors (ESLint, auto-fix applied) |
-| 3     | `npm run test:cov` | All tests pass; coverage thresholds met  |
-| 4     | `npm run build`    | NestJS application builds without errors |
+| 3     | `npm run test:cov` | All tests pass; coverage thresholds met     |
+| 4     | `npm run build`    | NestJS application builds without errors    |
 
 No feature branch MAY be merged unless all four gates are green. Gates MUST be run in the
 listed order; a failure at any gate blocks subsequent gates.
@@ -105,7 +105,7 @@ listed order; a failure at any gate blocks subsequent gates.
   the HTTP layer; the domain MUST never import DTO types.
 - **Test file location**: Unit tests colocated in `__tests__/` directories alongside source;
   E2E tests in `test/`; one expectation per `it` block; max 10 lines per `it` block.
-- **No version drift**: Code MUST match the active runtime (Node.js 24, NestJS 11) and
+- **No version drift**: Code MUST match the active runtime (Node.js 26 , NestJS 11) and
   dependency versions declared in `package.json`.
 - **`gh` CLI for GitHub operations**: All GitHub interactions (PRs, issues, releases) MUST
   use the `gh` CLI, not the web UI or manual API calls.
@@ -116,6 +116,7 @@ This constitution supersedes all other practices documented in the repository. W
 in any other document conflicts with this constitution, this constitution takes precedence.
 
 **Amendment procedure**:
+
 1. Propose the amendment in a PR with a summary of the change and its rationale.
 2. Increment `CONSTITUTION_VERSION` according to semantic versioning:
    - MAJOR: A principle is removed, renamed with changed meaning, or fundamentally redefined.

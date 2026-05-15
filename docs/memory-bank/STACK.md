@@ -12,7 +12,7 @@ argument-hint: N/A
 
 ### Runtime & Framework
 
-- Node.js 24 (Alpine Linux in Docker)
+- Node.js 26 (Alpine Linux in Docker)
 - NestJS 11
 - Express (via `@nestjs/platform-express`)
 

@@ -34,7 +34,7 @@ POST /fight → complete fight log (JSON)
 
 | Layer            | Technology                           |
 | ---------------- | ------------------------------------ |
-| Runtime          | Node.js 24                           |
+| Runtime          | Node.js 26                           |
 | Framework        | NestJS 11                            |
 | Language         | TypeScript                           |
 | Testing          | Jest 29, Supertest, @faker-js/faker  |
@@ -45,7 +45,7 @@ POST /fight → complete fight log (JSON)
 
 ### Prerequisites
 
-- Node.js 24+
+- Node.js 26 +
 - npm
 
 ### Installation
@@ -178,18 +178,18 @@ Note: provide exactly one of `simpleAttack` or `multipleAttack` in `skills`.
 
 **Enums**
 
-| Field                       | Values                                                                                              |
-| --------------------------- | --------------------------------------------------------------------------------------------------- |
-| `element`                   | `PHYSICAL`, `FIRE`, `WATER`, `EARTH`, `AIR`                                                         |
-| `damages[].type`            | `PHYSICAL`, `FIRE`, `WATER`, `EARTH`, `AIR`                                                         |
-| `special.kind`              | `ATTACK`, `HEALING`                                                                                 |
-| `others[].kind`             | `HEALING`, `BUFF`, `DEBUFF`, `CONDITIONAL_ATTACK`, `TARGETING_OVERRIDE`                             |
-| `others[].event`            | `turn-end`, `next-action`, `ally-death`, `enemy-death`, `dormant`                                   |
-| `targetingStrategy`         | `position-based`, `target-all`, `line-three`, `all-owner-cards`, `all-allies`, `self`, `targeted-card` |
-| `behaviors.dodge`           | `simple-dodge`, `random-dodge`                                                                      |
-| `effect.type`               | `POISON`, `BURN`, `FREEZE`                                                                          |
-| `effect.level`              | `1`, `2`, `3`                                                                                       |
-| `buffApplication[].type`    | `attack`, `defense`, `agility`, `accuracy`                                                          |
+| Field                    | Values                                                                                                 |
+| ------------------------ | ------------------------------------------------------------------------------------------------------ |
+| `element`                | `PHYSICAL`, `FIRE`, `WATER`, `EARTH`, `AIR`                                                            |
+| `damages[].type`         | `PHYSICAL`, `FIRE`, `WATER`, `EARTH`, `AIR`                                                            |
+| `special.kind`           | `ATTACK`, `HEALING`                                                                                    |
+| `others[].kind`          | `HEALING`, `BUFF`, `DEBUFF`, `CONDITIONAL_ATTACK`, `TARGETING_OVERRIDE`                                |
+| `others[].event`         | `turn-end`, `next-action`, `ally-death`, `enemy-death`, `dormant`                                      |
+| `targetingStrategy`      | `position-based`, `target-all`, `line-three`, `all-owner-cards`, `all-allies`, `self`, `targeted-card` |
+| `behaviors.dodge`        | `simple-dodge`, `random-dodge`                                                                         |
+| `effect.type`            | `POISON`, `BURN`, `FREEZE`                                                                             |
+| `effect.level`           | `1`, `2`, `3`                                                                                          |
+| `buffApplication[].type` | `attack`, `defense`, `agility`, `accuracy`                                                             |
 
 **`others[].event` notes:**
 
@@ -198,13 +198,13 @@ Note: provide exactly one of `simpleAttack` or `multipleAttack` in `skills`.
 
 **`others[]` optional fields:**
 
-| Field                    | Applies to                                    | Description                                                               |
-| ------------------------ | --------------------------------------------- | ------------------------------------------------------------------------- |
-| `terminationEvent`       | `BUFF`, `DEBUFF`, `TARGETING_OVERRIDE`        | Named event that removes this skill's effect when fired                   |
-| `activationLimit`        | any                                           | Max activations before lifecycle ends (≥ 1)                               |
-| `endEvent`               | any                                           | Event emitted when activation limit is reached                            |
-| `powerId`                | any                                           | Groups multiple skills as a composite power (must share event + terminationEvent) |
-| `activationCondition`    | any                                           | Condition that must be met for the skill to activate                      |
+| Field                 | Applies to                             | Description                                                                       |
+| --------------------- | -------------------------------------- | --------------------------------------------------------------------------------- |
+| `terminationEvent`    | `BUFF`, `DEBUFF`, `TARGETING_OVERRIDE` | Named event that removes this skill's effect when fired                           |
+| `activationLimit`     | any                                    | Max activations before lifecycle ends (≥ 1)                                       |
+| `endEvent`            | any                                    | Event emitted when activation limit is reached                                    |
+| `powerId`             | any                                    | Groups multiple skills as a composite power (must share event + terminationEvent) |
+| `activationCondition` | any                                    | Condition that must be met for the skill to activate                              |
 
 **Response**
 
@@ -215,21 +215,21 @@ attack | special_attack | healing | status_change | state_effect | buff | debuff
 buff_removed | effect_removed | targeting_override | targeting_reverted | winner | fight_end
 ```
 
-| Step kind            | Description                                                                            |
-| -------------------- | -------------------------------------------------------------------------------------- |
-| `attack`             | A card performs a basic attack                                                         |
-| `special_attack`     | A card uses its special ability                                                        |
-| `healing`            | A card heals itself or an ally                                                         |
-| `status_change`      | A status effect (poison/burn/freeze) is applied to a card                              |
-| `state_effect`       | A status effect deals damage at turn end                                               |
-| `buff`               | A buff is applied to a card                                                            |
-| `debuff`             | A debuff is applied to a card                                                          |
-| `buff_removed`       | An event-bound buff is removed when its termination event fires                        |
-| `effect_removed`     | An event-bound status effect is removed when its termination event fires               |
-| `targeting_override` | A targeting override skill activates, redirecting the card's attacks                   |
-| `targeting_reverted` | A targeting override is removed when its termination event fires                       |
-| `winner`             | Battle result with winning player                                                      |
-| `fight_end`          | Battle ended (time limit reached or all cards defeated)                                |
+| Step kind            | Description                                                              |
+| -------------------- | ------------------------------------------------------------------------ |
+| `attack`             | A card performs a basic attack                                           |
+| `special_attack`     | A card uses its special ability                                          |
+| `healing`            | A card heals itself or an ally                                           |
+| `status_change`      | A status effect (poison/burn/freeze) is applied to a card                |
+| `state_effect`       | A status effect deals damage at turn end                                 |
+| `buff`               | A buff is applied to a card                                              |
+| `debuff`             | A debuff is applied to a card                                            |
+| `buff_removed`       | An event-bound buff is removed when its termination event fires          |
+| `effect_removed`     | An event-bound status effect is removed when its termination event fires |
+| `targeting_override` | A targeting override skill activates, redirecting the card's attacks     |
+| `targeting_reverted` | A targeting override is removed when its termination event fires         |
+| `winner`             | Battle result with winning player                                        |
+| `fight_end`          | Battle ended (time limit reached or all cards defeated)                  |
 
 **Error responses**
 
