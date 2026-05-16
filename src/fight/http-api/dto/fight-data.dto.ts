@@ -13,6 +13,7 @@ import {
   ValidateIf,
   Min,
   IsNotIn,
+  IsIn,
   ValidatorConstraint,
   ValidatorConstraintInterface,
   ValidationArguments,
@@ -176,7 +177,7 @@ class StatAlterationDto {
   })
   targetingStrategy: TargetingStrategy;
 
-  @IsEnum(['buff', 'debuff'])
+  @IsIn(['buff', 'debuff'])
   polarity: 'buff' | 'debuff';
 
   @IsOptional()
@@ -376,7 +377,7 @@ export class OtherSkillDto {
 
   @ValidateIf((o) => o.kind === SkillKind.ALTERATION)
   @IsDefined()
-  @IsEnum(['buff', 'debuff'])
+  @IsIn(['buff', 'debuff'])
   polarity?: 'buff' | 'debuff';
 
   @IsOptional()
