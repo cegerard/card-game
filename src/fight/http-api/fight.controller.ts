@@ -362,6 +362,9 @@ export class FightController {
         if (!skillData.buffType) {
           throw new Error('Alteration skill requires buffType');
         }
+        if (!skillData.polarity) {
+          throw new Error('Alteration skill requires polarity');
+        }
         const alterationCondition = skillData.activationCondition
           ? buildAlterationCondition(skillData.activationCondition.type, {
               allyName: skillData.activationCondition.allyName,
