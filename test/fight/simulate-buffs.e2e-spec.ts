@@ -320,7 +320,9 @@ describe('Simulate fight with buffs', () => {
       .expect(200)
       .then((res) => {
         const steps = Object.values(res.body);
-        const expiredStep = steps.find((s: any) => s.kind === 'debuff_expired') as any;
+        const expiredStep = steps.find(
+          (s: any) => s.kind === 'debuff_expired',
+        ) as any;
         expect(expiredStep).toMatchObject({
           kind: 'debuff_expired',
           expired: [{ kind: 'defense', value: 30 }],
