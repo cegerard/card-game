@@ -1,8 +1,9 @@
 # card-game Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-04-08
+Auto-generated from all feature plans. Last updated: 2026-05-16
 
 ## Active Technologies
+- N/A — stateless in-memory simulator (007-survive-skill)
 
 - N/A (stateless in-memory simulator) (003-composite-power)
 
@@ -25,11 +26,11 @@ npm test && npm run lint
 TypeScript on Node.js 26: Follow standard conventions
 
 ## Recent Changes
+- 007-survive-skill: Added TypeScript on Node.js 26 + NestJS 11, class-validator, class-transformer
 
 - 006-dynamic-skill-trigger: Added TypeScript on Node.js 26 + NestJS 11, class-validator, class-transformer
 
 - 005-targeted-card-strategy: Added TypeScript on Node.js 26 + NestJS 11, class-validator, class-transformer
-- 004-event-bound-effect-termination: Added TypeScript on Node.js 26 + NestJS 11, class-validator, class-transformer
 
 <!-- MANUAL ADDITIONS START -->
 
