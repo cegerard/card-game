@@ -3,6 +3,79 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 
+const debufferCard = (duration: number) => ({
+  id: 'debuffer',
+  name: 'Debuffer',
+  attack: 150,
+  defense: 50,
+  health: 1000,
+  speed: 50,
+  agility: 0,
+  accuracy: 100,
+  criticalChance: 0,
+  skills: {
+    special: {
+      kind: 'ATTACK',
+      name: 'Power Strike',
+      damages: [{ type: 'PHYSICAL', rate: 2.0 }],
+      energy: 1000,
+      targetingStrategy: 'position-based',
+    },
+    simpleAttack: {
+      name: 'Attack',
+      damages: [{ type: 'PHYSICAL', rate: 1.0 }],
+      targetingStrategy: 'position-based',
+    },
+    others: [
+      {
+        kind: 'ALTERATION',
+        name: 'Defense Break',
+        rate: 0.3,
+        targetingStrategy: 'position-based',
+        event: 'turn-end',
+        buffType: 'defense',
+        duration,
+        polarity: 'debuff',
+      },
+    ],
+  },
+  behaviors: { dodge: 'simple-dodge' },
+});
+
+const tankCard = {
+  id: 'tank',
+  name: 'Tank',
+  attack: 5,
+  defense: 100,
+  health: 1000,
+  speed: 50,
+  agility: 0,
+  accuracy: 100,
+  criticalChance: 0,
+  skills: {
+    special: {
+      kind: 'ATTACK',
+      name: 'Weak Strike',
+      damages: [{ type: 'PHYSICAL', rate: 1.0 }],
+      energy: 1000,
+      targetingStrategy: 'position-based',
+    },
+    simpleAttack: {
+      name: 'Weak Attack',
+      damages: [{ type: 'PHYSICAL', rate: 1.0 }],
+      targetingStrategy: 'position-based',
+    },
+    others: [],
+  },
+  behaviors: { dodge: 'simple-dodge' },
+};
+
+const buildDebuffFight = (duration: number) => ({
+  cardSelectorStrategy: 'player-by-player',
+  player1: { name: 'Debuffer Team', deck: [debufferCard(duration)] },
+  player2: { name: 'Defender Team', deck: [tankCard] },
+});
+
 describe('Simulate fight with buffs', () => {
   let app: INestApplication;
 
@@ -209,6 +282,48 @@ describe('Simulate fight with buffs', () => {
             deckIdentity: 'Team Buffer-1',
             name: 'DPS Warrior',
           },
+        });
+      });
+  });
+
+  describe('ALTERATION skill with polarity debuff (issue #319)', () => {
+    let fightResult: Record<string, any>;
+
+    beforeAll(async () => {
+      const res = await request(app.getHttpServer())
+        .post('/fight')
+        .send(buildDebuffFight(5));
+      fightResult = res.body;
+    });
+
+    it('emits a debuff step at turn-end', () => {
+      expect(fightResult[3].kind).toBe('debuff');
+    });
+
+    it('debuff targets the defense stat', () => {
+      expect(fightResult[3].alterations[0].kind).toBe('defense');
+    });
+
+    it('debuff has value of 30% of base defense (30)', () => {
+      expect(fightResult[3].alterations[0].value).toBe(30);
+    });
+
+    it('subsequent attack deals more damage due to reduced defense', () => {
+      expect(fightResult[4].damages[0].damage).toBe(80);
+    });
+  });
+
+  it('emits a debuff_expired step when debuff duration runs out (issue #321)', () => {
+    return request(app.getHttpServer())
+      .post('/fight')
+      .send(buildDebuffFight(1))
+      .expect(200)
+      .then((res) => {
+        const steps = Object.values(res.body);
+        const expiredStep = steps.find((s: any) => s.kind === 'debuff_expired') as any;
+        expect(expiredStep).toMatchObject({
+          kind: 'debuff_expired',
+          expired: [{ kind: 'defense', value: 30 }],
         });
       });
   });

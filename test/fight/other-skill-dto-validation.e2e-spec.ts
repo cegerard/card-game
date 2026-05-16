@@ -131,6 +131,25 @@ describe('OtherSkillDto validation', () => {
         .expect(400);
     });
 
+    it('returns 400 for invalid polarity value', () => {
+      const payload = basePayload([
+        {
+          kind: 'ALTERATION',
+          name: 'Invalid',
+          rate: 1.5,
+          buffType: 'attack',
+          duration: 3,
+          polarity: 'neutral',
+          targetingStrategy: 'self',
+          event: 'turn-end',
+        },
+      ]);
+      return request(app.getHttpServer())
+        .post('/fight')
+        .send(payload)
+        .expect(400);
+    });
+
     it('returns 200 for buff polarity', () => {
       const payload = basePayload([
         {
