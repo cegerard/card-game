@@ -13,6 +13,7 @@ import { EffectLevel } from './@types/attack/effect-level';
 import { Buff, Debuff } from './@types/alteration/alteration-detail';
 import { Skill, SkillResults } from './skills/skill';
 import { HealthReactiveSkill } from './skills/reactive-skill';
+import { SurviveSkill } from './skills/survive';
 import { AlterationType } from './@types/alteration/alteration-type';
 import { Element } from './@types/damage/element';
 import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
@@ -23,6 +24,8 @@ import { Shield } from './@types/shield/shield';
 export type FinalDamageResult = {
   damageToHealth: number;
   shieldAbsorbed: number;
+  survived?: boolean;
+  survivedSkillName?: string;
 };
 
 export type TargetingOverrideEntry = {
@@ -69,6 +72,9 @@ export class FightingCard {
   // Shield
   private shield: Shield | null = null;
 
+  // Survive
+  private surviveSkill: SurviveSkill | null = null;
+
   // Targeting overrides
   private targetingOverrides: TargetingOverrideEntry[] = [];
 
@@ -94,6 +100,7 @@ export class FightingCard {
       simpleAttack: AttackSkill;
       special: Special;
       others: Skill[];
+      survive?: SurviveSkill;
     },
     behaviors: {
       dodge: DodgeBehavior;
@@ -114,6 +121,7 @@ export class FightingCard {
     this.special = skills.special;
     this.dodgeBehavior = behaviors.dodge;
     this.skills = skills.others;
+    this.surviveSkill = skills.survive ?? null;
   }
 
   public get actualHealth(): number {
@@ -365,9 +373,23 @@ export class FightingCard {
     }
 
     const shieldAbsorbed = this.absorbWithShield(causedDamages);
-    const damageToHealth = causedDamages - shieldAbsorbed;
-    this.receivedDamages += damageToHealth;
+    let damageToHealth = causedDamages - shieldAbsorbed;
 
+    if (
+      this.actualHealth - damageToHealth <= 0 &&
+      this.surviveSkill?.tryConsume()
+    ) {
+      damageToHealth = this.actualHealth - 1;
+      this.receivedDamages += damageToHealth;
+      return {
+        damageToHealth,
+        shieldAbsorbed,
+        survived: true,
+        survivedSkillName: this.surviveSkill.name,
+      };
+    }
+
+    this.receivedDamages += damageToHealth;
     return { damageToHealth, shieldAbsorbed };
   }
 

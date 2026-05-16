@@ -81,8 +81,8 @@ export class MultipleAttack implements AttackSkill {
           attackPower * damageMultiplier,
           defender,
         );
-        const { damageToHealth, shieldAbsorbed } =
-          defender.applyFinalDamage(total);
+        const finalResult = defender.applyFinalDamage(total);
+        const { damageToHealth, shieldAbsorbed } = finalResult;
 
         const effects = this.effects
           ?.map((e) => e.applyEffect(defender, card, context))
@@ -99,6 +99,8 @@ export class MultipleAttack implements AttackSkill {
           remainingHealth: defender.actualHealth,
           effects: effects?.length ? effects : undefined,
           kind,
+          survived: finalResult.survived,
+          survivedSkillName: finalResult.survivedSkillName,
         });
       }
     }
@@ -113,8 +115,8 @@ export class MultipleAttack implements AttackSkill {
           card.actualAttack,
           defender,
         );
-        const { damageToHealth, shieldAbsorbed } =
-          defender.applyFinalDamage(total);
+        const finisherResult = defender.applyFinalDamage(total);
+        const { damageToHealth, shieldAbsorbed } = finisherResult;
         results.results.push({
           damage: damageToHealth + shieldAbsorbed,
           shieldAbsorbed: shieldAbsorbed > 0 ? shieldAbsorbed : undefined,
@@ -125,6 +127,8 @@ export class MultipleAttack implements AttackSkill {
           defender,
           remainingHealth: defender.actualHealth,
           kind: finisherKind,
+          survived: finisherResult.survived,
+          survivedSkillName: finisherResult.survivedSkillName,
         });
       }
     }

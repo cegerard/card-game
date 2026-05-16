@@ -22,6 +22,7 @@ import { ShieldResult } from '../cards/@types/action-result/shield-result';
 import { ShieldAppliedReport } from '../fight-simulator/@types/shield-report';
 import { triggerReactiveSkills } from '../fight-simulator/reactive-skill-checker';
 import { skillResultsToSteps } from '../fight-simulator/skill-results-to-steps';
+import { SurvivedReport } from '../fight-simulator/@types/survived-report';
 
 type SplittedSteps = {
   actionSteps: Step[];
@@ -277,6 +278,22 @@ export class ActionStage {
           kind: StepKind.ShieldBroken,
           card: defensiveCard.identityInfo,
         });
+      }
+
+      if (damageDealt.survived) {
+        const survivedReport: SurvivedReport = {
+          kind: StepKind.Survived,
+          name: damageDealt.survivedSkillName,
+          card: defensiveCard.identityInfo,
+        };
+        report.statusChanges.push(survivedReport);
+        const survivedSkillResults = defensiveCard.launchSkills(
+          'survived',
+          this.getFightingContext(defensiveCard),
+        );
+        report.statusChanges.push(
+          ...skillResultsToSteps(defensiveCard, survivedSkillResults),
+        );
       }
 
       if (defensiveCard.isDead() && !reportedDeaths.has(defensiveCard)) {

@@ -60,6 +60,7 @@ import { AttackSkill } from '../core/cards/skills/attack-skill';
 import { TargetedCard } from '../core/targeting-card-strategies/targeted-card';
 import { validatePowerIdConsistency } from '../core/cards/skills/power-id-consistency';
 import { ShieldApplication } from '../core/cards/@types/shield/shield-application';
+import { SurviveSkill } from '../core/cards/skills/survive';
 
 @Controller()
 @UsePipes(
@@ -210,9 +211,19 @@ export class FightController {
       );
     }
 
+    const surviveDto = cardData.skills.others.find(
+      (s) => s.kind === SkillKind.SURVIVE,
+    );
+    const surviveSkill = surviveDto
+      ? new SurviveSkill(surviveDto.name)
+      : undefined;
+    const nonSurviveOthers = cardData.skills.others.filter(
+      (s) => s.kind !== SkillKind.SURVIVE,
+    );
+
     try {
       validatePowerIdConsistency(
-        cardData.skills.others
+        nonSurviveOthers
           .filter((s) => s.event !== undefined)
           .map((s) => ({
             powerId: s.powerId,
@@ -224,7 +235,7 @@ export class FightController {
       throw new BadRequestException((e as Error).message);
     }
 
-    const otherSkills: Skill[] = cardData.skills.others.map((skill) =>
+    const otherSkills: Skill[] = nonSurviveOthers.map((skill) =>
       this.createOtherSkill(skill),
     );
 
@@ -236,6 +247,7 @@ export class FightController {
         special,
         simpleAttack: attackSkill,
         others: otherSkills,
+        survive: surviveSkill,
       },
       {
         dodge: buildDodgeStrategy(cardData.behaviors.dodge),
@@ -481,6 +493,8 @@ export class FightController {
           ),
         );
       }
+      case SkillKind.SURVIVE:
+        throw new Error('SURVIVE skill must not appear in others skill list');
       default:
         throw new Error(`Unknown skill kind: ${skillData.kind}`);
     }

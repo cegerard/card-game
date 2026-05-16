@@ -25,7 +25,7 @@ No new directories or project structure required. All new files fit into existin
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T001 Add `StepKind.Survived = 'survived'` to the `StepKind` enum in `src/fight/core/fight-simulator/@types/step.ts`, create `SurvivedReport = { kind: StepKind.Survived; name: string; card: CardInfo }` in `src/fight/core/fight-simulator/@types/survived-report.ts`, and add `SurvivedReport` to the `Step` union in `src/fight/core/fight-simulator/@types/step.ts`
+- [X] T001 Add `StepKind.Survived = 'survived'` to the `StepKind` enum in `src/fight/core/fight-simulator/@types/step.ts`, create `SurvivedReport = { kind: StepKind.Survived; name: string; card: CardInfo }` in `src/fight/core/fight-simulator/@types/survived-report.ts`, and add `SurvivedReport` to the `Step` union in `src/fight/core/fight-simulator/@types/step.ts`
 
 **Checkpoint**: `StepKind.Survived` and `SurvivedReport` are available — user story implementation can begin.
 
@@ -39,18 +39,18 @@ No new directories or project structure required. All new files fit into existin
 
 ### Tests for User Story 1 ⚠️ Write FIRST — confirm they FAIL before implementing
 
-- [ ] T002 [P] [US1] Write unit tests for `SurviveSkill.tryConsume()` — returns `true` first call, `false` on subsequent calls — in `src/fight/core/cards/skills/__tests__/survive.spec.ts`
-- [ ] T003 [P] [US1] Write unit tests for `FightingCard.applyFinalDamage()` with survive — HP set to 1, `survived: true` returned; second fatal blow kills; non-fatal damage does not trigger survive — in `src/fight/core/cards/__tests__/fighting-card-survive.spec.ts`
-- [ ] T004 [US1] Write E2E tests covering: `survived` step present and at correct position after `attack` step; card remains alive at 1 HP; second fatal blow produces `status_change: dead` normally; card without survive dies normally — in `test/fight/survive-skill.e2e-spec.ts`
+- [X] T002 [P] [US1] Write unit tests for `SurviveSkill.tryConsume()` — returns `true` first call, `false` on subsequent calls — in `src/fight/core/cards/skills/__tests__/survive.spec.ts`
+- [X] T003 [P] [US1] Write unit tests for `FightingCard.applyFinalDamage()` with survive — HP set to 1, `survived: true` returned; second fatal blow kills; non-fatal damage does not trigger survive — in `src/fight/core/cards/__tests__/fighting-card-survive.spec.ts`
+- [X] T004 [US1] Write E2E tests covering: `survived` step present and at correct position after `attack` step; card remains alive at 1 HP; second fatal blow produces `status_change: dead` normally; card without survive dies normally — in `test/fight/survive-skill.e2e-spec.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T005 [P] [US1] Create `SurviveSkill` with `name: string` and `private consumed = false`; implement `tryConsume(): boolean` (single-use) — in `src/fight/core/cards/skills/survive.ts`
-- [ ] T006 [P] [US1] Add `survived?: boolean` and `survivedSkillName?: string` to `AttackResult` in `src/fight/core/cards/@types/action-result/attack-result.ts`; add the same two optional fields to the `FinalDamageResult` type in `src/fight/core/cards/fighting-card.ts`
-- [ ] T007 [US1] Integrate `SurviveSkill` in `FightingCard` in `src/fight/core/cards/fighting-card.ts`: add `private surviveSkill: SurviveSkill | null = null` field; add `survive?: SurviveSkill` to the `skills` constructor parameter; assign `this.surviveSkill = skills.survive ?? null`; modify `applyFinalDamage()` to intercept fatal blows — when `actualHealth - damageToHealth <= 0` and `surviveSkill.tryConsume()` succeeds, cap `damageToHealth` to `actualHealth - 1` and return `{ damageToHealth, shieldAbsorbed, survived: true, survivedSkillName: surviveSkill.name }` (depends on T005, T006)
-- [ ] T008 [US1] Handle the `survived` branch in `ActionStage.handleAttackResult()` in `src/fight/core/card-action/action-stage.ts`: when `damageDealt.survived` is true, push a `SurvivedReport` step to `report.statusChanges`, then call `defensiveCard.launchSkills('survived', this.getFightingContext(defensiveCard))` and push the resulting steps via `skillResultsToSteps()` — card is alive so no death handling fires (depends on T001, T007)
-- [ ] T009 [P] [US1] Add `SURVIVE = 'SURVIVE'` to the `SkillKind` enum and extend the `event` field `@ValidateIf` guard to exclude `SURVIVE` kind (matching the existing SHIELD exclusion pattern) in `src/fight/http-api/dto/fight-data.dto.ts`
-- [ ] T010 [US1] Add `case SkillKind.SURVIVE:` to `createOtherSkill()` returning `new SurviveSkill(skillData.name)`; in `convertCardDtoToCard()` extract the `SurviveSkill` from `allSkills`, filter it out of `otherSkills`, and pass it as `skills.survive` to the `FightingCard` constructor — in `src/fight/http-api/fight.controller.ts` (depends on T005, T009)
+- [X] T005 [P] [US1] Create `SurviveSkill` with `name: string` and `private consumed = false`; implement `tryConsume(): boolean` (single-use) — in `src/fight/core/cards/skills/survive.ts`
+- [X] T006 [P] [US1] Add `survived?: boolean` and `survivedSkillName?: string` to `AttackResult` in `src/fight/core/cards/@types/action-result/attack-result.ts`; add the same two optional fields to the `FinalDamageResult` type in `src/fight/core/cards/fighting-card.ts`
+- [X] T007 [US1] Integrate `SurviveSkill` in `FightingCard` in `src/fight/core/cards/fighting-card.ts`: add `private surviveSkill: SurviveSkill | null = null` field; add `survive?: SurviveSkill` to the `skills` constructor parameter; assign `this.surviveSkill = skills.survive ?? null`; modify `applyFinalDamage()` to intercept fatal blows — when `actualHealth - damageToHealth <= 0` and `surviveSkill.tryConsume()` succeeds, cap `damageToHealth` to `actualHealth - 1` and return `{ damageToHealth, shieldAbsorbed, survived: true, survivedSkillName: surviveSkill.name }` (depends on T005, T006)
+- [X] T008 [US1] Handle the `survived` branch in `ActionStage.handleAttackResult()` in `src/fight/core/card-action/action-stage.ts`: when `damageDealt.survived` is true, push a `SurvivedReport` step to `report.statusChanges`, then call `defensiveCard.launchSkills('survived', this.getFightingContext(defensiveCard))` and push the resulting steps via `skillResultsToSteps()` — card is alive so no death handling fires (depends on T001, T007)
+- [X] T009 [P] [US1] Add `SURVIVE = 'SURVIVE'` to the `SkillKind` enum and extend the `event` field `@ValidateIf` guard to exclude `SURVIVE` kind (matching the existing SHIELD exclusion pattern) in `src/fight/http-api/dto/fight-data.dto.ts`
+- [X] T010 [US1] Add `case SkillKind.SURVIVE:` to `createOtherSkill()` returning `new SurviveSkill(skillData.name)`; in `convertCardDtoToCard()` extract the `SurviveSkill` from `allSkills`, filter it out of `otherSkills`, and pass it as `skills.survive` to the `FightingCard` constructor — in `src/fight/http-api/fight.controller.ts` (depends on T005, T009)
 
 **Checkpoint**: User Story 1 fully functional — POST `/fight` with `SURVIVE` skill works end-to-end.
 
@@ -64,14 +64,14 @@ No new directories or project structure required. All new files fit into existin
 
 ### Tests for User Story 2 ⚠️ Write FIRST — confirm they FAIL before implementing
 
-- [ ] T011 [P] [US2] Write unit tests for `SurvivedTrigger` — `isTriggered('survived')` returns `true`; `isTriggered('turn-end')` returns `false` — in `src/fight/core/trigger/__tests__/survived.spec.ts`
-- [ ] T012 [P] [US2] Extend `test/fight/survive-skill.e2e-spec.ts` with buff scenarios: two `ALTERATION(event:'survived')` buffs appear immediately after the `survived` step in correct order; buffs are active during the surviving card's next action turn; `buff_expired` steps appear at the end of the next turn
+- [X] T011 [P] [US2] Write unit tests for `SurvivedTrigger` — `isTriggered('survived')` returns `true`; `isTriggered('turn-end')` returns `false` — in `src/fight/core/trigger/__tests__/survived.spec.ts`
+- [X] T012 [P] [US2] Extend `test/fight/survive-skill.e2e-spec.ts` with buff scenarios: two `ALTERATION(event:'survived')` buffs appear immediately after the `survived` step in correct order; buffs are active during the surviving card's next action turn; `buff_expired` steps appear at the end of the next turn
 
 ### Implementation for User Story 2
 
-- [ ] T013 [US2] Create `SurvivedTrigger implements Trigger` with `id = 'survived'` and `isTriggered(triggerId): boolean { return triggerId === this.id; }` — in `src/fight/core/trigger/survived.ts`
-- [ ] T014 [P] [US2] Add `SURVIVED = 'survived'` to the `TriggerEvent` enum in `src/fight/http-api/dto/fight-data.dto.ts`
-- [ ] T015 [US2] Register `SurvivedTrigger` in `STRATEGY_MAP` as `[TriggerEvent.SURVIVED]: new SurvivedTrigger()` in `src/fight/http-api/trigger-factory.ts` (depends on T013, T014)
+- [X] T013 [US2] Create `SurvivedTrigger implements Trigger` with `id = 'survived'` and `isTriggered(triggerId): boolean { return triggerId === this.id; }` — in `src/fight/core/trigger/survived.ts`
+- [X] T014 [P] [US2] Add `SURVIVED = 'survived'` to the `TriggerEvent` enum in `src/fight/http-api/dto/fight-data.dto.ts`
+- [X] T015 [US2] Register `SurvivedTrigger` in `STRATEGY_MAP` as `[TriggerEvent.SURVIVED]: new SurvivedTrigger()` in `src/fight/http-api/trigger-factory.ts` (depends on T013, T014)
 
 **Checkpoint**: User Stories 1 and 2 both functional — `ALTERATION(event:'survived')` buffs fire correctly via the survived event.
 
@@ -79,7 +79,7 @@ No new directories or project structure required. All new files fit into existin
 
 ## Phase 5: Polish & Cross-Cutting Concerns
 
-- [ ] T016 Run quality gates in order: `npm run format`, `npm run lint`, `npm run test:cov`, `npm run build` — fix any issues before marking complete
+- [X] T016 Run quality gates in order: `npm run format`, `npm run lint`, `npm run test:cov`, `npm run build` — fix any issues before marking complete
 
 ---
 
