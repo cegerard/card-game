@@ -2,12 +2,14 @@ import { TurnEnd } from '../core/trigger/turn-end';
 import { NextAction } from '../core/trigger/next-action';
 import { DeathTrigger } from '../core/trigger/death-trigger';
 import { DynamicTrigger } from '../core/trigger/dynamic-trigger';
+import { SurvivedTrigger } from '../core/trigger/survived';
 import { Trigger } from '../core/trigger/trigger';
 import { TriggerEvent } from './dto/fight-data.dto';
 
 const STRATEGY_MAP: Record<string, Trigger> = {
   [TriggerEvent.TURN_END]: new TurnEnd(),
   [TriggerEvent.NEXT_ACTION]: new NextAction(),
+  [TriggerEvent.SURVIVED]: new SurvivedTrigger(),
 };
 
 function buildDeathTrigger(

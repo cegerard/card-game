@@ -29,6 +29,8 @@ export const ICON = {
   shield_applied:    '🛡️',
   shield_broken:     '💥',
   shield_expired:    '🔻',
+  /* Survive */
+  survived:          '🌟',
   /* Targeting */
   targeting_override: '🎯',
   targeting_reverted: '🔄',
@@ -70,6 +72,7 @@ export const EVENT_COLOR = {
   shield_applied:    '#60a5fa',
   shield_broken:     '#f87171',
   shield_expired:    '#94a3b8',
+  survived:          '#fbbf24',
   fight_end:         '#22c55e',
 };
 

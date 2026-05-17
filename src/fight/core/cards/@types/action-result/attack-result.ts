@@ -14,4 +14,6 @@ export type AttackResult = {
   effects?: EffectResult[];
   buffResults?: BuffResult[];
   kind?: DamageType[];
+  survived?: boolean;
+  survivedSkillName?: string;
 };

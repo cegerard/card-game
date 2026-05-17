@@ -64,8 +64,8 @@ export class SimpleAttack implements AttackSkill {
           card.actualAttack * damageMultiplier,
           defender,
         );
-        const { damageToHealth, shieldAbsorbed } =
-          defender.applyFinalDamage(total);
+        const finalResult = defender.applyFinalDamage(total);
+        const { damageToHealth, shieldAbsorbed } = finalResult;
 
         const effects = this.effects
           ?.map((e) => e.applyEffect(defender, card, context))
@@ -82,6 +82,8 @@ export class SimpleAttack implements AttackSkill {
           effects: effects?.length ? effects : undefined,
           kind,
           remainingHealth: defender.actualHealth,
+          survived: finalResult.survived,
+          survivedSkillName: finalResult.survivedSkillName,
         };
       }),
     };

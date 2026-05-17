@@ -309,6 +309,8 @@ function buildGenericDetail(ev) {
     case 'shield_broken':
     case 'shield_expired':
       return esc(ev.card?.name);
+    case 'survived':
+      return `${esc(ev.card?.name)} survived with 1 HP — skill: ${esc(ev.name ?? '?')}`;
     case 'fight_end':
       return ev.winner ? `Winner: ${esc(ev.winner)}` : 'Draw';
     default:
@@ -441,6 +443,12 @@ export function describeEvent(ev, teamBName) {
         icon: ICON.shield_expired,
         text: `${ev.card?.name} — Shield expired`,
         color: EVENT_COLOR.shield_expired,
+      };
+    case 'survived':
+      return {
+        icon: ICON.survived,
+        text: `${ev.card?.name} — Survived (${ev.name ?? 'Survive'})`,
+        color: EVENT_COLOR.survived,
       };
     case 'fight_end': {
       const bossWins = ev.winner && ev.winner === teamBName;

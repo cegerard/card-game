@@ -7,6 +7,7 @@ export type AttackReport = {
   kind: StepKind.Attack | StepKind.SpecialAttack;
   attack: DamageReport;
   statusChanges: Step[];
+  survivedSteps: Step[];
   buffReport?: BuffReport;
   debuffReport?: DebuffReport;
   shieldAppliedReport?: ShieldAppliedReport;

@@ -59,6 +59,7 @@ export enum SkillKind {
   CONDITIONAL_ATTACK = 'CONDITIONAL_ATTACK',
   TARGETING_OVERRIDE = 'TARGETING_OVERRIDE',
   SHIELD = 'SHIELD',
+  SURVIVE = 'SURVIVE',
 }
 
 export enum BuffType {
@@ -86,6 +87,7 @@ export enum TriggerEvent {
   ALLY_DEATH = 'ally-death',
   ENEMY_DEATH = 'enemy-death',
   DORMANT = 'dormant',
+  SURVIVED = 'survived',
 }
 
 export enum TargetingStrategy {
@@ -356,10 +358,14 @@ export class OtherSkillDto {
   @IsNumber()
   rate?: number;
 
+  @ValidateIf((o) => o.kind !== SkillKind.SURVIVE)
+  @IsDefined()
   @IsEnum(TargetingStrategy)
   targetingStrategy: TargetingStrategy;
 
-  @ValidateIf((o) => o.kind !== SkillKind.SHIELD)
+  @ValidateIf(
+    (o) => o.kind !== SkillKind.SHIELD && o.kind !== SkillKind.SURVIVE,
+  )
   @IsDefined()
   @IsEnum(TriggerEvent)
   event?: TriggerEvent;

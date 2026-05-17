@@ -287,6 +287,12 @@ function applyEvent(state, ev) {
       break;
     }
 
+    case 'survived': {
+      const c = get(ev.card?.id);
+      if (c) c.hp = Math.max(c.hp, 1);
+      break;
+    }
+
     // targeting_override / targeting_reverted don't mutate card stats
     default: break;
   }

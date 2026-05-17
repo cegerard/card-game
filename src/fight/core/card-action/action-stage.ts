@@ -22,6 +22,7 @@ import { ShieldResult } from '../cards/@types/action-result/shield-result';
 import { ShieldAppliedReport } from '../fight-simulator/@types/shield-report';
 import { triggerReactiveSkills } from '../fight-simulator/reactive-skill-checker';
 import { skillResultsToSteps } from '../fight-simulator/skill-results-to-steps';
+import { SurvivedReport } from '../fight-simulator/@types/survived-report';
 
 type SplittedSteps = {
   actionSteps: Step[];
@@ -86,6 +87,7 @@ export class ActionStage {
         energy: card.increaseSpecialEnergy(),
       },
       statusChanges: [],
+      survivedSteps: [],
     };
 
     this.handleAttackResult(attackResults.results, report, card);
@@ -110,6 +112,7 @@ export class ActionStage {
         energy: card.increaseSpecialEnergy(),
       },
       statusChanges: [],
+      survivedSteps: [],
     };
 
     this.handleAttackResult(attackSkill.results, result, card);
@@ -140,6 +143,7 @@ export class ActionStage {
         energy: card.resetSpecialEnergy(),
       },
       statusChanges: [],
+      survivedSteps: [],
     };
     const actionResults = specialResults.actionResults as AttackResult[];
 
@@ -238,6 +242,10 @@ export class ActionStage {
             acc.actionSteps.push(report.shieldAppliedReport);
           }
 
+          report.survivedSteps.forEach((step) => {
+            acc.actionSteps.push(step);
+          });
+
           report.statusChanges.forEach((statusChange) => {
             acc.statusChangeSteps.push(statusChange);
           });
@@ -277,6 +285,22 @@ export class ActionStage {
           kind: StepKind.ShieldBroken,
           card: defensiveCard.identityInfo,
         });
+      }
+
+      if (damageDealt.survived) {
+        const survivedReport: SurvivedReport = {
+          kind: StepKind.Survived,
+          name: damageDealt.survivedSkillName,
+          card: defensiveCard.identityInfo,
+        };
+        report.survivedSteps.push(survivedReport);
+        const survivedSkillResults = defensiveCard.launchSkills(
+          'survived',
+          this.getFightingContext(defensiveCard),
+        );
+        report.survivedSteps.push(
+          ...skillResultsToSteps(defensiveCard, survivedSkillResults),
+        );
       }
 
       if (defensiveCard.isDead() && !reportedDeaths.has(defensiveCard)) {
