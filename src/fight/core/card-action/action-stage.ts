@@ -87,6 +87,7 @@ export class ActionStage {
         energy: card.increaseSpecialEnergy(),
       },
       statusChanges: [],
+      survivedSteps: [],
     };
 
     this.handleAttackResult(attackResults.results, report, card);
@@ -111,6 +112,7 @@ export class ActionStage {
         energy: card.increaseSpecialEnergy(),
       },
       statusChanges: [],
+      survivedSteps: [],
     };
 
     this.handleAttackResult(attackSkill.results, result, card);
@@ -141,6 +143,7 @@ export class ActionStage {
         energy: card.resetSpecialEnergy(),
       },
       statusChanges: [],
+      survivedSteps: [],
     };
     const actionResults = specialResults.actionResults as AttackResult[];
 
@@ -239,6 +242,10 @@ export class ActionStage {
             acc.actionSteps.push(report.shieldAppliedReport);
           }
 
+          report.survivedSteps.forEach((step) => {
+            acc.actionSteps.push(step);
+          });
+
           report.statusChanges.forEach((statusChange) => {
             acc.statusChangeSteps.push(statusChange);
           });
@@ -286,12 +293,12 @@ export class ActionStage {
           name: damageDealt.survivedSkillName,
           card: defensiveCard.identityInfo,
         };
-        report.statusChanges.push(survivedReport);
+        report.survivedSteps.push(survivedReport);
         const survivedSkillResults = defensiveCard.launchSkills(
           'survived',
           this.getFightingContext(defensiveCard),
         );
-        report.statusChanges.push(
+        report.survivedSteps.push(
           ...skillResultsToSteps(defensiveCard, survivedSkillResults),
         );
       }

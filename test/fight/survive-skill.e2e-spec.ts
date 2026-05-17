@@ -269,40 +269,43 @@ function buildNoSurvivePayload() {
 }
 
 function buildSurviveWithBuffsPayload() {
+  // Kaelion defense=250 so the +100% defense buff (=+250) brings actual defense to 500,
+  // matching Arionis attack=500 → 0 damage on turn 2, letting Kaelion survive until
+  // the buff expires at turn 2 end.
+  const kaelion = {
+    ...buildKaelionBase([
+      {
+        kind: 'SURVIVE',
+        name: "Earth's Embrace",
+        targetingStrategy: 'self',
+      },
+      {
+        kind: 'ALTERATION',
+        name: "Earth's Embrace",
+        event: 'survived',
+        buffType: 'defense',
+        rate: 1.0,
+        duration: 1,
+        targetingStrategy: 'self',
+        polarity: 'buff',
+      },
+      {
+        kind: 'ALTERATION',
+        name: "Earth's Embrace",
+        event: 'survived',
+        buffType: 'attack',
+        rate: 1.5,
+        duration: 1,
+        targetingStrategy: 'self',
+        polarity: 'buff',
+      },
+    ]),
+    defense: 250,
+  };
+
   return {
     cardSelectorStrategy: 'player-by-player',
     player1: { name: 'Attacker', deck: [buildAttacker()] },
-    player2: {
-      name: 'Kaelion Team',
-      deck: [
-        buildKaelionBase([
-          {
-            kind: 'SURVIVE',
-            name: "Earth's Embrace",
-            targetingStrategy: 'self',
-          },
-          {
-            kind: 'ALTERATION',
-            name: "Earth's Embrace",
-            event: 'survived',
-            buffType: 'defense',
-            rate: 1.0,
-            duration: 1,
-            targetingStrategy: 'self',
-            polarity: 'buff',
-          },
-          {
-            kind: 'ALTERATION',
-            name: "Earth's Embrace",
-            event: 'survived',
-            buffType: 'attack',
-            rate: 1.5,
-            duration: 1,
-            targetingStrategy: 'self',
-            polarity: 'buff',
-          },
-        ]),
-      ],
-    },
+    player2: { name: 'Kaelion Team', deck: [kaelion] },
   };
 }
