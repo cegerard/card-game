@@ -237,6 +237,31 @@
             "operator": "below",
             "threshold": 0.3
           }
+        },
+        {
+          "kind": "SURVIVE",
+          "name": "Recharge naturelle",
+          "targetingStrategy": "self"
+        },
+        {
+          "kind": "ALTERATION",
+          "name": "Recharge naturelle - DEFENSE",
+          "event": "survived",
+          "buffType": "defense",
+          "rate": 1.0,
+          "duration": 1,
+          "targetingStrategy": "self",
+          "polarity": "buff"
+        },
+        {
+          "kind": "ALTERATION",
+          "name": "Recharge naturelle - ATTACK",
+          "event": "survived",
+          "buffType": "attack",
+          "rate": 1.5,
+          "duration": 1,
+          "targetingStrategy": "self",
+          "polarity": "buff"
         }
       ]
     },
