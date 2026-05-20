@@ -16,6 +16,7 @@ export type DamageReport = {
   attacker: CardInfo;
   damages: Damage[];
   energy: number;
+  powerId?: string;
 };
 
 export type AttackStepReport = { kind: StepKind.Attack } & DamageReport;

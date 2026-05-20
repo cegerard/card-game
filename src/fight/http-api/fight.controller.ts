@@ -55,6 +55,10 @@ import { HealthThresholdCondition } from '../core/cards/@types/skill-activation-
 import { DamageComposition } from '../core/cards/@types/damage/damage-composition';
 import { ConditionalAttack } from '../core/cards/skills/conditional-attack';
 import { EveryNTurnsCondition } from '../core/cards/@types/attack/conditions/every-n-turns-condition';
+import { AlwaysTrueAttackCondition } from '../core/cards/@types/attack/conditions/always-true-attack-condition';
+import { AllyHealthBelowThresholdTrigger } from '../core/trigger/ally-health-below-threshold-trigger';
+import { LastAttackerOfAllyTargetingStrategy } from '../core/targeting-card-strategies/last-attacker-of-ally';
+import { AlliedCardByIdStrategy } from '../core/targeting-card-strategies/allied-card-by-id';
 import { MultipleAttack } from '../core/cards/skills/multiple-attack';
 import { AttackSkill } from '../core/cards/skills/attack-skill';
 import { TargetedCard } from '../core/targeting-card-strategies/targeted-card';
@@ -377,6 +381,33 @@ export class FightController {
         if (!skillData.polarity) {
           throw new Error('Alteration skill requires polarity');
         }
+        if (skillData.event === TriggerEvent.ALLY_HEALTH_BELOW) {
+          if (!skillData.activationCondition) {
+            throw new BadRequestException(
+              'ALTERATION with ally-health-below requires activationCondition',
+            );
+          }
+          if (!skillData.targetCardId) {
+            throw new BadRequestException(
+              'ALTERATION with ally-health-below requires targetCardId',
+            );
+          }
+          return new AlterationSkill({
+            name: skillData.name,
+            polarity: skillData.polarity,
+            attributeType: this.mapAlterationType(skillData.buffType),
+            rate: skillData.rate,
+            duration: skillData.duration ?? 0,
+            trigger: new AllyHealthBelowThresholdTrigger(
+              skillData.targetCardId,
+              skillData.activationCondition.threshold,
+            ),
+            targetingStrategy: new AlliedCardByIdStrategy(
+              skillData.targetCardId,
+            ),
+            powerId: skillData.powerId,
+          });
+        }
         const alterationCondition = skillData.activationCondition
           ? buildAlterationCondition(skillData.activationCondition.type, {
               allyName: skillData.activationCondition.allyName,
@@ -406,6 +437,41 @@ export class FightController {
           powerId: skillData.powerId,
         });
       case SkillKind.CONDITIONAL_ATTACK:
+        if (skillData.event === TriggerEvent.ALLY_HEALTH_BELOW) {
+          if (!skillData.activationCondition) {
+            throw new BadRequestException(
+              'CONDITIONAL_ATTACK with ally-health-below requires activationCondition',
+            );
+          }
+          if (!skillData.targetCardId) {
+            throw new BadRequestException(
+              'CONDITIONAL_ATTACK with ally-health-below requires targetCardId',
+            );
+          }
+          const ahDamages = skillData.damages.map(
+            (d) => new DamageComposition(d.type, d.rate),
+          );
+          const ahEffects = skillData.effect
+            ? [this.buildEffect(skillData.effect)]
+            : undefined;
+          const ahAttackSkill = new SimpleAttack(
+            skillData.name,
+            ahDamages,
+            new LastAttackerOfAllyTargetingStrategy(skillData.targetCardId),
+            ahEffects,
+          );
+          const ahTrigger = new AllyHealthBelowThresholdTrigger(
+            skillData.targetCardId,
+            skillData.activationCondition.threshold,
+          );
+          return new ConditionalAttack(
+            skillData.name,
+            ahAttackSkill,
+            new AlwaysTrueAttackCondition(),
+            ahTrigger,
+            skillData.powerId,
+          );
+        }
         const caDamages = skillData.damages.map(
           (d) => new DamageComposition(d.type, d.rate),
         );

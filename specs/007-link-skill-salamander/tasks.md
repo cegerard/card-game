@@ -19,7 +19,7 @@
 
 **⚠️ CRITICAL**: Must be complete before any Phase 2+ work.
 
-- [ ] T001 Add `lastAttacker?: FightingCard` to `FightingContext` in `src/fight/core/cards/@types/fighting-context.ts`
+- [x] T001 Add `lastAttacker?: FightingCard` to `FightingContext` in `src/fight/core/cards/@types/fighting-context.ts`
 
 **Checkpoint**: Type compiles — all downstream code can reference `context.lastAttacker`.
 
@@ -33,10 +33,10 @@
 
 > **Write tests first (RED), implement second (GREEN)**
 
-- [ ] T002 [US1] Write unit tests (RED) for `AllyHealthBelowThresholdTrigger` covering: `isTriggered()` before any activate, non-matching event ID no-op, first crossing fires, subsequent below-threshold no re-fire, rearm on recovery, `setLastAttacker()` called on crossing, ally absent silent no-op — in `src/fight/core/trigger/__tests__/ally-health-below-threshold-trigger.spec.ts`
-- [ ] T003 [US1] Implement `AllyHealthBelowThresholdTrigger` (implements `ActivatableTrigger`) with `monitoredAllyId`, `threshold`, optional `lastAttackerStrategy`, private `wasAboveThreshold`/`shouldFire` state — in `src/fight/core/trigger/ally-health-below-threshold-trigger.ts`
-- [ ] T004 [US1] Dispatch `ally-health-<id>` events to teammates after each non-dodged hit in `handleAttackResult()` in `src/fight/card-action/action-stage.ts`
-- [ ] T005 [US1] Add `ALLY_HEALTH_BELOW = 'ally-health-below'` to `TriggerEvent` enum, extend `@ValidateIf` on `targetCardId` and `activationCondition` to include `ALLY_HEALTH_BELOW` — in `src/fight/http-api/dto/fight-data.dto.ts`
+- [x] T002 [US1] Write unit tests (RED) for `AllyHealthBelowThresholdTrigger` covering: `isTriggered()` before any activate, non-matching event ID no-op, first crossing fires, subsequent below-threshold no re-fire, rearm on recovery, `setLastAttacker()` called on crossing, ally absent silent no-op — in `src/fight/core/trigger/__tests__/ally-health-below-threshold-trigger.spec.ts`
+- [x] T003 [US1] Implement `AllyHealthBelowThresholdTrigger` (implements `ActivatableTrigger`) with `monitoredAllyId`, `threshold`, optional `lastAttackerStrategy`, private `wasAboveThreshold`/`shouldFire` state — in `src/fight/core/trigger/ally-health-below-threshold-trigger.ts`
+- [x] T004 [US1] Dispatch `ally-health-<id>` events to teammates after each non-dodged hit in `handleAttackResult()` in `src/fight/card-action/action-stage.ts`
+- [x] T005 [US1] Add `ALLY_HEALTH_BELOW = 'ally-health-below'` to `TriggerEvent` enum, extend `@ValidateIf` on `targetCardId` and `activationCondition` to include `ALLY_HEALTH_BELOW` — in `src/fight/http-api/dto/fight-data.dto.ts`
 
 **Checkpoint**: Trigger unit tests pass. `ActionStage` dispatches the event; skills with a matching trigger can `activate()`.
 
@@ -50,13 +50,13 @@
 
 > **Write tests first (RED), implement second (GREEN)**
 
-- [ ] T006 [US2] Write unit tests (RED) for `LastAttackerOfAllyTargetingStrategy` covering: returns `[]` before `setLastAttacker()`, returns `[card]` after `setLastAttacker(card)` if alive, returns `[]` if card is dead — in `src/fight/core/targeting-card-strategies/__tests__/last-attacker-of-ally.spec.ts`
-- [ ] T007 [P] [US2] Create `AlwaysTrueAttackCondition` implementing `AttackCondition` with `isTriggered(): true`, no-op `tick()` and `reset()` — in `src/fight/core/cards/@types/attack/conditions/always-true-attack-condition.ts`
-- [ ] T008 [P] [US2] Add `activate(triggerId, context)` method to `ConditionalAttack` delegating to `(this.trigger as ActivatableTrigger).activate()` when trigger implements `ActivatableTrigger` — in `src/fight/core/cards/skills/conditional-attack.ts`
-- [ ] T009 [US2] Implement `LastAttackerOfAllyTargetingStrategy` with `setLastAttacker(card)` and `targetedCards()` returning `[lastAttacker]` if alive — in `src/fight/core/targeting-card-strategies/last-attacker-of-ally.ts`
-- [ ] T010 [P] [US2] Add `LAST_ATTACKER_OF_ALLY = 'last-attacker-of-ally'` to `TargetingStrategy` enum in `src/fight/http-api/dto/fight-data.dto.ts`
-- [ ] T011 [P] [US2] Register `LastAttackerOfAllyTargetingStrategy` in `src/fight/http-api/targeting-strategy-factory.ts`
-- [ ] T012 [US2] Wire `CONDITIONAL_ATTACK` + `ALLY_HEALTH_BELOW` case in `fight.controller.ts`: create shared `LastAttackerOfAllyTargetingStrategy`, create `AllyHealthBelowThresholdTrigger(targetCardId, threshold, sharedStrategy)`, create `SimpleAttack` using shared strategy, pass `AlwaysTrueAttackCondition`; throw on missing `activationCondition` or `targetCardId` — in `src/fight/http-api/fight.controller.ts`
+- [x] T006 [US2] Write unit tests (RED) for `LastAttackerOfAllyTargetingStrategy` covering: returns `[]` before `setLastAttacker()`, returns `[card]` after `setLastAttacker(card)` if alive, returns `[]` if card is dead — in `src/fight/core/targeting-card-strategies/__tests__/last-attacker-of-ally.spec.ts`
+- [x] T007 [P] [US2] Create `AlwaysTrueAttackCondition` implementing `AttackCondition` with `isTriggered(): true`, no-op `tick()` and `reset()` — in `src/fight/core/cards/@types/attack/conditions/always-true-attack-condition.ts`
+- [x] T008 [P] [US2] Add `activate(triggerId, context)` method to `ConditionalAttack` delegating to `(this.trigger as ActivatableTrigger).activate()` when trigger implements `ActivatableTrigger` — in `src/fight/core/cards/skills/conditional-attack.ts`
+- [x] T009 [US2] Implement `LastAttackerOfAllyTargetingStrategy` with `setLastAttacker(card)` and `targetedCards()` returning `[lastAttacker]` if alive — in `src/fight/core/targeting-card-strategies/last-attacker-of-ally.ts`
+- [x] T010 [P] [US2] Add `LAST_ATTACKER_OF_ALLY = 'last-attacker-of-ally'` to `TargetingStrategy` enum in `src/fight/http-api/dto/fight-data.dto.ts`
+- [x] T011 [P] [US2] Register `LastAttackerOfAllyTargetingStrategy` in `src/fight/http-api/targeting-strategy-factory.ts`
+- [x] T012 [US2] Wire `CONDITIONAL_ATTACK` + `ALLY_HEALTH_BELOW` case in `fight.controller.ts`: create shared `LastAttackerOfAllyTargetingStrategy`, create `AllyHealthBelowThresholdTrigger(targetCardId, threshold, sharedStrategy)`, create `SimpleAttack` using shared strategy, pass `AlwaysTrueAttackCondition`; throw on missing `activationCondition` or `targetCardId` — in `src/fight/http-api/fight.controller.ts`
 
 **Checkpoint**: Explosion unit tests pass. Fight log includes an `attack` step with `powerId: "salamander-tears"` targeting the last attacker when threshold is crossed.
 
@@ -70,11 +70,11 @@
 
 > **Write tests first (RED), implement second (GREEN)**
 
-- [ ] T013 [US3] Write unit tests (RED) for `AlliedCardByIdStrategy` covering: returns `[card]` if ally is alive in `sourcePlayer`, returns `[]` if ally is dead, returns `[]` if ally is absent from team — in `src/fight/core/targeting-card-strategies/__tests__/allied-card-by-id.spec.ts`
-- [ ] T014 [US3] Implement `AlliedCardByIdStrategy` searching `sourcePlayer.allCards` by `allyId`, returning `[]` if absent or dead — in `src/fight/core/targeting-card-strategies/allied-card-by-id.ts`
-- [ ] T015 [P] [US3] Add `LINKED_ALLY = 'linked-ally'` to `TargetingStrategy` enum in `src/fight/http-api/dto/fight-data.dto.ts`
-- [ ] T016 [P] [US3] Register `AlliedCardByIdStrategy` in `src/fight/http-api/targeting-strategy-factory.ts`
-- [ ] T017 [US3] Wire `ALTERATION` + `ALLY_HEALTH_BELOW` case in `fight.controller.ts`: create `AllyHealthBelowThresholdTrigger(targetCardId, threshold)` (no shared strategy), use `AlliedCardByIdStrategy(targetCardId)`; throw on missing `activationCondition` or `targetCardId` — in `src/fight/http-api/fight.controller.ts`
+- [x] T013 [US3] Write unit tests (RED) for `AlliedCardByIdStrategy` covering: returns `[card]` if ally is alive in `sourcePlayer`, returns `[]` if ally is dead, returns `[]` if ally is absent from team — in `src/fight/core/targeting-card-strategies/__tests__/allied-card-by-id.spec.ts`
+- [x] T014 [US3] Implement `AlliedCardByIdStrategy` searching `sourcePlayer.allCards` by `allyId`, returning `[]` if absent or dead — in `src/fight/core/targeting-card-strategies/allied-card-by-id.ts`
+- [x] T015 [P] [US3] Add `LINKED_ALLY = 'linked-ally'` to `TargetingStrategy` enum in `src/fight/http-api/dto/fight-data.dto.ts`
+- [x] T016 [P] [US3] Register `AlliedCardByIdStrategy` in `src/fight/http-api/targeting-strategy-factory.ts`
+- [x] T017 [US3] Wire `ALTERATION` + `ALLY_HEALTH_BELOW` case in `fight.controller.ts`: create `AllyHealthBelowThresholdTrigger(targetCardId, threshold)` (no shared strategy), use `AlliedCardByIdStrategy(targetCardId)`; throw on missing `activationCondition` or `targetCardId` — in `src/fight/http-api/fight.controller.ts`
 
 **Checkpoint**: Buff unit tests pass. Fight log includes two `buff` steps on Arionis with `remainingTurns: 5` and `powerId: "salamander-tears"` immediately after the threshold crossing.
 
@@ -84,8 +84,8 @@
 
 **Purpose**: End-to-end validation and all four quality gates.
 
-- [ ] T018 Write e2e test covering: threshold crossing emits attack + two buff steps in order with same `powerId`; correct last-attacker targeting; no re-trigger while below threshold; no steps when Arionis absent from team — in `test/fight/salamander-tears.e2e-spec.ts`
-- [ ] T019 Run quality gates in order: `npm run format && npm run lint && npm run test:cov && npm run build`
+- [x] T018 Write e2e test covering: threshold crossing emits attack + two buff steps in order with same `powerId`; correct last-attacker targeting; no re-trigger while below threshold; no steps when Arionis absent from team — in `test/fight/salamander-tears.e2e-spec.ts`
+- [x] T019 Run quality gates in order: `npm run format && npm run lint && npm run test:cov && npm run build`
 
 ---
 

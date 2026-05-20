@@ -62,6 +62,7 @@ export function skillResultsToSteps(
             kind: r.kind,
           })),
           energy: card.actualEnergy,
+          powerId: skillResult.powerId,
         });
 
         const statusChanges: StatusChangeReport[] = skillResult.results.flatMap(

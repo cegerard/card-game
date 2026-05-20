@@ -88,6 +88,7 @@ export enum TriggerEvent {
   ENEMY_DEATH = 'enemy-death',
   DORMANT = 'dormant',
   SURVIVED = 'survived',
+  ALLY_HEALTH_BELOW = 'ally-health-below',
 }
 
 export enum TargetingStrategy {
@@ -98,6 +99,8 @@ export enum TargetingStrategy {
   ALL_ALLIES = 'all-allies',
   SELF = 'self',
   TARGETED_CARD = 'targeted-card',
+  LAST_ATTACKER_OF_ALLY = 'last-attacker-of-ally',
+  LINKED_ALLY = 'linked-ally',
 }
 
 export enum CardSelectorStrategy {
@@ -400,7 +403,11 @@ export class OtherSkillDto {
   @Type(/* istanbul ignore next */ () => DamageCompositionDto)
   damages?: DamageCompositionDto[];
 
-  @ValidateIf((o) => o.kind === SkillKind.CONDITIONAL_ATTACK)
+  @ValidateIf(
+    (o) =>
+      o.kind === SkillKind.CONDITIONAL_ATTACK &&
+      o.event !== TriggerEvent.ALLY_HEALTH_BELOW,
+  )
   @IsDefined()
   @IsNumber()
   @Min(1)
@@ -426,11 +433,12 @@ export class OtherSkillDto {
   @Type(/* istanbul ignore next */ () => DamageCompositionDto)
   comboFinisher?: DamageCompositionDto[];
 
-  // Required when event is ally-death or enemy-death
+  // Required when event is ally-death, enemy-death, or ally-health-below
   @ValidateIf(
     (o) =>
       o.event === TriggerEvent.ALLY_DEATH ||
-      o.event === TriggerEvent.ENEMY_DEATH,
+      o.event === TriggerEvent.ENEMY_DEATH ||
+      o.event === TriggerEvent.ALLY_HEALTH_BELOW,
   )
   @IsDefined()
   @IsString()
