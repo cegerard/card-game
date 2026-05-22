@@ -28,6 +28,7 @@ src/
 ├── main.ts                 # Application entry point with NestJS bootstrap
 ├── app.module.ts           # Root NestJS module
 ├── logger-middleware.ts    # Request logging middleware
+├── fight-replayer/         # Static HTML/JS fight replay viewer
 └── fight/                  # Fight simulation feature module
     ├── fight.module.ts     # Fight feature module configuration
     ├── core/               # Domain logic and business rules
@@ -70,6 +71,7 @@ cards/
 │   ├── targeting-override.ts  # Overrides card attack targeting strategy
 │   ├── shield.ts           # SHIELD skill: health-reactive, edge-triggered on threshold cross
 │   ├── reactive-skill.ts   # HealthReactiveSkill interface (isHealthReactive, onHealthChanged)
+│   ├── survive.ts          # SurviveSkill: one-time fatal-blow interception; not a Skill implementor
 │   └── power-id-consistency.ts  # Domain validation for composite power groups
 ├── behaviors/              # Card behavior patterns
 │   ├── dodge-behaviors.ts  # Dodge behavior interface
@@ -81,12 +83,13 @@ cards/
 └── @types/                 # Type definitions
     ├── action-result/      # Action outcome types
     │   ├── special-result.ts        # Unified result: { name, actionResults, buffResults }
-    │   ├── attack-result.ts         # Includes remainingHealth snapshot + effects?: EffectResult[] (multi-effect array)
+    │   ├── attack-result.ts         # Includes remainingHealth snapshot + effects?: EffectResult[] + survived?: boolean + survivedSkillName?: string
     │   ├── named-attack-result.ts   # { name: string; results: AttackResult[] }
     │   ├── healing-result.ts
     │   ├── buff-results.ts
     │   └── shield-result.ts         # { target: CardInfo; shield: Shield }
     ├── attack/             # Attack and effect types (attack-effect.ts, attack-poison-effect.ts, attack-burn-effect.ts, attack-freeze-effect.ts, attack-stunt-effect.ts)
+    │   └── conditions/     # Attack conditions (always-true-attack-condition.ts)
     ├── alteration/         # Buff/debuff discriminated union
     │   ├── alteration-detail.ts     # AlterationDetail = Buff | Debuff (polarity: 'buff' | 'debuff')
     │   ├── alteration-type.ts       # AlterationType enum
@@ -156,6 +159,7 @@ fight-simulator/
     ├── damage-report.ts    # Damage calculation
     ├── status-change-report.ts # Status changes
     ├── shield-report.ts    # ShieldAppliedReport, ShieldBrokenReport, ShieldExpiredReport
+    ├── survived-report.ts  # SurvivedReport: { kind: 'survived', name, card }
     └── winner-report.ts    # Victory determination
 ```
 
@@ -169,7 +173,9 @@ targeting-card-strategies/
 ├── targeted-line-three.ts     # Line-of-three targeting
 ├── all-owner-cards.ts         # Target own cards
 ├── all-allies.ts              # Target all allies
-└── launcher.ts                # Self-targeting
+├── launcher.ts                # Self-targeting
+├── allied-card-by-id.ts       # Targets a specific ally by ID (returns [] if dead)
+└── last-attacker-of-ally.ts   # Targets the last card that attacked a specific ally (returns [] if dead)
 ```
 
 ### HTTP API Layer (`src/fight/http-api/`)

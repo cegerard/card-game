@@ -63,7 +63,7 @@ src/
     │   ├── card-action/
     │   │   └── action_stage.ts       # Action resolution logic
     │   ├── cards/                    # Card domain
-    │   │   ├── fighting-card.ts      # Main card entity (includes shield buffer, getHealthReactiveSkills())
+    │   │   ├── fighting-card.ts      # Main card entity (shield buffer, getHealthReactiveSkills(), lastAttacker, surviveSkill)
     │   │   ├── @types/               # Card-related types
     │   │   │   ├── card-info.ts
     │   │   │   ├── fighting-context.ts
@@ -88,6 +88,7 @@ src/
     │   │   │   ├── targeting-override.ts # Overrides card attack targeting strategy
     │   │   │   ├── shield.ts         # ShieldSkill: HealthReactiveSkill, edge-triggered on health threshold
     │   │   │   ├── reactive-skill.ts # HealthReactiveSkill interface
+    │   │   │   ├── survive.ts        # SurviveSkill: one-time fatal-blow interception; not a Skill implementor
     │   │   │   └── power-id-consistency.ts # Domain validation: skills with same powerId must share event + terminationEvent
     │   │   ├── behaviors/            # Card behaviors
     │   │   │   ├── dodge-behaviors.ts
@@ -103,13 +104,17 @@ src/
     │   │   ├── targeted-line-three.ts
     │   │   ├── all-owner-cards.ts
     │   │   ├── all-allies.ts
-    │   │   └── launcher.ts
+    │   │   ├── launcher.ts
+    │   │   ├── allied-card-by-id.ts  # Targets a specific ally by ID; returns [] if dead
+    │   │   └── last-attacker-of-ally.ts # Targets lastAttacker of a specific ally; returns [] if dead
     │   └── trigger/                  # Skill trigger events
     │       ├── trigger.ts
     │       ├── activatable-trigger.ts  # Interface extending Trigger with activate(triggerId, context)
     │       ├── turn-end.ts
     │       ├── death-trigger.ts      # Parameterized trigger matching 'ally-death:<cardId>' or 'enemy-death:<cardId>'
-    │       └── dynamic-trigger.ts    # Dormant→active trigger wrapper (composes activation + replacement triggers)
+    │       ├── dynamic-trigger.ts    # Dormant→active trigger wrapper (composes activation + replacement triggers)
+    │       ├── survived.ts           # SurvivedTrigger: id='survived', fires after a card survives a fatal blow
+    │       └── ally-health-below-threshold-trigger.ts # Edge-triggered on ally health crossing threshold downward
     └── tools/                        # Utility implementations
         └── math-randomizer.ts
 ```
@@ -220,9 +225,12 @@ sequenceDiagram
 - **Shield Mechanic**: `FightingCard` maintains an optional shield buffer (`{ points, duration }`). `applyShield(rate, duration)` sets `points = rate * maxHealth`. All damage flows through `applyFinalDamage()` returning `{ damageToHealth, shieldAbsorbed }` — shield absorbs first. Shield breaks on depleted points → `shield_broken` step. `TurnManager.decreaseShieldDuration()` called each turn; expiry → `shield_expired` step. Specials can apply shields post-action via `shieldApplication?: ShieldApplicationDto` (independent targeting).
 - **SHIELD Skill Kind (Reactive)**: `SkillKind.Shield` with `ShieldSkill implements HealthReactiveSkill`. The `HealthReactiveSkill` interface adds `isHealthReactive: true` and `onHealthChanged(card): boolean`. `ShieldSkill` is edge-triggered: fires once when `card.healthRatio` crosses the `HealthThresholdCondition` threshold downward, rearms when health goes back above. `triggerReactiveSkills()` (`reactive-skill-checker.ts`) is a pure function called after each HP change in `ActionStage`. `OtherSkillDto.event` is optional — SHIELD kind has no event trigger.
 - **AlterationDetail Discriminated Union**: `Buff` and `Debuff` are unified under `AlterationDetail = Buff | Debuff` discriminated by `polarity: 'buff' | 'debuff'`. Located in `@types/alteration/alteration-detail.ts` (former `@types/buff/` directory removed).
+- **SURVIVE Skill Pattern**: `SurviveSkill` is not a `Skill` implementor — it has no event trigger and no targeting strategy. It is extracted from `others[]` before the normal skill loop in the controller and stored on `FightingCard` as `surviveSkill: SurviveSkill | null`. `tryConsume()` is called inside `applyFinalDamage()` when a fatal blow would kill the card: if unconsumed, absorbs all excess damage and leaves the card at 1 HP, setting `AttackResult.survived = true` + `survivedSkillName`. Emits a `StepKind.Survived` step. One-time use per card.
+- **`FightingCard.lastAttacker`**: Optional field (`lastAttacker?: FightingCard`) set by `ActionStage` after each successful hit. Used by `LastAttackerOfAllyTargetingStrategy` to resolve the target dynamically at skill launch time.
+- **AllyHealthBelowThreshold Pattern**: `ActionStage` fires the synthetic event `ally-health-${card.id}` (via `ActivatableTrigger.activate()`) after each damage application. `AllyHealthBelowThresholdTrigger` monitors a named ally's health ratio: fires once when it crosses the threshold downward (edge-triggered), rearms when health recovers above. Requires `FightingContext.lastAttacker` to resolve player ownership. Used with `AlliedCardByIdStrategy` (buff the injured ally) or `LastAttackerOfAllyTargetingStrategy` (attack the attacker).
 - **Separation of Concerns**:
   - `Fight` orchestrates battle flow
-  - `ActionStage` handles attack/heal resolution, triggers reactive skills after each HP change
+  - `ActionStage` handles attack/heal resolution, triggers reactive skills after each HP change, fires ally-health events
   - `TurnManager` handles turn-end effects including shield duration
   - `CardSelector` determines turn order
   - `EndEventProcessor` handles event-bound buff and effect removal across all cards

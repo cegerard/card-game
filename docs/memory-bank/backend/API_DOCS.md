@@ -132,14 +132,14 @@ Simulates a turn-based card battle between two players.
 
 ```typescript
 {
-  kind: "HEALING" | "BUFF" | "CONDITIONAL_ATTACK" | "TARGETING_OVERRIDE" | "SHIELD",
+  kind: "HEALING" | "BUFF" | "CONDITIONAL_ATTACK" | "TARGETING_OVERRIDE" | "SHIELD" | "SURVIVE",
   name: string,
-  rate?: number,                // Optional — not required for TARGETING_OVERRIDE; required for SHIELD
-  targetingStrategy: TargetingStrategy,
-  event?: "turn-end" | "next-action" | "ally-death",  // When skill triggers; NOT required for SHIELD kind
-  targetCardId?: string,        // Required when event=ally-death: id of the ally whose death triggers this skill
+  rate?: number,                // Optional — not required for TARGETING_OVERRIDE or SURVIVE; required for SHIELD
+  targetingStrategy?: TargetingStrategy,  // Not required for SHIELD or SURVIVE kinds
+  event?: "turn-end" | "next-action" | "ally-death" | "ally-health-below",  // When skill triggers; NOT required for SHIELD or SURVIVE kinds
+  targetCardId?: string,        // Required when event=ally-death or ally-health-below: id of the monitored card
   // SHIELD-specific fields:
-  activationCondition?: { operator: "below" | "above", threshold: number },  // Health ratio threshold (0–1) for SHIELD activation
+  activationCondition?: { operator?: "below" | "above", threshold: number },  // Health ratio threshold (0–1) for SHIELD/ally-health-below activation
   buffType?: "attack" | "defense" | "agility" | "accuracy",  // Required if kind=BUFF
   duration?: number,            // Required if kind=BUFF (0 = infinite: permanent or event-bound)
   terminationEvent?: string,    // Event name that removes this skill's buff/targeting override when fired
@@ -197,7 +197,7 @@ Simulates a turn-based card battle between two players.
 ```typescript
 {
   [stepNumber: number]: {
-    kind: "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "debuff_removed" | "buff_expired" | "debuff_expired" | "effect_removed" | "targeting_override" | "targeting_reverted" | "shield_applied" | "shield_broken" | "shield_expired" | "fight_end",
+    kind: "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "debuff_removed" | "buff_expired" | "debuff_expired" | "effect_removed" | "targeting_override" | "targeting_reverted" | "shield_applied" | "shield_broken" | "shield_expired" | "survived" | "fight_end",
     // Additional properties vary by step kind
   }
 }
@@ -209,8 +209,17 @@ Simulates a turn-based card battle between two players.
   kind: "attack" | "special_attack",
   name?: string,         // Skill name that triggered the attack
   attacker: CardInfo,
-  damages: { defender: CardInfo, damage: number, isCritical: boolean, dodge: boolean, remainingHealth: number }[],
+  damages: { defender: CardInfo, damage: number, isCritical: boolean, dodge: boolean, remainingHealth: number, survived?: boolean, survivedSkillName?: string }[],
   energy: number
+}
+```
+
+**`survived` step** (`SurvivedReport`): Emitted immediately after a fatal blow is intercepted by a SURVIVE skill.
+```typescript
+{
+  kind: "survived",
+  name: string,          // Name of the SURVIVE skill that triggered
+  card: CardInfo         // Card that survived the fatal blow (left at 1 HP)
 }
 ```
 
@@ -378,6 +387,8 @@ Simulates a turn-based card battle between two players.
 - `all-owner-cards`: Targets all cards belonging to owner
 - `all-allies`: Targets all allied cards
 - `self`: Targets the card itself
+- `last-attacker-of-ally`: Targets the card that last attacked a specific ally (requires `targetCardId`); built inline in controller with `LastAttackerOfAllyTargetingStrategy`
+- `linked-ally`: Targets a specific ally by ID (requires `targetCardId`); built inline in controller with `AlliedCardByIdStrategy`
 
 ### DodgeStrategy
 
@@ -391,6 +402,8 @@ Simulates a turn-based card battle between two players.
 - `ally-death`: Skill triggers when a specific ally dies (requires `targetCardId` matching the dead card's `id`)
 - `enemy-death`: Skill triggers when a specific enemy dies (requires `targetCardId` matching the dead card's `id`)
 - `dormant`: Skill starts inactive; requires `activationEvent`, `activationTargetCardId`, and `replacementEvent` to define when and how the trigger activates mid-battle. The replacement trigger's target card ID is resolved dynamically at activation time from the killer card's ID
+- `survived`: Skill triggers after the owning card survives a fatal blow via SURVIVE skill
+- `ally-health-below`: Edge-triggered when a monitored ally's health ratio crosses `activationCondition.threshold` downward; requires `targetCardId` (the monitored ally's id) and `activationCondition.threshold`
 
 ### SpecialKind
 
@@ -404,6 +417,7 @@ Simulates a turn-based card battle between two players.
 - `CONDITIONAL_ATTACK`: Attack skill triggered conditionally by an event
 - `TARGETING_OVERRIDE`: Overrides the card's attack targeting strategy (requires `terminationEvent`)
 - `SHIELD`: Health-reactive shield skill — no `event` field; triggers when card's health ratio crosses `activationCondition.threshold` downward (edge-triggered, rearms on recovery)
+- `SURVIVE`: One-time fatal-blow interception — no `event`, no `targetingStrategy`; only `name` required; extracted from `others[]` before normal skill loop
 
 ### Effect
 
