@@ -262,6 +262,54 @@
           "duration": 1,
           "targetingStrategy": "self",
           "polarity": "buff"
+        },
+        {
+          "kind": "CONDITIONAL_ATTACK",
+          "name": "Larmes de la salamandre",
+          "event": "ally-health-below",
+          "targetCardId": "arionis",
+          "activationCondition": {
+            "type": "health-threshold",
+            "operator": "below",
+            "threshold": 0.3
+          },
+          "damages": [{ "type": "FIRE", "rate": 2.0 }],
+          "targetingStrategy": "last-attacker-of-ally",
+          "powerId": "salamander-tears"
+        },
+        {
+          "kind": "ALTERATION",
+          "name": "Larmes de la salamandre",
+          "event": "ally-health-below",
+          "targetCardId": "arionis",
+          "activationCondition": {
+            "type": "health-threshold",
+            "operator": "below",
+            "threshold": 0.3
+          },
+          "polarity": "buff",
+          "buffType": "attack",
+          "rate": 0.1,
+          "duration": 5,
+          "targetingStrategy": "linked-ally",
+          "powerId": "salamander-tears"
+        },
+        {
+          "kind": "ALTERATION",
+          "name": "Larmes de la salamandre",
+          "event": "ally-health-below",
+          "targetCardId": "arionis",
+          "activationCondition": {
+            "type": "health-threshold",
+            "operator": "below",
+            "threshold": 0.3
+          },
+          "polarity": "buff",
+          "buffType": "defense",
+          "rate": 0.2,
+          "duration": 5,
+          "targetingStrategy": "linked-ally",
+          "powerId": "salamander-tears"
         }
       ]
     },

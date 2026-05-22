@@ -54,6 +54,7 @@ export class FightingCard {
   private specialEnergy: number = 0;
   private receivedDamages: number = 0;
   private receivedHeal: number = 0;
+  public lastAttacker?: FightingCard;
 
   // Buffs
   private buffs: Buff[] = [];

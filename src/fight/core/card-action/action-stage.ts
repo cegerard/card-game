@@ -303,6 +303,27 @@ export class ActionStage {
         );
       }
 
+      if (!damageDealt.dodge) {
+        defensiveCard.lastAttacker = attackerCard;
+        const damagedCardPlayer = this.player1.ownCard(defensiveCard)
+          ? this.player1
+          : this.player2;
+        const allyHealthContext: FightingContext = {
+          sourcePlayer: this.player1,
+          opponentPlayer: this.player2,
+          lastAttacker: attackerCard,
+        };
+        damagedCardPlayer.playableCards
+          .filter((c) => c !== defensiveCard)
+          .forEach((caster) => {
+            const results = caster.launchSkills(
+              `ally-health-${defensiveCard.id}`,
+              allyHealthContext,
+            );
+            report.statusChanges.push(...skillResultsToSteps(caster, results));
+          });
+      }
+
       if (defensiveCard.isDead() && !reportedDeaths.has(defensiveCard)) {
         reportedDeaths.add(defensiveCard);
         this.notifyDeath(defensiveCard, attackerCard);

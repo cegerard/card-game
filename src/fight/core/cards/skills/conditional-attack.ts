@@ -4,6 +4,7 @@ import { AttackCondition } from '../@types/attack/attack-condition';
 import { AttackSkill } from './attack-skill';
 import { Skill, SkillKind, SkillResults } from './skill';
 import { Trigger } from '../../trigger/trigger';
+import { isActivatableTrigger } from '../../trigger/activatable-trigger';
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 
 export class ConditionalAttack implements Skill {
@@ -14,6 +15,7 @@ export class ConditionalAttack implements Skill {
     private readonly attackSkill: AttackSkill,
     private readonly condition: AttackCondition,
     private readonly trigger: Trigger,
+    private readonly powerId?: string,
   ) {}
 
   isTriggered(triggerName: string): boolean {
@@ -38,7 +40,14 @@ export class ConditionalAttack implements Skill {
       skillKind: SkillKind.Attack,
       results: attackResults.results,
       name: this.name,
+      powerId: this.powerId,
     };
+  }
+
+  activate(triggerId: string, context: FightingContext): void {
+    if (isActivatableTrigger(this.trigger)) {
+      this.trigger.activate(triggerId, context);
+    }
   }
 
   tick(): void {

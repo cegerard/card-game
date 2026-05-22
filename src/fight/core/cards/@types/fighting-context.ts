@@ -5,4 +5,5 @@ export type FightingContext = {
   sourcePlayer: Player;
   opponentPlayer: Player;
   killerCard?: FightingCard;
+  lastAttacker?: FightingCard;
 };
