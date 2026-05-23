@@ -309,8 +309,9 @@ export class ActionStage {
           ? this.player1
           : this.player2;
         const allyHealthContext: FightingContext = {
-          sourcePlayer: this.player1,
-          opponentPlayer: this.player2,
+          sourcePlayer: damagedCardPlayer,
+          opponentPlayer:
+            damagedCardPlayer === this.player1 ? this.player2 : this.player1,
           lastAttacker: attackerCard,
         };
         damagedCardPlayer.playableCards

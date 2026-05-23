@@ -20,19 +20,9 @@ export class AllyHealthBelowThresholdTrigger implements ActivatableTrigger {
   activate(triggerId: string, context: FightingContext): void {
     if (triggerId !== `ally-health-${this.monitoredAllyId}`) return;
 
-    const attackerPlayer =
-      context.lastAttacker &&
-      context.sourcePlayer.allCards.some((c) => c === context.lastAttacker)
-        ? context.sourcePlayer
-        : context.opponentPlayer;
-    const allyPlayer =
-      attackerPlayer === context.sourcePlayer
-        ? context.opponentPlayer
-        : context.sourcePlayer;
-
-    const ally =
-      allyPlayer.allCards.find((c) => c.id === this.monitoredAllyId) ??
-      attackerPlayer.allCards?.find((c) => c.id === this.monitoredAllyId);
+    const ally = context.sourcePlayer.allCards.find(
+      (c) => c.id === this.monitoredAllyId,
+    );
     if (!ally) return;
 
     const nowBelow = ally.healthRatio < this.threshold;
