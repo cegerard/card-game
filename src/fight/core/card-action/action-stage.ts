@@ -303,28 +303,6 @@ export class ActionStage {
         );
       }
 
-      if (!damageDealt.dodge) {
-        defensiveCard.lastAttacker = attackerCard;
-        const damagedCardPlayer = this.player1.ownCard(defensiveCard)
-          ? this.player1
-          : this.player2;
-        const allyHealthContext: FightingContext = {
-          sourcePlayer: damagedCardPlayer,
-          opponentPlayer:
-            damagedCardPlayer === this.player1 ? this.player2 : this.player1,
-          lastAttacker: attackerCard,
-        };
-        damagedCardPlayer.playableCards
-          .filter((c) => c !== defensiveCard)
-          .forEach((caster) => {
-            const results = caster.launchSkills(
-              `ally-health-${defensiveCard.id}`,
-              allyHealthContext,
-            );
-            report.statusChanges.push(...skillResultsToSteps(caster, results));
-          });
-      }
-
       if (defensiveCard.isDead() && !reportedDeaths.has(defensiveCard)) {
         reportedDeaths.add(defensiveCard);
         this.notifyDeath(defensiveCard, attackerCard);
@@ -335,6 +313,29 @@ export class ActionStage {
         });
         report.statusChanges.push(...this.deathSkillHandler.drainSteps());
       } else if (!defensiveCard.isDead()) {
+        if (!damageDealt.dodge) {
+          defensiveCard.lastAttacker = attackerCard;
+          const damagedCardPlayer = this.player1.ownCard(defensiveCard)
+            ? this.player1
+            : this.player2;
+          const allyHealthContext: FightingContext = {
+            sourcePlayer: damagedCardPlayer,
+            opponentPlayer:
+              damagedCardPlayer === this.player1 ? this.player2 : this.player1,
+            lastAttacker: attackerCard,
+          };
+          damagedCardPlayer.playableCards
+            .filter((c) => c !== defensiveCard)
+            .forEach((caster) => {
+              const results = caster.launchSkills(
+                `ally-health-${defensiveCard.id}`,
+                allyHealthContext,
+              );
+              report.statusChanges.push(
+                ...skillResultsToSteps(caster, results),
+              );
+            });
+        }
         if (damageDealt.effects?.length) {
           for (const effect of damageDealt.effects) {
             report.statusChanges.push({
