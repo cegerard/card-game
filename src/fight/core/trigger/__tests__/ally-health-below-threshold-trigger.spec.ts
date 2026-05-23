@@ -90,8 +90,21 @@ describe('AllyHealthBelowThresholdTrigger', () => {
     });
   });
 
-  describe('player-resolution branch: lastAttacker in sourcePlayer', () => {
-    it('finds the ally in opponentPlayer and fires the trigger', () => {
+  describe('sourcePlayer is always the ally owner', () => {
+    it('fires when ally is in sourcePlayer regardless of lastAttacker', () => {
+      const trigger = new AllyHealthBelowThresholdTrigger(ALLY_ID, THRESHOLD);
+      const ally = makeAlly(ALLY_ID, 0.2);
+      const attacker = { id: 'attacker-01' } as unknown as FightingCard;
+      const context: FightingContext = {
+        sourcePlayer: { allCards: [ally] } as unknown as Player,
+        opponentPlayer: { allCards: [attacker] } as unknown as Player,
+        lastAttacker: attacker,
+      };
+      trigger.activate(EVENT_ID, context);
+      expect(trigger.isTriggered(EVENT_ID)).toBe(true);
+    });
+
+    it('does not fire when ally is only in opponentPlayer', () => {
       const trigger = new AllyHealthBelowThresholdTrigger(ALLY_ID, THRESHOLD);
       const ally = makeAlly(ALLY_ID, 0.2);
       const attacker = { id: 'attacker-01' } as unknown as FightingCard;
@@ -101,7 +114,7 @@ describe('AllyHealthBelowThresholdTrigger', () => {
         lastAttacker: attacker,
       };
       trigger.activate(EVENT_ID, context);
-      expect(trigger.isTriggered(EVENT_ID)).toBe(true);
+      expect(trigger.isTriggered(EVENT_ID)).toBe(false);
     });
   });
 });
