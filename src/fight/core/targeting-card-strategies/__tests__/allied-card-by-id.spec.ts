@@ -23,7 +23,11 @@ describe('AlliedCardByIdStrategy', () => {
 
     it('returns the ally card', () => {
       expect(
-        strategy.targetedCards(createFightingCard(), sourcePlayer, opponentPlayer),
+        strategy.targetedCards(
+          createFightingCard(),
+          sourcePlayer,
+          opponentPlayer,
+        ),
       ).toEqual([ally]);
     });
   });
@@ -41,7 +45,11 @@ describe('AlliedCardByIdStrategy', () => {
 
     it('returns empty array', () => {
       expect(
-        strategy.targetedCards(createFightingCard(), sourcePlayer, opponentPlayer),
+        strategy.targetedCards(
+          createFightingCard(),
+          sourcePlayer,
+          opponentPlayer,
+        ),
       ).toEqual([]);
     });
   });
@@ -57,7 +65,11 @@ describe('AlliedCardByIdStrategy', () => {
 
     it('returns empty array', () => {
       expect(
-        strategy.targetedCards(createFightingCard(), sourcePlayer, opponentPlayer),
+        strategy.targetedCards(
+          createFightingCard(),
+          sourcePlayer,
+          opponentPlayer,
+        ),
       ).toEqual([]);
     });
   });

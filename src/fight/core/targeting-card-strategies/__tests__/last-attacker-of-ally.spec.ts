@@ -17,7 +17,11 @@ describe('LastAttackerOfAllyTargetingStrategy', () => {
   describe('when ally has no lastAttacker recorded', () => {
     it('returns empty array', () => {
       expect(
-        strategy.targetedCards(createFightingCard(), sourcePlayer, opponentPlayer),
+        strategy.targetedCards(
+          createFightingCard(),
+          sourcePlayer,
+          opponentPlayer,
+        ),
       ).toEqual([]);
     });
   });
@@ -32,7 +36,11 @@ describe('LastAttackerOfAllyTargetingStrategy', () => {
 
     it('returns the last attacker card', () => {
       expect(
-        strategy.targetedCards(createFightingCard(), sourcePlayer, opponentPlayer),
+        strategy.targetedCards(
+          createFightingCard(),
+          sourcePlayer,
+          opponentPlayer,
+        ),
       ).toEqual([attacker]);
     });
   });
@@ -46,7 +54,11 @@ describe('LastAttackerOfAllyTargetingStrategy', () => {
 
     it('returns empty array', () => {
       expect(
-        strategy.targetedCards(createFightingCard(), sourcePlayer, opponentPlayer),
+        strategy.targetedCards(
+          createFightingCard(),
+          sourcePlayer,
+          opponentPlayer,
+        ),
       ).toEqual([]);
     });
   });
@@ -58,7 +70,11 @@ describe('LastAttackerOfAllyTargetingStrategy', () => {
 
     it('returns empty array', () => {
       expect(
-        strategy.targetedCards(createFightingCard(), sourcePlayer, opponentPlayer),
+        strategy.targetedCards(
+          createFightingCard(),
+          sourcePlayer,
+          opponentPlayer,
+        ),
       ).toEqual([]);
     });
   });
@@ -69,13 +85,19 @@ describe('LastAttackerOfAllyTargetingStrategy', () => {
     beforeEach(() => {
       attacker = createFightingCard();
       sourcePlayer = new Player('source', [createFightingCard()]);
-      opponentPlayer = new Player('opponent', [createFightingCard({ id: ALLY_ID })]);
+      opponentPlayer = new Player('opponent', [
+        createFightingCard({ id: ALLY_ID }),
+      ]);
       opponentPlayer.allCards[0].lastAttacker = attacker;
     });
 
     it('finds ally via fallback and returns last attacker', () => {
       expect(
-        strategy.targetedCards(createFightingCard(), sourcePlayer, opponentPlayer),
+        strategy.targetedCards(
+          createFightingCard(),
+          sourcePlayer,
+          opponentPlayer,
+        ),
       ).toEqual([attacker]);
     });
   });

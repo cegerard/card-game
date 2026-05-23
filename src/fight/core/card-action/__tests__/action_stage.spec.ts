@@ -26,6 +26,8 @@ import {
   BuffReport,
   DebuffReport,
 } from '../../fight-simulator/@types/alteration-report';
+import { AlterationSkill } from '../../cards/skills/alteration-skill';
+import { AllyHealthBelowThresholdTrigger } from '../../trigger/ally-health-below-threshold-trigger';
 
 class UnknownSpecial implements Special {
   name = 'unknown';
@@ -326,6 +328,150 @@ describe('ActionStage', () => {
         expect(() => actionStage.computeNextAction([attacker])).toThrow(
           'Unknown special kind: unknownKind',
         );
+      });
+    });
+  });
+
+  describe('ally-health dispatch', () => {
+    const ARIONIS_ID = 'arionis-01';
+    const HIGH_ENERGY = new SpecialAttack(
+      'special',
+      [new DamageComposition(DamageType.PHYSICAL, 1)],
+      999,
+      POSITION_BASED,
+    );
+
+    function makeObserverCard(allyId: string, threshold: number): FightingCard {
+      const buffSkill = new AlterationSkill({
+        name: 'Watch Out',
+        polarity: 'buff',
+        attributeType: 'attack',
+        rate: 0.1,
+        duration: 1,
+        trigger: new AllyHealthBelowThresholdTrigger(allyId, threshold),
+        targetingStrategy: new Launcher(),
+      });
+      return new FightingCard(
+        'observer-01',
+        'Observer',
+        {
+          attack: 10,
+          defense: 0,
+          health: 1000,
+          speed: 100,
+          agility: 0,
+          accuracy: 100,
+          criticalChance: 0,
+        },
+        {
+          simpleAttack: SIMPLE_ATTACK,
+          special: HIGH_ENERGY,
+          others: [buffSkill],
+        },
+        { dodge: new SimpleDodge() },
+        Element.PHYSICAL,
+      );
+    }
+
+    describe('when ally is hit (non-dodge)', () => {
+      let steps: ReturnType<ActionStage['computeNextAction']>;
+      let arionis: FightingCard;
+
+      beforeEach(() => {
+        const attacker = makeCard(HIGH_ENERGY);
+        arionis = new FightingCard(
+          ARIONIS_ID,
+          'Arionis',
+          {
+            attack: 10,
+            defense: 0,
+            health: 200,
+            speed: 100,
+            agility: 0,
+            accuracy: 100,
+            criticalChance: 0,
+          },
+          { simpleAttack: SIMPLE_ATTACK, special: HIGH_ENERGY, others: [] },
+          { dodge: new SimpleDodge() },
+          Element.PHYSICAL,
+        );
+        const observer = makeObserverCard(ARIONIS_ID, 0.6);
+        const player1 = new Player('Player 1', [attacker]);
+        const player2 = new Player('Player 2', [arionis, observer]);
+        const actionStage = new ActionStage(
+          player1,
+          player2,
+          { onCardDeath: [] },
+          new DeathSkillHandler(player1, player2),
+        );
+        steps = actionStage.computeNextAction([attacker]);
+      });
+
+      it('emits a buff step from the observer ally-health trigger', () => {
+        expect(steps.some((s) => s.kind === StepKind.Buff)).toBe(true);
+      });
+    });
+
+    describe('when the hit is dodged', () => {
+      let steps: ReturnType<ActionStage['computeNextAction']>;
+      let arionis: FightingCard;
+
+      beforeEach(() => {
+        const LOW_ACCURACY = new SimpleAttack(
+          'attack',
+          [new DamageComposition(DamageType.PHYSICAL, 1)],
+          POSITION_BASED,
+        );
+        const attacker = new FightingCard(
+          faker.string.uuid(),
+          'Attacker',
+          {
+            attack: 100,
+            defense: 0,
+            health: 1000,
+            speed: 100,
+            agility: 0,
+            accuracy: 0,
+            criticalChance: 0,
+          },
+          { simpleAttack: LOW_ACCURACY, special: HIGH_ENERGY, others: [] },
+          { dodge: new SimpleDodge() },
+          Element.PHYSICAL,
+        );
+        arionis = new FightingCard(
+          ARIONIS_ID,
+          'Arionis',
+          {
+            attack: 10,
+            defense: 0,
+            health: 200,
+            speed: 100,
+            agility: 1,
+            accuracy: 100,
+            criticalChance: 0,
+          },
+          { simpleAttack: SIMPLE_ATTACK, special: HIGH_ENERGY, others: [] },
+          { dodge: new SimpleDodge() },
+          Element.PHYSICAL,
+        );
+        const observer = makeObserverCard(ARIONIS_ID, 0.6);
+        const player1 = new Player('Player 1', [attacker]);
+        const player2 = new Player('Player 2', [arionis, observer]);
+        const actionStage = new ActionStage(
+          player1,
+          player2,
+          { onCardDeath: [] },
+          new DeathSkillHandler(player1, player2),
+        );
+        steps = actionStage.computeNextAction([attacker]);
+      });
+
+      it('does not emit a buff step from the observer', () => {
+        expect(steps.some((s) => s.kind === StepKind.Buff)).toBe(false);
+      });
+
+      it('does not set lastAttacker on the dodging card', () => {
+        expect(arionis.lastAttacker).toBeUndefined();
       });
     });
   });

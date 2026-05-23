@@ -70,14 +70,38 @@ describe('AllyHealthBelowThresholdTrigger', () => {
   });
 
   describe('ally absent from context', () => {
-    it('is a silent no-op when ally is not in sourcePlayer', () => {
+    it('does not throw when ally is not found', () => {
       const trigger = new AllyHealthBelowThresholdTrigger(ALLY_ID, THRESHOLD);
       const context: FightingContext = {
         sourcePlayer: { allCards: [] } as unknown as Player,
-        opponentPlayer: {} as unknown as Player,
+        opponentPlayer: { allCards: [] } as unknown as Player,
       };
       expect(() => trigger.activate(EVENT_ID, context)).not.toThrow();
+    });
+
+    it('is not triggered when ally is not found', () => {
+      const trigger = new AllyHealthBelowThresholdTrigger(ALLY_ID, THRESHOLD);
+      const context: FightingContext = {
+        sourcePlayer: { allCards: [] } as unknown as Player,
+        opponentPlayer: { allCards: [] } as unknown as Player,
+      };
+      trigger.activate(EVENT_ID, context);
       expect(trigger.isTriggered(EVENT_ID)).toBe(false);
+    });
+  });
+
+  describe('player-resolution branch: lastAttacker in sourcePlayer', () => {
+    it('finds the ally in opponentPlayer and fires the trigger', () => {
+      const trigger = new AllyHealthBelowThresholdTrigger(ALLY_ID, THRESHOLD);
+      const ally = makeAlly(ALLY_ID, 0.2);
+      const attacker = { id: 'attacker-01' } as unknown as FightingCard;
+      const context: FightingContext = {
+        sourcePlayer: { allCards: [attacker] } as unknown as Player,
+        opponentPlayer: { allCards: [ally] } as unknown as Player,
+        lastAttacker: attacker,
+      };
+      trigger.activate(EVENT_ID, context);
+      expect(trigger.isTriggered(EVENT_ID)).toBe(true);
     });
   });
 });
