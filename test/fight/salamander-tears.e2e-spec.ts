@@ -319,22 +319,23 @@ describe('Salamander Tears — link skill trigger', () => {
     expect(buffSteps).toHaveLength(2);
   });
 
-  it('buff steps target Arionis', () => {
+  it('buff steps all target Arionis', () => {
     const buffSteps = stepEntries.filter(
       ([, s]) => s.kind === 'buff' && s.powerId === 'salamander-tears',
     );
-    buffSteps.forEach(([, step]) => {
-      expect(step.alterations[0].target.id).toBe(ARIONIS_ID);
-    });
+    expect(buffSteps.map(([, s]) => s.alterations[0].target.id)).toEqual([
+      ARIONIS_ID,
+      ARIONIS_ID,
+    ]);
   });
 
-  it('buff steps have remainingTurns of 5', () => {
+  it('buff steps all have remainingTurns of 5', () => {
     const buffSteps = stepEntries.filter(
       ([, s]) => s.kind === 'buff' && s.powerId === 'salamander-tears',
     );
-    buffSteps.forEach(([, step]) => {
-      expect(step.alterations[0].remainingTurns).toBe(5);
-    });
+    expect(buffSteps.map(([, s]) => s.alterations[0].remainingTurns)).toEqual([
+      5, 5,
+    ]);
   });
 
   it('attack buff has rate-based value (attack +10%)', () => {
