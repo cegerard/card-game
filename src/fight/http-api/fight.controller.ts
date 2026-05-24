@@ -385,16 +385,7 @@ export class FightController {
           throw new Error('Alteration skill requires polarity');
         }
         if (skillData.event === TriggerEvent.ALLY_HEALTH_BELOW) {
-          if (!skillData.activationCondition) {
-            throw new BadRequestException(
-              'ALTERATION with ally-health-below requires activationCondition',
-            );
-          }
-          if (!skillData.targetCardId) {
-            throw new BadRequestException(
-              'ALTERATION with ally-health-below requires targetCardId',
-            );
-          }
+          this.requireAllyHealthBelowFields(skillData);
           return new AlterationSkill({
             name: skillData.name,
             polarity: skillData.polarity,
@@ -443,16 +434,7 @@ export class FightController {
         });
       case SkillKind.CONDITIONAL_ATTACK:
         if (skillData.event === TriggerEvent.ALLY_HEALTH_BELOW) {
-          if (!skillData.activationCondition) {
-            throw new BadRequestException(
-              'CONDITIONAL_ATTACK with ally-health-below requires activationCondition',
-            );
-          }
-          if (!skillData.targetCardId) {
-            throw new BadRequestException(
-              'CONDITIONAL_ATTACK with ally-health-below requires targetCardId',
-            );
-          }
+          this.requireAllyHealthBelowFields(skillData);
           const ahDamages = skillData.damages.map(
             (d) => new DamageComposition(d.type, d.rate),
           );
@@ -580,6 +562,19 @@ export class FightController {
         throw new Error('SURVIVE skill must not appear in others skill list');
       default:
         throw new Error(`Unknown skill kind: ${skillData.kind}`);
+    }
+  }
+
+  private requireAllyHealthBelowFields(skillData: OtherSkillDto): void {
+    if (!skillData.activationCondition) {
+      throw new BadRequestException(
+        `${skillData.kind} with ally-health-below requires activationCondition`,
+      );
+    }
+    if (!skillData.targetCardId) {
+      throw new BadRequestException(
+        `${skillData.kind} with ally-health-below requires targetCardId`,
+      );
     }
   }
 
