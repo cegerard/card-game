@@ -1,7 +1,7 @@
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 import { FightingCard } from '../fighting-card';
 import { Trigger } from '../../trigger/trigger';
-import { ActivatableTrigger } from '../../trigger/activatable-trigger';
+import { isActivatableTrigger } from '../../trigger/activatable-trigger';
 import { FightingContext } from '../@types/fighting-context';
 import { AlterationType } from '../@types/alteration/alteration-type';
 import {
@@ -137,8 +137,8 @@ export class AlterationSkill implements Skill {
   }
 
   activate(triggerId: string, context: FightingContext): void {
-    if ('activate' in this.trigger) {
-      (this.trigger as ActivatableTrigger).activate(triggerId, context);
+    if (isActivatableTrigger(this.trigger)) {
+      this.trigger.activate(triggerId, context);
     }
   }
 
