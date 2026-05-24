@@ -106,8 +106,8 @@ describe('ConditionalAttack', () => {
     conditionalAttack = new ConditionalAttack(
       'attack',
       makeSimpleAttack(),
-      new NextAction(),
       condition,
+      new NextAction(),
     );
   });
 
@@ -133,8 +133,8 @@ describe('ConditionalAttack', () => {
       const allyDeathAttack = new ConditionalAttack(
         'attack',
         makeSimpleAttack(),
-        new DeathTrigger('ally-death', 'kaelion'),
         new EveryNTurnsCondition(0),
+        new DeathTrigger('ally-death', 'kaelion'),
       );
       expect(allyDeathAttack.isTriggered('ally-death:kaelion')).toBe(true);
     });
@@ -143,8 +143,8 @@ describe('ConditionalAttack', () => {
       const allyDeathAttack = new ConditionalAttack(
         'attack',
         makeSimpleAttack(),
-        new DeathTrigger('ally-death', 'kaelion'),
         new EveryNTurnsCondition(0),
+        new DeathTrigger('ally-death', 'kaelion'),
       );
       expect(allyDeathAttack.isTriggered('ally-death:other')).toBe(false);
     });
@@ -192,8 +192,8 @@ describe('FightingCard.tickSkills', () => {
     const ca = new ConditionalAttack(
       'attack',
       makeSimpleAttack(),
-      new NextAction(),
       condition,
+      new NextAction(),
     );
     const card = makeCard({ conditionalAttack: ca });
 
@@ -225,8 +225,8 @@ describe('ConditionalAttack integration via Fight (interval=3)', () => {
         [new DamageComposition(DamageType.PHYSICAL, CONDITIONAL_RATE)],
         POSITION_BASED,
       ),
-      new NextAction(),
       new EveryNTurnsCondition(3),
+      new NextAction(),
     );
 
     attacker = new FightingCard(
@@ -338,8 +338,8 @@ describe('ConditionalAttack respects targeting override', () => {
     const ca = new ConditionalAttack(
       'attack',
       makeSimpleAttack(),
-      new NextAction(),
       condition,
+      new NextAction(),
     );
     condition.tick();
     const result = ca.launch(attacker, context, override);
@@ -367,8 +367,8 @@ describe('ConditionalAttack respects targeting override', () => {
     const ca = new ConditionalAttack(
       'attack',
       targetAllAttack,
-      new NextAction(),
       condition,
+      new NextAction(),
     );
     condition.tick();
     const result = ca.launch(attacker, context, override);
@@ -437,8 +437,8 @@ describe('Frozen card skips tick', () => {
         [new DamageComposition(DamageType.PHYSICAL, 3.0)],
         POSITION_BASED,
       ),
-      new NextAction(),
       new EveryNTurnsCondition(2),
+      new NextAction(),
     );
     attacker = makeCard({
       name: 'Attacker',

@@ -55,6 +55,7 @@ import { HealthThresholdCondition } from '../core/cards/@types/skill-activation-
 import { DamageComposition } from '../core/cards/@types/damage/damage-composition';
 import { ConditionalAttack } from '../core/cards/skills/conditional-attack';
 import { EveryNTurnsCondition } from '../core/cards/@types/attack/conditions/every-n-turns-condition';
+import { AlwaysTrueAttackCondition } from '../core/cards/@types/attack/conditions/always-true-attack-condition';
 import { AllyHealthBelowThresholdTrigger } from '../core/trigger/ally-health-below-threshold-trigger';
 import { LastAttackerOfAllyTargetingStrategy } from '../core/targeting-card-strategies/last-attacker-of-ally';
 import { AlliedCardByIdStrategy } from '../core/targeting-card-strategies/allied-card-by-id';
@@ -384,7 +385,16 @@ export class FightController {
           throw new Error('Alteration skill requires polarity');
         }
         if (skillData.event === TriggerEvent.ALLY_HEALTH_BELOW) {
-          this.requireAllyHealthBelowFields(skillData);
+          if (!skillData.activationCondition) {
+            throw new BadRequestException(
+              'ALTERATION with ally-health-below requires activationCondition',
+            );
+          }
+          if (!skillData.targetCardId) {
+            throw new BadRequestException(
+              'ALTERATION with ally-health-below requires targetCardId',
+            );
+          }
           return new AlterationSkill({
             name: skillData.name,
             polarity: skillData.polarity,
@@ -433,7 +443,16 @@ export class FightController {
         });
       case SkillKind.CONDITIONAL_ATTACK:
         if (skillData.event === TriggerEvent.ALLY_HEALTH_BELOW) {
-          this.requireAllyHealthBelowFields(skillData);
+          if (!skillData.activationCondition) {
+            throw new BadRequestException(
+              'CONDITIONAL_ATTACK with ally-health-below requires activationCondition',
+            );
+          }
+          if (!skillData.targetCardId) {
+            throw new BadRequestException(
+              'CONDITIONAL_ATTACK with ally-health-below requires targetCardId',
+            );
+          }
           const ahDamages = skillData.damages.map(
             (d) => new DamageComposition(d.type, d.rate),
           );
@@ -453,8 +472,8 @@ export class FightController {
           return new ConditionalAttack(
             skillData.name,
             ahAttackSkill,
+            new AlwaysTrueAttackCondition(),
             ahTrigger,
-            undefined,
             skillData.powerId,
           );
         }
@@ -494,8 +513,8 @@ export class FightController {
         return new ConditionalAttack(
           skillData.name,
           caAttackSkill,
-          this.buildTriggerForSkill(skillData),
           new EveryNTurnsCondition(skillData.interval),
+          this.buildTriggerForSkill(skillData),
         );
       case SkillKind.TARGETING_OVERRIDE:
         if (!skillData.terminationEvent) {
@@ -561,19 +580,6 @@ export class FightController {
         throw new Error('SURVIVE skill must not appear in others skill list');
       default:
         throw new Error(`Unknown skill kind: ${skillData.kind}`);
-    }
-  }
-
-  private requireAllyHealthBelowFields(skillData: OtherSkillDto): void {
-    if (!skillData.activationCondition) {
-      throw new BadRequestException(
-        `${skillData.kind} with ally-health-below requires activationCondition`,
-      );
-    }
-    if (!skillData.targetCardId) {
-      throw new BadRequestException(
-        `${skillData.kind} with ally-health-below requires targetCardId`,
-      );
     }
   }
 
