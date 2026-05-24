@@ -12,6 +12,7 @@ import {
   IsDefined,
   ValidateIf,
   Min,
+  Max,
   IsNotIn,
   IsIn,
   ValidatorConstraint,
@@ -39,10 +40,12 @@ class BuffConditionDto {
 
   @IsOptional()
   @IsNumber()
+  @Min(0)
+  @Max(1)
   threshold?: number;
 
   @IsOptional()
-  @IsString()
+  @IsIn(['below', 'above'])
   operator?: string;
 }
 import { DamageType } from '../../core/cards/@types/damage/damage-type';
