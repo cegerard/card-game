@@ -54,7 +54,7 @@ export class FightingCard {
   private specialEnergy: number = 0;
   private receivedDamages: number = 0;
   private receivedHeal: number = 0;
-  public lastAttacker?: FightingCard;
+  private _lastAttacker?: FightingCard;
 
   // Buffs
   private buffs: Buff[] = [];
@@ -123,6 +123,14 @@ export class FightingCard {
     this.dodgeBehavior = behaviors.dodge;
     this.skills = skills.others;
     this.surviveSkill = skills.survive ?? null;
+  }
+
+  public get lastAttacker(): FightingCard | undefined {
+    return this._lastAttacker;
+  }
+
+  public set lastAttacker(card: FightingCard) {
+    this._lastAttacker = card;
   }
 
   public get actualHealth(): number {
