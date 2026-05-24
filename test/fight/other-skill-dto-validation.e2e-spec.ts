@@ -282,4 +282,132 @@ describe('OtherSkillDto validation', () => {
         .expect(400);
     });
   });
+
+  describe('activationCondition threshold validation', () => {
+    it('returns 400 when threshold is below 0', () => {
+      const payload = basePayload([
+        {
+          kind: 'SHIELD',
+          name: 'Iron Wall',
+          rate: 0.3,
+          targetingStrategy: 'self',
+          activationCondition: {
+            type: 'health-threshold',
+            operator: 'below',
+            threshold: -0.1,
+          },
+        },
+      ]);
+
+      return request(app.getHttpServer())
+        .post('/fight')
+        .send(payload)
+        .expect(400);
+    });
+
+    it('returns 400 when threshold is above 1', () => {
+      const payload = basePayload([
+        {
+          kind: 'SHIELD',
+          name: 'Iron Wall',
+          rate: 0.3,
+          targetingStrategy: 'self',
+          activationCondition: {
+            type: 'health-threshold',
+            operator: 'below',
+            threshold: 1.5,
+          },
+        },
+      ]);
+
+      return request(app.getHttpServer())
+        .post('/fight')
+        .send(payload)
+        .expect(400);
+    });
+
+    it('returns 400 when operator is not a valid value', () => {
+      const payload = basePayload([
+        {
+          kind: 'SHIELD',
+          name: 'Iron Wall',
+          rate: 0.3,
+          targetingStrategy: 'self',
+          activationCondition: {
+            type: 'health-threshold',
+            operator: 'invalid-operator',
+            threshold: 0.3,
+          },
+        },
+      ]);
+
+      return request(app.getHttpServer())
+        .post('/fight')
+        .send(payload)
+        .expect(400);
+    });
+
+    it('accepts threshold of 0', () => {
+      const payload = basePayload([
+        {
+          kind: 'SHIELD',
+          name: 'Iron Wall',
+          rate: 0.3,
+          targetingStrategy: 'self',
+          activationCondition: {
+            type: 'health-threshold',
+            operator: 'below',
+            threshold: 0,
+          },
+        },
+      ]);
+
+      return request(app.getHttpServer())
+        .post('/fight')
+        .send(payload)
+        .expect(200);
+    });
+
+    it('accepts threshold of 1', () => {
+      const payload = basePayload([
+        {
+          kind: 'SHIELD',
+          name: 'Iron Wall',
+          rate: 0.3,
+          targetingStrategy: 'self',
+          activationCondition: {
+            type: 'health-threshold',
+            operator: 'below',
+            threshold: 1,
+          },
+        },
+      ]);
+
+      return request(app.getHttpServer())
+        .post('/fight')
+        .send(payload)
+        .expect(200);
+    });
+
+    it('accepts operator "above"', () => {
+      const payload = basePayload([
+        {
+          kind: 'SHIELD',
+          name: 'Iron Wall',
+          rate: 0.3,
+          targetingStrategy: 'self',
+          activationCondition: {
+            type: 'health-threshold',
+            operator: 'above',
+            threshold: 0.7,
+          },
+        },
+      ]);
+
+      return request(app.getHttpServer())
+        .post('/fight')
+        .send(payload)
+        .expect(200);
+    });
+  });
 });
