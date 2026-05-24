@@ -31,7 +31,7 @@ describe('LastAttackerOfAllyTargetingStrategy', () => {
 
     beforeEach(() => {
       attacker = createFightingCard();
-      sourcePlayer.allCards[0].setLastAttacker(attacker);
+      sourcePlayer.allCards[0].lastAttacker = attacker;
     });
 
     it('returns the last attacker card', () => {
@@ -49,7 +49,7 @@ describe('LastAttackerOfAllyTargetingStrategy', () => {
     beforeEach(() => {
       const deadAttacker = createFightingCard({ health: 1 });
       deadAttacker.applyFinalDamage(9999);
-      sourcePlayer.allCards[0].setLastAttacker(deadAttacker);
+      sourcePlayer.allCards[0].lastAttacker = deadAttacker;
     });
 
     it('returns empty array', () => {
@@ -88,7 +88,7 @@ describe('LastAttackerOfAllyTargetingStrategy', () => {
       opponentPlayer = new Player('opponent', [
         createFightingCard({ id: ALLY_ID }),
       ]);
-      opponentPlayer.allCards[0].setLastAttacker(attacker);
+      opponentPlayer.allCards[0].lastAttacker = attacker;
     });
 
     it('finds ally via fallback and returns last attacker', () => {

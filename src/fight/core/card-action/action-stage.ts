@@ -314,7 +314,7 @@ export class ActionStage {
         report.statusChanges.push(...this.deathSkillHandler.drainSteps());
       } else if (!defensiveCard.isDead()) {
         if (!damageDealt.dodge) {
-          defensiveCard.setLastAttacker(attackerCard);
+          defensiveCard.lastAttacker = attackerCard;
           const damagedCardPlayer = this.player1.ownCard(defensiveCard)
             ? this.player1
             : this.player2;

@@ -129,7 +129,7 @@ export class FightingCard {
     return this._lastAttacker;
   }
 
-  public setLastAttacker(card: FightingCard): void {
+  public set lastAttacker(card: FightingCard) {
     this._lastAttacker = card;
   }
 
