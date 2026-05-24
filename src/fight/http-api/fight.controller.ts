@@ -369,7 +369,10 @@ export class FightController {
           skillData.name,
           skillData.rate,
           this.buildTriggerForSkill(skillData),
-          buildTargetingStrategy(skillData.targetingStrategy),
+          buildTargetingStrategy(
+            skillData.targetingStrategy,
+            skillData.targetCardId,
+          ),
           skillData.powerId,
           skillData.activationLimit,
           skillData.endEvent,
@@ -429,6 +432,7 @@ export class FightController {
           trigger: this.buildTriggerForSkill(skillData),
           targetingStrategy: buildTargetingStrategy(
             skillData.targetingStrategy,
+            skillData.targetCardId,
           ),
           activationCondition: alterationCondition,
           activationLimit: skillData.activationLimit,
@@ -488,7 +492,10 @@ export class FightController {
               skillData.name,
               skillData.hits,
               caDamages,
-              buildTargetingStrategy(skillData.targetingStrategy),
+              buildTargetingStrategy(
+                skillData.targetingStrategy,
+                skillData.targetCardId,
+              ),
               skillData.amplifier ?? 0,
               caEffects,
               caComboFinisher,
@@ -496,7 +503,10 @@ export class FightController {
           : new SimpleAttack(
               skillData.name,
               caDamages,
-              buildTargetingStrategy(skillData.targetingStrategy),
+              buildTargetingStrategy(
+                skillData.targetingStrategy,
+                skillData.targetCardId,
+              ),
               caEffects,
             );
         return new ConditionalAttack(
@@ -524,7 +534,10 @@ export class FightController {
         }
         return new TargetingOverrideSkill(
           skillData.name,
-          buildTargetingStrategy(skillData.targetingStrategy),
+          buildTargetingStrategy(
+            skillData.targetingStrategy,
+            skillData.targetCardId,
+          ),
           skillData.terminationEvent,
           this.buildTriggerForSkill(skillData),
           skillData.powerId,
@@ -552,7 +565,10 @@ export class FightController {
         return new ShieldSkill(
           skillData.name,
           skillData.rate,
-          buildTargetingStrategy(skillData.targetingStrategy),
+          buildTargetingStrategy(
+            skillData.targetingStrategy,
+            skillData.targetCardId,
+          ),
           new HealthThresholdCondition(
             skillData.activationCondition.operator as 'below' | 'above',
             skillData.activationCondition.threshold,

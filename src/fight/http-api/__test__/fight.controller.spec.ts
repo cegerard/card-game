@@ -1411,5 +1411,172 @@ describe('FightController', () => {
         /Unknown card selector strategy/,
       );
     });
+
+    it('throws when buildTargetingStrategy receives an unknown strategy name', () => {
+      const data: FightDataDto = {
+        cardSelectorStrategy: CardSelectorStrategy.PLAYER_BY_PLAYER,
+        player1: {
+          name: 'P1',
+          deck: [
+            {
+              ...baseCard,
+              skills: {
+                ...baseCard.skills,
+                others: [
+                  {
+                    kind: SkillKind.HEALING,
+                    name: 'Heal',
+                    rate: 0.3,
+                    targetingStrategy: 'unknown-strategy' as any,
+                    event: TriggerEvent.TURN_END,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        player2: { name: 'P2', deck: [] },
+      };
+
+      expect(() => fightController.startFight(data)).toThrow(
+        /Unknown targeting strategy/,
+      );
+    });
+  });
+
+  describe('when a skill uses linked-ally targeting strategy', () => {
+    const allyId = 'ally-01';
+
+    beforeEach(() => {
+      fightData = {
+        cardSelectorStrategy: CardSelectorStrategy.PLAYER_BY_PLAYER,
+        player1: {
+          name: 'P1',
+          deck: [
+            {
+              id: 'card-01',
+              name: 'Healer',
+              attack: 10,
+              defense: 5,
+              health: 100,
+              speed: 3,
+              agility: 10,
+              accuracy: 50,
+              criticalChance: 0,
+              skills: {
+                special: {
+                  kind: SpecialKind.ATTACK,
+                  name: 'Special',
+                  damages: [{ type: DamageType.PHYSICAL, rate: 2 }],
+                  energy: 9999,
+                  targetingStrategy: TargetingStrategy.POSITION_BASED,
+                },
+                simpleAttack: {
+                  name: 'Attack',
+                  damages: [{ type: DamageType.PHYSICAL, rate: 1.0 }],
+                  targetingStrategy: TargetingStrategy.POSITION_BASED,
+                },
+                others: [
+                  {
+                    kind: SkillKind.HEALING,
+                    name: 'Linked Heal',
+                    rate: 0.3,
+                    targetingStrategy: TargetingStrategy.LINKED_ALLY,
+                    event: TriggerEvent.TURN_END,
+                    targetCardId: allyId,
+                  },
+                ],
+              },
+              behaviors: { dodge: DodgeStrategy.SIMPLE_DODGE },
+            },
+          ],
+        },
+        player2: { name: 'P2', deck: [] },
+      };
+
+      fightController.startFight(fightData);
+    });
+
+    it('creates the healing skill with an allied-card-by-id targeting strategy', () => {
+      fightSimulatorStub.validatePlayer1FirstCard((card) => {
+        expect((card as any).skills[0].targetingStrategy.id).toBe(
+          'allied-card-by-id',
+        );
+      });
+    });
+
+    it('creates the allied-card-by-id strategy with the correct allyId', () => {
+      fightSimulatorStub.validatePlayer1FirstCard((card) => {
+        expect((card as any).skills[0].targetingStrategy.allyId).toBe(allyId);
+      });
+    });
+  });
+
+  describe('when a skill uses last-attacker-of-ally targeting strategy', () => {
+    const allyId = 'ally-02';
+
+    beforeEach(() => {
+      fightData = {
+        cardSelectorStrategy: CardSelectorStrategy.PLAYER_BY_PLAYER,
+        player1: {
+          name: 'P1',
+          deck: [
+            {
+              id: 'card-01',
+              name: 'Avenger',
+              attack: 10,
+              defense: 5,
+              health: 100,
+              speed: 3,
+              agility: 10,
+              accuracy: 50,
+              criticalChance: 0,
+              skills: {
+                special: {
+                  kind: SpecialKind.ATTACK,
+                  name: 'Special',
+                  damages: [{ type: DamageType.PHYSICAL, rate: 2 }],
+                  energy: 9999,
+                  targetingStrategy: TargetingStrategy.POSITION_BASED,
+                },
+                simpleAttack: {
+                  name: 'Attack',
+                  damages: [{ type: DamageType.PHYSICAL, rate: 1.0 }],
+                  targetingStrategy: TargetingStrategy.POSITION_BASED,
+                },
+                others: [
+                  {
+                    kind: SkillKind.HEALING,
+                    name: 'Revenge Heal',
+                    rate: 0.3,
+                    targetingStrategy: TargetingStrategy.LAST_ATTACKER_OF_ALLY,
+                    event: TriggerEvent.TURN_END,
+                    targetCardId: allyId,
+                  },
+                ],
+              },
+              behaviors: { dodge: DodgeStrategy.SIMPLE_DODGE },
+            },
+          ],
+        },
+        player2: { name: 'P2', deck: [] },
+      };
+
+      fightController.startFight(fightData);
+    });
+
+    it('creates the healing skill with a last-attacker-of-ally targeting strategy', () => {
+      fightSimulatorStub.validatePlayer1FirstCard((card) => {
+        expect((card as any).skills[0].targetingStrategy.id).toBe(
+          'last-attacker-of-ally',
+        );
+      });
+    });
+
+    it('creates the last-attacker-of-ally strategy with the correct allyId', () => {
+      fightSimulatorStub.validatePlayer1FirstCard((card) => {
+        expect((card as any).skills[0].targetingStrategy.allyId).toBe(allyId);
+      });
+    });
   });
 });
