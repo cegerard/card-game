@@ -13,14 +13,15 @@ export class ConditionalAttack implements Skill {
   constructor(
     public readonly name: string,
     private readonly attackSkill: AttackSkill,
-    private readonly condition: AttackCondition,
     private readonly trigger: Trigger,
+    private readonly condition?: AttackCondition,
     private readonly powerId?: string,
   ) {}
 
   isTriggered(triggerName: string): boolean {
     return (
-      this.trigger.isTriggered(triggerName) && this.condition.isTriggered()
+      this.trigger.isTriggered(triggerName) &&
+      (this.condition?.isTriggered() ?? true)
     );
   }
 
@@ -34,7 +35,7 @@ export class ConditionalAttack implements Skill {
       context,
       targetingStrategy,
     );
-    this.condition.reset();
+    this.condition?.reset();
 
     return {
       skillKind: SkillKind.Attack,
@@ -51,6 +52,6 @@ export class ConditionalAttack implements Skill {
   }
 
   tick(): void {
-    this.condition.tick();
+    this.condition?.tick();
   }
 }
