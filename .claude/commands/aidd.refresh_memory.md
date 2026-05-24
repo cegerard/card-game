@@ -20,27 +20,27 @@ Every file has its own template to follow.
 
 Used for each module! (Backend, Frontend, etc...)
 
-- docs/templates/memory/ARCHITECTURE.md
-- docs/templates/memory/CODING_ASSERTIONS.md
-- docs/templates/memory/TESTING.md
+- .claude/templates/memory/ARCHITECTURE.md
+- .claude/templates/memory/CODING_ASSERTIONS.md
+- .claude/templates/memory/TESTING.md
 
 ### Backend Specific
 
-- docs/templates/memory/backend/API_DOCS.md
-- docs/templates/memory/backend/DATABASE.md
+- .claude/templates/memory/backend/API_DOCS.md
+- .claude/templates/memory/backend/DATABASE.md
 
 ### Frontend Specific
 
-- docs/templates/memory/frontend/BACKEND_COMMUNICATION.md
-- docs/templates/memory/frontend/DESIGN.md
-- docs/templates/memory/frontend/FORMS.md
+- .claude/templates/memory/frontend/BACKEND_COMMUNICATION.md
+- .claude/templates/memory/frontend/DESIGN.md
+- .claude/templates/memory/frontend/FORMS.md
 
 ### Documentation Root
 
-- docs/templates/memory/PROJECT_BRIEF.md
-- docs/templates/memory/DEPLOYMENT.md
-- docs/templates/memory/STACK.md
-- docs/templates/memory/CODEBASE_STRUCTURE.md
+- .claude/templates/memory/PROJECT_BRIEF.md
+- .claude/templates/memory/DEPLOYMENT.md
+- .claude/templates/memory/STACK.md
+- .claude/templates/memory/CODEBASE_STRUCTURE.md
 
 ## Steps
 

@@ -12,7 +12,7 @@ Generate a specialized agent template tailored to specific user requirements.
 ### Agent template
 
 ```markdown
-@docs/templates/agent.md
+.claude/templates/agent.md
 ```
 
 ## Rules

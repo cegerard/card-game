@@ -19,7 +19,7 @@ Create structured .instructions.md rule files with proper front-matter and conte
 ### Template
 
 ```markdown
-@docs/templates/rule.md
+.claude/templates/rule.md
 ```
 
 ## Constraints to respect

@@ -23,7 +23,7 @@ $ARGUMENTS
 ### Template
 
 ```markdown
-@docs/templates/code_review.md
+.claude/templates/code_review.md
 ```
 
 ## Goal

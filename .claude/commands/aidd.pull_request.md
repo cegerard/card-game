@@ -20,7 +20,7 @@ Fill a PR template with recent changes in the current branch and create a PR wit
 ### Use this template
 
 ```markdown
-@docs/templates/vcs/pull_request.md
+.claude/templates/vcs/pull_request.md
 ```
 
 ## Steps

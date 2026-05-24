@@ -23,7 +23,7 @@ You are a Prompt Engineering Specialist with expertise in:
 ### Template
 
 ```markdown
-@docs/templates/command.md
+.claude/templates/command.md
 ```
 
 ### Arguments
@@ -57,8 +57,8 @@ Generate a production-ready prompt that maximizes LLM performance argument.
 
 1. Ultra think about the prompt we are trying to achieve.
 2. Analyze task → Extract core objective and constraints
-3. Look into !`ls .aidd/prompts` folder and propose a relevant place if any.
-4. Check if the prompt already exists in @.aidd/prompts/<folder>/<file>.md.
+3. Look into !`ls .claude/commands` folder and propose a relevant place if any.
+4. Check if the prompt already exists in @.claude/commands/<folder>/<file>.md.
    - If it exists, analyze it for improvements.
    - If not, create a new prompt file.
 5. Challenge it is necessary, then summarize it to user.

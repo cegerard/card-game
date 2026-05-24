@@ -14,8 +14,7 @@ card-game/
 ├── test/                   # End-to-end tests
 ├── doc/                    # Documentation and diagrams
 ├── samples/                # Sample JSON files (cards, payloads, results)
-├── .aidd/                  # AI-driven development configuration
-├── .claude/                # Claude AI commands and configuration
+├── .claude/                # Claude AI commands, configuration and templates
 ├── .github/                # GitHub workflows and CI/CD
 ├── .vscode/                # VSCode editor settings
 └── dist/                   # Compiled output (generated)
@@ -230,13 +229,10 @@ Unit tests are colocated with source files in `__tests__/` directories.
 - @.github/workflows/heroku.yml - Heroku deployment workflow
 
 ### AI Development
-- `.aidd/` - AI-driven development prompts and templates
-  - `prompts/` - Categorized AI prompts (00-10 numbered categories)
-  - `templates/` - Memory bank and document templates
-  - `agents/` - Custom agent configurations
 - `.claude/` - Claude AI integration
   - @.claude/CLAUDE.md - Project-specific Claude instructions
   - `commands/` - Claude command definitions
+  - `templates/` - Memory bank and document templates
 
 ### Editor
 - @.vscode/settings.json - VSCode workspace settings

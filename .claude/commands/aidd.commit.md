@@ -28,7 +28,7 @@ Generate git commit with standardized message following project conventions.
 ### Commit rules
 
 ```markdown
-@docs/templates/vcs/commit.md
+.claude/templates/vcs/commit.md
 ```
 
 ### Previous commits

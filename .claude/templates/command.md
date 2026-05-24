@@ -20,7 +20,7 @@ argument-hint: <generated-argument-hint-if-applicable>
 
 ## Rules
 
-- [Optional template file to follow from @aidd/prompts/templates/]
+- [Optional template file to follow from @.claude/templates/]
 - [Strict rule 1]
 - [Strict rule 2]
 - [Strict rule 3]

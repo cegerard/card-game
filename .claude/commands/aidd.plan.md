@@ -30,7 +30,7 @@ $ARGUMENTS
 ### Template
 
 ```markdown
-@docs/templates/plan.md
+.claude/templates/plan.md
 ```
 
 ## Steps
