@@ -400,7 +400,8 @@ export class FightController {
             polarity: skillData.polarity,
             attributeType: this.mapAlterationType(skillData.buffType),
             rate: skillData.rate,
-            duration: skillData.duration ?? 0,
+            duration:
+              skillData.duration === 0 ? Infinity : (skillData.duration ?? 0),
             trigger: new AllyHealthBelowThresholdTrigger(
               skillData.targetCardId,
               skillData.activationCondition.threshold,
