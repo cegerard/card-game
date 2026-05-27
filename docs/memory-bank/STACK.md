@@ -6,9 +6,17 @@ argument-hint: N/A
 
 # Stack
 
+## Mono-repo
+
+- Package manager: pnpm 11
+- Workspace config: `pnpm-workspace.yaml`
+- Packages: `packages/combat-engine`, `packages/shared-types`
+- Clients: `clients/fight-replayer`, `clients/gasha`
+- Root scripts: `pnpm --filter combat-engine <script>`
+
 ## Backend
 
-@package.json
+@packages/combat-engine/package.json
 
 ### Runtime & Framework
 
@@ -25,7 +33,7 @@ argument-hint: N/A
 
 ## Testing
 
-@package.json
+@packages/combat-engine/package.json
 
 ### Framework & Tools
 
@@ -37,7 +45,7 @@ argument-hint: N/A
 
 ### Configuration
 
-- @package.json (jest config in package.json)
+- @packages/combat-engine/package.json (jest config in package.json)
 - @test/jest-e2e.json (e2e test config)
 - Test files: `*.spec.ts` pattern
 - E2E tests: `.e2e-spec.ts` pattern
@@ -45,7 +53,7 @@ argument-hint: N/A
 
 ## TypeScript
 
-@tsconfig.json
+@packages/combat-engine/tsconfig.json
 
 ### Compiler Settings
 
@@ -61,8 +69,8 @@ argument-hint: N/A
 
 ### Linting
 
-- @.eslintrc.js
-- ESLint 8 with TypeScript plugin
+- @packages/combat-engine/eslint.config.js
+- ESLint with TypeScript plugin
 - Extends `@typescript-eslint/recommended` and `prettier/recommended`
 - Custom rules: unused vars must use `_` prefix, explicit types optional
 
@@ -74,7 +82,7 @@ argument-hint: N/A
 
 ## Build & Development
 
-@nest-cli.json
+@packages/combat-engine/nest-cli.json
 
 ### Build Tool
 
@@ -91,7 +99,7 @@ argument-hint: N/A
 
 ## Containerization
 
-@Dockerfile
+@packages/combat-engine/Dockerfile
 
 ### Docker
 

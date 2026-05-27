@@ -20,7 +20,8 @@ tests/
 
 ## Commands
 
-npm test && npm run lint
+From repo root: `pnpm --filter combat-engine test && pnpm --filter combat-engine lint`
+From `packages/combat-engine/`: `npm test && npm run lint`
 
 ## Code Style
 

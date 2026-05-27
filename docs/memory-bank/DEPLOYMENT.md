@@ -46,15 +46,16 @@ argument-hint: N/A
 ## Project Structure
 
 ```plaintext
-/
-├── dist/                    # Compiled JavaScript output (Docker production)
-├── src/                     # TypeScript source code
-│   └── main.ts              # Application entry point
-├── test/                    # End-to-end tests
-├── Dockerfile               # Multi-stage production build
-├── .github/workflows/       # CI/CD configuration
-│   └── heroku.yml           # Heroku deployment workflow
-└── @package.json            # Scripts and dependencies
+card-game/                             # Mono-repo root
+├── packages/combat-engine/
+│   ├── dist/                          # Compiled JavaScript output (Docker production)
+│   ├── src/                           # TypeScript source code
+│   │   └── main.ts                    # Application entry point
+│   ├── test/                          # End-to-end tests
+│   └── Dockerfile                     # Multi-stage production build
+├── .github/workflows/                 # CI/CD configuration
+│   └── heroku.yml                     # Heroku deployment workflow
+└── package.json                       # Root workspace scripts
 ```
 
 ## Environment Variables
@@ -88,14 +89,14 @@ argument-hint: N/A
 ```mermaid
 graph TB
     subgraph "Build Stage"
-        A[node:24-alpine] --> B[Install all dependencies]
+        A[node:26-alpine] --> B[Install all dependencies]
         B --> C[Copy source code]
         C --> D[npm run build]
         D --> E[TypeScript → JavaScript in /app/dist]
     end
 
     subgraph "Production Stage"
-        F[node:24-alpine] --> G[Install production deps only]
+        F[node:26-alpine] --> G[Install production deps only]
         E --> H[Copy dist/ from builder]
         G --> I[Final Image]
         H --> I

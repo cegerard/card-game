@@ -9,25 +9,28 @@ argument-hint: N/A
 ## Root Structure
 
 ```
-card-game/
-├── src/                    # Application source code
-├── test/                   # End-to-end tests
-├── doc/                    # Documentation and diagrams
-├── samples/                # Sample JSON files (cards, payloads, results)
+card-game/                  # Mono-repo root (pnpm 11 workspace)
+├── packages/
+│   ├── combat-engine/      # NestJS fight simulation backend
+│   └── shared-types/       # Shared TypeScript types (stub)
+├── clients/
+│   ├── fight-replayer/     # Static HTML/JS fight replay viewer
+│   └── gasha/              # Gasha client app
+├── docs/                   # Documentation and memory bank
+├── specs/                  # Feature specifications
 ├── .claude/                # Claude AI commands, configuration and templates
 ├── .github/                # GitHub workflows and CI/CD
-├── .vscode/                # VSCode editor settings
-└── dist/                   # Compiled output (generated)
+├── pnpm-workspace.yaml     # pnpm workspace config
+└── package.json            # Root workspace scripts
 ```
 
-## Source Code Organization (`src/`)
+## Source Code Organization (`packages/combat-engine/src/`)
 
 ```
 src/
 ├── main.ts                 # Application entry point with NestJS bootstrap
 ├── app.module.ts           # Root NestJS module
 ├── logger-middleware.ts    # Request logging middleware
-├── fight-replayer/         # Static HTML/JS fight replay viewer
 └── fight/                  # Fight simulation feature module
     ├── fight.module.ts     # Fight feature module configuration
     ├── core/               # Domain logic and business rules
@@ -35,7 +38,7 @@ src/
     └── tools/              # Shared utilities
 ```
 
-### Core Domain (`src/fight/core/`)
+### Core Domain (`packages/combat-engine/src/fight/core/`)
 
 Domain-driven design structure containing all fight simulation logic:
 
@@ -51,7 +54,7 @@ core/
 └── __tests__/              # Core domain tests
 ```
 
-#### Cards System (`src/fight/core/cards/`)
+#### Cards System (`packages/combat-engine/src/fight/core/cards/`)
 
 ```
 cards/
@@ -128,7 +131,7 @@ This allows special attacks to perform their primary action (damage/healing) whi
 
 **SHIELD Skill Kind (Reactive)**: `ShieldSkill` implements `HealthReactiveSkill` (interface: `isHealthReactive: true`, `onHealthChanged(card): boolean`). It is edge-triggered: fires once when `card.healthRatio` crosses the `HealthThresholdCondition` threshold downward, then rearms when health goes back above. `OtherSkillDto.event` is **optional** — SHIELD kind has no trigger event. After each HP change, `triggerReactiveSkills()` (in `reactive-skill-checker.ts`) checks all `HealthReactiveSkill` instances on the damaged card and fires those that return `true` from `onHealthChanged()`.
 
-#### Fight Simulator (`src/fight/core/fight-simulator/`)
+#### Fight Simulator (`packages/combat-engine/src/fight/core/fight-simulator/`)
 
 ```
 fight-simulator/
@@ -162,7 +165,7 @@ fight-simulator/
     └── winner-report.ts    # Victory determination
 ```
 
-#### Targeting Strategies (`src/fight/core/targeting-card-strategies/`)
+#### Targeting Strategies (`packages/combat-engine/src/fight/core/targeting-card-strategies/`)
 
 ```
 targeting-card-strategies/
@@ -177,7 +180,7 @@ targeting-card-strategies/
 └── last-attacker-of-ally.ts   # Targets the last card that attacked a specific ally (returns [] if dead)
 ```
 
-### HTTP API Layer (`src/fight/http-api/`)
+### HTTP API Layer (`packages/combat-engine/src/fight/http-api/`)
 
 ```
 http-api/
@@ -190,14 +193,14 @@ http-api/
 └── buff-condition-factory.ts # BuffConditionType enum → BuffCondition instance
 ```
 
-### Tools (`src/fight/tools/`)
+### Tools (`packages/combat-engine/src/fight/tools/`)
 
 ```
 tools/
 └── math-randomizer.ts      # Math.random() implementation
 ```
 
-## Test Structure (`test/`)
+## Test Structure (`packages/combat-engine/test/`)
 
 End-to-end tests organized by feature:
 
@@ -213,17 +216,17 @@ Unit tests are colocated with source files in `__tests__/` directories.
 ## Configuration Files
 
 ### Build & Runtime
-- @package.json - Dependencies and scripts
-- @tsconfig.json - TypeScript compiler configuration
-- @tsconfig.build.json - Production build configuration
-- @nest-cli.json - NestJS CLI configuration
+- @packages/combat-engine/package.json - Dependencies and scripts
+- @packages/combat-engine/tsconfig.json - TypeScript compiler configuration
+- @packages/combat-engine/tsconfig.build.json - Production build configuration
+- @packages/combat-engine/nest-cli.json - NestJS CLI configuration
 
 ### Code Quality
-- @.eslintrc.js - ESLint rules with TypeScript support
-- @.prettierrc - Code formatting (single quotes, trailing commas)
+- @packages/combat-engine/eslint.config.js - ESLint rules with TypeScript support
+- @packages/combat-engine/.prettierrc - Code formatting (single quotes, trailing commas)
 
 ### Containerization
-- @Dockerfile - Multi-stage Docker build (Node 20 Alpine)
+- @packages/combat-engine/Dockerfile - Multi-stage Docker build (Node 26 Alpine)
 
 ### CI/CD
 - @.github/workflows/heroku.yml - Heroku deployment workflow

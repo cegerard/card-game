@@ -18,12 +18,12 @@ argument-hint: N/A
 
 ### Backend
 
-- **Language/Framework**: Node.js with NestJS 11 → @package.json
+- **Language/Framework**: Node.js with NestJS 11 → @packages/combat-engine/package.json
 - **API Style**: REST - Single endpoint for fight simulation
 - **Architecture**: Domain-Driven Design with hexagonal architecture - Core domain logic separated from HTTP layer
 - **ORM**: None - No database, in-memory battle simulation
-- **Schema path**: @src/fight/http-api/dto/fight-data.dto.ts - DTOs with class-validator decorators
-- **Endpoints**: @src/fight/http-api/fight.controller.ts - Single POST /fight endpoint
+- **Schema path**: @packages/combat-engine/src/fight/http-api/dto/fight-data.dto.ts - DTOs with class-validator decorators
+- **Endpoints**: @packages/combat-engine/src/fight/http-api/fight.controller.ts - Single POST /fight endpoint
 - **Database**: None - Stateless battle simulator
 - **Caching**: None
 - **Testing**: Jest with unit tests alongside source files in `__tests__` directories
@@ -31,7 +31,7 @@ argument-hint: N/A
 ## Full project structure
 
 ```text
-src/
+packages/combat-engine/src/
 ├── main.ts                           # Application entry point with NestJS bootstrap
 ├── app.module.ts                     # Root module importing FightModule
 ├── logger-middleware.ts              # HTTP request logging middleware

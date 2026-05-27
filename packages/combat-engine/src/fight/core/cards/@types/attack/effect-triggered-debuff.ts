@@ -1,7 +1,7 @@
 import { FightingCard } from '../../fighting-card';
 import { Debuff } from '../alteration/alteration-detail';
 import { AlterationType } from '../alteration/alteration-type';
-import { Randomizer } from '../../../../core/randomizer';
+import { Randomizer } from '../../../randomizer';
 
 export class EffectTriggeredDebuff {
   public readonly probability: number;

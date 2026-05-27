@@ -1,38 +1,28 @@
-# Stage 1: Build the application
-FROM node:26-alpine AS builder
+FROM node:26-alpine AS base
+RUN npm install -g pnpm@11
 
-# Set the working directory
+# --- deps stage ---
+FROM base AS deps
 WORKDIR /app
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
+COPY packages/combat-engine/package.json ./packages/combat-engine/
+COPY packages/shared-types/package.json ./packages/shared-types/
+RUN pnpm install --frozen-lockfile --filter combat-engine...
 
-# Copy package.json and package-lock.json
-COPY package*.json ./
+# --- build stage ---
+FROM deps AS build
+COPY packages/combat-engine ./packages/combat-engine
+COPY packages/shared-types ./packages/shared-types
+RUN pnpm --filter combat-engine build
 
-# Install dependencies
-RUN npm install
-
-# Copy the rest of the application code
-COPY . .
-
-# Build the application
-RUN npm run build
-
-# Stage 2: Create the production image
-FROM node:26-alpine
-
-# Set the working directory
+# --- prod stage ---
+FROM node:26-alpine AS prod
+RUN npm install -g pnpm@11
 WORKDIR /app
-
-# Copy package.json and package-lock.json
-COPY package*.json ./
-
-# Install only production dependencies
-RUN npm install --only=production
-
-# Copy the built application from the builder stage
-COPY --from=builder /app/dist ./dist
-
-# Expose the application port
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
+COPY packages/combat-engine/package.json ./packages/combat-engine/
+COPY packages/shared-types/package.json ./packages/shared-types/
+RUN pnpm install --frozen-lockfile --filter combat-engine... --prod
+COPY --from=build /app/packages/combat-engine/dist ./packages/combat-engine/dist
 EXPOSE 3000
-
-# Command to run the application
-CMD ["node", "dist/main"]
+CMD ["node", "packages/combat-engine/dist/main"]

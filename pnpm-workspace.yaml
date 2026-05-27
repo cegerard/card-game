@@ -1,0 +1,6 @@
+packages:
+  - 'packages/*'
+  - 'clients/*'
+allowBuilds:
+  '@nestjs/core': true
+  unrs-resolver: true
