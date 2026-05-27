@@ -14,7 +14,7 @@ Not implemented - API is currently open without authentication.
 
 ## Endpoints
 
-- Controller file: @src/fight/http-api/fight.controller.ts - Single endpoint for fight simulation
+- Controller file: @packages/combat-engine/src/fight/http-api/fight.controller.ts - Single endpoint for fight simulation
 - Base URL: `http://localhost:3000` (default port, configurable via `PORT` env var)
 - Versioning: None - Unversioned API
 - Format: REST - Single POST endpoint
@@ -458,13 +458,13 @@ Validation errors return 400 Bad Request with detailed error messages.
 
 Three factory functions map DTO enums to domain implementations:
 
-- `buildTargetingStrategy()` in @src/fight/http-api/targeting-strategy-factory.ts - Maps `TargetingStrategy` enum to strategy objects
-- `buildDodgeStrategy()` in @src/fight/http-api/dodge-strategy-factory.ts - Maps `DodgeStrategy` enum to behavior objects
-- `buildTriggerStrategy()` in @src/fight/http-api/trigger-factory.ts - Maps `TriggerEvent` enum to trigger objects
+- `buildTargetingStrategy()` in @packages/combat-engine/src/fight/http-api/targeting-strategy-factory.ts - Maps `TargetingStrategy` enum to strategy objects
+- `buildDodgeStrategy()` in @packages/combat-engine/src/fight/http-api/dodge-strategy-factory.ts - Maps `DodgeStrategy` enum to behavior objects
+- `buildTriggerStrategy()` in @packages/combat-engine/src/fight/http-api/trigger-factory.ts - Maps `TriggerEvent` enum to trigger objects
 
 ## Response Types
 
-See @src/fight/core/fight-simulator/@types/ for complete type definitions:
+See @packages/combat-engine/src/fight/core/fight-simulator/@types/ for complete type definitions:
 
 - `FightResult`: Map of step numbers to `Step` objects
 - `Step`: Union type with `kind` discriminator
