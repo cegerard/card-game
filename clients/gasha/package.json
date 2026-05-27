@@ -1,0 +1,6 @@
+{
+  "name": "gasha",
+  "dependencies": {
+    "@card-game/shared-types": "workspace:*"
+  }
+}
