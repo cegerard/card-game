@@ -1,8 +1,10 @@
 # card-game Development Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-05-18
+Auto-generated from all feature plans. Last updated: 2026-06-08
 
 ## Active Technologies
+- TypeScript — SvelteKit 2.x + Phaser 3.60+, Node.js 26, ES2021+ + `@sveltejs/kit`, `svelte`, `phaser`, `vite`, `@sveltejs/adapter-static`, `@card-game/shared-types` (008-arcade-combat-mode)
+- N/A — stateless; arcade session held in Svelte writable store (in-memory only) (008-arcade-combat-mode)
 
 - N/A — stateless in-memory simulator (007-survive-skill)
 
@@ -28,14 +30,13 @@ From `packages/combat-engine/`: `npm test && npm run lint`
 TypeScript on Node.js 26: Follow standard conventions
 
 ## Recent Changes
+- 008-arcade-combat-mode: Added TypeScript — SvelteKit 2.x + Phaser 3.60+, Node.js 26, ES2021+ + `@sveltejs/kit`, `svelte`, `phaser`, `vite`, `@sveltejs/adapter-static`, `@card-game/shared-types`
 
 - 008-link-skill-salamander: Added TypeScript on Node.js 26 + NestJS 11, class-validator, class-transformer
 
 - 007-survive-skill: Added TypeScript on Node.js 26 + NestJS 11, class-validator, class-transformer
 
-- 006-dynamic-skill-trigger: Added TypeScript on Node.js 26 + NestJS 11, class-validator, class-transformer
 
-- 005-targeted-card-strategy: Added TypeScript on Node.js 26 + NestJS 11, class-validator, class-transformer
 
 <!-- MANUAL ADDITIONS START -->
 
