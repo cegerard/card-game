@@ -1,7 +1,8 @@
-# Tasks: Arcade Combat Mode (008)
+# Tasks: Arcade Combat Mode (008) — TDD
 
-**Input**: `specs/008-arcade-combat-mode/` — plan.md, spec.md, data-model.md, contracts/combat-engine-api.md, research.md, quickstart.md  
+**Input**: `specs/008-arcade-combat-mode/` — plan.md, spec.md, data-model.md, contracts/combat-engine-api.md, research.md, quickstart.md
 **Branch**: `008-arcade-combat-mode`
+**Mode**: TDD — test tasks appear **before** their implementations in each user story phase
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -13,35 +14,36 @@
 
 ## Phase 1: Setup
 
-**Purpose**: Bootstrap the `clients/gasha` SvelteKit application.
+**Purpose**: Bootstrap the `clients/gasha` SvelteKit application with full test tooling.
 
-`clients/gasha/package.json` already exists as a stub; root workspace scripts (`dev:gasha`, `build:gasha`) and `pnpm-workspace.yaml` are already configured — no changes needed there.
+`clients/gasha/package.json` is a stub; root workspace scripts (`dev:gasha`, `build:gasha`) and `pnpm-workspace.yaml` are already configured — no changes needed there.
 
-- [ ] T001 Update `clients/gasha/package.json` with full deps: `svelte`, `@sveltejs/kit`, `@sveltejs/adapter-static`, `phaser`, `vite`, `typescript`, `vitest`, `@sveltejs/vite-plugin-svelte`, `svelte-check` and dev tooling
-- [ ] T002 Create `clients/gasha/svelte.config.js` — `adapter-static`, no SSR (`ssr: false`), `paths.base` empty, `alias: { $lib: 'src/lib' }`
-- [ ] T003 [P] Create `clients/gasha/vite.config.ts` — import `sveltekit()` plugin, expose `PUBLIC_COMBAT_ENGINE_URL` via `$env/static/public` (default `http://localhost:3000`)
-- [ ] T004 [P] Create `clients/gasha/tsconfig.json` — `extends: ".svelte-kit/tsconfig.json"`, `target: ES2021`, `paths: { "$lib/*": ["src/lib/*"] }`
-- [ ] T005 [P] Create `clients/gasha/eslint.config.js` and `clients/gasha/.prettierrc` — single quotes, trailing commas, 2-space indent (matches root `.prettierrc`)
-- [ ] T006 Create `clients/gasha/src/app.html` — minimal HTML shell with `%sveltekit.head%` and `%sveltekit.body%` placeholders
-- [ ] T007 Create `clients/gasha/src/routes/+layout.svelte` — empty root layout wrapper (`<slot />`)
+- [X] T001 Update `clients/gasha/package.json` — add `svelte`, `@sveltejs/kit`, `@sveltejs/adapter-static`, `phaser`, `vite`, `typescript`, `vitest`, `@testing-library/svelte`, `jsdom`, `@playwright/test`, `svelte-check`, `@sveltejs/vite-plugin-svelte` and dev tooling deps
+- [X] T002 Create `clients/gasha/svelte.config.js` — `adapter-static`, `ssr: false`, `alias: { $lib: 'src/lib' }`
+- [X] T003 [P] Create `clients/gasha/vite.config.ts` — `sveltekit()` plugin, `PUBLIC_COMBAT_ENGINE_URL` via `$env/static/public`, Vitest config section (`environment: 'jsdom'`, `include: ['src/**/*.spec.ts']`)
+- [X] T004 [P] Create `clients/gasha/tsconfig.json` — extends `.svelte-kit/tsconfig.json`, `target: ES2021`, `paths: { "$lib/*": ["src/lib/*"] }`
+- [X] T005 [P] Create `clients/gasha/eslint.config.js` and `clients/gasha/.prettierrc` — single quotes, trailing commas, 2-space indent (matches root `.prettierrc`)
+- [X] T006 [P] Create `clients/gasha/playwright.config.ts` — `baseURL: 'http://localhost:5173'`, `webServer: { command: 'pnpm dev', url: 'http://localhost:5173' }`, `testDir: 'tests'`
+- [X] T007 Create `clients/gasha/src/app.html` — minimal HTML shell with `%sveltekit.head%` and `%sveltekit.body%` placeholders
+- [X] T008 Create `clients/gasha/src/routes/+layout.svelte` — empty root layout (`<slot />`)
 
-**Checkpoint**: `pnpm --filter gasha dev` should start Vite without errors.
+**Checkpoint**: `pnpm --filter gasha dev` starts without errors; `pnpm --filter gasha test` runs with zero tests.
 
 ---
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-**Purpose**: Infrastructure all user stories depend on. No US work begins until this phase is complete.
+**Purpose**: Shared infrastructure all user stories depend on. No US work until complete.
 
-**⚠️ CRITICAL**: Session store, levels, and player team are read by every arcade route.
+**⚠️ CRITICAL**: Session store, levels, and player team are imported by every arcade-related file.
 
-- [ ] T008 Add `app.enableCors()` to `packages/combat-engine/src/main.ts` before `app.listen(port)` — required for browser `fetch()` from Gasha origin (D-004, contracts/combat-engine-api.md §CORS)
-- [ ] T009 [P] Define shared TypeScript types in `clients/gasha/src/lib/arcade/types.ts` — `ArcadePhase` union, `ArcadeSession` interface, `ArcadeLevel` interface, `CardConfig` with nested `SpecialConfig`, `SimpleAttackConfig`, `OtherSkillConfig`, minimal `FightResult` / `Step` union (`fight_end` winner field)
-- [ ] T010 [P] Implement arcade session Svelte store in `clients/gasha/src/lib/arcade/session.ts` — `writable<ArcadeSession>` with initial `{ currentLevel: 1, phase: 'idle', fightResult: null }`, export `resetSession()` helper (FR-007, FR-008, D-005)
-- [ ] T011 [P] Define `PLAYER_TEAM: CardConfig[]` (3–5 balanced cards) in `clients/gasha/src/lib/arcade/player-team.ts` — hand-crafted stats compatible with `FightingCardDto` schema (FR-012)
-- [ ] T012 [P] Define `ARCADE_LEVELS: ArcadeLevel[]` (exactly 5 entries) in `clients/gasha/src/lib/arcade/levels.ts` — progressive stat multipliers ×1.0 → ×2.5 per data-model.md table, skill complexity increases from level 3 (FR-009, FR-013, SC-003)
+- [X] T009 Add `app.enableCors()` to `packages/combat-engine/src/main.ts` before `app.listen(port)` — required for browser `fetch()` from Gasha origin (D-004, contracts/combat-engine-api.md §CORS)
+- [X] T010 [P] Define shared TypeScript types in `clients/gasha/src/lib/arcade/types.ts` — `ArcadePhase` union, `ArcadeSession` interface, `ArcadeLevel` interface, `CardConfig` with nested `SpecialConfig`, `SimpleAttackConfig`, `OtherSkillConfig`, minimal `FightResult` / `Step` union covering `fight_end` step with `winner?: string`
+- [X] T011 [P] Implement arcade session Svelte store in `clients/gasha/src/lib/arcade/session.ts` — `writable<ArcadeSession>` with initial `{ currentLevel: 1, phase: 'idle', fightResult: null }`, export `resetSession()` that resets store to initial state (FR-007, FR-008, D-005)
+- [X] T012 [P] Define `PLAYER_TEAM: CardConfig[]` (3–5 balanced cards) in `clients/gasha/src/lib/arcade/player-team.ts` — hand-crafted stats compatible with `FightingCardDto` schema (FR-012)
+- [X] T013 [P] Define `ARCADE_LEVELS: ArcadeLevel[]` (exactly 5 entries) in `clients/gasha/src/lib/arcade/levels.ts` — progressive stat multipliers ×1.0 → ×2.5 per data-model.md table, skill complexity increases from level 3 (FR-009, FR-013, SC-003)
 
-**Checkpoint**: All types, store, and static configs importable without runtime errors.
+**Checkpoint**: All types, store, and static configs importable; no runtime errors.
 
 ---
 
@@ -49,15 +51,25 @@
 
 **Goal**: Player opens Gasha, clicks "Arcade Mode", and a combat encounter is presented.
 
-**Independent Test**: Open `http://localhost:5173`, click "Arcade Mode" on the main menu, verify the Phaser canvas mounts and the first combat begins animating.
+**Independent Test**: Open `http://localhost:5173`, click "Arcade Mode" on the main menu, verify Phaser canvas mounts and the first combat begins animating.
 
-- [ ] T013 [US1] Implement main menu in `clients/gasha/src/routes/+page.svelte` — display game title, "Arcade Mode" button that navigates to `/arcade` via SvelteKit `goto()` (FR-001, SC-001 ≤ 2 interactions)
-- [ ] T014 [P] [US1] Implement combat engine API client in `clients/gasha/src/lib/combat/engine-client.ts` — `fetchFight(player1Deck: CardConfig[], player2Deck: CardConfig[], enemyName: string): Promise<FightResult>` using `PUBLIC_COMBAT_ENGINE_URL`, `cardSelectorStrategy: 'speed-weighted'`, throws `Error` on non-200 or network failure (D-003, contracts/combat-engine-api.md)
-- [ ] T015 [US1] Implement Phaser 3 `CombatScene` class in `clients/gasha/src/lib/combat/CombatScene.ts` — extends `Phaser.Scene`, receives `FightResult` via scene data, replays steps sequentially in `create()`, emits `'fight-complete'` custom event with `{ playerWon: boolean }` on `fight_end` step (FR-010, D-002)
-- [ ] T016 [US1] Create `clients/gasha/src/routes/arcade/+page.svelte` — `onMount`: set session phase to `'combat'`, call `fetchFight` with `PLAYER_TEAM` vs level 1 enemy, instantiate `new Phaser.Game({ scene: CombatScene, ... })` targeting a `<div bind:this={container}>`; `onDestroy`: call `game.destroy(true)` (D-002, D-005)
-- [ ] T017 [US1] Wire `CombatScene`'s `fight-complete` event in `clients/gasha/src/routes/arcade/+page.svelte` — listen via `game.events.on('fight-complete', handler)`, store `fightResult` in session, route to victory/game-over phase based on outcome
+### Tests for User Story 1 ⚠️
 
-**Checkpoint**: US1 fully functional — menu → arcade → combat animates end-to-end.
+> **Write these tests FIRST — verify they FAIL before implementing T017–T021**
+
+- [X] T014 [P] [US1] Write Vitest unit test for `fetchFight()` in `clients/gasha/src/lib/combat/__tests__/engine-client.spec.ts` — mock `globalThis.fetch`, assert `POST /fight` called with `{ player1: { name: 'Player', deck: PLAYER_TEAM }, player2, cardSelectorStrategy: 'speed-weighted' }`, assert `FightResult` returned on 200, assert `Error` thrown on non-200 and network failure
+- [X] T015 [P] [US1] Write Vitest unit test for arcade session store in `clients/gasha/src/lib/arcade/__tests__/session.spec.ts` — assert store initial state is `{ currentLevel: 1, phase: 'idle', fightResult: null }`, assert `resetSession()` restores initial state after mutation
+- [X] T016 [P] [US1] Write Playwright E2E test for US1 in `clients/gasha/tests/us1-arcade-session.spec.ts` — navigate to `/`, assert "Arcade Mode" button is visible, click it, assert URL is `/arcade`, assert `<canvas>` element present in the DOM (Phaser mounted)
+
+### Implementation for User Story 1
+
+- [X] T017 [US1] Implement main menu in `clients/gasha/src/routes/+page.svelte` — game title, "Arcade Mode" button using SvelteKit `goto('/arcade')` (FR-001, SC-001 ≤ 2 interactions)
+- [X] T018 [P] [US1] Implement `fetchFight(player1Deck: CardConfig[], player2Deck: CardConfig[], enemyName: string): Promise<FightResult>` in `clients/gasha/src/lib/combat/engine-client.ts` — uses `PUBLIC_COMBAT_ENGINE_URL`, `player1.name: 'Player'`, `cardSelectorStrategy: 'speed-weighted'`, throws `Error` on non-200 or network failure (D-003)
+- [X] T019 [US1] Implement Phaser 3 `CombatScene` class in `clients/gasha/src/lib/combat/CombatScene.ts` — extends `Phaser.Scene`, receives `FightResult` via `scene.settings.data`, replays steps sequentially in `create()`, uses `detectOutcome()` from `outcome.ts`, emits `'fight-complete'` with `{ playerWon: boolean }` on `fight_end` step (FR-010, D-002)
+- [X] T020 [US1] Create `clients/gasha/src/routes/arcade/+page.svelte` — `onMount`: set session phase to `'combat'`, call `fetchFight(PLAYER_TEAM, level.enemyTeam, level.name)`, instantiate `new Phaser.Game({ scene: CombatScene, ... })` targeting `<div bind:this={container}>` (D-002); `onDestroy`: `game.destroy(true)`
+- [X] T021 [US1] Wire `fight-complete` event in `clients/gasha/src/routes/arcade/+page.svelte` — listen via `game.events.on('fight-complete', ({ playerWon }) => ...)`, store `fightResult` in session, transition phase to `'victory'`, `'final-victory'`, or `'game-over'` based on `playerWon` and current level vs `ARCADE_LEVELS.length`
+
+**Checkpoint**: US1 fully functional — T014, T015, T016 all pass.
 
 ---
 
@@ -65,13 +77,23 @@
 
 **Goal**: Player wins a combat, sees a victory screen, and advances to a harder next level.
 
-**Independent Test**: Start arcade session, verify `CombatScene` resolves to victory, click "Next Level", confirm level counter increments and a new (harder) combat begins.
+**Independent Test**: Start arcade session with mocked engine returning a player-win result, confirm VictoryScreen appears and level counter increments to 2.
 
-- [ ] T018 [P] [US2] Implement `VictoryScreen.svelte` in `clients/gasha/src/lib/components/VictoryScreen.svelte` — props: `level: number`, `isFinalVictory: boolean`; slots/events: `on:next` (hidden when `isFinalVictory`), `on:menu`; shows level-complete message or final victory message (FR-003, FR-011)
-- [ ] T019 [US2] Integrate `VictoryScreen` into `clients/gasha/src/routes/arcade/+page.svelte` — show when `$session.phase === 'victory' || 'final-victory'`; "Next Level" handler: increment `currentLevel`, fetch next enemy team, call `fetchFight`, restart `CombatScene`; "Back to Menu" handler: call `resetSession()` and `goto('/')` (FR-003, FR-008)
-- [ ] T020 [US2] Add final-victory detection in `clients/gasha/src/routes/arcade/+page.svelte` — when player wins and `currentLevel >= ARCADE_LEVELS.length`, set phase to `'final-victory'` instead of `'victory'`; "Back to Menu" from final-victory resets session (FR-011)
+### Tests for User Story 2 ⚠️
 
-**Checkpoint**: US1 + US2 both functional — full win path from level 1 through level 5 playable.
+> **Write these tests FIRST — verify they FAIL before implementing T024–T027**
+
+- [X] T022 [P] [US2] Write Vitest unit test for `detectOutcome()` in `clients/gasha/src/lib/combat/__tests__/outcome.spec.ts` — assert `winner === 'Player'` → `'victory'`, `winner === undefined` (draw) → `'game-over'`, `winner !== 'Player'` → `'game-over'`
+- [X] T023 [P] [US2] Write Vitest component test for `VictoryScreen.svelte` in `clients/gasha/src/lib/components/__tests__/VictoryScreen.spec.ts` — mount with `level=2, isFinalVictory=false`, assert "Next Level" and "Back to Menu" buttons visible; mount with `isFinalVictory=true`, assert "Next Level" hidden and final victory message visible
+
+### Implementation for User Story 2
+
+- [X] T024 [P] [US2] Extract `detectOutcome(steps: Record<number, Step>, playerName: string): 'victory' | 'game-over'` into `clients/gasha/src/lib/combat/outcome.ts` — pure function; `CombatScene.ts` (T019) must call it for the `'fight-complete'` payload; handles draw (no winner) as `'game-over'` (FR-014, contracts §Victory detection)
+- [X] T025 [P] [US2] Implement `VictoryScreen.svelte` in `clients/gasha/src/lib/components/VictoryScreen.svelte` — props: `level: number`, `isFinalVictory: boolean`; `on:next` event (hidden when `isFinalVictory`), `on:menu` event; level-complete or final-victory message (FR-003, FR-011)
+- [X] T026 [US2] Integrate `VictoryScreen` into `clients/gasha/src/routes/arcade/+page.svelte` — show when `$session.phase === 'victory' || 'final-victory'`; "Next Level": `currentLevel++`, fetch next level enemy, restart `CombatScene`; "Back to Menu": `resetSession()` + `goto('/')` (FR-003, FR-008)
+- [X] T027 [US2] Add final-victory detection in `clients/gasha/src/routes/arcade/+page.svelte` — when player wins and `currentLevel >= ARCADE_LEVELS.length`, set phase to `'final-victory'`; "Back to Menu" from final-victory resets session (FR-011)
+
+**Checkpoint**: US1 + US2 functional — T022, T023 pass; full win path through all 5 levels playable.
 
 ---
 
@@ -79,33 +101,50 @@
 
 **Goal**: Player loses (or draw occurs), game over screen appears, player returns to menu with fresh state.
 
-**Independent Test**: Lose first combat, verify `GameOverScreen` appears, click "Back to Menu", verify session resets and level 1 starts fresh on next session.
+**Independent Test**: Start arcade session, lose combat (mocked engine returns enemy win), verify `GameOverScreen` appears, click "Back to Menu", verify session resets and `currentLevel` is 1 on next session.
 
-- [ ] T021 [P] [US3] Implement `GameOverScreen.svelte` in `clients/gasha/src/lib/components/GameOverScreen.svelte` — "Game Over" heading, `on:menu` event from "Back to Menu" button (FR-005, FR-006)
-- [ ] T022 [US3] Integrate `GameOverScreen` into `clients/gasha/src/routes/arcade/+page.svelte` — show when `$session.phase === 'game-over'`; "Back to Menu" handler: call `resetSession()` and `goto('/')` (FR-006, FR-014)
-- [ ] T023 [US3] Add error handling to `clients/gasha/src/lib/combat/engine-client.ts` and `clients/gasha/src/routes/arcade/+page.svelte` — catch fetch errors, surface a visible error notification (e.g., Svelte `bind:this` toast or alert), then call `resetSession()` and `goto('/')` (edge case spec, contracts/combat-engine-api.md §Error Handling)
+### Tests for User Story 3 ⚠️
 
-**Checkpoint**: US1 + US2 + US3 functional — complete arcade loop (win path + loss path + error path).
+> **Write these tests FIRST — verify they FAIL before implementing T030–T032**
+
+- [X] T028 [P] [US3] Write Vitest component test for `GameOverScreen.svelte` in `clients/gasha/src/lib/components/__tests__/GameOverScreen.spec.ts` — mount component, assert "Game Over" heading visible, assert "Back to Menu" button present and emits `menu` event on click
+- [X] T029 [P] [US3] Write Playwright E2E test for US3 in `clients/gasha/tests/us3-game-over.spec.ts` — mock `POST /fight` via `page.route()` returning an enemy-wins `FightResult`, start arcade session, assert `GameOverScreen` visible, click "Back to Menu", assert URL is `/` and session `currentLevel` resets to 1 on next visit to `/arcade`
+
+### Implementation for User Story 3
+
+- [X] T030 [P] [US3] Implement `GameOverScreen.svelte` in `clients/gasha/src/lib/components/GameOverScreen.svelte` — "Game Over" heading, `on:menu` event from "Back to Menu" button (FR-005, FR-006)
+- [X] T031 [US3] Integrate `GameOverScreen` into `clients/gasha/src/routes/arcade/+page.svelte` — show when `$session.phase === 'game-over'`; "Back to Menu": `resetSession()` + `goto('/')` (FR-006, FR-014)
+- [X] T032 [US3] Add error handling in `clients/gasha/src/lib/combat/engine-client.ts` and `clients/gasha/src/routes/arcade/+page.svelte` — catch fetch/API errors, display a visible error notification, then `resetSession()` + `goto('/')` (edge case spec, contracts §Error Handling)
+
+**Checkpoint**: US1 + US2 + US3 functional — T028, T029 pass; full arcade loop (win + loss + error paths).
 
 ---
 
 ## Phase 6: User Story 4 — View Current Arcade Level (Priority: P3)
 
-**Goal**: Level indicator shows current level throughout the arcade session, updates on progression.
+**Goal**: Level indicator shows and updates the current level throughout the arcade session.
 
 **Independent Test**: Start arcade session, win first combat, verify `LevelIndicator` updates from "Level 1" to "Level 2".
 
-- [ ] T024 [P] [US4] Implement `LevelIndicator.svelte` in `clients/gasha/src/lib/components/LevelIndicator.svelte` — prop `level: number`, renders "Level {level}" badge visible during combat phase (FR-004, SC-001)
-- [ ] T025 [US4] Integrate `LevelIndicator` into `clients/gasha/src/routes/arcade/+page.svelte` — bind `level={$session.currentLevel}`, display during `'combat'` phase (FR-004)
+### Tests for User Story 4 ⚠️
 
-**Checkpoint**: All four user stories complete and independently testable.
+> **Write this test FIRST — verify it FAILS before implementing T034–T035**
+
+- [X] T033 [P] [US4] Write Vitest component test for `LevelIndicator.svelte` in `clients/gasha/src/lib/components/__tests__/LevelIndicator.spec.ts` — mount with `level=3`, assert "Level 3" text is visible in rendered output
+
+### Implementation for User Story 4
+
+- [X] T034 [P] [US4] Implement `LevelIndicator.svelte` in `clients/gasha/src/lib/components/LevelIndicator.svelte` — prop `level: number`, renders "Level {level}" badge visible during combat phase (FR-004, SC-001)
+- [X] T035 [US4] Integrate `LevelIndicator` into `clients/gasha/src/routes/arcade/+page.svelte` — bind `level={$session.currentLevel}`, display during `'combat'` phase (FR-004)
+
+**Checkpoint**: All four user stories complete; all unit, component, and E2E tests pass.
 
 ---
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T026 [P] Create `clients/gasha/static/` directory with a `.gitkeep` and document expected asset structure (card sprite placeholders) for future asset integration
-- [ ] T027 Run full-stack smoke test per `specs/008-arcade-combat-mode/quickstart.md` — `pnpm dev:engine` + `pnpm dev:gasha`, open `http://localhost:5173`, manually validate SC-001 through SC-006; record any animation frame-rate or transition timing issues
+- [X] T036 [P] Create `clients/gasha/static/` directory with a `.gitkeep` and comment documenting expected card sprite file structure for future asset integration
+- [ ] T037 Run full-stack smoke test per `specs/008-arcade-combat-mode/quickstart.md` — `pnpm dev:engine` + `pnpm dev:gasha`, open `http://localhost:5173`, manually validate SC-001 through SC-006; record any animation frame-rate or transition-timing issues
 
 ---
 
@@ -116,41 +155,48 @@
 - **Phase 1 (Setup)**: No dependencies — start immediately
 - **Phase 2 (Foundational)**: Depends on Phase 1 — BLOCKS all user story phases
 - **Phase 3 (US1)**: Depends on Phase 2
-- **Phase 4 (US2)**: Depends on Phase 3 (VictoryScreen integrates into arcade page built in US1)
-- **Phase 5 (US3)**: Depends on Phase 3 (GameOverScreen integrates into arcade page built in US1)
-- **Phase 6 (US4)**: Depends on Phase 3 (LevelIndicator integrates into arcade page)
+- **Phase 4 (US2)**: Depends on Phase 3 (VictoryScreen integrates into arcade page from US1)
+- **Phase 5 (US3)**: Depends on Phase 3 — parallel with Phase 4 (adds loss path)
+- **Phase 6 (US4)**: Depends on Phase 3 — parallel with Phases 4 and 5 (adds display layer)
 - **Phase 7 (Polish)**: Depends on all user story phases
 
 ### User Story Dependencies
 
-- **US1 (P1)**: Unblocked after Phase 2 — implements the core flow scaffold
-- **US2 (P1)**: Depends on US1 arcade page existing — adds victory path on top
-- **US3 (P2)**: Depends on US1 arcade page existing — adds loss path on top (parallel with US2)
-- **US4 (P3)**: Depends on US1 arcade page existing — adds display overlay (parallel with US2 and US3)
+- **US1 (P1)**: Unblocked after Phase 2 — establishes core arcade page scaffold
+- **US2 (P1)**: Depends on US1 arcade page — adds victory path on top
+- **US3 (P2)**: Depends on US1 arcade page — adds loss path (independent of US2)
+- **US4 (P3)**: Depends on US1 arcade page — adds level display (independent of US2, US3)
+
+### Within Each User Story (TDD Order)
+
+1. Write all `[P]` test tasks simultaneously (they touch different files)
+2. Confirm tests FAIL
+3. Implement in the order shown
+4. Confirm tests PASS before moving to next story
 
 ### Parallel Opportunities
 
-Within Phase 1: T003, T004, T005 can run in parallel after T001 + T002  
-Within Phase 2: T009, T010, T011, T012 can all run in parallel after T008 (or concurrently with T008 since they touch different files)  
-Within Phase 3: T014 (engine-client) can run in parallel with T013 (menu page) and T015 (CombatScene)  
-Phases 4, 5, 6: US2, US3, US4 can all start in parallel once Phase 3 is complete  
+Within Phase 1: T003, T004, T005, T006 can run in parallel after T001 + T002
+Within Phase 2: T010, T011, T012, T013 all parallel (different files); T009 touches a different package
+Within Phase 3 tests: T014, T015, T016 can run in parallel (different test files)
+Within Phase 3 impl: T018 can run in parallel with T017 and T019 (different files)
+Phases 4, 5, 6: All can start in parallel once Phase 3 is complete
 
 ---
 
-## Parallel Example: Phase 2
+## Parallel Example: Phase 3 Tests (Write-fail-first)
 
 ```
-# All four can run simultaneously (different files):
-T009 → src/lib/arcade/types.ts
-T010 → src/lib/arcade/session.ts
-T011 → src/lib/arcade/player-team.ts
-T012 → src/lib/arcade/levels.ts
+# Run simultaneously — all touch different files:
+T014 → src/lib/combat/__tests__/engine-client.spec.ts
+T015 → src/lib/arcade/__tests__/session.spec.ts
+T016 → tests/us1-arcade-session.spec.ts
 ```
 
 ## Parallel Example: Phases 4 + 5 + 6 (after Phase 3)
 
 ```
-Developer A: Phase 4 (US2) — VictoryScreen + level progression
+Developer A: Phase 4 (US2) — outcome.ts + VictoryScreen + level progression
 Developer B: Phase 5 (US3) — GameOverScreen + error handling
 Developer C: Phase 6 (US4) — LevelIndicator
 ```
@@ -163,25 +209,36 @@ Developer C: Phase 6 (US4) — LevelIndicator
 
 1. Complete Phase 1: Setup
 2. Complete Phase 2: Foundational
-3. Complete Phase 3: US1 (menu → arcade → combat animates)
-4. **STOP and VALIDATE**: Click "Arcade Mode", verify combat encounter appears
-5. Demo-able at this point
+3. Write T014, T015, T016 — confirm all FAIL
+4. Complete Phase 3 implementations (T017–T021)
+5. Confirm T014, T015, T016 all PASS
+6. **STOP and VALIDATE**: Menu → Arcade → combat animates end-to-end
 
 ### Incremental Delivery
 
 1. Phase 1 + 2 → Foundation ready
-2. Phase 3 (US1) → Menu + combat flow works (**MVP**)
+2. Phase 3 (US1) → Menu + combat flow → **MVP demo**
 3. Phase 4 (US2) → Win path complete → full session playable
 4. Phase 5 (US3) → Loss + error paths → game loop complete
 5. Phase 6 (US4) → Level indicator → full spec delivered
 6. Phase 7 → Smoke test + polish
+
+### Parallel Team Strategy
+
+With multiple developers (after Phase 3):
+
+- Developer A: Phase 4 (US2) — victory path
+- Developer B: Phase 5 (US3) — loss + error path
+- Developer C: Phase 6 (US4) — level indicator
 
 ---
 
 ## Notes
 
 - `[P]` = different files, no blocking dependencies within the phase
-- `[USn]` maps each task to a user story for traceability
-- `clients/gasha/package.json`, `pnpm-workspace.yaml`, and root scripts already exist — Phase 1 focuses on SvelteKit config and source scaffolding only
-- `app.enableCors()` (T008) is the only change to the combat engine for this feature
-- No test tasks generated — not explicitly requested in spec; add with `/speckit.tasks --tdd` if needed
+- `[USn]` maps each task to its user story for traceability
+- Test tasks are ordered BEFORE implementation tasks within each phase — mandatory for TDD
+- `clients/gasha/package.json`, `pnpm-workspace.yaml`, and root scripts already exist — Phase 1 is config and test tooling only
+- `app.enableCors()` (T009) is the only change to the combat engine for this feature
+- `outcome.ts` (T024) is a pure function extracted from `CombatScene` to make winner detection testable without mocking Phaser
+- `CombatScene.ts` is not unit-tested directly due to Phaser DOM dependency — covered by the US1 Playwright E2E test (T016)

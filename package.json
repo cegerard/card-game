@@ -1,7 +1,7 @@
 {
   "name": "card-game-monorepo",
   "private": true,
-  "packageManager": "pnpm@11.3.0",
+  "packageManager": "pnpm@11.6.0",
   "engines": {
     "node": "^26.0.0"
   },
