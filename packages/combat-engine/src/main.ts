@@ -15,6 +15,7 @@ async function bootstrap() {
     }),
   );
   app.use(loggerMiddleware);
+  app.enableCors();
 
   await app.listen(port);
 }
