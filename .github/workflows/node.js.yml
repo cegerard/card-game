@@ -27,8 +27,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
-      - run: pnpm --filter combat-engine install
-      - run: pnpm build:engine
-      - run: pnpm lint:engine
-      - run: pnpm test:engine
+      - run: pnpm install
+      - run: pnpm build:all
+      - run: pnpm lint:all
+      - run: pnpm test:all
       - run: pnpm test:e2e:engine
