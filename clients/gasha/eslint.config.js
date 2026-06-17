@@ -3,9 +3,17 @@ import ts from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import svelte from 'eslint-plugin-svelte';
 import svelteParser from 'svelte-eslint-parser';
+import globals from 'globals';
 
 export default [
   js.configs.recommended,
+  {
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+      },
+    },
+  },
   {
     files: ['**/*.ts'],
     languageOptions: {
