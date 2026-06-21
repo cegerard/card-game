@@ -31,7 +31,28 @@ argument-hint: N/A
 - `reflect-metadata` - Decorator metadata reflection
 - `rxjs` - Reactive extensions
 
-## Testing
+## Gasha Client
+
+@clients/gasha/package.json
+
+### Runtime & Framework
+
+- SvelteKit 2.x with `@sveltejs/adapter-static` (static site generation)
+- Svelte 5 (runes: `$state`, `$derived`, `$props`)
+- Phaser 3.60+ (lazy-loaded, only when Phaser renderer is active)
+- Vite (via SvelteKit)
+
+### Testing
+
+- Vitest — unit tests (`src/**/__tests__/*.spec.ts`)
+- Playwright — end-to-end tests (`tests/*.spec.ts`)
+
+### Key conventions
+
+- Renderer selected at runtime via `?mode=phaser` URL param; default is `web`
+- Navigation: prefer `<a href>` over `goto()` for JS-free routing
+
+## Testing (Backend)
 
 @packages/combat-engine/package.json
 

@@ -15,7 +15,7 @@ card-game/                  # Mono-repo root (pnpm 11 workspace)
 │   └── shared-types/       # Shared TypeScript types (stub)
 ├── clients/
 │   ├── fight-replayer/     # Static HTML/JS fight replay viewer
-│   └── gasha/              # Gasha client app
+│   └── gasha/              # SvelteKit arcade client (Phaser + Web renderer)
 ├── docs/                   # Documentation and memory bank
 ├── specs/                  # Feature specifications
 ├── .claude/                # Claude AI commands, configuration and templates
@@ -239,6 +239,61 @@ Unit tests are colocated with source files in `__tests__/` directories.
 
 ### Editor
 - @.vscode/settings.json - VSCode workspace settings
+
+## Gasha Client (`clients/gasha/`)
+
+SvelteKit 2.x arcade client with Phaser 3 and Web renderer support.
+
+```
+clients/gasha/src/
+├── app.html                    # HTML shell
+├── routes/
+│   ├── +layout.svelte          # Root layout
+│   ├── +page.svelte            # Home page — link to Arcade Mode
+│   └── arcade/
+│       └── +page.svelte        # Arcade flow: fetch fight, mount renderer, handle outcome
+└── lib/
+    ├── arcade/                 # Arcade session state and data
+    │   ├── session.ts          # Svelte writable store: phase, currentLevel, fightResult
+    │   ├── levels.ts           # ARCADE_LEVELS: enemy decks per level
+    │   ├── player-team.ts      # PLAYER_TEAM: player's card deck
+    │   └── types.ts            # CardConfig, FightResult shared types
+    ├── combat/                 # Fight rendering and engine integration
+    │   ├── engine-client.ts    # fetchFight(): POST /fight → FightResult
+    │   ├── outcome.ts          # detectOutcome(result, playerName): 'victory' | 'defeat'
+    │   ├── rendererMode.ts     # getRendererMode(): reads ?mode query param; default = 'web'
+    │   ├── CombatScene.ts      # Phaser 3 scene running the fight animation
+    │   ├── PhaserRenderer.svelte  # Mounts Phaser.Game in a div; opt-in via ?mode=phaser
+    │   └── WebRenderer.svelte     # HTML/CSS result screen (Victory/Defeat + Continue)
+    └── components/             # Shared UI components
+        ├── VictoryScreen.svelte
+        ├── LevelIndicator.svelte
+        └── GameOverScreen.svelte
+```
+
+### Dual Renderer Pattern
+
+The arcade page supports two pluggable renderers selected at runtime via URL query param:
+
+| URL param | Renderer | Description |
+|-----------|----------|-------------|
+| *(none)* | `WebRenderer` | Default — simple HTML/CSS Victory/Defeat screen |
+| `?mode=phaser` | `PhaserRenderer` | Full Phaser 3 animated combat scene |
+
+`getRendererMode()` in `rendererMode.ts` reads `window.location.search`. SSR context returns `'phaser'` as a safe fallback (Phaser is lazy-imported on mount anyway). The arcade page conditionally renders one component:
+
+```svelte
+{#if rendererMode === 'web'}
+  <WebRenderer {fightResult} playerName="Player" oncomplete={handleCombatComplete} />
+{:else}
+  <PhaserRenderer {fightResult} playerName="Player" oncomplete={handleCombatComplete} />
+{/if}
+```
+
+Both components share the same `Props` interface: `{ fightResult, playerName, oncomplete }`.
+
+### Navigation
+Home page uses `<a href="/arcade" role="button">` instead of `<button onclick={goto}>` — avoids JS dependency for basic navigation.
 
 ## Key Patterns
 
