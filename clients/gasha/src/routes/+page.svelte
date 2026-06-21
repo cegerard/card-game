@@ -1,10 +1,6 @@
-<script lang="ts">
-  import { goto } from '$app/navigation';
-</script>
-
 <main>
   <h1>Gasha</h1>
-  <button onclick={() => goto('/arcade')}>Arcade Mode</button>
+  <a href="/arcade" role="button">Arcade Mode</a>
 </main>
 
 <style>
@@ -22,9 +18,10 @@
     margin: 0;
   }
 
-  button {
+  a[role='button'] {
     padding: 1rem 2rem;
     font-size: 1.25rem;
     cursor: pointer;
+    text-decoration: none;
   }
 </style>
