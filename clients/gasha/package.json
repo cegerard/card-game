@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@card-game/shared-types": "workspace:*",
-    "phaser": "^3.88.2",
+    "phaser": "^4.2.0",
     "svelte": "^5.33.13"
   },
   "devDependencies": {
