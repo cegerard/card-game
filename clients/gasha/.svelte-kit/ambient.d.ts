@@ -86,9 +86,10 @@ declare module '$env/static/private' {
 	export const TERM_PROGRAM: string;
 	export const VSCODE_GIT_IPC_HANDLE: string;
 	export const npm_lifecycle_script: string;
+	export const npm_config_manage_package_manager_versions: string;
 	export const SHELL: string;
-	export const npm_package_version: string;
 	export const npm_lifecycle_event: string;
+	export const npm_package_version: string;
 	export const NODE_PATH: string;
 	export const rvm_prefix: string;
 	export const GEM_HOME: string;
@@ -101,8 +102,8 @@ declare module '$env/static/private' {
 	export const NVM_CD_FLAGS: string;
 	export const COPILOT_DEBUG_NONCE: string;
 	export const ZDOTDIR: string;
-	export const PNPM_SCRIPT_SRC_DIR: string;
 	export const npm_command: string;
+	export const PNPM_SCRIPT_SRC_DIR: string;
 	export const HOSTTYPE: string;
 	export const WSL2_GUI_APPS_ENABLED: string;
 	export const rvm_path: string;
@@ -244,9 +245,10 @@ declare module '$env/dynamic/private' {
 		TERM_PROGRAM: string;
 		VSCODE_GIT_IPC_HANDLE: string;
 		npm_lifecycle_script: string;
+		npm_config_manage_package_manager_versions: string;
 		SHELL: string;
-		npm_package_version: string;
 		npm_lifecycle_event: string;
+		npm_package_version: string;
 		NODE_PATH: string;
 		rvm_prefix: string;
 		GEM_HOME: string;
@@ -259,8 +261,8 @@ declare module '$env/dynamic/private' {
 		NVM_CD_FLAGS: string;
 		COPILOT_DEBUG_NONCE: string;
 		ZDOTDIR: string;
-		PNPM_SCRIPT_SRC_DIR: string;
 		npm_command: string;
+		PNPM_SCRIPT_SRC_DIR: string;
 		HOSTTYPE: string;
 		WSL2_GUI_APPS_ENABLED: string;
 		rvm_path: string;
