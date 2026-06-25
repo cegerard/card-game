@@ -8,7 +8,7 @@
   import { fetchFight } from '$lib/combat/engine-client.js';
   import { getRendererMode } from '$lib/combat/rendererMode.js';
   import PhaserRenderer from '$lib/combat/PhaserRenderer.svelte';
-  import WebRenderer from '$lib/combat/WebRenderer.svelte';
+  import CombatReportRenderer from '$lib/combat/CombatReportRenderer.svelte';
   import VictoryScreen from '$lib/components/VictoryScreen.svelte';
   import GameOverScreen from '$lib/components/GameOverScreen.svelte';
   import LevelIndicator from '$lib/components/LevelIndicator.svelte';
@@ -73,7 +73,7 @@
 
 {#if $session.phase === 'combat' && fightResult}
   {#if rendererMode === 'web'}
-    <WebRenderer {fightResult} playerName="Player" oncomplete={handleCombatComplete} />
+    <CombatReportRenderer {fightResult} playerName="Player" playerCardIds={PLAYER_TEAM.map((c) => c.id)} oncomplete={handleCombatComplete} />
   {:else}
     <PhaserRenderer {fightResult} playerName="Player" oncomplete={handleCombatComplete} />
   {/if}
