@@ -21,14 +21,24 @@
     onclick,
     children,
   }: Props = $props();
+
+  function handleAnchorClick(e: MouseEvent) {
+    if (disabled) {
+      e.preventDefault();
+      return;
+    }
+    onclick?.(e);
+  }
 </script>
 
 {#if href}
   <a
-    {href}
+    href={disabled ? undefined : href}
     role="button"
+    aria-disabled={disabled}
     class="gasha-btn {variant}"
-    class:full-width={fullWidth}>{@render children()}</a
+    class:full-width={fullWidth}
+    onclick={handleAnchorClick}>{@render children()}</a
   >
 {:else}
   <button
@@ -60,7 +70,8 @@
     width: 100%;
   }
 
-  .gasha-btn:disabled {
+  .gasha-btn:disabled,
+  .gasha-btn[aria-disabled='true'] {
     cursor: not-allowed;
     opacity: 0.6;
   }
