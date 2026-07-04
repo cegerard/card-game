@@ -1,6 +1,10 @@
+<script lang="ts">
+  import Button from '$lib/design-system/primitives/Button.svelte';
+</script>
+
 <main>
   <h1>Gasha</h1>
-  <a href="/arcade" role="button">Arcade Mode</a>
+  <Button variant="primary" href="/arcade">Arcade Mode</Button>
 </main>
 
 <style>
@@ -11,17 +15,14 @@
     justify-content: center;
     height: 100vh;
     gap: 2rem;
+    background: var(--gasha-gradient-bg);
+    color: var(--gasha-text-primary);
   }
 
   h1 {
+    font-family: var(--gasha-font-display);
+    color: var(--gasha-gold-300);
     font-size: 3rem;
     margin: 0;
-  }
-
-  a[role='button'] {
-    padding: 1rem 2rem;
-    font-size: 1.25rem;
-    cursor: pointer;
-    text-decoration: none;
   }
 </style>

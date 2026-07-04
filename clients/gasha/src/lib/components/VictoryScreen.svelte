@@ -1,4 +1,7 @@
 <script lang="ts">
+  import Overlay from '$lib/design-system/primitives/Overlay.svelte';
+  import Button from '$lib/design-system/primitives/Button.svelte';
+
   interface Props {
     level: number;
     isFinalVictory: boolean;
@@ -9,7 +12,7 @@
   let { level, isFinalVictory, onnext, onmenu }: Props = $props();
 </script>
 
-<div class="overlay">
+<Overlay gap="1rem">
   {#if isFinalVictory}
     <h2>All Levels Cleared!</h2>
     <p>You conquered all {level} levels!</p>
@@ -20,39 +23,27 @@
 
   <div class="actions">
     {#if !isFinalVictory}
-      <button onclick={onnext}>Next Level</button>
+      <Button variant="secondary" onclick={onnext}>Next Level</Button>
     {/if}
-    <button onclick={onmenu}>Back to Menu</button>
+    <Button variant="secondary" onclick={onmenu}>Back to Menu</Button>
   </div>
-</div>
+</Overlay>
 
 <style>
-  .overlay {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.75);
-    color: white;
-    gap: 1rem;
-  }
-
   h2 {
+    font-family: var(--gasha-font-display);
+    color: var(--gasha-gold-300);
     font-size: 2rem;
     margin: 0;
+  }
+
+  p {
+    color: var(--gasha-text-warm);
   }
 
   .actions {
     display: flex;
     gap: 1rem;
     margin-top: 1rem;
-  }
-
-  button {
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    cursor: pointer;
   }
 </style>
