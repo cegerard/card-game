@@ -41,6 +41,14 @@
 
   const mvpIndex = $derived(allCards.findIndex((c) => c.id === mvp?.id));
 
+  const tone = $derived<'won' | 'lost'>(playerWon ? 'won' : 'lost');
+  const battleLabel = $derived(
+    playerWon ? '— Battle won —' : '— Squad defeated —',
+  );
+  const resultText = $derived(playerWon ? 'VICTORY' : 'DEFEAT');
+  const mvpTagText = $derived(playerWon ? '★ MVP' : '★ TOP');
+  const fallbackWinner = $derived(playerWon ? playerName : 'Enemy');
+
   let mounted = $state(false);
   let confettiEl: HTMLDivElement | undefined = $state();
 
@@ -91,33 +99,20 @@
 
   <div class="banner">
     <div class="banner-line top-line"></div>
-    {#if playerWon}
-      <div class="battle-label won-label">— Battle won —</div>
-      <div class="victory-text">VICTORY</div>
-      <div class="winner-line">
-        Winner · <b class="winner-name">{stats.winner ?? playerName}</b>
-      </div>
-      {#if mvp}
-        <Badge variant="outline-pill" tone="won">
-          <span class="mvp-totem">{totemAt(mvpIndex)}</span>
-          <span class="mvp-tag won-tag">★ MVP</span>
-          <span class="mvp-name won-name">{mvp.name}</span>
-        </Badge>
-      {/if}
-    {:else}
-      <div class="battle-label lost-label">— Squad defeated —</div>
-      <div class="defeat-text">DEFEAT</div>
-      <div class="winner-line lost-line">
-        Winner · <b class="winner-name lost-winner">{stats.winner ?? 'Enemy'}</b
-        >
-      </div>
-      {#if mvp}
-        <Badge variant="outline-pill" tone="lost">
-          <span class="mvp-totem">{totemAt(mvpIndex)}</span>
-          <span class="mvp-tag lost-tag">★ TOP</span>
-          <span class="mvp-name lost-name">{mvp.name}</span>
-        </Badge>
-      {/if}
+    <div class="battle-label {tone}-label">{battleLabel}</div>
+    <div class={playerWon ? 'victory-text' : 'defeat-text'}>{resultText}</div>
+    <div class="winner-line" class:lost-line={!playerWon}>
+      Winner ·
+      <b class="winner-name" class:lost-winner={!playerWon}
+        >{stats.winner ?? fallbackWinner}</b
+      >
+    </div>
+    {#if mvp}
+      <Badge variant="outline-pill" {tone}>
+        <span class="mvp-totem">{totemAt(mvpIndex)}</span>
+        <span class="mvp-tag {tone}-tag">{mvpTagText}</span>
+        <span class="mvp-name {tone}-name">{mvp.name}</span>
+      </Badge>
     {/if}
     <div class="legend">
       <span
