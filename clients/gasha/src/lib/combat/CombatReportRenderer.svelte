@@ -5,7 +5,7 @@
     type CardStat,
   } from '$lib/combat/combatStats.js';
   import { detectOutcome } from '$lib/combat/outcome.js';
-  import { totemAt } from '$lib/design-system/tokens.js';
+  import { totemAt, CONFETTI_COLORS } from '$lib/design-system/tokens.js';
   import Button from '$lib/design-system/primitives/Button.svelte';
   import Badge from '$lib/design-system/primitives/Badge.svelte';
   import CharacterCard from '$lib/design-system/composites/CharacterCard.svelte';
@@ -50,10 +50,10 @@
   });
 
   function spawnConfetti(container: HTMLDivElement) {
-    const colors = ['#ffcf6b', '#ff7a45', '#4ade80', '#37e0ff', '#c87bff'];
     for (let i = 0; i < 44; i++) {
       const piece = document.createElement('div');
-      const color = colors[Math.floor(Math.random() * colors.length)];
+      const color =
+        CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
       const isCircle = Math.random() > 0.5;
       Object.assign(piece.style, {
         position: 'absolute',
