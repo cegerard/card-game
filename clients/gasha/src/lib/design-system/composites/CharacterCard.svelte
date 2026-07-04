@@ -5,13 +5,17 @@
   import { colorAt, totemAt, labelAt } from '$lib/design-system/tokens.js';
   import type { CardStat } from '$lib/combat/combatStats.js';
 
+  interface MaxStats {
+    dealt: number;
+    taken: number;
+    heal: number;
+  }
+
   interface Props {
     card: CardStat;
     index: number;
     isMvp: boolean;
-    maxDealt: number;
-    maxTaken: number;
-    maxHeal: number;
+    maxStats: MaxStats;
     animate?: boolean;
     row?: 'top' | 'bottom';
   }
@@ -20,9 +24,7 @@
     card,
     index,
     isMvp,
-    maxDealt,
-    maxTaken,
-    maxHeal,
+    maxStats,
     animate = true,
     row = 'top',
   }: Props = $props();
@@ -57,14 +59,14 @@
       <StatBar
         label="DG"
         value={card.damageDealt}
-        max={maxDealt}
+        max={maxStats.dealt}
         tone="damage"
         {animate}
       />
       <StatBar
         label="EN"
         value={card.damageTaken}
-        max={maxTaken}
+        max={maxStats.taken}
         tone="taken"
         {animate}
       />
@@ -72,7 +74,7 @@
         <StatBar
           label="SO"
           value={card.healingDone}
-          max={maxHeal}
+          max={maxStats.heal}
           tone="heal"
           {animate}
         />

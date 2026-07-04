@@ -26,9 +26,11 @@
   const playerWon = $derived(outcome === 'victory');
 
   const allCards = $derived([...stats.enemyCards, ...stats.playerCards]);
-  const maxDealt = $derived(Math.max(...allCards.map((c) => c.damageDealt), 1));
-  const maxTaken = $derived(Math.max(...allCards.map((c) => c.damageTaken), 1));
-  const maxHeal = $derived(Math.max(...allCards.map((c) => c.healingDone), 1));
+  const maxStats = $derived({
+    dealt: Math.max(...allCards.map((c) => c.damageDealt), 1),
+    taken: Math.max(...allCards.map((c) => c.damageTaken), 1),
+    heal: Math.max(...allCards.map((c) => c.healingDone), 1),
+  });
 
   const mvp = $derived<CardStat | null>(
     allCards.length > 0
@@ -88,9 +90,7 @@
         {card}
         index={i}
         isMvp={mvp?.id === card.id}
-        {maxDealt}
-        {maxTaken}
-        {maxHeal}
+        {maxStats}
         animate={mounted}
         row="top"
       />
@@ -137,9 +137,7 @@
         {card}
         index={i}
         isMvp={mvp?.id === card.id}
-        {maxDealt}
-        {maxTaken}
-        {maxHeal}
+        {maxStats}
         animate={mounted}
         row="bottom"
       />
