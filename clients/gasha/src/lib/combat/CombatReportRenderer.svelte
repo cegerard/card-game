@@ -217,8 +217,6 @@
     align-items: stretch;
   }
 
-  /* ── Banner ── */
-
   .banner {
     padding: 8px 10px;
     text-align: center;
