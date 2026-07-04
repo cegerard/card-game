@@ -1,5 +1,4 @@
 :root {
-  /* Color — gold accents */
   --gasha-gold-100: #fff6df;
   --gasha-gold-200: #ffe9af;
   --gasha-gold-300: #ffd87a;
@@ -9,14 +8,12 @@
   --gasha-gold-700: #a9802f;
   --gasha-gold-900: #2a1c06;
 
-  /* Color — dark backgrounds */
   --gasha-bg-void: #0d0a07;
   --gasha-bg-deep: #160f08;
   --gasha-bg-panel: #241a10;
   --gasha-bg-card-a: #322516;
   --gasha-bg-card-b: #160f08;
 
-  /* Color — semantic (stat bars / legend) */
   --gasha-dmg-from: #ff7a45;
   --gasha-dmg-to: #ffb35b;
   --gasha-taken-from: #4a86d6;
@@ -27,17 +24,14 @@
   --gasha-defeat: #c9554b;
   --gasha-defeat-soft: #a85149;
 
-  /* Text */
   --gasha-text-primary: #e7e5e4;
   --gasha-text-warm: #fde7bd;
   --gasha-text-muted: rgba(255, 255, 255, 0.55);
 
-  /* Fonts */
   --gasha-font-display: 'Cinzel', serif;
   --gasha-font-ui: 'Oswald', system-ui, sans-serif;
   --gasha-font-mono: 'JetBrains Mono', monospace;
 
-  /* Radius scale */
   --gasha-radius-xs: 2px;
   --gasha-radius-sm: 4px;
   --gasha-radius-md: 5px;
@@ -45,12 +39,10 @@
   --gasha-radius-xl: 13px;
   --gasha-radius-pill: 999px;
 
-  /* Shadows */
   --gasha-shadow-card: 0 6px 14px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.09);
   --gasha-shadow-button: 0 8px 22px rgba(255, 207, 107, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.5);
   --gasha-shadow-badge-glow: 0 0 9px rgba(255, 207, 107, 0.67);
 
-  /* Gradients */
   --gasha-gradient-button: linear-gradient(95deg, var(--gasha-gold-500), var(--gasha-gold-300), var(--gasha-gold-500));
   --gasha-gradient-bg: radial-gradient(120% 80% at 50% 0%, var(--gasha-bg-panel), var(--gasha-bg-void) 70%);
 }

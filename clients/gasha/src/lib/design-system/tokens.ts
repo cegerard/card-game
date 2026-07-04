@@ -15,16 +15,20 @@ export const CONFETTI_COLORS = [
   '#c87bff',
 ] as const;
 
+function wrapIndex(index: number, length: number): number {
+  return ((index % length) + length) % length;
+}
+
 export function colorAt(index: number): string {
-  return ELEMENT_PALETTE[index % ELEMENT_PALETTE.length];
+  return ELEMENT_PALETTE[wrapIndex(index, ELEMENT_PALETTE.length)];
 }
 
 export function totemAt(index: number): string {
-  return ELEMENT_TOTEMS[index % ELEMENT_TOTEMS.length];
+  return ELEMENT_TOTEMS[wrapIndex(index, ELEMENT_TOTEMS.length)];
 }
 
 export function labelAt(index: number): string {
-  return ELEMENT_LABELS[index % ELEMENT_LABELS.length];
+  return ELEMENT_LABELS[wrapIndex(index, ELEMENT_LABELS.length)];
 }
 
 export function pct(value: number, max: number): number {

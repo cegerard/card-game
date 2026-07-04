@@ -5,7 +5,7 @@
     type CardStat,
   } from '$lib/combat/combatStats.js';
   import { detectOutcome } from '$lib/combat/outcome.js';
-  import { totemAt } from '$lib/design-system/tokens.js';
+  import { totemAt, CONFETTI_COLORS } from '$lib/design-system/tokens.js';
   import Button from '$lib/design-system/primitives/Button.svelte';
   import Badge from '$lib/design-system/primitives/Badge.svelte';
   import CharacterCard from '$lib/design-system/composites/CharacterCard.svelte';
@@ -26,9 +26,11 @@
   const playerWon = $derived(outcome === 'victory');
 
   const allCards = $derived([...stats.enemyCards, ...stats.playerCards]);
-  const maxDealt = $derived(Math.max(...allCards.map((c) => c.damageDealt), 1));
-  const maxTaken = $derived(Math.max(...allCards.map((c) => c.damageTaken), 1));
-  const maxHeal = $derived(Math.max(...allCards.map((c) => c.healingDone), 1));
+  const maxStats = $derived({
+    dealt: Math.max(...allCards.map((c) => c.damageDealt), 1),
+    taken: Math.max(...allCards.map((c) => c.damageTaken), 1),
+    heal: Math.max(...allCards.map((c) => c.healingDone), 1),
+  });
 
   const mvp = $derived<CardStat | null>(
     allCards.length > 0
@@ -41,6 +43,14 @@
 
   const mvpIndex = $derived(allCards.findIndex((c) => c.id === mvp?.id));
 
+  const tone = $derived<'won' | 'lost'>(playerWon ? 'won' : 'lost');
+  const battleLabel = $derived(
+    playerWon ? '— Battle won —' : '— Squad defeated —',
+  );
+  const resultText = $derived(playerWon ? 'VICTORY' : 'DEFEAT');
+  const mvpTagText = $derived(playerWon ? '★ MVP' : '★ TOP');
+  const fallbackWinner = $derived(playerWon ? playerName : 'Enemy');
+
   let mounted = $state(false);
   let confettiEl: HTMLDivElement | undefined = $state();
 
@@ -50,10 +60,10 @@
   });
 
   function spawnConfetti(container: HTMLDivElement) {
-    const colors = ['#ffcf6b', '#ff7a45', '#4ade80', '#37e0ff', '#c87bff'];
     for (let i = 0; i < 44; i++) {
       const piece = document.createElement('div');
-      const color = colors[Math.floor(Math.random() * colors.length)];
+      const color =
+        CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
       const isCircle = Math.random() > 0.5;
       Object.assign(piece.style, {
         position: 'absolute',
@@ -80,9 +90,7 @@
         {card}
         index={i}
         isMvp={mvp?.id === card.id}
-        {maxDealt}
-        {maxTaken}
-        {maxHeal}
+        {maxStats}
         animate={mounted}
         row="top"
       />
@@ -91,33 +99,20 @@
 
   <div class="banner">
     <div class="banner-line top-line"></div>
-    {#if playerWon}
-      <div class="battle-label won-label">— Battle won —</div>
-      <div class="victory-text">VICTORY</div>
-      <div class="winner-line">
-        Winner · <b class="winner-name">{stats.winner ?? playerName}</b>
-      </div>
-      {#if mvp}
-        <Badge variant="outline-pill" tone="won">
-          <span class="mvp-totem">{totemAt(mvpIndex)}</span>
-          <span class="mvp-tag won-tag">★ MVP</span>
-          <span class="mvp-name won-name">{mvp.name}</span>
-        </Badge>
-      {/if}
-    {:else}
-      <div class="battle-label lost-label">— Squad defeated —</div>
-      <div class="defeat-text">DEFEAT</div>
-      <div class="winner-line lost-line">
-        Winner · <b class="winner-name lost-winner">{stats.winner ?? 'Enemy'}</b
-        >
-      </div>
-      {#if mvp}
-        <Badge variant="outline-pill" tone="lost">
-          <span class="mvp-totem">{totemAt(mvpIndex)}</span>
-          <span class="mvp-tag lost-tag">★ TOP</span>
-          <span class="mvp-name lost-name">{mvp.name}</span>
-        </Badge>
-      {/if}
+    <div class="battle-label {tone}-label">{battleLabel}</div>
+    <div class={playerWon ? 'victory-text' : 'defeat-text'}>{resultText}</div>
+    <div class="winner-line" class:lost-line={!playerWon}>
+      Winner ·
+      <b class="winner-name" class:lost-winner={!playerWon}
+        >{stats.winner ?? fallbackWinner}</b
+      >
+    </div>
+    {#if mvp}
+      <Badge variant="outline-pill" {tone}>
+        <span class="mvp-totem">{totemAt(mvpIndex)}</span>
+        <span class="mvp-tag {tone}-tag">{mvpTagText}</span>
+        <span class="mvp-name {tone}-name">{mvp.name}</span>
+      </Badge>
     {/if}
     <div class="legend">
       <span
@@ -142,9 +137,7 @@
         {card}
         index={i}
         isMvp={mvp?.id === card.id}
-        {maxDealt}
-        {maxTaken}
-        {maxHeal}
+        {maxStats}
         animate={mounted}
         row="bottom"
       />
@@ -216,8 +209,6 @@
     flex: 1.05;
     align-items: stretch;
   }
-
-  /* ── Banner ── */
 
   .banner {
     padding: 8px 10px;

@@ -12,7 +12,7 @@
   let { level, isFinalVictory, onnext, onmenu }: Props = $props();
 </script>
 
-<Overlay gap="1rem">
+<Overlay>
   {#if isFinalVictory}
     <h2>All Levels Cleared!</h2>
     <p>You conquered all {level} levels!</p>
