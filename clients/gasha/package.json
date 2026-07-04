@@ -17,7 +17,7 @@
   "dependencies": {
     "@card-game/shared-types": "workspace:*",
     "phaser": "^4.2.0",
-    "svelte": "^5.33.13"
+    "svelte": "^5.56.4"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
