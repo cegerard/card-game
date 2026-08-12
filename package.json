@@ -6,15 +6,21 @@
     "node": "^26.0.0"
   },
   "scripts": {
+    "dev": "pnpm --parallel --filter combat-engine --filter gasha dev",
     "dev:engine": "pnpm --filter combat-engine start:dev",
     "dev:gasha": "pnpm --filter gasha dev",
+    "build": "pnpm build:all",
     "build:engine": "pnpm --filter combat-engine build",
     "build:gasha": "pnpm --filter gasha build",
     "build:all": "pnpm -r build",
+    "check": "pnpm --filter gasha check && pnpm --filter combat-engine exec tsc --noEmit",
+    "test": "pnpm test:all",
     "test:engine": "pnpm --filter combat-engine test",
     "test:e2e:engine": "pnpm --filter combat-engine test:e2e",
     "test:all": "pnpm -r test",
+    "lint": "pnpm lint:all",
     "lint:engine": "pnpm --filter combat-engine lint",
-    "lint:all": "pnpm -r lint"
+    "lint:all": "pnpm -r lint",
+    "verify": "pnpm check && pnpm build:all && pnpm lint:all && pnpm test:all && pnpm test:e2e:engine"
   }
 }
