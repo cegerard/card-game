@@ -1,17 +1,13 @@
 {
   "name": "card-game",
-
   "image": "mcr.microsoft.com/devcontainers/typescript-node:26-bookworm",
-
   "features": {
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
-
   "forwardPorts": [
     5173,
     3000
   ],
-
   "portsAttributes": {
     "5173": {
       "label": "Gasha / Svelte + Phaser",
@@ -22,9 +18,7 @@
       "onAutoForward": "notify"
     }
   },
-
   "postCreateCommand": "corepack enable && corepack prepare pnpm@11.8.0 --activate && pnpm install --frozen-lockfile",
-
   "customizations": {
     "vscode": {
       "extensions": [
@@ -42,6 +36,5 @@
       }
     }
   },
-
   "remoteUser": "vscode"
 }
