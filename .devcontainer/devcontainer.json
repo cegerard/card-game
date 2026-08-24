@@ -4,10 +4,7 @@
   "features": {
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
-  "forwardPorts": [
-    5173,
-    3000
-  ],
+  "forwardPorts": [5173, 3000],
   "portsAttributes": {
     "5173": {
       "label": "Gasha / Svelte + Phaser",
@@ -32,7 +29,7 @@
         "editor.codeActionsOnSave": {
           "source.fixAll.eslint": "explicit"
         },
-        "typescript.tsdk": "node_modules/typescript/lib"
+        "typescript.tsdk.path": "node_modules/typescript/lib"
       }
     }
   },
