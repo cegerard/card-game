@@ -1,6 +1,6 @@
 {
   "name": "card-game",
-  "image": "mcr.microsoft.com/devcontainers/typescript-node:26-bookworm",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-26-bookworm",
   "features": {
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
