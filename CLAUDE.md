@@ -32,7 +32,7 @@ TypeScript on Node.js 26: Follow standard conventions
 ## Recent Changes
 - 008-arcade-combat-mode: Added TypeScript — SvelteKit 2.x + Phaser 3.60+, Node.js 26, ES2021+ + `@sveltejs/kit`, `svelte`, `phaser`, `vite`, `@sveltejs/adapter-static`, `@card-game/shared-types`
 
-- 008-link-skill-salamander: Added TypeScript on Node.js 26 + NestJS 11, class-validator, class-transformer
+- 007-link-skill-salamander: Added TypeScript on Node.js 26 + NestJS 11, class-validator, class-transformer
 
 - 007-survive-skill: Added TypeScript on Node.js 26 + NestJS 11, class-validator, class-transformer
 

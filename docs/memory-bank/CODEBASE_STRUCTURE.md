@@ -236,6 +236,8 @@ Unit tests are colocated with source files in `__tests__/` directories.
   - @.claude/CLAUDE.md - Project-specific Claude instructions
   - `commands/` - Claude command definitions
   - `templates/` - Memory bank and document templates
+- @AGENTS.md - Cross-agent guidelines (repo overview, architecture boundaries, workflow) for AI coding agents other than Claude Code
+- @.devcontainer/devcontainer.json - Dev container config so agents/contributors get a working repo environment out of the box
 
 ### Editor
 - @.vscode/settings.json - VSCode workspace settings
@@ -262,13 +264,19 @@ clients/gasha/src/
     │   ├── engine-client.ts    # fetchFight(): POST /fight → FightResult
     │   ├── outcome.ts          # detectOutcome(result, playerName): 'victory' | 'defeat'
     │   ├── rendererMode.ts     # getRendererMode(): reads ?mode query param; default = 'web'
+    │   ├── combatStats.ts      # aggregateCombatStats(): per-card damageDealt/damageTaken/healingDone + winner from FightResult
     │   ├── CombatScene.ts      # Phaser 3 scene running the fight animation
-    │   ├── PhaserRenderer.svelte  # Mounts Phaser.Game in a div; opt-in via ?mode=phaser
-    │   └── WebRenderer.svelte     # HTML/CSS result screen (Victory/Defeat + Continue)
-    └── components/             # Shared UI components
-        ├── VictoryScreen.svelte
-        ├── LevelIndicator.svelte
-        └── GameOverScreen.svelte
+    │   ├── PhaserRenderer.svelte      # Mounts Phaser.Game in a div; opt-in via ?mode=phaser
+    │   └── CombatReportRenderer.svelte  # Default (?mode=web) — mobile-portrait combat report screen (per-card stats, dead cards grayed out); replaced WebRenderer.svelte
+    ├── components/             # Shared UI components
+    │   ├── VictoryScreen.svelte
+    │   ├── LevelIndicator.svelte
+    │   └── GameOverScreen.svelte
+    └── design-system/          # Shared visual primitives/composites + design tokens
+        ├── tokens.ts           # Design tokens (colors, spacing, etc.) + helpers (e.g. pct())
+        ├── tokens.css          # CSS custom properties
+        ├── primitives/         # Button.svelte, Panel.svelte, Badge.svelte, StatBar.svelte, Overlay.svelte
+        └── composites/         # CharacterCard.svelte (built from primitives)
 ```
 
 ### Dual Renderer Pattern
@@ -277,20 +285,20 @@ The arcade page supports two pluggable renderers selected at runtime via URL que
 
 | URL param | Renderer | Description |
 |-----------|----------|-------------|
-| *(none)* | `WebRenderer` | Default — simple HTML/CSS Victory/Defeat screen |
+| *(none)* | `CombatReportRenderer` | Default — mobile-portrait combat report (per-card damage/healing stats via `combatStats.ts`, dead cards grayed out) |
 | `?mode=phaser` | `PhaserRenderer` | Full Phaser 3 animated combat scene |
 
 `getRendererMode()` in `rendererMode.ts` reads `window.location.search`. SSR context returns `'phaser'` as a safe fallback (Phaser is lazy-imported on mount anyway). The arcade page conditionally renders one component:
 
 ```svelte
 {#if rendererMode === 'web'}
-  <WebRenderer {fightResult} playerName="Player" oncomplete={handleCombatComplete} />
+  <CombatReportRenderer {fightResult} playerName="Player" playerCardIds={PLAYER_TEAM.map((c) => c.id)} oncomplete={handleCombatComplete} />
 {:else}
   <PhaserRenderer {fightResult} playerName="Player" oncomplete={handleCombatComplete} />
 {/if}
 ```
 
-Both components share the same `Props` interface: `{ fightResult, playerName, oncomplete }`.
+`PhaserRenderer` and `CombatReportRenderer` no longer share an identical `Props` interface — `CombatReportRenderer` additionally requires `playerCardIds: string[]` to partition cards into player/enemy for stat aggregation.
 
 ### Navigation
 Home page uses `<a href="/arcade" role="button">` instead of `<button onclick={goto}>` — avoids JS dependency for basic navigation.
