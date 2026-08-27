@@ -1,9 +1,5 @@
 export type ArcadePhase =
-  | 'idle'
-  | 'combat'
-  | 'victory'
-  | 'game-over'
-  | 'final-victory';
+  'idle' | 'combat' | 'victory' | 'game-over' | 'final-victory';
 
 export interface ArcadeSession {
   currentLevel: number;
@@ -65,6 +61,7 @@ export interface OtherSkillConfig {
   targetingStrategy?: string;
   event?: string;
   buffType?: string;
+  polarity?: 'buff' | 'debuff';
   duration?: number;
 }
 

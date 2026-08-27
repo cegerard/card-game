@@ -6,7 +6,7 @@
     "node": "^26.0.0"
   },
   "scripts": {
-    "dev": "pnpm --parallel --filter combat-engine --filter gasha dev",
+    "dev": "pnpm -r --parallel dev",
     "dev:engine": "pnpm --filter combat-engine start:dev",
     "dev:gasha": "pnpm --filter gasha dev",
     "build": "pnpm build:all",

@@ -70,7 +70,8 @@ function makeDebuffEnemy(id: string, name: string, mult: number): CardConfig {
       },
       others: [
         {
-          kind: 'BUFF',
+          kind: 'ALTERATION',
+          polarity: 'buff',
           name: 'Fortify',
           rate: 0.3,
           targetingStrategy: 'self',
@@ -104,12 +105,13 @@ function makeChainEnemy(id: string, name: string, mult: number): CardConfig {
       },
       others: [
         {
-          kind: 'BUFF',
+          kind: 'ALTERATION',
           name: 'Wind Step',
           rate: 0.4,
           targetingStrategy: 'self',
           event: 'turn-end',
           buffType: 'agility',
+          polarity: 'buff',
           duration: 3,
         },
       ],
