@@ -48,10 +48,18 @@ export interface SpecialConfig {
   targetingStrategy: string;
 }
 
+export interface EffectConfig {
+  type: 'POISON' | 'BURN' | 'FREEZE' | 'STUNT';
+  rate: number;
+  level: 1 | 2 | 3;
+  probability?: number;
+}
+
 export interface SimpleAttackConfig {
   name: string;
   damages: DamageCompositionConfig[];
   targetingStrategy: string;
+  effects?: EffectConfig[];
 }
 
 export interface OtherSkillConfig {

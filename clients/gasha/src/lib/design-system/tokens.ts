@@ -34,3 +34,12 @@ export function labelAt(index: number): string {
 export function pct(value: number, max: number): number {
   return Math.round((value / max) * 100);
 }
+
+const ELEMENT_ORDER = ['FIRE', 'WATER', 'EARTH', 'AIR', 'PHYSICAL'] as const;
+
+export function elementIndex(element: string | undefined): number {
+  const index = ELEMENT_ORDER.indexOf(
+    element as (typeof ELEMENT_ORDER)[number],
+  );
+  return index === -1 ? ELEMENT_ORDER.length - 1 : index;
+}

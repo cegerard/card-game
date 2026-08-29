@@ -5,6 +5,7 @@
 <main>
   <h1>Gasha</h1>
   <Button variant="primary" href="/arcade">Arcade Mode</Button>
+  <Button variant="secondary" href="/deck">Deck Builder</Button>
 </main>
 
 <style>

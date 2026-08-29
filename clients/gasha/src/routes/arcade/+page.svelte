@@ -3,7 +3,7 @@
   import { get } from 'svelte/store';
   import { goto } from '$app/navigation';
   import { session, resetSession } from '$lib/arcade/session.js';
-  import { PLAYER_TEAM } from '$lib/arcade/player-team.js';
+  import { selectedDeckCards } from '$lib/deck/deck-store.js';
   import { ARCADE_LEVELS } from '$lib/arcade/levels.js';
   import { fetchFight } from '$lib/combat/engine-client.js';
   import { getRendererMode } from '$lib/combat/rendererMode.js';
@@ -29,7 +29,11 @@
     fightResult = null;
 
     try {
-      fightResult = await fetchFight(PLAYER_TEAM, level.enemyTeam, level.name);
+      fightResult = await fetchFight(
+        get(selectedDeckCards),
+        level.enemyTeam,
+        level.name,
+      );
     } catch {
       resetSession();
       goto('/');
@@ -40,18 +44,30 @@
     const current = get(session);
     const result = fightResult!;
     if (!playerWon) {
-      session.update((s) => ({ ...s, phase: 'game-over', fightResult: result }));
+      session.update((s) => ({
+        ...s,
+        phase: 'game-over',
+        fightResult: result,
+      }));
       return;
     }
     if (current.currentLevel >= ARCADE_LEVELS.length) {
-      session.update((s) => ({ ...s, phase: 'final-victory', fightResult: result }));
+      session.update((s) => ({
+        ...s,
+        phase: 'final-victory',
+        fightResult: result,
+      }));
     } else {
       session.update((s) => ({ ...s, phase: 'victory', fightResult: result }));
     }
   }
 
   function handleNextLevel() {
-    session.update((s) => ({ ...s, phase: 'combat', currentLevel: s.currentLevel + 1 }));
+    session.update((s) => ({
+      ...s,
+      phase: 'combat',
+      currentLevel: s.currentLevel + 1,
+    }));
     launchCombat(get(session).currentLevel);
   }
 
@@ -73,9 +89,18 @@
 
 {#if $session.phase === 'combat' && fightResult}
   {#if rendererMode === 'web'}
-    <CombatReportRenderer {fightResult} playerName="Player" playerCardIds={PLAYER_TEAM.map((c) => c.id)} oncomplete={handleCombatComplete} />
+    <CombatReportRenderer
+      {fightResult}
+      playerName="Player"
+      playerCardIds={$selectedDeckCards.map((c) => c.id)}
+      oncomplete={handleCombatComplete}
+    />
   {:else}
-    <PhaserRenderer {fightResult} playerName="Player" oncomplete={handleCombatComplete} />
+    <PhaserRenderer
+      {fightResult}
+      playerName="Player"
+      oncomplete={handleCombatComplete}
+    />
   {/if}
 {/if}
 
