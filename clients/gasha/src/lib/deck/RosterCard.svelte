@@ -23,15 +23,30 @@
   const color = $derived(colorAt(index));
   const totem = $derived(totemAt(index));
   const label = $derived(labelAt(index));
+
+  function toggle() {
+    if (!disabled) ontoggle(card.id);
+  }
+
+  function onKeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      toggle();
+    }
+  }
 </script>
 
-<button
-  type="button"
+<div
   class="roster-card"
   class:selected
-  {disabled}
+  class:disabled
+  role="button"
+  tabindex={disabled ? -1 : 0}
   aria-pressed={selected}
-  onclick={() => ontoggle(card.id)}
+  aria-disabled={disabled}
+  aria-label={card.name}
+  onclick={toggle}
+  onkeydown={onKeydown}
 >
   <Panel>
     <div
@@ -67,32 +82,33 @@
       </dl>
     </div>
   </Panel>
-</button>
+</div>
 
 <style>
   .roster-card {
-    display: block;
     width: 100%;
-    padding: 0;
-    border: none;
-    background: none;
     cursor: pointer;
     border-radius: var(--gasha-radius-lg);
     transition: transform 0.15s;
   }
 
-  .roster-card:not(:disabled):hover {
+  .roster-card:not(.disabled):hover {
     transform: translateY(-3px);
   }
 
-  .roster-card:disabled {
-    cursor: not-allowed;
-    opacity: 0.4;
+  .roster-card:focus-visible {
+    outline: 2px solid var(--gasha-gold-300);
+    outline-offset: 2px;
   }
 
   .roster-card.selected {
     outline: 2px solid var(--gasha-gold-300);
     outline-offset: 2px;
+  }
+
+  .roster-card.disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
   }
 
   .card-header {
