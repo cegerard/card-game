@@ -28,3 +28,15 @@ test('deselecting a card drops the counter to 4 / 5', async ({ page }) => {
   await page.getByRole('button', { name: /warrior/i }).click();
   await expect(page.getByText(/4\s*\/\s*5/)).toBeVisible();
 });
+
+test('Arcade Mode is disabled while the deck is incomplete', async ({
+  page,
+}) => {
+  await page.goto('/deck');
+  await page.waitForLoadState('networkidle');
+  await page.getByRole('button', { name: /warrior/i }).click();
+  await page.getByRole('button', { name: /back to menu/i }).click();
+  await expect(
+    page.getByRole('button', { name: /arcade mode/i }),
+  ).toBeDisabled();
+});

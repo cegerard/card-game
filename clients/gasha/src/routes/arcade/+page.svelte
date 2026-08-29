@@ -3,7 +3,7 @@
   import { get } from 'svelte/store';
   import { goto } from '$app/navigation';
   import { session, resetSession } from '$lib/arcade/session.js';
-  import { selectedDeckCards } from '$lib/deck/deck-store.js';
+  import { selectedDeckCards, isDeckComplete } from '$lib/deck/deck-store.js';
   import { ARCADE_LEVELS } from '$lib/arcade/levels.js';
   import { fetchFight } from '$lib/combat/engine-client.js';
   import { getRendererMode } from '$lib/combat/rendererMode.js';
@@ -77,6 +77,10 @@
   }
 
   onMount(() => {
+    if (!get(isDeckComplete)) {
+      goto('/deck');
+      return;
+    }
     rendererMode = getRendererMode();
     session.update((s) => ({ ...s, phase: 'combat' }));
     launchCombat(get(session).currentLevel);
