@@ -1,10 +1,17 @@
 <script lang="ts">
   import Button from '$lib/design-system/primitives/Button.svelte';
+  import { isDeckComplete } from '$lib/deck/deck-store.js';
 </script>
 
 <main>
   <h1>Gasha</h1>
-  <Button variant="primary" href="/arcade">Arcade Mode</Button>
+  <Button variant="primary" href="/arcade" disabled={!$isDeckComplete}>
+    Arcade Mode
+  </Button>
+  <Button variant="secondary" href="/deck">Deck Builder</Button>
+  {#if !$isDeckComplete}
+    <p class="warning">Build a full deck of 5 to play.</p>
+  {/if}
 </main>
 
 <style>
@@ -24,5 +31,11 @@
     color: var(--gasha-gold-300);
     font-size: 3rem;
     margin: 0;
+  }
+
+  .warning {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--gasha-danger);
   }
 </style>

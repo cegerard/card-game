@@ -251,15 +251,20 @@ clients/gasha/src/
 ├── app.html                    # HTML shell
 ├── routes/
 │   ├── +layout.svelte          # Root layout
-│   ├── +page.svelte            # Home page — link to Arcade Mode
-│   └── arcade/
-│       └── +page.svelte        # Arcade flow: fetch fight, mount renderer, handle outcome
+│   ├── +page.svelte            # Home page — links to Arcade Mode and Deck Builder
+│   ├── arcade/
+│   │   └── +page.svelte        # Arcade flow: fetch fight (uses selectedDeckCards), mount renderer, handle outcome
+│   └── deck/
+│       └── +page.svelte        # Deck Builder: browse roster, pick exactly 5 characters
 └── lib/
     ├── arcade/                 # Arcade session state and data
     │   ├── session.ts          # Svelte writable store: phase, currentLevel, fightResult
     │   ├── levels.ts           # ARCADE_LEVELS: enemy decks per level
-    │   ├── player-team.ts      # PLAYER_TEAM: player's card deck
-    │   └── types.ts            # CardConfig, FightResult shared types
+    │   └── types.ts            # CardConfig, EffectConfig, FightResult shared types
+    ├── deck/                   # Player roster + selected deck (in-memory)
+    │   ├── roster.ts           # CHARACTER_ROSTER (8 hard-coded cards), DEFAULT_DECK_IDS, findRosterCard()
+    │   ├── deck-store.ts       # In-memory stores: selectedCardIds, selectedDeckCards, isDeckComplete; toggleCard(), resetDeck(), DECK_SIZE=5
+    │   └── RosterCard.svelte   # Presentational card tile (role=button) with selected/disabled state; reuses CardHeader
     ├── combat/                 # Fight rendering and engine integration
     │   ├── engine-client.ts    # fetchFight(): POST /fight → FightResult
     │   ├── outcome.ts          # detectOutcome(result, playerName): 'victory' | 'defeat'
@@ -273,10 +278,10 @@ clients/gasha/src/
     │   ├── LevelIndicator.svelte
     │   └── GameOverScreen.svelte
     └── design-system/          # Shared visual primitives/composites + design tokens
-        ├── tokens.ts           # Design tokens (colors, spacing, etc.) + helpers (e.g. pct())
+        ├── tokens.ts           # Design tokens (colors, spacing, etc.) + helpers (e.g. pct(), elementIndex())
         ├── tokens.css          # CSS custom properties
         ├── primitives/         # Button.svelte, Panel.svelte, Badge.svelte, StatBar.svelte, Overlay.svelte
-        └── composites/         # CharacterCard.svelte (built from primitives)
+        └── composites/         # CardHeader.svelte (element gradient + totem + badge + optional corner snippet), CharacterCard.svelte (built from primitives + CardHeader)
 ```
 
 ### Dual Renderer Pattern
@@ -292,7 +297,7 @@ The arcade page supports two pluggable renderers selected at runtime via URL que
 
 ```svelte
 {#if rendererMode === 'web'}
-  <CombatReportRenderer {fightResult} playerName="Player" playerCardIds={PLAYER_TEAM.map((c) => c.id)} oncomplete={handleCombatComplete} />
+  <CombatReportRenderer {fightResult} playerName="Player" playerCardIds={$selectedDeckCards.map((c) => c.id)} oncomplete={handleCombatComplete} />
 {:else}
   <PhaserRenderer {fightResult} playerName="Player" oncomplete={handleCombatComplete} />
 {/if}
@@ -301,7 +306,10 @@ The arcade page supports two pluggable renderers selected at runtime via URL que
 `PhaserRenderer` and `CombatReportRenderer` no longer share an identical `Props` interface — `CombatReportRenderer` additionally requires `playerCardIds: string[]` to partition cards into player/enemy for stat aggregation.
 
 ### Navigation
-Home page uses `<a href="/arcade" role="button">` instead of `<button onclick={goto}>` — avoids JS dependency for basic navigation.
+Home page uses `<a href="/arcade" role="button">` (and `/deck`) instead of `<button onclick={goto}>` — avoids JS dependency for basic navigation.
+
+### Deck Builder
+`/deck` lets the player pick **exactly 5** characters from `CHARACTER_ROSTER` (8 hard-coded cards in `lib/deck/roster.ts`). The selection lives in the module-scoped `selectedCardIds` writable (`lib/deck/deck-store.ts`) — it persists across client-side navigation between menu/deck/arcade (like the `session` store) but **not** across a hard page reload (no `localStorage`). `toggleCard()` enforces the 5-card cap. Arcade Mode fights with `get(selectedDeckCards)` instead of the former hard-coded `PLAYER_TEAM` (removed with `lib/arcade/player-team.ts`). Default deck = first 5 roster ids, so Arcade works out of the box.
 
 ## Key Patterns
 

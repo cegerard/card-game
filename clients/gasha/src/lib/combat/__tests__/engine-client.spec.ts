@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { PLAYER_TEAM } from '$lib/arcade/player-team.js';
+import { CHARACTER_ROSTER } from '$lib/deck/roster.js';
 import type { CardConfig, FightResult } from '$lib/arcade/types.js';
+
+const PLAYER_DECK = CHARACTER_ROSTER.slice(0, 5);
 
 describe('fetchFight', () => {
   let fetchFight: (
@@ -19,20 +21,24 @@ describe('fetchFight', () => {
   });
 
   it('calls POST /fight with correct payload', async () => {
-    const mockResult: FightResult = { 0: { kind: 'fight_end', winner: 'Player' } };
+    const mockResult: FightResult = {
+      0: { kind: 'fight_end', winner: 'Player' },
+    };
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: () => Promise.resolve(mockResult),
     });
     vi.stubGlobal('fetch', fetchMock);
 
-    await fetchFight(PLAYER_TEAM, [], 'Level 1');
+    await fetchFight(PLAYER_DECK, [], 'Level 1');
 
     expect(fetchMock).toHaveBeenCalledWith(
       expect.stringContaining('/fight'),
       expect.objectContaining({
         method: 'POST',
-        body: expect.stringContaining('"cardSelectorStrategy":"speed-weighted"'),
+        body: expect.stringContaining(
+          '"cardSelectorStrategy":"speed-weighted"',
+        ),
       }),
     );
   });
@@ -44,30 +50,46 @@ describe('fetchFight', () => {
     });
     vi.stubGlobal('fetch', fetchMock);
 
-    await fetchFight(PLAYER_TEAM, [], 'Level 1');
+    await fetchFight(PLAYER_DECK, [], 'Level 1');
     const body = JSON.parse(fetchMock.mock.calls[0][1].body);
 
     expect(body.player1.name).toBe('Player');
   });
 
   it('returns FightResult on 200', async () => {
-    const mockResult: FightResult = { 0: { kind: 'fight_end', winner: 'Player' } };
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(mockResult) }));
+    const mockResult: FightResult = {
+      0: { kind: 'fight_end', winner: 'Player' },
+    };
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockResult),
+      }),
+    );
 
-    const result = await fetchFight(PLAYER_TEAM, [], 'Level 1');
+    const result = await fetchFight(PLAYER_DECK, [], 'Level 1');
 
     expect(result).toEqual(mockResult);
   });
 
   it('throws Error on non-200 response', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 400 }));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: false, status: 400 }),
+    );
 
-    await expect(fetchFight(PLAYER_TEAM, [], 'Level 1')).rejects.toThrow();
+    await expect(fetchFight(PLAYER_DECK, [], 'Level 1')).rejects.toThrow();
   });
 
   it('throws Error on network failure', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Network error')));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockRejectedValue(new Error('Network error')),
+    );
 
-    await expect(fetchFight(PLAYER_TEAM, [], 'Level 1')).rejects.toThrow('Network error');
+    await expect(fetchFight(PLAYER_DECK, [], 'Level 1')).rejects.toThrow(
+      'Network error',
+    );
   });
 });
