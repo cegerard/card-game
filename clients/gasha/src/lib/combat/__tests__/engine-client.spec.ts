@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { CHARACTER_ROSTER } from '$lib/deck/roster.js';
 import type { CardConfig, FightResult } from '$lib/arcade/types.js';
 
+const PLAYER_DECK = CHARACTER_ROSTER.slice(0, 5);
+
 describe('fetchFight', () => {
   let fetchFight: (
     player1Deck: CardConfig[],
@@ -28,7 +30,7 @@ describe('fetchFight', () => {
     });
     vi.stubGlobal('fetch', fetchMock);
 
-    await fetchFight(CHARACTER_ROSTER, [], 'Level 1');
+    await fetchFight(PLAYER_DECK, [], 'Level 1');
 
     expect(fetchMock).toHaveBeenCalledWith(
       expect.stringContaining('/fight'),
@@ -48,7 +50,7 @@ describe('fetchFight', () => {
     });
     vi.stubGlobal('fetch', fetchMock);
 
-    await fetchFight(CHARACTER_ROSTER, [], 'Level 1');
+    await fetchFight(PLAYER_DECK, [], 'Level 1');
     const body = JSON.parse(fetchMock.mock.calls[0][1].body);
 
     expect(body.player1.name).toBe('Player');
@@ -60,15 +62,13 @@ describe('fetchFight', () => {
     };
     vi.stubGlobal(
       'fetch',
-      vi
-        .fn()
-        .mockResolvedValue({
-          ok: true,
-          json: () => Promise.resolve(mockResult),
-        }),
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockResult),
+      }),
     );
 
-    const result = await fetchFight(CHARACTER_ROSTER, [], 'Level 1');
+    const result = await fetchFight(PLAYER_DECK, [], 'Level 1');
 
     expect(result).toEqual(mockResult);
   });
@@ -79,7 +79,7 @@ describe('fetchFight', () => {
       vi.fn().mockResolvedValue({ ok: false, status: 400 }),
     );
 
-    await expect(fetchFight(CHARACTER_ROSTER, [], 'Level 1')).rejects.toThrow();
+    await expect(fetchFight(PLAYER_DECK, [], 'Level 1')).rejects.toThrow();
   });
 
   it('throws Error on network failure', async () => {
@@ -88,7 +88,7 @@ describe('fetchFight', () => {
       vi.fn().mockRejectedValue(new Error('Network error')),
     );
 
-    await expect(fetchFight(CHARACTER_ROSTER, [], 'Level 1')).rejects.toThrow(
+    await expect(fetchFight(PLAYER_DECK, [], 'Level 1')).rejects.toThrow(
       'Network error',
     );
   });
