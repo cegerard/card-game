@@ -1,12 +1,7 @@
 <script lang="ts">
   import Panel from '$lib/design-system/primitives/Panel.svelte';
-  import Badge from '$lib/design-system/primitives/Badge.svelte';
-  import {
-    colorAt,
-    totemAt,
-    labelAt,
-    elementIndex,
-  } from '$lib/design-system/tokens.js';
+  import CardHeader from '$lib/design-system/composites/CardHeader.svelte';
+  import { elementIndex } from '$lib/design-system/tokens.js';
   import type { CardConfig } from '$lib/arcade/types.js';
 
   interface Props {
@@ -20,9 +15,6 @@
   let { card, selected, disabled, ontoggle }: Props = $props();
 
   const index = $derived(elementIndex(card.element));
-  const color = $derived(colorAt(index));
-  const totem = $derived(totemAt(index));
-  const label = $derived(labelAt(index));
 
   function toggle() {
     if (!disabled) ontoggle(card.id);
@@ -49,21 +41,11 @@
   onkeydown={onKeydown}
 >
   <Panel>
-    <div
-      class="card-header"
-      style="background: radial-gradient(120% 90% at 50% 18%, {color}55, #0c0a07)"
-    >
-      <span class="totem">{totem}</span>
-      <span class="badge-pos">
-        <Badge variant="element">
-          <i class="el-dot" style="background:{color}"></i>
-          <span class="el-text">{label}</span>
-        </Badge>
-      </span>
-      {#if selected}
-        <span class="check">✓</span>
-      {/if}
-    </div>
+    <CardHeader {index}>
+      {#snippet corner()}
+        {#if selected}<span class="check">✓</span>{/if}
+      {/snippet}
+    </CardHeader>
     <div class="card-body">
       <div class="card-name">{card.name}</div>
       <dl class="stats">
@@ -111,47 +93,9 @@
     opacity: 0.4;
   }
 
-  .card-header {
-    position: relative;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-  }
-
-  .totem {
-    font-size: 28px;
-    line-height: 1;
-    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.55));
-  }
-
-  .badge-pos {
-    position: absolute;
-    top: 3px;
-    left: 3px;
-  }
-
   .check {
-    position: absolute;
-    top: 3px;
-    right: 5px;
     font: 700 14px var(--gasha-font-ui);
     color: var(--gasha-gold-300);
-  }
-
-  .el-dot {
-    display: block;
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    box-shadow: 0 0 5px currentColor;
-  }
-
-  .el-text {
-    font: 700 6px var(--gasha-font-mono);
-    letter-spacing: 0.05em;
-    color: #f3e6c8;
   }
 
   .card-body {

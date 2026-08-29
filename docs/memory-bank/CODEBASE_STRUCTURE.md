@@ -264,7 +264,7 @@ clients/gasha/src/
     ├── deck/                   # Player roster + selected deck (in-memory)
     │   ├── roster.ts           # CHARACTER_ROSTER (8 hard-coded cards), DEFAULT_DECK_IDS, findRosterCard()
     │   ├── deck-store.ts       # In-memory stores: selectedCardIds, selectedDeckCards, isDeckComplete; toggleCard(), resetDeck(), DECK_SIZE=5
-    │   └── RosterCard.svelte   # Presentational card tile with selected/disabled state (built from Panel/Badge)
+    │   └── RosterCard.svelte   # Presentational card tile (role=button) with selected/disabled state; reuses CardHeader
     ├── combat/                 # Fight rendering and engine integration
     │   ├── engine-client.ts    # fetchFight(): POST /fight → FightResult
     │   ├── outcome.ts          # detectOutcome(result, playerName): 'victory' | 'defeat'
@@ -281,7 +281,7 @@ clients/gasha/src/
         ├── tokens.ts           # Design tokens (colors, spacing, etc.) + helpers (e.g. pct(), elementIndex())
         ├── tokens.css          # CSS custom properties
         ├── primitives/         # Button.svelte, Panel.svelte, Badge.svelte, StatBar.svelte, Overlay.svelte
-        └── composites/         # CharacterCard.svelte (built from primitives)
+        └── composites/         # CardHeader.svelte (element gradient + totem + badge + optional corner snippet), CharacterCard.svelte (built from primitives + CardHeader)
 ```
 
 ### Dual Renderer Pattern
