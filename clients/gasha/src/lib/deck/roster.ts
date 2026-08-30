@@ -254,6 +254,37 @@ export const CHARACTER_ROSTER: CardConfig[] = [
     },
     behaviors: { dodge: 'random-dodge' },
   },
+  {
+    id: 'player-invisible-hero',
+    name: 'Invisible Hero',
+    attack: 900,
+    defense: 350,
+    health: 850,
+    speed: 700,
+    agility: 500,
+    accuracy: 870,
+    criticalChance: 100,
+    element: 'FIRE',
+    skills: {
+      special: {
+        kind: 'ATTACK',
+        name: 'Inferno Blast',
+        damages: [{ type: 'FIRE', rate: 2.0 }],
+        energy: 4,
+        targetingStrategy: 'target-all',
+      },
+      simpleAttack: {
+        name: 'Flame Wave',
+        damages: [
+          { type: 'FIRE', rate: 1.0 },
+          { type: 'PHYSICAL', rate: 1.0 },
+        ],
+        targetingStrategy: 'position-based',
+      },
+      others: [],
+    },
+    behaviors: { dodge: 'random-dodge' },
+  },
 ];
 
 export const DEFAULT_DECK_IDS: string[] = CHARACTER_ROSTER.slice(0, 5).map(
