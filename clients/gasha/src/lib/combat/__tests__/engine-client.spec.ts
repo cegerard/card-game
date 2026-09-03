@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { CHARACTER_ROSTER } from '$lib/deck/roster.js';
+import { toCombatConfig } from '@card-game/shared-types';
 import type { CardConfig, FightResult } from '$lib/arcade/types.js';
 
-const PLAYER_DECK = CHARACTER_ROSTER.slice(0, 5);
+const PLAYER_DECK = CHARACTER_ROSTER.slice(0, 5).map(toCombatConfig);
 
 describe('fetchFight', () => {
   let fetchFight: (

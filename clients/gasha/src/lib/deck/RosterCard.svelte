@@ -2,10 +2,10 @@
   import Panel from '$lib/design-system/primitives/Panel.svelte';
   import CardHeader from '$lib/design-system/composites/CardHeader.svelte';
   import { elementIndex } from '$lib/design-system/tokens.js';
-  import type { CardConfig } from '$lib/arcade/types.js';
+  import type { CardDefinition } from '@card-game/shared-types';
 
   interface Props {
-    card: CardConfig;
+    card: CardDefinition;
     selected: boolean;
     disabled: boolean;
     // eslint-disable-next-line no-unused-vars
@@ -51,15 +51,15 @@
       <dl class="stats">
         <div>
           <dt>ATK</dt>
-          <dd>{card.attack}</dd>
+          <dd>{card.stats.attack}</dd>
         </div>
         <div>
           <dt>DEF</dt>
-          <dd>{card.defense}</dd>
+          <dd>{card.stats.defense}</dd>
         </div>
         <div>
           <dt>HP</dt>
-          <dd>{card.health}</dd>
+          <dd>{card.stats.health}</dd>
         </div>
       </dl>
     </div>

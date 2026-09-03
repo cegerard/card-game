@@ -1,49 +1,43 @@
-import type { ArcadeLevel, CardConfig } from './types.js';
+import type { ArcadeLevel } from './types.js';
+import type {
+  Archetype,
+  CardDefinition,
+  Element,
+} from '@card-game/shared-types';
 
 function makeEnemy(
   id: string,
   name: string,
   mult: number,
-  element: string = 'PHYSICAL',
-): CardConfig {
-  const base = {
+  element: Element = 'PHYSICAL',
+  archetype: Archetype = 'Guerrier',
+): CardDefinition {
+  const stats = {
     attack: Math.round(60 * mult),
     defense: Math.round(40 * mult),
     health: Math.round(100 * mult),
     speed: Math.round(45 * mult),
+    agility: 35,
+    accuracy: 80,
   };
   return {
     id,
     name,
-    attack: base.attack,
-    defense: base.defense,
-    health: base.health,
-    speed: base.speed,
-    agility: 35,
-    accuracy: 80,
-    criticalChance: 10,
+    archetype,
     element,
+    stats,
+    criticalChance: 0.1,
     skills: {
       special: {
         kind: 'ATTACK',
         name: 'Heavy Strike',
-        damages: [
-          {
-            type: element as 'PHYSICAL' | 'FIRE' | 'WATER' | 'EARTH' | 'AIR',
-            rate: 1.8,
-          },
-        ],
+        damages: [{ type: element, rate: 1.8 }],
         energy: 3,
         targetingStrategy: 'position-based',
       },
       simpleAttack: {
         name: 'Attack',
-        damages: [
-          {
-            type: element as 'PHYSICAL' | 'FIRE' | 'WATER' | 'EARTH' | 'AIR',
-            rate: 1.0,
-          },
-        ],
+        damages: [{ type: element, rate: 1.0 }],
         targetingStrategy: 'position-based',
       },
       others: [],
@@ -52,9 +46,13 @@ function makeEnemy(
   };
 }
 
-function makeDebuffEnemy(id: string, name: string, mult: number): CardConfig {
+function makeDebuffEnemy(
+  id: string,
+  name: string,
+  mult: number,
+): CardDefinition {
   return {
-    ...makeEnemy(id, name, mult, 'EARTH'),
+    ...makeEnemy(id, name, mult, 'EARTH', 'Tank'),
     skills: {
       special: {
         kind: 'ATTACK',
@@ -84,9 +82,13 @@ function makeDebuffEnemy(id: string, name: string, mult: number): CardConfig {
   };
 }
 
-function makeChainEnemy(id: string, name: string, mult: number): CardConfig {
+function makeChainEnemy(
+  id: string,
+  name: string,
+  mult: number,
+): CardDefinition {
   return {
-    ...makeEnemy(id, name, mult, 'AIR'),
+    ...makeEnemy(id, name, mult, 'AIR', 'Assassin'),
     skills: {
       special: {
         kind: 'ATTACK',
@@ -130,7 +132,7 @@ export const ARCADE_LEVELS: ArcadeLevel[] = [
     name: 'Level 2 — Brawlers',
     enemyTeam: [
       makeEnemy('enemy-2-1', 'Brawler', 1.3),
-      makeEnemy('enemy-2-2', 'Scout', 1.3, 'AIR'),
+      makeEnemy('enemy-2-2', 'Scout', 1.3, 'AIR', 'Assassin'),
     ],
   },
   {
@@ -139,7 +141,7 @@ export const ARCADE_LEVELS: ArcadeLevel[] = [
     enemyTeam: [
       makeDebuffEnemy('enemy-3-1', 'Brute', 1.6),
       makeEnemy('enemy-3-2', 'Guard', 1.6),
-      makeEnemy('enemy-3-3', 'Ranger', 1.6, 'AIR'),
+      makeEnemy('enemy-3-3', 'Ranger', 1.6, 'AIR', 'Assassin'),
     ],
   },
   {
@@ -148,8 +150,8 @@ export const ARCADE_LEVELS: ArcadeLevel[] = [
     enemyTeam: [
       makeChainEnemy('enemy-4-1', 'Champion', 2.0),
       makeDebuffEnemy('enemy-4-2', 'Crusher', 2.0),
-      makeEnemy('enemy-4-3', 'Sentinel', 2.0, 'WATER'),
-      makeEnemy('enemy-4-4', 'Pyro', 2.0, 'FIRE'),
+      makeEnemy('enemy-4-3', 'Sentinel', 2.0, 'WATER', 'Support'),
+      makeEnemy('enemy-4-4', 'Pyro', 2.0, 'FIRE', 'DPS'),
     ],
   },
   {
@@ -159,8 +161,8 @@ export const ARCADE_LEVELS: ArcadeLevel[] = [
       makeChainEnemy('enemy-5-1', 'Overlord', 2.5),
       makeChainEnemy('enemy-5-2', 'Tempest', 2.5),
       makeDebuffEnemy('enemy-5-3', 'Colossus', 2.5),
-      makeEnemy('enemy-5-4', 'Inferno', 2.5, 'FIRE'),
-      makeEnemy('enemy-5-5', 'Glacier', 2.5, 'WATER'),
+      makeEnemy('enemy-5-4', 'Inferno', 2.5, 'FIRE', 'DPS'),
+      makeEnemy('enemy-5-5', 'Glacier', 2.5, 'WATER', 'Support'),
     ],
   },
 ];

@@ -1,3 +1,17 @@
+import type { CardDefinition } from '@card-game/shared-types';
+
+// Le contrat de carte (CardConfig et ses composants) vit désormais dans
+// @card-game/shared-types, contrat unique partagé avec le combat-engine.
+// Voir Notion > Les cartes > Système d'expérience > Plan d'implémentation.
+export type {
+  CardConfig,
+  DamageComposition as DamageCompositionConfig,
+  SpecialSkill as SpecialConfig,
+  EffectConfig,
+  SimpleAttackSkill as SimpleAttackConfig,
+  OtherSkill as OtherSkillConfig,
+} from '@card-game/shared-types';
+
 export type ArcadePhase =
   'idle' | 'combat' | 'victory' | 'game-over' | 'final-victory';
 
@@ -10,67 +24,7 @@ export interface ArcadeSession {
 export interface ArcadeLevel {
   index: number;
   name: string;
-  enemyTeam: CardConfig[];
-}
-
-export interface CardConfig {
-  id: string;
-  name: string;
-  attack: number;
-  defense: number;
-  health: number;
-  speed: number;
-  agility: number;
-  accuracy: number;
-  criticalChance: number;
-  element?: string;
-  skills: {
-    special: SpecialConfig;
-    simpleAttack: SimpleAttackConfig;
-    others: OtherSkillConfig[];
-  };
-  behaviors: {
-    dodge: 'simple-dodge' | 'random-dodge';
-  };
-}
-
-export interface DamageCompositionConfig {
-  type: 'PHYSICAL' | 'FIRE' | 'WATER' | 'EARTH' | 'AIR';
-  rate: number;
-}
-
-export interface SpecialConfig {
-  kind: 'ATTACK' | 'HEALING';
-  name: string;
-  damages?: DamageCompositionConfig[];
-  rate?: number;
-  energy: number;
-  targetingStrategy: string;
-}
-
-export interface EffectConfig {
-  type: 'POISON' | 'BURN' | 'FREEZE' | 'STUNT';
-  rate: number;
-  level: 1 | 2 | 3;
-  probability?: number;
-}
-
-export interface SimpleAttackConfig {
-  name: string;
-  damages: DamageCompositionConfig[];
-  targetingStrategy: string;
-  effects?: EffectConfig[];
-}
-
-export interface OtherSkillConfig {
-  kind: string;
-  name: string;
-  rate?: number;
-  targetingStrategy?: string;
-  event?: string;
-  buffType?: string;
-  polarity?: 'buff' | 'debuff';
-  duration?: number;
+  enemyTeam: CardDefinition[];
 }
 
 export type Step =

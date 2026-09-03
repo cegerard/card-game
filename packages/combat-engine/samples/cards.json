@@ -9,6 +9,7 @@
     "agility": 55,
     "accuracy": 80,
     "criticalChance": 0.05,
+    "element": "FIRE",
     "skills": {
       "special": {
         "kind": "ATTACK",
@@ -162,11 +163,12 @@
     "name": "Kaelion",
     "attack": 85,
     "defense": 50,
-    "health": 430,
+    "health": 530,
     "speed": 80,
     "agility": 60,
     "accuracy": 85,
     "criticalChance": 0.08,
+    "element": "FIRE",
     "skills": {
       "simpleAttack": {
         "name": "Flamme Terreuse",
