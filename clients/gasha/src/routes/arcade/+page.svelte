@@ -14,6 +14,7 @@
   import LevelIndicator from '$lib/components/LevelIndicator.svelte';
   import type { FightResult } from '$lib/arcade/types.js';
   import type { RendererMode } from '$lib/combat/rendererMode.js';
+  import { toCombatConfig } from '@card-game/shared-types';
 
   let fightResult: FightResult | null = $state(null);
   let rendererMode: RendererMode = $state('phaser');
@@ -31,7 +32,7 @@
     try {
       fightResult = await fetchFight(
         get(selectedDeckCards),
-        level.enemyTeam,
+        level.enemyTeam.map(toCombatConfig),
         level.name,
       );
     } catch {

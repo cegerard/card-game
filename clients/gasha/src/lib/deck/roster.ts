@@ -1,17 +1,25 @@
-import type { CardConfig } from '$lib/arcade/types.js';
+import type { CardDefinition } from '@card-game/shared-types';
 
-export const CHARACTER_ROSTER: CardConfig[] = [
+// Roster de test à des fins de développement et de démonstration.
+// Échelle de valeurs volontairement distincte du roster réel (base Notion
+// "Cartes") : ces personnages sont voués à disparaître une fois le roster
+// réel intégré. Voir Notion > Les cartes > Système d'expérience > Plan
+// d'implémentation > Étape 1.
+export const CHARACTER_ROSTER: CardDefinition[] = [
   {
     id: 'player-warrior',
     name: 'Warrior',
-    attack: 80,
-    defense: 60,
-    health: 120,
-    speed: 50,
-    agility: 40,
-    accuracy: 85,
-    criticalChance: 15,
+    archetype: 'Guerrier',
     element: 'PHYSICAL',
+    stats: {
+      attack: 80,
+      defense: 60,
+      health: 120,
+      speed: 50,
+      agility: 40,
+      accuracy: 85,
+    },
+    criticalChance: 0.15,
     skills: {
       special: {
         kind: 'ATTACK',
@@ -32,14 +40,17 @@ export const CHARACTER_ROSTER: CardConfig[] = [
   {
     id: 'player-mage',
     name: 'Mage',
-    attack: 100,
-    defense: 30,
-    health: 80,
-    speed: 60,
-    agility: 35,
-    accuracy: 90,
-    criticalChance: 20,
+    archetype: 'DPS',
     element: 'FIRE',
+    stats: {
+      attack: 100,
+      defense: 30,
+      health: 80,
+      speed: 60,
+      agility: 35,
+      accuracy: 90,
+    },
+    criticalChance: 0.2,
     skills: {
       special: {
         kind: 'ATTACK',
@@ -63,14 +74,17 @@ export const CHARACTER_ROSTER: CardConfig[] = [
   {
     id: 'player-healer',
     name: 'Healer',
-    attack: 40,
-    defense: 50,
-    health: 100,
-    speed: 55,
-    agility: 45,
-    accuracy: 80,
-    criticalChance: 5,
+    archetype: 'Support',
     element: 'WATER',
+    stats: {
+      attack: 40,
+      defense: 50,
+      health: 100,
+      speed: 55,
+      agility: 45,
+      accuracy: 80,
+    },
+    criticalChance: 0.05,
     skills: {
       special: {
         kind: 'HEALING',
@@ -99,14 +113,17 @@ export const CHARACTER_ROSTER: CardConfig[] = [
   {
     id: 'player-rogue',
     name: 'Rogue',
-    attack: 85,
-    defense: 35,
-    health: 85,
-    speed: 90,
-    agility: 70,
-    accuracy: 88,
-    criticalChance: 35,
+    archetype: 'Assassin',
     element: 'AIR',
+    stats: {
+      attack: 85,
+      defense: 35,
+      health: 85,
+      speed: 90,
+      agility: 70,
+      accuracy: 88,
+    },
+    criticalChance: 0.35,
     skills: {
       special: {
         kind: 'ATTACK',
@@ -130,14 +147,17 @@ export const CHARACTER_ROSTER: CardConfig[] = [
   {
     id: 'player-guardian',
     name: 'Guardian',
-    attack: 45,
-    defense: 90,
-    health: 140,
-    speed: 40,
-    agility: 30,
-    accuracy: 80,
-    criticalChance: 5,
+    archetype: 'Tank',
     element: 'EARTH',
+    stats: {
+      attack: 45,
+      defense: 90,
+      health: 140,
+      speed: 40,
+      agility: 30,
+      accuracy: 80,
+    },
+    criticalChance: 0.05,
     skills: {
       special: {
         kind: 'ATTACK',
@@ -169,14 +189,17 @@ export const CHARACTER_ROSTER: CardConfig[] = [
   {
     id: 'player-berserker',
     name: 'Berserker',
-    attack: 120,
-    defense: 25,
-    health: 95,
-    speed: 65,
-    agility: 40,
-    accuracy: 82,
-    criticalChance: 25,
+    archetype: 'DPS',
     element: 'PHYSICAL',
+    stats: {
+      attack: 120,
+      defense: 25,
+      health: 95,
+      speed: 65,
+      agility: 40,
+      accuracy: 82,
+    },
+    criticalChance: 0.25,
     skills: {
       special: {
         kind: 'ATTACK',
@@ -197,14 +220,17 @@ export const CHARACTER_ROSTER: CardConfig[] = [
   {
     id: 'player-frost-sage',
     name: 'Frost Sage',
-    attack: 75,
-    defense: 45,
-    health: 90,
-    speed: 58,
-    agility: 40,
-    accuracy: 90,
-    criticalChance: 10,
+    archetype: 'DPS',
     element: 'WATER',
+    stats: {
+      attack: 75,
+      defense: 45,
+      health: 90,
+      speed: 58,
+      agility: 40,
+      accuracy: 90,
+    },
+    criticalChance: 0.1,
     skills: {
       special: {
         kind: 'ATTACK',
@@ -226,14 +252,17 @@ export const CHARACTER_ROSTER: CardConfig[] = [
   {
     id: 'player-storm-caller',
     name: 'Storm Caller',
-    attack: 90,
-    defense: 35,
-    health: 85,
-    speed: 70,
-    agility: 50,
-    accuracy: 87,
-    criticalChance: 18,
+    archetype: 'DPS',
     element: 'AIR',
+    stats: {
+      attack: 90,
+      defense: 35,
+      health: 85,
+      speed: 70,
+      agility: 50,
+      accuracy: 87,
+    },
+    criticalChance: 0.18,
     skills: {
       special: {
         kind: 'ATTACK',
@@ -257,14 +286,17 @@ export const CHARACTER_ROSTER: CardConfig[] = [
   {
     id: 'player-invisible-hero',
     name: 'Invisible Hero',
-    attack: 900,
-    defense: 350,
-    health: 850,
-    speed: 700,
-    agility: 500,
-    accuracy: 870,
-    criticalChance: 100,
+    archetype: 'Guerrier',
     element: 'FIRE',
+    stats: {
+      attack: 900,
+      defense: 350,
+      health: 850,
+      speed: 700,
+      agility: 500,
+      accuracy: 870,
+    },
+    criticalChance: 1,
     skills: {
       special: {
         kind: 'ATTACK',
@@ -291,6 +323,6 @@ export const DEFAULT_DECK_IDS: string[] = CHARACTER_ROSTER.slice(0, 5).map(
   (card) => card.id,
 );
 
-export function findRosterCard(id: string): CardConfig | undefined {
+export function findRosterCard(id: string): CardDefinition | undefined {
   return CHARACTER_ROSTER.find((card) => card.id === id);
 }
