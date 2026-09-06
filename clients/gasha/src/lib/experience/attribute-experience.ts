@@ -9,11 +9,12 @@ const PARTICIPATION_KO = 0.5;
 const PARTICIPATION_NOT_ENGAGED = 0;
 
 /**
- * Figé à 1 à cette étape (voir Notion > Système d'expérience > Plan
- * d'implémentation > Étape 5). Remplacé par le ratio de puissance de
- * combat réel à l'étape 6.
+ * Valeur utilisée quand aucune difficulté n'est fournie à
+ * attributeExperience (tests, appels ne calculant pas encore le ratio).
+ * En production, +page.svelte calcule le ratio réel via
+ * computeDifficulty (étape 6 du plan) et le transmet explicitement.
  */
-const DIFFICULTY_FIXED = 1;
+const DEFAULT_DIFFICULTY = 1;
 
 /** Facteur Résultat : victoire si le vainqueur du combat est le joueur. */
 export function computeCombatResult(
@@ -41,7 +42,7 @@ export function computeParticipation(
 export function computeXpGain(
   result: number,
   participation: number,
-  difficulty: number = DIFFICULTY_FIXED,
+  difficulty: number = DEFAULT_DIFFICULTY,
 ): number {
   return XP_BASE * result * participation * difficulty;
 }
@@ -49,18 +50,20 @@ export function computeXpGain(
 /**
  * Crédite l'XP de fin de combat à chaque carte engagée du deck du joueur,
  * et persiste le résultat via le contrat de l'étape 2. Une carte dont le
- * gain est nul (non engagée) n'est pas réécrite.
+ * gain est nul (non engagée) n'est pas réécrite. La difficulté par défaut
+ * (1) est utilisée si l'appelant ne calcule pas encore le ratio réel.
  */
 export function attributeExperience(
   playerCardIds: string[],
   combatStats: CombatStats,
   playerName: string,
   progressionStore: ProgressionStore,
+  difficulty: number = DEFAULT_DIFFICULTY,
 ): void {
   const result = computeCombatResult(combatStats.winner, playerName);
   for (const cardId of playerCardIds) {
     const participation = computeParticipation(cardId, combatStats.playerCards);
-    const gain = computeXpGain(result, participation);
+    const gain = computeXpGain(result, participation, difficulty);
     if (gain === 0) continue;
     const current = progressionStore.getProgression(cardId);
     progressionStore.setProgression({

@@ -26,16 +26,24 @@ export function resetDeck(): void {
   selectedCardIds.set([...DEFAULT_DECK_IDS]);
 }
 
+// Définitions des cartes sélectionnées, avant toute conversion d'XP. Exposé
+// séparément de selectedDeckCards pour que le calcul de puissance de combat
+// (étape 6) puisse accéder à l'archétype et aux valeurs de base, absents de
+// la configuration de combat projetée.
+export const selectedCardDefinitions = derived(selectedCardIds, (ids) =>
+  ids
+    .map(findRosterCard)
+    .filter((card): card is CardDefinition => card !== undefined),
+);
+
 // Point de projection définition -> configuration de combat. La progression
 // est appliquée ici (Notion > Système d'expérience > Plan d'implémentation >
 // Étape 4) avant toCombatConfig, qui reste une simple recopie : c'est ce qui
 // fait qu'une carte avec de l'XP entre en combat avec des stats supérieures.
 export const selectedDeckCards = derived(
-  [selectedCardIds, progressionStore],
-  ([ids, progressions]) =>
-    ids
-      .map(findRosterCard)
-      .filter((card): card is CardDefinition => card !== undefined)
+  [selectedCardDefinitions, progressionStore],
+  ([cards, progressions]) =>
+    cards
       .map((card) =>
         applyExperience(
           card,
