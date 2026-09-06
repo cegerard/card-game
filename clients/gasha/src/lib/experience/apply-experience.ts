@@ -1,5 +1,6 @@
 import type { CardDefinition, CardStats } from '@card-game/shared-types';
 import type { CardProgression } from '$lib/progression/types.js';
+import { computeConvertibleExperience } from '$lib/progression/convertible-experience.js';
 import { ARCHETYPE_MODIFIERS } from '$lib/score/constants.js';
 import { XP_MULTIPLIERS, STAT_CAPS } from './constants.js';
 
@@ -9,19 +10,20 @@ import { XP_MULTIPLIERS, STAT_CAPS } from './constants.js';
  * Système d'expérience > § 3 : « en réutilisant exactement les
  * modificateurs de rôle déjà définis dans Calcul du score global »).
  *
- * L'XP utilisée ici est l'XP cumulée brute : le plafond d'XP convertible
- * par palier de fusion (Notion > Système d'expérience > § 4) est introduit
- * à l'étape 7 du plan, pas ici.
+ * L'XP utilisée est l'XP convertible (Notion > Système d'expérience > § 4) :
+ * plafonnée par le palier de fusion actuel de la carte. L'excédent reste
+ * en réserve jusqu'à la prochaine fusion (voir fuseCard).
  */
 export function computeEffectiveStats(
   definition: CardDefinition,
   progression: CardProgression,
 ): CardStats {
   const modifiers = ARCHETYPE_MODIFIERS[definition.archetype];
+  const convertibleXp = computeConvertibleExperience(progression);
   const stats = { ...definition.stats };
   (Object.keys(stats) as (keyof CardStats)[]).forEach((stat) => {
     const modifier = modifiers[stat] ?? 1;
-    const gain = progression.experience * XP_MULTIPLIERS[stat] * modifier;
+    const gain = convertibleXp * XP_MULTIPLIERS[stat] * modifier;
     const raw = definition.stats[stat] + gain;
     const cap = STAT_CAPS[stat];
     // Le plancher à la valeur de base protège d'un modificateur négatif

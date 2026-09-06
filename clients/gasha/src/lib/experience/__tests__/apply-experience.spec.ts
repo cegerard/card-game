@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { applyExperience, computeEffectiveStats } from '../apply-experience.js';
+import { fuseCard } from '$lib/progression/fuse-card.js';
 import type {
   Archetype,
   CardDefinition,
@@ -110,6 +111,36 @@ describe('computeEffectiveStats', () => {
       tier: 5,
     });
     expect(stats.attack).toBeGreaterThan(1000);
+  });
+
+  it('caps the stat gain once XP exceeds the tier ceiling (★1 = 5 000)', () => {
+    const overCeiling: CardProgression = {
+      cardId: 'arionis',
+      experience: 8000,
+      tier: 1,
+    };
+    const atCeiling: CardProgression = {
+      cardId: 'arionis',
+      experience: 5000,
+      tier: 1,
+    };
+    expect(computeEffectiveStats(arionis, overCeiling)).toEqual(
+      computeEffectiveStats(arionis, atCeiling),
+    );
+  });
+
+  it('unlocks the XP held in reserve immediately after fusion', () => {
+    const overCeiling: CardProgression = {
+      cardId: 'arionis',
+      experience: 8000,
+      tier: 1,
+    };
+    const beforeFusion = computeEffectiveStats(arionis, overCeiling).attack;
+    const afterFusion = computeEffectiveStats(
+      arionis,
+      fuseCard(overCeiling),
+    ).attack;
+    expect(afterFusion).toBeGreaterThan(beforeFusion);
   });
 });
 
