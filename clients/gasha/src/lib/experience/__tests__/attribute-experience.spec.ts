@@ -175,4 +175,10 @@ describe('attributeExperience', () => {
     attributeExperience(playerCardIds, combatStats, 'Player', store);
     expect(store.getProgression('arionis').experience).toBe(200);
   });
+
+  it('applies an explicit difficulty factor instead of the default', () => {
+    const store = createProgressionStore(createInMemoryRepository());
+    attributeExperience(playerCardIds, combatStats, 'Player', store, 2);
+    expect(store.getProgression('arionis').experience).toBe(200);
+  });
 });

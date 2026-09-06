@@ -3,12 +3,21 @@
   import { get } from 'svelte/store';
   import { goto } from '$app/navigation';
   import { session, resetSession } from '$lib/arcade/session.js';
-  import { selectedDeckCards, isDeckComplete } from '$lib/deck/deck-store.js';
+  import {
+    selectedCardDefinitions,
+    selectedDeckCards,
+    isDeckComplete,
+  } from '$lib/deck/deck-store.js';
   import { ARCADE_LEVELS } from '$lib/arcade/levels.js';
   import { fetchFight } from '$lib/combat/engine-client.js';
   import { aggregateCombatStats } from '$lib/combat/combatStats.js';
   import { attributeExperience } from '$lib/experience/attribute-experience.js';
   import { progressionStore } from '$lib/progression/progression-store.js';
+  import { defaultProgression } from '$lib/progression/types.js';
+  import {
+    computeTeamPower,
+    computeDifficulty,
+  } from '$lib/score/combat-power.js';
   import { getRendererMode } from '$lib/combat/rendererMode.js';
   import PhaserRenderer from '$lib/combat/PhaserRenderer.svelte';
   import CombatReportRenderer from '$lib/combat/CombatReportRenderer.svelte';
@@ -17,10 +26,12 @@
   import LevelIndicator from '$lib/components/LevelIndicator.svelte';
   import type { FightResult } from '$lib/arcade/types.js';
   import type { RendererMode } from '$lib/combat/rendererMode.js';
+  import type { CardDefinition } from '@card-game/shared-types';
   import { toCombatConfig } from '@card-game/shared-types';
 
   let fightResult: FightResult | null = $state(null);
   let rendererMode: RendererMode = $state('phaser');
+  let currentEnemyTeam: CardDefinition[] = $state([]);
 
   async function launchCombat(levelIndex: number) {
     const level = ARCADE_LEVELS[levelIndex - 1];
@@ -31,6 +42,7 @@
     }
 
     fightResult = null;
+    currentEnemyTeam = level.enemyTeam;
 
     try {
       fightResult = await fetchFight(
@@ -50,7 +62,30 @@
 
     const playerCardIds = get(selectedDeckCards).map((card) => card.id);
     const combatStats = aggregateCombatStats(result, playerCardIds);
-    attributeExperience(playerCardIds, combatStats, 'Player', progressionStore);
+
+    // Puissance calculée avant l'attribution : la progression de ce
+    // combat ne doit pas influencer sa propre difficulté.
+    const playerPower = computeTeamPower(
+      get(selectedCardDefinitions).map((definition) => ({
+        definition,
+        progression: progressionStore.getProgression(definition.id),
+      })),
+    );
+    const opponentPower = computeTeamPower(
+      currentEnemyTeam.map((definition) => ({
+        definition,
+        progression: defaultProgression(definition.id),
+      })),
+    );
+    const difficulty = computeDifficulty(opponentPower, playerPower);
+
+    attributeExperience(
+      playerCardIds,
+      combatStats,
+      'Player',
+      progressionStore,
+      difficulty,
+    );
 
     if (!playerWon) {
       session.update((s) => ({
