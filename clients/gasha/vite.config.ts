@@ -11,7 +11,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     include: ['src/**/*.spec.ts'],
-    setupFiles: ['@testing-library/svelte/vitest'],
+    setupFiles: ['vitest.setup.ts', '@testing-library/svelte/vitest'],
     alias: [{ find: /^svelte$/, replacement: svelteClient }],
   },
 });
