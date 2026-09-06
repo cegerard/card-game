@@ -6,6 +6,7 @@ import {
 } from '../combat-power.js';
 import { computeGlobalScore } from '../global-score.js';
 import { applyExperience } from '$lib/experience/apply-experience.js';
+import { fuseCard } from '$lib/progression/fuse-card.js';
 import type {
   Archetype,
   CardDefinition,
@@ -96,6 +97,34 @@ describe('computeCardPower', () => {
     // sur cette seule stat.
     const power = computeCardPower(arionis, highXp);
     expect(power).toBeLessThan(1_000_000);
+  });
+
+  it('stops growing once XP exceeds the tier ceiling (★1 = 5 000)', () => {
+    const overCeiling: CardProgression = {
+      cardId: 'arionis',
+      experience: 8000,
+      tier: 1,
+    };
+    const atCeiling: CardProgression = {
+      cardId: 'arionis',
+      experience: 5000,
+      tier: 1,
+    };
+    expect(computeCardPower(arionis, overCeiling)).toBeCloseTo(
+      computeCardPower(arionis, atCeiling),
+      5,
+    );
+  });
+
+  it('resumes growing immediately after fusion', () => {
+    const overCeiling: CardProgression = {
+      cardId: 'arionis',
+      experience: 8000,
+      tier: 1,
+    };
+    const before = computeCardPower(arionis, overCeiling);
+    const after = computeCardPower(arionis, fuseCard(overCeiling));
+    expect(after).toBeGreaterThan(before);
   });
 });
 
