@@ -267,14 +267,17 @@ export interface CardDefinition {
 
 /**
  * Projette une définition de carte vers la configuration attendue par
- * POST /fight. Aujourd'hui une simple recopie des champs communs ;
- * `archetype`, `resistance` et `regeneration` restent côté définition,
- * jamais transmis au moteur.
+ * POST /fight. Une simple recopie des champs communs ; `archetype`,
+ * `resistance` et `regeneration` restent côté définition, jamais transmis
+ * au moteur.
  *
- * C'est le point d'insertion prévu pour la conversion d'expérience
- * (Notion > Système d'expérience) : à l'étape 4 du plan, cette fonction
- * prendra l'XP cumulée et le palier de la carte en paramètres et appliquera
- * les multiplicateurs avant de renvoyer le CardConfig.
+ * Reste volontairement une fonction pure, sans connaissance de l'XP :
+ * shared-types est partagé avec le combat-engine et ne doit pas dépendre
+ * de la logique de progression, qui vit côté client
+ * (clients/gasha/src/lib/experience). La conversion XP → stats effectives
+ * (Notion > Système d'expérience > Plan d'implémentation > Étape 4) se fait
+ * en amont, sur une CardDefinition, avant l'appel à cette fonction — voir
+ * applyExperience() puis toCombatConfig() dans clients/gasha/src/lib/deck/deck-store.ts.
  */
 export function toCombatConfig(definition: CardDefinition): CardConfig {
   return {
