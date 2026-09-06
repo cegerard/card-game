@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { get } from 'svelte/store';
 import { DEFAULT_DECK_IDS } from '../roster.js';
 import {
@@ -8,6 +8,7 @@ import {
   toggleCard,
   resetDeck,
 } from '../deck-store.js';
+import { progressionStore } from '$lib/progression/progression-store.js';
 
 describe('deck store', () => {
   beforeEach(() => {
@@ -47,5 +48,32 @@ describe('deck store', () => {
     expect(get(selectedDeckCards).map((card) => card.id)).toEqual(
       DEFAULT_DECK_IDS,
     );
+  });
+
+  describe('with experience applied', () => {
+    afterEach(() => {
+      progressionStore.reset();
+    });
+
+    it('boosts the combat stats of a card with cumulated XP', () => {
+      const baseAttack = get(selectedDeckCards)[0].attack;
+      progressionStore.setProgression({
+        cardId: DEFAULT_DECK_IDS[0],
+        experience: 10000,
+        tier: 2,
+      });
+      const boostedAttack = get(selectedDeckCards)[0].attack;
+      expect(boostedAttack).toBeGreaterThan(baseAttack);
+    });
+
+    it('does not affect the stats of a card with no progression of its own', () => {
+      const otherCardBaseAttack = get(selectedDeckCards)[1].attack;
+      progressionStore.setProgression({
+        cardId: DEFAULT_DECK_IDS[0],
+        experience: 10000,
+        tier: 2,
+      });
+      expect(get(selectedDeckCards)[1].attack).toBe(otherCardBaseAttack);
+    });
   });
 });
