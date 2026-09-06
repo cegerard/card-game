@@ -47,11 +47,21 @@ export function computeXpGain(
   return XP_BASE * result * participation * difficulty;
 }
 
+/** Gain d'XP crédité à une carte, pour l'affichage post-combat. */
+export interface CardXpGain {
+  cardId: string;
+  gain: number;
+}
+
 /**
  * Crédite l'XP de fin de combat à chaque carte engagée du deck du joueur,
  * et persiste le résultat via le contrat de l'étape 2. Une carte dont le
- * gain est nul (non engagée) n'est pas réécrite. La difficulté par défaut
- * (1) est utilisée si l'appelant ne calcule pas encore le ratio réel.
+ * gain est nul (non engagée) n'est pas réécrite et n'apparaît pas dans le
+ * résultat. La difficulté par défaut (1) est utilisée si l'appelant ne
+ * calcule pas encore le ratio réel.
+ *
+ * Retourne le détail des gains crédités, dans l'ordre de playerCardIds,
+ * pour permettre à l'appelant de les afficher (ex. écran de fin de combat).
  */
 export function attributeExperience(
   playerCardIds: string[],
@@ -59,16 +69,19 @@ export function attributeExperience(
   playerName: string,
   progressionStore: ProgressionStore,
   difficulty: number = DEFAULT_DIFFICULTY,
-): void {
+): CardXpGain[] {
   const result = computeCombatResult(combatStats.winner, playerName);
+  const gains: CardXpGain[] = [];
   for (const cardId of playerCardIds) {
     const participation = computeParticipation(cardId, combatStats.playerCards);
     const gain = computeXpGain(result, participation, difficulty);
     if (gain === 0) continue;
+    gains.push({ cardId, gain });
     const current = progressionStore.getProgression(cardId);
     progressionStore.setProgression({
       ...current,
       experience: current.experience + gain,
     });
   }
+  return gains;
 }

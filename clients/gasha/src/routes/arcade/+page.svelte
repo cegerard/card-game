@@ -9,6 +9,7 @@
     isDeckComplete,
   } from '$lib/deck/deck-store.js';
   import { ARCADE_LEVELS } from '$lib/arcade/levels.js';
+  import { findRosterCard } from '$lib/deck/roster.js';
   import { fetchFight } from '$lib/combat/engine-client.js';
   import { aggregateCombatStats } from '$lib/combat/combatStats.js';
   import { attributeExperience } from '$lib/experience/attribute-experience.js';
@@ -32,6 +33,9 @@
   let fightResult: FightResult | null = $state(null);
   let rendererMode: RendererMode = $state('phaser');
   let currentEnemyTeam: CardDefinition[] = $state([]);
+  let lastXpGains: { cardId: string; name: string; gain: number }[] = $state(
+    [],
+  );
 
   async function launchCombat(levelIndex: number) {
     const level = ARCADE_LEVELS[levelIndex - 1];
@@ -79,13 +83,18 @@
     );
     const difficulty = computeDifficulty(opponentPower, playerPower);
 
-    attributeExperience(
+    const gains = attributeExperience(
       playerCardIds,
       combatStats,
       'Player',
       progressionStore,
       difficulty,
     );
+    lastXpGains = gains.map((g) => ({
+      cardId: g.cardId,
+      name: findRosterCard(g.cardId)?.name ?? g.cardId,
+      gain: g.gain,
+    }));
 
     if (!playerWon) {
       session.update((s) => ({
@@ -156,11 +165,12 @@
   <VictoryScreen
     level={$session.currentLevel}
     isFinalVictory={$session.phase === 'final-victory'}
+    xpGains={lastXpGains}
     onnext={handleNextLevel}
     onmenu={handleBackToMenu}
   />
 {/if}
 
 {#if $session.phase === 'game-over'}
-  <GameOverScreen onmenu={handleBackToMenu} />
+  <GameOverScreen xpGains={lastXpGains} onmenu={handleBackToMenu} />
 {/if}

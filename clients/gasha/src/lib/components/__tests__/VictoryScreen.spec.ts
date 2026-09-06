@@ -20,6 +20,19 @@ describe('VictoryScreen', () => {
 
   it('shows a final victory message when isFinalVictory is true', () => {
     render(VictoryScreen, { props: { level: 5, isFinalVictory: true } });
-    expect(screen.getByText(/all levels cleared|final victory|you won/i)).toBeTruthy();
+    expect(
+      screen.getByText(/all levels cleared|final victory|you won/i),
+    ).toBeTruthy();
+  });
+
+  it('shows XP gains when provided', () => {
+    render(VictoryScreen, {
+      props: {
+        level: 2,
+        isFinalVictory: false,
+        xpGains: [{ cardId: 'arionis', name: 'Arionis', gain: 120 }],
+      },
+    });
+    expect(screen.getByText('+120 XP')).toBeTruthy();
   });
 });

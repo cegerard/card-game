@@ -8,6 +8,8 @@
     isDeckComplete,
     DECK_SIZE,
   } from '$lib/deck/deck-store.js';
+  import { progressionStore } from '$lib/progression/progression-store.js';
+  import { defaultProgression } from '$lib/progression/types.js';
 
   const count = $derived($selectedCardIds.length);
 </script>
@@ -32,8 +34,11 @@
   <section class="roster">
     {#each CHARACTER_ROSTER as card (card.id)}
       {@const selected = $selectedCardIds.includes(card.id)}
+      {@const progression =
+        $progressionStore[card.id] ?? defaultProgression(card.id)}
       <RosterCard
         {card}
+        {progression}
         {selected}
         disabled={!selected && count >= DECK_SIZE}
         ontoggle={toggleCard}

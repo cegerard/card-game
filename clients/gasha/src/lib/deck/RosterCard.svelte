@@ -1,20 +1,41 @@
 <script lang="ts">
   import Panel from '$lib/design-system/primitives/Panel.svelte';
   import CardHeader from '$lib/design-system/composites/CardHeader.svelte';
-  import { elementIndex } from '$lib/design-system/tokens.js';
+  import { elementIndex, pct } from '$lib/design-system/tokens.js';
+  import { TIER_CAPS } from '$lib/progression/constants.js';
+  import { computeEffectiveStats } from '$lib/experience/apply-experience.js';
   import type { CardDefinition } from '@card-game/shared-types';
+  import type { CardProgression } from '$lib/progression/types.js';
 
   interface Props {
     card: CardDefinition;
+    progression: CardProgression;
     selected: boolean;
     disabled: boolean;
     // eslint-disable-next-line no-unused-vars
     ontoggle: (id: string) => void;
   }
 
-  let { card, selected, disabled, ontoggle }: Props = $props();
+  let { card, progression, selected, disabled, ontoggle }: Props = $props();
 
   const index = $derived(elementIndex(card.element));
+  const isMaxTier = $derived(progression.tier >= 5);
+  const tierCap = $derived(TIER_CAPS[progression.tier]);
+  const xpTowardCap = $derived(Math.min(progression.experience, tierCap));
+  const xpBarPct = $derived(isMaxTier ? 100 : pct(xpTowardCap, tierCap));
+  const xpLabel = $derived(
+    isMaxTier
+      ? `${Math.round(progression.experience)} XP`
+      : `${Math.round(xpTowardCap)}/${tierCap}`,
+  );
+
+  // Stats affichées = stats effectives (XP incluse), pour que la sélection
+  // du deck reflète la vraie force des cartes plutôt que leurs valeurs de
+  // base. La carte n'entre jamais en combat sur ses seules valeurs de base
+  // dès qu'elle a de l'XP (voir Notion > Système d'expérience > § 3).
+  const effectiveStats = $derived(computeEffectiveStats(card, progression));
+  const isBoosted = (stat: keyof typeof card.stats) =>
+    effectiveStats[stat] > card.stats[stat];
 
   function toggle() {
     if (!disabled) ontoggle(card.id);
@@ -51,17 +72,30 @@
       <dl class="stats">
         <div>
           <dt>ATK</dt>
-          <dd>{card.stats.attack}</dd>
+          <dd class:boosted={isBoosted('attack')}>
+            {Math.round(effectiveStats.attack)}
+          </dd>
         </div>
         <div>
           <dt>DEF</dt>
-          <dd>{card.stats.defense}</dd>
+          <dd class:boosted={isBoosted('defense')}>
+            {Math.round(effectiveStats.defense)}
+          </dd>
         </div>
         <div>
           <dt>HP</dt>
-          <dd>{card.stats.health}</dd>
+          <dd class:boosted={isBoosted('health')}>
+            {Math.round(effectiveStats.health)}
+          </dd>
         </div>
       </dl>
+      <div class="xp-row">
+        <span class="tier-badge">★{progression.tier}</span>
+        <div class="xp-track">
+          <i class="xp-fill" style:width="{xpBarPct}%"></i>
+        </div>
+        <span class="xp-label">{xpLabel}</span>
+      </div>
     </div>
   </Panel>
 </div>
@@ -136,5 +170,47 @@
     margin: 0;
     font: 700 12px var(--gasha-font-ui);
     color: var(--gasha-text-warm);
+  }
+
+  .stats dd.boosted {
+    color: var(--gasha-gold-300);
+  }
+
+  .xp-row {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin-top: 5px;
+  }
+
+  .tier-badge {
+    font: 700 8px var(--gasha-font-ui);
+    color: var(--gasha-gold-300);
+    flex-shrink: 0;
+  }
+
+  .xp-track {
+    flex: 1;
+    height: 4px;
+    border-radius: var(--gasha-radius-xs);
+    background: rgba(255, 255, 255, 0.09);
+    overflow: hidden;
+  }
+
+  .xp-fill {
+    display: block;
+    height: 100%;
+    border-radius: var(--gasha-radius-xs);
+    background: linear-gradient(
+      90deg,
+      var(--gasha-gold-400),
+      var(--gasha-gold-300)
+    );
+  }
+
+  .xp-label {
+    font: 700 7px var(--gasha-font-mono);
+    color: var(--gasha-text-muted);
+    white-space: nowrap;
   }
 </style>
