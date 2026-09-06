@@ -6,6 +6,9 @@
   import { selectedDeckCards, isDeckComplete } from '$lib/deck/deck-store.js';
   import { ARCADE_LEVELS } from '$lib/arcade/levels.js';
   import { fetchFight } from '$lib/combat/engine-client.js';
+  import { aggregateCombatStats } from '$lib/combat/combatStats.js';
+  import { attributeExperience } from '$lib/experience/attribute-experience.js';
+  import { progressionStore } from '$lib/progression/progression-store.js';
   import { getRendererMode } from '$lib/combat/rendererMode.js';
   import PhaserRenderer from '$lib/combat/PhaserRenderer.svelte';
   import CombatReportRenderer from '$lib/combat/CombatReportRenderer.svelte';
@@ -44,6 +47,11 @@
   function handleCombatComplete({ playerWon }: { playerWon: boolean }) {
     const current = get(session);
     const result = fightResult!;
+
+    const playerCardIds = get(selectedDeckCards).map((card) => card.id);
+    const combatStats = aggregateCombatStats(result, playerCardIds);
+    attributeExperience(playerCardIds, combatStats, 'Player', progressionStore);
+
     if (!playerWon) {
       session.update((s) => ({
         ...s,
