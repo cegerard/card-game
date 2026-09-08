@@ -1,15 +1,23 @@
 <script lang="ts">
   import Overlay from '$lib/design-system/primitives/Overlay.svelte';
   import Button from '$lib/design-system/primitives/Button.svelte';
+  import XpGainList from './XpGainList.svelte';
+
+  interface XpGain {
+    cardId: string;
+    name: string;
+    gain: number;
+  }
 
   interface Props {
     level: number;
     isFinalVictory: boolean;
+    xpGains?: XpGain[];
     onnext?: () => void;
     onmenu?: () => void;
   }
 
-  let { level, isFinalVictory, onnext, onmenu }: Props = $props();
+  let { level, isFinalVictory, xpGains = [], onnext, onmenu }: Props = $props();
 </script>
 
 <Overlay>
@@ -20,6 +28,8 @@
     <h2>Victory!</h2>
     <p>Level {level} complete</p>
   {/if}
+
+  <XpGainList gains={xpGains} />
 
   <div class="actions">
     {#if !isFinalVictory}

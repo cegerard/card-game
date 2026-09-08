@@ -16,7 +16,18 @@ describe('GameOverScreen', () => {
   it('calls onmenu callback when "Back to Menu" is clicked', async () => {
     const onmenu = vi.fn();
     render(GameOverScreen, { props: { onmenu } });
-    await fireEvent.click(screen.getByRole('button', { name: /back to menu/i }));
+    await fireEvent.click(
+      screen.getByRole('button', { name: /back to menu/i }),
+    );
     expect(onmenu).toHaveBeenCalledOnce();
+  });
+
+  it('shows XP gains when provided', () => {
+    render(GameOverScreen, {
+      props: {
+        xpGains: [{ cardId: 'arionis', name: 'Arionis', gain: 30 }],
+      },
+    });
+    expect(screen.getByText('+30 XP')).toBeTruthy();
   });
 });

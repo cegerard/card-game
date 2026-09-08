@@ -181,4 +181,37 @@ describe('attributeExperience', () => {
     attributeExperience(playerCardIds, combatStats, 'Player', store, 2);
     expect(store.getProgression('arionis').experience).toBe(200);
   });
+
+  it('returns the gain credited to a surviving card', () => {
+    const store = createProgressionStore(createInMemoryRepository());
+    const gains = attributeExperience(
+      playerCardIds,
+      combatStats,
+      'Player',
+      store,
+    );
+    expect(gains.find((g) => g.cardId === 'arionis')?.gain).toBe(100);
+  });
+
+  it('returns the reduced gain credited to a KO card', () => {
+    const store = createProgressionStore(createInMemoryRepository());
+    const gains = attributeExperience(
+      playerCardIds,
+      combatStats,
+      'Player',
+      store,
+    );
+    expect(gains.find((g) => g.cardId === 'kaelion')?.gain).toBe(50);
+  });
+
+  it('omits a non-engaged card from the returned gains', () => {
+    const store = createProgressionStore(createInMemoryRepository());
+    const gains = attributeExperience(
+      playerCardIds,
+      combatStats,
+      'Player',
+      store,
+    );
+    expect(gains.some((g) => g.cardId === 'sekhara')).toBe(false);
+  });
 });
