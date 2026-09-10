@@ -77,6 +77,7 @@ export enum Effect {
   BURN = 'BURN',
   FREEZE = 'FREEZE',
   STUNT = 'STUNT',
+  MARK = 'MARK',
 }
 
 export enum DodgeStrategy {
@@ -143,15 +144,33 @@ class EffectTriggeredDebuffDto {
   powerId?: string;
 }
 
-class EffectDto {
+export class EffectDto {
   @IsEnum(Effect)
   type: Effect;
 
   @IsNumber()
   rate: number;
 
+  @ValidateIf((o) => o.type !== Effect.MARK)
+  @IsDefined()
   @IsNumber()
-  level: number;
+  level?: number;
+
+  @ValidateIf((o) => o.type === Effect.MARK)
+  @IsDefined()
+  @IsEnum(DamageType)
+  damageType?: DamageType;
+
+  @ValidateIf((o) => o.type === Effect.MARK)
+  @IsDefined()
+  @IsNumber()
+  @Min(1)
+  maxStacks?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  stacks?: number;
 
   @IsOptional()
   @ValidateNested()

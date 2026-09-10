@@ -1,5 +1,5 @@
 import { FightingCard } from '../../fighting-card';
-import { AttackEffect, EffectResult } from './attack-effect';
+import { AttackEffect, StateEffectResult } from './attack-effect';
 import { EffectLevel } from './effect-level';
 import { FightingContext } from '../fighting-context';
 import { CardStateStunted } from '../state/card-state-stunted';
@@ -31,7 +31,7 @@ export class StuntAttackEffect implements AttackEffect {
     defender: FightingCard,
     _card: FightingCard,
     _context: FightingContext,
-  ): EffectResult {
+  ): StateEffectResult {
     if (
       this.probability !== undefined &&
       this.randomizer.random() >= this.probability

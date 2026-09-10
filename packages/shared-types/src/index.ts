@@ -35,7 +35,7 @@ export type SkillKind =
 
 export type BuffType = 'attack' | 'defense' | 'agility' | 'accuracy';
 
-export type EffectType = 'POISON' | 'BURN' | 'FREEZE' | 'STUNT';
+export type EffectType = 'POISON' | 'BURN' | 'FREEZE' | 'STUNT' | 'MARK';
 
 export type DodgeStrategy = 'simple-dodge' | 'random-dodge';
 
@@ -91,8 +91,16 @@ export interface EffectTriggeredDebuff {
 
 export interface EffectConfig {
   type: EffectType;
+  /** Coefficient de dégâts par tick ; pour MARK, amplification par cumul. */
   rate: number;
-  level: number;
+  /** Requis sauf pour une marque élémentaire (type MARK). */
+  level?: number;
+  /** MARK uniquement : type de dégâts amplifié par la marque. */
+  damageType?: DamageType;
+  /** MARK uniquement : nombre maximal de cumuls. */
+  maxStacks?: number;
+  /** MARK uniquement : cumuls appliqués par déclenchement (défaut 1). */
+  stacks?: number;
   triggeredDebuff?: EffectTriggeredDebuff;
   terminationEvent?: string;
   probability?: number;

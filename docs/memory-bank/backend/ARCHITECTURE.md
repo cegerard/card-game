@@ -68,10 +68,11 @@ packages/combat-engine/src/
     │   │   │   ├── card-info.ts
     │   │   │   ├── fighting-context.ts
     │   │   │   ├── action-result/    # Action result types (+ shield-result.ts)
-    │   │   │   ├── attack/           # Attack effects (poison, burn, freeze, stunt)
+    │   │   │   ├── attack/           # Attack effects (poison, burn, freeze, stunt, mark)
     │   │   │   ├── state/            # Status effect state
     │   │   │   ├── alteration/       # Buff/debuff discriminated union (AlterationDetail = Buff|Debuff via polarity)
     │   │   │   ├── shield/           # Shield value type + ShieldApplication
+    │   │   │   ├── mark/             # ElementalMark value object (cumulative damage-type amplifier)
     │   │   │   ├── skill-activation-conditions/  # HealthThresholdCondition
     │   │   │   └── damage/           # Damage types (DamageType, DamageComposition, Element)
     │   │   ├── skills/               # Card abilities
@@ -222,6 +223,7 @@ sequenceDiagram
 - **STUNT Status Effect**: `CardStateStunted` prevents the card from acting (same skip condition as freeze: `card.frozenLevel > 0 || card.isStunted`) and amplifies incoming damage by 20% via `applyDamageRate()`. No damage tick. Does not stack — `StuntAttackEffect.applyEffect()` returns early if the defender is already frozen or stunted. Duration: `2 * level - 1` turns.
 - **`AttackEffect.probability`**: Optional `0-1` field on the `AttackEffect` interface. Effect classes guard `applyEffect()` with `if (probability !== undefined && randomizer.random() >= probability) return`. Randomizer is injected via constructor, not via `FightingContext`.
 - **`skill-results-to-steps.ts`**: Standalone pure function extracted from `ActionStage`, mapping `SkillResults[]` to `Step[]` for reuse across `ActionStage`, `TurnManager`, and `DeathSkillHandler`.
+- **Elemental Mark Mechanic**: `MarkAttackEffect` (an `AttackEffect`, so it plugs into `effects?: AttackEffect[]` with an optional `probability`) applies an `ElementalMark` (`damageType` + `ratePerStack` + `maxStacks`) on the defender. `FightingCard` keeps one independent stack counter per damage type (`applyMark()`, `markStacks()`, `markAmplifier()`); `DamageCalculator` multiplies each damage composition by the defender amplifier for that type, after the elemental matrix and before defense. Marks never expire and cap at `maxStacks`; an application at the cap is a no-op and emits no step. Each application emits a `StepKind.MarkApplied` step carrying the resulting stack count.
 - **Shield Mechanic**: `FightingCard` maintains an optional shield buffer (`{ points, duration }`). `applyShield(rate, duration)` sets `points = rate * maxHealth`. All damage flows through `applyFinalDamage()` returning `{ damageToHealth, shieldAbsorbed }` — shield absorbs first. Shield breaks on depleted points → `shield_broken` step. `TurnManager.decreaseShieldDuration()` called each turn; expiry → `shield_expired` step. Specials can apply shields post-action via `shieldApplication?: ShieldApplicationDto` (independent targeting).
 - **SHIELD Skill Kind (Reactive)**: `SkillKind.Shield` with `ShieldSkill implements HealthReactiveSkill`. The `HealthReactiveSkill` interface adds `isHealthReactive: true` and `onHealthChanged(card): boolean`. `ShieldSkill` is edge-triggered: fires once when `card.healthRatio` crosses the `HealthThresholdCondition` threshold downward, rearms when health goes back above. `triggerReactiveSkills()` (`reactive-skill-checker.ts`) is a pure function called after each HP change in `ActionStage`. `OtherSkillDto.event` is optional — SHIELD kind has no event trigger.
 - **AlterationDetail Discriminated Union**: `Buff` and `Debuff` are unified under `AlterationDetail = Buff | Debuff` discriminated by `polarity: 'buff' | 'debuff'`. Located in `@types/alteration/alteration-detail.ts` (former `@types/buff/` directory removed).

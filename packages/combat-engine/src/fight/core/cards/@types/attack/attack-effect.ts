@@ -4,16 +4,27 @@ import { FightingContext } from '../fighting-context';
 import { Debuff } from '../alteration/alteration-detail';
 import { EffectTriggeredDebuff } from './effect-triggered-debuff';
 import { StateEffectType } from '../state/state-effect-type';
+import { DamageType } from '../damage/damage-type';
+import { MARK_EFFECT_TYPE } from '../mark/elemental-mark';
 
-export type EffectResult = {
+export type StateEffectResult = {
   type: StateEffectType;
   card: FightingCard;
   triggeredDebuff?: { card: FightingCard; debuff: Debuff };
 };
 
+export type MarkEffectResult = {
+  type: typeof MARK_EFFECT_TYPE;
+  card: FightingCard;
+  damageType: DamageType;
+  stacks: number;
+};
+
+export type EffectResult = StateEffectResult | MarkEffectResult;
+
 export interface AttackEffect {
   rate: number;
-  level: EffectLevel;
+  level?: EffectLevel;
   type: string;
   triggeredDebuff?: EffectTriggeredDebuff;
   terminationEvent?: string;
