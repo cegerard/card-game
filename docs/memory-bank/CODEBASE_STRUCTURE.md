@@ -120,7 +120,7 @@ cards/
 
 This allows special attacks to perform their primary action (damage/healing) while optionally applying buffs to a separate set of targets using independent targeting strategies.
 
-**AlterationDetail Discriminated Union**: `Buff` and `Debuff` are members of `AlterationDetail` discriminated by `polarity: 'buff' | 'debuff'`. `AlterationType` covers attack, defense, agility, accuracy and speed; every stat getter runs through `computeActualStat`, and turn order reads `actualSpeed` in both card selectors. Both share `AlterationDetailBase` (type, value, duration, terminationEvent?, powerId?). Located in `@types/alteration/alteration-detail.ts` (not `@types/buff/`).
+**AlterationDetail Discriminated Union**: `Buff` and `Debuff` are members of `AlterationDetail` discriminated by `polarity: 'buff' | 'debuff'`. `AlterationType` covers attack, defense, agility, accuracy, speed and criticalChance; every stat getter runs through `computeActualStat`, and turn order reads `actualSpeed` in both card selectors. Both share `AlterationDetailBase` (type, value, duration, terminationEvent?, powerId?). Located in `@types/alteration/alteration-detail.ts` (not `@types/buff/`).
 
 **Buff Type**: `Buff` has an optional `terminationEvent?: string` field. A buff with this set persists until the named event fires (instead of, or in addition to, a turn duration).
 

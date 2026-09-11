@@ -159,7 +159,10 @@ export class FightingCard {
   }
 
   public get actualCriticalChance(): number {
-    return this.criticalChance;
+    return Math.min(
+      1,
+      this.computeActualStat(this.criticalChance, 'criticalChance'),
+    );
   }
 
   public get actualAccuracy(): number {
@@ -649,6 +652,8 @@ export class FightingCard {
         return round2(rate * this.accuracy);
       case 'speed':
         return round2(rate * this.speed);
+      case 'criticalChance':
+        return round2(rate * this.criticalChance);
       default:
         throw new Error(`Unknown attribute type: ${type}`);
     }

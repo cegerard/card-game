@@ -325,17 +325,13 @@ export class ActionStage {
               damagedCardPlayer === this.player1 ? this.player2 : this.player1,
             lastAttacker: attackerCard,
           };
-          damagedCardPlayer.playableCards
-            .filter((c) => c !== defensiveCard)
-            .forEach((caster) => {
-              const results = caster.launchSkills(
-                `ally-health-${defensiveCard.id}`,
-                allyHealthContext,
-              );
-              report.statusChanges.push(
-                ...skillResultsToSteps(caster, results),
-              );
-            });
+          damagedCardPlayer.playableCards.forEach((caster) => {
+            const results = caster.launchSkills(
+              `ally-health-${defensiveCard.id}`,
+              allyHealthContext,
+            );
+            report.statusChanges.push(...skillResultsToSteps(caster, results));
+          });
         }
         if (damageDealt.effects?.length) {
           for (const effect of damageDealt.effects) {

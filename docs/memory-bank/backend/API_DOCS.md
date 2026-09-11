@@ -145,7 +145,7 @@ Simulates a turn-based card battle between two players.
   targetCardId?: string,        // Required when event=ally-death or ally-health-below: id of the monitored card
   // SHIELD-specific fields:
   activationCondition?: { operator?: "below" | "above", threshold: number },  // Health ratio threshold (0–1) for SHIELD/ally-health-below activation
-  buffType?: "attack" | "defense" | "agility" | "accuracy" | "speed",  // Required if kind=BUFF
+  buffType?: "attack" | "defense" | "agility" | "accuracy" | "speed" | "criticalChance",  // Required if kind=BUFF
   duration?: number,            // Required if kind=BUFF (0 = infinite: permanent or event-bound)
   terminationEvent?: string,    // Event name that removes this skill's buff/targeting override when fired
   activationLimit?: number,     // Max activations (>=1) before skill lifecycle ends — supported for HEALING and TARGETING_OVERRIDE kinds
@@ -178,7 +178,7 @@ Simulates a turn-based card battle between two players.
   stacks?: number,            // MARK only: stacks applied per trigger (default 1)
   probability?: number,       // 0-1 chance to apply effect on hit; omit for guaranteed application
   triggeredDebuff?: {         // Optional debuff applied on effect hit (not supported on STUNT)
-    debuffType: "attack" | "defense" | "agility" | "accuracy" | "speed",
+    debuffType: "attack" | "defense" | "agility" | "accuracy" | "speed" | "criticalChance",
     debuffRate: number,
     duration: number,
     probability: number,
@@ -192,7 +192,7 @@ Simulates a turn-based card battle between two players.
 
 ```typescript
 {
-  type: "attack" | "defense" | "agility" | "accuracy" | "speed",
+  type: "attack" | "defense" | "agility" | "accuracy" | "speed" | "criticalChance",
   rate: number,               // Buff strength multiplier
   duration: number,           // Number of turns buff lasts (0 = infinite: permanent if no terminationEvent, event-bound if terminationEvent is set)
   targetingStrategy: TargetingStrategy,
@@ -422,7 +422,7 @@ Simulates a turn-based card battle between two players.
 - `enemy-death`: Skill triggers when a specific enemy dies (requires `targetCardId` matching the dead card's `id`)
 - `dormant`: Skill starts inactive; requires `activationEvent`, `activationTargetCardId`, and `replacementEvent` to define when and how the trigger activates mid-battle. The replacement trigger's target card ID is resolved dynamically at activation time from the killer card's ID
 - `survived`: Skill triggers after the owning card survives a fatal blow via SURVIVE skill
-- `ally-health-below`: Edge-triggered when a monitored ally's health ratio crosses `activationCondition.threshold` downward; requires `targetCardId` (the monitored ally's id) and `activationCondition.threshold`
+- `ally-health-below`: Edge-triggered when a monitored ally's health ratio crosses `activationCondition.threshold` downward; requires `targetCardId` (the monitored ally's id) and `activationCondition.threshold`. A card may monitor itself by passing its own id, which is how a health-reactive self buff is declared
 
 ### SpecialKind
 
@@ -453,6 +453,7 @@ Simulates a turn-based card battle between two players.
 - `agility`: Increases agility stat
 - `accuracy`: Increases accuracy stat
 - `speed`: Increases the speed stat, which drives turn order in both card selectors
+- `criticalChance`: Increases the critical hit rate. The altered value is capped at 1, and like every other stat the buff value is a rate applied to the base stat, so a card with a base rate of 0.1 needs a rate of 2.5 to reach 0.35
 
 ## Validation
 
