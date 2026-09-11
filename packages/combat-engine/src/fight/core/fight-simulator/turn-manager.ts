@@ -63,8 +63,10 @@ export class TurnManager {
       if (endedTransformation) {
         steps.push({
           kind: StepKind.TransformationEnded,
-          name: endedTransformation,
+          name: endedTransformation.name,
           card: card.identityInfo,
+          healthCost: endedTransformation.healthCost,
+          remainingHealth: card.actualHealth,
         });
       }
       const expiredShield = card.decreaseShieldDuration();

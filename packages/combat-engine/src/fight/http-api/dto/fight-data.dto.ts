@@ -465,6 +465,11 @@ export class OtherSkillDto {
   @IsBoolean()
   statusImmunity?: boolean;
 
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  endCostRate?: number;
+
   // Required for CONDITIONAL_ATTACK kind
   @ValidateIf((o) => o.kind === SkillKind.CONDITIONAL_ATTACK)
   @IsDefined()

@@ -30,6 +30,7 @@ const frenzy = {
   ],
   lifestealRate: 0.1,
   statusImmunity: true,
+  endCostRate: 0.1,
 };
 
 const card = (id: string, attack: number, others = []) => ({
@@ -123,6 +124,7 @@ describe('TRANSFORMATION skill', () => {
       expect.objectContaining({
         kind: 'transformation_ended',
         name: 'Frénésie du Grand Blanc',
+        healthCost: 100,
       }),
     );
   });

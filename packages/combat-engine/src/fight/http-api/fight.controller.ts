@@ -553,6 +553,7 @@ export class FightController {
           ),
           lifestealRate: skillData.lifestealRate,
           statusImmunity: skillData.statusImmunity,
+          endCostRate: skillData.endCostRate,
         });
       }
       case SkillKind.SHIELD: {

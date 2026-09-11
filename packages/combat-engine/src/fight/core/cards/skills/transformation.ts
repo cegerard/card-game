@@ -14,6 +14,7 @@ export type TransformationConfig = {
   alterations?: Alteration[];
   lifestealRate?: number;
   statusImmunity?: boolean;
+  endCostRate?: number;
 };
 
 /**
@@ -43,7 +44,11 @@ export class TransformationSkill implements HealthReactiveSkill {
     _targetingOverride?: TargetingCardStrategy,
   ): TransformationSkillResults {
     this.consumed = true;
-    source.startTransformation(this.name, this.config.duration);
+    source.startTransformation(
+      this.name,
+      this.config.duration,
+      this.config.endCostRate,
+    );
 
     if (this.config.lifestealRate) {
       source.applyLifesteal(

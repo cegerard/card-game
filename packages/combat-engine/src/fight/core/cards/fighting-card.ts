@@ -30,6 +30,17 @@ export type FinalDamageResult = {
   survivedSkillName?: string;
 };
 
+type Transformation = {
+  name: string;
+  remainingTurns: number;
+  endCostRate?: number;
+};
+
+export type TransformationEnd = {
+  name: string;
+  healthCost: number;
+};
+
 type Lifesteal = {
   name: string;
   rate: number;
@@ -96,8 +107,7 @@ export class FightingCard {
   private statusImmunity: { remainingTurns: number } | null = null;
 
   // Transformation
-  private transformation: { name: string; remainingTurns: number } | null =
-    null;
+  private transformation: Transformation | null = null;
 
   // Survive
   private surviveSkill: SurviveSkill | null = null;
@@ -466,8 +476,12 @@ export class FightingCard {
    * Turns on a transformation for a number of turns. Turn counting follows
    * the buff convention, decremented by the turn manager.
    */
-  public startTransformation(name: string, duration: number): void {
-    this.transformation = { name, remainingTurns: duration };
+  public startTransformation(
+    name: string,
+    duration: number,
+    endCostRate?: number,
+  ): void {
+    this.transformation = { name, remainingTurns: duration, endCostRate };
   }
 
   public get isTransformed(): boolean {
@@ -475,21 +489,35 @@ export class FightingCard {
   }
 
   /**
-   * Decrements the running transformation and returns its name on the turn it
-   * ends, so callers can report it. Returns null otherwise.
+  /**
+   * Decrements the running transformation and returns it on the turn it ends,
+   * after charging its health cost, so callers can report both. Returns null
+   * otherwise. The cost never kills its owner: it leaves at least one health
+   * point.
    */
-  public decreaseTransformationDuration(): string | null {
+  public decreaseTransformationDuration(): TransformationEnd | null {
     if (!this.transformation) return null;
 
     const remainingTurns = this.transformation.remainingTurns - 1;
     if (remainingTurns < 0) {
-      const { name } = this.transformation;
+      const { name, endCostRate } = this.transformation;
       this.transformation = null;
-      return name;
+      return { name, healthCost: this.payTransformationCost(endCostRate) };
     }
 
     this.transformation = { ...this.transformation, remainingTurns };
     return null;
+  }
+
+  private payTransformationCost(rate?: number): number {
+    if (!rate) return 0;
+
+    const cost = Math.min(
+      Math.round(rate * this.maxHealth),
+      this.actualHealth - 1,
+    );
+
+    return cost > 0 ? this.addRealDamage(cost) : 0;
   }
 
   public applyLifesteal(name: string, rate: number, duration: number): void {

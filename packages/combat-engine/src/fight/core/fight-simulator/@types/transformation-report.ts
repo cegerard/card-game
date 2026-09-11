@@ -12,4 +12,6 @@ export type TransformationEndedReport = {
   kind: StepKind.TransformationEnded;
   name: string;
   card: CardInfo;
+  healthCost: number;
+  remainingHealth: number;
 };

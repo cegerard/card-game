@@ -74,6 +74,7 @@ cards/
 │   ├── shield.ts           # SHIELD skill: health-reactive, edge-triggered on threshold cross
 │   ├── reactive-skill.ts   # HealthReactiveSkill interface (isHealthReactive, onHealthChanged)
 │   ├── survive.ts          # SurviveSkill: one-time fatal-blow interception; not a Skill implementor
+│   ├── transformation.ts   # TransformationSkill: one-shot health-reactive transformation
 │   └── power-id-consistency.ts  # Domain validation for composite power groups
 ├── behaviors/              # Card behavior patterns
 │   ├── dodge-behaviors.ts  # Dodge behavior interface
@@ -136,6 +137,8 @@ This allows special attacks to perform their primary action (damage/healing) whi
 
 **Shield Mechanic**: `FightingCard` has an optional shield buffer (`applyShield(rate, duration)` computes `points = rate * maxHealth`). Damage first absorbs shield points before hitting health (`applyFinalDamage()` returns `{ damageToHealth, shieldAbsorbed }`). Shield breaks when points hit 0 → `shield_broken` step. `TurnManager` decrements shield duration each turn; reaching 0 → `shield_expired` step. Special skills can include a `shieldApplication?: ShieldApplicationDto` to apply shields post-action to a separate set of targets.
 
+**TRANSFORMATION Skill Kind (Reactive)**: `TransformationSkill` is a one-shot health-reactive skill. It transforms its owner for a duration, applying stat alterations, an optional lifesteal (heals a share of max health on every landed hit) and an optional status immunity. `TurnManager` ends it, charging an optional health cost that never kills its owner, and emits `transformation_started` then `transformation_ended` steps.
+
 **SHIELD Skill Kind (Reactive)**: `ShieldSkill` implements `HealthReactiveSkill` (interface: `isHealthReactive: true`, `onHealthChanged(card): boolean`). It is edge-triggered: fires once when `card.healthRatio` crosses the `HealthThresholdCondition` threshold downward, then rearms when health goes back above. `OtherSkillDto.event` is **optional** — SHIELD kind has no trigger event. After each HP change, `triggerReactiveSkills()` (in `reactive-skill-checker.ts`) checks all `HealthReactiveSkill` instances on the damaged card and fires those that return `true` from `onHealthChanged()`.
 
 #### Fight Simulator (`packages/combat-engine/src/fight/core/fight-simulator/`)
@@ -169,6 +172,7 @@ fight-simulator/
     ├── status-change-report.ts # Status changes
     ├── shield-report.ts    # ShieldAppliedReport, ShieldBrokenReport, ShieldExpiredReport
     ├── mark-report.ts      # MarkAppliedReport: { kind: 'mark_applied', card, damageType, stacks }
+    ├── transformation-report.ts # TransformationStartedReport + TransformationEndedReport (healthCost on exit)
     ├── survived-report.ts  # SurvivedReport: { kind: 'survived', name, card }
     └── winner-report.ts    # Victory determination
 ```

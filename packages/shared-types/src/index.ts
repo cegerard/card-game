@@ -31,7 +31,8 @@ export type SkillKind =
   | 'CONDITIONAL_ATTACK'
   | 'TARGETING_OVERRIDE'
   | 'SHIELD'
-  | 'SURVIVE';
+  | 'SURVIVE'
+  | 'TRANSFORMATION';
 
 export type BuffType =
   | 'attack'
@@ -197,6 +198,11 @@ export interface OtherSkill {
   activationLimit?: number;
   endEvent?: string;
   powerId?: string;
+  /** TRANSFORMATION uniquement. */
+  statAlterations?: StatAlteration[];
+  lifestealRate?: number;
+  statusImmunity?: boolean;
+  endCostRate?: number;
   /** Requis quand event vaut dormant. */
   activationEvent?: TriggerEvent;
   activationTargetCardId?: string;
