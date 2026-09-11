@@ -41,6 +41,7 @@ export class FreezeAttackEffect implements AttackEffect {
       this.randomizer.random() >= this.probability
     )
       return;
+    if (defender.isStatusImmune) return;
     if (defender.frozenLevel >= this.level) return;
     if (defender.burnLevel > this.level) return;
 
@@ -61,7 +62,7 @@ export class FreezeAttackEffect implements AttackEffect {
       this.rate,
       this.terminationEvent,
     );
-    defender.setState(frozenState);
+    if (!defender.setState(frozenState)) return;
 
     const effectResult: StateEffectResult = {
       type: this.type,

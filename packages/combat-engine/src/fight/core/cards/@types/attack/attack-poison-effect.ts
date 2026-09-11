@@ -51,7 +51,7 @@ export class PoisonAttackEffect implements AttackEffect {
       round2(card.actualAttack * this.rate),
       this.terminationEvent,
     );
-    defender.setState(poisonedState);
+    if (!defender.setState(poisonedState)) return;
 
     const effectResult: StateEffectResult = {
       type: this.type,

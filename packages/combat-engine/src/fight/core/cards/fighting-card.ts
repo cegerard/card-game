@@ -92,6 +92,9 @@ export class FightingCard {
   // Lifesteal
   private lifesteal: Lifesteal | null = null;
 
+  // Status immunity
+  private statusImmunity: { remainingTurns: number } | null = null;
+
   // Survive
   private surviveSkill: SurviveSkill | null = null;
 
@@ -234,8 +237,12 @@ export class FightingCard {
     this.cardDeckIdentity = `${ownerName}-${cardPositionInDeck}`;
   }
 
-  public setState(newState: CardState): void {
-    if (this.isDead()) return;
+  /**
+   * Applies a status state on the card. Returns false when the card refuses
+   * it, either because it is dead or because it is immune to status effects.
+   */
+  public setState(newState: CardState): boolean {
+    if (this.isDead() || this.isStatusImmune) return false;
 
     if (newState.type === 'poison') {
       this.poisoned = newState;
@@ -252,6 +259,8 @@ export class FightingCard {
     if (newState.type === 'stunt') {
       this.stunted = newState;
     }
+
+    return true;
   }
 
   public unFreeze(): void {
@@ -430,6 +439,25 @@ export class FightingCard {
    * decremented at each turn end and the lifesteal is dropped once it goes
    * below zero.
    */
+  /**
+   * Makes the card refuse every status effect for a number of turns. Turn
+   * counting follows the buff convention.
+   */
+  public applyStatusImmunity(duration: number): void {
+    this.statusImmunity = { remainingTurns: duration };
+  }
+
+  public get isStatusImmune(): boolean {
+    return this.statusImmunity !== null;
+  }
+
+  public decreaseStatusImmunityDuration(): void {
+    if (!this.statusImmunity) return;
+
+    const remainingTurns = this.statusImmunity.remainingTurns - 1;
+    this.statusImmunity = remainingTurns < 0 ? null : { remainingTurns };
+  }
+
   public applyLifesteal(name: string, rate: number, duration: number): void {
     this.lifesteal = { name, rate, remainingTurns: duration };
   }
