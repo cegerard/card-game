@@ -17,6 +17,7 @@ export class MultipleAttack implements AttackSkill {
     private readonly amplifier: number = 0,
     private readonly effects?: AttackEffect[],
     private readonly comboFinisher?: DamageComposition[],
+    private readonly comboFinisherEffects?: AttackEffect[],
   ) {}
 
   public get targetingId(): string {
@@ -117,6 +118,11 @@ export class MultipleAttack implements AttackSkill {
         );
         const finisherResult = defender.applyFinalDamage(total);
         const { damageToHealth, shieldAbsorbed } = finisherResult;
+
+        const finisherEffects = this.comboFinisherEffects
+          ?.map((e) => e.applyEffect(defender, card, context))
+          .filter((r): r is EffectResult => r != null);
+
         results.results.push({
           damage: damageToHealth + shieldAbsorbed,
           shieldAbsorbed: shieldAbsorbed > 0 ? shieldAbsorbed : undefined,
@@ -126,6 +132,7 @@ export class MultipleAttack implements AttackSkill {
           dodge: false,
           defender,
           remainingHealth: defender.actualHealth,
+          effects: finisherEffects?.length ? finisherEffects : undefined,
           kind: finisherKind,
           survived: finisherResult.survived,
           survivedSkillName: finisherResult.survivedSkillName,

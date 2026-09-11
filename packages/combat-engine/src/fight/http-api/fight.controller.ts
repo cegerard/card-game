@@ -43,6 +43,7 @@ import { FreezeAttackEffect } from '../core/cards/@types/attack/attack-freeze-ef
 import { StuntAttackEffect } from '../core/cards/@types/attack/attack-stunt-effect';
 import { MarkAttackEffect } from '../core/cards/@types/attack/attack-mark-effect';
 import { ElementalMark } from '../core/cards/@types/mark/elemental-mark';
+import { MarkedTargetBonus } from '../core/cards/@types/mark/marked-target-bonus';
 import { EffectTriggeredDebuff } from '../core/cards/@types/attack/effect-triggered-debuff';
 import { MathRandomizer } from '../tools/math-randomizer';
 import { Alteration } from '../core/cards/@types/alteration/alteration';
@@ -159,6 +160,14 @@ export class FightController {
           )
         : undefined;
 
+      const markedBonusDto = cardData.skills.special.markedTargetBonus;
+      const markedTargetBonus = markedBonusDto
+        ? new MarkedTargetBonus(
+            markedBonusDto.damageType,
+            markedBonusDto.multiplier,
+          )
+        : undefined;
+
       special = new SpecialAttack(
         cardData.skills.special.name,
         specialDamages,
@@ -167,6 +176,7 @@ export class FightController {
         specialEffect,
         alterations.length > 0 ? alterations : undefined,
         shieldApplication,
+        markedTargetBonus,
       );
     } else if (cardData.skills.special.kind === SpecialKind.HEALING) {
       special = new SpecialHealing(
@@ -198,6 +208,7 @@ export class FightController {
         ma.amplifier ?? 0,
         maEffects,
         maComboFinisher,
+        this.buildEffects(ma.comboFinisherEffects),
       );
     } else {
       const sa = cardData.skills.simpleAttack;
@@ -466,6 +477,7 @@ export class FightController {
               skillData.amplifier ?? 0,
               caEffects,
               caComboFinisher,
+              this.buildEffects(skillData.comboFinisherEffects),
             )
           : new SimpleAttack(
               skillData.name,

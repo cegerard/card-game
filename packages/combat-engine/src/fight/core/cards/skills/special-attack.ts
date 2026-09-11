@@ -13,6 +13,7 @@ import {
 } from '../@types/action-result/alteration-result';
 import { ShieldApplication } from '../@types/shield/shield-application';
 import { ShieldResult } from '../@types/action-result/shield-result';
+import { MarkedTargetBonus } from '../@types/mark/marked-target-bonus';
 
 const ENERGY_INCREASE_FACTOR = 10;
 const CRITICAL_RATE = 1.3;
@@ -26,6 +27,7 @@ export class SpecialAttack implements Special {
     private readonly effect?: AttackEffect,
     private readonly alterations?: Alteration[],
     private readonly shieldApplication?: ShieldApplication,
+    private readonly markedTargetBonus?: MarkedTargetBonus,
   ) {}
 
   public ready(actualEnergy: number): boolean {
@@ -62,9 +64,10 @@ export class SpecialAttack implements Special {
         };
       }
 
+      const markedBonus = this.markedTargetBonus?.multiplierFor(target) ?? 1;
       const { total } = DamageCalculator.calculateDamage(
         this.damages,
-        source.actualAttack * damageMultiplier,
+        source.actualAttack * damageMultiplier * markedBonus,
         target,
       );
       const { damageToHealth, shieldAbsorbed } = target.applyFinalDamage(total);

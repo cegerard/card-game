@@ -85,7 +85,11 @@ Simulates a turn-based card battle between two players.
   targetingStrategy: TargetingStrategy,
   effect?: EffectDto,         // Optional status effect (poison, burn, freeze)
   buffApplication?: BuffApplicationDto,   // Optional buff application (for special attacks)
-  shieldApplication?: ShieldApplicationDto  // Optional shield application (independent targeting)
+  shieldApplication?: ShieldApplicationDto,  // Optional shield application (independent targeting)
+  markedTargetBonus?: {                   // Optional damage bonus against an already marked target
+    damageType: "PHYSICAL" | "FIRE" | "WATER" | "EARTH" | "AIR",
+    multiplier: number                    // Must be > 0, e.g. 1.3 for +30%
+  }
 }
 ```
 
@@ -122,7 +126,8 @@ Simulates a turn-based card battle between two players.
   targetingStrategy: TargetingStrategy,
   amplifier?: number,               // Optional damage amplifier
   effects?: EffectDto[],            // Optional array of status effects
-  comboFinisher?: DamageCompositionDto[]  // Optional finisher hit compositions
+  comboFinisher?: DamageCompositionDto[],  // Optional finisher hit compositions
+  comboFinisherEffects?: EffectDto[]      // Optional effects applied on the finisher hit only
 }
 ```
 
@@ -156,7 +161,8 @@ Simulates a turn-based card battle between two players.
   interval?: number,
   amplifier?: number,
   effect?: EffectDto,
-  comboFinisher?: DamageCompositionDto[]
+  comboFinisher?: DamageCompositionDto[],
+  comboFinisherEffects?: EffectDto[]  // Effects applied on the finisher hit only
 }
 ```
 

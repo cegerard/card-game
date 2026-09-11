@@ -13,6 +13,7 @@ import {
   ValidateIf,
   Min,
   Max,
+  IsPositive,
   IsNotIn,
   IsIn,
   ValidatorConstraint,
@@ -233,6 +234,15 @@ class ShieldApplicationDto {
   targetingStrategy: TargetingStrategy;
 }
 
+class MarkedTargetBonusDto {
+  @IsEnum(DamageType)
+  damageType: DamageType;
+
+  @IsNumber()
+  @IsPositive()
+  multiplier: number;
+}
+
 class SpecialDto {
   @IsEnum(SpecialKind)
   kind: SpecialKind;
@@ -276,6 +286,11 @@ class SpecialDto {
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => ShieldApplicationDto)
   shieldApplication?: ShieldApplicationDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => MarkedTargetBonusDto)
+  markedTargetBonus?: MarkedTargetBonusDto;
 }
 
 class DamageCompositionDto {
@@ -347,6 +362,12 @@ class MultipleAttackDto {
   @ValidateNested({ each: true })
   @Type(/* istanbul ignore next */ () => DamageCompositionDto)
   comboFinisher?: DamageCompositionDto[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(/* istanbul ignore next */ () => EffectDto)
+  comboFinisherEffects?: EffectDto[];
 }
 
 @ValidatorConstraint({ name: 'targetedCardOnlyForOverride', async: false })
@@ -454,6 +475,12 @@ export class OtherSkillDto {
   @ValidateNested({ each: true })
   @Type(/* istanbul ignore next */ () => DamageCompositionDto)
   comboFinisher?: DamageCompositionDto[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(/* istanbul ignore next */ () => EffectDto)
+  comboFinisherEffects?: EffectDto[];
 
   // Required when event is ally-death, enemy-death, or ally-health-below
   @ValidateIf(

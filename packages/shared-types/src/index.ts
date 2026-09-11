@@ -117,6 +117,12 @@ export interface StatAlteration {
   terminationEvent?: string;
 }
 
+export interface MarkedTargetBonus {
+  damageType: DamageType;
+  /** Multiplicateur appliqué aux dégâts, par exemple 1.3 pour +30%. */
+  multiplier: number;
+}
+
 export interface ShieldApplication {
   rate: number;
   duration: number;
@@ -133,6 +139,8 @@ export interface SpecialSkill {
   effect?: EffectConfig;
   statAlterations?: StatAlteration[];
   shieldApplication?: ShieldApplication;
+  /** Bonus de dégâts quand la cible porte déjà une marque de ce type. */
+  markedTargetBonus?: MarkedTargetBonus;
 }
 
 export interface SimpleAttackSkill {
@@ -150,6 +158,8 @@ export interface MultipleAttackSkill {
   amplifier?: number;
   effects?: EffectConfig[];
   comboFinisher?: DamageComposition[];
+  /** Effets appliqués uniquement sur le coup final du combo. */
+  comboFinisherEffects?: EffectConfig[];
 }
 
 export interface OtherSkill {
@@ -173,6 +183,8 @@ export interface OtherSkill {
   amplifier?: number;
   effect?: EffectConfig;
   comboFinisher?: DamageComposition[];
+  /** Effets appliqués uniquement sur le coup final du combo. */
+  comboFinisherEffects?: EffectConfig[];
   /** Requis quand event vaut ally-death, enemy-death ou ally-health-below. */
   targetCardId?: string;
   terminationEvent?: string;
