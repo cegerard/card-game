@@ -120,7 +120,7 @@ cards/
 
 This allows special attacks to perform their primary action (damage/healing) while optionally applying buffs to a separate set of targets using independent targeting strategies.
 
-**AlterationDetail Discriminated Union**: `Buff` and `Debuff` are members of `AlterationDetail` discriminated by `polarity: 'buff' | 'debuff'`. Both share `AlterationDetailBase` (type, value, duration, terminationEvent?, powerId?). Located in `@types/alteration/alteration-detail.ts` (not `@types/buff/`).
+**AlterationDetail Discriminated Union**: `Buff` and `Debuff` are members of `AlterationDetail` discriminated by `polarity: 'buff' | 'debuff'`. `AlterationType` covers attack, defense, agility, accuracy and speed; every stat getter runs through `computeActualStat`, and turn order reads `actualSpeed` in both card selectors. Both share `AlterationDetailBase` (type, value, duration, terminationEvent?, powerId?). Located in `@types/alteration/alteration-detail.ts` (not `@types/buff/`).
 
 **Buff Type**: `Buff` has an optional `terminationEvent?: string` field. A buff with this set persists until the named event fires (instead of, or in addition to, a turn duration).
 
@@ -132,7 +132,7 @@ This allows special attacks to perform their primary action (damage/healing) whi
 
 **Marked Target Bonus**: `SpecialAttack` accepts an optional `MarkedTargetBonus` (damage type + multiplier). The multiplier is applied to the attack power when the defender already carries a mark of that type, evaluated before the special applies its own effects.
 
-**Elemental Mark Mechanic**: `MarkAttackEffect` applies an `ElementalMark` (damage type + rate per stack + stack cap) on hit, reusing the `effects?: AttackEffect[]` pipeline and its optional `probability`. `FightingCard` counts stacks per damage type (`applyMark()`, `markStacks()`, `markAmplifier()`) and `DamageCalculator` amplifies only the matching damage compositions. Marks cap at `maxStacks`, never expire, and each application emits a `mark_applied` step.
+**Elemental Mark Mechanic**: `MarkAttackEffect` applies an `ElementalMark` (damage type + rate per stack + stack cap) on hit, reusing the `effects?: AttackEffect[]` pipeline and its optional `probability`. `FightingCard` counts stacks per damage type (`applyMark()`, `markStacks()`, `markAmplifier()`) and `DamageCalculator` amplifies only the matching damage compositions. Marks cap at `maxStacks`, never expire, and each application emits a `mark_applied` step. An optional `triggeredDebuff` is rolled when the mark lands.
 
 **Shield Mechanic**: `FightingCard` has an optional shield buffer (`applyShield(rate, duration)` computes `points = rate * maxHealth`). Damage first absorbs shield points before hitting health (`applyFinalDamage()` returns `{ damageToHealth, shieldAbsorbed }`). Shield breaks when points hit 0 → `shield_broken` step. `TurnManager` decrements shield duration each turn; reaching 0 → `shield_expired` step. Special skills can include a `shieldApplication?: ShieldApplicationDto` to apply shields post-action to a separate set of targets.
 

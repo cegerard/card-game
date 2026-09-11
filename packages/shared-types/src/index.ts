@@ -33,7 +33,12 @@ export type SkillKind =
   | 'SHIELD'
   | 'SURVIVE';
 
-export type BuffType = 'attack' | 'defense' | 'agility' | 'accuracy';
+export type BuffType =
+  | 'attack'
+  | 'defense'
+  | 'agility'
+  | 'accuracy'
+  | 'speed';
 
 export type EffectType = 'POISON' | 'BURN' | 'FREEZE' | 'STUNT' | 'MARK';
 

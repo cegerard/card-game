@@ -337,6 +337,7 @@ export class FightController {
           new MathRandomizer(),
           effectDto.stacks,
           effectDto.probability,
+          triggeredDebuff,
         );
     }
   }
@@ -582,6 +583,7 @@ export class FightController {
       [BuffType.DEFENSE]: 'defense' as const,
       [BuffType.AGILITY]: 'agility' as const,
       [BuffType.ACCURACY]: 'accuracy' as const,
+      [BuffType.SPEED]: 'speed' as const,
     };
 
     const result = BUFF_TYPE_MAP[buffType];

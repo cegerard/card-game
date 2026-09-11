@@ -145,7 +145,7 @@ Simulates a turn-based card battle between two players.
   targetCardId?: string,        // Required when event=ally-death or ally-health-below: id of the monitored card
   // SHIELD-specific fields:
   activationCondition?: { operator?: "below" | "above", threshold: number },  // Health ratio threshold (0–1) for SHIELD/ally-health-below activation
-  buffType?: "attack" | "defense" | "agility" | "accuracy",  // Required if kind=BUFF
+  buffType?: "attack" | "defense" | "agility" | "accuracy" | "speed",  // Required if kind=BUFF
   duration?: number,            // Required if kind=BUFF (0 = infinite: permanent or event-bound)
   terminationEvent?: string,    // Event name that removes this skill's buff/targeting override when fired
   activationLimit?: number,     // Max activations (>=1) before skill lifecycle ends — supported for HEALING and TARGETING_OVERRIDE kinds
@@ -178,7 +178,7 @@ Simulates a turn-based card battle between two players.
   stacks?: number,            // MARK only: stacks applied per trigger (default 1)
   probability?: number,       // 0-1 chance to apply effect on hit; omit for guaranteed application
   triggeredDebuff?: {         // Optional debuff applied on effect hit (not supported on STUNT)
-    debuffType: "attack" | "defense" | "agility" | "accuracy",
+    debuffType: "attack" | "defense" | "agility" | "accuracy" | "speed",
     debuffRate: number,
     duration: number,
     probability: number,
@@ -192,7 +192,7 @@ Simulates a turn-based card battle between two players.
 
 ```typescript
 {
-  type: "attack" | "defense" | "agility" | "accuracy",
+  type: "attack" | "defense" | "agility" | "accuracy" | "speed",
   rate: number,               // Buff strength multiplier
   duration: number,           // Number of turns buff lasts (0 = infinite: permanent if no terminationEvent, event-bound if terminationEvent is set)
   targetingStrategy: TargetingStrategy,
@@ -250,7 +250,7 @@ Simulates a turn-based card battle between two players.
   kind: "buff",
   name?: string,         // Skill name that applied the buff
   source: CardInfo,
-  buffs: { target: CardInfo, kind: BuffType, value: number, remainingTurns: number }[],
+  alterations: { target: CardInfo, kind: BuffType, value: number, remainingTurns: number }[],
   energy: number,
   powerId?: string
 }
@@ -262,7 +262,7 @@ Simulates a turn-based card battle between two players.
   kind: "debuff",
   name?: string,         // Skill name that applied the debuff
   source: CardInfo,
-  debuffs: { target: CardInfo, kind: DebuffType, value: number, remainingTurns: number }[],
+  alterations: { target: CardInfo, kind: DebuffType, value: number, remainingTurns: number }[],
   energy: number,
   powerId?: string
 }
@@ -452,6 +452,7 @@ Simulates a turn-based card battle between two players.
 - `defense`: Increases defense stat
 - `agility`: Increases agility stat
 - `accuracy`: Increases accuracy stat
+- `speed`: Increases the speed stat, which drives turn order in both card selectors
 
 ## Validation
 

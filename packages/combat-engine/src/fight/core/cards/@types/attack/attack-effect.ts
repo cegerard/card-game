@@ -18,6 +18,7 @@ export type MarkEffectResult = {
   card: FightingCard;
   damageType: DamageType;
   stacks: number;
+  triggeredDebuff?: { card: FightingCard; debuff: Debuff };
 };
 
 export type EffectResult = StateEffectResult | MarkEffectResult;

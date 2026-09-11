@@ -346,14 +346,14 @@ export class ActionStage {
                 damageType: effect.damageType,
                 stacks: effect.stacks,
               });
-              continue;
+            } else {
+              report.statusChanges.push({
+                kind: StepKind.StatusChange,
+                status: effect.type,
+                card: effect.card.identityInfo,
+              });
             }
 
-            report.statusChanges.push({
-              kind: StepKind.StatusChange,
-              status: effect.type,
-              card: effect.card.identityInfo,
-            });
             if (effect.triggeredDebuff) {
               const { card: debuffTarget, debuff } = effect.triggeredDebuff;
               report.statusChanges.push({
