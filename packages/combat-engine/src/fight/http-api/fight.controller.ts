@@ -584,6 +584,7 @@ export class FightController {
       [BuffType.AGILITY]: 'agility' as const,
       [BuffType.ACCURACY]: 'accuracy' as const,
       [BuffType.SPEED]: 'speed' as const,
+      [BuffType.CRITICAL_CHANCE]: 'criticalChance' as const,
     };
 
     const result = BUFF_TYPE_MAP[buffType];

@@ -38,7 +38,8 @@ export type BuffType =
   | 'defense'
   | 'agility'
   | 'accuracy'
-  | 'speed';
+  | 'speed'
+  | 'criticalChance';
 
 export type EffectType = 'POISON' | 'BURN' | 'FREEZE' | 'STUNT' | 'MARK';
 

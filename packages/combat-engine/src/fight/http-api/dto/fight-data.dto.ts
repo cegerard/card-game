@@ -72,6 +72,7 @@ export enum BuffType {
   AGILITY = 'agility',
   ACCURACY = 'accuracy',
   SPEED = 'speed',
+  CRITICAL_CHANCE = 'criticalChance',
 }
 
 export enum Effect {
