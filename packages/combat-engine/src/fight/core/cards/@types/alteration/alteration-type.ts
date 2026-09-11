@@ -1,1 +1,2 @@
-export type AlterationType = 'attack' | 'defense' | 'agility' | 'accuracy';
+export type AlterationType =
+  'attack' | 'defense' | 'agility' | 'accuracy' | 'speed';

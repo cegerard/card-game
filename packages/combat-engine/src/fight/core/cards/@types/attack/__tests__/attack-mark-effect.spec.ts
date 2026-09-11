@@ -6,6 +6,7 @@ import { RandomizerFake } from '../../../../../../../test/helpers/randomizer-fak
 import { createFightingCard } from '../../../../../../../test/helpers/fighting-card';
 import { FightingCard } from '../../../fighting-card';
 import { MarkEffectResult } from '../attack-effect';
+import { EffectTriggeredDebuff } from '../effect-triggered-debuff';
 
 function waterMark(maxStacks: number = 5): ElementalMark {
   return new ElementalMark(DamageType.WATER, 0.05, maxStacks);
@@ -111,5 +112,39 @@ describe('ElementalMark', () => {
     expect(() => new ElementalMark(DamageType.WATER, 0.05, 0)).toThrow(
       'ElementalMark maxStacks must be greater than or equal to 1',
     );
+  });
+});
+
+describe('MarkAttackEffect with a triggered debuff', () => {
+  const randomizer = new RandomizerFake();
+  let markedCard: FightingCard;
+  let result: MarkEffectResult;
+
+  beforeEach(() => {
+    randomizer.setNextRandomValue(0);
+    markedCard = createFightingCard({ speed: 100 });
+    const effect = new MarkAttackEffect(
+      waterMark(),
+      new MathRandomizer(),
+      1,
+      undefined,
+      new EffectTriggeredDebuff(1, 'speed', 0.08, 3, randomizer),
+    );
+    result = effect.applyEffect(
+      markedCard,
+      createFightingCard({ attack: 100 }),
+      null,
+    );
+  });
+
+  it('slows the marked card', () => {
+    expect(markedCard.actualSpeed).toBe(92);
+  });
+
+  it('reports the triggered debuff alongside the mark', () => {
+    expect(result.triggeredDebuff).toEqual({
+      card: markedCard,
+      debuff: expect.objectContaining({ type: 'speed', value: 8 }),
+    });
   });
 });

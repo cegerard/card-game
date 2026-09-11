@@ -71,6 +71,7 @@ export enum BuffType {
   DEFENSE = 'defense',
   AGILITY = 'agility',
   ACCURACY = 'accuracy',
+  SPEED = 'speed',
 }
 
 export enum Effect {

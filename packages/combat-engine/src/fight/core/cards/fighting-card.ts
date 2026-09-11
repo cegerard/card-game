@@ -155,7 +155,7 @@ export class FightingCard {
   }
 
   public get actualSpeed(): number {
-    return this.speed;
+    return this.computeActualStat(this.speed, 'speed');
   }
 
   public get actualCriticalChance(): number {
@@ -351,7 +351,7 @@ export class FightingCard {
   }
 
   public fasterThan(defender: FightingCard | null): boolean {
-    return !defender || this.speed > defender.speed;
+    return !defender || this.actualSpeed > defender.actualSpeed;
   }
 
   public isDead(): boolean {
@@ -647,6 +647,8 @@ export class FightingCard {
         return round2(rate * this.agility);
       case 'accuracy':
         return round2(rate * this.accuracy);
+      case 'speed':
+        return round2(rate * this.speed);
       default:
         throw new Error(`Unknown attribute type: ${type}`);
     }
