@@ -1,5 +1,5 @@
 import { FightingCard } from '../../fighting-card';
-import { AttackEffect, EffectResult } from './attack-effect';
+import { AttackEffect, StateEffectResult } from './attack-effect';
 import { EffectLevel } from './effect-level';
 import { FightingContext } from '../fighting-context';
 import { CardStateBurned } from '../state/card-state-burned';
@@ -36,7 +36,7 @@ export class BurnAttackEffect implements AttackEffect {
     defender: FightingCard,
     card: FightingCard,
     _context: FightingContext,
-  ): EffectResult {
+  ): StateEffectResult {
     if (
       this.probability !== undefined &&
       this.randomizer.random() >= this.probability
@@ -64,7 +64,10 @@ export class BurnAttackEffect implements AttackEffect {
     );
     defender.setState(burnedState);
 
-    const effectResult: EffectResult = { type: this.type, card: defender };
+    const effectResult: StateEffectResult = {
+      type: this.type,
+      card: defender,
+    };
     const appliedDebuff = this.triggeredDebuff?.tryApply(defender);
     if (appliedDebuff) {
       effectResult.triggeredDebuff = { card: defender, debuff: appliedDebuff };

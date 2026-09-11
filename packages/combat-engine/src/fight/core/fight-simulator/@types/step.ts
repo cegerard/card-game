@@ -23,6 +23,7 @@ import {
   ShieldExpiredReport,
 } from './shield-report';
 import { SurvivedReport } from './survived-report';
+import { MarkAppliedReport } from './mark-report';
 
 export enum StepKind {
   FightEnd = 'fight_end',
@@ -44,6 +45,7 @@ export enum StepKind {
   ShieldBroken = 'shield_broken',
   ShieldExpired = 'shield_expired',
   Survived = 'survived',
+  MarkApplied = 'mark_applied',
 }
 
 export type Step =
@@ -65,4 +67,5 @@ export type Step =
   | ShieldAppliedReport
   | ShieldBrokenReport
   | ShieldExpiredReport
-  | SurvivedReport;
+  | SurvivedReport
+  | MarkAppliedReport;

@@ -1,5 +1,5 @@
 import { FightingCard } from '../../fighting-card';
-import { AttackEffect, EffectResult } from './attack-effect';
+import { AttackEffect, StateEffectResult } from './attack-effect';
 import { CardStatePoisoned } from '../state/card-state-poisoned';
 import { EffectLevel } from './effect-level';
 import { FightingContext } from '../fighting-context';
@@ -36,7 +36,7 @@ export class PoisonAttackEffect implements AttackEffect {
     defender: FightingCard,
     card: FightingCard,
     _context: FightingContext,
-  ): EffectResult {
+  ): StateEffectResult {
     if (
       this.probability !== undefined &&
       this.randomizer.random() >= this.probability
@@ -53,7 +53,10 @@ export class PoisonAttackEffect implements AttackEffect {
     );
     defender.setState(poisonedState);
 
-    const effectResult: EffectResult = { type: this.type, card: defender };
+    const effectResult: StateEffectResult = {
+      type: this.type,
+      card: defender,
+    };
     const appliedDebuff = this.triggeredDebuff?.tryApply(defender);
     if (appliedDebuff) {
       effectResult.triggeredDebuff = { card: defender, debuff: appliedDebuff };

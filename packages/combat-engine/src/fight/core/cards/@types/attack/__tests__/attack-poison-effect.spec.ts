@@ -4,7 +4,7 @@ import { CardStateFrozen } from '../../state/card-state-frozen';
 import { RandomizerFake } from '../../../../../../../test/helpers/randomizer-fake';
 import { MathRandomizer } from '../../../../../tools/math-randomizer';
 import { createFightingCard } from '../../../../../../../test/helpers/fighting-card';
-import { EffectResult } from '../attack-effect';
+import { StateEffectResult } from '../attack-effect';
 
 function makeCards() {
   const attacker = createFightingCard({ attack: 200 });
@@ -33,7 +33,7 @@ describe('PoisonAttackEffect with triggeredDebuff', () => {
   });
 
   describe('when poison is applied and roll succeeds', () => {
-    let result: EffectResult;
+    let result: StateEffectResult;
 
     beforeEach(() => {
       randomizer.setNextRandomValue(0);
@@ -67,7 +67,7 @@ describe('PoisonAttackEffect with triggeredDebuff', () => {
   });
 
   describe('when defender is frozen (effect skipped)', () => {
-    let result: EffectResult;
+    let result: StateEffectResult;
 
     beforeEach(() => {
       const { attacker, defender } = makeCards();

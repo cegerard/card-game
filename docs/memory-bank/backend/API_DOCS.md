@@ -85,7 +85,11 @@ Simulates a turn-based card battle between two players.
   targetingStrategy: TargetingStrategy,
   effect?: EffectDto,         // Optional status effect (poison, burn, freeze)
   buffApplication?: BuffApplicationDto,   // Optional buff application (for special attacks)
-  shieldApplication?: ShieldApplicationDto  // Optional shield application (independent targeting)
+  shieldApplication?: ShieldApplicationDto,  // Optional shield application (independent targeting)
+  markedTargetBonus?: {                   // Optional damage bonus against an already marked target
+    damageType: "PHYSICAL" | "FIRE" | "WATER" | "EARTH" | "AIR",
+    multiplier: number                    // Must be > 0, e.g. 1.3 for +30%
+  }
 }
 ```
 
@@ -122,7 +126,8 @@ Simulates a turn-based card battle between two players.
   targetingStrategy: TargetingStrategy,
   amplifier?: number,               // Optional damage amplifier
   effects?: EffectDto[],            // Optional array of status effects
-  comboFinisher?: DamageCompositionDto[]  // Optional finisher hit compositions
+  comboFinisher?: DamageCompositionDto[],  // Optional finisher hit compositions
+  comboFinisherEffects?: EffectDto[]      // Optional effects applied on the finisher hit only
 }
 ```
 
@@ -156,7 +161,8 @@ Simulates a turn-based card battle between two players.
   interval?: number,
   amplifier?: number,
   effect?: EffectDto,
-  comboFinisher?: DamageCompositionDto[]
+  comboFinisher?: DamageCompositionDto[],
+  comboFinisherEffects?: EffectDto[]  // Effects applied on the finisher hit only
 }
 ```
 
@@ -164,9 +170,12 @@ Simulates a turn-based card battle between two players.
 
 ```typescript
 {
-  type: "POISON" | "BURN" | "FREEZE" | "STUNT",
-  rate: number,               // Damage coefficient per tick (unused for STUNT — no damage tick)
-  level: 1 | 2 | 3,           // Duration: STUNT = 2*level-1 turns; others = level 1=1, 2=3, 3=5 ticks
+  type: "POISON" | "BURN" | "FREEZE" | "STUNT" | "MARK",
+  rate: number,               // Damage coefficient per tick (unused for STUNT); amplification per stack for MARK
+  level: 1 | 2 | 3,           // Required except for MARK. Duration: STUNT = 2*level-1 turns; others = level 1=1, 2=3, 3=5 ticks
+  damageType?: "PHYSICAL" | "FIRE" | "WATER" | "EARTH" | "AIR",  // MARK only (required): amplified damage type
+  maxStacks?: number,         // MARK only (required): stack cap
+  stacks?: number,            // MARK only: stacks applied per trigger (default 1)
   probability?: number,       // 0-1 chance to apply effect on hit; omit for guaranteed application
   triggeredDebuff?: {         // Optional debuff applied on effect hit (not supported on STUNT)
     debuffType: "attack" | "defense" | "agility" | "accuracy",
@@ -197,7 +206,7 @@ Simulates a turn-based card battle between two players.
 ```typescript
 {
   [stepNumber: number]: {
-    kind: "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "debuff_removed" | "buff_expired" | "debuff_expired" | "effect_removed" | "targeting_override" | "targeting_reverted" | "shield_applied" | "shield_broken" | "shield_expired" | "survived" | "fight_end",
+    kind: "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "debuff_removed" | "buff_expired" | "debuff_expired" | "effect_removed" | "targeting_override" | "targeting_reverted" | "shield_applied" | "shield_broken" | "shield_expired" | "survived" | "mark_applied" | "fight_end",
     // Additional properties vary by step kind
   }
 }
@@ -318,6 +327,16 @@ Simulates a turn-based card battle between two players.
 }
 ```
 
+**`mark_applied` step** (`MarkAppliedReport`): Emitted when an elemental mark is applied on hit. Absent when the target already carries the maximum number of stacks.
+```typescript
+{
+  kind: "mark_applied",
+  card: CardInfo,        // Marked card
+  damageType: string,    // Damage type amplified by the mark
+  stacks: number         // Stack count after this application
+}
+```
+
 **`targeting_override` step** (`TargetingOverrideReport`): Emitted when a targeting override skill activates.
 ```typescript
 {
@@ -425,6 +444,7 @@ Simulates a turn-based card battle between two players.
 - `BURN`: Damage over time
 - `FREEZE`: Prevents action for 1-5 turns, increases damage taken by 20%
 - `STUNT`: Prevents action for 1-5 turns (2*level-1), increases damage taken by 20%; no damage tick; does not stack with freeze (whichever is active takes precedence)
+- `MARK`: Cumulative elemental mark — each stack amplifies the damage the card receives from `damageType` by `rate` (multiplicative on that damage portion, before defense). Stacks up to `maxStacks`, never expires, no damage tick. One independent mark per damage type
 
 ### BuffType
 

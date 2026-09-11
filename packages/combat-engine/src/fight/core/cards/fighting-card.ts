@@ -16,6 +16,8 @@ import { HealthReactiveSkill } from './skills/reactive-skill';
 import { SurviveSkill } from './skills/survive';
 import { AlterationType } from './@types/alteration/alteration-type';
 import { Element } from './@types/damage/element';
+import { DamageType } from './@types/damage/damage-type';
+import { ElementalMark } from './@types/mark/elemental-mark';
 import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
 import { NamedAttackResult } from './@types/action-result/named-attack-result';
 import { round2 } from '../../tools/round';
@@ -26,6 +28,11 @@ export type FinalDamageResult = {
   shieldAbsorbed: number;
   survived?: boolean;
   survivedSkillName?: string;
+};
+
+type MarkEntry = {
+  mark: ElementalMark;
+  stacks: number;
 };
 
 export type TargetingOverrideEntry = {
@@ -72,6 +79,9 @@ export class FightingCard {
 
   // Shield
   private shield: Shield | null = null;
+
+  // Elemental marks
+  private marks: MarkEntry[] = [];
 
   // Survive
   private surviveSkill: SurviveSkill | null = null;
@@ -429,6 +439,33 @@ export class FightingCard {
       this.shield = null;
     }
     return absorbed;
+  }
+
+  public applyMark(mark: ElementalMark, stacks: number = 1): number {
+    const entry = this.findMark(mark.damageType);
+    if (!entry) {
+      const appliedStacks = Math.min(stacks, mark.maxStacks);
+      this.marks.push({ mark, stacks: appliedStacks });
+      return appliedStacks;
+    }
+
+    entry.stacks = Math.min(entry.stacks + stacks, entry.mark.maxStacks);
+    return entry.stacks;
+  }
+
+  public markStacks(damageType: DamageType): number {
+    return this.findMark(damageType)?.stacks ?? 0;
+  }
+
+  public markAmplifier(damageType: DamageType): number {
+    const entry = this.findMark(damageType);
+    if (!entry) return 1;
+
+    return 1 + entry.stacks * entry.mark.ratePerStack;
+  }
+
+  private findMark(damageType: DamageType): MarkEntry | undefined {
+    return this.marks.find((entry) => entry.mark.damageType === damageType);
   }
 
   public addRealDamage(damage: number): number {

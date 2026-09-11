@@ -21,6 +21,7 @@ import { DeathSkillHandler } from '../fight-simulator/death-skill-handler';
 import { ShieldResult } from '../cards/@types/action-result/shield-result';
 import { ShieldAppliedReport } from '../fight-simulator/@types/shield-report';
 import { triggerReactiveSkills } from '../fight-simulator/reactive-skill-checker';
+import { MARK_EFFECT_TYPE } from '../cards/@types/mark/elemental-mark';
 import { skillResultsToSteps } from '../fight-simulator/skill-results-to-steps';
 import { SurvivedReport } from '../fight-simulator/@types/survived-report';
 
@@ -338,6 +339,16 @@ export class ActionStage {
         }
         if (damageDealt.effects?.length) {
           for (const effect of damageDealt.effects) {
+            if (effect.type === MARK_EFFECT_TYPE) {
+              report.statusChanges.push({
+                kind: StepKind.MarkApplied,
+                card: effect.card.identityInfo,
+                damageType: effect.damageType,
+                stacks: effect.stacks,
+              });
+              continue;
+            }
+
             report.statusChanges.push({
               kind: StepKind.StatusChange,
               status: effect.type,

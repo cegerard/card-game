@@ -35,7 +35,7 @@ export type SkillKind =
 
 export type BuffType = 'attack' | 'defense' | 'agility' | 'accuracy';
 
-export type EffectType = 'POISON' | 'BURN' | 'FREEZE' | 'STUNT';
+export type EffectType = 'POISON' | 'BURN' | 'FREEZE' | 'STUNT' | 'MARK';
 
 export type DodgeStrategy = 'simple-dodge' | 'random-dodge';
 
@@ -91,8 +91,16 @@ export interface EffectTriggeredDebuff {
 
 export interface EffectConfig {
   type: EffectType;
+  /** Coefficient de dégâts par tick ; pour MARK, amplification par cumul. */
   rate: number;
-  level: number;
+  /** Requis sauf pour une marque élémentaire (type MARK). */
+  level?: number;
+  /** MARK uniquement : type de dégâts amplifié par la marque. */
+  damageType?: DamageType;
+  /** MARK uniquement : nombre maximal de cumuls. */
+  maxStacks?: number;
+  /** MARK uniquement : cumuls appliqués par déclenchement (défaut 1). */
+  stacks?: number;
   triggeredDebuff?: EffectTriggeredDebuff;
   terminationEvent?: string;
   probability?: number;
@@ -107,6 +115,12 @@ export interface StatAlteration {
   polarity: 'buff' | 'debuff';
   condition?: BuffCondition;
   terminationEvent?: string;
+}
+
+export interface MarkedTargetBonus {
+  damageType: DamageType;
+  /** Multiplicateur appliqué aux dégâts, par exemple 1.3 pour +30%. */
+  multiplier: number;
 }
 
 export interface ShieldApplication {
@@ -125,6 +139,8 @@ export interface SpecialSkill {
   effect?: EffectConfig;
   statAlterations?: StatAlteration[];
   shieldApplication?: ShieldApplication;
+  /** Bonus de dégâts quand la cible porte déjà une marque de ce type. */
+  markedTargetBonus?: MarkedTargetBonus;
 }
 
 export interface SimpleAttackSkill {
@@ -142,6 +158,8 @@ export interface MultipleAttackSkill {
   amplifier?: number;
   effects?: EffectConfig[];
   comboFinisher?: DamageComposition[];
+  /** Effets appliqués uniquement sur le coup final du combo. */
+  comboFinisherEffects?: EffectConfig[];
 }
 
 export interface OtherSkill {
@@ -165,6 +183,8 @@ export interface OtherSkill {
   amplifier?: number;
   effect?: EffectConfig;
   comboFinisher?: DamageComposition[];
+  /** Effets appliqués uniquement sur le coup final du combo. */
+  comboFinisherEffects?: EffectConfig[];
   /** Requis quand event vaut ally-death, enemy-death ou ally-health-below. */
   targetCardId?: string;
   terminationEvent?: string;

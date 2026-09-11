@@ -90,7 +90,7 @@ cards/
     │   ├── healing-result.ts
     │   ├── buff-results.ts
     │   └── shield-result.ts         # { target: CardInfo; shield: Shield }
-    ├── attack/             # Attack and effect types (attack-effect.ts, attack-poison-effect.ts, attack-burn-effect.ts, attack-freeze-effect.ts, attack-stunt-effect.ts)
+    ├── attack/             # Attack and effect types (attack-effect.ts, attack-poison-effect.ts, attack-burn-effect.ts, attack-freeze-effect.ts, attack-stunt-effect.ts, attack-mark-effect.ts)
     │   └── conditions/     # Attack conditions (always-true-attack-condition.ts)
     ├── alteration/         # Buff/debuff discriminated union
     │   ├── alteration-detail.ts     # AlterationDetail = Buff | Debuff (polarity: 'buff' | 'debuff')
@@ -98,6 +98,9 @@ cards/
     │   ├── alteration-condition.ts  # Condition interface for conditional buff multipliers
     │   ├── buff-application.ts      # Applies buff with optional condition + multiplier
     │   └── conditions/              # Condition implementations (ally-presence-condition.ts)
+    ├── mark/              # Elemental mark types
+    │   ├── elemental-mark.ts        # ElementalMark: damageType + ratePerStack + maxStacks (cumulative, never expires)
+    │   └── marked-target-bonus.ts   # MarkedTargetBonus: damage multiplier when the defender already carries a mark
     ├── shield/             # Shield types
     │   ├── shield.ts                # Shield value type: { points: number, duration: number }
     │   └── shield-application.ts    # Applies shield to targets via targeting strategy
@@ -123,9 +126,13 @@ This allows special attacks to perform their primary action (damage/healing) whi
 
 **Skill Lifecycle Pattern**: The `Skill` interface includes optional `tick?()` and `lifecycleEndEvent?()` methods. Skills with a finite `activationLimit` track their count via `tick()` and emit an `endEvent` string via `lifecycleEndEvent()` when exhausted. `SkillResults` carries an optional `endEvent` field so callers (`TurnManager`, `ActionStage`) can invoke `EndEventProcessor` to remove all matching event-bound buffs.
 
-**Multi-Effect Attack Pattern**: `SimpleAttack` and `MultipleAttack` accept `effects?: AttackEffect[]`. Each effect is evaluated independently per hit; effects with `probability` roll a random check. `SpecialAttack` retains a single `effect?: AttackEffect`. `AttackResult.effects` is `EffectResult[]` to carry all applied effects per hit.
+**Multi-Effect Attack Pattern**: `SimpleAttack` and `MultipleAttack` accept `effects?: AttackEffect[]`. `MultipleAttack` also accepts `comboFinisherEffects?: AttackEffect[]`, evaluated only on the combo finisher hit. Each effect is evaluated independently per hit; effects with `probability` roll a random check. `SpecialAttack` retains a single `effect?: AttackEffect`. `AttackResult.effects` is `EffectResult[]` to carry all applied effects per hit.
 
 **STUNT State Pattern**: `CardStateStunted` (like `CardStateFrozen`) skips action and applies +20% incoming damage via `applyDamageRate()`. No damage tick. Skip condition: `card.frozenLevel > 0 || card.isStunted`. Does not stack — `StuntAttackEffect` returns early if defender is already frozen or stunted.
+
+**Marked Target Bonus**: `SpecialAttack` accepts an optional `MarkedTargetBonus` (damage type + multiplier). The multiplier is applied to the attack power when the defender already carries a mark of that type, evaluated before the special applies its own effects.
+
+**Elemental Mark Mechanic**: `MarkAttackEffect` applies an `ElementalMark` (damage type + rate per stack + stack cap) on hit, reusing the `effects?: AttackEffect[]` pipeline and its optional `probability`. `FightingCard` counts stacks per damage type (`applyMark()`, `markStacks()`, `markAmplifier()`) and `DamageCalculator` amplifies only the matching damage compositions. Marks cap at `maxStacks`, never expire, and each application emits a `mark_applied` step.
 
 **Shield Mechanic**: `FightingCard` has an optional shield buffer (`applyShield(rate, duration)` computes `points = rate * maxHealth`). Damage first absorbs shield points before hitting health (`applyFinalDamage()` returns `{ damageToHealth, shieldAbsorbed }`). Shield breaks when points hit 0 → `shield_broken` step. `TurnManager` decrements shield duration each turn; reaching 0 → `shield_expired` step. Special skills can include a `shieldApplication?: ShieldApplicationDto` to apply shields post-action to a separate set of targets.
 
@@ -149,7 +156,7 @@ fight-simulator/
 │   └── speed-weighted-card-pool.ts # Speed-based selection
 └── @types/                 # Fight result types
     ├── fight-result.ts     # Complete fight outcome
-    ├── step.ts             # Turn step recording (includes shield_applied, shield_broken, shield_expired)
+    ├── step.ts             # Turn step recording (includes shield_applied, shield_broken, shield_expired, mark_applied)
     ├── action-report.ts    # Action reporting
     ├── attack-report.ts    # Attack details
     ├── healing-report.ts   # Healing details
@@ -161,6 +168,7 @@ fight-simulator/
     ├── damage-report.ts    # Damage calculation
     ├── status-change-report.ts # Status changes
     ├── shield-report.ts    # ShieldAppliedReport, ShieldBrokenReport, ShieldExpiredReport
+    ├── mark-report.ts      # MarkAppliedReport: { kind: 'mark_applied', card, damageType, stacks }
     ├── survived-report.ts  # SurvivedReport: { kind: 'survived', name, card }
     └── winner-report.ts    # Victory determination
 ```

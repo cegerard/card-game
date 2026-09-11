@@ -13,6 +13,7 @@ import {
   ValidateIf,
   Min,
   Max,
+  IsPositive,
   IsNotIn,
   IsIn,
   ValidatorConstraint,
@@ -77,6 +78,7 @@ export enum Effect {
   BURN = 'BURN',
   FREEZE = 'FREEZE',
   STUNT = 'STUNT',
+  MARK = 'MARK',
 }
 
 export enum DodgeStrategy {
@@ -143,15 +145,33 @@ class EffectTriggeredDebuffDto {
   powerId?: string;
 }
 
-class EffectDto {
+export class EffectDto {
   @IsEnum(Effect)
   type: Effect;
 
   @IsNumber()
   rate: number;
 
+  @ValidateIf((o) => o.type !== Effect.MARK)
+  @IsDefined()
   @IsNumber()
-  level: number;
+  level?: number;
+
+  @ValidateIf((o) => o.type === Effect.MARK)
+  @IsDefined()
+  @IsEnum(DamageType)
+  damageType?: DamageType;
+
+  @ValidateIf((o) => o.type === Effect.MARK)
+  @IsDefined()
+  @IsNumber()
+  @Min(1)
+  maxStacks?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  stacks?: number;
 
   @IsOptional()
   @ValidateNested()
@@ -214,6 +234,15 @@ class ShieldApplicationDto {
   targetingStrategy: TargetingStrategy;
 }
 
+class MarkedTargetBonusDto {
+  @IsEnum(DamageType)
+  damageType: DamageType;
+
+  @IsNumber()
+  @IsPositive()
+  multiplier: number;
+}
+
 class SpecialDto {
   @IsEnum(SpecialKind)
   kind: SpecialKind;
@@ -257,6 +286,11 @@ class SpecialDto {
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => ShieldApplicationDto)
   shieldApplication?: ShieldApplicationDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => MarkedTargetBonusDto)
+  markedTargetBonus?: MarkedTargetBonusDto;
 }
 
 class DamageCompositionDto {
@@ -328,6 +362,12 @@ class MultipleAttackDto {
   @ValidateNested({ each: true })
   @Type(/* istanbul ignore next */ () => DamageCompositionDto)
   comboFinisher?: DamageCompositionDto[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(/* istanbul ignore next */ () => EffectDto)
+  comboFinisherEffects?: EffectDto[];
 }
 
 @ValidatorConstraint({ name: 'targetedCardOnlyForOverride', async: false })
@@ -435,6 +475,12 @@ export class OtherSkillDto {
   @ValidateNested({ each: true })
   @Type(/* istanbul ignore next */ () => DamageCompositionDto)
   comboFinisher?: DamageCompositionDto[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(/* istanbul ignore next */ () => EffectDto)
+  comboFinisherEffects?: EffectDto[];
 
   // Required when event is ally-death, enemy-death, or ally-health-below
   @ValidateIf(

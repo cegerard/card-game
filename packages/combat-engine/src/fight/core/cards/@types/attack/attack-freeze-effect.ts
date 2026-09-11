@@ -1,7 +1,7 @@
 import { FightingCard } from '../../fighting-card';
 import { FightingContext } from '../fighting-context';
 import { CardStateFrozen } from '../state/card-state-frozen';
-import { AttackEffect, EffectResult } from './attack-effect';
+import { AttackEffect, StateEffectResult } from './attack-effect';
 import { EffectLevel } from './effect-level';
 import { EffectTriggeredDebuff } from './effect-triggered-debuff';
 import { Randomizer } from '../../../randomizer';
@@ -35,7 +35,7 @@ export class FreezeAttackEffect implements AttackEffect {
     defender: FightingCard,
     _card: FightingCard,
     _context: FightingContext,
-  ): EffectResult {
+  ): StateEffectResult {
     if (
       this.probability !== undefined &&
       this.randomizer.random() >= this.probability
@@ -63,7 +63,10 @@ export class FreezeAttackEffect implements AttackEffect {
     );
     defender.setState(frozenState);
 
-    const effectResult: EffectResult = { type: this.type, card: defender };
+    const effectResult: StateEffectResult = {
+      type: this.type,
+      card: defender,
+    };
     const appliedDebuff = this.triggeredDebuff?.tryApply(defender);
     if (appliedDebuff) {
       effectResult.triggeredDebuff = { card: defender, debuff: appliedDebuff };

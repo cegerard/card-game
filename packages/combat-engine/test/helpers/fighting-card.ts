@@ -33,7 +33,11 @@ import { ShieldApplication } from '../../src/fight/core/cards/@types/shield/shie
 type effect = {
   type: string;
   rate: number;
-  level: 1 | 2 | 3;
+  level?: 1 | 2 | 3;
+  damageType?: DamageType;
+  maxStacks?: number;
+  stacks?: number;
+  probability?: number;
 };
 
 type FightingCardParams = {

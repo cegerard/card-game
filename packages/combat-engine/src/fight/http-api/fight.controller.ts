@@ -13,6 +13,7 @@ import {
   AlterationConditionType,
   CardSelectorStrategy,
   Effect,
+  EffectDto,
   FightDataDto,
   FightingCardDto,
   OtherSkillDto,
@@ -40,6 +41,9 @@ import { AttackEffect } from '../core/cards/@types/attack/attack-effect';
 import { BurnAttackEffect } from '../core/cards/@types/attack/attack-burn-effect';
 import { FreezeAttackEffect } from '../core/cards/@types/attack/attack-freeze-effect';
 import { StuntAttackEffect } from '../core/cards/@types/attack/attack-stunt-effect';
+import { MarkAttackEffect } from '../core/cards/@types/attack/attack-mark-effect';
+import { ElementalMark } from '../core/cards/@types/mark/elemental-mark';
+import { MarkedTargetBonus } from '../core/cards/@types/mark/marked-target-bonus';
 import { EffectTriggeredDebuff } from '../core/cards/@types/attack/effect-triggered-debuff';
 import { MathRandomizer } from '../tools/math-randomizer';
 import { Alteration } from '../core/cards/@types/alteration/alteration';
@@ -156,6 +160,14 @@ export class FightController {
           )
         : undefined;
 
+      const markedBonusDto = cardData.skills.special.markedTargetBonus;
+      const markedTargetBonus = markedBonusDto
+        ? new MarkedTargetBonus(
+            markedBonusDto.damageType,
+            markedBonusDto.multiplier,
+          )
+        : undefined;
+
       special = new SpecialAttack(
         cardData.skills.special.name,
         specialDamages,
@@ -164,6 +176,7 @@ export class FightController {
         specialEffect,
         alterations.length > 0 ? alterations : undefined,
         shieldApplication,
+        markedTargetBonus,
       );
     } else if (cardData.skills.special.kind === SpecialKind.HEALING) {
       special = new SpecialHealing(
@@ -195,6 +208,7 @@ export class FightController {
         ma.amplifier ?? 0,
         maEffects,
         maComboFinisher,
+        this.buildEffects(ma.comboFinisherEffects),
       );
     } else {
       const sa = cardData.skills.simpleAttack;
@@ -259,42 +273,12 @@ export class FightController {
     );
   }
 
-  private buildEffects(
-    effectDtos?: {
-      type: Effect;
-      rate: number;
-      level: number;
-      triggeredDebuff?: {
-        debuffType: BuffType;
-        debuffRate: number;
-        duration: number;
-        probability: number;
-        terminationEvent?: string;
-        powerId?: string;
-      };
-      terminationEvent?: string;
-      probability?: number;
-    }[],
-  ): AttackEffect[] | undefined {
+  private buildEffects(effectDtos?: EffectDto[]): AttackEffect[] | undefined {
     if (!effectDtos?.length) return undefined;
     return effectDtos.map((dto) => this.buildEffect(dto));
   }
 
-  private buildEffect(effectDto: {
-    type: Effect;
-    rate: number;
-    level: number;
-    triggeredDebuff?: {
-      debuffType: BuffType;
-      debuffRate: number;
-      duration: number;
-      probability: number;
-      terminationEvent?: string;
-      powerId?: string;
-    };
-    terminationEvent?: string;
-    probability?: number;
-  }): AttackEffect {
+  private buildEffect(effectDto: EffectDto): AttackEffect {
     const triggeredDebuff = effectDto.triggeredDebuff
       ? new EffectTriggeredDebuff(
           effectDto.triggeredDebuff.probability,
@@ -342,6 +326,17 @@ export class FightController {
           new MathRandomizer(),
           effectDto.probability,
           effectDto.terminationEvent,
+        );
+      case Effect.MARK:
+        return new MarkAttackEffect(
+          new ElementalMark(
+            effectDto.damageType,
+            effectDto.rate,
+            effectDto.maxStacks,
+          ),
+          new MathRandomizer(),
+          effectDto.stacks,
+          effectDto.probability,
         );
     }
   }
@@ -482,6 +477,7 @@ export class FightController {
               skillData.amplifier ?? 0,
               caEffects,
               caComboFinisher,
+              this.buildEffects(skillData.comboFinisherEffects),
             )
           : new SimpleAttack(
               skillData.name,

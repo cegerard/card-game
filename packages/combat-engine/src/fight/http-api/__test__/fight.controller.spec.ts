@@ -778,6 +778,77 @@ describe('FightController', () => {
         fightSimulatorStub.validatePlayer1FirstCard(validation);
       });
     });
+
+    describe('and the simple attack has a mark effect', () => {
+      beforeEach(() => {
+        const effect = {
+          type: Effect.MARK,
+          rate: 0.05,
+          damageType: DamageType.WATER,
+          maxStacks: 5,
+          stacks: 2,
+          probability: 0.2,
+        };
+
+        fightData = {
+          cardSelectorStrategy: CardSelectorStrategy.PLAYER_BY_PLAYER,
+          player1: {
+            name: 'Player 1',
+            deck: [
+              {
+                id: 'axe-01',
+                name: 'Axe',
+                attack: 10,
+                defense: 6,
+                health: 100,
+                speed: 3,
+                agility: 25,
+                accuracy: 15,
+                criticalChance: 0.05,
+                skills: {
+                  special: {
+                    name: 'No Special Attack',
+                    kind: SpecialKind.ATTACK,
+                    damages: [{ type: DamageType.PHYSICAL, rate: 0 }],
+                    energy: 0,
+                    targetingStrategy: TargetingStrategy.POSITION_BASED,
+                  },
+                  simpleAttack: {
+                    ...simpleAttack,
+                    effects: [effect],
+                  },
+                  others: [],
+                },
+                behaviors: {
+                  dodge: DodgeStrategy.SIMPLE_DODGE,
+                },
+              },
+            ],
+          },
+          player2: {
+            name: 'Player 2',
+            deck: [],
+          },
+        };
+
+        fightController.startFight(fightData);
+      });
+
+      it('maps the mark effect to the simple attack', () => {
+        const validation = (card: FightingCard) => {
+          const jsonCard = JSON.parse(JSON.stringify(card));
+
+          expect(jsonCard.simpleAttack.effects[0]).toMatchObject({
+            type: 'mark',
+            stacks: 2,
+            probability: 0.2,
+            mark: { damageType: 'WATER', ratePerStack: 0.05, maxStacks: 5 },
+          });
+        };
+
+        fightSimulatorStub.validatePlayer1FirstCard(validation);
+      });
+    });
   });
 
   describe('when a player use a card with a simple dodge strategy', () => {

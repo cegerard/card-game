@@ -7,12 +7,19 @@ import { EffectLevel } from '../../src/fight/core/cards/@types/attack/effect-lev
 import { FreezeAttackEffect } from '../../src/fight/core/cards/@types/attack/attack-freeze-effect';
 import { StuntAttackEffect } from '../../src/fight/core/cards/@types/attack/attack-stunt-effect';
 import { MathRandomizer } from '../../src/fight/tools/math-randomizer';
+import { MarkAttackEffect } from '../../src/fight/core/cards/@types/attack/attack-mark-effect';
+import { ElementalMark } from '../../src/fight/core/cards/@types/mark/elemental-mark';
+import { DamageType } from '../../src/fight/core/cards/@types/damage/damage-type';
 
 export function createEffect(params: {
   rate?: number;
   level?: EffectLevel;
   type: string;
   terminationEvent?: string;
+  damageType?: DamageType;
+  maxStacks?: number;
+  stacks?: number;
+  probability?: number;
 }): AttackEffect {
   const effectRate = params.rate ?? faker.number.float({ min: 0.1, max: 0.5 });
   const effectLevel =
@@ -50,6 +57,16 @@ export function createEffect(params: {
         new MathRandomizer(),
         undefined,
         params.terminationEvent,
+      );
+    case 'mark':
+      if (!params.damageType || !params.maxStacks) {
+        throw new Error('mark effect requires a damageType and a maxStacks');
+      }
+      return new MarkAttackEffect(
+        new ElementalMark(params.damageType, effectRate, params.maxStacks),
+        new MathRandomizer(),
+        params.stacks,
+        params.probability,
       );
     default:
       throw new Error(`Unknown effect type: ${params.type}`);
