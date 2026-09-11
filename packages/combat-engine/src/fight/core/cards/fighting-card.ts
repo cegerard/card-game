@@ -30,6 +30,12 @@ export type FinalDamageResult = {
   survivedSkillName?: string;
 };
 
+type Lifesteal = {
+  name: string;
+  rate: number;
+  remainingTurns: number;
+};
+
 type MarkEntry = {
   mark: ElementalMark;
   stacks: number;
@@ -82,6 +88,9 @@ export class FightingCard {
 
   // Elemental marks
   private marks: MarkEntry[] = [];
+
+  // Lifesteal
+  private lifesteal: Lifesteal | null = null;
 
   // Survive
   private surviveSkill: SurviveSkill | null = null;
@@ -413,6 +422,38 @@ export class FightingCard {
 
     this.receivedDamages += damageToHealth;
     return { damageToHealth, shieldAbsorbed };
+  }
+
+  /**
+   * Heals a fraction of max health on every landed attack, for a number of
+   * turns. Turn counting follows the buff convention: the duration is
+   * decremented at each turn end and the lifesteal is dropped once it goes
+   * below zero.
+   */
+  public applyLifesteal(name: string, rate: number, duration: number): void {
+    this.lifesteal = { name, rate, remainingTurns: duration };
+  }
+
+  public get lifestealName(): string | undefined {
+    return this.lifesteal?.name;
+  }
+
+  public get hasLifesteal(): boolean {
+    return this.lifesteal !== null;
+  }
+
+  public stealLife(): number {
+    if (!this.lifesteal) return 0;
+
+    return this.heal(this.lifesteal.rate * this.maxHealth);
+  }
+
+  public decreaseLifestealDuration(): void {
+    if (!this.lifesteal) return;
+
+    const remainingTurns = this.lifesteal.remainingTurns - 1;
+    this.lifesteal =
+      remainingTurns < 0 ? null : { ...this.lifesteal, remainingTurns };
   }
 
   public applyShield(rate: number, duration: number): Shield {

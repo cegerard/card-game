@@ -268,8 +268,13 @@ export class ActionStage {
     attackerCard: FightingCard,
   ): void {
     const reportedDeaths = new Set<FightingCard>();
+    let stolenLife = 0;
 
     attackResults.forEach((damageDealt) => {
+      if (!damageDealt.dodge && attackerCard.hasLifesteal) {
+        stolenLife += attackerCard.stealLife();
+      }
+
       const defensiveCard = damageDealt.defender;
 
       report.attack.damages.push({
@@ -377,6 +382,22 @@ export class ActionStage {
         );
       }
     });
+
+    if (stolenLife > 0) {
+      report.statusChanges.push({
+        kind: StepKind.Healing,
+        name: attackerCard.lifestealName,
+        source: attackerCard.identityInfo,
+        heal: [
+          {
+            target: attackerCard.identityInfo,
+            healed: stolenLife,
+            remainingHealth: attackerCard.actualHealth,
+          },
+        ],
+        energy: attackerCard.actualEnergy,
+      });
+    }
   }
 
   private getFightingContext(card: FightingCard): FightingContext {

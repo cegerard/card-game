@@ -57,6 +57,7 @@ export class TurnManager {
           })),
         });
       }
+      card.decreaseLifestealDuration();
       const expiredShield = card.decreaseShieldDuration();
       if (expiredShield) {
         steps.push({ kind: StepKind.ShieldExpired, card: card.identityInfo });
