@@ -1,5 +1,14 @@
 import { FightingCard } from '../cards/fighting-card';
-import { SkillKind, SkillResults } from '../cards/skills/skill';
+import {
+  BuffSkillResults,
+  DebuffSkillResults,
+  SkillKind,
+  SkillResults,
+  TransformationSkillResults,
+} from '../cards/skills/skill';
+
+type AlterationSkillResults =
+  BuffSkillResults | DebuffSkillResults | TransformationSkillResults;
 import { Step, StepKind } from './@types/step';
 import { EndEventProcessor } from './end-event-processor';
 import { StatusChangeReport, status } from './@types/status-change-report';
@@ -29,24 +38,14 @@ export function skillResultsToSteps(
         break;
       case SkillKind.Buff:
       case SkillKind.Debuff:
-        if (skillResult.results.length > 0) {
-          steps.push({
-            kind:
-              skillResult.skillKind === SkillKind.Buff
-                ? StepKind.Buff
-                : StepKind.Debuff,
-            name: skillResult.name,
-            source: card.identityInfo,
-            alterations: skillResult.results.map((result) => ({
-              target: result.target,
-              kind: result.alteration.type,
-              value: result.alteration.value,
-              remainingTurns: result.alteration.duration,
-            })),
-            energy: card.actualEnergy,
-            powerId: skillResult.powerId,
-          });
-        }
+        pushAlterationStep(
+          steps,
+          card,
+          skillResult.skillKind === SkillKind.Buff
+            ? StepKind.Buff
+            : StepKind.Debuff,
+          skillResult,
+        );
         break;
       case SkillKind.Attack: {
         steps.push({
@@ -97,6 +96,15 @@ export function skillResultsToSteps(
           }),
         );
         break;
+      case SkillKind.Transformation:
+        steps.push({
+          kind: StepKind.TransformationStarted,
+          name: skillResult.name,
+          card: card.identityInfo,
+          remainingTurns: skillResult.remainingTurns,
+        });
+        pushAlterationStep(steps, card, StepKind.Buff, skillResult);
+        break;
       case SkillKind.Shield:
         if (skillResult.results.length > 0) {
           steps.push({
@@ -126,4 +134,27 @@ export function skillResultsToSteps(
   }
 
   return steps;
+}
+
+function pushAlterationStep(
+  steps: Step[],
+  card: FightingCard,
+  kind: StepKind.Buff | StepKind.Debuff,
+  skillResult: AlterationSkillResults,
+): void {
+  if (skillResult.results.length === 0) return;
+
+  steps.push({
+    kind,
+    name: skillResult.name,
+    source: card.identityInfo,
+    alterations: skillResult.results.map((result) => ({
+      target: result.target,
+      kind: result.alteration.type,
+      value: result.alteration.value,
+      remainingTurns: result.alteration.duration,
+    })),
+    energy: card.actualEnergy,
+    powerId: skillResult.powerId,
+  });
 }

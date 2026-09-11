@@ -59,6 +59,14 @@ export class TurnManager {
       }
       card.decreaseLifestealDuration();
       card.decreaseStatusImmunityDuration();
+      const endedTransformation = card.decreaseTransformationDuration();
+      if (endedTransformation) {
+        steps.push({
+          kind: StepKind.TransformationEnded,
+          name: endedTransformation,
+          card: card.identityInfo,
+        });
+      }
       const expiredShield = card.decreaseShieldDuration();
       if (expiredShield) {
         steps.push({ kind: StepKind.ShieldExpired, card: card.identityInfo });

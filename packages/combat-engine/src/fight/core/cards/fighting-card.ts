@@ -95,6 +95,10 @@ export class FightingCard {
   // Status immunity
   private statusImmunity: { remainingTurns: number } | null = null;
 
+  // Transformation
+  private transformation: { name: string; remainingTurns: number } | null =
+    null;
+
   // Survive
   private surviveSkill: SurviveSkill | null = null;
 
@@ -456,6 +460,36 @@ export class FightingCard {
 
     const remainingTurns = this.statusImmunity.remainingTurns - 1;
     this.statusImmunity = remainingTurns < 0 ? null : { remainingTurns };
+  }
+
+  /**
+   * Turns on a transformation for a number of turns. Turn counting follows
+   * the buff convention, decremented by the turn manager.
+   */
+  public startTransformation(name: string, duration: number): void {
+    this.transformation = { name, remainingTurns: duration };
+  }
+
+  public get isTransformed(): boolean {
+    return this.transformation !== null;
+  }
+
+  /**
+   * Decrements the running transformation and returns its name on the turn it
+   * ends, so callers can report it. Returns null otherwise.
+   */
+  public decreaseTransformationDuration(): string | null {
+    if (!this.transformation) return null;
+
+    const remainingTurns = this.transformation.remainingTurns - 1;
+    if (remainingTurns < 0) {
+      const { name } = this.transformation;
+      this.transformation = null;
+      return name;
+    }
+
+    this.transformation = { ...this.transformation, remainingTurns };
+    return null;
   }
 
   public applyLifesteal(name: string, rate: number, duration: number): void {
