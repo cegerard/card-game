@@ -128,6 +128,8 @@ function buildInitialState(cardsMeta, firstHP) {
       buffs: [],        // { kind, value, turns, name, powerId }
       debuffs: [],      // { kind, value, turns, name, powerId }
       shield: null,     // null | { points: number }
+      marks: {},        // { [damageType]: stacks }
+      transformation: null, // null | { name, turns }
       dead: false,
     };
   });
@@ -176,6 +178,8 @@ function applyEvent(state, ev) {
         c.debuffs = [];
         c.statuses = [];
         c.stateEffects = {};
+        c.marks = {};
+        c.transformation = null;
       } else if (!c.statuses.includes(ev.status)) {
         c.statuses = [...c.statuses, ev.status];
       }
@@ -290,6 +294,26 @@ function applyEvent(state, ev) {
     case 'survived': {
       const c = get(ev.card?.id);
       if (c) c.hp = Math.max(c.hp, 1);
+      break;
+    }
+
+    case 'mark_applied': {
+      const c = get(ev.card?.id);
+      if (c) c.marks = { ...c.marks, [ev.damageType]: ev.stacks };
+      break;
+    }
+
+    case 'transformation_started': {
+      const c = get(ev.card?.id);
+      if (c) c.transformation = { name: ev.name, turns: ev.remainingTurns };
+      break;
+    }
+
+    case 'transformation_ended': {
+      const c = get(ev.card?.id);
+      if (!c) break;
+      c.transformation = null;
+      if (ev.remainingHealth != null) c.hp = ev.remainingHealth;
       break;
     }
 

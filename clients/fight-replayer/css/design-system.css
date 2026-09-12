@@ -535,3 +535,34 @@ textarea, input { font-family: var(--font-mono); }
 .log-item__icon  { font-size: 16px; line-height: 1; }
 .log-item__label { font-size: 11px; color: var(--text-muted); line-height: 1.3; word-break: break-word; }
 .log-item--active .log-item__label { color: var(--text); }
+
+/* ── Elemental marks & transformation ────────────────────────── */
+.card-panel__marks {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+.mark-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  background: #164e63;
+  border: 1px solid #22d3ee;
+  border-radius: var(--r-pill);
+  padding: 1px 7px;
+  white-space: nowrap;
+}
+.card-panel__transformation {
+  margin-top: 6px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: #e9d5ff;
+  background: #4c1d95;
+  border: 1px solid #a855f7;
+  border-radius: var(--r-pill);
+  padding: 1px 8px;
+  display: inline-block;
+}
