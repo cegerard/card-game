@@ -30,6 +30,23 @@ export type FinalDamageResult = {
   survivedSkillName?: string;
 };
 
+type Transformation = {
+  name: string;
+  remainingTurns: number;
+  endCostRate?: number;
+};
+
+export type TransformationEnd = {
+  name: string;
+  healthCost: number;
+};
+
+type Lifesteal = {
+  name: string;
+  rate: number;
+  remainingTurns: number;
+};
+
 type MarkEntry = {
   mark: ElementalMark;
   stacks: number;
@@ -82,6 +99,15 @@ export class FightingCard {
 
   // Elemental marks
   private marks: MarkEntry[] = [];
+
+  // Lifesteal
+  private lifesteal: Lifesteal | null = null;
+
+  // Status immunity
+  private statusImmunity: { remainingTurns: number } | null = null;
+
+  // Transformation
+  private transformation: Transformation | null = null;
 
   // Survive
   private surviveSkill: SurviveSkill | null = null;
@@ -225,8 +251,12 @@ export class FightingCard {
     this.cardDeckIdentity = `${ownerName}-${cardPositionInDeck}`;
   }
 
-  public setState(newState: CardState): void {
-    if (this.isDead()) return;
+  /**
+   * Applies a status state on the card. Returns false when the card refuses
+   * it, either because it is dead or because it is immune to status effects.
+   */
+  public setState(newState: CardState): boolean {
+    if (this.isDead() || this.isStatusImmune) return false;
 
     if (newState.type === 'poison') {
       this.poisoned = newState;
@@ -243,6 +273,8 @@ export class FightingCard {
     if (newState.type === 'stunt') {
       this.stunted = newState;
     }
+
+    return true;
   }
 
   public unFreeze(): void {
@@ -413,6 +445,105 @@ export class FightingCard {
 
     this.receivedDamages += damageToHealth;
     return { damageToHealth, shieldAbsorbed };
+  }
+
+  /**
+   * Heals a fraction of max health on every landed attack, for a number of
+   * turns. Turn counting follows the buff convention: the duration is
+   * decremented at each turn end and the lifesteal is dropped once it goes
+   * below zero.
+   */
+  /**
+   * Makes the card refuse every status effect for a number of turns. Turn
+   * counting follows the buff convention.
+   */
+  public applyStatusImmunity(duration: number): void {
+    this.statusImmunity = { remainingTurns: duration };
+  }
+
+  public get isStatusImmune(): boolean {
+    return this.statusImmunity !== null;
+  }
+
+  public decreaseStatusImmunityDuration(): void {
+    if (!this.statusImmunity) return;
+
+    const remainingTurns = this.statusImmunity.remainingTurns - 1;
+    this.statusImmunity = remainingTurns < 0 ? null : { remainingTurns };
+  }
+
+  /**
+   * Turns on a transformation for a number of turns. Turn counting follows
+   * the buff convention, decremented by the turn manager.
+   */
+  public startTransformation(
+    name: string,
+    duration: number,
+    endCostRate?: number,
+  ): void {
+    this.transformation = { name, remainingTurns: duration, endCostRate };
+  }
+
+  public get isTransformed(): boolean {
+    return this.transformation !== null;
+  }
+
+  /**
+  /**
+   * Decrements the running transformation and returns it on the turn it ends,
+   * after charging its health cost, so callers can report both. Returns null
+   * otherwise. The cost never kills its owner: it leaves at least one health
+   * point.
+   */
+  public decreaseTransformationDuration(): TransformationEnd | null {
+    if (!this.transformation) return null;
+
+    const remainingTurns = this.transformation.remainingTurns - 1;
+    if (remainingTurns < 0) {
+      const { name, endCostRate } = this.transformation;
+      this.transformation = null;
+      return { name, healthCost: this.payTransformationCost(endCostRate) };
+    }
+
+    this.transformation = { ...this.transformation, remainingTurns };
+    return null;
+  }
+
+  private payTransformationCost(rate?: number): number {
+    if (!rate) return 0;
+
+    const cost = Math.min(
+      Math.round(rate * this.maxHealth),
+      this.actualHealth - 1,
+    );
+
+    return cost > 0 ? this.addRealDamage(cost) : 0;
+  }
+
+  public applyLifesteal(name: string, rate: number, duration: number): void {
+    this.lifesteal = { name, rate, remainingTurns: duration };
+  }
+
+  public get lifestealName(): string | undefined {
+    return this.lifesteal?.name;
+  }
+
+  public get hasLifesteal(): boolean {
+    return this.lifesteal !== null;
+  }
+
+  public stealLife(): number {
+    if (!this.lifesteal) return 0;
+
+    return this.heal(this.lifesteal.rate * this.maxHealth);
+  }
+
+  public decreaseLifestealDuration(): void {
+    if (!this.lifesteal) return;
+
+    const remainingTurns = this.lifesteal.remainingTurns - 1;
+    this.lifesteal =
+      remainingTurns < 0 ? null : { ...this.lifesteal, remainingTurns };
   }
 
   public applyShield(rate: number, duration: number): Shield {

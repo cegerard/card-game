@@ -62,7 +62,7 @@ export class BurnAttackEffect implements AttackEffect {
       round2(card.actualAttack * this.rate),
       this.terminationEvent,
     );
-    defender.setState(burnedState);
+    if (!defender.setState(burnedState)) return;
 
     const effectResult: StateEffectResult = {
       type: this.type,

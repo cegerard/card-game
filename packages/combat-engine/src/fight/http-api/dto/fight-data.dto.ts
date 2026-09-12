@@ -14,6 +14,7 @@ import {
   Min,
   Max,
   IsPositive,
+  IsBoolean,
   IsNotIn,
   IsIn,
   ValidatorConstraint,
@@ -64,6 +65,7 @@ export enum SkillKind {
   TARGETING_OVERRIDE = 'TARGETING_OVERRIDE',
   SHIELD = 'SHIELD',
   SURVIVE = 'SURVIVE',
+  TRANSFORMATION = 'TRANSFORMATION',
 }
 
 export enum BuffType {
@@ -406,13 +408,18 @@ export class OtherSkillDto {
   @IsNumber()
   rate?: number;
 
-  @ValidateIf((o) => o.kind !== SkillKind.SURVIVE)
+  @ValidateIf(
+    (o) => o.kind !== SkillKind.SURVIVE && o.kind !== SkillKind.TRANSFORMATION,
+  )
   @IsDefined()
   @IsEnum(TargetingStrategy)
   targetingStrategy: TargetingStrategy;
 
   @ValidateIf(
-    (o) => o.kind !== SkillKind.SHIELD && o.kind !== SkillKind.SURVIVE,
+    (o) =>
+      o.kind !== SkillKind.SHIELD &&
+      o.kind !== SkillKind.SURVIVE &&
+      o.kind !== SkillKind.TRANSFORMATION,
   )
   @IsDefined()
   @IsEnum(TriggerEvent)
@@ -424,7 +431,10 @@ export class OtherSkillDto {
   @IsEnum(BuffType)
   buffType?: BuffType;
 
-  @ValidateIf((o) => o.kind === SkillKind.ALTERATION)
+  @ValidateIf(
+    (o) =>
+      o.kind === SkillKind.ALTERATION || o.kind === SkillKind.TRANSFORMATION,
+  )
   @IsDefined()
   @IsNumber()
   duration?: number;
@@ -438,6 +448,27 @@ export class OtherSkillDto {
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => BuffConditionDto)
   activationCondition?: BuffConditionDto;
+
+  // TRANSFORMATION kind
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(/* istanbul ignore next */ () => StatAlterationDto)
+  statAlterations?: StatAlterationDto[];
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  lifestealRate?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  statusImmunity?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  endCostRate?: number;
 
   // Required for CONDITIONAL_ATTACK kind
   @ValidateIf((o) => o.kind === SkillKind.CONDITIONAL_ATTACK)

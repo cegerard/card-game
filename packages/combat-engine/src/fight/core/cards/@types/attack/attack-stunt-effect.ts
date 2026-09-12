@@ -45,7 +45,7 @@ export class StuntAttackEffect implements AttackEffect {
       2 * this.level - 1,
       this.terminationEvent,
     );
-    defender.setState(stuntState);
+    if (!defender.setState(stuntState)) return;
 
     return { type: this.type, card: defender };
   }

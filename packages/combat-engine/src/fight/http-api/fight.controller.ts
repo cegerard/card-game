@@ -55,6 +55,7 @@ import { FightSimulator } from '../core/fight-simulator/@types/fight-simulator';
 import { Skill } from '../core/cards/skills/skill';
 import { TargetingOverrideSkill } from '../core/cards/skills/targeting-override';
 import { ShieldSkill } from '../core/cards/skills/shield';
+import { TransformationSkill } from '../core/cards/skills/transformation';
 import { HealthThresholdCondition } from '../core/cards/@types/skill-activation-conditions/health-threshold-condition';
 import { DamageComposition } from '../core/cards/@types/damage/damage-composition';
 import { ConditionalAttack } from '../core/cards/skills/conditional-attack';
@@ -522,6 +523,39 @@ export class FightController {
           this.buildTriggerForSkill(skillData),
           skillData.powerId,
         );
+      case SkillKind.TRANSFORMATION: {
+        const threshold = skillData.activationCondition?.threshold;
+        if (threshold === undefined) {
+          throw new Error(
+            'TRANSFORMATION skill requires an activationCondition threshold',
+          );
+        }
+        return new TransformationSkill({
+          name: skillData.name,
+          activationCondition: new HealthThresholdCondition(
+            (skillData.activationCondition.operator as 'below' | 'above') ??
+              'below',
+            threshold,
+          ),
+          duration: skillData.duration,
+          alterations: (skillData.statAlterations ?? []).map(
+            (a) =>
+              new Alteration(
+                this.mapAlterationType(a.type),
+                a.rate,
+                a.duration,
+                buildTargetingStrategy(a.targetingStrategy),
+                undefined,
+                undefined,
+                a.terminationEvent,
+                a.polarity,
+              ),
+          ),
+          lifestealRate: skillData.lifestealRate,
+          statusImmunity: skillData.statusImmunity,
+          endCostRate: skillData.endCostRate,
+        });
+      }
       case SkillKind.SHIELD: {
         if (!skillData.activationCondition) {
           throw new Error('SHIELD skill requires activationCondition');

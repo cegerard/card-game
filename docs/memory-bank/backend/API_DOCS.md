@@ -155,6 +155,11 @@ Simulates a turn-based card battle between two players.
   activationEvent?: TriggerEvent, // Event that activates the dormant skill (e.g., "ally-death")
   activationTargetCardId?: string, // Card ID for the activation event trigger
   replacementEvent?: TriggerEvent, // Event to use after activation (e.g., "enemy-death"). Target card ID resolved dynamically from killer card at activation time
+  // TRANSFORMATION fields:
+  statAlterations?: StatAlterationDto[],  // Alterations applied on transformation
+  lifestealRate?: number,       // Share of max health healed on every landed attack
+  statusImmunity?: boolean,     // Refuses every status effect while transformed
+  endCostRate?: number,         // Share of max health paid when the transformation ends
   // CONDITIONAL_ATTACK fields:
   damages?: DamageCompositionDto[],
   hits?: number,
@@ -206,7 +211,7 @@ Simulates a turn-based card battle between two players.
 ```typescript
 {
   [stepNumber: number]: {
-    kind: "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "debuff_removed" | "buff_expired" | "debuff_expired" | "effect_removed" | "targeting_override" | "targeting_reverted" | "shield_applied" | "shield_broken" | "shield_expired" | "survived" | "mark_applied" | "fight_end",
+    kind: "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "debuff_removed" | "buff_expired" | "debuff_expired" | "effect_removed" | "targeting_override" | "targeting_reverted" | "shield_applied" | "shield_broken" | "shield_expired" | "survived" | "mark_applied" | "transformation_started" | "transformation_ended" | "fight_end",
     // Additional properties vary by step kind
   }
 }
@@ -337,6 +342,27 @@ Simulates a turn-based card battle between two players.
 }
 ```
 
+**`transformation_started` step** (`TransformationStartedReport`): Emitted when a TRANSFORMATION skill fires.
+```typescript
+{
+  kind: "transformation_started",
+  name: string,          // Transformation skill name
+  card: CardInfo,        // Transformed card
+  remainingTurns: number // Transformation duration
+}
+```
+
+**`transformation_ended` step** (`TransformationEndedReport`): Emitted at turn-end when a transformation duration runs out, after its health cost is charged.
+```typescript
+{
+  kind: "transformation_ended",
+  name: string,
+  card: CardInfo,
+  healthCost: number,      // Health points paid on exit, 0 when the skill has no cost
+  remainingHealth: number
+}
+```
+
 **`targeting_override` step** (`TargetingOverrideReport`): Emitted when a targeting override skill activates.
 ```typescript
 {
@@ -437,6 +463,7 @@ Simulates a turn-based card battle between two players.
 - `TARGETING_OVERRIDE`: Overrides the card's attack targeting strategy (requires `terminationEvent`)
 - `SHIELD`: Health-reactive shield skill — no `event` field; triggers when card's health ratio crosses `activationCondition.threshold` downward (edge-triggered, rearms on recovery)
 - `SURVIVE`: One-time fatal-blow interception — no `event`, no `targetingStrategy`; only `name` required; extracted from `others[]` before normal skill loop
+- `TRANSFORMATION`: One-shot health-reactive transformation — no `event`, no `targetingStrategy`; requires `duration` and an `activationCondition` threshold. Applies its own `statAlterations` and, for the same duration, an optional `lifestealRate` (heals that share of max health on every landed attack) and `statusImmunity`. An optional `endCostRate` charges that share of max health when the transformation ends, never below one health point. Fires once per fight
 
 ### Effect
 

@@ -17,6 +17,7 @@ export enum SkillKind {
   Attack = 'attack',
   TargetingOverride = 'targeting_override',
   Shield = 'shield',
+  Transformation = 'transformation',
 }
 
 type BaseSkillResults = {
@@ -55,13 +56,20 @@ export type ShieldSkillResults = BaseSkillResults & {
   results: ShieldResult[];
 };
 
+export type TransformationSkillResults = BaseSkillResults & {
+  skillKind: SkillKind.Transformation;
+  results: BuffResult[];
+  remainingTurns: number;
+};
+
 export type SkillResults =
   | HealingSkillResults
   | BuffSkillResults
   | DebuffSkillResults
   | AttackSkillResults
   | TargetingOverrideSkillResults
-  | ShieldSkillResults;
+  | ShieldSkillResults
+  | TransformationSkillResults;
 
 export interface Skill {
   id: string;
