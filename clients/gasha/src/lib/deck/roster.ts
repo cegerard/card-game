@@ -1,9 +1,10 @@
 import type { CardDefinition } from '@card-game/shared-types';
 
-// Roster de test à des fins de développement et de démonstration.
-// Échelle de valeurs volontairement distincte du roster réel (base Notion
-// "Cartes") : ces personnages sont voués à disparaître une fois le roster
-// réel intégré. Voir Notion > Les cartes > Système d'expérience > Plan
+// Roster mixte le temps de la transition : les personnages de test ouvrent la
+// liste, les cartes du roster réel (base Notion "Cartes") la ferment.
+// L'échelle de valeurs des deux groupes est volontairement distincte ; les
+// personnages de test sont voués à disparaître une fois le roster réel
+// intégré. Voir Notion > Les cartes > Système d'expérience > Plan
 // d'implémentation > Étape 1.
 export const CHARACTER_ROSTER: CardDefinition[] = [
   {
@@ -316,6 +317,154 @@ export const CHARACTER_ROSTER: CardDefinition[] = [
       others: [],
     },
     behaviors: { dodge: 'random-dodge' },
+  },
+  // Première carte du roster réel (base Notion "Cartes"). Ses valeurs suivent
+  // l'échelle du roster réel, pas celle des personnages de test ci-dessus.
+  // Résistance et Régénération ne sont pas reprises : le moteur ne les
+  // implémente pas.
+  {
+    id: 'kaito',
+    name: 'Kaito',
+    archetype: 'Assassin',
+    element: 'WATER',
+    stats: {
+      attack: 85,
+      defense: 45,
+      health: 520,
+      speed: 85,
+      /** Esquive côté Notion. */
+      agility: 70,
+      accuracy: 85,
+    },
+    criticalChance: 0.12,
+    skills: {
+      special: {
+        kind: 'ATTACK',
+        name: 'Abysses Impitoyables',
+        damages: [{ type: 'WATER', rate: 1.5 }],
+        energy: 40,
+        targetingStrategy: 'target-all',
+        effect: {
+          type: 'MARK',
+          rate: 0.05,
+          damageType: 'WATER',
+          maxStacks: 5,
+          stacks: 2,
+          triggeredDebuff: {
+            debuffType: 'speed',
+            debuffRate: 0.08,
+            probability: 0.3,
+            duration: 3,
+          },
+        },
+        markedTargetBonus: { damageType: 'WATER', multiplier: 1.3 },
+        statAlterations: [
+          {
+            type: 'agility',
+            rate: 0.2,
+            duration: 1,
+            targetingStrategy: 'self',
+            polarity: 'buff',
+          },
+        ],
+      },
+      simpleAttack: {
+        name: 'Crocs de Marée',
+        damages: [
+          { type: 'PHYSICAL', rate: 0.8 },
+          { type: 'WATER', rate: 0.4 },
+        ],
+        targetingStrategy: 'position-based',
+        effects: [
+          {
+            type: 'MARK',
+            rate: 0.05,
+            damageType: 'WATER',
+            maxStacks: 5,
+            probability: 0.2,
+            triggeredDebuff: {
+              debuffType: 'speed',
+              debuffRate: 0.08,
+              probability: 0.3,
+              duration: 3,
+            },
+          },
+        ],
+      },
+      others: [
+        {
+          kind: 'ALTERATION',
+          name: 'Sang-froid du chasseur',
+          buffType: 'criticalChance',
+          polarity: 'buff',
+          rate: 2.5,
+          duration: 0,
+          targetingStrategy: 'self',
+          event: 'ally-health-below',
+          targetCardId: 'kaito',
+          activationCondition: {
+            type: 'health-threshold',
+            operator: 'below',
+            threshold: 0.4,
+          },
+        },
+        {
+          kind: 'CONDITIONAL_ATTACK',
+          name: 'Tourbillon Carnassier',
+          targetingStrategy: 'position-based',
+          event: 'next-action',
+          damages: [{ type: 'PHYSICAL', rate: 0.35 }],
+          hits: 5,
+          interval: 3,
+          comboFinisher: [{ type: 'WATER', rate: 0.9 }],
+          comboFinisherEffects: [
+            {
+              type: 'MARK',
+              rate: 0.05,
+              damageType: 'WATER',
+              maxStacks: 5,
+              stacks: 2,
+              triggeredDebuff: {
+                debuffType: 'speed',
+                debuffRate: 0.08,
+                probability: 0.3,
+                duration: 3,
+              },
+            },
+          ],
+        },
+        {
+          kind: 'TRANSFORMATION',
+          name: 'Frénésie du Grand Blanc',
+          duration: 3,
+          activationCondition: {
+            type: 'health-threshold',
+            operator: 'below',
+            threshold: 0.25,
+          },
+          statAlterations: [
+            {
+              type: 'attack',
+              rate: 0.35,
+              duration: 3,
+              targetingStrategy: 'self',
+              polarity: 'buff',
+            },
+            {
+              type: 'speed',
+              rate: 0.2,
+              duration: 3,
+              targetingStrategy: 'self',
+              polarity: 'buff',
+            },
+          ],
+          lifestealRate: 0.1,
+          statusImmunity: true,
+          endCostRate: 0.1,
+        },
+      ],
+    },
+    behaviors: { dodge: 'simple-dodge' },
   },
 ];
 

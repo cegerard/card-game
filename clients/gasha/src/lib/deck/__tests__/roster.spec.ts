@@ -4,6 +4,7 @@ import {
   DEFAULT_DECK_IDS,
   findRosterCard,
 } from '../roster.js';
+import { toCombatConfig } from '@card-game/shared-types';
 
 describe('character roster', () => {
   it('holds more characters than a deck can fit', () => {
@@ -25,5 +26,29 @@ describe('character roster', () => {
 
   it('findRosterCard returns undefined for an unknown id', () => {
     expect(findRosterCard('nope')).toBeUndefined();
+  });
+});
+
+describe('Kaito', () => {
+  const kaito = findRosterCard('kaito');
+
+  it('is part of the roster', () => {
+    expect(kaito).toBeDefined();
+  });
+
+  it('maps the Notion dodge stat to agility', () => {
+    expect(kaito?.stats.agility).toBe(70);
+  });
+
+  it('carries his three extra skills, the slow riding on his marks', () => {
+    expect(kaito?.skills.others.map((skill) => skill.kind)).toEqual([
+      'ALTERATION',
+      'CONDITIONAL_ATTACK',
+      'TRANSFORMATION',
+    ]);
+  });
+
+  it('keeps a fightable combat config', () => {
+    expect(toCombatConfig(kaito!).agility).toBe(70);
   });
 });
