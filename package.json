@@ -21,6 +21,7 @@
     "lint": "pnpm lint:all",
     "lint:engine": "pnpm --filter combat-engine lint",
     "lint:all": "pnpm -r lint",
-    "verify": "pnpm check && pnpm build:all && pnpm lint:all && pnpm test:all && pnpm test:e2e:engine"
+    "verify": "pnpm check && pnpm build:all && pnpm lint:all && pnpm test:all && pnpm test:e2e:engine",
+    "replayer": "npx serve clients/fight-replayer"
   }
 }
