@@ -62,6 +62,30 @@ export function buildCardPanel(card, isTeamA, isActive) {
       </div>`
     : '';
 
+  const markEntries = Object.entries(card.marks ?? {}).filter(
+    ([, stacks]) => stacks > 0,
+  );
+  const marksHtml = markEntries.length
+    ? `<div class="card-panel__marks">
+        ${markEntries
+          .map(
+            ([type, stacks]) =>
+              `<span class="mark-badge">${ICON.mark_applied} ${elemBadge(type)}×${stacks}</span>`,
+          )
+          .join('')}
+      </div>`
+    : '';
+
+  const transformationHtml = card.transformation
+    ? `<div class="card-panel__transformation">
+        ${ICON.transformation_started} ${esc(card.transformation.name)}${
+          card.transformation.turns != null
+            ? ` (${card.transformation.turns}T)`
+            : ''
+        }
+      </div>`
+    : '';
+
   const shieldHtml = card.shield
     ? `<div class="card-panel__shield">${ICON.shield_applied} ${card.shield.points} shield</div>`
     : '';
@@ -87,6 +111,8 @@ export function buildCardPanel(card, isTeamA, isActive) {
       ${card.deckIdentity ? `<div class="card-panel__identity">${esc(card.deckIdentity)}</div>` : ''}
       ${hpHtml}
       ${shieldHtml}
+      ${transformationHtml}
+      ${marksHtml}
       ${statusesHtml}
       ${buffsHtml}
       ${debuffsHtml}
@@ -311,6 +337,14 @@ function buildGenericDetail(ev) {
       return esc(ev.card?.name);
     case 'survived':
       return `${esc(ev.card?.name)} survived with 1 HP — skill: ${esc(ev.name ?? '?')}`;
+    case 'mark_applied':
+      return `${esc(ev.card?.name)} carries ${ev.stacks} ${esc(ev.damageType)} mark(s)`;
+    case 'transformation_started':
+      return `Transformed for ${ev.remainingTurns} turn(s)`;
+    case 'transformation_ended':
+      return ev.healthCost
+        ? `${esc(ev.card?.name)} pays ${ev.healthCost} HP — ${(ev.remainingHealth ?? 0).toFixed(1)} HP left`
+        : `${esc(ev.card?.name)} — no exhaustion cost`;
     case 'fight_end':
       return ev.winner ? `Winner: ${esc(ev.winner)}` : 'Draw';
     default:
@@ -449,6 +483,24 @@ export function describeEvent(ev, teamBName) {
         icon: ICON.survived,
         text: `${ev.card?.name} — Survived (${ev.name ?? 'Survive'})`,
         color: EVENT_COLOR.survived,
+      };
+    case 'mark_applied':
+      return {
+        icon: ICON.mark_applied,
+        text: `${ev.card?.name} — ${ev.damageType} mark ×${ev.stacks}`,
+        color: EVENT_COLOR.mark_applied,
+      };
+    case 'transformation_started':
+      return {
+        icon: ICON.transformation_started,
+        text: `${ev.card?.name} — ${ev.name ?? 'Transformation'} (TRANSFORMED)`,
+        color: EVENT_COLOR.transformation_started,
+      };
+    case 'transformation_ended':
+      return {
+        icon: ICON.transformation_ended,
+        text: `${ev.card?.name} — ${ev.name ?? 'Transformation'} over`,
+        color: EVENT_COLOR.transformation_ended,
       };
     case 'fight_end': {
       const bossWins = ev.winner && ev.winner === teamBName;

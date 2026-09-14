@@ -31,6 +31,11 @@ export const ICON = {
   shield_expired:    '🔻',
   /* Survive */
   survived:          '🌟',
+  /* Elemental mark */
+  mark_applied:      '💠',
+  /* Transformation */
+  transformation_started: '🌀',
+  transformation_ended:   '💤',
   /* Targeting */
   targeting_override: '🎯',
   targeting_reverted: '🔄',
@@ -73,6 +78,9 @@ export const EVENT_COLOR = {
   shield_broken:     '#f87171',
   shield_expired:    '#94a3b8',
   survived:          '#fbbf24',
+  mark_applied:      '#22d3ee',
+  transformation_started: '#a855f7',
+  transformation_ended:   '#94a3b8',
   fight_end:         '#22c55e',
 };
 
