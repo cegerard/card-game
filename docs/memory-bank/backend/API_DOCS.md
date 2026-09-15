@@ -141,8 +141,8 @@ Simulates a turn-based card battle between two players.
   name: string,
   rate?: number,                // Optional — not required for TARGETING_OVERRIDE or SURVIVE; required for SHIELD
   targetingStrategy?: TargetingStrategy,  // Not required for SHIELD or SURVIVE kinds
-  event?: "turn-end" | "next-action" | "ally-death" | "ally-health-below",  // When skill triggers; NOT required for SHIELD or SURVIVE kinds
-  targetCardId?: string,        // Required when event=ally-death or ally-health-below: id of the monitored card
+  event?: "turn-end" | "next-action" | "ally-death" | "ally-health-below" | "damage-taken",  // When skill triggers; NOT required for SHIELD or SURVIVE kinds
+  targetCardId?: string,        // Required when event=ally-death, ally-health-below or damage-taken: id of the monitored card
   // SHIELD-specific fields:
   activationCondition?: { operator?: "below" | "above", threshold: number },  // Health ratio threshold (0–1) for SHIELD/ally-health-below activation
   buffType?: "attack" | "defense" | "agility" | "accuracy" | "speed" | "criticalChance",  // Required if kind=BUFF
@@ -163,7 +163,7 @@ Simulates a turn-based card battle between two players.
   // CONDITIONAL_ATTACK fields:
   damages?: DamageCompositionDto[],
   hits?: number,
-  interval?: number,
+  interval?: number,            // Turns between two activations; omit for a skill whose cadence is driven by its event (ally-health-below, damage-taken)
   amplifier?: number,
   effect?: EffectDto,
   comboFinisher?: DamageCompositionDto[],
@@ -449,6 +449,7 @@ Simulates a turn-based card battle between two players.
 - `dormant`: Skill starts inactive; requires `activationEvent`, `activationTargetCardId`, and `replacementEvent` to define when and how the trigger activates mid-battle. The replacement trigger's target card ID is resolved dynamically at activation time from the killer card's ID
 - `survived`: Skill triggers after the owning card survives a fatal blow via SURVIVE skill
 - `ally-health-below`: Edge-triggered when a monitored ally's health ratio crosses `activationCondition.threshold` downward; requires `targetCardId` (the monitored ally's id) and `activationCondition.threshold`. A card may monitor itself by passing its own id, which is how a health-reactive self buff is declared
+- `damage-taken`: Fires every time the monitored card takes damage from a landed attack; requires `targetCardId` (the monitored card id). Unlike `ally-health-below` it is not edge-triggered — it fires on each hit, which is what counter attacks and damage-reactive passives need. A card reacts to its own wounds by passing its own id. The event reaches every playable card of the damaged card team, and `FightingContext.lastAttacker` is set, so `last-attacker-of-ally` resolves to the attacker
 
 ### SpecialKind
 

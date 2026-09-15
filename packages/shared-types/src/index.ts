@@ -53,7 +53,8 @@ export type TriggerEvent =
   | 'enemy-death'
   | 'dormant'
   | 'survived'
-  | 'ally-health-below';
+  | 'ally-health-below'
+  | 'damage-taken';
 
 export type TargetingStrategy =
   | 'position-based'
@@ -192,7 +193,10 @@ export interface OtherSkill {
   comboFinisher?: DamageComposition[];
   /** Effets appliqués uniquement sur le coup final du combo. */
   comboFinisherEffects?: EffectConfig[];
-  /** Requis quand event vaut ally-death, enemy-death ou ally-health-below. */
+  /**
+   * Requis quand event vaut ally-death, enemy-death, ally-health-below ou
+   * damage-taken.
+   */
   targetCardId?: string;
   terminationEvent?: string;
   activationLimit?: number;

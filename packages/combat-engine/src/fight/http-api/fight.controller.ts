@@ -493,8 +493,11 @@ export class FightController {
         return new ConditionalAttack(
           skillData.name,
           caAttackSkill,
-          new EveryNTurnsCondition(skillData.interval),
+          skillData.interval
+            ? new EveryNTurnsCondition(skillData.interval)
+            : new AlwaysTrueAttackCondition(),
           this.buildTriggerForSkill(skillData),
+          skillData.powerId,
         );
       case SkillKind.TARGETING_OVERRIDE:
         if (!skillData.terminationEvent) {

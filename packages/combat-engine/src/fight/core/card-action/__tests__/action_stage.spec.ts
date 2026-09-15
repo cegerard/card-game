@@ -28,6 +28,11 @@ import {
 } from '../../fight-simulator/@types/alteration-report';
 import { AlterationSkill } from '../../cards/skills/alteration-skill';
 import { AllyHealthBelowThresholdTrigger } from '../../trigger/ally-health-below-threshold-trigger';
+import { DamageTakenTrigger } from '../../trigger/damage-taken';
+import { ConditionalAttack } from '../../cards/skills/conditional-attack';
+import { AlwaysTrueAttackCondition } from '../../cards/@types/attack/conditions/always-true-attack-condition';
+import { LastAttackerOfAllyTargetingStrategy } from '../../targeting-card-strategies/last-attacker-of-ally';
+import { Skill } from '../../cards/skills/skill';
 
 class UnknownSpecial implements Special {
   name = 'unknown';
@@ -472,6 +477,186 @@ describe('ActionStage', () => {
 
       it('does not set lastAttacker on the dodging card', () => {
         expect(arionis.lastAttacker).toBeUndefined();
+      });
+    });
+  });
+
+  describe('damage-taken dispatch', () => {
+    const AEGIS_ID = 'aegis-01';
+    const RIPOSTE_NAME = 'Contre-attaque';
+    const HIGH_ENERGY = new SpecialAttack(
+      'special',
+      [new DamageComposition(DamageType.PHYSICAL, 1)],
+      999,
+      POSITION_BASED,
+    );
+
+    function makeRiposteSkill(monitoredId: string): ConditionalAttack {
+      return new ConditionalAttack(
+        RIPOSTE_NAME,
+        new SimpleAttack(
+          RIPOSTE_NAME,
+          [new DamageComposition(DamageType.PHYSICAL, 0.5)],
+          new LastAttackerOfAllyTargetingStrategy(monitoredId),
+        ),
+        new AlwaysTrueAttackCondition(),
+        new DamageTakenTrigger(monitoredId),
+      );
+    }
+
+    function makeDefender(agility: number, others: Skill[]): FightingCard {
+      return new FightingCard(
+        AEGIS_ID,
+        'Aegis',
+        {
+          attack: 100,
+          defense: 0,
+          health: 1000,
+          speed: 100,
+          agility,
+          accuracy: 100,
+          criticalChance: 0,
+        },
+        { simpleAttack: SIMPLE_ATTACK, special: HIGH_ENERGY, others },
+        { dodge: new SimpleDodge() },
+        Element.PHYSICAL,
+      );
+    }
+
+    function riposteSteps(
+      steps: ReturnType<ActionStage['computeNextAction']>,
+    ): unknown[] {
+      return steps.filter(
+        (s) => s.kind === StepKind.Attack && s.name === RIPOSTE_NAME,
+      );
+    }
+
+    describe('when the monitored card is hit', () => {
+      let steps: ReturnType<ActionStage['computeNextAction']>;
+      let attacker: FightingCard;
+
+      beforeEach(() => {
+        attacker = makeCard(HIGH_ENERGY);
+        const aegis = makeDefender(0, [makeRiposteSkill(AEGIS_ID)]);
+        const player1 = new Player('Player 1', [attacker]);
+        const player2 = new Player('Player 2', [aegis]);
+        const actionStage = new ActionStage(
+          player1,
+          player2,
+          { onCardDeath: [] },
+          new DeathSkillHandler(player1, player2),
+        );
+        steps = actionStage.computeNextAction([attacker]);
+      });
+
+      it('emits the counter attack step', () => {
+        expect(riposteSteps(steps)).toHaveLength(1);
+      });
+
+      it('damages the attacker back', () => {
+        expect(attacker.actualHealth).toBeLessThan(1000);
+      });
+    });
+
+    describe('when the monitored card is hit a second time', () => {
+      let secondSteps: ReturnType<ActionStage['computeNextAction']>;
+
+      beforeEach(() => {
+        const attacker = makeCard(HIGH_ENERGY);
+        const aegis = makeDefender(0, [makeRiposteSkill(AEGIS_ID)]);
+        const player1 = new Player('Player 1', [attacker]);
+        const player2 = new Player('Player 2', [aegis]);
+        const actionStage = new ActionStage(
+          player1,
+          player2,
+          { onCardDeath: [] },
+          new DeathSkillHandler(player1, player2),
+        );
+        actionStage.computeNextAction([attacker]);
+        secondSteps = actionStage.computeNextAction([attacker]);
+      });
+
+      it('counters again instead of arming only once', () => {
+        expect(riposteSteps(secondSteps)).toHaveLength(1);
+      });
+    });
+
+    describe('when the hit is dodged', () => {
+      let steps: ReturnType<ActionStage['computeNextAction']>;
+
+      beforeEach(() => {
+        const attacker = new FightingCard(
+          faker.string.uuid(),
+          'Attacker',
+          {
+            attack: 100,
+            defense: 0,
+            health: 1000,
+            speed: 100,
+            agility: 0,
+            accuracy: 0,
+            criticalChance: 0,
+          },
+          { simpleAttack: SIMPLE_ATTACK, special: HIGH_ENERGY, others: [] },
+          { dodge: new SimpleDodge() },
+          Element.PHYSICAL,
+        );
+        const aegis = makeDefender(1, [makeRiposteSkill(AEGIS_ID)]);
+        const player1 = new Player('Player 1', [attacker]);
+        const player2 = new Player('Player 2', [aegis]);
+        const actionStage = new ActionStage(
+          player1,
+          player2,
+          { onCardDeath: [] },
+          new DeathSkillHandler(player1, player2),
+        );
+        steps = actionStage.computeNextAction([attacker]);
+      });
+
+      it('does not counter', () => {
+        expect(riposteSteps(steps)).toHaveLength(0);
+      });
+    });
+
+    describe('when an ally monitors the damaged card', () => {
+      let steps: ReturnType<ActionStage['computeNextAction']>;
+
+      beforeEach(() => {
+        const attacker = makeCard(HIGH_ENERGY);
+        const aegis = makeDefender(0, []);
+        const ally = new FightingCard(
+          'ally-01',
+          'Ally',
+          {
+            attack: 100,
+            defense: 0,
+            health: 1000,
+            speed: 100,
+            agility: 0,
+            accuracy: 100,
+            criticalChance: 0,
+          },
+          {
+            simpleAttack: SIMPLE_ATTACK,
+            special: HIGH_ENERGY,
+            others: [makeRiposteSkill(AEGIS_ID)],
+          },
+          { dodge: new SimpleDodge() },
+          Element.PHYSICAL,
+        );
+        const player1 = new Player('Player 1', [attacker]);
+        const player2 = new Player('Player 2', [aegis, ally]);
+        const actionStage = new ActionStage(
+          player1,
+          player2,
+          { onCardDeath: [] },
+          new DeathSkillHandler(player1, player2),
+        );
+        steps = actionStage.computeNextAction([attacker]);
+      });
+
+      it('lets the ally react to the hit', () => {
+        expect(riposteSteps(steps)).toHaveLength(1);
       });
     });
   });

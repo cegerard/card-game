@@ -98,6 +98,7 @@ export enum TriggerEvent {
   DORMANT = 'dormant',
   SURVIVED = 'survived',
   ALLY_HEALTH_BELOW = 'ally-health-below',
+  DAMAGE_TAKEN = 'damage-taken',
 }
 
 export enum TargetingStrategy {
@@ -482,7 +483,8 @@ export class OtherSkillDto {
   @ValidateIf(
     (o) =>
       o.kind === SkillKind.CONDITIONAL_ATTACK &&
-      o.event !== TriggerEvent.ALLY_HEALTH_BELOW,
+      o.event !== TriggerEvent.ALLY_HEALTH_BELOW &&
+      o.event !== TriggerEvent.DAMAGE_TAKEN,
   )
   @IsDefined()
   @IsNumber()
@@ -515,12 +517,14 @@ export class OtherSkillDto {
   @Type(/* istanbul ignore next */ () => EffectDto)
   comboFinisherEffects?: EffectDto[];
 
-  // Required when event is ally-death, enemy-death, or ally-health-below
+  // Required when event is ally-death, enemy-death, ally-health-below or
+  // damage-taken
   @ValidateIf(
     (o) =>
       o.event === TriggerEvent.ALLY_DEATH ||
       o.event === TriggerEvent.ENEMY_DEATH ||
-      o.event === TriggerEvent.ALLY_HEALTH_BELOW,
+      o.event === TriggerEvent.ALLY_HEALTH_BELOW ||
+      o.event === TriggerEvent.DAMAGE_TAKEN,
   )
   @IsDefined()
   @IsString()
