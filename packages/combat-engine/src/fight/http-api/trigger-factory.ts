@@ -3,6 +3,7 @@ import { NextAction } from '../core/trigger/next-action';
 import { DeathTrigger } from '../core/trigger/death-trigger';
 import { DynamicTrigger } from '../core/trigger/dynamic-trigger';
 import { SurvivedTrigger } from '../core/trigger/survived';
+import { DamageTakenTrigger } from '../core/trigger/damage-taken';
 import { Trigger } from '../core/trigger/trigger';
 import { TriggerEvent } from './dto/fight-data.dto';
 
@@ -28,6 +29,12 @@ function buildSimpleTrigger(
 ): Trigger {
   if (event === TriggerEvent.ALLY_DEATH || event === TriggerEvent.ENEMY_DEATH) {
     return buildDeathTrigger(event, targetCardId);
+  }
+  if (event === TriggerEvent.DAMAGE_TAKEN) {
+    if (!targetCardId) {
+      throw new Error(`${event} trigger requires targetCardId`);
+    }
+    return new DamageTakenTrigger(targetCardId);
   }
   const trigger = STRATEGY_MAP[event];
   if (!trigger) {

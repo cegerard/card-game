@@ -6,6 +6,7 @@ import { TurnEnd } from '../../core/trigger/turn-end';
 import { NextAction } from '../../core/trigger/next-action';
 import { DeathTrigger } from '../../core/trigger/death-trigger';
 import { DynamicTrigger } from '../../core/trigger/dynamic-trigger';
+import { DamageTakenTrigger } from '../../core/trigger/damage-taken';
 
 describe('buildTriggerStrategy', () => {
   describe('known simple events', () => {
@@ -107,6 +108,26 @@ describe('buildTriggerStrategy', () => {
       } as any);
 
       expect(trigger.isTriggered('turn-end')).toBe(true);
+    });
+  });
+
+  describe('damage-taken event', () => {
+    it('returns DamageTakenTrigger when targetCardId is provided', () => {
+      const trigger = buildTriggerStrategy(TriggerEvent.DAMAGE_TAKEN, 'card-1');
+
+      expect(trigger).toBeInstanceOf(DamageTakenTrigger);
+    });
+
+    it('keys the trigger on the provided card id', () => {
+      const trigger = buildTriggerStrategy(TriggerEvent.DAMAGE_TAKEN, 'card-1');
+
+      expect(trigger.isTriggered('damage-taken-card-1')).toBe(true);
+    });
+
+    it('throws when targetCardId is missing', () => {
+      expect(() => buildTriggerStrategy(TriggerEvent.DAMAGE_TAKEN)).toThrow(
+        'damage-taken trigger requires targetCardId',
+      );
     });
   });
 });

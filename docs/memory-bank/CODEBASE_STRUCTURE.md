@@ -147,7 +147,7 @@ This allows special attacks to perform their primary action (damage/healing) whi
 fight-simulator/
 ├── fight.ts                # Main fight orchestrator
 ├── turn-manager.ts         # Turn-end effects: buff/debuff duration, state effects, shield duration
-├── action_stage.ts         # Action resolution (attacks, specials, healing); triggers reactive skills after HP changes
+├── action_stage.ts         # Action resolution (attacks, specials, healing); triggers reactive skills after HP changes; dispatches damage-taken + ally-health events
 ├── card-death-subscriber.ts # Card death event handling interface
 ├── death-skill-handler.ts  # Triggers ally-death skills on surviving cards; drainable steps
 ├── end-event-processor.ts  # Removes event-bound buffs when a skill end event fires; emits buff_removed steps

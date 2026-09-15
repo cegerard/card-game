@@ -321,22 +321,9 @@ export class ActionStage {
       } else if (!defensiveCard.isDead()) {
         if (!damageDealt.dodge) {
           defensiveCard.lastAttacker = attackerCard;
-          const damagedCardPlayer = this.player1.ownCard(defensiveCard)
-            ? this.player1
-            : this.player2;
-          const allyHealthContext: FightingContext = {
-            sourcePlayer: damagedCardPlayer,
-            opponentPlayer:
-              damagedCardPlayer === this.player1 ? this.player2 : this.player1,
-            lastAttacker: attackerCard,
-          };
-          damagedCardPlayer.playableCards.forEach((caster) => {
-            const results = caster.launchSkills(
-              `ally-health-${defensiveCard.id}`,
-              allyHealthContext,
-            );
-            report.statusChanges.push(...skillResultsToSteps(caster, results));
-          });
+          report.statusChanges.push(
+            ...this.dispatchDamageReactions(defensiveCard, attackerCard),
+          );
         }
         if (damageDealt.effects?.length) {
           for (const effect of damageDealt.effects) {
@@ -398,6 +385,34 @@ export class ActionStage {
         energy: attackerCard.actualEnergy,
       });
     }
+  }
+
+  /**
+   * Fires the reactive events of a landed hit on the damaged card team:
+   * `damage-taken-<id>` on every hit, then `ally-health-<id>` for the
+   * threshold-based reactions. Both reach the damaged card itself, so a card
+   * reacts to its own wounds by monitoring its own id.
+   */
+  private dispatchDamageReactions(
+    damagedCard: FightingCard,
+    attackerCard: FightingCard,
+  ): Step[] {
+    const damagedCardPlayer = this.player1.ownCard(damagedCard)
+      ? this.player1
+      : this.player2;
+    const context: FightingContext = {
+      sourcePlayer: damagedCardPlayer,
+      opponentPlayer:
+        damagedCardPlayer === this.player1 ? this.player2 : this.player1,
+      lastAttacker: attackerCard,
+    };
+
+    return damagedCardPlayer.playableCards.flatMap((caster) =>
+      skillResultsToSteps(caster, [
+        ...caster.launchSkills(`damage-taken-${damagedCard.id}`, context),
+        ...caster.launchSkills(`ally-health-${damagedCard.id}`, context),
+      ]),
+    );
   }
 
   private getFightingContext(card: FightingCard): FightingContext {
