@@ -14,6 +14,7 @@ import { Buff, Debuff } from './@types/alteration/alteration-detail';
 import { Skill, SkillResults } from './skills/skill';
 import { HealthReactiveSkill } from './skills/reactive-skill';
 import { SurviveSkill } from './skills/survive';
+import { DamageReductionSkill } from './skills/damage-reduction';
 import { AlterationType } from './@types/alteration/alteration-type';
 import { Element } from './@types/damage/element';
 import { DamageType } from './@types/damage/damage-type';
@@ -28,6 +29,8 @@ export type FinalDamageResult = {
   shieldAbsorbed: number;
   survived?: boolean;
   survivedSkillName?: string;
+  mitigated?: boolean;
+  mitigatedSkillName?: string;
 };
 
 type Transformation = {
@@ -112,6 +115,9 @@ export class FightingCard {
   // Survive
   private surviveSkill: SurviveSkill | null = null;
 
+  // Damage reduction
+  private damageReduction: DamageReductionSkill | null = null;
+
   // Targeting overrides
   private targetingOverrides: TargetingOverrideEntry[] = [];
 
@@ -138,6 +144,7 @@ export class FightingCard {
       special: Special;
       others: Skill[];
       survive?: SurviveSkill;
+      damageReduction?: DamageReductionSkill;
     },
     behaviors: {
       dodge: DodgeBehavior;
@@ -159,6 +166,7 @@ export class FightingCard {
     this.dodgeBehavior = behaviors.dodge;
     this.skills = skills.others;
     this.surviveSkill = skills.survive ?? null;
+    this.damageReduction = skills.damageReduction ?? null;
   }
 
   public get lastAttacker(): FightingCard | undefined {
@@ -413,6 +421,15 @@ export class FightingCard {
     return this.special.getSpecialKind();
   }
 
+  /**
+   * Resolves the damage of one hit against the card defensive layers, in
+   * order: state amplifiers (freeze, stunt), damage reduction, shield buffer,
+   * then the health pool. Reducing before the shield absorbs makes the shield
+   * last longer, which is the point of stacking both.
+   *
+   * Status effect ticks go through `addRealDamage()` and bypass all of this,
+   * exactly as they bypass the shield.
+   */
   public applyFinalDamage(damage: number): FinalDamageResult {
     let causedDamages = damage;
     if (this.frozen) {
@@ -425,6 +442,15 @@ export class FightingCard {
         causedDamages,
       );
     }
+
+    const mitigatedDamages = this.damageReduction?.tryMitigate(causedDamages);
+    const mitigated = mitigatedDamages !== undefined;
+    if (mitigated) {
+      causedDamages = mitigatedDamages;
+    }
+    const mitigationReport = mitigated
+      ? { mitigated: true, mitigatedSkillName: this.damageReduction.name }
+      : {};
 
     const shieldAbsorbed = this.absorbWithShield(causedDamages);
     let damageToHealth = causedDamages - shieldAbsorbed;
@@ -440,11 +466,12 @@ export class FightingCard {
         shieldAbsorbed,
         survived: true,
         survivedSkillName: this.surviveSkill.name,
+        ...mitigationReport,
       };
     }
 
     this.receivedDamages += damageToHealth;
-    return { damageToHealth, shieldAbsorbed };
+    return { damageToHealth, shieldAbsorbed, ...mitigationReport };
   }
 
   /**

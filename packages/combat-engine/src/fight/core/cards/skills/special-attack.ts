@@ -70,7 +70,8 @@ export class SpecialAttack implements Special {
         source.actualAttack * damageMultiplier * markedBonus,
         target,
       );
-      const { damageToHealth, shieldAbsorbed } = target.applyFinalDamage(total);
+      const finalResult = target.applyFinalDamage(total);
+      const { damageToHealth, shieldAbsorbed } = finalResult;
 
       let effectResult: EffectResult;
       if (this.effect) {
@@ -87,6 +88,8 @@ export class SpecialAttack implements Special {
         kind,
         remainingHealth: target.actualHealth,
         effects: effectResult ? [effectResult] : undefined,
+        mitigated: finalResult.mitigated,
+        mitigatedSkillName: finalResult.mitigatedSkillName,
       };
     });
 

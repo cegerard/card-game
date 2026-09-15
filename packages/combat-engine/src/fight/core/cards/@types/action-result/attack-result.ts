@@ -16,4 +16,6 @@ export type AttackResult = {
   kind?: DamageType[];
   survived?: boolean;
   survivedSkillName?: string;
+  mitigated?: boolean;
+  mitigatedSkillName?: string;
 };

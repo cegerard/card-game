@@ -32,7 +32,8 @@ export type SkillKind =
   | 'TARGETING_OVERRIDE'
   | 'SHIELD'
   | 'SURVIVE'
-  | 'TRANSFORMATION';
+  | 'TRANSFORMATION'
+  | 'DAMAGE_REDUCTION';
 
 export type BuffType =
   | 'attack'
@@ -173,11 +174,16 @@ export interface MultipleAttackSkill {
 export interface OtherSkill {
   kind: SkillKind;
   name: string;
-  /** Requis pour HEALING, ALTERATION, SHIELD. */
+  /** Requis pour HEALING, ALTERATION, SHIELD, DAMAGE_REDUCTION. */
   rate?: number;
-  /** Absent uniquement pour SURVIVE. */
+  /**
+   * DAMAGE_REDUCTION uniquement : probabilité du tirage à chaque coup reçu.
+   * Omise, la réduction est permanente.
+   */
+  probability?: number;
+  /** Absent pour SURVIVE et DAMAGE_REDUCTION. */
   targetingStrategy?: TargetingStrategy;
-  /** Absent pour SHIELD et SURVIVE. */
+  /** Absent pour SHIELD, SURVIVE et DAMAGE_REDUCTION. */
   event?: TriggerEvent;
   /** Requis pour ALTERATION. */
   buffType?: BuffType;

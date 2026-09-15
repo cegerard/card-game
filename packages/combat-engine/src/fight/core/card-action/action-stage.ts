@@ -286,6 +286,14 @@ export class ActionStage {
         kind: damageDealt.kind,
       });
 
+      if (damageDealt.mitigated) {
+        report.statusChanges.push({
+          kind: StepKind.DamageMitigated,
+          name: damageDealt.mitigatedSkillName,
+          card: defensiveCard.identityInfo,
+        });
+      }
+
       if (damageDealt.shieldBroken) {
         report.statusChanges.push({
           kind: StepKind.ShieldBroken,

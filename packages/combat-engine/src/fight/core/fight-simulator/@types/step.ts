@@ -23,6 +23,7 @@ import {
   ShieldExpiredReport,
 } from './shield-report';
 import { SurvivedReport } from './survived-report';
+import { DamageMitigatedReport } from './damage-mitigated-report';
 import { MarkAppliedReport } from './mark-report';
 import {
   TransformationStartedReport,
@@ -49,6 +50,7 @@ export enum StepKind {
   ShieldBroken = 'shield_broken',
   ShieldExpired = 'shield_expired',
   Survived = 'survived',
+  DamageMitigated = 'damage_mitigated',
   MarkApplied = 'mark_applied',
   TransformationStarted = 'transformation_started',
   TransformationEnded = 'transformation_ended',
@@ -74,6 +76,7 @@ export type Step =
   | ShieldBrokenReport
   | ShieldExpiredReport
   | SurvivedReport
+  | DamageMitigatedReport
   | MarkAppliedReport
   | TransformationStartedReport
   | TransformationEndedReport;
