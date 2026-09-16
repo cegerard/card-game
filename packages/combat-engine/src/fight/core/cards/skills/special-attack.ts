@@ -88,6 +88,8 @@ export class SpecialAttack implements Special {
         kind,
         remainingHealth: target.actualHealth,
         effects: effectResult ? [effectResult] : undefined,
+        survived: finalResult.survived,
+        survivedSkillName: finalResult.survivedSkillName,
         mitigated: finalResult.mitigated,
         mitigatedSkillName: finalResult.mitigatedSkillName,
       };
