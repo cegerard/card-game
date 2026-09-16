@@ -511,7 +511,7 @@ Validation errors return 400 Bad Request with detailed error messages.
 
 ## Error Handling
 
-- **400 Bad Request**: Validation failures from `ValidationPipe`
+- **400 Bad Request**: Validation failures from `ValidationPipe`, plus the domain checks the controller converts explicitly — composite power consistency (`validatePowerIdConsistency`) and the DAMAGE_REDUCTION rate range
 - **500 Internal Server Error**: Runtime errors (e.g., unknown skill kind, missing buff properties)
 - No custom error handling middleware - uses NestJS defaults
 

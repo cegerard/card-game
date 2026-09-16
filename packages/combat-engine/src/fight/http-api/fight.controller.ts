@@ -237,17 +237,7 @@ export class FightController {
     const surviveSkill = surviveDto
       ? new SurviveSkill(surviveDto.name)
       : undefined;
-    const damageReductionDto = cardData.skills.others.find(
-      (s) => s.kind === SkillKind.DAMAGE_REDUCTION,
-    );
-    const damageReduction = damageReductionDto
-      ? new DamageReductionSkill(
-          damageReductionDto.name,
-          damageReductionDto.rate,
-          new MathRandomizer(),
-          damageReductionDto.probability,
-        )
-      : undefined;
+    const damageReduction = this.buildDamageReduction(cardData.skills.others);
 
     // SURVIVE and DAMAGE_REDUCTION carry no trigger and no targeting: they live
     // on the card itself and are consulted at damage time, so they are pulled
@@ -358,6 +348,28 @@ export class FightController {
           effectDto.probability,
           triggeredDebuff,
         );
+    }
+  }
+
+  /**
+   * The domain rejects an out-of-range rate. That is a malformed request, not
+   * a server fault, so it surfaces as a 400 like the composite power check.
+   */
+  private buildDamageReduction(
+    skills: OtherSkillDto[],
+  ): DamageReductionSkill | undefined {
+    const dto = skills.find((s) => s.kind === SkillKind.DAMAGE_REDUCTION);
+    if (!dto) return undefined;
+
+    try {
+      return new DamageReductionSkill(
+        dto.name,
+        dto.rate,
+        new MathRandomizer(),
+        dto.probability,
+      );
+    } catch (e) {
+      throw new BadRequestException((e as Error).message);
     }
   }
 
