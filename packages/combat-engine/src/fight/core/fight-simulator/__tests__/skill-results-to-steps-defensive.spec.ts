@@ -3,6 +3,8 @@ import { SkillKind, AttackSkillResults } from '../../cards/skills/skill';
 import { StepKind } from '../@types/step';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 import { FightingCard } from '../../cards/fighting-card';
+import { MARK_EFFECT_TYPE } from '../../cards/@types/mark/elemental-mark';
+import { DamageType } from '../../cards/@types/damage/damage-type';
 
 function attackOn(
   defender: FightingCard,
@@ -126,6 +128,55 @@ describe('skillResultsToSteps: defensive layers of a reactive attack', () => {
       const steps = skillResultsToSteps(card, [attackOn(defender)]);
 
       expect(steps).toHaveLength(1);
+    });
+  });
+
+  describe('effects landed by the reactive attack', () => {
+    const defender = createFightingCard({ id: 'marked' });
+
+    it('reports an elemental mark as a mark_applied step', () => {
+      const steps = skillResultsToSteps(card, [
+        attackOn(defender, {
+          effects: [
+            {
+              type: MARK_EFFECT_TYPE,
+              card: defender,
+              damageType: DamageType.EARTH,
+              stacks: 2,
+            },
+          ],
+        }),
+      ]);
+
+      expect(steps[1].kind).toBe(StepKind.MarkApplied);
+    });
+
+    it('reports the debuff an effect triggered', () => {
+      const steps = skillResultsToSteps(card, [
+        attackOn(defender, {
+          effects: [
+            {
+              type: 'burn',
+              card: defender,
+              triggeredDebuff: {
+                card: defender,
+                debuff: {
+                  polarity: 'debuff',
+                  type: 'speed',
+                  value: 5,
+                  duration: 3,
+                },
+              },
+            },
+          ],
+        }),
+      ]);
+
+      expect(steps.map((s) => s.kind)).toEqual([
+        StepKind.Attack,
+        StepKind.StatusChange,
+        StepKind.Debuff,
+      ]);
     });
   });
 });

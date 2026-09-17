@@ -10,8 +10,8 @@ import {
 type AlterationSkillResults =
   BuffSkillResults | DebuffSkillResults | TransformationSkillResults;
 import { Step, StepKind } from './@types/step';
+import { effectResultsToSteps } from './effect-results-to-steps';
 import { EndEventProcessor } from './end-event-processor';
-import { status } from './@types/status-change-report';
 
 export function skillResultsToSteps(
   card: FightingCard,
@@ -93,15 +93,7 @@ export function skillResultsToSteps(
             return perHit;
           }
 
-          if (r.effects?.length) {
-            perHit.push(
-              ...r.effects.map((effect) => ({
-                kind: StepKind.StatusChange as const,
-                status: effect.type as status,
-                card: effect.card.identityInfo,
-              })),
-            );
-          }
+          perHit.push(...effectResultsToSteps(card, r.effects));
 
           return perHit;
         });

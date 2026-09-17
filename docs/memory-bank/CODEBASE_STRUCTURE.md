@@ -155,6 +155,7 @@ fight-simulator/
 ├── death-skill-handler.ts  # Triggers ally-death skills on surviving cards; drainable steps
 ├── end-event-processor.ts  # Removes event-bound buffs when a skill end event fires; emits buff_removed steps
 ├── skill-results-to-steps.ts # Pure fn: SkillResults[] → Step[]; shared by ActionStage, TurnManager, DeathSkillHandler
+├── effect-results-to-steps.ts # Pure fn: EffectResult[] → Step[] (mark_applied vs status_change + triggered debuff); shared by ActionStage and skillResultsToSteps
 ├── reactive-skill-checker.ts # Pure fn: triggers HealthReactiveSkills after HP changes → ShieldSkillResults[]
 ├── card-selectors/         # Turn order strategies
 │   ├── card-selector.ts    # Selector interface
