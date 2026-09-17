@@ -102,6 +102,8 @@ export class MultipleAttack implements AttackSkill {
           kind,
           survived: finalResult.survived,
           survivedSkillName: finalResult.survivedSkillName,
+          mitigated: finalResult.mitigated,
+          mitigatedSkillName: finalResult.mitigatedSkillName,
         });
       }
     }
@@ -136,6 +138,8 @@ export class MultipleAttack implements AttackSkill {
           kind: finisherKind,
           survived: finisherResult.survived,
           survivedSkillName: finisherResult.survivedSkillName,
+          mitigated: finisherResult.mitigated,
+          mitigatedSkillName: finisherResult.mitigatedSkillName,
         });
       }
     }

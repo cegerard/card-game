@@ -84,6 +84,8 @@ export class SimpleAttack implements AttackSkill {
           remainingHealth: defender.actualHealth,
           survived: finalResult.survived,
           survivedSkillName: finalResult.survivedSkillName,
+          mitigated: finalResult.mitigated,
+          mitigatedSkillName: finalResult.mitigatedSkillName,
         };
       }),
     };

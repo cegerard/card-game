@@ -137,11 +137,12 @@ Simulates a turn-based card battle between two players.
 
 ```typescript
 {
-  kind: "HEALING" | "BUFF" | "CONDITIONAL_ATTACK" | "TARGETING_OVERRIDE" | "SHIELD" | "SURVIVE",
+  kind: "HEALING" | "BUFF" | "CONDITIONAL_ATTACK" | "TARGETING_OVERRIDE" | "SHIELD" | "SURVIVE" | "DAMAGE_REDUCTION",
   name: string,
-  rate?: number,                // Optional — not required for TARGETING_OVERRIDE or SURVIVE; required for SHIELD
-  targetingStrategy?: TargetingStrategy,  // Not required for SHIELD or SURVIVE kinds
-  event?: "turn-end" | "next-action" | "ally-death" | "ally-health-below" | "damage-taken",  // When skill triggers; NOT required for SHIELD or SURVIVE kinds
+  rate?: number,                // Optional — not required for TARGETING_OVERRIDE or SURVIVE; required for SHIELD and DAMAGE_REDUCTION (share of incoming damage removed, in ]0, 1])
+  probability?: number,         // DAMAGE_REDUCTION only: per-hit roll (0-1); omit for a permanent reduction
+  targetingStrategy?: TargetingStrategy,  // Not required for SHIELD, SURVIVE or DAMAGE_REDUCTION kinds
+  event?: "turn-end" | "next-action" | "ally-death" | "ally-health-below" | "damage-taken",  // When skill triggers; NOT required for SHIELD, SURVIVE or DAMAGE_REDUCTION kinds
   targetCardId?: string,        // Required when event=ally-death, ally-health-below or damage-taken: id of the monitored card
   // SHIELD-specific fields:
   activationCondition?: { operator?: "below" | "above", threshold: number },  // Health ratio threshold (0–1) for SHIELD/ally-health-below activation
@@ -211,7 +212,7 @@ Simulates a turn-based card battle between two players.
 ```typescript
 {
   [stepNumber: number]: {
-    kind: "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "debuff_removed" | "buff_expired" | "debuff_expired" | "effect_removed" | "targeting_override" | "targeting_reverted" | "shield_applied" | "shield_broken" | "shield_expired" | "survived" | "mark_applied" | "transformation_started" | "transformation_ended" | "fight_end",
+    kind: "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "debuff_removed" | "buff_expired" | "debuff_expired" | "effect_removed" | "targeting_override" | "targeting_reverted" | "shield_applied" | "shield_broken" | "shield_expired" | "survived" | "damage_mitigated" | "mark_applied" | "transformation_started" | "transformation_ended" | "fight_end",
     // Additional properties vary by step kind
   }
 }
@@ -234,6 +235,15 @@ Simulates a turn-based card battle between two players.
   kind: "survived",
   name: string,          // Name of the SURVIVE skill that triggered
   card: CardInfo         // Card that survived the fatal blow (left at 1 HP)
+}
+```
+
+**`damage_mitigated` step** (`DamageMitigatedReport`): Emitted when a DAMAGE_REDUCTION skill removes a share of an incoming hit, before the shield absorbs the rest.
+```typescript
+{
+  kind: "damage_mitigated",
+  name: string,          // Name of the DAMAGE_REDUCTION skill that triggered
+  card: CardInfo         // Card whose incoming damage was reduced
 }
 ```
 
@@ -464,6 +474,7 @@ Simulates a turn-based card battle between two players.
 - `TARGETING_OVERRIDE`: Overrides the card's attack targeting strategy (requires `terminationEvent`)
 - `SHIELD`: Health-reactive shield skill — no `event` field; triggers when card's health ratio crosses `activationCondition.threshold` downward (edge-triggered, rearms on recovery)
 - `SURVIVE`: One-time fatal-blow interception — no `event`, no `targetingStrategy`; only `name` required; extracted from `others[]` before normal skill loop
+- `DAMAGE_REDUCTION`: Removes a share of every incoming hit — no `event`, no `targetingStrategy`; requires `rate` (share removed, in `]0, 1]`) and accepts an optional `probability` making it a per-hit roll. Like SURVIVE it is extracted from `others[]` and consulted inside `applyFinalDamage()`, so it mitigates the very hit that triggers it. Applies after the freeze/stunt amplifiers and before the shield buffer, so a shield absorbs only the reduced damage. Status effect ticks bypass it, as they bypass the shield
 - `TRANSFORMATION`: One-shot health-reactive transformation — no `event`, no `targetingStrategy`; requires `duration` and an `activationCondition` threshold. Applies its own `statAlterations` and, for the same duration, an optional `lifestealRate` (heals that share of max health on every landed attack) and `statusImmunity`. An optional `endCostRate` charges that share of max health when the transformation ends, never below one health point. Fires once per fight
 
 ### Effect
@@ -500,7 +511,7 @@ Validation errors return 400 Bad Request with detailed error messages.
 
 ## Error Handling
 
-- **400 Bad Request**: Validation failures from `ValidationPipe`
+- **400 Bad Request**: Validation failures from `ValidationPipe`, plus the domain checks the controller converts explicitly — composite power consistency (`validatePowerIdConsistency`) and the DAMAGE_REDUCTION rate range
 - **500 Internal Server Error**: Runtime errors (e.g., unknown skill kind, missing buff properties)
 - No custom error handling middleware - uses NestJS defaults
 

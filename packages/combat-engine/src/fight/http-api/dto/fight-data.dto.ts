@@ -65,6 +65,7 @@ export enum SkillKind {
   TARGETING_OVERRIDE = 'TARGETING_OVERRIDE',
   SHIELD = 'SHIELD',
   SURVIVE = 'SURVIVE',
+  DAMAGE_REDUCTION = 'DAMAGE_REDUCTION',
   TRANSFORMATION = 'TRANSFORMATION',
 }
 
@@ -403,14 +404,18 @@ export class OtherSkillDto {
     (o) =>
       o.kind === SkillKind.HEALING ||
       o.kind === SkillKind.ALTERATION ||
-      o.kind === SkillKind.SHIELD,
+      o.kind === SkillKind.SHIELD ||
+      o.kind === SkillKind.DAMAGE_REDUCTION,
   )
   @IsDefined()
   @IsNumber()
   rate?: number;
 
   @ValidateIf(
-    (o) => o.kind !== SkillKind.SURVIVE && o.kind !== SkillKind.TRANSFORMATION,
+    (o) =>
+      o.kind !== SkillKind.SURVIVE &&
+      o.kind !== SkillKind.TRANSFORMATION &&
+      o.kind !== SkillKind.DAMAGE_REDUCTION,
   )
   @IsDefined()
   @IsEnum(TargetingStrategy)
@@ -420,11 +425,19 @@ export class OtherSkillDto {
     (o) =>
       o.kind !== SkillKind.SHIELD &&
       o.kind !== SkillKind.SURVIVE &&
-      o.kind !== SkillKind.TRANSFORMATION,
+      o.kind !== SkillKind.TRANSFORMATION &&
+      o.kind !== SkillKind.DAMAGE_REDUCTION,
   )
   @IsDefined()
   @IsEnum(TriggerEvent)
   event?: TriggerEvent;
+
+  // DAMAGE_REDUCTION: per-hit roll; omit for a permanent reduction
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(1)
+  probability?: number;
 
   // Required for ALTERATION kind
   @ValidateIf((o) => o.kind === SkillKind.ALTERATION)

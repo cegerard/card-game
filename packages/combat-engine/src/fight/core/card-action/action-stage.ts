@@ -21,8 +21,8 @@ import { DeathSkillHandler } from '../fight-simulator/death-skill-handler';
 import { ShieldResult } from '../cards/@types/action-result/shield-result';
 import { ShieldAppliedReport } from '../fight-simulator/@types/shield-report';
 import { triggerReactiveSkills } from '../fight-simulator/reactive-skill-checker';
-import { MARK_EFFECT_TYPE } from '../cards/@types/mark/elemental-mark';
 import { skillResultsToSteps } from '../fight-simulator/skill-results-to-steps';
+import { effectResultsToSteps } from '../fight-simulator/effect-results-to-steps';
 import { SurvivedReport } from '../fight-simulator/@types/survived-report';
 
 type SplittedSteps = {
@@ -286,6 +286,14 @@ export class ActionStage {
         kind: damageDealt.kind,
       });
 
+      if (damageDealt.mitigated) {
+        report.statusChanges.push({
+          kind: StepKind.DamageMitigated,
+          name: damageDealt.mitigatedSkillName,
+          card: defensiveCard.identityInfo,
+        });
+      }
+
       if (damageDealt.shieldBroken) {
         report.statusChanges.push({
           kind: StepKind.ShieldBroken,
@@ -325,41 +333,9 @@ export class ActionStage {
             ...this.dispatchDamageReactions(defensiveCard, attackerCard),
           );
         }
-        if (damageDealt.effects?.length) {
-          for (const effect of damageDealt.effects) {
-            if (effect.type === MARK_EFFECT_TYPE) {
-              report.statusChanges.push({
-                kind: StepKind.MarkApplied,
-                card: effect.card.identityInfo,
-                damageType: effect.damageType,
-                stacks: effect.stacks,
-              });
-            } else {
-              report.statusChanges.push({
-                kind: StepKind.StatusChange,
-                status: effect.type,
-                card: effect.card.identityInfo,
-              });
-            }
-
-            if (effect.triggeredDebuff) {
-              const { card: debuffTarget, debuff } = effect.triggeredDebuff;
-              report.statusChanges.push({
-                kind: StepKind.Debuff,
-                source: attackerCard.identityInfo,
-                alterations: [
-                  {
-                    target: debuffTarget.identityInfo,
-                    kind: debuff.type,
-                    value: debuff.value,
-                    remainingTurns: debuff.duration,
-                  },
-                ],
-                energy: attackerCard.actualEnergy,
-              });
-            }
-          }
-        }
+        report.statusChanges.push(
+          ...effectResultsToSteps(attackerCard, damageDealt.effects),
+        );
         const reactiveResults = triggerReactiveSkills(
           defensiveCard,
           this.getFightingContext(defensiveCard),

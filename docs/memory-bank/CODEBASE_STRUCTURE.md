@@ -74,6 +74,7 @@ cards/
 │   ├── shield.ts           # SHIELD skill: health-reactive, edge-triggered on threshold cross
 │   ├── reactive-skill.ts   # HealthReactiveSkill interface (isHealthReactive, onHealthChanged)
 │   ├── survive.ts          # SurviveSkill: one-time fatal-blow interception; not a Skill implementor
+│   ├── damage-reduction.ts # DamageReductionSkill: removes a share of each incoming hit; not a Skill implementor
 │   ├── transformation.ts   # TransformationSkill: one-shot health-reactive transformation
 │   └── power-id-consistency.ts  # Domain validation for composite power groups
 ├── behaviors/              # Card behavior patterns
@@ -141,6 +142,8 @@ This allows special attacks to perform their primary action (damage/healing) whi
 
 **SHIELD Skill Kind (Reactive)**: `ShieldSkill` implements `HealthReactiveSkill` (interface: `isHealthReactive: true`, `onHealthChanged(card): boolean`). It is edge-triggered: fires once when `card.healthRatio` crosses the `HealthThresholdCondition` threshold downward, then rearms when health goes back above. `OtherSkillDto.event` is **optional** — SHIELD kind has no trigger event. After each HP change, `triggerReactiveSkills()` (in `reactive-skill-checker.ts`) checks all `HealthReactiveSkill` instances on the damaged card and fires those that return `true` from `onHealthChanged()`.
 
+**DAMAGE_REDUCTION Skill Kind**: `DamageReductionSkill` mirrors `SurviveSkill` — no event, no targeting strategy, extracted from `others[]` and stored on `FightingCard`. `applyFinalDamage()` calls `tryMitigate(damage)`, which removes `rate` of the incoming damage, or returns `undefined` when its optional `probability` roll fails. It runs after the freeze/stunt amplifiers and before the shield buffer, so the shield only absorbs the reduced damage. Emits a `damage_mitigated` step; status effect ticks bypass it.
+
 #### Fight Simulator (`packages/combat-engine/src/fight/core/fight-simulator/`)
 
 ```
@@ -152,6 +155,7 @@ fight-simulator/
 ├── death-skill-handler.ts  # Triggers ally-death skills on surviving cards; drainable steps
 ├── end-event-processor.ts  # Removes event-bound buffs when a skill end event fires; emits buff_removed steps
 ├── skill-results-to-steps.ts # Pure fn: SkillResults[] → Step[]; shared by ActionStage, TurnManager, DeathSkillHandler
+├── effect-results-to-steps.ts # Pure fn: EffectResult[] → Step[] (mark_applied vs status_change + triggered debuff); shared by ActionStage and skillResultsToSteps
 ├── reactive-skill-checker.ts # Pure fn: triggers HealthReactiveSkills after HP changes → ShieldSkillResults[]
 ├── card-selectors/         # Turn order strategies
 │   ├── card-selector.ts    # Selector interface
@@ -159,7 +163,7 @@ fight-simulator/
 │   └── speed-weighted-card-pool.ts # Speed-based selection
 └── @types/                 # Fight result types
     ├── fight-result.ts     # Complete fight outcome
-    ├── step.ts             # Turn step recording (includes shield_applied, shield_broken, shield_expired, mark_applied)
+    ├── step.ts             # Turn step recording (includes shield_applied, shield_broken, shield_expired, damage_mitigated, mark_applied)
     ├── action-report.ts    # Action reporting
     ├── attack-report.ts    # Attack details
     ├── healing-report.ts   # Healing details
@@ -174,6 +178,7 @@ fight-simulator/
     ├── mark-report.ts      # MarkAppliedReport: { kind: 'mark_applied', card, damageType, stacks }
     ├── transformation-report.ts # TransformationStartedReport + TransformationEndedReport (healthCost on exit)
     ├── survived-report.ts  # SurvivedReport: { kind: 'survived', name, card }
+    ├── damage-mitigated-report.ts # DamageMitigatedReport: { kind: 'damage_mitigated', name, card }
     └── winner-report.ts    # Victory determination
 ```
 

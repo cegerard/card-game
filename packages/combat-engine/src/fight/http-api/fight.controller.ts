@@ -70,6 +70,7 @@ import { TargetedCard } from '../core/targeting-card-strategies/targeted-card';
 import { validatePowerIdConsistency } from '../core/cards/skills/power-id-consistency';
 import { ShieldApplication } from '../core/cards/@types/shield/shield-application';
 import { SurviveSkill } from '../core/cards/skills/survive';
+import { DamageReductionSkill } from '../core/cards/skills/damage-reduction';
 
 @Controller()
 @UsePipes(
@@ -236,13 +237,19 @@ export class FightController {
     const surviveSkill = surviveDto
       ? new SurviveSkill(surviveDto.name)
       : undefined;
-    const nonSurviveOthers = cardData.skills.others.filter(
-      (s) => s.kind !== SkillKind.SURVIVE,
+    const damageReduction = this.buildDamageReduction(cardData.skills.others);
+
+    // SURVIVE and DAMAGE_REDUCTION carry no trigger and no targeting: they live
+    // on the card itself and are consulted at damage time, so they are pulled
+    // out before the regular skill loop.
+    const triggeredOthers = cardData.skills.others.filter(
+      (s) =>
+        s.kind !== SkillKind.SURVIVE && s.kind !== SkillKind.DAMAGE_REDUCTION,
     );
 
     try {
       validatePowerIdConsistency(
-        nonSurviveOthers
+        triggeredOthers
           .filter((s) => s.event !== undefined)
           .map((s) => ({
             powerId: s.powerId,
@@ -254,7 +261,7 @@ export class FightController {
       throw new BadRequestException((e as Error).message);
     }
 
-    const otherSkills: Skill[] = nonSurviveOthers.map((skill) =>
+    const otherSkills: Skill[] = triggeredOthers.map((skill) =>
       this.createOtherSkill(skill),
     );
 
@@ -267,6 +274,7 @@ export class FightController {
         simpleAttack: attackSkill,
         others: otherSkills,
         survive: surviveSkill,
+        damageReduction,
       },
       {
         dodge: buildDodgeStrategy(cardData.behaviors.dodge),
@@ -340,6 +348,28 @@ export class FightController {
           effectDto.probability,
           triggeredDebuff,
         );
+    }
+  }
+
+  /**
+   * The domain rejects an out-of-range rate. That is a malformed request, not
+   * a server fault, so it surfaces as a 400 like the composite power check.
+   */
+  private buildDamageReduction(
+    skills: OtherSkillDto[],
+  ): DamageReductionSkill | undefined {
+    const dto = skills.find((s) => s.kind === SkillKind.DAMAGE_REDUCTION);
+    if (!dto) return undefined;
+
+    try {
+      return new DamageReductionSkill(
+        dto.name,
+        dto.rate,
+        new MathRandomizer(),
+        dto.probability,
+      );
+    } catch (e) {
+      throw new BadRequestException((e as Error).message);
     }
   }
 
@@ -594,6 +624,10 @@ export class FightController {
       }
       case SkillKind.SURVIVE:
         throw new Error('SURVIVE skill must not appear in others skill list');
+      case SkillKind.DAMAGE_REDUCTION:
+        throw new Error(
+          'DAMAGE_REDUCTION skill must not appear in others skill list',
+        );
       default:
         throw new Error(`Unknown skill kind: ${skillData.kind}`);
     }

@@ -10,8 +10,8 @@ import {
 type AlterationSkillResults =
   BuffSkillResults | DebuffSkillResults | TransformationSkillResults;
 import { Step, StepKind } from './@types/step';
+import { effectResultsToSteps } from './effect-results-to-steps';
 import { EndEventProcessor } from './end-event-processor';
-import { StatusChangeReport, status } from './@types/status-change-report';
 
 export function skillResultsToSteps(
   card: FightingCard,
@@ -64,28 +64,40 @@ export function skillResultsToSteps(
           powerId: skillResult.powerId,
         });
 
-        const statusChanges: StatusChangeReport[] = skillResult.results.flatMap(
-          (r): StatusChangeReport[] => {
-            if (r.defender.isDead()) {
-              return [
-                {
-                  kind: StepKind.StatusChange,
-                  card: r.defender.identityInfo,
-                  status: 'dead',
-                },
-              ];
-            }
-            if (r.effects?.length) {
-              return r.effects.map((effect) => ({
-                kind: StepKind.StatusChange as const,
-                status: effect.type as status,
-                card: effect.card.identityInfo,
-              }));
-            }
-            return [];
-          },
-        );
-        steps.push(...statusChanges);
+        // Same per-hit order as ActionStage.handleAttackResult: what happened
+        // on the way to the health pool first, then the outcome.
+        const hitSteps: Step[] = skillResult.results.flatMap((r): Step[] => {
+          const perHit: Step[] = [];
+
+          if (r.mitigated) {
+            perHit.push({
+              kind: StepKind.DamageMitigated,
+              name: r.mitigatedSkillName,
+              card: r.defender.identityInfo,
+            });
+          }
+
+          if (r.shieldBroken) {
+            perHit.push({
+              kind: StepKind.ShieldBroken,
+              card: r.defender.identityInfo,
+            });
+          }
+
+          if (r.defender.isDead()) {
+            perHit.push({
+              kind: StepKind.StatusChange,
+              card: r.defender.identityInfo,
+              status: 'dead',
+            });
+            return perHit;
+          }
+
+          perHit.push(...effectResultsToSteps(card, r.effects));
+
+          return perHit;
+        });
+        steps.push(...hitSteps);
         break;
       }
       case SkillKind.TargetingOverride:

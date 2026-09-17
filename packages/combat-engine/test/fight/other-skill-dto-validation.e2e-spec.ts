@@ -410,4 +410,61 @@ describe('OtherSkillDto validation', () => {
         .expect(200);
     });
   });
+
+  describe('DAMAGE_REDUCTION kind', () => {
+    const reduction = (extra: Record<string, unknown>) => [
+      { kind: 'DAMAGE_REDUCTION', name: 'Resilience', ...extra },
+    ];
+
+    it('accepts a rate inside the allowed range', () => {
+      return request(app.getHttpServer())
+        .post('/fight')
+        .send(basePayload(reduction({ rate: 0.15 }) as []))
+        .expect(200);
+    });
+
+    it('accepts an optional probability', () => {
+      return request(app.getHttpServer())
+        .post('/fight')
+        .send(basePayload(reduction({ rate: 0.15, probability: 0.3 }) as []))
+        .expect(200);
+    });
+
+    it('returns 400 when rate is missing', () => {
+      return request(app.getHttpServer())
+        .post('/fight')
+        .send(basePayload(reduction({}) as []))
+        .expect(400);
+    });
+
+    it('returns 400 on a rate of 0', () => {
+      return request(app.getHttpServer())
+        .post('/fight')
+        .send(basePayload(reduction({ rate: 0 }) as []))
+        .expect(400);
+    });
+
+    it('returns 400 on a rate above 1', () => {
+      return request(app.getHttpServer())
+        .post('/fight')
+        .send(basePayload(reduction({ rate: 1.5 }) as []))
+        .expect(400);
+    });
+
+    it('explains the rejected rate', () => {
+      return request(app.getHttpServer())
+        .post('/fight')
+        .send(basePayload(reduction({ rate: 1.5 }) as []))
+        .expect((res) =>
+          expect(res.body.message).toContain('rate must be in ]0, 1]'),
+        );
+    });
+
+    it('returns 400 on a probability above 1', () => {
+      return request(app.getHttpServer())
+        .post('/fight')
+        .send(basePayload(reduction({ rate: 0.15, probability: 2 }) as []))
+        .expect(400);
+    });
+  });
 });
