@@ -95,6 +95,12 @@ export interface BuffCondition {
 }
 
 export interface EffectTriggeredDebuff {
+  /**
+   * Nom de la pile de cumul. Les debuffs qui le partagent comptent ensemble
+   * contre `maxStacks`. Les deux champs vont de pair.
+   */
+  stackId?: string;
+  maxStacks?: number;
   debuffType: BuffType;
   debuffRate: number;
   duration: number;
@@ -186,6 +192,13 @@ export interface OtherSkill {
    * Omise, la réduction est permanente.
    */
   probability?: number;
+  /**
+   * ALTERATION en debuff : nom de la pile de cumul et son plafond. Les deux
+   * champs vont de pair ; une pile est partagée entre tous les skills qui
+   * déclarent le même `stackId`.
+   */
+  stackId?: string;
+  debuffMaxStacks?: number;
   /** Absent pour SURVIVE et DAMAGE_REDUCTION. */
   targetingStrategy?: TargetingStrategy;
   /** Absent pour SHIELD, SURVIVE et DAMAGE_REDUCTION. */

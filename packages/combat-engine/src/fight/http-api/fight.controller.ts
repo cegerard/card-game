@@ -70,6 +70,7 @@ import { TargetedCard } from '../core/targeting-card-strategies/targeted-card';
 import { validatePowerIdConsistency } from '../core/cards/skills/power-id-consistency';
 import { ShieldApplication } from '../core/cards/@types/shield/shield-application';
 import { SurviveSkill } from '../core/cards/skills/survive';
+import { DebuffStacking } from '../core/cards/@types/alteration/alteration-detail';
 import { DamageReductionSkill } from '../core/cards/skills/damage-reduction';
 
 @Controller()
@@ -297,6 +298,11 @@ export class FightController {
           new MathRandomizer(),
           effectDto.triggeredDebuff.terminationEvent,
           effectDto.triggeredDebuff.powerId,
+          this.buildDebuffStacking(
+            effectDto.triggeredDebuff.stackId,
+            effectDto.triggeredDebuff.maxStacks,
+            ` triggeredDebuff`,
+          ),
         )
       : undefined;
 
@@ -371,6 +377,24 @@ export class FightController {
     } catch (e) {
       throw new BadRequestException((e as Error).message);
     }
+  }
+
+  /**
+   * A stack budget needs both its id and its cap: half of one is a malformed
+   * request, not a silent no-cap, so it is rejected rather than ignored.
+   */
+  private buildDebuffStacking(
+    stackId: string | undefined,
+    maxStacks: number | undefined,
+    owner: string,
+  ): DebuffStacking | undefined {
+    if (stackId === undefined && maxStacks === undefined) return undefined;
+    if (stackId === undefined || maxStacks === undefined) {
+      throw new BadRequestException(
+        `${owner} requires both stackId and a max stacks value to cap a debuff pile`,
+      );
+    }
+    return { id: stackId, maxStacks };
   }
 
   private buildTriggerForSkill(skillData: OtherSkillDto): Trigger {
@@ -455,6 +479,11 @@ export class FightController {
             skillData.targetCardId,
           ),
           activationCondition: alterationCondition,
+          stacking: this.buildDebuffStacking(
+            skillData.stackId,
+            skillData.debuffMaxStacks,
+            `${skillData.kind} ${skillData.name}`,
+          ),
           activationLimit: skillData.activationLimit,
           endEvent: skillData.endEvent,
           terminationEvent: skillData.terminationEvent,

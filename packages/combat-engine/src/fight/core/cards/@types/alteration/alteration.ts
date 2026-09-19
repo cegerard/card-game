@@ -36,15 +36,19 @@ export class Alteration {
     );
 
     if (this.polarity === 'debuff') {
-      return targets.map((target) => ({
-        target: target.identityInfo,
-        alteration: target.applyDebuff(
-          this.type,
-          effectiveRate,
-          this.duration,
-          this.terminationEvent,
-        ),
-      }));
+      // applyDebuff refuses an application that would exceed a stack cap, so
+      // only the alterations that really landed are reported.
+      return targets
+        .map((target) => ({
+          target: target.identityInfo,
+          alteration: target.applyDebuff(
+            this.type,
+            effectiveRate,
+            this.duration,
+            this.terminationEvent,
+          ),
+        }))
+        .filter((result) => result.alteration !== undefined);
     }
 
     return targets.map((target) => ({
