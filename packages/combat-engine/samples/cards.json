@@ -456,5 +456,134 @@
       ]
     },
     "behaviors": { "dodge": "simple-dodge" }
+  },
+  {
+    "id": "aegis",
+    "name": "Aegis",
+    "attack": 55,
+    "defense": 85,
+    "health": 650,
+    "speed": 50,
+    "agility": 35,
+    "accuracy": 60,
+    "criticalChance": 0.03,
+    "element": "EARTH",
+    "skills": {
+      "special": {
+        "kind": "ATTACK",
+        "name": "Forteresse des Âges",
+        "damages": [{ "type": "EARTH", "rate": 0 }],
+        "energy": 40,
+        "targetingStrategy": "position-based",
+        "shieldApplication": {
+          "rate": 0.5,
+          "duration": 3,
+          "targetingStrategy": "all-owner-cards"
+        }
+      },
+      "simpleAttack": {
+        "name": "Poing de Limon",
+        "damages": [
+          { "type": "PHYSICAL", "rate": 0.7 },
+          { "type": "EARTH", "rate": 0.175 },
+          { "type": "WATER", "rate": 0.175 }
+        ],
+        "targetingStrategy": "position-based",
+        "effects": [
+          {
+            "type": "MARK",
+            "rate": 0,
+            "damageType": "EARTH",
+            "maxStacks": 99,
+            "probability": 0.25,
+            "triggeredDebuff": {
+              "debuffType": "speed",
+              "debuffRate": 0.1,
+              "duration": 3,
+              "probability": 1,
+              "stackId": "enlisement",
+              "maxStacks": 3
+            }
+          }
+        ]
+      },
+      "others": [
+        {
+          "kind": "CONDITIONAL_ATTACK",
+          "name": "Vagues de Pierre",
+          "event": "next-action",
+          "interval": 4,
+          "hits": 3,
+          "damages": [{ "type": "PHYSICAL", "rate": 0.45 }],
+          "targetingStrategy": "target-all",
+          "effect": {
+            "type": "MARK",
+            "rate": 0,
+            "damageType": "EARTH",
+            "maxStacks": 99,
+            "triggeredDebuff": {
+              "debuffType": "speed",
+              "debuffRate": 0.1,
+              "duration": 3,
+              "probability": 1,
+              "stackId": "enlisement",
+              "maxStacks": 3
+            }
+          },
+          "comboFinisher": [
+            { "type": "EARTH", "rate": 0.3 },
+            { "type": "WATER", "rate": 0.3 }
+          ],
+          "comboFinisherEffects": [{ "type": "STUNT", "rate": 0, "level": 1 }]
+        },
+        {
+          "kind": "ALTERATION",
+          "name": "Endurance séculaire",
+          "event": "turn-end",
+          "polarity": "buff",
+          "buffType": "defense",
+          "rate": 0.1,
+          "duration": 1,
+          "targetingStrategy": "self",
+          "activationCondition": {
+            "type": "health-threshold",
+            "operator": "above",
+            "threshold": 0.3
+          }
+        },
+        {
+          "kind": "DAMAGE_REDUCTION",
+          "name": "Résilience des marais",
+          "rate": 0.15,
+          "probability": 0.3
+        },
+        {
+          "kind": "ALTERATION",
+          "name": "Résilience des marais - Enlisement",
+          "event": "damage-taken",
+          "targetCardId": "aegis",
+          "polarity": "debuff",
+          "buffType": "speed",
+          "rate": 0.1,
+          "duration": 3,
+          "targetingStrategy": "last-attacker-of-ally",
+          "activationCondition": { "type": "probability", "probability": 0.3 },
+          "stackId": "enlisement",
+          "debuffMaxStacks": 3
+        },
+        {
+          "kind": "CONDITIONAL_ATTACK",
+          "name": "Contre-attaque défensive",
+          "event": "damage-taken",
+          "targetCardId": "aegis",
+          "damages": [
+            { "type": "EARTH", "rate": 0.25 },
+            { "type": "WATER", "rate": 0.25 }
+          ],
+          "targetingStrategy": "last-attacker-of-ally"
+        }
+      ]
+    },
+    "behaviors": { "dodge": "simple-dodge" }
   }
 ]
