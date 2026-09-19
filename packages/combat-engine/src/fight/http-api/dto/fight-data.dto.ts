@@ -26,6 +26,7 @@ import {
 export enum AlterationConditionType {
   ALLY_PRESENCE = 'ally-presence',
   HEALTH_THRESHOLD = 'health-threshold',
+  PROBABILITY = 'probability',
 }
 
 class BuffConditionDto {
@@ -49,6 +50,13 @@ class BuffConditionDto {
   @IsOptional()
   @IsIn(['below', 'above'])
   operator?: string;
+
+  // PROBABILITY condition only: activation chance of the skill
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(1)
+  probability?: number;
 }
 import { DamageType } from '../../core/cards/@types/damage/damage-type';
 export { DamageType };

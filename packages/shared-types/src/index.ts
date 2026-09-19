@@ -70,7 +70,10 @@ export type TargetingStrategy =
 
 export type CardSelectorStrategy = 'player-by-player' | 'speed-weighted';
 
-export type AlterationConditionType = 'ally-presence' | 'health-threshold';
+export type AlterationConditionType =
+  | 'ally-presence'
+  | 'health-threshold'
+  | 'probability';
 
 // ---------------------------------------------------------------------------
 // Skill building blocks
@@ -87,6 +90,8 @@ export interface BuffCondition {
   multiplier?: number;
   threshold?: number;
   operator?: 'below' | 'above';
+  /** Condition 'probability' uniquement : chance d'activation du skill. */
+  probability?: number;
 }
 
 export interface EffectTriggeredDebuff {

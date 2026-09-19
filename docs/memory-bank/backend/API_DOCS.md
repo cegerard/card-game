@@ -145,7 +145,7 @@ Simulates a turn-based card battle between two players.
   event?: "turn-end" | "next-action" | "ally-death" | "ally-health-below" | "damage-taken",  // When skill triggers; NOT required for SHIELD, SURVIVE or DAMAGE_REDUCTION kinds
   targetCardId?: string,        // Required when event=ally-death, ally-health-below or damage-taken: id of the monitored card
   // SHIELD-specific fields:
-  activationCondition?: { operator?: "below" | "above", threshold: number },  // Health ratio threshold (0–1) for SHIELD/ally-health-below activation
+  activationCondition?: { type?: "health-threshold" | "ally-presence" | "probability", operator?: "below" | "above", threshold?: number, allyName?: string, probability?: number },  // Health ratio threshold (0–1) for SHIELD/ally-health-below activation; type "probability" gates any triggered ALTERATION skill on a per-event roll
   buffType?: "attack" | "defense" | "agility" | "accuracy" | "speed" | "criticalChance",  // Required if kind=BUFF
   duration?: number,            // Required if kind=BUFF (0 = infinite: permanent or event-bound)
   terminationEvent?: string,    // Event name that removes this skill's buff/targeting override when fired

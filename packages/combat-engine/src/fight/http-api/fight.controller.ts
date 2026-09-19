@@ -435,6 +435,7 @@ export class FightController {
               allyName: skillData.activationCondition.allyName,
               threshold: skillData.activationCondition.threshold,
               operator: skillData.activationCondition.operator,
+              probability: skillData.activationCondition.probability,
             })
           : undefined;
         // duration: 0 means infinite — either permanent (no terminationEvent)
