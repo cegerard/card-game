@@ -27,6 +27,7 @@ import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-ca
 import { NamedAttackResult } from './@types/action-result/named-attack-result';
 import { round2 } from '../../tools/round';
 import { Shield } from './@types/shield/shield';
+import { Stance } from './@types/stance/stance';
 
 export type FinalDamageResult = {
   damageToHealth: number;
@@ -121,6 +122,9 @@ export class FightingCard {
 
   // Damage reduction
   private damageReduction: DamageReductionSkill | null = null;
+
+  // Stances
+  private stances: Stance[] = [];
 
   // Targeting overrides
   private targetingOverrides: TargetingOverrideEntry[] = [];
@@ -359,8 +363,15 @@ export class FightingCard {
     context: FightingContext,
   ): SkillResults[] {
     this.skills.forEach((s) => s.activate?.(trigger, context));
+    // A skill bound to a stance stays silent outside it: gating here rather
+    // than in isTriggered() keeps the trigger about events only, and emits no
+    // empty step for a skill that did not run.
     return this.skills
-      .filter((s) => s.isTriggered(trigger))
+      .filter(
+        (s) =>
+          s.isTriggered(trigger) &&
+          (!s.requiredStance || this.hasStance(s.requiredStance)),
+      )
       .map((skill) =>
         skill.launch(this, context, this.currentTargetingOverride),
       );
@@ -575,6 +586,38 @@ export class FightingCard {
     const remainingTurns = this.lifesteal.remainingTurns - 1;
     this.lifesteal =
       remainingTurns < 0 ? null : { ...this.lifesteal, remainingTurns };
+  }
+
+  /**
+   * Opens a stance on the card, or refreshes the duration of one already
+   * running: re-casting the power that grants it must not double its length.
+   */
+  public activateStance(name: string, duration: number): Stance {
+    const running = this.stances.find((s) => s.name === name);
+    if (running) {
+      running.remainingTurns = duration;
+      return running;
+    }
+
+    const stance: Stance = { name, remainingTurns: duration };
+    this.stances.push(stance);
+    return stance;
+  }
+
+  public hasStance(name: string): boolean {
+    return this.stances.some((s) => s.name === name);
+  }
+
+  /** Decrements every running stance and returns the ones that just ended. */
+  public decreaseStanceDurations(): string[] {
+    const decremented = this.stances.map((s) => ({
+      ...s,
+      remainingTurns: s.remainingTurns - 1,
+    }));
+    const ended = decremented.filter((s) => s.remainingTurns < 0);
+    this.stances = decremented.filter((s) => s.remainingTurns >= 0);
+
+    return ended.map((s) => s.name);
   }
 
   public applyShield(rate: number, duration: number): Shield {

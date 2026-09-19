@@ -89,6 +89,10 @@ Simulates a turn-based card battle between two players.
   markedTargetBonus?: {                   // Optional damage bonus against an already marked target
     damageType: "PHYSICAL" | "FIRE" | "WATER" | "EARTH" | "AIR",
     multiplier: number                    // Must be > 0, e.g. 1.3 for +30%
+  },
+  stanceActivation?: {                    // Optional: opens a named stance on the caster
+    name: string,                         // Stance name that skills reference with requiresStance
+    duration: number                      // Turns it runs; re-casting refreshes instead of stacking
   }
 }
 ```
@@ -144,6 +148,7 @@ Simulates a turn-based card battle between two players.
   targetingStrategy?: TargetingStrategy,  // Not required for SHIELD, SURVIVE or DAMAGE_REDUCTION kinds
   event?: "turn-end" | "next-action" | "ally-death" | "ally-health-below" | "damage-taken",  // When skill triggers; NOT required for SHIELD, SURVIVE or DAMAGE_REDUCTION kinds
   targetCardId?: string,        // Required when event=ally-death, ally-health-below or damage-taken: id of the monitored card
+  requiresStance?: string,      // Skill only fires while its owner holds that stance (see SpecialDto.stanceActivation)
   // SHIELD-specific fields:
   activationCondition?: { type?: "health-threshold" | "ally-presence" | "probability", operator?: "below" | "above", threshold?: number, allyName?: string, probability?: number },  // Health ratio threshold (0–1) for SHIELD/ally-health-below activation; type "probability" gates any triggered ALTERATION skill on a per-event roll
   buffType?: "attack" | "defense" | "agility" | "accuracy" | "speed" | "criticalChance",  // Required if kind=BUFF
@@ -216,7 +221,7 @@ Simulates a turn-based card battle between two players.
 ```typescript
 {
   [stepNumber: number]: {
-    kind: "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "debuff_removed" | "buff_expired" | "debuff_expired" | "effect_removed" | "targeting_override" | "targeting_reverted" | "shield_applied" | "shield_broken" | "shield_expired" | "survived" | "damage_mitigated" | "mark_applied" | "transformation_started" | "transformation_ended" | "fight_end",
+    kind: "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "debuff_removed" | "buff_expired" | "debuff_expired" | "effect_removed" | "targeting_override" | "targeting_reverted" | "shield_applied" | "shield_broken" | "shield_expired" | "survived" | "damage_mitigated" | "stance_started" | "stance_ended" | "mark_applied" | "transformation_started" | "transformation_ended" | "fight_end",
     // Additional properties vary by step kind
   }
 }
@@ -248,6 +253,25 @@ Simulates a turn-based card battle between two players.
   kind: "damage_mitigated",
   name: string,          // Name of the DAMAGE_REDUCTION skill that triggered
   card: CardInfo         // Card whose incoming damage was reduced
+}
+```
+
+**`stance_started` step** (`StanceStartedReport`): Emitted when a special opens a stance on its caster.
+```typescript
+{
+  kind: "stance_started",
+  name: string,          // Stance name
+  card: CardInfo,        // Caster now holding it
+  remainingTurns: number
+}
+```
+
+**`stance_ended` step** (`StanceEndedReport`): Emitted at turn-end when a stance duration runs out.
+```typescript
+{
+  kind: "stance_ended",
+  name: string,
+  card: CardInfo
 }
 ```
 

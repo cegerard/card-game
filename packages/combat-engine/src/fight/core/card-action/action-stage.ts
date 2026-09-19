@@ -197,6 +197,15 @@ export class ActionStage {
       );
     }
 
+    if (specialResults.stanceStarted) {
+      result.stanceStartedReport = {
+        kind: StepKind.StanceStarted,
+        name: specialResults.stanceStarted.name,
+        card: card.identityInfo,
+        remainingTurns: specialResults.stanceStarted.remainingTurns,
+      };
+    }
+
     return result;
   }
 
@@ -241,6 +250,10 @@ export class ActionStage {
 
           if (report.shieldAppliedReport) {
             acc.actionSteps.push(report.shieldAppliedReport);
+          }
+
+          if (report.stanceStartedReport) {
+            acc.actionSteps.push(report.stanceStartedReport);
           }
 
           report.survivedSteps.forEach((step) => {

@@ -76,6 +76,13 @@ export interface Skill {
   name: string;
 
   /**
+   * Name of the stance this skill needs to be active on its owner. Set, the
+   * skill never fires outside that stance, which is how an ability lasts only
+   * as long as the power that granted it.
+   */
+  readonly requiredStance?: string;
+
+  /**
    * Executes the skill. When `targetingStrategy` is provided, it overrides
    * the skill's own default targeting strategy for this invocation.
    */

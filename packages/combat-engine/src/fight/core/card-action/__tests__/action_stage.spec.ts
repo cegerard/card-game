@@ -660,4 +660,68 @@ describe('ActionStage', () => {
       });
     });
   });
+
+  describe('stance opened by a special', () => {
+    const STANCE = 'forteresse-des-ages';
+
+    function stanceSpecial() {
+      return new SpecialAttack(
+        'Forteresse des Âges',
+        [new DamageComposition(DamageType.PHYSICAL, 0)],
+        0,
+        POSITION_BASED,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        { name: STANCE, duration: 3 },
+      );
+    }
+
+    function run(special: SpecialAttack) {
+      const caster = makeCard(special);
+      const defender = makeCard(stanceSpecial());
+      const player1 = new Player('Player 1', [caster]);
+      const player2 = new Player('Player 2', [defender]);
+      const actionStage = new ActionStage(
+        player1,
+        player2,
+        { onCardDeath: [] },
+        new DeathSkillHandler(player1, player2),
+      );
+      return { steps: actionStage.computeNextAction([caster]), caster };
+    }
+
+    it('emits a stance_started step', () => {
+      const { steps } = run(stanceSpecial());
+
+      expect(steps.some((s) => s.kind === StepKind.StanceStarted)).toBe(true);
+    });
+
+    it('names the stance in the step', () => {
+      const { steps } = run(stanceSpecial());
+      const started = steps.find((s) => s.kind === StepKind.StanceStarted);
+
+      expect((started as any).name).toBe(STANCE);
+    });
+
+    it('holds the stance on the caster', () => {
+      const { caster } = run(stanceSpecial());
+
+      expect(caster.hasStance(STANCE)).toBe(true);
+    });
+
+    it('emits no stance step for a special without one', () => {
+      const plain = new SpecialAttack(
+        'Plain',
+        [new DamageComposition(DamageType.PHYSICAL, 1)],
+        0,
+        POSITION_BASED,
+      );
+
+      const { steps } = run(plain);
+
+      expect(steps.some((s) => s.kind === StepKind.StanceStarted)).toBe(false);
+    });
+  });
 });

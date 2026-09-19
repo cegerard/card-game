@@ -180,6 +180,7 @@ export class FightController {
         alterations.length > 0 ? alterations : undefined,
         shieldApplication,
         markedTargetBonus,
+        cardData.skills.special.stanceActivation,
       );
     } else if (cardData.skills.special.kind === SpecialKind.HEALING) {
       special = new SpecialHealing(
@@ -558,6 +559,7 @@ export class FightController {
             : new AlwaysTrueAttackCondition(),
           this.buildTriggerForSkill(skillData),
           skillData.powerId,
+          skillData.requiresStance,
         );
       case SkillKind.TARGETING_OVERRIDE:
         if (!skillData.terminationEvent) {

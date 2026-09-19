@@ -88,4 +88,21 @@ describe('samples/cards.json', () => {
 
     expect(buffs.length).toBeGreaterThan(0);
   });
+
+  it('opens the Forteresse des Âges stance with the special', () => {
+    const stances = steps.filter(
+      (s) => s.kind === 'stance_started' && s.name === 'forteresse-des-ages',
+    );
+
+    expect(stances.length).toBeGreaterThan(0);
+  });
+
+  it('holds the counter attack back until the stance is open', () => {
+    const firstStance = steps.findIndex((s) => s.kind === 'stance_started');
+    const firstCounter = steps.findIndex(
+      (s) => s.kind === 'attack' && s.name === 'Contre-attaque défensive',
+    );
+
+    expect(firstCounter).toBeGreaterThan(firstStance);
+  });
 });

@@ -14,6 +14,7 @@ import {
 import { ShieldApplication } from '../@types/shield/shield-application';
 import { ShieldResult } from '../@types/action-result/shield-result';
 import { MarkedTargetBonus } from '../@types/mark/marked-target-bonus';
+import { Stance, StanceActivation } from '../@types/stance/stance';
 
 const ENERGY_INCREASE_FACTOR = 10;
 const CRITICAL_RATE = 1.3;
@@ -28,6 +29,7 @@ export class SpecialAttack implements Special {
     private readonly alterations?: Alteration[],
     private readonly shieldApplication?: ShieldApplication,
     private readonly markedTargetBonus?: MarkedTargetBonus,
+    private readonly stanceActivation?: StanceActivation,
   ) {}
 
   public ready(actualEnergy: number): boolean {
@@ -103,6 +105,7 @@ export class SpecialAttack implements Special {
       actionResults: attackResults,
       alterationResults,
       shieldResults,
+      stanceStarted: this.openStance(source),
     };
   }
 
@@ -125,6 +128,15 @@ export class SpecialAttack implements Special {
     return this.alterations.flatMap(
       (alteration) =>
         alteration.apply(source, context) as (BuffResult | DebuffResult)[],
+    );
+  }
+
+  private openStance(source: FightingCard): Stance | undefined {
+    if (!this.stanceActivation) return undefined;
+
+    return source.activateStance(
+      this.stanceActivation.name,
+      this.stanceActivation.duration,
     );
   }
 

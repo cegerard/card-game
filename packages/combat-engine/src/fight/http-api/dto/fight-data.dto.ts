@@ -268,6 +268,16 @@ class MarkedTargetBonusDto {
   multiplier: number;
 }
 
+class StanceActivationDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsNumber()
+  @Min(1)
+  duration: number;
+}
+
 class SpecialDto {
   @IsEnum(SpecialKind)
   kind: SpecialKind;
@@ -316,6 +326,13 @@ class SpecialDto {
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => MarkedTargetBonusDto)
   markedTargetBonus?: MarkedTargetBonusDto;
+
+  // Opens a named stance on the caster for a number of turns; skills carrying
+  // requiresStance with that name are only active while it runs
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => StanceActivationDto)
+  stanceActivation?: StanceActivationDto;
 }
 
 class DamageCompositionDto {
@@ -457,6 +474,12 @@ export class OtherSkillDto {
   @Min(0)
   @Max(1)
   probability?: number;
+
+  // Only active while its owner holds the named stance
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  requiresStance?: string;
 
   // ALTERATION debuff stack budget: both fields together, or neither
   @IsOptional()
