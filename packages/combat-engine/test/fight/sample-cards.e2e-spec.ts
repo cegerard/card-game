@@ -48,4 +48,44 @@ describe('samples/cards.json', () => {
 
     expect(marks.length).toBeGreaterThan(0);
   });
+
+  it('lets Aegis shield his whole team with Forteresse des Âges', () => {
+    const shields = steps.filter(
+      (s) => s.kind === 'shield_applied' && s.name === 'Forteresse des Âges',
+    );
+
+    expect(shields.length).toBeGreaterThan(0);
+  });
+
+  it('shields every card of the caster team at once', () => {
+    const shield = steps.find(
+      (s) => s.kind === 'shield_applied' && s.name === 'Forteresse des Âges',
+    );
+
+    expect(shield.targets.length).toBe(sampleCards.length);
+  });
+
+  it('lets Aegis counter the card that hit him', () => {
+    const counters = steps.filter(
+      (s) => s.kind === 'attack' && s.name === 'Contre-attaque défensive',
+    );
+
+    expect(counters.length).toBeGreaterThan(0);
+  });
+
+  it('replaces the normal attack with Vagues de Pierre on its interval', () => {
+    const waves = steps.filter(
+      (s) => s.kind === 'attack' && s.name === 'Vagues de Pierre',
+    );
+
+    expect(waves.length).toBeGreaterThan(0);
+  });
+
+  it('keeps Endurance séculaire up while Aegis is above the threshold', () => {
+    const buffs = steps.filter(
+      (s) => s.kind === 'buff' && s.name === 'Endurance séculaire',
+    );
+
+    expect(buffs.length).toBeGreaterThan(0);
+  });
 });

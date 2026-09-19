@@ -10,7 +10,11 @@ import { StateResult } from './@types/action-result/state-result';
 import { CardStateFrozen } from './@types/state/card-state-frozen';
 import { CardStateStunted } from './@types/state/card-state-stunted';
 import { EffectLevel } from './@types/attack/effect-level';
-import { Buff, Debuff } from './@types/alteration/alteration-detail';
+import {
+  Buff,
+  Debuff,
+  DebuffStacking,
+} from './@types/alteration/alteration-detail';
 import { Skill, SkillResults } from './skills/skill';
 import { HealthReactiveSkill } from './skills/reactive-skill';
 import { SurviveSkill } from './skills/survive';
@@ -752,13 +756,23 @@ export class FightingCard {
     return { expiredBuffs, expiredDebuffs };
   }
 
+  /**
+   * Applies a debuff and returns it, or returns undefined when `stacking` caps
+   * the pile it belongs to and that pile is already full. A refused
+   * application changes nothing and is reported by nobody.
+   */
   public applyDebuff(
     debuffType: AlterationType,
     debuffRate: number,
     duration: number,
     terminationEvent?: string,
     powerId?: string,
-  ): Debuff {
+    stacking?: DebuffStacking,
+  ): Debuff | undefined {
+    if (stacking && this.debuffStacks(stacking.id) >= stacking.maxStacks) {
+      return undefined;
+    }
+
     const debuff: Debuff = {
       polarity: 'debuff',
       type: debuffType,
@@ -766,11 +780,16 @@ export class FightingCard {
       duration: duration,
       terminationEvent,
       powerId,
+      stackId: stacking?.id,
     };
 
     this.debuffs.push(debuff);
 
     return debuff;
+  }
+
+  public debuffStacks(stackId: string): number {
+    return this.debuffs.filter((d) => d.stackId === stackId).length;
   }
 
   public removeEventBoundDebuffs(

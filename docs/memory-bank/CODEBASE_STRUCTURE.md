@@ -99,7 +99,7 @@ cards/
     │   ├── alteration-type.ts       # AlterationType enum
     │   ├── alteration-condition.ts  # Condition interface for conditional buff multipliers
     │   ├── buff-application.ts      # Applies buff with optional condition + multiplier
-    │   └── conditions/              # Condition implementations (ally-presence-condition.ts)
+    │   └── conditions/              # Condition implementations (ally-presence-condition.ts, health-threshold-condition.ts, probability-condition.ts)
     ├── mark/              # Elemental mark types
     │   ├── elemental-mark.ts        # ElementalMark: damageType + ratePerStack + maxStacks (cumulative, never expires)
     │   └── marked-target-bonus.ts   # MarkedTargetBonus: damage multiplier when the defender already carries a mark

@@ -4,6 +4,8 @@ import { AlterationCondition } from '../../core/cards/@types/alteration/alterati
 import { AllyPresenceCondition } from '../../core/cards/@types/alteration/conditions/ally-presence-condition';
 import { HealthThresholdCondition } from '../../core/cards/@types/alteration/conditions/health-threshold-condition';
 import { AlterationConditionType } from '../dto/fight-data.dto';
+import { ProbabilityCondition } from '../../core/cards/@types/alteration/conditions/probability-condition';
+import { RandomizerFake } from '../../../../test/helpers/randomizer-fake';
 import { buildAlterationCondition } from '../alteration-condition-factory';
 
 describe('buildAlterationCondition', () => {
@@ -104,6 +106,51 @@ describe('buildAlterationCondition', () => {
       expect(() =>
         buildAlterationCondition('UNKNOWN_TYPE' as AlterationConditionType, {}),
       ).toThrow('Unknown AlterationConditionType: UNKNOWN_TYPE');
+    });
+  });
+
+  describe('PROBABILITY', () => {
+    it('returns ProbabilityCondition when probability is provided', () => {
+      const condition = buildAlterationCondition(
+        AlterationConditionType.PROBABILITY,
+        { probability: 0.3 },
+      );
+
+      expect(condition).toBeInstanceOf(ProbabilityCondition);
+    });
+
+    it('throws when probability is missing', () => {
+      expect(() =>
+        buildAlterationCondition(AlterationConditionType.PROBABILITY, {}),
+      ).toThrow('ProbabilityCondition requires probability');
+    });
+
+    it('accepts a probability of 0', () => {
+      const condition = buildAlterationCondition(
+        AlterationConditionType.PROBABILITY,
+        { probability: 0 },
+      );
+
+      expect(condition).toBeInstanceOf(ProbabilityCondition);
+    });
+
+    it('rolls with the injected randomizer', () => {
+      const randomizer = new RandomizerFake().setNextRandomValue(0.9);
+      const condition = buildAlterationCondition(
+        AlterationConditionType.PROBABILITY,
+        { probability: 0.3 },
+        randomizer,
+      );
+
+      expect(condition.evaluate({} as any, {} as any)).toBe(false);
+    });
+
+    it('rejects a probability outside the allowed range', () => {
+      expect(() =>
+        buildAlterationCondition(AlterationConditionType.PROBABILITY, {
+          probability: 2,
+        }),
+      ).toThrow('probability must be in [0, 1], got: 2');
     });
   });
 });

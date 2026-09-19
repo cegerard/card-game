@@ -467,4 +467,74 @@ describe('OtherSkillDto validation', () => {
         .expect(400);
     });
   });
+
+  describe('debuff stack budget', () => {
+    const alteration = (extra: Record<string, unknown>) => [
+      {
+        kind: 'ALTERATION',
+        name: 'Enlisement',
+        event: 'turn-end',
+        polarity: 'debuff',
+        buffType: 'speed',
+        rate: 0.1,
+        duration: 3,
+        targetingStrategy: 'target-all',
+        ...extra,
+      },
+    ];
+
+    it('accepts a complete stack budget', () => {
+      return request(app.getHttpServer())
+        .post('/fight')
+        .send(
+          basePayload(
+            alteration({ stackId: 'enlisement', debuffMaxStacks: 3 }) as [],
+          ),
+        )
+        .expect(200);
+    });
+
+    it('accepts no stack budget at all', () => {
+      return request(app.getHttpServer())
+        .post('/fight')
+        .send(basePayload(alteration({}) as []))
+        .expect(200);
+    });
+
+    it('returns 400 when only stackId is given', () => {
+      return request(app.getHttpServer())
+        .post('/fight')
+        .send(basePayload(alteration({ stackId: 'enlisement' }) as []))
+        .expect(400);
+    });
+
+    it('returns 400 when only the cap is given', () => {
+      return request(app.getHttpServer())
+        .post('/fight')
+        .send(basePayload(alteration({ debuffMaxStacks: 3 }) as []))
+        .expect(400);
+    });
+
+    it('explains which half is missing', () => {
+      return request(app.getHttpServer())
+        .post('/fight')
+        .send(basePayload(alteration({ stackId: 'enlisement' }) as []))
+        .expect((res) =>
+          expect(res.body.message).toContain(
+            'requires both stackId and a max stacks value',
+          ),
+        );
+    });
+
+    it('returns 400 on a cap below 1', () => {
+      return request(app.getHttpServer())
+        .post('/fight')
+        .send(
+          basePayload(
+            alteration({ stackId: 'enlisement', debuffMaxStacks: 0 }) as [],
+          ),
+        )
+        .expect(400);
+    });
+  });
 });

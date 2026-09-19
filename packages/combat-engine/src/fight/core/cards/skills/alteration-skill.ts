@@ -12,6 +12,7 @@ import {
   SkillResults,
 } from './skill';
 import { AlterationCondition } from '../@types/alteration/alteration-condition';
+import { DebuffStacking } from '../@types/alteration/alteration-detail';
 
 export interface AlterationSkillOptions {
   name: string;
@@ -27,6 +28,8 @@ export interface AlterationSkillOptions {
   endEvent?: string;
   terminationEvent?: string;
   powerId?: string;
+  /** Stack budget shared by every debuff carrying the same id. */
+  stacking?: DebuffStacking;
 }
 
 export class AlterationSkill implements Skill {
@@ -44,6 +47,7 @@ export class AlterationSkill implements Skill {
   private readonly endEvent?: string;
   private readonly terminationEvent?: string;
   private readonly powerId?: string;
+  private readonly stacking?: DebuffStacking;
   private activationCount = 0;
 
   constructor({
@@ -59,6 +63,7 @@ export class AlterationSkill implements Skill {
     endEvent,
     terminationEvent,
     powerId,
+    stacking,
   }: AlterationSkillOptions) {
     if (polarity !== 'buff' && polarity !== 'debuff') {
       throw new Error(`Invalid polarity: ${polarity}`);
@@ -75,6 +80,7 @@ export class AlterationSkill implements Skill {
     this.endEvent = endEvent;
     this.terminationEvent = terminationEvent;
     this.powerId = powerId;
+    this.stacking = stacking;
   }
 
   launch(
@@ -103,25 +109,30 @@ export class AlterationSkill implements Skill {
       this.activationCount >= this.activationLimit;
     const endEvent = isExhausted ? this.endEvent : undefined;
 
-    const results = targetedCards.map((targetedCard) => ({
-      target: targetedCard.identityInfo,
-      alteration:
-        this.polarity === 'buff'
-          ? targetedCard.applyBuff(
-              this.attributeType,
-              this.rate,
-              this.duration,
-              this.terminationEvent,
-              this.powerId,
-            )
-          : targetedCard.applyDebuff(
-              this.attributeType,
-              this.rate,
-              this.duration,
-              this.terminationEvent,
-              this.powerId,
-            ),
-    }));
+    // A capped debuff refused at its stack limit returns undefined: drop it so
+    // no step reports an alteration that was never applied.
+    const results = targetedCards
+      .map((targetedCard) => ({
+        target: targetedCard.identityInfo,
+        alteration:
+          this.polarity === 'buff'
+            ? targetedCard.applyBuff(
+                this.attributeType,
+                this.rate,
+                this.duration,
+                this.terminationEvent,
+                this.powerId,
+              )
+            : targetedCard.applyDebuff(
+                this.attributeType,
+                this.rate,
+                this.duration,
+                this.terminationEvent,
+                this.powerId,
+                this.stacking,
+              ),
+      }))
+      .filter((result) => result.alteration !== undefined);
     return {
       skillKind: this.polarity === 'buff' ? SkillKind.Buff : SkillKind.Debuff,
       results,

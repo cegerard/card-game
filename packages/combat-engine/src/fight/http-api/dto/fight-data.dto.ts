@@ -26,6 +26,7 @@ import {
 export enum AlterationConditionType {
   ALLY_PRESENCE = 'ally-presence',
   HEALTH_THRESHOLD = 'health-threshold',
+  PROBABILITY = 'probability',
 }
 
 class BuffConditionDto {
@@ -49,6 +50,13 @@ class BuffConditionDto {
   @IsOptional()
   @IsIn(['below', 'above'])
   operator?: string;
+
+  // PROBABILITY condition only: activation chance of the skill
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(1)
+  probability?: number;
 }
 import { DamageType } from '../../core/cards/@types/damage/damage-type';
 export { DamageType };
@@ -128,6 +136,17 @@ export enum ElementDto {
 }
 
 class EffectTriggeredDebuffDto {
+  // Stack budget: both fields together, or neither
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  stackId?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  maxStacks?: number;
+
   @IsEnum(BuffType)
   debuffType: BuffType;
 
@@ -438,6 +457,17 @@ export class OtherSkillDto {
   @Min(0)
   @Max(1)
   probability?: number;
+
+  // ALTERATION debuff stack budget: both fields together, or neither
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  stackId?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  debuffMaxStacks?: number;
 
   // Required for ALTERATION kind
   @ValidateIf((o) => o.kind === SkillKind.ALTERATION)

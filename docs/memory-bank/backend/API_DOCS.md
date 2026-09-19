@@ -145,9 +145,11 @@ Simulates a turn-based card battle between two players.
   event?: "turn-end" | "next-action" | "ally-death" | "ally-health-below" | "damage-taken",  // When skill triggers; NOT required for SHIELD, SURVIVE or DAMAGE_REDUCTION kinds
   targetCardId?: string,        // Required when event=ally-death, ally-health-below or damage-taken: id of the monitored card
   // SHIELD-specific fields:
-  activationCondition?: { operator?: "below" | "above", threshold: number },  // Health ratio threshold (0–1) for SHIELD/ally-health-below activation
+  activationCondition?: { type?: "health-threshold" | "ally-presence" | "probability", operator?: "below" | "above", threshold?: number, allyName?: string, probability?: number },  // Health ratio threshold (0–1) for SHIELD/ally-health-below activation; type "probability" gates any triggered ALTERATION skill on a per-event roll
   buffType?: "attack" | "defense" | "agility" | "accuracy" | "speed" | "criticalChance",  // Required if kind=BUFF
   duration?: number,            // Required if kind=BUFF (0 = infinite: permanent or event-bound)
+  stackId?: string,             // ALTERATION debuff: name of the stack pile it counts against
+  debuffMaxStacks?: number,     // Cap of that pile; goes with stackId, both or neither
   terminationEvent?: string,    // Event name that removes this skill's buff/targeting override when fired
   activationLimit?: number,     // Max activations (>=1) before skill lifecycle ends — supported for HEALING and TARGETING_OVERRIDE kinds
   endEvent?: string,            // Event emitted when activation limit is reached — supported for HEALING and TARGETING_OVERRIDE kinds
@@ -188,6 +190,8 @@ Simulates a turn-based card battle between two players.
     debuffRate: number,
     duration: number,
     probability: number,
+    stackId?: string,          // Name of the stack pile this debuff counts against
+    maxStacks?: number,        // Cap of that pile; goes with stackId, both or neither
     terminationEvent?: string  // Event name that removes this triggered debuff when fired
   },
   terminationEvent?: string   // Event name that removes this effect when fired
@@ -511,7 +515,7 @@ Validation errors return 400 Bad Request with detailed error messages.
 
 ## Error Handling
 
-- **400 Bad Request**: Validation failures from `ValidationPipe`, plus the domain checks the controller converts explicitly — composite power consistency (`validatePowerIdConsistency`) and the DAMAGE_REDUCTION rate range
+- **400 Bad Request**: Validation failures from `ValidationPipe`, plus the domain checks the controller converts explicitly — composite power consistency (`validatePowerIdConsistency`), the DAMAGE_REDUCTION rate range, and a debuff stack budget given by halves (`stackId` without its cap, or the reverse)
 - **500 Internal Server Error**: Runtime errors (e.g., unknown skill kind, missing buff properties)
 - No custom error handling middleware - uses NestJS defaults
 

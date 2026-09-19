@@ -1,5 +1,5 @@
 import { FightingCard } from '../../fighting-card';
-import { Debuff } from '../alteration/alteration-detail';
+import { Debuff, DebuffStacking } from '../alteration/alteration-detail';
 import { AlterationType } from '../alteration/alteration-type';
 import { Randomizer } from '../../../randomizer';
 
@@ -10,6 +10,7 @@ export class EffectTriggeredDebuff {
   public readonly duration: number;
   public readonly terminationEvent?: string;
   public readonly powerId?: string;
+  public readonly stacking?: DebuffStacking;
   private readonly randomizer: Randomizer;
 
   constructor(
@@ -20,6 +21,7 @@ export class EffectTriggeredDebuff {
     randomizer: Randomizer,
     terminationEvent?: string,
     powerId?: string,
+    stacking?: DebuffStacking,
   ) {
     if (probability < 0 || probability > 1) {
       throw new Error(`probability must be in [0, 1], got: ${probability}`);
@@ -30,6 +32,7 @@ export class EffectTriggeredDebuff {
     this.duration = duration;
     this.terminationEvent = terminationEvent;
     this.powerId = powerId;
+    this.stacking = stacking;
     this.randomizer = randomizer;
   }
 
@@ -43,6 +46,7 @@ export class EffectTriggeredDebuff {
       this.duration,
       this.terminationEvent,
       this.powerId,
+      this.stacking,
     );
   }
 }
