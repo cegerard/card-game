@@ -137,6 +137,7 @@ export class SpecialAttack implements Special {
     return source.activateStance(
       this.stanceActivation.name,
       this.stanceActivation.duration,
+      this.stanceActivation.immunities,
     );
   }
 

@@ -45,6 +45,12 @@ export type BuffType =
 
 export type EffectType = 'POISON' | 'BURN' | 'FREEZE' | 'STUNT' | 'MARK';
 
+/**
+ * Ce que fait un statut à sa cible, et donc ce contre quoi une immunité est
+ * accordée : `control` prive du tour, `damage-over-time` ne fait que mordre.
+ */
+export type StatusCategory = 'control' | 'damage-over-time';
+
 export type DodgeStrategy = 'simple-dodge' | 'random-dodge';
 
 export type TriggerEvent =
@@ -142,6 +148,8 @@ export interface StanceActivation {
   name: string;
   /** Nombre de tours pendant lesquels elle reste active. */
   duration: number;
+  /** Catégories de statuts refusées par le porteur pendant la posture. */
+  immunities?: StatusCategory[];
 }
 
 export interface MarkedTargetBonus {

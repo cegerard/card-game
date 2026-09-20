@@ -41,7 +41,9 @@ export class FreezeAttackEffect implements AttackEffect {
       this.randomizer.random() >= this.probability
     )
       return;
-    if (defender.isStatusImmune) return;
+    // Checked before the burn interaction below: an immune card must not lose
+    // its burn to a freeze that cannot land.
+    if (defender.isImmuneTo('control')) return;
     if (defender.frozenLevel >= this.level) return;
     if (defender.burnLevel > this.level) return;
 

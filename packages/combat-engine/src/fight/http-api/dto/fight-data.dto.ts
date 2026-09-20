@@ -268,6 +268,11 @@ class MarkedTargetBonusDto {
   multiplier: number;
 }
 
+export enum StatusCategoryDto {
+  CONTROL = 'control',
+  DAMAGE_OVER_TIME = 'damage-over-time',
+}
+
 class StanceActivationDto {
   @IsString()
   @IsNotEmpty()
@@ -276,6 +281,13 @@ class StanceActivationDto {
   @IsNumber()
   @Min(1)
   duration: number;
+
+  // Status categories the caster refuses while the stance runs
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(1)
+  @IsEnum(StatusCategoryDto, { each: true })
+  immunities?: StatusCategoryDto[];
 }
 
 class SpecialDto {

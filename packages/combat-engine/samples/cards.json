@@ -480,7 +480,11 @@
           "duration": 3,
           "targetingStrategy": "all-owner-cards"
         },
-        "stanceActivation": { "name": "forteresse-des-ages", "duration": 3 }
+        "stanceActivation": {
+          "name": "forteresse-des-ages",
+          "duration": 3,
+          "immunities": ["control"]
+        }
       },
       "simpleAttack": {
         "name": "Poing de Limon",
