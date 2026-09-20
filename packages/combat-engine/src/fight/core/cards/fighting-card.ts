@@ -28,6 +28,10 @@ import { NamedAttackResult } from './@types/action-result/named-attack-result';
 import { round2 } from '../../tools/round';
 import { Shield } from './@types/shield/shield';
 import { Stance } from './@types/stance/stance';
+import {
+  StatusCategory,
+  statusCategoryOf,
+} from './@types/state/status-category';
 
 export type FinalDamageResult = {
   damageToHealth: number;
@@ -272,7 +276,8 @@ export class FightingCard {
    * it, either because it is dead or because it is immune to status effects.
    */
   public setState(newState: CardState): boolean {
-    if (this.isDead() || this.isStatusImmune) return false;
+    if (this.isDead() || this.isImmuneTo(statusCategoryOf(newState.type)))
+      return false;
 
     if (newState.type === 'poison') {
       this.poisoned = newState;
@@ -503,6 +508,18 @@ export class FightingCard {
     this.statusImmunity = { remainingTurns: duration };
   }
 
+  /**
+   * Whether the card refuses the statuses of that category right now, either
+   * through a blanket immunity (a transformation) or through a stance granting
+   * it for that category only.
+   */
+  public isImmuneTo(category: StatusCategory): boolean {
+    return (
+      this.isStatusImmune ||
+      this.stances.some((stance) => stance.immunities?.includes(category))
+    );
+  }
+
   public get isStatusImmune(): boolean {
     return this.statusImmunity !== null;
   }
@@ -592,14 +609,19 @@ export class FightingCard {
    * Opens a stance on the card, or refreshes the duration of one already
    * running: re-casting the power that grants it must not double its length.
    */
-  public activateStance(name: string, duration: number): Stance {
+  public activateStance(
+    name: string,
+    duration: number,
+    immunities?: StatusCategory[],
+  ): Stance {
     const running = this.stances.find((s) => s.name === name);
     if (running) {
       running.remainingTurns = duration;
+      running.immunities = immunities;
       return running;
     }
 
-    const stance: Stance = { name, remainingTurns: duration };
+    const stance: Stance = { name, remainingTurns: duration, immunities };
     this.stances.push(stance);
     return stance;
   }

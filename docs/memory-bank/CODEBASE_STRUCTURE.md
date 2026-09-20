@@ -106,13 +106,15 @@ cards/
     ├── shield/             # Shield types
     │   ├── shield.ts                # Shield value type: { points: number, duration: number }
     │   └── shield-application.ts    # Applies shield to targets via targeting strategy
+    ├── stance/             # Stance types
+    │   └── stance.ts                # Stance: name + remainingTurns + granted status immunities; StanceActivation
     ├── skill-activation-conditions/  # Reactive skill activation conditions
     │   └── health-threshold-condition.ts  # HealthThresholdCondition: operator ('below'|'above') + threshold ratio
     ├── damage/             # Damage type definitions
     │   ├── damage-type.ts     # DamageType enum (PHYSICAL, FIRE, WATER, EARTH, AIR)
     │   ├── damage-composition.ts # Value object: type + rate pair
     │   └── element.ts         # Element enum for card affinity
-    └── state/              # Card state types (card-state-frozen.ts, card-state-stunted.ts)
+    └── state/              # Card state types (card-state-frozen.ts, card-state-stunted.ts) + status-category.ts (control vs damage-over-time)
 ```
 
 **Special Skills Pattern**: Both `SpecialAttack` and `SpecialHealing` implement the `Special` interface with a unified return type `SpecialResult` containing:
@@ -141,6 +143,8 @@ This allows special attacks to perform their primary action (damage/healing) whi
 **TRANSFORMATION Skill Kind (Reactive)**: `TransformationSkill` is a one-shot health-reactive skill. It transforms its owner for a duration, applying stat alterations, an optional lifesteal (heals a share of max health on every landed hit) and an optional status immunity. `TurnManager` ends it, charging an optional health cost that never kills its owner, and emits `transformation_started` then `transformation_ended` steps.
 
 **SHIELD Skill Kind (Reactive)**: `ShieldSkill` implements `HealthReactiveSkill` (interface: `isHealthReactive: true`, `onHealthChanged(card): boolean`). It is edge-triggered: fires once when `card.healthRatio` crosses the `HealthThresholdCondition` threshold downward, then rearms when health goes back above. `OtherSkillDto.event` is **optional** — SHIELD kind has no trigger event. After each HP change, `triggerReactiveSkills()` (in `reactive-skill-checker.ts`) checks all `HealthReactiveSkill` instances on the damaged card and fires those that return `true` from `onHealthChanged()`.
+
+**Stance Mechanic**: a stance is a named posture a card holds for a number of turns, opened by a special through `stanceActivation` and optionally listing the `StatusCategory` values its bearer refuses while it runs. A skill carrying `requiredStance` only fires while that stance is held — `FightingCard.launchSkills()` filters the others out. Emits `stance_started` and `stance_ended` steps.
 
 **DAMAGE_REDUCTION Skill Kind**: `DamageReductionSkill` mirrors `SurviveSkill` — no event, no targeting strategy, extracted from `others[]` and stored on `FightingCard`. `applyFinalDamage()` calls `tryMitigate(damage)`, which removes `rate` of the incoming damage, or returns `undefined` when its optional `probability` roll fails. It runs after the freeze/stunt amplifiers and before the shield buffer, so the shield only absorbs the reduced damage. Emits a `damage_mitigated` step; status effect ticks bypass it.
 

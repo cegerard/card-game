@@ -92,7 +92,8 @@ Simulates a turn-based card battle between two players.
   },
   stanceActivation?: {                    // Optional: opens a named stance on the caster
     name: string,                         // Stance name that skills reference with requiresStance
-    duration: number                      // Turns it runs; re-casting refreshes instead of stacking
+    duration: number,                     // Turns it runs; re-casting refreshes instead of stacking
+    immunities?: ("control" | "damage-over-time")[]  // Status categories the caster refuses while it runs
   }
 }
 ```
@@ -504,6 +505,15 @@ Simulates a turn-based card battle between two players.
 - `SURVIVE`: One-time fatal-blow interception — no `event`, no `targetingStrategy`; only `name` required; extracted from `others[]` before normal skill loop
 - `DAMAGE_REDUCTION`: Removes a share of every incoming hit — no `event`, no `targetingStrategy`; requires `rate` (share removed, in `]0, 1]`) and accepts an optional `probability` making it a per-hit roll. Like SURVIVE it is extracted from `others[]` and consulted inside `applyFinalDamage()`, so it mitigates the very hit that triggers it. Applies after the freeze/stunt amplifiers and before the shield buffer, so a shield absorbs only the reduced damage. Status effect ticks bypass it, as they bypass the shield
 - `TRANSFORMATION`: One-shot health-reactive transformation — no `event`, no `targetingStrategy`; requires `duration` and an `activationCondition` threshold. Applies its own `statAlterations` and, for the same duration, an optional `lifestealRate` (heals that share of max health on every landed attack) and `statusImmunity`. An optional `endCostRate` charges that share of max health when the transformation ends, never below one health point. Fires once per fight
+
+### StatusCategory
+
+What a status effect does to its bearer, and therefore what an immunity is granted against. Used by `SpecialDto.stanceActivation.immunities`.
+
+- `control`: takes the turn away — `FREEZE` and `STUNT`
+- `damage-over-time`: only bites — `POISON` and `BURN`
+
+An elemental `MARK` is not a status effect and no immunity refuses it.
 
 ### Effect
 

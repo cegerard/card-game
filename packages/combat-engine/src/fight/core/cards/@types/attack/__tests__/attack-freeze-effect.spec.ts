@@ -1,6 +1,7 @@
 import { FreezeAttackEffect } from '../attack-freeze-effect';
 import { EffectTriggeredDebuff } from '../effect-triggered-debuff';
 import { CardStateFrozen } from '../../state/card-state-frozen';
+import { CardStateBurned } from '../../state/card-state-burned';
 import { RandomizerFake } from '../../../../../../../test/helpers/randomizer-fake';
 import { MathRandomizer } from '../../../../../tools/math-randomizer';
 import { createFightingCard } from '../../../../../../../test/helpers/fighting-card';
@@ -78,5 +79,46 @@ describe('FreezeAttackEffect with triggeredDebuff', () => {
     it('returns undefined (no triggered debuff)', () => {
       expect(result).toBeUndefined();
     });
+  });
+});
+
+describe('FreezeAttackEffect against a control-immune defender', () => {
+  const ANCHOR = 'forteresse-des-ages';
+
+  function immuneDefenderCarryingBurn() {
+    const defender = createFightingCard({ agility: 0, health: 1000 });
+    defender.setState(new CardStateBurned(1, 3, 10));
+    defender.activateStance(ANCHOR, 3, ['control']);
+    return defender;
+  }
+
+  const effect = () => new FreezeAttackEffect(0.2, 1, new MathRandomizer());
+
+  it('applies no freeze', () => {
+    const defender = immuneDefenderCarryingBurn();
+
+    effect().applyEffect(defender, createFightingCard({}), {} as any);
+
+    expect(defender.isFrozen).toBe(false);
+  });
+
+  it('leaves the burn it would otherwise have cancelled', () => {
+    const defender = immuneDefenderCarryingBurn();
+
+    effect().applyEffect(defender, createFightingCard({}), {} as any);
+
+    expect(defender.burnLevel).toBe(1);
+  });
+
+  it('reports nothing', () => {
+    const defender = immuneDefenderCarryingBurn();
+
+    const result = effect().applyEffect(
+      defender,
+      createFightingCard({}),
+      {} as any,
+    );
+
+    expect(result).toBeUndefined();
   });
 });
