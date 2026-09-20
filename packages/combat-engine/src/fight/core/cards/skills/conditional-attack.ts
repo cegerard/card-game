@@ -16,6 +16,7 @@ export class ConditionalAttack implements Skill {
     private readonly condition: AttackCondition,
     private readonly trigger: Trigger,
     private readonly powerId?: string,
+    public readonly requiredStance?: string,
   ) {}
 
   isTriggered(triggerName: string): boolean {

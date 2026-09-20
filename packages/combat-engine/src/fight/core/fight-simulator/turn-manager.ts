@@ -73,6 +73,13 @@ export class TurnManager {
       if (expiredShield) {
         steps.push({ kind: StepKind.ShieldExpired, card: card.identityInfo });
       }
+      card.decreaseStanceDurations().forEach((name) => {
+        steps.push({
+          kind: StepKind.StanceEnded,
+          name,
+          card: card.identityInfo,
+        });
+      });
       this.processCardSkill(card, steps);
       this.processCardEffectStates(card, steps);
     });

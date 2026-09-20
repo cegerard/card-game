@@ -137,6 +137,13 @@ export interface StatAlteration {
   terminationEvent?: string;
 }
 
+export interface StanceActivation {
+  /** Nom de la posture ouverte sur le lanceur. */
+  name: string;
+  /** Nombre de tours pendant lesquels elle reste active. */
+  duration: number;
+}
+
 export interface MarkedTargetBonus {
   damageType: DamageType;
   /** Multiplicateur appliqué aux dégâts, par exemple 1.3 pour +30%. */
@@ -161,6 +168,11 @@ export interface SpecialSkill {
   shieldApplication?: ShieldApplication;
   /** Bonus de dégâts quand la cible porte déjà une marque de ce type. */
   markedTargetBonus?: MarkedTargetBonus;
+  /**
+   * Ouvre une posture nommée sur le lanceur : les skills portant
+   * `requiresStance` avec ce nom ne sont actifs que pendant sa durée.
+   */
+  stanceActivation?: StanceActivation;
 }
 
 export interface SimpleAttackSkill {
@@ -203,6 +215,8 @@ export interface OtherSkill {
   targetingStrategy?: TargetingStrategy;
   /** Absent pour SHIELD, SURVIVE et DAMAGE_REDUCTION. */
   event?: TriggerEvent;
+  /** Le skill n'est actif que si son porteur tient cette posture. */
+  requiresStance?: string;
   /** Requis pour ALTERATION. */
   buffType?: BuffType;
   duration?: number;

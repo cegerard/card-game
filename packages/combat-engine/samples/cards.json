@@ -479,7 +479,8 @@
           "rate": 0.5,
           "duration": 3,
           "targetingStrategy": "all-owner-cards"
-        }
+        },
+        "stanceActivation": { "name": "forteresse-des-ages", "duration": 3 }
       },
       "simpleAttack": {
         "name": "Poing de Limon",
@@ -576,6 +577,7 @@
           "name": "Contre-attaque défensive",
           "event": "damage-taken",
           "targetCardId": "aegis",
+          "requiresStance": "forteresse-des-ages",
           "damages": [
             { "type": "EARTH", "rate": 0.25 },
             { "type": "WATER", "rate": 0.25 }
