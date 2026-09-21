@@ -281,6 +281,7 @@ export class FightController {
       {
         dodge: buildDodgeStrategy(cardData.behaviors.dodge),
       },
+      new MathRandomizer(),
     );
   }
 
@@ -688,6 +689,8 @@ export class FightController {
       [BuffType.ACCURACY]: 'accuracy' as const,
       [BuffType.SPEED]: 'speed' as const,
       [BuffType.CRITICAL_CHANCE]: 'criticalChance' as const,
+      [BuffType.REGENERATION]: 'regeneration' as const,
+      [BuffType.RESISTANCE]: 'resistance' as const,
     };
 
     const result = BUFF_TYPE_MAP[buffType];

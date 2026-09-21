@@ -41,7 +41,9 @@ export type BuffType =
   | 'agility'
   | 'accuracy'
   | 'speed'
-  | 'criticalChance';
+  | 'criticalChance'
+  | 'regeneration'
+  | 'resistance';
 
 export type EffectType = 'POISON' | 'BURN' | 'FREEZE' | 'STUNT' | 'MARK';
 
@@ -288,6 +290,13 @@ export interface CardConfig {
   accuracy: number;
   /** Taux entre 0 et 1 (pas un pourcentage). */
   criticalChance: number;
+  /** Points de vie rendus à chaque fin de tour. Optionnel ; 0 si absent. */
+  regeneration?: number;
+  /**
+   * Chance de refuser un statut ou un debuff entrant : la stat divisée par
+   * 200. Optionnel ; 0 si absent.
+   */
+  resistance?: number;
   /** Optionnel côté moteur ; retombe sur PHYSICAL si absent. */
   element?: DamageType;
   skills: SkillSet;
@@ -313,9 +322,10 @@ export interface FightResult {
 export type Archetype = 'Tank' | 'DPS' | 'Assassin' | 'Support' | 'Guerrier';
 
 /**
- * Les six caractéristiques utilisées par le score global et le système
- * d'expérience. Résistance et Régénération en sont volontairement exclues :
- * elles ne sont pas implémentées dans le moteur de combat.
+ * Les six caractéristiques portées par le score global et le système
+ * d'expérience. Résistance et Régénération vivent sur CardDefinition : elles
+ * agissent en combat mais leur poids de score et leur multiplicateur d'XP
+ * restent à arbitrer.
  */
 export interface CardStats {
   attack: number;
@@ -337,8 +347,9 @@ export interface CardDefinition {
   /** Taux entre 0 et 1. Hors système d'expérience. */
   criticalChance: number;
   /**
-   * Renseignées en base Notion, non transmises au moteur de combat tant
-   * qu'elles n'y sont pas implémentées. Voir Notion > Les cartes.
+   * Implémentées dans le moteur de combat et transmises par toCombatConfig().
+   * Restent hors du score global et du système d'expérience, qui ne portent
+   * que sur les six stats de CardStats. Voir Notion > Les cartes.
    */
   resistance?: number;
   regeneration?: number;
@@ -349,9 +360,8 @@ export interface CardDefinition {
 
 /**
  * Projette une définition de carte vers la configuration attendue par
- * POST /fight. Une simple recopie des champs communs ; `archetype`,
- * `resistance` et `regeneration` restent côté définition, jamais transmis
- * au moteur.
+ * POST /fight. Une simple recopie des champs communs ; seul `archetype`
+ * reste côté définition, jamais transmis au moteur.
  *
  * Reste volontairement une fonction pure, sans connaissance de l'XP :
  * shared-types est partagé avec le combat-engine et ne doit pas dépendre
@@ -372,6 +382,8 @@ export function toCombatConfig(definition: CardDefinition): CardConfig {
     agility: definition.stats.agility,
     accuracy: definition.stats.accuracy,
     criticalChance: definition.criticalChance,
+    regeneration: definition.regeneration,
+    resistance: definition.resistance,
     element: definition.element,
     skills: definition.skills,
     behaviors: definition.behaviors,

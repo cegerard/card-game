@@ -81,6 +81,9 @@ export class TurnManager {
         });
       });
       this.processCardSkill(card, steps);
+      // Regeneration runs before the status ticks: the card mends itself, then
+      // the poison bites into what is left.
+      this.processCardRegeneration(card, steps);
       this.processCardEffectStates(card, steps);
     });
 
@@ -97,6 +100,18 @@ export class TurnManager {
     steps.push(
       ...skillResultsToSteps(card, appliedSkills, this.endEventProcessor),
     );
+  }
+
+  private processCardRegeneration(card: FightingCard, steps: Step[]) {
+    const healed = card.regenerate();
+    if (healed <= 0) return;
+
+    steps.push({
+      kind: StepKind.Regenerated,
+      card: card.identityInfo,
+      healed,
+      remainingHealth: card.actualHealth,
+    });
   }
 
   private processCardEffectStates(card: FightingCard, steps: Step[]) {

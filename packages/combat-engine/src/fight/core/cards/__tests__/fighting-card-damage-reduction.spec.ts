@@ -50,6 +50,7 @@ function createCard(options: {
       damageReduction,
     },
     { dodge: new SimpleDodge() },
+    new MathRandomizer(),
     Element.PHYSICAL,
   );
 }

@@ -93,13 +93,13 @@ describe('toCombatConfig', () => {
     expect('archetype' in config).toBe(false);
   });
 
-  it('does not leak resistance onto the combat config', () => {
+  it('carries resistance onto the combat config', () => {
     const config = toCombatConfig(makeDefinition());
-    expect('resistance' in config).toBe(false);
+    expect(config.resistance).toBe(50);
   });
 
-  it('does not leak regeneration onto the combat config', () => {
+  it('carries regeneration onto the combat config', () => {
     const config = toCombatConfig(makeDefinition());
-    expect('regeneration' in config).toBe(false);
+    expect(config.regeneration).toBe(45);
   });
 });

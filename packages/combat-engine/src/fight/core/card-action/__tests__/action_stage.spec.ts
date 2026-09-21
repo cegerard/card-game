@@ -80,6 +80,7 @@ function makeCard(
     },
     { simpleAttack, special, others: [] },
     { dodge: new SimpleDodge() },
+    new MathRandomizer(),
     Element.PHYSICAL,
   );
 }
@@ -374,6 +375,7 @@ describe('ActionStage', () => {
           others: [buffSkill],
         },
         { dodge: new SimpleDodge() },
+        new MathRandomizer(),
         Element.PHYSICAL,
       );
     }
@@ -398,6 +400,7 @@ describe('ActionStage', () => {
           },
           { simpleAttack: SIMPLE_ATTACK, special: HIGH_ENERGY, others: [] },
           { dodge: new SimpleDodge() },
+          new MathRandomizer(),
           Element.PHYSICAL,
         );
         const observer = makeObserverCard(ARIONIS_ID, 0.6);
@@ -441,6 +444,7 @@ describe('ActionStage', () => {
           },
           { simpleAttack: LOW_ACCURACY, special: HIGH_ENERGY, others: [] },
           { dodge: new SimpleDodge() },
+          new MathRandomizer(),
           Element.PHYSICAL,
         );
         arionis = new FightingCard(
@@ -457,6 +461,7 @@ describe('ActionStage', () => {
           },
           { simpleAttack: SIMPLE_ATTACK, special: HIGH_ENERGY, others: [] },
           { dodge: new SimpleDodge() },
+          new MathRandomizer(),
           Element.PHYSICAL,
         );
         const observer = makeObserverCard(ARIONIS_ID, 0.6);
@@ -519,6 +524,7 @@ describe('ActionStage', () => {
         },
         { simpleAttack: SIMPLE_ATTACK, special: HIGH_ENERGY, others },
         { dodge: new SimpleDodge() },
+        new MathRandomizer(),
         Element.PHYSICAL,
       );
     }
@@ -599,6 +605,7 @@ describe('ActionStage', () => {
           },
           { simpleAttack: SIMPLE_ATTACK, special: HIGH_ENERGY, others: [] },
           { dodge: new SimpleDodge() },
+          new MathRandomizer(),
           Element.PHYSICAL,
         );
         const aegis = makeDefender(1, [makeRiposteSkill(AEGIS_ID)]);
@@ -642,6 +649,7 @@ describe('ActionStage', () => {
             others: [makeRiposteSkill(AEGIS_ID)],
           },
           { dodge: new SimpleDodge() },
+          new MathRandomizer(),
           Element.PHYSICAL,
         );
         const player1 = new Player('Player 1', [attacker]);

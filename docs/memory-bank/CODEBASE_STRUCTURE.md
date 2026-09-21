@@ -124,7 +124,7 @@ cards/
 
 This allows special attacks to perform their primary action (damage/healing) while optionally applying buffs to a separate set of targets using independent targeting strategies.
 
-**AlterationDetail Discriminated Union**: `Buff` and `Debuff` are members of `AlterationDetail` discriminated by `polarity: 'buff' | 'debuff'`. `AlterationType` covers attack, defense, agility, accuracy, speed and criticalChance; every stat getter runs through `computeActualStat`, and turn order reads `actualSpeed` in both card selectors. Both share `AlterationDetailBase` (type, value, duration, terminationEvent?, powerId?). Located in `@types/alteration/alteration-detail.ts` (not `@types/buff/`).
+**AlterationDetail Discriminated Union**: `Buff` and `Debuff` are members of `AlterationDetail` discriminated by `polarity: 'buff' | 'debuff'`. `AlterationType` covers attack, defense, agility, accuracy, speed, criticalChance, regeneration and resistance; every stat getter runs through `computeActualStat`, and turn order reads `actualSpeed` in both card selectors. Both share `AlterationDetailBase` (type, value, duration, terminationEvent?, powerId?). Located in `@types/alteration/alteration-detail.ts` (not `@types/buff/`).
 
 **Buff Type**: `Buff` has an optional `terminationEvent?: string` field. A buff with this set persists until the named event fires (instead of, or in addition to, a turn duration).
 
@@ -137,6 +137,10 @@ This allows special attacks to perform their primary action (damage/healing) whi
 **Marked Target Bonus**: `SpecialAttack` accepts an optional `MarkedTargetBonus` (damage type + multiplier). The multiplier is applied to the attack power when the defender already carries a mark of that type, evaluated before the special applies its own effects.
 
 **Elemental Mark Mechanic**: `MarkAttackEffect` applies an `ElementalMark` (damage type + rate per stack + stack cap) on hit, reusing the `effects?: AttackEffect[]` pipeline and its optional `probability`. `FightingCard` counts stacks per damage type (`applyMark()`, `markStacks()`, `markAmplifier()`) and `DamageCalculator` amplifies only the matching damage compositions. Marks cap at `maxStacks`, never expire, and each application emits a `mark_applied` step. An optional `triggeredDebuff` is rolled when the mark lands.
+
+**Regeneration Stat**: an optional base stat (default 0). `FightingCard.regenerate()` restores `actualRegeneration` raw health points and `TurnManager` calls it at each turn end, before the status ticks, emitting a `regenerated` step when the heal is non-zero. A `regeneration` buff raises it like any other stat.
+
+**Resistance Stat**: an optional base stat (default 0) driving the chance to refuse an incoming status effect or stat debuff — `resistance / 200`. `FightingCard.resists()` is consulted inside `setState()` and `applyDebuff()`, so every source is covered without threading a parameter and a refusal reuses the existing no-op plumbing (no step emitted). Buffs are never opposed. This is why the constructor takes a `Randomizer`; a card without resistance never rolls.
 
 **Shield Mechanic**: `FightingCard` has an optional shield buffer (`applyShield(rate, duration)` computes `points = rate * maxHealth`). Damage first absorbs shield points before hitting health (`applyFinalDamage()` returns `{ damageToHealth, shieldAbsorbed }`). Shield breaks when points hit 0 → `shield_broken` step. `TurnManager` decrements shield duration each turn; reaching 0 → `shield_expired` step. Special skills can include a `shieldApplication?: ShieldApplicationDto` to apply shields post-action to a separate set of targets.
 
@@ -153,7 +157,7 @@ This allows special attacks to perform their primary action (damage/healing) whi
 ```
 fight-simulator/
 ├── fight.ts                # Main fight orchestrator
-├── turn-manager.ts         # Turn-end effects: buff/debuff duration, state effects, shield duration
+├── turn-manager.ts         # Turn-end effects: buff/debuff duration, regeneration, state effects, shield duration
 ├── action_stage.ts         # Action resolution (attacks, specials, healing); triggers reactive skills after HP changes; dispatches damage-taken + ally-health events
 ├── card-death-subscriber.ts # Card death event handling interface
 ├── death-skill-handler.ts  # Triggers ally-death skills on surviving cards; drainable steps
@@ -167,7 +171,7 @@ fight-simulator/
 │   └── speed-weighted-card-pool.ts # Speed-based selection
 └── @types/                 # Fight result types
     ├── fight-result.ts     # Complete fight outcome
-    ├── step.ts             # Turn step recording (includes shield_applied, shield_broken, shield_expired, damage_mitigated, mark_applied)
+    ├── step.ts             # Turn step recording (includes shield_applied, shield_broken, shield_expired, damage_mitigated, mark_applied, regenerated)
     ├── action-report.ts    # Action reporting
     ├── attack-report.ts    # Attack details
     ├── healing-report.ts   # Healing details
@@ -180,6 +184,7 @@ fight-simulator/
     ├── status-change-report.ts # Status changes
     ├── shield-report.ts    # ShieldAppliedReport, ShieldBrokenReport, ShieldExpiredReport
     ├── mark-report.ts      # MarkAppliedReport: { kind: 'mark_applied', card, damageType, stacks }
+    ├── regeneration-report.ts # RegeneratedReport: { kind: 'regenerated', card, healed, remainingHealth }
     ├── transformation-report.ts # TransformationStartedReport + TransformationEndedReport (healthCost on exit)
     ├── survived-report.ts  # SurvivedReport: { kind: 'survived', name, card }
     ├── damage-mitigated-report.ts # DamageMitigatedReport: { kind: 'damage_mitigated', name, card }

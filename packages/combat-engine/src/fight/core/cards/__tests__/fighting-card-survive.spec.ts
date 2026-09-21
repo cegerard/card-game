@@ -1,3 +1,4 @@
+import { MathRandomizer } from '../../../tools/math-randomizer';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 import { SurviveSkill } from '../skills/survive';
 import { FightingCard } from '../fighting-card';
@@ -32,6 +33,7 @@ function createCardWithSurvive(health: number): FightingCard {
       survive,
     },
     { dodge: new SimpleDodge() },
+    new MathRandomizer(),
     Element.PHYSICAL,
   );
 }
