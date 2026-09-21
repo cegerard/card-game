@@ -20,6 +20,7 @@ import {
   SpecialKind,
   SkillKind,
   BuffType,
+  ElementDto,
   TriggerEvent,
   TargetingStrategy,
 } from './dto/fight-data.dto';
@@ -41,6 +42,7 @@ import { AttackEffect } from '../core/cards/@types/attack/attack-effect';
 import { BurnAttackEffect } from '../core/cards/@types/attack/attack-burn-effect';
 import { FreezeAttackEffect } from '../core/cards/@types/attack/attack-freeze-effect';
 import { StuntAttackEffect } from '../core/cards/@types/attack/attack-stunt-effect';
+import { Element } from '../core/cards/@types/damage/element';
 import { MarkAttackEffect } from '../core/cards/@types/attack/attack-mark-effect';
 import { ElementalMark } from '../core/cards/@types/mark/elemental-mark';
 import { MarkedTargetBonus } from '../core/cards/@types/mark/marked-target-bonus';
@@ -282,7 +284,29 @@ export class FightController {
         dodge: buildDodgeStrategy(cardData.behaviors.dodge),
       },
       new MathRandomizer(),
+      this.mapElement(cardData.element),
     );
+  }
+
+  /**
+   * Maps the DTO element onto its domain counterpart. The two enums carry the
+   * same string values, but going through an explicit map keeps an unknown
+   * element loud instead of silently reaching the elemental matrix.
+   */
+  private mapElement(element?: ElementDto): Element {
+    if (element === undefined) return Element.PHYSICAL;
+
+    const ELEMENT_MAP: Record<ElementDto, Element> = {
+      [ElementDto.PHYSICAL]: Element.PHYSICAL,
+      [ElementDto.FIRE]: Element.FIRE,
+      [ElementDto.WATER]: Element.WATER,
+      [ElementDto.EARTH]: Element.EARTH,
+      [ElementDto.AIR]: Element.AIR,
+    };
+
+    const result = ELEMENT_MAP[element];
+    if (!result) throw new Error(`Unknown element: ${element}`);
+    return result;
   }
 
   private buildEffects(effectDtos?: EffectDto[]): AttackEffect[] | undefined {
