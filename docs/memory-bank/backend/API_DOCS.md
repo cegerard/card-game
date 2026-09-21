@@ -60,6 +60,8 @@ Simulates a turn-based card battle between two players.
   agility: number,
   accuracy: number,
   criticalChance: number,
+  regeneration?: number,       // Health points restored at each turn end (default 0)
+  resistance?: number,         // Chance to refuse a status or debuff = resistance / 200 (default 0)
   skills: {
     special: SpecialDto,      // Ultimate ability (attack or healing)
     simpleAttack: SimpleAttackDto,  // Basic attack
@@ -152,7 +154,7 @@ Simulates a turn-based card battle between two players.
   requiresStance?: string,      // Skill only fires while its owner holds that stance (see SpecialDto.stanceActivation)
   // SHIELD-specific fields:
   activationCondition?: { type?: "health-threshold" | "ally-presence" | "probability", operator?: "below" | "above", threshold?: number, allyName?: string, probability?: number },  // Health ratio threshold (0–1) for SHIELD/ally-health-below activation; type "probability" gates any triggered ALTERATION skill on a per-event roll
-  buffType?: "attack" | "defense" | "agility" | "accuracy" | "speed" | "criticalChance",  // Required if kind=BUFF
+  buffType?: "attack" | "defense" | "agility" | "accuracy" | "speed" | "criticalChance" | "regeneration" | "resistance",  // Required if kind=BUFF
   duration?: number,            // Required if kind=BUFF (0 = infinite: permanent or event-bound)
   stackId?: string,             // ALTERATION debuff: name of the stack pile it counts against
   debuffMaxStacks?: number,     // Cap of that pile; goes with stackId, both or neither
@@ -192,7 +194,7 @@ Simulates a turn-based card battle between two players.
   stacks?: number,            // MARK only: stacks applied per trigger (default 1)
   probability?: number,       // 0-1 chance to apply effect on hit; omit for guaranteed application
   triggeredDebuff?: {         // Optional debuff applied on effect hit (not supported on STUNT)
-    debuffType: "attack" | "defense" | "agility" | "accuracy" | "speed" | "criticalChance",
+    debuffType: "attack" | "defense" | "agility" | "accuracy" | "speed" | "criticalChance" | "regeneration" | "resistance",
     debuffRate: number,
     duration: number,
     probability: number,
@@ -208,7 +210,7 @@ Simulates a turn-based card battle between two players.
 
 ```typescript
 {
-  type: "attack" | "defense" | "agility" | "accuracy" | "speed" | "criticalChance",
+  type: "attack" | "defense" | "agility" | "accuracy" | "speed" | "criticalChance" | "regeneration" | "resistance",
   rate: number,               // Buff strength multiplier
   duration: number,           // Number of turns buff lasts (0 = infinite: permanent if no terminationEvent, event-bound if terminationEvent is set)
   targetingStrategy: TargetingStrategy,
@@ -222,7 +224,7 @@ Simulates a turn-based card battle between two players.
 ```typescript
 {
   [stepNumber: number]: {
-    kind: "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "debuff_removed" | "buff_expired" | "debuff_expired" | "effect_removed" | "targeting_override" | "targeting_reverted" | "shield_applied" | "shield_broken" | "shield_expired" | "survived" | "damage_mitigated" | "stance_started" | "stance_ended" | "mark_applied" | "transformation_started" | "transformation_ended" | "fight_end",
+    kind: "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "debuff_removed" | "buff_expired" | "debuff_expired" | "effect_removed" | "targeting_override" | "targeting_reverted" | "shield_applied" | "shield_broken" | "shield_expired" | "survived" | "damage_mitigated" | "stance_started" | "stance_ended" | "mark_applied" | "regenerated" | "transformation_started" | "transformation_ended" | "fight_end",
     // Additional properties vary by step kind
   }
 }
@@ -381,6 +383,16 @@ Simulates a turn-based card battle between two players.
 }
 ```
 
+**`regenerated` step** (`RegeneratedReport`): Emitted at turn-end when a card restores health through its `regeneration` stat. Absent when the card carries no regeneration or is already at full health.
+```typescript
+{
+  kind: "regenerated",
+  card: CardInfo,
+  healed: number,          // Health points actually restored, clamped at max health
+  remainingHealth: number
+}
+```
+
 **`transformation_started` step** (`TransformationStartedReport`): Emitted when a TRANSFORMATION skill fires.
 ```typescript
 {
@@ -531,6 +543,8 @@ An elemental `MARK` is not a status effect and no immunity refuses it.
 - `accuracy`: Increases accuracy stat
 - `speed`: Increases the speed stat, which drives turn order in both card selectors
 - `criticalChance`: Increases the critical hit rate. The altered value is capped at 1, and like every other stat the buff value is a rate applied to the base stat, so a card with a base rate of 0.1 needs a rate of 2.5 to reach 0.35
+- `regeneration`: Increases the health points restored at each turn end
+- `resistance`: Increases the chance to refuse an incoming status effect or stat debuff
 
 ## Validation
 

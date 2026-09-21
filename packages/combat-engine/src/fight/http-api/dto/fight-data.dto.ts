@@ -84,6 +84,8 @@ export enum BuffType {
   ACCURACY = 'accuracy',
   SPEED = 'speed',
   CRITICAL_CHANCE = 'criticalChance',
+  REGENERATION = 'regeneration',
+  RESISTANCE = 'resistance',
 }
 
 export enum Effect {
@@ -700,6 +702,16 @@ export class FightingCardDto {
 
   @IsNumber()
   criticalChance: number;
+
+  /** Health points restored to itself at each turn end. Defaults to 0. */
+  @IsOptional()
+  @IsNumber()
+  regeneration?: number;
+
+  /** Drives the chance to refuse an incoming status or debuff. Defaults to 0. */
+  @IsOptional()
+  @IsNumber()
+  resistance?: number;
 
   @IsOptional()
   @IsEnum(ElementDto)

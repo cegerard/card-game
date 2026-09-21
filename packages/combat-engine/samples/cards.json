@@ -467,6 +467,8 @@
     "agility": 35,
     "accuracy": 60,
     "criticalChance": 0.03,
+    "regeneration": 55,
+    "resistance": 75,
     "element": "EARTH",
     "skills": {
       "special": {
@@ -553,6 +555,21 @@
           "activationCondition": {
             "type": "health-threshold",
             "operator": "above",
+            "threshold": 0.3
+          }
+        },
+        {
+          "kind": "ALTERATION",
+          "name": "Endurance séculaire - Second souffle",
+          "event": "turn-end",
+          "polarity": "buff",
+          "buffType": "regeneration",
+          "rate": 0.15,
+          "duration": 1,
+          "targetingStrategy": "self",
+          "activationCondition": {
+            "type": "health-threshold",
+            "operator": "below",
             "threshold": 0.3
           }
         },

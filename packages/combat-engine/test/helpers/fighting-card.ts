@@ -29,6 +29,8 @@ import { Element } from '../../src/fight/core/cards/@types/damage/element';
 import { DamageComposition } from '../../src/fight/core/cards/@types/damage/damage-composition';
 import { DamageType } from '../../src/fight/core/cards/@types/damage/damage-type';
 import { ShieldApplication } from '../../src/fight/core/cards/@types/shield/shield-application';
+import { Randomizer } from '../../src/fight/core/randomizer';
+import { MathRandomizer } from '../../src/fight/tools/math-randomizer';
 
 type effect = {
   type: string;
@@ -50,6 +52,9 @@ type FightingCardParams = {
   criticalChance?: number;
   agility?: number;
   accuracy?: number;
+  regeneration?: number;
+  resistance?: number;
+  randomizer?: Randomizer;
   element?: Element;
   skills?: {
     simpleAttack?: {
@@ -490,6 +495,8 @@ export function createFightingCard(
       criticalChance,
       agility,
       accuracy,
+      regeneration: params.regeneration,
+      resistance: params.resistance,
     },
     {
       simpleAttack: createSimpleAttack({
@@ -505,6 +512,7 @@ export function createFightingCard(
     {
       dodge: new SimpleDodge(),
     },
+    params.randomizer ?? new MathRandomizer(),
     element,
   );
 }

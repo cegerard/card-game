@@ -26,6 +26,7 @@ import { SurvivedReport } from './survived-report';
 import { DamageMitigatedReport } from './damage-mitigated-report';
 import { StanceStartedReport, StanceEndedReport } from './stance-report';
 import { MarkAppliedReport } from './mark-report';
+import { RegeneratedReport } from './regeneration-report';
 import {
   TransformationStartedReport,
   TransformationEndedReport,
@@ -55,6 +56,7 @@ export enum StepKind {
   StanceStarted = 'stance_started',
   StanceEnded = 'stance_ended',
   MarkApplied = 'mark_applied',
+  Regenerated = 'regenerated',
   TransformationStarted = 'transformation_started',
   TransformationEnded = 'transformation_ended',
 }
@@ -83,5 +85,6 @@ export type Step =
   | StanceStartedReport
   | StanceEndedReport
   | MarkAppliedReport
+  | RegeneratedReport
   | TransformationStartedReport
   | TransformationEndedReport;

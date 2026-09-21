@@ -26,12 +26,19 @@ import { ElementalMark } from './@types/mark/elemental-mark';
 import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
 import { NamedAttackResult } from './@types/action-result/named-attack-result';
 import { round2 } from '../../tools/round';
+import { Randomizer } from '../randomizer';
 import { Shield } from './@types/shield/shield';
 import { Stance } from './@types/stance/stance';
 import {
   StatusCategory,
   statusCategoryOf,
 } from './@types/state/status-category';
+
+/**
+ * Turns the resistance stat into a refusal chance. Chosen so the 20-80 design
+ * range of the stat spans 10% to 40% of incoming statuses and debuffs refused.
+ */
+const RESISTANCE_REFUSAL_DIVISOR = 200;
 
 export type FinalDamageResult = {
   damageToHealth: number;
@@ -84,7 +91,10 @@ export class FightingCard {
   private readonly agility: number;
   private readonly accuracy: number;
   private readonly criticalChance: number;
+  private readonly regeneration: number;
+  private readonly resistance: number;
   private readonly element: Element;
+  private readonly randomizer: Randomizer;
 
   // Dynamic Stats
   private specialEnergy: number = 0;
@@ -150,6 +160,8 @@ export class FightingCard {
       agility: number;
       accuracy: number;
       criticalChance: number;
+      regeneration?: number;
+      resistance?: number;
     },
     skills: {
       simpleAttack: AttackSkill;
@@ -161,6 +173,7 @@ export class FightingCard {
     behaviors: {
       dodge: DodgeBehavior;
     },
+    randomizer: Randomizer,
     element: Element = Element.PHYSICAL,
   ) {
     this.id = id;
@@ -172,7 +185,10 @@ export class FightingCard {
     this.agility = stats.agility;
     this.accuracy = stats.accuracy;
     this.criticalChance = stats.criticalChance;
+    this.regeneration = stats.regeneration ?? 0;
+    this.resistance = stats.resistance ?? 0;
     this.element = element;
+    this.randomizer = randomizer;
     this.simpleAttack = skills.simpleAttack;
     this.special = skills.special;
     this.dodgeBehavior = behaviors.dodge;
@@ -227,6 +243,15 @@ export class FightingCard {
     return this.computeActualStat(this.agility, 'agility');
   }
 
+  /** Health points the card restores to itself at each turn end. */
+  public get actualRegeneration(): number {
+    return this.computeActualStat(this.regeneration, 'regeneration');
+  }
+
+  public get actualResistance(): number {
+    return this.computeActualStat(this.resistance, 'resistance');
+  }
+
   public get actualEnergy(): number {
     return this.specialEnergy;
   }
@@ -273,11 +298,14 @@ export class FightingCard {
 
   /**
    * Applies a status state on the card. Returns false when the card refuses
-   * it, either because it is dead or because it is immune to status effects.
+   * it, because it is dead, because it is immune to that status category, or
+   * because its resistance won the roll.
    */
   public setState(newState: CardState): boolean {
     if (this.isDead() || this.isImmuneTo(statusCategoryOf(newState.type)))
       return false;
+
+    if (this.resists()) return false;
 
     if (newState.type === 'poison') {
       this.poisoned = newState;
@@ -823,8 +851,9 @@ export class FightingCard {
 
   /**
    * Applies a debuff and returns it, or returns undefined when `stacking` caps
-   * the pile it belongs to and that pile is already full. A refused
-   * application changes nothing and is reported by nobody.
+   * the pile it belongs to and that pile is already full, or when the card
+   * resistance won the roll. A refused application changes nothing and is
+   * reported by nobody.
    */
   public applyDebuff(
     debuffType: AlterationType,
@@ -837,6 +866,8 @@ export class FightingCard {
     if (stacking && this.debuffStacks(stacking.id) >= stacking.maxStacks) {
       return undefined;
     }
+
+    if (this.resists()) return undefined;
 
     const debuff: Debuff = {
       polarity: 'debuff',
@@ -869,6 +900,28 @@ export class FightingCard {
     return removed;
   }
 
+  /**
+   * Rolls the card resistance against one incoming status effect or stat
+   * debuff. The refusal chance is the resistance over
+   * `RESISTANCE_REFUSAL_DIVISOR`, so the 20-80 design range spans 10% to 40%.
+   */
+  private resists(): boolean {
+    const resistance = this.actualResistance;
+    if (resistance <= 0) return false;
+
+    return this.randomizer.random() < resistance / RESISTANCE_REFUSAL_DIVISOR;
+  }
+
+  /**
+   * Restores the regeneration stat as raw health points, and returns what was
+   * actually healed — 0 at full health, where nothing is worth reporting.
+   */
+  public regenerate(): number {
+    if (this.isDead()) return 0;
+
+    return this.heal(this.actualRegeneration);
+  }
+
   private computeActualStat(base: number, type: AlterationType): number {
     const buffsSum = this.buffs
       .filter((buff) => buff.type === type)
@@ -896,6 +949,10 @@ export class FightingCard {
         return round2(rate * this.speed);
       case 'criticalChance':
         return round2(rate * this.criticalChance);
+      case 'regeneration':
+        return round2(rate * this.regeneration);
+      case 'resistance':
+        return round2(rate * this.resistance);
       default:
         throw new Error(`Unknown attribute type: ${type}`);
     }

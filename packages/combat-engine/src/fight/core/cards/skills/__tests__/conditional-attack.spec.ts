@@ -1,3 +1,4 @@
+import { MathRandomizer } from '../../../../tools/math-randomizer';
 import { EveryNTurnsCondition } from '../../@types/attack/conditions/every-n-turns-condition';
 import { ConditionalAttack } from '../conditional-attack';
 import { SimpleAttack } from '../simple-attack';
@@ -64,6 +65,7 @@ function makeCard(opts: {
       others: opts.conditionalAttack ? [opts.conditionalAttack] : [],
     },
     { dodge: new SimpleDodge() },
+    new MathRandomizer(),
     Element.PHYSICAL,
   );
 }
@@ -252,6 +254,7 @@ describe('ConditionalAttack integration via Fight (interval=3)', () => {
         others: [ca],
       },
       { dodge: new SimpleDodge() },
+      new MathRandomizer(),
       Element.PHYSICAL,
     );
 
@@ -278,6 +281,7 @@ describe('ConditionalAttack integration via Fight (interval=3)', () => {
         others: [],
       },
       { dodge: new SimpleDodge() },
+      new MathRandomizer(),
       Element.PHYSICAL,
     );
 

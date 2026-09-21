@@ -1,3 +1,4 @@
+import { MathRandomizer } from '../../../tools/math-randomizer';
 import { SpecialAttack } from '../skills/special-attack';
 import { SurviveSkill } from '../skills/survive';
 import { SimpleAttack } from '../skills/simple-attack';
@@ -36,6 +37,7 @@ function createDefenderWithSurvive(): FightingCard {
       survive: new SurviveSkill('Last Stand'),
     },
     { dodge: new SimpleDodge() },
+    new MathRandomizer(),
     Element.PHYSICAL,
   );
 }
