@@ -6,6 +6,7 @@ import { AllAllies } from '../core/targeting-card-strategies/all-allies';
 import { Launcher } from '../core/targeting-card-strategies/launcher';
 import { AlliedCardByIdStrategy } from '../core/targeting-card-strategies/allied-card-by-id';
 import { LastAttackerOfAllyTargetingStrategy } from '../core/targeting-card-strategies/last-attacker-of-ally';
+import { MostWoundedAllyStrategy } from '../core/targeting-card-strategies/most-wounded-ally';
 import { TargetingStrategy } from './dto/fight-data.dto';
 import { TargetingCardStrategy } from '../core/targeting-card-strategies/targeting-card-strategy';
 
@@ -21,7 +22,15 @@ const STATIC_STRATEGY_MAP: Record<string, TargetingCardStrategy> = {
 export function buildTargetingStrategy(
   strategyName: string,
   targetCardId?: string,
+  threshold?: number,
 ): TargetingCardStrategy {
+  if (strategyName === TargetingStrategy.MOST_WOUNDED_ALLY) {
+    if (threshold === undefined)
+      throw new Error(
+        `${strategyName} strategy requires activationCondition.threshold`,
+      );
+    return new MostWoundedAllyStrategy(threshold);
+  }
   if (strategyName === TargetingStrategy.LINKED_ALLY) {
     if (!targetCardId)
       throw new Error(`${strategyName} strategy requires targetCardId`);
