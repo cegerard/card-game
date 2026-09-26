@@ -113,6 +113,11 @@ export enum TriggerEvent {
   ANY_ALLY_HEALTH_BELOW = 'any-ally-health-below',
 }
 
+export enum HealBasisDto {
+  SOURCE_ATTACK = 'source-attack',
+  TARGET_MAX_HEALTH = 'target-max-health',
+}
+
 export enum TargetingStrategy {
   POSITION_BASED = 'position-based',
   TARGET_ALL = 'target-all',
@@ -627,6 +632,11 @@ export class OtherSkillDto {
   @IsString()
   @IsNotEmpty()
   endEvent?: string;
+
+  // HEALING only: what the rate is a share of. Defaults to source-attack.
+  @IsOptional()
+  @IsEnum(HealBasisDto)
+  healBasis?: HealBasisDto;
 
   @IsOptional()
   @IsString()

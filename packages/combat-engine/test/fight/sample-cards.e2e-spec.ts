@@ -37,6 +37,28 @@ describe('samples/cards.json', () => {
     await app.close();
   });
 
+  // `all-owner-cards` targets the living cards, so what a team-wide shield
+  // should cover depends on who is still standing when it lands, not on the
+  // deck size. The sample deck fights itself with real dodges, criticals and
+  // probabilities, so an ally can fall before the special is charged.
+  const teamOf = (card: any) => card.deckIdentity.split('-')[0];
+
+  function livingTeammatesAt(stepIndex: number, team: string): number {
+    const fallen = new Set(
+      steps
+        .slice(0, stepIndex)
+        .filter(
+          (s) =>
+            s.kind === 'status_change' &&
+            s.status === 'dead' &&
+            teamOf(s.card) === team,
+        )
+        .map((s) => s.card.deckIdentity),
+    );
+
+    return sampleCards.length - fallen.size;
+  }
+
   it('is a deck the engine accepts and can fight with', () => {
     expect(steps.length).toBeGreaterThan(0);
   });
@@ -57,12 +79,15 @@ describe('samples/cards.json', () => {
     expect(shields.length).toBeGreaterThan(0);
   });
 
-  it('shields every card of the caster team at once', () => {
-    const shield = steps.find(
+  it('shields every living card of the caster team at once', () => {
+    const index = steps.findIndex(
       (s) => s.kind === 'shield_applied' && s.name === 'Forteresse des Âges',
     );
+    const shield = steps[index];
 
-    expect(shield.targets.length).toBe(sampleCards.length);
+    expect(shield.targets.length).toBe(
+      livingTeammatesAt(index, teamOf(shield.source)),
+    );
   });
 
   it('lets Aegis counter the card that hit him', () => {

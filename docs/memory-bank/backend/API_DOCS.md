@@ -161,6 +161,7 @@ Simulates a turn-based card battle between two players.
   terminationEvent?: string,    // Event name that removes this skill's buff/targeting override when fired
   activationLimit?: number,     // Max activations (>=1) before skill lifecycle ends — supported for HEALING and TARGETING_OVERRIDE kinds
   endEvent?: string,            // Event emitted when activation limit is reached — supported for HEALING and TARGETING_OVERRIDE kinds
+  healBasis?: "source-attack" | "target-max-health",  // HEALING only: what the rate is a share of (default source-attack)
   powerId?: string,             // Groups multiple skills as a composite power (must share same event + terminationEvent)
   // DORMANT trigger fields (required when event="dormant"):
   activationEvent?: TriggerEvent, // Event that activates the dormant skill (e.g., "ally-death")
@@ -519,6 +520,15 @@ Simulates a turn-based card battle between two players.
 - `SURVIVE`: One-time fatal-blow interception — no `event`, no `targetingStrategy`; only `name` required; extracted from `others[]` before normal skill loop
 - `DAMAGE_REDUCTION`: Removes a share of every incoming hit — no `event`, no `targetingStrategy`; requires `rate` (share removed, in `]0, 1]`) and accepts an optional `probability` making it a per-hit roll. Like SURVIVE it is extracted from `others[]` and consulted inside `applyFinalDamage()`, so it mitigates the very hit that triggers it. Applies after the freeze/stunt amplifiers and before the shield buffer, so a shield absorbs only the reduced damage. Status effect ticks bypass it, as they bypass the shield
 - `TRANSFORMATION`: One-shot health-reactive transformation — no `event`, no `targetingStrategy`; requires `duration` and an `activationCondition` threshold. Applies its own `statAlterations` and, for the same duration, an optional `lifestealRate` (heals that share of max health on every landed attack) and `statusImmunity`. An optional `endCostRate` charges that share of max health when the transformation ends, never below one health point. Fires once per fight
+
+### HealBasis
+
+What a `HEALING` skill's `rate` is a share of. Defaults to `source-attack`, which every card written before this option keeps.
+
+- `source-attack`: the healer's `actualAttack` — the heal grows with the caster, which suits a support whose offence and care scale together
+- `target-max-health`: the receiver's maximum health — the same heal whoever casts it, which is what a kit phrased as "the ally recovers 10% of its health per turn" means
+
+Both go through `applyHealing()` (`skills/heal-basis.ts`), shared with `SpecialHealing`; an unknown basis throws. The heal is capped at the target's maximum health either way.
 
 ### StatusCategory
 

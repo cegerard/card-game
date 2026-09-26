@@ -3,6 +3,7 @@ import { FightingContext } from '../@types/fighting-context';
 import { FightingCard } from '../fighting-card';
 import { Special } from './special';
 import { SpecialResult } from '../@types/action-result/special-result';
+import { applyHealing } from './heal-basis';
 
 const ENERGY_INCREASE_FACTOR = 10;
 
@@ -30,7 +31,7 @@ export class SpecialHealing implements Special {
     );
 
     const actionResults = targetedCards.map((target) => {
-      const healed = target.heal(source.actualAttack * this.rate);
+      const healed = applyHealing(source, target, this.rate);
       const remainingHealth = target.actualHealth;
 
       return { healed, target, remainingHealth };

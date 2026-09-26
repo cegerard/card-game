@@ -494,6 +494,7 @@ export class FightController {
           skillData.powerId,
           skillData.activationLimit,
           skillData.endEvent,
+          skillData.healBasis,
         );
       case SkillKind.ALTERATION:
         if (!skillData.buffType) {

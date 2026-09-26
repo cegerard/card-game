@@ -69,6 +69,7 @@ cards/
 │   ├── special-healing.ts  # Healing ultimate
 │   ├── skill.ts            # Event-triggered abilities + SkillKind enum (includes Shield)
 │   ├── healing.ts          # Healing skill
+│   ├── heal-basis.ts       # HealBasis ('source-attack' | 'target-max-health') + applyHealing(), shared with SpecialHealing
 │   ├── conditional-attack.ts  # Attack triggered conditionally by event
 │   ├── targeting-override.ts  # Overrides card attack targeting strategy
 │   ├── shield.ts           # SHIELD skill: health-reactive, edge-triggered on threshold cross
