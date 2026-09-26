@@ -142,6 +142,8 @@ This allows special attacks to perform their primary action (damage/healing) whi
 
 **Resistance Stat**: an optional base stat (default 0) driving the chance to refuse an incoming status effect or stat debuff — `resistance / 200`. `FightingCard.resists()` is consulted inside `setState()` and `applyDebuff()`, so every source is covered without threading a parameter and a refusal reuses the existing no-op plumbing (no step emitted). Buffs are never opposed. This is why the constructor takes a `Randomizer`; a card without resistance never rolls.
 
+**Dynamic Ally Targeting**: `AnyAllyHealthBelowThresholdTrigger` (event `any-ally-health-below`) fires when **any** ally crosses a health threshold downward, edge-triggered per ally and skipping its owner, where `AllyHealthBelowThresholdTrigger` watches one ally named up front. `MostWoundedAllyStrategy` (targeting `most-wounded-ally`) resolves the target from the live board: the caster's most wounded living ally below the same threshold, caster excluded, nobody on a healthy team. Together they express a guardian power on a deck the player composes, where no `targetCardId` can be hard-coded.
+
 **Shield Mechanic**: `FightingCard` has an optional shield buffer (`applyShield(rate, duration)` computes `points = rate * maxHealth`). Damage first absorbs shield points before hitting health (`applyFinalDamage()` returns `{ damageToHealth, shieldAbsorbed }`). Shield breaks when points hit 0 → `shield_broken` step. `TurnManager` decrements shield duration each turn; reaching 0 → `shield_expired` step. Special skills can include a `shieldApplication?: ShieldApplicationDto` to apply shields post-action to a separate set of targets.
 
 **TRANSFORMATION Skill Kind (Reactive)**: `TransformationSkill` is a one-shot health-reactive skill. It transforms its owner for a duration, applying stat alterations, an optional lifesteal (heals a share of max health on every landed hit) and an optional status immunity. `TurnManager` ends it, charging an optional health cost that never kills its owner, and emits `transformation_started` then `transformation_ended` steps.
@@ -203,7 +205,8 @@ targeting-card-strategies/
 ├── all-allies.ts              # Target all allies
 ├── launcher.ts                # Self-targeting
 ├── allied-card-by-id.ts       # Targets a specific ally by ID (returns [] if dead)
-└── last-attacker-of-ally.ts   # Targets the last card that attacked a specific ally (returns [] if dead)
+├── last-attacker-of-ally.ts   # Targets the last card that attacked a specific ally (returns [] if dead)
+└── most-wounded-ally.ts       # Targets the caster ally in the worst shape below a threshold (excludes the caster)
 ```
 
 ### HTTP API Layer (`packages/combat-engine/src/fight/http-api/`)

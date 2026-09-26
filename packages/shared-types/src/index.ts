@@ -63,6 +63,7 @@ export type TriggerEvent =
   | 'dormant'
   | 'survived'
   | 'ally-health-below'
+  | 'any-ally-health-below'
   | 'damage-taken';
 
 export type TargetingStrategy =
@@ -74,7 +75,8 @@ export type TargetingStrategy =
   | 'self'
   | 'targeted-card'
   | 'last-attacker-of-ally'
-  | 'linked-ally';
+  | 'linked-ally'
+  | 'most-wounded-ally';
 
 export type CardSelectorStrategy = 'player-by-player' | 'speed-weighted';
 
@@ -243,7 +245,8 @@ export interface OtherSkill {
   comboFinisherEffects?: EffectConfig[];
   /**
    * Requis quand event vaut ally-death, enemy-death, ally-health-below ou
-   * damage-taken.
+   * damage-taken. Jamais pour any-ally-health-below, qui surveille toute
+   * l'équipe et se passe d'une cible nommée.
    */
   targetCardId?: string;
   terminationEvent?: string;

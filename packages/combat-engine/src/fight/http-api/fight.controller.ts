@@ -64,6 +64,7 @@ import { ConditionalAttack } from '../core/cards/skills/conditional-attack';
 import { EveryNTurnsCondition } from '../core/cards/@types/attack/conditions/every-n-turns-condition';
 import { AlwaysTrueAttackCondition } from '../core/cards/@types/attack/conditions/always-true-attack-condition';
 import { AllyHealthBelowThresholdTrigger } from '../core/trigger/ally-health-below-threshold-trigger';
+import { AnyAllyHealthBelowThresholdTrigger } from '../core/trigger/any-ally-health-below-threshold-trigger';
 import { LastAttackerOfAllyTargetingStrategy } from '../core/targeting-card-strategies/last-attacker-of-ally';
 import { AlliedCardByIdStrategy } from '../core/targeting-card-strategies/allied-card-by-id';
 import { MultipleAttack } from '../core/cards/skills/multiple-attack';
@@ -266,7 +267,7 @@ export class FightController {
     }
 
     const otherSkills: Skill[] = triggeredOthers.map((skill) =>
-      this.createOtherSkill(skill),
+      this.createOtherSkill(skill, cardData.id),
     );
 
     return new FightingCard(
@@ -423,7 +424,50 @@ export class FightController {
     return { id: stackId, maxStacks };
   }
 
-  private buildTriggerForSkill(skillData: OtherSkillDto): Trigger {
+  /**
+   * Resolves the targeting a triggered skill declares. Some strategies name
+   * their target up front (`targetCardId`), others resolve it against the live
+   * board from a health threshold, so both are handed over.
+   */
+  private buildSkillTargeting(skillData: OtherSkillDto) {
+    const threshold =
+      skillData.targetingStrategy === TargetingStrategy.MOST_WOUNDED_ALLY
+        ? this.requireThreshold(skillData, skillData.targetingStrategy)
+        : skillData.activationCondition?.threshold;
+
+    return buildTargetingStrategy(
+      skillData.targetingStrategy,
+      skillData.targetCardId,
+      threshold,
+    );
+  }
+
+  /**
+   * The health threshold both the any-ally trigger and the most-wounded-ally
+   * targeting read. Missing, it is malformed input rather than a runtime
+   * failure, so it answers 400 like the other domain checks here.
+   */
+  private requireThreshold(skillData: OtherSkillDto, requiredBy: string) {
+    const threshold = skillData.activationCondition?.threshold;
+    if (threshold === undefined) {
+      throw new BadRequestException(
+        `${requiredBy} requires activationCondition.threshold`,
+      );
+    }
+    return threshold;
+  }
+
+  private buildTriggerForSkill(
+    skillData: OtherSkillDto,
+    ownerId: string,
+  ): Trigger {
+    if (skillData.event === TriggerEvent.ANY_ALLY_HEALTH_BELOW) {
+      return new AnyAllyHealthBelowThresholdTrigger(
+        this.requireThreshold(skillData, skillData.event),
+        ownerId,
+      );
+    }
+
     const dormantConfig =
       skillData.event === TriggerEvent.DORMANT
         ? {
@@ -439,17 +483,14 @@ export class FightController {
     );
   }
 
-  private createOtherSkill(skillData: OtherSkillDto): Skill {
+  private createOtherSkill(skillData: OtherSkillDto, ownerId: string): Skill {
     switch (skillData.kind) {
       case SkillKind.HEALING:
         return new Healing(
           skillData.name,
           skillData.rate,
-          this.buildTriggerForSkill(skillData),
-          buildTargetingStrategy(
-            skillData.targetingStrategy,
-            skillData.targetCardId,
-          ),
+          this.buildTriggerForSkill(skillData, ownerId),
+          this.buildSkillTargeting(skillData),
           skillData.powerId,
           skillData.activationLimit,
           skillData.endEvent,
@@ -499,11 +540,8 @@ export class FightController {
           attributeType: this.mapAlterationType(skillData.buffType),
           rate: skillData.rate,
           duration: alterationDuration,
-          trigger: this.buildTriggerForSkill(skillData),
-          targetingStrategy: buildTargetingStrategy(
-            skillData.targetingStrategy,
-            skillData.targetCardId,
-          ),
+          trigger: this.buildTriggerForSkill(skillData, ownerId),
+          targetingStrategy: this.buildSkillTargeting(skillData),
           activationCondition: alterationCondition,
           stacking: this.buildDebuffStacking(
             skillData.stackId,
@@ -558,10 +596,7 @@ export class FightController {
               skillData.name,
               skillData.hits,
               caDamages,
-              buildTargetingStrategy(
-                skillData.targetingStrategy,
-                skillData.targetCardId,
-              ),
+              this.buildSkillTargeting(skillData),
               skillData.amplifier ?? 0,
               caEffects,
               caComboFinisher,
@@ -570,10 +605,7 @@ export class FightController {
           : new SimpleAttack(
               skillData.name,
               caDamages,
-              buildTargetingStrategy(
-                skillData.targetingStrategy,
-                skillData.targetCardId,
-              ),
+              this.buildSkillTargeting(skillData),
               caEffects,
             );
         return new ConditionalAttack(
@@ -582,7 +614,7 @@ export class FightController {
           skillData.interval
             ? new EveryNTurnsCondition(skillData.interval)
             : new AlwaysTrueAttackCondition(),
-          this.buildTriggerForSkill(skillData),
+          this.buildTriggerForSkill(skillData, ownerId),
           skillData.powerId,
           skillData.requiresStance,
         );
@@ -595,7 +627,7 @@ export class FightController {
             skillData.name,
             undefined,
             skillData.terminationEvent,
-            this.buildTriggerForSkill(skillData),
+            this.buildTriggerForSkill(skillData, ownerId),
             skillData.powerId,
             (ctx) => {
               if (!ctx.killerCard) return null;
@@ -605,12 +637,9 @@ export class FightController {
         }
         return new TargetingOverrideSkill(
           skillData.name,
-          buildTargetingStrategy(
-            skillData.targetingStrategy,
-            skillData.targetCardId,
-          ),
+          this.buildSkillTargeting(skillData),
           skillData.terminationEvent,
-          this.buildTriggerForSkill(skillData),
+          this.buildTriggerForSkill(skillData, ownerId),
           skillData.powerId,
         );
       case SkillKind.TRANSFORMATION: {
@@ -669,10 +698,7 @@ export class FightController {
         return new ShieldSkill(
           skillData.name,
           skillData.rate,
-          buildTargetingStrategy(
-            skillData.targetingStrategy,
-            skillData.targetCardId,
-          ),
+          this.buildSkillTargeting(skillData),
           new HealthThresholdCondition(
             skillData.activationCondition.operator as 'below' | 'above',
             skillData.activationCondition.threshold,
