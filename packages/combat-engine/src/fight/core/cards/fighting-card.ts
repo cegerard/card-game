@@ -732,6 +732,15 @@ export class FightingCard {
     return damage;
   }
 
+  /**
+   * Heals a share of the card own maximum health, the way the shield and the
+   * lifesteal buffers already size themselves. Keeping the computation here
+   * means callers never need the maximum health itself.
+   */
+  public healShareOfMaxHealth(rate: number): number {
+    return this.heal(rate * this.maxHealth);
+  }
+
   public heal(hpToRestore: number): number {
     const roundedHpToRestore = round2(hpToRestore);
     let healed = roundedHpToRestore;

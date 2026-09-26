@@ -123,3 +123,48 @@ describe('Healing.isTriggered', () => {
     });
   });
 });
+
+describe('Healing heal basis', () => {
+  const RATE = 0.1;
+  let source: FightingCard;
+  let wounded: FightingCard;
+  let context: { sourcePlayer: Player; opponentPlayer: Player };
+
+  function healSelf(healBasis?: 'source-attack' | 'target-max-health') {
+    const skill = new Healing(
+      'healing',
+      RATE,
+      new TurnEnd(),
+      new Launcher(),
+      undefined,
+      undefined,
+      undefined,
+      healBasis,
+    );
+    return skill.launch(wounded, context).results[0];
+  }
+
+  beforeEach(() => {
+    source = createFightingCard({ attack: 100, health: 500 });
+    wounded = createFightingCard({ attack: 40, health: 1000 });
+    wounded.addRealDamage(900);
+    context = {
+      sourcePlayer: new Player('p1', [wounded, source]),
+      opponentPlayer: new Player('p2', [createFightingCard()]),
+    };
+  });
+
+  it('heals a share of the caster attack by default', () => {
+    expect(healSelf()).toMatchObject({ healAmount: 4 });
+  });
+
+  it('heals a share of the target maximum health when asked', () => {
+    expect(healSelf('target-max-health')).toMatchObject({ healAmount: 100 });
+  });
+
+  it('reports the resulting health', () => {
+    expect(healSelf('target-max-health')).toMatchObject({
+      remainingHealth: 200,
+    });
+  });
+});

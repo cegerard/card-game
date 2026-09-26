@@ -4,6 +4,7 @@ import { Skill, SkillKind, SkillResults } from './skill';
 import { Trigger } from '../../trigger/trigger';
 import { ActivatableTrigger } from '../../trigger/activatable-trigger';
 import { FightingContext } from '../@types/fighting-context';
+import { HealBasis, applyHealing } from './heal-basis';
 
 export class Healing implements Skill {
   public id = 'healing-skill';
@@ -15,6 +16,7 @@ export class Healing implements Skill {
   private readonly powerId?: string;
   private readonly activationLimit?: number;
   private readonly endEvent?: string;
+  private readonly healBasis?: HealBasis;
   private activationCount = 0;
 
   constructor(
@@ -25,6 +27,7 @@ export class Healing implements Skill {
     powerId?: string,
     activationLimit?: number,
     endEvent?: string,
+    healBasis?: HealBasis,
   ) {
     this.name = name;
     this.effectRate = effectRate;
@@ -33,6 +36,7 @@ export class Healing implements Skill {
     this.powerId = powerId;
     this.activationLimit = activationLimit;
     this.endEvent = endEvent;
+    this.healBasis = healBasis;
   }
 
   launch(
@@ -54,7 +58,12 @@ export class Healing implements Skill {
 
     const healingResults = targetedCards.map((targetedCard) => ({
       target: targetedCard.identityInfo,
-      healAmount: targetedCard.heal(source.actualAttack * this.effectRate),
+      healAmount: applyHealing(
+        source,
+        targetedCard,
+        this.effectRate,
+        this.healBasis,
+      ),
       remainingHealth: targetedCard.actualHealth,
     }));
 
