@@ -23,5 +23,8 @@
     "lint:all": "pnpm -r lint",
     "verify": "pnpm check && pnpm build:all && pnpm lint:all && pnpm test:all && pnpm test:e2e:engine",
     "replayer": "npx serve clients/fight-replayer"
+  },
+  "devDependencies": {
+    "ts-jest": "^29.4.14"
   }
 }
