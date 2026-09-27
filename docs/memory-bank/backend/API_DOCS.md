@@ -149,7 +149,7 @@ Simulates a turn-based card battle between two players.
   rate?: number,                // Optional — not required for TARGETING_OVERRIDE or SURVIVE; required for SHIELD and DAMAGE_REDUCTION (share of incoming damage removed, in ]0, 1])
   probability?: number,         // DAMAGE_REDUCTION only: per-hit roll (0-1); omit for a permanent reduction
   targetingStrategy?: TargetingStrategy,  // Not required for SHIELD, SURVIVE or DAMAGE_REDUCTION kinds
-  event?: "turn-end" | "next-action" | "ally-death" | "ally-health-below" | "any-ally-health-below" | "damage-taken",  // When skill triggers; NOT required for SHIELD, SURVIVE or DAMAGE_REDUCTION kinds
+  event?: "turn-end" | "next-action" | "ally-death" | "ally-health-below" | "any-ally-health-below" | "self-death" | "damage-taken",  // When skill triggers; NOT required for SHIELD, SURVIVE or DAMAGE_REDUCTION kinds
   targetCardId?: string,        // Required when event=ally-death, ally-health-below or damage-taken (never for any-ally-health-below): id of the monitored card
   requiresStance?: string,      // Skill only fires while its owner holds that stance (see SpecialDto.stanceActivation)
   // SHIELD-specific fields:
@@ -514,6 +514,7 @@ Simulates a turn-based card battle between two players.
 - `all-allies`: Targets all allied cards
 - `self`: Targets the card itself
 - `last-attacker-of-ally`: Targets the card that last attacked a specific ally (requires `targetCardId`); built inline in controller with `LastAttackerOfAllyTargetingStrategy`
+- `protected-ally`: Targets the ally the caster is currently standing in front of (see `PROTECTION`). Needs no `targetCardId` and no threshold — the protection itself says who, and its absence says nobody, so a skill using it is silent outside the power that opened the protection. Returns nothing if that ally is dead; still resolves when the **caster** is dead, which is what a guardian parting gift needs. Built with `ProtectedAllyStrategy`
 - `linked-ally`: Targets a specific ally by ID (requires `targetCardId`); built inline in controller with `AlliedCardByIdStrategy`
 - `most-wounded-ally`: Targets the caster’s ally in the worst shape among those below `activationCondition.threshold`, resolved against the live board at each launch (requires the threshold, never a `targetCardId`). Excludes the caster and the dead; targets nobody when every ally is above the threshold. Ties keep deck order, so the choice is reproducible. Built with `MostWoundedAllyStrategy`
 
@@ -531,6 +532,7 @@ Simulates a turn-based card battle between two players.
 - `dormant`: Skill starts inactive; requires `activationEvent`, `activationTargetCardId`, and `replacementEvent` to define when and how the trigger activates mid-battle. The replacement trigger's target card ID is resolved dynamically at activation time from the killer card's ID
 - `survived`: Skill triggers after the owning card survives a fatal blow via SURVIVE skill
 - `ally-health-below`: Edge-triggered when a monitored ally's health ratio crosses `activationCondition.threshold` downward; requires `targetCardId` (the monitored ally's id) and `activationCondition.threshold`. A card may monitor itself by passing its own id, which is how a health-reactive self buff is declared
+- `self-death`: Fires on the card that just died, for its own last words — every other death trigger runs on somebody else, since `ally-death` and `enemy-death` only reach the survivors. Needs no `targetCardId`: the trigger is the owner own id. It runs as phase 2 of the death cascade, before the survivors answer, so what the fallen card leaves behind lands first. Pairs with `protected-ally` targeting for a guardian parting gift
 - `damage-taken`: Fires every time the monitored card takes damage from a landed attack; requires `targetCardId` (the monitored card id). Unlike `ally-health-below` it is not edge-triggered — it fires on each hit, which is what counter attacks and damage-reactive passives need. A card reacts to its own wounds by passing its own id. The event reaches every playable card of the damaged card team, and `FightingContext.lastAttacker` is set, so `last-attacker-of-ally` resolves to the attacker
 - `any-ally-health-below`: Edge-triggered when **any** ally crosses `activationCondition.threshold` downward, where `ally-health-below` watches one ally named up front. Requires the threshold, never a `targetCardId`. Each ally is edge-triggered on its own — the trigger fires once per crossing and rearms for that ally when its health recovers. The owner is skipped, so a card watching its own health still uses `ally-health-below`. Pairs with `most-wounded-ally` targeting for a guardian power on a deck the player composes
 

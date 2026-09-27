@@ -180,3 +180,38 @@ describe('skillResultsToSteps: defensive layers of a reactive attack', () => {
     });
   });
 });
+
+describe('skillResultsToSteps: a heal that reached nobody', () => {
+  const healer = createFightingCard({ id: 'healer' });
+
+  const emptyHeal = {
+    skillKind: SkillKind.Healing as const,
+    name: 'Sacrifice',
+    results: [],
+  };
+
+  it('emits no healing step', () => {
+    expect(skillResultsToSteps(healer, [emptyHeal])).toEqual([]);
+  });
+
+  it('still emits one when somebody was healed', () => {
+    const target = createFightingCard({ id: 'ally' });
+    const steps = skillResultsToSteps(healer, [
+      {
+        ...emptyHeal,
+        results: [
+          {
+            target: target.identityInfo,
+            healAmount: 40,
+            remainingHealth: 140,
+          },
+        ],
+      },
+    ]);
+
+    expect(steps[0]).toMatchObject({
+      kind: StepKind.Healing,
+      name: 'Sacrifice',
+    });
+  });
+});
