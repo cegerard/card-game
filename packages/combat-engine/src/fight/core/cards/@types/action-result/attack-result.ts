@@ -10,6 +10,8 @@ export type AttackResult = {
   isCritical: boolean;
   dodge: boolean;
   defender: FightingCard;
+  /** The ally this hit was aimed at, when a guardian stepped in front. */
+  interceptedFor?: FightingCard;
   remainingHealth: number;
   effects?: EffectResult[];
   buffResults?: BuffResult[];

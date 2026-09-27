@@ -54,13 +54,20 @@ export class SpecialAttack implements Special {
     );
     const kind = this.damages.map((d) => d.type);
 
-    const attackResults = targetedCards.map((target) => {
+    const attackResults = targetedCards.map((aimedAt) => {
+      // A guardian standing in front answers with its own dodge, defence and
+      // element, so the swap happens before anything is rolled.
+      const protector = context.opponentPlayer.protectorOf(aimedAt);
+      const target = protector ?? aimedAt;
+      const interceptedFor = protector ? aimedAt : undefined;
+
       if (target.dodge(source.actualAccuracy)) {
         return {
           damage: 0,
           isCritical,
           dodge: true,
           defender: target,
+          interceptedFor,
           kind,
           remainingHealth: target.actualHealth,
         };
@@ -87,6 +94,7 @@ export class SpecialAttack implements Special {
         isCritical,
         dodge: false,
         defender: target,
+        interceptedFor,
         kind,
         remainingHealth: target.actualHealth,
         effects: effectResult ? [effectResult] : undefined,

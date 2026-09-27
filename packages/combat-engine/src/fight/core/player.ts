@@ -22,6 +22,14 @@ export class Player {
     return this.cards.indexOf(card);
   }
 
+  /**
+   * The living teammate currently standing in front of that card, if any.
+   * Attacks aimed at the card are resolved against the protector instead.
+   */
+  public protectorOf(card: FightingCard): FightingCard | undefined {
+    return this.playableCards.find((teammate) => teammate.isProtecting(card));
+  }
+
   public ownCard(card: FightingCard): boolean {
     return this.cards.includes(card);
   }

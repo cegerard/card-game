@@ -73,6 +73,7 @@ cards/
 │   ├── conditional-attack.ts  # Attack triggered conditionally by event
 │   ├── targeting-override.ts  # Overrides card attack targeting strategy
 │   ├── shield.ts           # SHIELD skill: health-reactive, edge-triggered on threshold cross
+│   ├── protection.ts       # PROTECTION skill: guardian steps in front of one ally; attacks aimed at it hit the guardian
 │   ├── reactive-skill.ts   # HealthReactiveSkill interface (isHealthReactive, onHealthChanged)
 │   ├── survive.ts          # SurviveSkill: one-time fatal-blow interception; not a Skill implementor
 │   ├── damage-reduction.ts # DamageReductionSkill: removes a share of each incoming hit; not a Skill implementor
@@ -145,6 +146,8 @@ This allows special attacks to perform their primary action (damage/healing) whi
 
 **Dynamic Ally Targeting**: `AnyAllyHealthBelowThresholdTrigger` (event `any-ally-health-below`) fires when **any** ally crosses a health threshold downward, edge-triggered per ally and skipping its owner, where `AllyHealthBelowThresholdTrigger` watches one ally named up front. `MostWoundedAllyStrategy` (targeting `most-wounded-ally`) resolves the target from the live board: the caster's most wounded living ally below the same threshold, caster excluded, nobody on a healthy team. Together they express a guardian power on a deck the player composes, where no `targetCardId` can be hard-coded.
 
+**PROTECTION Skill Kind (Attack Interception)**: `ProtectionSkill` puts its owner in front of one ally (`FightingCard.protect()`), and the three attack skills ask `Player.protectorOf(target)` right after targeting, swapping the defender **before** anything is rolled — so the dodge, defence, element, shield and damage reduction are the guardian's. The buffer lives on the protector, so its duration ticks on the guardian's turns; a dead guardian protects nobody. `AttackResult.interceptedFor` becomes an `attack_intercepted` step. Emits `protection_started` and `protection_ended`.
+
 **Shield Mechanic**: `FightingCard` has an optional shield buffer (`applyShield(rate, duration)` computes `points = rate * maxHealth`). Damage first absorbs shield points before hitting health (`applyFinalDamage()` returns `{ damageToHealth, shieldAbsorbed }`). Shield breaks when points hit 0 → `shield_broken` step. `TurnManager` decrements shield duration each turn; reaching 0 → `shield_expired` step. Special skills can include a `shieldApplication?: ShieldApplicationDto` to apply shields post-action to a separate set of targets.
 
 **TRANSFORMATION Skill Kind (Reactive)**: `TransformationSkill` is a one-shot health-reactive skill. It transforms its owner for a duration, applying stat alterations, an optional lifesteal (heals a share of max health on every landed hit) and an optional status immunity. `TurnManager` ends it, charging an optional health cost that never kills its owner, and emits `transformation_started` then `transformation_ended` steps.
@@ -188,6 +191,7 @@ fight-simulator/
     ├── shield-report.ts    # ShieldAppliedReport, ShieldBrokenReport, ShieldExpiredReport
     ├── mark-report.ts      # MarkAppliedReport: { kind: 'mark_applied', card, damageType, stacks }
     ├── regeneration-report.ts # RegeneratedReport: { kind: 'regenerated', card, healed, remainingHealth }
+    ├── protection-report.ts # ProtectionStartedReport + ProtectionEndedReport + AttackInterceptedReport
     ├── transformation-report.ts # TransformationStartedReport + TransformationEndedReport (healthCost on exit)
     ├── survived-report.ts  # SurvivedReport: { kind: 'survived', name, card }
     ├── damage-mitigated-report.ts # DamageMitigatedReport: { kind: 'damage_mitigated', name, card }

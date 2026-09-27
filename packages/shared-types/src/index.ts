@@ -33,7 +33,8 @@ export type SkillKind =
   | 'SHIELD'
   | 'SURVIVE'
   | 'TRANSFORMATION'
-  | 'DAMAGE_REDUCTION';
+  | 'DAMAGE_REDUCTION'
+  | 'PROTECTION';
 
 export type BuffType =
   | 'attack'
@@ -238,6 +239,7 @@ export interface OtherSkill {
   requiresStance?: string;
   /** Requis pour ALTERATION. */
   buffType?: BuffType;
+  /** Requis pour ALTERATION et PROTECTION. */
   duration?: number;
   polarity?: 'buff' | 'debuff';
   activationCondition?: BuffCondition;

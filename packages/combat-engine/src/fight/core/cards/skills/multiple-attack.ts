@@ -57,8 +57,14 @@ export class MultipleAttack implements AttackSkill {
         context.opponentPlayer,
       );
 
-      for (const defender of targets) {
-        if (defender.isDead()) continue;
+      for (const target of targets) {
+        if (target.isDead()) continue;
+
+        // A guardian standing in front answers with its own dodge, defence
+        // and element, so the swap happens before anything is rolled.
+        const protector = context.opponentPlayer.protectorOf(target);
+        const defender = protector ?? target;
+        const interceptedFor = protector ? target : undefined;
 
         hitTargets.add(defender);
         const isCritical = Math.random() < card.actualCriticalChance;
@@ -71,6 +77,7 @@ export class MultipleAttack implements AttackSkill {
             isCritical,
             dodge: true,
             defender,
+            interceptedFor,
             remainingHealth: defender.actualHealth,
             kind,
           });
@@ -97,6 +104,7 @@ export class MultipleAttack implements AttackSkill {
           isCritical,
           dodge: false,
           defender,
+          interceptedFor,
           remainingHealth: defender.actualHealth,
           effects: effects?.length ? effects : undefined,
           kind,

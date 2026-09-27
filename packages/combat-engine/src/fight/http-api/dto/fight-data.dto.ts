@@ -75,6 +75,7 @@ export enum SkillKind {
   SURVIVE = 'SURVIVE',
   DAMAGE_REDUCTION = 'DAMAGE_REDUCTION',
   TRANSFORMATION = 'TRANSFORMATION',
+  PROTECTION = 'PROTECTION',
 }
 
 export enum BuffType {
