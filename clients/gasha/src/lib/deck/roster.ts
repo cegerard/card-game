@@ -19,6 +19,8 @@ export const CHARACTER_ROSTER: CardDefinition[] = [
       speed: 50,
       agility: 40,
       accuracy: 85,
+      regeneration: 10,
+      resistance: 45,
     },
     criticalChance: 0.15,
     skills: {
@@ -50,6 +52,8 @@ export const CHARACTER_ROSTER: CardDefinition[] = [
       speed: 60,
       agility: 35,
       accuracy: 90,
+      regeneration: 6,
+      resistance: 30,
     },
     criticalChance: 0.2,
     skills: {
@@ -84,6 +88,8 @@ export const CHARACTER_ROSTER: CardDefinition[] = [
       speed: 55,
       agility: 45,
       accuracy: 80,
+      regeneration: 15,
+      resistance: 60,
     },
     criticalChance: 0.05,
     skills: {
@@ -123,6 +129,8 @@ export const CHARACTER_ROSTER: CardDefinition[] = [
       speed: 90,
       agility: 70,
       accuracy: 88,
+      regeneration: 6,
+      resistance: 30,
     },
     criticalChance: 0.35,
     skills: {
@@ -157,6 +165,8 @@ export const CHARACTER_ROSTER: CardDefinition[] = [
       speed: 40,
       agility: 30,
       accuracy: 80,
+      regeneration: 12,
+      resistance: 70,
     },
     criticalChance: 0.05,
     skills: {
@@ -199,6 +209,8 @@ export const CHARACTER_ROSTER: CardDefinition[] = [
       speed: 65,
       agility: 40,
       accuracy: 82,
+      regeneration: 7,
+      resistance: 35,
     },
     criticalChance: 0.25,
     skills: {
@@ -230,6 +242,8 @@ export const CHARACTER_ROSTER: CardDefinition[] = [
       speed: 58,
       agility: 40,
       accuracy: 90,
+      regeneration: 7,
+      resistance: 35,
     },
     criticalChance: 0.1,
     skills: {
@@ -262,6 +276,8 @@ export const CHARACTER_ROSTER: CardDefinition[] = [
       speed: 70,
       agility: 50,
       accuracy: 87,
+      regeneration: 6,
+      resistance: 35,
     },
     criticalChance: 0.18,
     skills: {
@@ -296,6 +312,8 @@ export const CHARACTER_ROSTER: CardDefinition[] = [
       speed: 700,
       agility: 500,
       accuracy: 870,
+      regeneration: 60,
+      resistance: 45,
     },
     criticalChance: 1,
     skills: {
@@ -319,9 +337,8 @@ export const CHARACTER_ROSTER: CardDefinition[] = [
     behaviors: { dodge: 'random-dodge' },
   },
   // Première carte du roster réel (base Notion "Cartes"). Ses valeurs suivent
-  // l'échelle du roster réel, pas celle des personnages de test ci-dessus.
-  // Résistance et Régénération ne sont pas reprises : le moteur ne les
-  // implémente pas.
+  // l'échelle du roster réel, pas celle des personnages de test ci-dessus,
+  // Résistance et Régénération comprises.
   {
     id: 'kaito',
     name: 'Kaito',
@@ -335,6 +352,8 @@ export const CHARACTER_ROSTER: CardDefinition[] = [
       /** Esquive côté Notion. */
       agility: 70,
       accuracy: 85,
+      regeneration: 35,
+      resistance: 40,
     },
     criticalChance: 0.12,
     skills: {
