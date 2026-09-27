@@ -5,17 +5,29 @@
 
 version: 2
 updates:
-  # Enable version updates for npm
-  - package-ecosystem: "npm"
-    directory: "/"
+  # Enable version updates for npm root dir
+  - package-ecosystem: 'npm'
+    directory: '/'
     # Check for updates every day
     schedule:
-      interval: "daily"
+      interval: 'daily'
+  # Enable version updates for npm gasha subdirectory
+  - package-ecosystem: 'npm'
+    directory: '/clients/gasha'
+    # Check for updates every day
+    schedule:
+      interval: 'daily'
+  # Enable version updates for other npm combat-engine subdirectory
+  - package-ecosystem: 'npm'
+    directory: '/packages/combat-engine'
+    # Check for updates every day
+    schedule:
+      interval: 'daily'
 
   # Enable version updates for Docker
-  - package-ecosystem: "docker"
+  - package-ecosystem: 'docker'
     # Look for a `Dockerfile` in the `root` directory
-    directory: "/"
+    directory: '/'
     # Check for updates once a week
     schedule:
-      interval: "weekly"
+      interval: 'weekly'
