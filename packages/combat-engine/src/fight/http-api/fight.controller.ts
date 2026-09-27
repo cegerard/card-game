@@ -445,6 +445,27 @@ export class FightController {
   }
 
   /**
+   * Whether the skill event already consumes `activationCondition` as its own
+   * threshold. It then says "an ally fell low", and reusing it as the skill
+   * activation condition would gate the skill a second time on the *caster*
+   * health — a guardian in perfect shape would never answer its wounded ally.
+   */
+  private ownsActivationCondition(skillData: OtherSkillDto): boolean {
+    return skillData.event === TriggerEvent.ANY_ALLY_HEALTH_BELOW;
+  }
+
+  private buildSkillActivationCondition(skillData: OtherSkillDto) {
+    if (!skillData.activationCondition) return undefined;
+
+    return buildAlterationCondition(skillData.activationCondition.type, {
+      allyName: skillData.activationCondition.allyName,
+      threshold: skillData.activationCondition.threshold,
+      operator: skillData.activationCondition.operator,
+      probability: skillData.activationCondition.probability,
+    });
+  }
+
+  /**
    * The health threshold both the any-ally trigger and the most-wounded-ally
    * targeting read. Missing, it is malformed input rather than a runtime
    * failure, so it answers 400 like the other domain checks here.
@@ -529,14 +550,9 @@ export class FightController {
             powerId: skillData.powerId,
           });
         }
-        const alterationCondition = skillData.activationCondition
-          ? buildAlterationCondition(skillData.activationCondition.type, {
-              allyName: skillData.activationCondition.allyName,
-              threshold: skillData.activationCondition.threshold,
-              operator: skillData.activationCondition.operator,
-              probability: skillData.activationCondition.probability,
-            })
-          : undefined;
+        const alterationCondition = this.ownsActivationCondition(skillData)
+          ? undefined
+          : this.buildSkillActivationCondition(skillData);
         // duration: 0 means infinite — either permanent (no terminationEvent)
         // or event-bound (removed when terminationEvent fires via EndEventProcessor).
         // The domain uses Infinity to bypass the turn-decrement filter.
