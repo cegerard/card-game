@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import { TargetedCard } from '../targeting-card-strategies/targeted-card';
 import { createFightingCard } from '../../../../test/helpers/fighting-card';
 import { Player } from '../player';
