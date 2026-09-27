@@ -72,6 +72,7 @@ export type TriggerEvent =
   | 'survived'
   | 'ally-health-below'
   | 'any-ally-health-below'
+  | 'self-death'
   | 'damage-taken';
 
 export type TargetingStrategy =
@@ -84,7 +85,8 @@ export type TargetingStrategy =
   | 'targeted-card'
   | 'last-attacker-of-ally'
   | 'linked-ally'
-  | 'most-wounded-ally';
+  | 'most-wounded-ally'
+  | 'protected-ally';
 
 export type CardSelectorStrategy = 'player-by-player' | 'speed-weighted';
 

@@ -23,6 +23,12 @@ export function skillResultsToSteps(
   for (const skillResult of skillResults) {
     switch (skillResult.skillKind) {
       case SkillKind.Healing:
+        // A heal that reached nobody reports nothing, like an alteration or a
+        // shield. Targeting that legitimately comes back empty — a protected
+        // ally when no protection runs, a linked ally already dead — would
+        // otherwise leave an empty step in the log.
+        if (skillResult.results.length === 0) break;
+
         steps.push({
           kind: StepKind.Healing,
           name: skillResult.name,

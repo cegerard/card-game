@@ -7,6 +7,7 @@ import { Launcher } from '../core/targeting-card-strategies/launcher';
 import { AlliedCardByIdStrategy } from '../core/targeting-card-strategies/allied-card-by-id';
 import { LastAttackerOfAllyTargetingStrategy } from '../core/targeting-card-strategies/last-attacker-of-ally';
 import { MostWoundedAllyStrategy } from '../core/targeting-card-strategies/most-wounded-ally';
+import { ProtectedAllyStrategy } from '../core/targeting-card-strategies/protected-ally';
 import { TargetingStrategy } from './dto/fight-data.dto';
 import { TargetingCardStrategy } from '../core/targeting-card-strategies/targeting-card-strategy';
 
@@ -15,6 +16,7 @@ const STATIC_STRATEGY_MAP: Record<string, TargetingCardStrategy> = {
   [TargetingStrategy.ALL_OWNER_CARD]: new AllOwnerCards(),
   [TargetingStrategy.LINE_THREE]: new TargetedLineThree(),
   [TargetingStrategy.POSITION_BASED]: new TargetedFromPosition(),
+  [TargetingStrategy.PROTECTED_ALLY]: new ProtectedAllyStrategy(),
   [TargetingStrategy.SELF]: new Launcher(),
   [TargetingStrategy.TARGET_ALL]: new TargetedAll(),
 };

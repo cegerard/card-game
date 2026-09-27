@@ -112,6 +112,7 @@ export enum TriggerEvent {
   ALLY_HEALTH_BELOW = 'ally-health-below',
   DAMAGE_TAKEN = 'damage-taken',
   ANY_ALLY_HEALTH_BELOW = 'any-ally-health-below',
+  SELF_DEATH = 'self-death',
 }
 
 export enum HealBasisDto {
@@ -130,6 +131,7 @@ export enum TargetingStrategy {
   LAST_ATTACKER_OF_ALLY = 'last-attacker-of-ally',
   LINKED_ALLY = 'linked-ally',
   MOST_WOUNDED_ALLY = 'most-wounded-ally',
+  PROTECTED_ALLY = 'protected-ally',
 }
 
 export enum CardSelectorStrategy {
