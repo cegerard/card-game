@@ -341,10 +341,11 @@ export interface FightResult {
 export type Archetype = 'Tank' | 'DPS' | 'Assassin' | 'Support' | 'Guerrier';
 
 /**
- * Les six caractéristiques portées par le score global et le système
- * d'expérience. Résistance et Régénération vivent sur CardDefinition : elles
- * agissent en combat mais leur poids de score et leur multiplicateur d'XP
- * restent à arbitrer.
+ * Les huit caractéristiques portées par le score global et le système
+ * d'expérience. Résistance et Régénération en font partie depuis qu'elles
+ * agissent en combat : les laisser sur CardDefinition les rendait invisibles
+ * aux deux calculs, qui n'itèrent que sur les clés de CardStats.
+ * Voir Notion > Les cartes > Calcul du score global.
  */
 export interface CardStats {
   attack: number;
@@ -355,6 +356,10 @@ export interface CardStats {
   accuracy: number;
   /** Esquive. */
   agility: number;
+  /** Points de vie rendus à chaque fin de tour. */
+  regeneration: number;
+  /** Chance de refuser un statut ou un debuff entrant : la stat divisée par 200. */
+  resistance: number;
 }
 
 export interface CardDefinition {
@@ -365,13 +370,6 @@ export interface CardDefinition {
   stats: CardStats;
   /** Taux entre 0 et 1. Hors système d'expérience. */
   criticalChance: number;
-  /**
-   * Implémentées dans le moteur de combat et transmises par toCombatConfig().
-   * Restent hors du score global et du système d'expérience, qui ne portent
-   * que sur les six stats de CardStats. Voir Notion > Les cartes.
-   */
-  resistance?: number;
-  regeneration?: number;
   skills: SkillSet;
   behaviors: Behaviors;
   image?: string;
@@ -401,8 +399,8 @@ export function toCombatConfig(definition: CardDefinition): CardConfig {
     agility: definition.stats.agility,
     accuracy: definition.stats.accuracy,
     criticalChance: definition.criticalChance,
-    regeneration: definition.regeneration,
-    resistance: definition.resistance,
+    regeneration: definition.stats.regeneration,
+    resistance: definition.stats.resistance,
     element: definition.element,
     skills: definition.skills,
     behaviors: definition.behaviors,

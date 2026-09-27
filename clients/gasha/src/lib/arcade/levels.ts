@@ -19,6 +19,8 @@ function makeEnemy(
     speed: Math.round(45 * mult),
     agility: 35,
     accuracy: 80,
+    regeneration: Math.round(8 * mult),
+    resistance: 40,
   };
   return {
     id,

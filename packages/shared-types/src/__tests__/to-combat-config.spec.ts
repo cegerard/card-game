@@ -17,10 +17,10 @@ function makeDefinition(
       speed: 75,
       accuracy: 80,
       agility: 55,
+      regeneration: 45,
+      resistance: 50,
     },
     criticalChance: 0.05,
-    resistance: 50,
-    regeneration: 45,
     skills: {
       special: {
         kind: 'ATTACK',
