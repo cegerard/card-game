@@ -299,6 +299,14 @@ export class ActionStage {
         kind: damageDealt.kind,
       });
 
+      if (damageDealt.interceptedFor) {
+        report.statusChanges.push({
+          kind: StepKind.AttackIntercepted,
+          card: defensiveCard.identityInfo,
+          protectedCard: damageDealt.interceptedFor.identityInfo,
+        });
+      }
+
       if (damageDealt.mitigated) {
         report.statusChanges.push({
           kind: StepKind.DamageMitigated,

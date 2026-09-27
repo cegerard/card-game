@@ -66,6 +66,11 @@ type Lifesteal = {
   remainingTurns: number;
 };
 
+type Protection = {
+  ally: FightingCard;
+  remainingTurns: number;
+};
+
 type MarkEntry = {
   mark: ElementalMark;
   stacks: number;
@@ -124,6 +129,9 @@ export class FightingCard {
 
   // Lifesteal
   private lifesteal: Lifesteal | null = null;
+
+  // Protection granted to one ally
+  private protection: Protection | null = null;
 
   // Status immunity
   private statusImmunity: { remainingTurns: number } | null = null;
@@ -605,6 +613,41 @@ export class FightingCard {
     );
 
     return cost > 0 ? this.addRealDamage(cost) : 0;
+  }
+
+  /**
+   * Steps in front of an ally for a number of turns: while it runs, attacks
+   * aimed at that ally are resolved against this card instead, with its own
+   * dodge, defence and element. Turn counting follows the buff convention, so
+   * the protection lasts as many of the protector's turns as the power that
+   * granted it. Re-protecting refreshes rather than stacks.
+   */
+  public protect(ally: FightingCard, duration: number): void {
+    this.protection = { ally, remainingTurns: duration };
+  }
+
+  /** A dead guardian protects nobody. */
+  public isProtecting(card: FightingCard): boolean {
+    return this.protection?.ally === card && !this.isDead();
+  }
+
+  public get protectedAlly(): FightingCard | undefined {
+    return this.protection?.ally;
+  }
+
+  /** Decrements the protection and returns the ally it just freed, if any. */
+  public decreaseProtectionDuration(): FightingCard | null {
+    if (!this.protection) return null;
+
+    const remainingTurns = this.protection.remainingTurns - 1;
+    if (remainingTurns < 0) {
+      const { ally } = this.protection;
+      this.protection = null;
+      return ally;
+    }
+
+    this.protection = { ...this.protection, remainingTurns };
+    return null;
   }
 
   public applyLifesteal(name: string, rate: number, duration: number): void {

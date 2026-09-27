@@ -57,6 +57,7 @@ import { FightSimulator } from '../core/fight-simulator/@types/fight-simulator';
 import { Skill } from '../core/cards/skills/skill';
 import { TargetingOverrideSkill } from '../core/cards/skills/targeting-override';
 import { ShieldSkill } from '../core/cards/skills/shield';
+import { ProtectionSkill } from '../core/cards/skills/protection';
 import { TransformationSkill } from '../core/cards/skills/transformation';
 import { HealthThresholdCondition } from '../core/cards/@types/skill-activation-conditions/health-threshold-condition';
 import { DamageComposition } from '../core/cards/@types/damage/damage-composition';
@@ -706,6 +707,18 @@ export class FightController {
           ),
         );
       }
+      case SkillKind.PROTECTION:
+        if (!skillData.duration) {
+          throw new BadRequestException('PROTECTION skill requires duration');
+        }
+        return new ProtectionSkill(
+          skillData.name,
+          skillData.duration,
+          this.buildTriggerForSkill(skillData, ownerId),
+          this.buildSkillTargeting(skillData),
+          skillData.activationLimit,
+          skillData.powerId,
+        );
       case SkillKind.SURVIVE:
         throw new Error('SURVIVE skill must not appear in others skill list');
       case SkillKind.DAMAGE_REDUCTION:

@@ -9,6 +9,7 @@ import { FightingContext } from '../@types/fighting-context';
 import { TargetingOverrideReport } from '../../fight-simulator/@types/targeting-override-report';
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 import { ShieldResult } from '../@types/action-result/shield-result';
+import { ProtectionResult } from './protection';
 
 export enum SkillKind {
   Healing = 'healing',
@@ -18,6 +19,7 @@ export enum SkillKind {
   TargetingOverride = 'targeting_override',
   Shield = 'shield',
   Transformation = 'transformation',
+  Protection = 'protection',
 }
 
 type BaseSkillResults = {
@@ -62,6 +64,11 @@ export type TransformationSkillResults = BaseSkillResults & {
   remainingTurns: number;
 };
 
+export type ProtectionSkillResults = BaseSkillResults & {
+  skillKind: SkillKind.Protection;
+  results: ProtectionResult[];
+};
+
 export type SkillResults =
   | HealingSkillResults
   | BuffSkillResults
@@ -69,7 +76,8 @@ export type SkillResults =
   | AttackSkillResults
   | TargetingOverrideSkillResults
   | ShieldSkillResults
-  | TransformationSkillResults;
+  | TransformationSkillResults
+  | ProtectionSkillResults;
 
 export interface Skill {
   id: string;

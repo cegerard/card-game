@@ -47,13 +47,20 @@ export class SimpleAttack implements AttackSkill {
     const kind = this.damages.map((d) => d.type);
     return {
       name: this.name,
-      results: defensiveCards.map((defender) => {
+      results: defensiveCards.map((target) => {
+        // A guardian standing in front answers with its own dodge, defence
+        // and element, so the swap happens before anything is rolled.
+        const protector = context.opponentPlayer.protectorOf(target);
+        const defender = protector ?? target;
+        const interceptedFor = protector ? target : undefined;
+
         if (defender.dodge(card.actualAccuracy)) {
           return {
             damage: 0,
             isCritical,
             dodge: true,
             defender,
+            interceptedFor,
             kind,
             remainingHealth: defender.actualHealth,
           };
@@ -79,6 +86,7 @@ export class SimpleAttack implements AttackSkill {
           isCritical,
           dodge: false,
           defender,
+          interceptedFor,
           effects: effects?.length ? effects : undefined,
           kind,
           remainingHealth: defender.actualHealth,

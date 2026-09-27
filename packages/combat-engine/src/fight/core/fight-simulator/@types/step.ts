@@ -28,6 +28,11 @@ import { StanceStartedReport, StanceEndedReport } from './stance-report';
 import { MarkAppliedReport } from './mark-report';
 import { RegeneratedReport } from './regeneration-report';
 import {
+  ProtectionStartedReport,
+  ProtectionEndedReport,
+  AttackInterceptedReport,
+} from './protection-report';
+import {
   TransformationStartedReport,
   TransformationEndedReport,
 } from './transformation-report';
@@ -57,6 +62,9 @@ export enum StepKind {
   StanceEnded = 'stance_ended',
   MarkApplied = 'mark_applied',
   Regenerated = 'regenerated',
+  ProtectionStarted = 'protection_started',
+  ProtectionEnded = 'protection_ended',
+  AttackIntercepted = 'attack_intercepted',
   TransformationStarted = 'transformation_started',
   TransformationEnded = 'transformation_ended',
 }
@@ -86,5 +94,8 @@ export type Step =
   | StanceEndedReport
   | MarkAppliedReport
   | RegeneratedReport
+  | ProtectionStartedReport
+  | ProtectionEndedReport
+  | AttackInterceptedReport
   | TransformationStartedReport
   | TransformationEndedReport;

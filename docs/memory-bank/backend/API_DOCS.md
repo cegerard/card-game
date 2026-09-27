@@ -144,7 +144,7 @@ Simulates a turn-based card battle between two players.
 
 ```typescript
 {
-  kind: "HEALING" | "BUFF" | "CONDITIONAL_ATTACK" | "TARGETING_OVERRIDE" | "SHIELD" | "SURVIVE" | "DAMAGE_REDUCTION",
+  kind: "HEALING" | "BUFF" | "CONDITIONAL_ATTACK" | "TARGETING_OVERRIDE" | "SHIELD" | "SURVIVE" | "DAMAGE_REDUCTION" | "PROTECTION",
   name: string,
   rate?: number,                // Optional — not required for TARGETING_OVERRIDE or SURVIVE; required for SHIELD and DAMAGE_REDUCTION (share of incoming damage removed, in ]0, 1])
   probability?: number,         // DAMAGE_REDUCTION only: per-hit roll (0-1); omit for a permanent reduction
@@ -225,7 +225,7 @@ Simulates a turn-based card battle between two players.
 ```typescript
 {
   [stepNumber: number]: {
-    kind: "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "debuff_removed" | "buff_expired" | "debuff_expired" | "effect_removed" | "targeting_override" | "targeting_reverted" | "shield_applied" | "shield_broken" | "shield_expired" | "survived" | "damage_mitigated" | "stance_started" | "stance_ended" | "mark_applied" | "regenerated" | "transformation_started" | "transformation_ended" | "fight_end",
+    kind: "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "debuff_removed" | "buff_expired" | "debuff_expired" | "effect_removed" | "targeting_override" | "targeting_reverted" | "shield_applied" | "shield_broken" | "shield_expired" | "survived" | "damage_mitigated" | "stance_started" | "stance_ended" | "mark_applied" | "regenerated" | "protection_started" | "protection_ended" | "attack_intercepted" | "transformation_started" | "transformation_ended" | "fight_end",
     // Additional properties vary by step kind
   }
 }
@@ -394,6 +394,35 @@ Simulates a turn-based card battle between two players.
 }
 ```
 
+**`protection_started` step** (`ProtectionStartedReport`): Emitted when a PROTECTION skill puts its owner in front of an ally.
+```typescript
+{
+  kind: "protection_started",
+  name: string,            // Protection skill name
+  card: CardInfo,          // The guardian
+  protectedCard: CardInfo, // The ally it now covers
+  remainingTurns: number
+}
+```
+
+**`protection_ended` step** (`ProtectionEndedReport`): Emitted at turn-end when a protection's duration runs out.
+```typescript
+{
+  kind: "protection_ended",
+  card: CardInfo,          // The guardian
+  protectedCard: CardInfo  // The ally it no longer covers
+}
+```
+
+**`attack_intercepted` step** (`AttackInterceptedReport`): Emitted for each hit a guardian took in place of the ally it protects. It follows the `attack` step that carries the damage, whose `defender` is the guardian.
+```typescript
+{
+  kind: "attack_intercepted",
+  card: CardInfo,          // The guardian that took the hit
+  protectedCard: CardInfo  // The ally the hit was aimed at
+}
+```
+
 **`transformation_started` step** (`TransformationStartedReport`): Emitted when a TRANSFORMATION skill fires.
 ```typescript
 {
@@ -519,6 +548,7 @@ Simulates a turn-based card battle between two players.
 - `SHIELD`: Health-reactive shield skill — no `event` field; triggers when card's health ratio crosses `activationCondition.threshold` downward (edge-triggered, rearms on recovery)
 - `SURVIVE`: One-time fatal-blow interception — no `event`, no `targetingStrategy`; only `name` required; extracted from `others[]` before normal skill loop
 - `DAMAGE_REDUCTION`: Removes a share of every incoming hit — no `event`, no `targetingStrategy`; requires `rate` (share removed, in `]0, 1]`) and accepts an optional `probability` making it a per-hit roll. Like SURVIVE it is extracted from `others[]` and consulted inside `applyFinalDamage()`, so it mitigates the very hit that triggers it. Applies after the freeze/stunt amplifiers and before the shield buffer, so a shield absorbs only the reduced damage. Status effect ticks bypass it, as they bypass the shield
+- `PROTECTION`: Steps in front of one ally for `duration` of the guardian's turns — attacks aimed at that ally are resolved against the guardian instead, with the guardian's own dodge, defence and element. Requires `duration`, plus an `event` and a `targetingStrategy`; it covers the **first** card its targeting returns, so pairing it with `most-wounded-ally` guards whoever is in the worst shape at that moment. A targeting that returns nobody is a no-op and spends no `activationLimit`. Re-casting refreshes the duration or moves the protection, never stacks. A dead guardian protects nobody. `activationLimit` is supported, so "once per fight" is `activationLimit: 1`
 - `TRANSFORMATION`: One-shot health-reactive transformation — no `event`, no `targetingStrategy`; requires `duration` and an `activationCondition` threshold. Applies its own `statAlterations` and, for the same duration, an optional `lifestealRate` (heals that share of max health on every landed attack) and `statusImmunity`. An optional `endCostRate` charges that share of max health when the transformation ends, never below one health point. Fires once per fight
 
 ### HealBasis

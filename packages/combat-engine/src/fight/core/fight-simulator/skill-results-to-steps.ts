@@ -130,6 +130,17 @@ export function skillResultsToSteps(
           });
         }
         break;
+      case SkillKind.Protection:
+        skillResult.results.forEach((result) => {
+          steps.push({
+            kind: StepKind.ProtectionStarted,
+            name: skillResult.name,
+            card: card.identityInfo,
+            protectedCard: result.protectedCard.identityInfo,
+            remainingTurns: result.remainingTurns,
+          });
+        });
+        break;
       default:
         throw new Error(`Unknown SkillKind: ${(skillResult as any).skillKind}`);
     }

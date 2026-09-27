@@ -69,6 +69,14 @@ export class TurnManager {
           remainingHealth: card.actualHealth,
         });
       }
+      const freedAlly = card.decreaseProtectionDuration();
+      if (freedAlly) {
+        steps.push({
+          kind: StepKind.ProtectionEnded,
+          card: card.identityInfo,
+          protectedCard: freedAlly.identityInfo,
+        });
+      }
       const expiredShield = card.decreaseShieldDuration();
       if (expiredShield) {
         steps.push({ kind: StepKind.ShieldExpired, card: card.identityInfo });
