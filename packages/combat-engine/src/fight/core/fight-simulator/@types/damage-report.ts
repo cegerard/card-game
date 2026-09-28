@@ -9,6 +9,12 @@ export type Damage = {
   dodge: boolean;
   remainingHealth: number;
   kind?: DamageType[];
+  /**
+   * How much of `damage` the shield buffer ate instead of the health pool.
+   * Absent when no shield was in the way. Consumers track the buffer from
+   * `shield_applied` and need this to draw it down (issue #326).
+   */
+  shieldAbsorbed?: number;
 };
 
 export type DamageReport = {

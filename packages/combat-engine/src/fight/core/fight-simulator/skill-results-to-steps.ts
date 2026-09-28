@@ -65,6 +65,7 @@ export function skillResultsToSteps(
             dodge: r.dodge,
             remainingHealth: r.remainingHealth,
             kind: r.kind,
+            shieldAbsorbed: r.shieldAbsorbed,
           })),
           energy: card.actualEnergy,
           powerId: skillResult.powerId,

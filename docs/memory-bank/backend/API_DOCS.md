@@ -153,7 +153,7 @@ Simulates a turn-based card battle between two players.
   targetCardId?: string,        // Required when event=ally-death, ally-health-below or damage-taken (never for any-ally-health-below): id of the monitored card
   requiresStance?: string,      // Skill only fires while its owner holds that stance (see SpecialDto.stanceActivation)
   // SHIELD-specific fields:
-  activationCondition?: { type?: "health-threshold" | "ally-presence" | "probability", operator?: "below" | "above", threshold?: number, allyName?: string, probability?: number },  // Health ratio threshold (0–1) for SHIELD/ally-health-below/any-ally-health-below activation and most-wounded-ally targeting; type "probability" gates any triggered ALTERATION skill on a per-event roll
+  activationCondition?: { type?: "health-threshold" | "ally-presence" | "probability", operator?: "below" | "above", threshold?: number, allyName?: string, probability?: number },  // Health ratio threshold (0–1) for SHIELD/ally-health-below/any-ally-health-below activation and most-wounded-ally targeting; type "probability" gates any triggered ALTERATION skill on a per-event roll. On `any-ally-health-below` the field belongs to the trigger alone and is NOT reused as the skill own activation condition — it says an ally fell low, not that the caster did
   buffType?: "attack" | "defense" | "agility" | "accuracy" | "speed" | "criticalChance" | "regeneration" | "resistance",  // Required if kind=BUFF
   duration?: number,            // Required if kind=BUFF (0 = infinite: permanent or event-bound)
   stackId?: string,             // ALTERATION debuff: name of the stack pile it counts against
@@ -237,10 +237,16 @@ Simulates a turn-based card battle between two players.
   kind: "attack" | "special_attack",
   name?: string,         // Skill name that triggered the attack
   attacker: CardInfo,
-  damages: { defender: CardInfo, damage: number, isCritical: boolean, dodge: boolean, remainingHealth: number, survived?: boolean, survivedSkillName?: string }[],
+  damages: { defender: CardInfo, damage: number, isCritical: boolean, dodge: boolean, remainingHealth: number, shieldAbsorbed?: number, survived?: boolean, survivedSkillName?: string }[],
   energy: number
 }
 ```
+
+`shieldAbsorbed` est la part de `damage` mangée par le bouclier au lieu de la
+santé, absente quand aucun bouclier n'était sur le chemin. `damage` reste le
+total infligé, donc un consommateur qui suit le tampon depuis `shield_applied`
+a besoin de ce champ pour le décrémenter : sans lui le bouclier restait affiché
+à sa valeur d'application jusqu'à sa rupture.
 
 **`survived` step** (`SurvivedReport`): Emitted immediately after a fatal blow is intercepted by a SURVIVE skill.
 ```typescript

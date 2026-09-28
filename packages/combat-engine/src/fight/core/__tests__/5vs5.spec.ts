@@ -211,7 +211,7 @@ describe('with five cards each', () => {
           damages: [
             {
               defender: card6.identityInfo,
-              damage: 70,
+              damage: 30,
               isCritical: false,
               dodge: false,
               remainingHealth: 0,
@@ -230,7 +230,7 @@ describe('with five cards each', () => {
           damages: [
             {
               defender: card5.identityInfo,
-              damage: 50,
+              damage: 20,
               isCritical: false,
               dodge: false,
               remainingHealth: 0,
@@ -263,7 +263,7 @@ describe('with five cards each', () => {
           damages: [
             {
               defender: card4.identityInfo,
-              damage: 50,
+              damage: 10,
               isCritical: false,
               dodge: false,
               remainingHealth: 0,
@@ -296,7 +296,7 @@ describe('with five cards each', () => {
           damages: [
             {
               defender: card3.identityInfo,
-              damage: 45,
+              damage: 5,
               isCritical: false,
               dodge: false,
               remainingHealth: 0,
@@ -329,7 +329,7 @@ describe('with five cards each', () => {
           damages: [
             {
               defender: card2.identityInfo,
-              damage: 39,
+              damage: 1,
               isCritical: false,
               dodge: false,
               remainingHealth: 0,
@@ -348,7 +348,7 @@ describe('with five cards each', () => {
           damages: [
             {
               defender: card7.identityInfo,
-              damage: 60,
+              damage: 40,
               isCritical: false,
               dodge: false,
               remainingHealth: 0,
@@ -442,7 +442,7 @@ describe('with five cards each', () => {
           damages: [
             {
               defender: card9.identityInfo,
-              damage: 40,
+              damage: 20,
               isCritical: false,
               dodge: false,
               remainingHealth: 0,
@@ -531,7 +531,7 @@ describe('with five cards each', () => {
           damages: [
             {
               defender: card10.identityInfo,
-              damage: 30,
+              damage: 10,
               isCritical: false,
               dodge: false,
               remainingHealth: 0,

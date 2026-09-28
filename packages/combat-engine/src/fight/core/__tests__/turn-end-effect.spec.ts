@@ -41,7 +41,7 @@ describe('Process card poisoned effect at turn end', () => {
         attacker: card1.identityInfo,
         damages: [
           {
-            damage: 100,
+            damage: 1,
             defender: card2.identityInfo,
             dodge: false,
             isCritical: false,

@@ -43,6 +43,8 @@ const arionis = makeCard('Guerrier', {
   speed: 75,
   accuracy: 80,
   agility: 55,
+  regeneration: 45,
+  resistance: 50,
 });
 
 const noProgress: CardProgression = {

@@ -37,6 +37,8 @@ const arionis = makeCard('Guerrier', {
   speed: 75,
   accuracy: 80,
   agility: 55,
+  regeneration: 45,
+  resistance: 50,
 });
 
 const noProgress: CardProgression = {
@@ -111,6 +113,43 @@ describe('computeEffectiveStats', () => {
       tier: 5,
     });
     expect(stats.attack).toBeGreaterThan(1000);
+  });
+
+  it('converts experience into regeneration', () => {
+    const stats = computeEffectiveStats(arionis, arionisAt10k);
+    // 45 + 10 000 * 0,002 * modificateur Guerrier par défaut 1,0
+    expect(stats.regeneration).toBeCloseTo(65, 5);
+  });
+
+  it('converts experience into resistance', () => {
+    const stats = computeEffectiveStats(arionis, arionisAt10k);
+    // 50 + 10 000 * 0,001 * modificateur Guerrier par défaut 1,0
+    expect(stats.resistance).toBeCloseTo(60, 5);
+  });
+
+  it('caps regeneration at 100 for a card with very high experience', () => {
+    const stats = computeEffectiveStats(arionis, {
+      cardId: 'arionis',
+      experience: 10_000_000,
+      tier: 5,
+    });
+    expect(stats.regeneration).toBe(100);
+  });
+
+  it('caps resistance at 100 for a card with very high experience', () => {
+    const stats = computeEffectiveStats(arionis, {
+      cardId: 'arionis',
+      experience: 10_000_000,
+      tier: 5,
+    });
+    expect(stats.resistance).toBe(100);
+  });
+
+  it('converts experience into regeneration faster for a Support', () => {
+    const support = makeCard('Support', arionis.stats);
+    const stats = computeEffectiveStats(support, arionisAt10k);
+    // 45 + 10 000 * 0,002 * modificateur Support 1,8
+    expect(stats.regeneration).toBeCloseTo(81, 5);
   });
 
   it('caps the stat gain once XP exceeds the tier ceiling (★1 = 5 000)', () => {

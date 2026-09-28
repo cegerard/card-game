@@ -277,7 +277,7 @@ describe('Trigger an attack with critical hit', () => {
         attacker: attacker.identityInfo,
         damages: [
           {
-            damage: 200,
+            damage: 100,
             defender: defender.identityInfo,
             dodge: false,
             isCritical: true,

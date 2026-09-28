@@ -14,7 +14,7 @@ card-game/                  # Mono-repo root (pnpm 11 workspace)
 │   ├── combat-engine/      # NestJS fight simulation backend
 │   └── shared-types/       # Shared TypeScript types (stub)
 ├── clients/
-│   ├── fight-replayer/     # Static HTML/JS fight replay viewer
+│   ├── fight-replayer/     # Static HTML/JS fight replay viewer (Vitest on the parser)
 │   └── gasha/              # SvelteKit arcade client (Phaser + Web renderer)
 ├── docs/                   # Documentation and memory bank
 ├── specs/                  # Feature specifications
@@ -147,6 +147,8 @@ This allows special attacks to perform their primary action (damage/healing) whi
 **Dynamic Ally Targeting**: `AnyAllyHealthBelowThresholdTrigger` (event `any-ally-health-below`) fires when **any** ally crosses a health threshold downward, edge-triggered per ally and skipping its owner, where `AllyHealthBelowThresholdTrigger` watches one ally named up front. `MostWoundedAllyStrategy` (targeting `most-wounded-ally`) resolves the target from the live board: the caster's most wounded living ally below the same threshold, caster excluded, nobody on a healthy team. Together they express a guardian power on a deck the player composes, where no `targetCardId` can be hard-coded.
 
 **PROTECTION Skill Kind (Attack Interception)**: `ProtectionSkill` puts its owner in front of one ally (`FightingCard.protect()`), and the three attack skills ask `Player.protectorOf(target)` right after targeting, swapping the defender **before** anything is rolled — so the dodge, defence, element, shield and damage reduction are the guardian's. The buffer lives on the protector, so its duration ticks on the guardian's turns; a dead guardian protects nobody. `AttackResult.interceptedFor` becomes an `attack_intercepted` step. Emits `protection_started` and `protection_ended`.
+
+**Event-Owned Activation Condition**: `any-ally-health-below` uses `activationCondition.threshold` as its trigger threshold, so the generic ALTERATION path no longer reuses it as the skill own condition — that gated the buff on the *caster* health too, and a healthy guardian never answered its wounded ally.
 
 **Self-Death Pattern**: `SelfDeathTrigger` (event `self-death`) fires on the card that just died — `ally-death` and `enemy-death` only reach survivors. `DeathSkillHandler` runs it as a phase before the survivors answer, so a parting gift lands first. With `ProtectedAllyStrategy` (targeting `protected-ally`) a guardian can leave something to the ally it was covering, conditioned on the protection having been running since an absent protection targets nobody.
 
@@ -354,6 +356,22 @@ Home page uses `<a href="/arcade" role="button">` (and `/deck`) instead of `<but
 - Feature-based modules (fight module)
 - Domain logic separated from HTTP layer
 - Factory pattern for DTO-to-domain conversion
+
+## Fight Replayer (`clients/fight-replayer/`)
+
+Static ES-module app, served with `pnpm replayer`; the fight JSON is pasted in.
+No build step. `js/parser.js` turns a raw report into `events`, `snapshots`
+(card state after each step), `teams` and `cardsMeta`, and is the only part
+with real logic — hence the one Vitest suite (`js/__tests__/parser.spec.js`),
+which makes the replayer a workspace package covered by `pnpm -r test`.
+
+`snapshots` carry every buffer a card holds: `shield`, `stance`, `protecting`,
+`transformation`, `marks`, `statuses`, `buffs`/`debuffs`. Death clears them all.
+The shield is drawn down per hit from `Damage.shieldAbsorbed` — the report's
+`damage` is the total dealt, so without that field the buffer stayed frozen at
+its applied value (issue #326). `js/icons.js` must carry an icon and a colour
+for every `StepKind`, otherwise `describeEvent()` falls back to a bare `•` and
+the event log row loses its label.
 
 ### Testing
 - Unit tests colocated with source (`__tests__/` directories)
