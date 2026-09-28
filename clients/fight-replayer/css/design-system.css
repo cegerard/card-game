@@ -449,6 +449,7 @@ textarea, input { font-family: var(--font-mono); }
 .attack-target__tag  { font-size: 11px; color: var(--text-muted); }
 .attack-target__tag--crit  { color: #f59e0b; }
 .attack-target__tag--dodge { color: var(--text-muted); }
+.attack-target__tag--shield { color: #60a5fa; }
 .attack-target__dmg {
   font-family: var(--font-mono);
   font-size: 15px;
@@ -565,4 +566,32 @@ textarea, input { font-family: var(--font-mono); }
   border-radius: var(--r-pill);
   padding: 1px 8px;
   display: inline-block;
+}
+
+/* Buffers a card carries for a number of turns. Same pill as the
+   transformation badge above, one colour per mechanic. */
+.card-panel__shield,
+.card-panel__stance,
+.card-panel__protection {
+  margin-top: 6px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  border-radius: var(--r-pill);
+  padding: 1px 8px;
+  display: inline-block;
+}
+.card-panel__shield {
+  color: #dbeafe;
+  background: #1e3a8a;
+  border: 1px solid #60a5fa;
+}
+.card-panel__stance {
+  color: #e0e7ff;
+  background: #312e81;
+  border: 1px solid #818cf8;
+}
+.card-panel__protection {
+  color: #cffafe;
+  background: #155e75;
+  border: 1px solid #38bdf8;
 }

@@ -36,6 +36,7 @@ function discoverCards(events) {
     ev.alterations?.forEach(b => registerCard(meta, b.target));
     ev.removed?.forEach(r => registerCard(meta, r.target));
     ev.targets?.forEach(t => registerCard(meta, t.target));
+    registerCard(meta, ev.protectedCard);
     if (ev.kind === 'state_effect') {
       trackFirstHP(firstHP, ev.card, ev.remainingHealth, ev.damage);
     }
@@ -130,10 +131,25 @@ function buildInitialState(cardsMeta, firstHP) {
       shield: null,     // null | { points: number }
       marks: {},        // { [damageType]: stacks }
       transformation: null, // null | { name, turns }
+      stance: null,     // null | { name, turns }
+      protecting: null, // null | { name, target, turns } — ally this card covers
       dead: false,
     };
   });
   return state;
+}
+
+/**
+ * Draws the shield buffer down by what a hit absorbed. The engine reports the
+ * absorbed share per hit (`shieldAbsorbed`); without it the buffer stayed at
+ * its applied value until it broke (issue #326). A depleted buffer is dropped
+ * here rather than waiting for `shield_broken`, which only fires on the hit
+ * that empties it.
+ */
+function drainShield(card, absorbed) {
+  if (!absorbed || !card.shield) return;
+  const points = card.shield.points - absorbed;
+  card.shield = points > 0 ? { points } : null;
 }
 
 function applyEvent(state, ev) {
@@ -144,7 +160,9 @@ function applyEvent(state, ev) {
     case 'special_attack':
       ev.damages?.forEach(d => {
         const c = get(d.defender?.id);
-        if (c) c.hp = d.remainingHealth;
+        if (!c) return;
+        c.hp = d.remainingHealth;
+        drainShield(c, d.shieldAbsorbed);
       });
       break;
 
@@ -180,6 +198,9 @@ function applyEvent(state, ev) {
         c.stateEffects = {};
         c.marks = {};
         c.transformation = null;
+        c.stance = null;
+        c.protecting = null;
+        c.shield = null;
       } else if (!c.statuses.includes(ev.status)) {
         c.statuses = [...c.statuses, ev.status];
       }
@@ -317,7 +338,44 @@ function applyEvent(state, ev) {
       break;
     }
 
-    // targeting_override / targeting_reverted don't mutate card stats
+    case 'regenerated': {
+      const c = get(ev.card?.id);
+      if (c && ev.remainingHealth != null) c.hp = ev.remainingHealth;
+      break;
+    }
+
+    case 'stance_started': {
+      const c = get(ev.card?.id);
+      if (c) c.stance = { name: ev.name, turns: ev.remainingTurns };
+      break;
+    }
+
+    case 'stance_ended': {
+      const c = get(ev.card?.id);
+      if (c) c.stance = null;
+      break;
+    }
+
+    case 'protection_started': {
+      const c = get(ev.card?.id);
+      if (c)
+        c.protecting = {
+          name: ev.name,
+          target: ev.protectedCard?.name,
+          turns: ev.remainingTurns,
+        };
+      break;
+    }
+
+    case 'protection_ended': {
+      const c = get(ev.card?.id);
+      if (c) c.protecting = null;
+      break;
+    }
+
+    // targeting_override / targeting_reverted / attack_intercepted /
+    // damage_mitigated report what happened around a hit; the hit itself
+    // already carried the stat changes.
     default: break;
   }
 }
