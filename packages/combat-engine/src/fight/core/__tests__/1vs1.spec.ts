@@ -50,7 +50,7 @@ describe('with only one card each', () => {
           damages: [
             {
               defender: card2.identityInfo,
-              damage: 99,
+              damage: 1,
               isCritical: false,
               dodge: false,
               remainingHealth: 0,
@@ -115,7 +115,7 @@ describe('with only one card each', () => {
           damages: [
             {
               defender: card1.identityInfo,
-              damage: 59,
+              damage: 1,
               isCritical: false,
               dodge: false,
               remainingHealth: 0,
@@ -185,7 +185,7 @@ describe('with only one card each', () => {
           damages: [
             {
               defender: card2.identityInfo,
-              damage: 25,
+              damage: 1,
               isCritical: false,
               dodge: false,
               remainingHealth: 0,
@@ -199,7 +199,7 @@ describe('with only one card each', () => {
           damages: [
             {
               defender: card1.identityInfo,
-              damage: 30,
+              damage: 1,
               isCritical: false,
               dodge: false,
               remainingHealth: 0,
