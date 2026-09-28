@@ -510,6 +510,7 @@ export class FightingCard {
 
     const shieldAbsorbed = this.absorbWithShield(causedDamages);
     let damageToHealth = causedDamages - shieldAbsorbed;
+    damageToHealth = Math.min(damageToHealth, this.actualHealth);
 
     if (
       this.actualHealth - damageToHealth <= 0 &&

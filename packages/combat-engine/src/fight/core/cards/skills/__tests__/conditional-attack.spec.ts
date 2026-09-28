@@ -314,7 +314,7 @@ describe('ConditionalAttack integration via Fight (interval=3)', () => {
     const result = fight.start();
     expect(result[5]).toMatchObject({
       kind: 'attack',
-      damages: [{ damage: 500 }],
+      damages: [{ damage: 150 }],
     });
   });
 
