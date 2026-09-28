@@ -86,8 +86,24 @@ export function buildCardPanel(card, isTeamA, isActive) {
       </div>`
     : '';
 
+  const stanceHtml = card.stance
+    ? `<div class="card-panel__stance">
+        ${ICON.stance_started} ${esc(card.stance.name)}${
+          card.stance.turns != null ? ` (${card.stance.turns}T)` : ''
+        }
+      </div>`
+    : '';
+
+  const protectionHtml = card.protecting
+    ? `<div class="card-panel__protection">
+        ${ICON.protection_started} covers ${esc(card.protecting.target)}${
+          card.protecting.turns != null ? ` (${card.protecting.turns}T)` : ''
+        }
+      </div>`
+    : '';
+
   const shieldHtml = card.shield
-    ? `<div class="card-panel__shield">${ICON.shield_applied} ${card.shield.points} shield</div>`
+    ? `<div class="card-panel__shield">${ICON.shield_applied} ${Math.round(card.shield.points)} shield</div>`
     : '';
 
   const hpHtml = !card.dead
@@ -112,6 +128,8 @@ export function buildCardPanel(card, isTeamA, isActive) {
       ${hpHtml}
       ${shieldHtml}
       ${transformationHtml}
+      ${stanceHtml}
+      ${protectionHtml}
       ${marksHtml}
       ${statusesHtml}
       ${buffsHtml}
@@ -172,11 +190,13 @@ function buildAttackDetail(ev) {
         hits: [],
         dodge: false,
         critical: false,
+        shieldAbsorbed: 0,
         finalHP: d.remainingHealth,
       };
     }
     grouped[key].hits.push(d);
     grouped[key].finalHP = d.remainingHealth;
+    grouped[key].shieldAbsorbed += d.shieldAbsorbed ?? 0;
     if (d.dodge) grouped[key].dodge = true;
     if (d.isCritical) grouped[key].critical = true;
   });
@@ -195,6 +215,9 @@ function buildAttackDetail(ev) {
           : '',
         multiHit
           ? `<span class="attack-target__tag">${g.hits.length} hits</span>`
+          : '',
+        g.shieldAbsorbed > 0
+          ? `<span class="attack-target__tag attack-target__tag--shield">${ICON.shield_applied} ${Math.round(g.shieldAbsorbed)} absorbed</span>`
           : '',
       ]
         .filter(Boolean)
@@ -337,6 +360,20 @@ function buildGenericDetail(ev) {
       return esc(ev.card?.name);
     case 'survived':
       return `${esc(ev.card?.name)} survived with 1 HP — skill: ${esc(ev.name ?? '?')}`;
+    case 'damage_mitigated':
+      return `${esc(ev.name ?? '?')} removed a share of the incoming hit on ${esc(ev.card?.name)}`;
+    case 'stance_started':
+      return `${esc(ev.name)} held for ${ev.remainingTurns} turn(s)`;
+    case 'stance_ended':
+      return `${esc(ev.card?.name)} leaves ${esc(ev.name)}`;
+    case 'protection_started':
+      return `${esc(ev.card?.name)} stands in front of ${esc(ev.protectedCard?.name)} for ${ev.remainingTurns} turn(s)`;
+    case 'protection_ended':
+      return `${esc(ev.card?.name)} steps away from ${esc(ev.protectedCard?.name)}`;
+    case 'attack_intercepted':
+      return `the hit was aimed at ${esc(ev.protectedCard?.name)} and resolved against ${esc(ev.card?.name)}`;
+    case 'regenerated':
+      return `+${(ev.healed ?? 0).toFixed(1)} HP → ${(ev.remainingHealth ?? 0).toFixed(1)} HP`;
     case 'mark_applied':
       return `${esc(ev.card?.name)} carries ${ev.stacks} ${esc(ev.damageType)} mark(s)`;
     case 'transformation_started':
@@ -483,6 +520,48 @@ export function describeEvent(ev, teamBName) {
         icon: ICON.survived,
         text: `${ev.card?.name} — Survived (${ev.name ?? 'Survive'})`,
         color: EVENT_COLOR.survived,
+      };
+    case 'damage_mitigated':
+      return {
+        icon: ICON.damage_mitigated,
+        text: `${ev.card?.name} — Damage reduced (${ev.name ?? 'Reduction'})`,
+        color: EVENT_COLOR.damage_mitigated,
+      };
+    case 'stance_started':
+      return {
+        icon: ICON.stance_started,
+        text: `${ev.card?.name} — ${ev.name ?? 'Stance'} (STANCE)`,
+        color: EVENT_COLOR.stance_started,
+      };
+    case 'stance_ended':
+      return {
+        icon: ICON.stance_ended,
+        text: `${ev.card?.name} — ${ev.name ?? 'Stance'} over`,
+        color: EVENT_COLOR.stance_ended,
+      };
+    case 'protection_started':
+      return {
+        icon: ICON.protection_started,
+        text: `${ev.card?.name} — ${ev.name ?? 'Protection'} covers ${ev.protectedCard?.name}`,
+        color: EVENT_COLOR.protection_started,
+      };
+    case 'protection_ended':
+      return {
+        icon: ICON.protection_ended,
+        text: `${ev.card?.name} — no longer covers ${ev.protectedCard?.name}`,
+        color: EVENT_COLOR.protection_ended,
+      };
+    case 'attack_intercepted':
+      return {
+        icon: ICON.attack_intercepted,
+        text: `${ev.card?.name} — took the hit for ${ev.protectedCard?.name}`,
+        color: EVENT_COLOR.attack_intercepted,
+      };
+    case 'regenerated':
+      return {
+        icon: ICON.regenerated,
+        text: `${ev.card?.name} — Regenerated`,
+        color: EVENT_COLOR.regenerated,
       };
     case 'mark_applied':
       return {

@@ -297,6 +297,7 @@ export class ActionStage {
         dodge: damageDealt.dodge,
         remainingHealth: damageDealt.remainingHealth,
         kind: damageDealt.kind,
+        shieldAbsorbed: damageDealt.shieldAbsorbed,
       });
 
       if (damageDealt.interceptedFor) {
