@@ -267,7 +267,7 @@ describe('Add Poison effect level 1', () => {
           attacker: card1.identityInfo,
           damages: [
             {
-              damage: 150,
+              damage: 10,
               defender: card2.identityInfo,
               dodge: false,
               isCritical: false,
@@ -552,7 +552,7 @@ describe('Add Poison effect level 2', () => {
           attacker: card1.identityInfo,
           damages: [
             {
-              damage: 150,
+              damage: 10,
               defender: card2.identityInfo,
               dodge: false,
               isCritical: false,
@@ -923,7 +923,7 @@ describe('Add Poison effect level 3', () => {
           attacker: card1.identityInfo,
           damages: [
             {
-              damage: 150,
+              damage: 10,
               defender: card2.identityInfo,
               dodge: false,
               isCritical: false,

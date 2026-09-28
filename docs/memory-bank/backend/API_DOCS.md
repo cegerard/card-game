@@ -237,10 +237,16 @@ Simulates a turn-based card battle between two players.
   kind: "attack" | "special_attack",
   name?: string,         // Skill name that triggered the attack
   attacker: CardInfo,
-  damages: { defender: CardInfo, damage: number, isCritical: boolean, dodge: boolean, remainingHealth: number, survived?: boolean, survivedSkillName?: string }[],
+  damages: { defender: CardInfo, damage: number, isCritical: boolean, dodge: boolean, remainingHealth: number, shieldAbsorbed?: number, survived?: boolean, survivedSkillName?: string }[],
   energy: number
 }
 ```
+
+`shieldAbsorbed` est la part de `damage` mangée par le bouclier au lieu de la
+santé, absente quand aucun bouclier n'était sur le chemin. `damage` reste le
+total infligé, donc un consommateur qui suit le tampon depuis `shield_applied`
+a besoin de ce champ pour le décrémenter : sans lui le bouclier restait affiché
+à sa valeur d'application jusqu'à sa rupture.
 
 **`survived` step** (`SurvivedReport`): Emitted immediately after a fatal blow is intercepted by a SURVIVE skill.
 ```typescript

@@ -31,6 +31,17 @@ export const ICON = {
   shield_expired:    '🔻',
   /* Survive */
   survived:          '🌟',
+  /* Damage reduction */
+  damage_mitigated:  '🩹',
+  /* Stance */
+  stance_started:    '🥋',
+  stance_ended:      '🔚',
+  /* Protection */
+  protection_started: '🫂',
+  protection_ended:   '🙌',
+  attack_intercepted: '🛡️',
+  /* Regeneration */
+  regenerated:       '♻️',
   /* Elemental mark */
   mark_applied:      '💠',
   /* Transformation */
@@ -78,6 +89,13 @@ export const EVENT_COLOR = {
   shield_broken:     '#f87171',
   shield_expired:    '#94a3b8',
   survived:          '#fbbf24',
+  damage_mitigated:  '#7dd3fc',
+  stance_started:    '#818cf8',
+  stance_ended:      '#94a3b8',
+  protection_started: '#38bdf8',
+  protection_ended:   '#94a3b8',
+  attack_intercepted: '#60a5fa',
+  regenerated:       '#4ade80',
   mark_applied:      '#22d3ee',
   transformation_started: '#a855f7',
   transformation_ended:   '#94a3b8',
