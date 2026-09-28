@@ -14,7 +14,7 @@ card-game/                  # Mono-repo root (pnpm 11 workspace)
 │   ├── combat-engine/      # NestJS fight simulation backend
 │   └── shared-types/       # Shared TypeScript types (stub)
 ├── clients/
-│   ├── fight-replayer/     # Static HTML/JS fight replay viewer
+│   ├── fight-replayer/     # Static HTML/JS fight replay viewer (Vitest on the parser)
 │   └── gasha/              # SvelteKit arcade client (Phaser + Web renderer)
 ├── docs/                   # Documentation and memory bank
 ├── specs/                  # Feature specifications
@@ -148,6 +148,10 @@ This allows special attacks to perform their primary action (damage/healing) whi
 
 **PROTECTION Skill Kind (Attack Interception)**: `ProtectionSkill` puts its owner in front of one ally (`FightingCard.protect()`), and the three attack skills ask `Player.protectorOf(target)` right after targeting, swapping the defender **before** anything is rolled — so the dodge, defence, element, shield and damage reduction are the guardian's. The buffer lives on the protector, so its duration ticks on the guardian's turns; a dead guardian protects nobody. `AttackResult.interceptedFor` becomes an `attack_intercepted` step. Emits `protection_started` and `protection_ended`.
 
+**Event-Owned Activation Condition**: `any-ally-health-below` uses `activationCondition.threshold` as its trigger threshold, so the generic ALTERATION path no longer reuses it as the skill own condition — that gated the buff on the *caster* health too, and a healthy guardian never answered its wounded ally.
+
+**Self-Death Pattern**: `SelfDeathTrigger` (event `self-death`) fires on the card that just died — `ally-death` and `enemy-death` only reach survivors. `DeathSkillHandler` runs it as a phase before the survivors answer, so a parting gift lands first. With `ProtectedAllyStrategy` (targeting `protected-ally`) a guardian can leave something to the ally it was covering, conditioned on the protection having been running since an absent protection targets nobody.
+
 **Shield Mechanic**: `FightingCard` has an optional shield buffer (`applyShield(rate, duration)` computes `points = rate * maxHealth`). Damage first absorbs shield points before hitting health (`applyFinalDamage()` returns `{ damageToHealth, shieldAbsorbed }`). Shield breaks when points hit 0 → `shield_broken` step. `TurnManager` decrements shield duration each turn; reaching 0 → `shield_expired` step. Special skills can include a `shieldApplication?: ShieldApplicationDto` to apply shields post-action to a separate set of targets.
 
 **TRANSFORMATION Skill Kind (Reactive)**: `TransformationSkill` is a one-shot health-reactive skill. It transforms its owner for a duration, applying stat alterations, an optional lifesteal (heals a share of max health on every landed hit) and an optional status immunity. `TurnManager` ends it, charging an optional health cost that never kills its owner, and emits `transformation_started` then `transformation_ended` steps.
@@ -211,7 +215,8 @@ targeting-card-strategies/
 ├── launcher.ts                # Self-targeting
 ├── allied-card-by-id.ts       # Targets a specific ally by ID (returns [] if dead)
 ├── last-attacker-of-ally.ts   # Targets the last card that attacked a specific ally (returns [] if dead)
-└── most-wounded-ally.ts       # Targets the caster ally in the worst shape below a threshold (excludes the caster)
+├── most-wounded-ally.ts       # Targets the caster ally in the worst shape below a threshold (excludes the caster)
+└── protected-ally.ts          # Targets the ally the caster stands in front of; empty outside a protection
 ```
 
 ### HTTP API Layer (`packages/combat-engine/src/fight/http-api/`)
@@ -351,6 +356,22 @@ Home page uses `<a href="/arcade" role="button">` (and `/deck`) instead of `<but
 - Feature-based modules (fight module)
 - Domain logic separated from HTTP layer
 - Factory pattern for DTO-to-domain conversion
+
+## Fight Replayer (`clients/fight-replayer/`)
+
+Static ES-module app, served with `pnpm replayer`; the fight JSON is pasted in.
+No build step. `js/parser.js` turns a raw report into `events`, `snapshots`
+(card state after each step), `teams` and `cardsMeta`, and is the only part
+with real logic — hence the one Vitest suite (`js/__tests__/parser.spec.js`),
+which makes the replayer a workspace package covered by `pnpm -r test`.
+
+`snapshots` carry every buffer a card holds: `shield`, `stance`, `protecting`,
+`transformation`, `marks`, `statuses`, `buffs`/`debuffs`. Death clears them all.
+The shield is drawn down per hit from `Damage.shieldAbsorbed` — the report's
+`damage` is the total dealt, so without that field the buffer stayed frozen at
+its applied value (issue #326). `js/icons.js` must carry an icon and a colour
+for every `StepKind`, otherwise `describeEvent()` falls back to a bare `•` and
+the event log row loses its label.
 
 ### Testing
 - Unit tests colocated with source (`__tests__/` directories)

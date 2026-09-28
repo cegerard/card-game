@@ -133,4 +133,37 @@ describe('samples/cards.json', () => {
 
     expect(firstCounter).toBeGreaterThan(firstStance);
   });
+
+  it('sends Aegis in front of the ally that dropped low', () => {
+    const protections = steps.filter(
+      (s) => s.kind === 'protection_started' && s.name === 'Gardien Éternel',
+    );
+
+    expect(protections.length).toBeGreaterThan(0);
+  });
+
+  it('hardens Aegis for the time he stands there', () => {
+    const buffs = steps.filter(
+      (s) =>
+        s.kind === 'buff' && s.name === 'Gardien Éternel - Carapace ancestrale',
+    );
+
+    expect(buffs.length).toBeGreaterThan(0);
+  });
+
+  it('makes Aegis take a hit aimed at the ally he covers', () => {
+    const intercepted = steps.filter((s) => s.kind === 'attack_intercepted');
+
+    expect(intercepted.length).toBeGreaterThan(0);
+  });
+
+  it('shares his regeneration with the ally he covers', () => {
+    const shared = steps.filter(
+      (s) =>
+        s.kind === 'healing' &&
+        s.name === 'Gardien Éternel - Régénération partagée',
+    );
+
+    expect(shared.length).toBeGreaterThan(0);
+  });
 });

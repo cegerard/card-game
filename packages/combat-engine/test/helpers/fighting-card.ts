@@ -17,6 +17,7 @@ import { AlterationSkill } from '../../src/fight/core/cards/skills/alteration-sk
 import { TurnEnd } from '../../src/fight/core/trigger/turn-end';
 import { NextAction } from '../../src/fight/core/trigger/next-action';
 import { DeathTrigger } from '../../src/fight/core/trigger/death-trigger';
+import { SelfDeathTrigger } from '../../src/fight/core/trigger/self-death';
 import { DynamicTrigger } from '../../src/fight/core/trigger/dynamic-trigger';
 import { Trigger } from '../../src/fight/core/trigger/trigger';
 import { createEffect } from './effect';
@@ -197,6 +198,11 @@ function createTrigger(
         throw new Error('Enemy death trigger requires targetCardId');
       }
       return new DeathTrigger('enemy-death', targetCardId);
+    case 'self-death':
+      if (!targetCardId) {
+        throw new Error('Self death trigger requires targetCardId');
+      }
+      return new SelfDeathTrigger(targetCardId);
     default:
       throw new Error(`Unknown trigger: ${trigger}`);
   }

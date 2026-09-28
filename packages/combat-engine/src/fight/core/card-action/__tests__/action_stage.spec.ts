@@ -669,6 +669,71 @@ describe('ActionStage', () => {
     });
   });
 
+  describe('attacking a shielded defender', () => {
+    function run() {
+      const attacker = makeCard(
+        new SpecialAttack(
+          'special',
+          [new DamageComposition(DamageType.PHYSICAL, 1)],
+          999,
+          POSITION_BASED,
+        ),
+      );
+      const defender = makeCard(
+        new SpecialAttack(
+          'special',
+          [new DamageComposition(DamageType.PHYSICAL, 1)],
+          999,
+          POSITION_BASED,
+        ),
+      );
+      defender.applyShield(0.5, 3);
+      const player1 = new Player('Player 1', [attacker]);
+      const player2 = new Player('Player 2', [defender]);
+      const actionStage = new ActionStage(
+        player1,
+        player2,
+        { onCardDeath: [] },
+        new DeathSkillHandler(player1, player2),
+      );
+      return actionStage.computeNextAction([attacker]);
+    }
+
+    // Without this the replayer cannot decrement the shield it drew from
+    // shield_applied: the report said how much damage landed but never how
+    // much of it the buffer ate (issue #326).
+    it('reports how much the shield absorbed', () => {
+      const attack = run().find((s) => s.kind === StepKind.Attack) as any;
+
+      expect(attack.damages[0].shieldAbsorbed).toBe(100);
+    });
+
+    it('leaves shieldAbsorbed out when the defender carries no shield', () => {
+      const attacker = makeCard(
+        new SpecialAttack(
+          'special',
+          [new DamageComposition(DamageType.PHYSICAL, 1)],
+          999,
+          POSITION_BASED,
+        ),
+      );
+      const player1 = new Player('Player 1', [attacker]);
+      const player2 = new Player('Player 2', [makeCard(new UnknownSpecial())]);
+      const stage = new ActionStage(
+        player1,
+        player2,
+        { onCardDeath: [] },
+        new DeathSkillHandler(player1, player2),
+      );
+
+      const attack = stage
+        .computeNextAction([attacker])
+        .find((s) => s.kind === StepKind.Attack) as any;
+
+      expect(attack.damages[0].shieldAbsorbed).toBeUndefined();
+    });
+  });
+
   describe('stance opened by a special', () => {
     const STANCE = 'forteresse-des-ages';
 

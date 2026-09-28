@@ -1,3 +1,4 @@
+import { SELF_DEATH_PREFIX } from '../trigger/self-death';
 import { FightingCard } from '../cards/fighting-card';
 import { CardDeathSubscriber } from './card-death-subscriber';
 import { Step } from './@types/step';
@@ -15,9 +16,12 @@ import { Player } from '../player';
  *    (e.g. an activation-limited buff skill that expires on death). These are
  *    processed first so that any event-bound buffs/effects they cancel are already
  *    gone before surviving cards react.
- * 2. **Ally-death triggers** – skills on the dead card's own team that listen for
+ * 2. **Self-death triggers** – the dead card's own skills listening for
+ *    `self-death:<deadCard.id>` fire next, so what it leaves behind lands before
+ *    anyone answers its death. It is the only phase running on the fallen card.
+ * 3. **Ally-death triggers** – skills on the dead card's own team that listen for
  *    `ally-death:<deadCard.id>` are fired next.
- * 3. **Enemy-death triggers** – skills on the opposing team that listen for
+ * 4. **Enemy-death triggers** – skills on the opposing team that listen for
  *    `enemy-death:<deadCard.id>` are fired last.
  *
  * All resulting steps are accumulated internally. Callers must call `drainSteps()`
@@ -67,6 +71,17 @@ export class DeathSkillHandler implements CardDeathSubscriber {
         );
       });
     }
+
+    // The fallen card speaks first: what it leaves behind must land before the
+    // survivors react to its death, so an ally's answer builds on the legacy
+    // rather than racing it.
+    this.fireSkillsOnCards(
+      [deadCard],
+      `${SELF_DEATH_PREFIX}:${deadCard.id}`,
+      ownerPlayer,
+      opponentPlayer,
+      killerCard,
+    );
 
     const allyTriggerId = `ally-death:${deadCard.id}`;
     this.fireSkillsOnCards(

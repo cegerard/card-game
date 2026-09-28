@@ -604,6 +604,77 @@
             { "type": "WATER", "rate": 0.25 }
           ],
           "targetingStrategy": "last-attacker-of-ally"
+        },
+        {
+          "kind": "PROTECTION",
+          "name": "Gardien Éternel",
+          "duration": 2,
+          "event": "any-ally-health-below",
+          "targetingStrategy": "most-wounded-ally",
+          "activationLimit": 1,
+          "activationCondition": {
+            "type": "health-threshold",
+            "operator": "below",
+            "threshold": 0.2
+          }
+        },
+        {
+          "kind": "ALTERATION",
+          "name": "Gardien Éternel - Carapace ancestrale",
+          "event": "any-ally-health-below",
+          "polarity": "buff",
+          "buffType": "defense",
+          "rate": 0.5,
+          "duration": 2,
+          "targetingStrategy": "self",
+          "activationLimit": 1,
+          "activationCondition": {
+            "type": "health-threshold",
+            "operator": "below",
+            "threshold": 0.2
+          }
+        },
+        {
+          "kind": "ALTERATION",
+          "name": "Gardien Éternel - Souffle de la tortue",
+          "event": "any-ally-health-below",
+          "polarity": "buff",
+          "buffType": "regeneration",
+          "rate": 0.3,
+          "duration": 2,
+          "targetingStrategy": "self",
+          "activationLimit": 1,
+          "activationCondition": {
+            "type": "health-threshold",
+            "operator": "below",
+            "threshold": 0.2
+          }
+        },
+        {
+          "kind": "HEALING",
+          "name": "Gardien Éternel - Régénération partagée",
+          "event": "turn-end",
+          "rate": 0.1,
+          "targetingStrategy": "protected-ally",
+          "healBasis": "target-max-health"
+        },
+        {
+          "kind": "HEALING",
+          "name": "Gardien Éternel - Sacrifice",
+          "event": "self-death",
+          "rate": 0.4,
+          "targetingStrategy": "protected-ally",
+          "healBasis": "target-max-health"
+        },
+        {
+          "kind": "ALTERATION",
+          "name": "Gardien Éternel - La carapace brisée",
+          "event": "self-death",
+          "polarity": "buff",
+          "buffType": "defense",
+          "rate": 0.2,
+          "duration": 0,
+          "targetingStrategy": "protected-ally"
         }
       ]
     },

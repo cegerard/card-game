@@ -110,7 +110,7 @@ describe('Trigger card special attack without effect', () => {
           attacker: defenderWithDodge.identityInfo,
           damages: [
             {
-              damage: 10,
+              damage: 5,
               isCritical: false,
               dodge: false,
               defender: attacker.identityInfo,

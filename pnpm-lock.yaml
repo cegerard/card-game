@@ -12,6 +12,12 @@ importers:
         specifier: ^29.4.14
         version: 29.4.14(@babel/core@7.29.7)(@jest/transform@30.5.2)(@jest/types@30.4.1)(babel-jest@30.5.2(@babel/core@7.29.7))(jest-util@30.4.1)(jest@30.5.2(@types/node@26.6.2)(ts-node@10.9.2(@types/node@26.6.2)(typescript@6.0.3)))(typescript@6.0.3)
 
+  clients/fight-replayer:
+    devDependencies:
+      vitest:
+        specifier: ^5.0.0
+        version: 5.0.0(@types/node@26.6.2)(jsdom@30.1.1(@noble/hashes@1.8.0))(vite@8.2.2(@types/node@26.6.2)(terser@5.51.2))
+
   clients/gasha:
     dependencies:
       '@card-game/shared-types':
@@ -118,6 +124,9 @@ importers:
       '@faker-js/faker':
         specifier: ^10.5.0
         version: 10.5.0
+      '@jest/globals':
+        specifier: ^30.5.2
+        version: 30.5.2
       '@nestjs/cli':
         specifier: ^12.0.7
         version: 12.0.7(@types/node@26.4.0)(fork-ts-checker-webpack-plugin@9.1.0(typescript@6.0.3)(webpack@5.106.2))(prettier@3.9.9)(ts-loader@9.6.2(typescript@6.0.3)(webpack@5.106.2))(tsconfig-paths-webpack-plugin@4.2.0)(webpack-node-externals@3.0.0)(webpack@5.106.2)
@@ -2952,9 +2961,6 @@ packages:
   magic-string@1.0.0:
     resolution: {integrity: sha512-CGvjzMN08iv6w1mm4/x3Gh1hLb4VnyRUA15FFpl6CsCIGGoe36k7kY5KNz9QDbSBN5I/fWHM6ZlIkUTa5xdUEA==}
 
-  magic-string@1.2.3:
-    resolution: {integrity: sha512-Bpb0W2TbLKOZ7vJnOUnVRGq3WL2p+ISV29M6hYPL1AFCpyKZpdr5ytiXoTSSxRVhg8YW7f65+6gbG8WG6PCa/g==}
-
   magic-string@1.4.1:
     resolution: {integrity: sha512-8lyCu36ErXR0J9uaGKlKQoiLZKmtI63YGLE8G2o9jyRPdr4X47LusSOwgOJOzcVtp81fTAAjxR7BwKz682Jhow==}
 
@@ -3125,10 +3131,6 @@ packages:
   object-inspect@1.13.4:
     resolution: {integrity: sha512-W67iLl4J2EXEGTbfeHCffrjDfitvLANg0UlX3wFUUSTx92KXRFegMHUVgSqE+wvhAbi4WqjGg9czysTV2Epbew==}
     engines: {node: '>= 0.4'}
-
-  obug@2.1.4:
-    resolution: {integrity: sha512-4a+OsYv9UktOJKE+l1A4OufDgdRF9PifWj+tJnHURo/P+WOxpG4GzUFL9qCalmWauao6ogiG+QvnCovwPoyAWA==}
-    engines: {node: '>=12.20.0'}
 
   obug@2.2.1:
     resolution: {integrity: sha512-XrsrhT5sybtKI6wakr2SPOlGZWWYbUXZ7a0jT8/QOeAPau+1X/bSegNe5YR75oJmEZQbKningirmGOEJCIk61Q==}
@@ -7288,10 +7290,6 @@ snapshots:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.6.0
 
-  magic-string@1.2.3:
-    dependencies:
-      '@jridgewell/sourcemap-codec': 1.6.0
-
   magic-string@1.4.1:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.6.0
@@ -7414,8 +7412,6 @@ snapshots:
   object-assign@4.1.1: {}
 
   object-inspect@1.13.4: {}
-
-  obug@2.1.4: {}
 
   obug@2.2.1: {}
 
@@ -8245,8 +8241,8 @@ snapshots:
       chai: 6.2.2
       es-module-lexer: 2.3.2
       expect-type: 1.4.0
-      magic-string: 1.2.3
-      obug: 2.1.4
+      magic-string: 1.4.2
+      obug: 2.2.1
       picomatch: 4.0.7
       std-env: 4.2.0
       tinybench: 6.1.4
@@ -8267,8 +8263,8 @@ snapshots:
       chai: 6.2.2
       es-module-lexer: 2.3.2
       expect-type: 1.4.0
-      magic-string: 1.2.3
-      obug: 2.1.4
+      magic-string: 1.4.2
+      obug: 2.2.1
       picomatch: 4.0.7
       std-env: 4.2.0
       tinybench: 6.1.4

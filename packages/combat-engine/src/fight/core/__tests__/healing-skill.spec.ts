@@ -88,7 +88,7 @@ describe('Trigger-healing-skill', () => {
           attacker: card1.identityInfo,
           damages: [
             {
-              damage: 99,
+              damage: 1,
               defender: card2.identityInfo,
               dodge: false,
               isCritical: false,
@@ -134,7 +134,7 @@ describe('Trigger-healing-skill', () => {
           attacker: card1.identityInfo,
           damages: [
             {
-              damage: 99,
+              damage: 1,
               defender: card2.identityInfo,
               dodge: false,
               isCritical: false,
@@ -180,7 +180,7 @@ describe('Trigger-healing-skill', () => {
           attacker: card1.identityInfo,
           damages: [
             {
-              damage: 99,
+              damage: 1,
               defender: card2.identityInfo,
               dodge: false,
               isCritical: false,
