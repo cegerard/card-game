@@ -16,4 +16,8 @@ describe('statusCategoryOf', () => {
   it('classes burn as damage over time', () => {
     expect(statusCategoryOf('burn')).toBe('damage-over-time');
   });
+
+  it('classes bleed as damage over time', () => {
+    expect(statusCategoryOf('bleed')).toBe('damage-over-time');
+  });
 });

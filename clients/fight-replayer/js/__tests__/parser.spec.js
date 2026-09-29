@@ -210,3 +210,39 @@ describe('death', () => {
     ]);
   });
 });
+
+describe('bleed', () => {
+  const bleeding = (stacks) => ({
+    kind: 'status_change',
+    card: AEGIS,
+    status: 'bleed',
+    stacks,
+  });
+  const tick = (remainingStacks, remainingTurns) => ({
+    kind: 'state_effect',
+    card: AEGIS,
+    type: 'bleed',
+    damage: 5,
+    remainingHealth: 495,
+    remainingTurns,
+    remainingStacks,
+  });
+
+  it('records the stack count of the latest application', () => {
+    const steps = { 1: hit(AEGIS, 100, 500), 2: bleeding(1), 3: bleeding(2) };
+
+    expect(finalState(steps, 'aegis').bleedStacks).toBe(2);
+  });
+
+  it('follows the stacks left after a tick', () => {
+    const steps = { 1: hit(AEGIS, 100, 500), 2: bleeding(3), 3: tick(1, 2) };
+
+    expect(finalState(steps, 'aegis').bleedStacks).toBe(1);
+  });
+
+  it('clears the stacks once the bleed ends', () => {
+    const steps = { 1: hit(AEGIS, 100, 500), 2: bleeding(1), 3: tick(0, 0) };
+
+    expect(finalState(steps, 'aegis').bleedStacks).toBe(0);
+  });
+});

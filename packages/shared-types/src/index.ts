@@ -46,7 +46,13 @@ export type BuffType =
   | 'regeneration'
   | 'resistance';
 
-export type EffectType = 'POISON' | 'BURN' | 'FREEZE' | 'STUNT' | 'MARK';
+export type EffectType =
+  | 'POISON'
+  | 'BURN'
+  | 'FREEZE'
+  | 'STUNT'
+  | 'MARK'
+  | 'BLEED';
 
 /**
  * Ce que fait un statut à sa cible, et donc ce contre quoi une immunité est
@@ -131,15 +137,20 @@ export interface EffectTriggeredDebuff {
 
 export interface EffectConfig {
   type: EffectType;
-  /** Coefficient de dégâts par tick ; pour MARK, amplification par cumul. */
+  /**
+   * Coefficient de dégâts par tick ; pour MARK, amplification par cumul ;
+   * pour BLEED, dégâts de chaque pile par tour.
+   */
   rate: number;
-  /** Requis sauf pour une marque élémentaire (type MARK). */
+  /** Requis sauf pour MARK et BLEED. */
   level?: number;
+  /** BLEED uniquement (requis) : tours pendant lesquels chaque pile saigne. */
+  duration?: number;
   /** MARK uniquement : type de dégâts amplifié par la marque. */
   damageType?: DamageType;
-  /** MARK uniquement : nombre maximal de cumuls. */
+  /** MARK et BLEED (requis) : nombre maximal de cumuls. */
   maxStacks?: number;
-  /** MARK uniquement : cumuls appliqués par déclenchement (défaut 1). */
+  /** MARK et BLEED : cumuls appliqués par déclenchement (défaut 1). */
   stacks?: number;
   triggeredDebuff?: EffectTriggeredDebuff;
   terminationEvent?: string;

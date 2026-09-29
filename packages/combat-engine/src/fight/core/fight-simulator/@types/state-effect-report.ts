@@ -8,4 +8,5 @@ export type StateEffectReport = {
   damage: number;
   remainingTurns: number;
   remainingHealth: number;
+  remainingStacks?: number;
 };

@@ -95,6 +95,7 @@ export enum Effect {
   FREEZE = 'FREEZE',
   STUNT = 'STUNT',
   MARK = 'MARK',
+  BLEED = 'BLEED',
 }
 
 export enum DodgeStrategy {
@@ -189,17 +190,23 @@ export class EffectDto {
   @IsNumber()
   rate: number;
 
-  @ValidateIf((o) => o.type !== Effect.MARK)
+  @ValidateIf((o) => o.type !== Effect.MARK && o.type !== Effect.BLEED)
   @IsDefined()
   @IsNumber()
   level?: number;
+
+  @ValidateIf((o) => o.type === Effect.BLEED)
+  @IsDefined()
+  @IsNumber()
+  @Min(1)
+  duration?: number;
 
   @ValidateIf((o) => o.type === Effect.MARK)
   @IsDefined()
   @IsEnum(DamageType)
   damageType?: DamageType;
 
-  @ValidateIf((o) => o.type === Effect.MARK)
+  @ValidateIf((o) => o.type === Effect.MARK || o.type === Effect.BLEED)
   @IsDefined()
   @IsNumber()
   @Min(1)

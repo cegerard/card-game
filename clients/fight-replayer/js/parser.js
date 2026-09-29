@@ -130,6 +130,7 @@ function buildInitialState(cardsMeta, firstHP) {
       debuffs: [],      // { kind, value, turns, name, powerId }
       shield: null,     // null | { points: number }
       marks: {},        // { [damageType]: stacks }
+      bleedStacks: 0,   // active bleed stacks
       transformation: null, // null | { name, turns }
       stance: null,     // null | { name, turns }
       protecting: null, // null | { name, target, turns } — ally this card covers
@@ -177,6 +178,7 @@ function applyEvent(state, ev) {
       const c = get(ev.card?.id);
       if (!c) break;
       c.hp = ev.remainingHealth;
+      if (ev.type === 'bleed') c.bleedStacks = ev.remainingStacks ?? 0;
       if (ev.remainingTurns <= 0) {
         c.statuses = c.statuses.filter(s => s !== ev.type);
         delete c.stateEffects[ev.type];
@@ -197,12 +199,16 @@ function applyEvent(state, ev) {
         c.statuses = [];
         c.stateEffects = {};
         c.marks = {};
+        c.bleedStacks = 0;
         c.transformation = null;
         c.stance = null;
         c.protecting = null;
         c.shield = null;
-      } else if (!c.statuses.includes(ev.status)) {
-        c.statuses = [...c.statuses, ev.status];
+      } else {
+        if (ev.status === 'bleed') c.bleedStacks = ev.stacks ?? 0;
+        if (!c.statuses.includes(ev.status)) {
+          c.statuses = [...c.statuses, ev.status];
+        }
       }
       break;
     }
@@ -284,6 +290,7 @@ function applyEvent(state, ev) {
         if (!c) return;
         c.statuses = c.statuses.filter(s => s !== r.effectType);
         delete c.stateEffects[r.effectType];
+        if (r.effectType === 'bleed') c.bleedStacks = 0;
       });
       if (ev.powerId) {
         Object.values(state).forEach(c => {

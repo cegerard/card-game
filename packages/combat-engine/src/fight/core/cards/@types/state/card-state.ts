@@ -5,7 +5,7 @@ import { StateEffectType } from './state-effect-type';
 
 export interface CardState {
   type: StateEffectType;
-  level: EffectLevel;
+  level?: EffectLevel;
   remainingTurns: number;
   terminationEvent?: string;
 

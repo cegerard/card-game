@@ -132,6 +132,9 @@ export class TurnManager {
         damage: result.damage,
         remainingTurns: result.remainingTurns,
         remainingHealth: result.remainingHealth,
+        ...(result.remainingStacks !== undefined && {
+          remainingStacks: result.remainingStacks,
+        }),
       });
     });
 

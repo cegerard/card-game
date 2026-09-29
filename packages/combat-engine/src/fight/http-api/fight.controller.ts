@@ -44,6 +44,7 @@ import { FreezeAttackEffect } from '../core/cards/@types/attack/attack-freeze-ef
 import { StuntAttackEffect } from '../core/cards/@types/attack/attack-stunt-effect';
 import { Element } from '../core/cards/@types/damage/element';
 import { MarkAttackEffect } from '../core/cards/@types/attack/attack-mark-effect';
+import { BleedAttackEffect } from '../core/cards/@types/attack/attack-bleed-effect';
 import { ElementalMark } from '../core/cards/@types/mark/elemental-mark';
 import { MarkedTargetBonus } from '../core/cards/@types/mark/marked-target-bonus';
 import { EffectTriggeredDebuff } from '../core/cards/@types/attack/effect-triggered-debuff';
@@ -382,6 +383,17 @@ export class FightController {
           effectDto.stacks,
           effectDto.probability,
           triggeredDebuff,
+        );
+      case Effect.BLEED:
+        return new BleedAttackEffect(
+          effectDto.rate,
+          effectDto.duration,
+          effectDto.maxStacks,
+          new MathRandomizer(),
+          effectDto.stacks,
+          effectDto.probability,
+          triggeredDebuff,
+          effectDto.terminationEvent,
         );
     }
   }
