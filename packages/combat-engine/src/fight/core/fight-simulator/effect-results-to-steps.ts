@@ -29,6 +29,7 @@ export function effectResultsToSteps(
             kind: StepKind.StatusChange,
             status: effect.type as status,
             card: effect.card.identityInfo,
+            ...(effect.stacks !== undefined && { stacks: effect.stacks }),
           },
     ];
 

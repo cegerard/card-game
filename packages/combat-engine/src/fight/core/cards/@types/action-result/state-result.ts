@@ -6,4 +6,5 @@ export type StateResult = {
   damage: number;
   remainingHealth: number;
   remainingTurns: number;
+  remainingStacks?: number;
 };

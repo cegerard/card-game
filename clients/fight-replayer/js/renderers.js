@@ -28,7 +28,7 @@ export function buildCardPanel(card, isTeamA, isActive) {
         ${card.statuses
           .map(
             (s) =>
-              `<span class="status-badge">${STATUS_ICON[s] ?? '⚡'} ${esc(s)}</span>`,
+              `<span class="status-badge">${STATUS_ICON[s] ?? '⚡'} ${esc(s)}${s === 'bleed' && card.bleedStacks ? ` ×${card.bleedStacks}` : ''}</span>`,
           )
           .join('')}
       </div>`
@@ -336,7 +336,7 @@ function buildHealDetail(ev) {
 function buildGenericDetail(ev) {
   switch (ev.kind) {
     case 'state_effect':
-      return `−${ev.damage} HP · ${ev.remainingTurns} turn(s) remaining · HP: ${(ev.remainingHealth ?? 0).toFixed(1)}`;
+      return `−${ev.damage} HP · ${ev.remainingTurns} turn(s) remaining${ev.remainingStacks !== undefined ? ` · ${ev.remainingStacks} stack(s)` : ''} · HP: ${(ev.remainingHealth ?? 0).toFixed(1)}`;
     case 'buff_expired':
     case 'debuff_expired': {
       const types = (ev.expired ?? []).map((e) => esc(e.kind)).join(', ');
@@ -468,11 +468,7 @@ export function describeEvent(ev, teamBName) {
       };
     case 'state_effect': {
       const col =
-        ev.type === 'burn'
-          ? EVENT_COLOR.state_effect_burn
-          : ev.type === 'poison'
-            ? EVENT_COLOR.state_effect_poison
-            : EVENT_COLOR.state_effect_freeze;
+        EVENT_COLOR[`state_effect_${ev.type}`] ?? EVENT_COLOR.state_effect_freeze;
       return {
         icon: STATUS_ICON[ev.type] ?? ICON.state_effect,
         text: `${ev.card?.name} — ${ev.type} tick`,

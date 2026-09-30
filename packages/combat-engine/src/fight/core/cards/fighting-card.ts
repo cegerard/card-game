@@ -9,6 +9,7 @@ import { StateEffectType } from './@types/state/state-effect-type';
 import { StateResult } from './@types/action-result/state-result';
 import { CardStateFrozen } from './@types/state/card-state-frozen';
 import { CardStateStunted } from './@types/state/card-state-stunted';
+import { CardStateBleeding } from './@types/state/card-state-bleeding';
 import { EffectLevel } from './@types/attack/effect-level';
 import {
   Buff,
@@ -156,6 +157,7 @@ export class FightingCard {
   private burned?: CardState;
   private frozen?: CardState;
   private stunted?: CardState;
+  private bleeding?: CardStateBleeding;
 
   constructor(
     id: string,
@@ -296,6 +298,10 @@ export class FightingCard {
     return this.burned?.level ?? 0;
   }
 
+  public bleedStacks(): number {
+    return this.bleeding?.stackCount ?? 0;
+  }
+
   public get shielded(): boolean {
     return this.shield !== null;
   }
@@ -329,6 +335,11 @@ export class FightingCard {
 
     if (newState.type === 'stunt') {
       this.stunted = newState;
+    }
+
+    if (newState instanceof CardStateBleeding) {
+      if (this.bleeding) this.bleeding.addStacks(newState);
+      else this.bleeding = newState;
     }
 
     return true;
@@ -441,10 +452,15 @@ export class FightingCard {
       stateResults.push(this.stunted.applyState(this));
     }
 
+    if (this.bleeding) {
+      stateResults.push(this.bleeding.applyState(this));
+    }
+
     this.frozen = this.frozen?.remainingTurns ? this.frozen : undefined;
     this.poisoned = this.poisoned?.remainingTurns ? this.poisoned : undefined;
     this.burned = this.burned?.remainingTurns ? this.burned : undefined;
     this.stunted = this.stunted?.remainingTurns ? this.stunted : undefined;
+    this.bleeding = this.bleeding?.stackCount ? this.bleeding : undefined;
 
     return stateResults.filter((result) => result !== undefined);
   }
@@ -858,6 +874,11 @@ export class FightingCard {
     if (this.stunted?.terminationEvent === eventName) {
       removed.push({ type: this.stunted.type, card });
       this.stunted = undefined;
+    }
+
+    if (this.bleeding?.removeStacksBoundTo(eventName)) {
+      removed.push({ type: this.bleeding.type, card });
+      if (!this.bleeding.stackCount) this.bleeding = undefined;
     }
 
     return removed;

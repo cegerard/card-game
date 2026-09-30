@@ -22,6 +22,7 @@ export const ICON = {
   poison:            '☠️',
   freeze:            '❄️',
   stunt:             '💫',
+  bleed:             '🩸',
   dead:              '💀',
   status_change:     '⚡',
   state_effect:      '💢',
@@ -65,6 +66,7 @@ export const STATUS_ICON = {
   poison: ICON.poison,
   freeze: ICON.freeze,
   stunt:  ICON.stunt,
+  bleed:  ICON.bleed,
 };
 
 /** Primary colour per event kind */
@@ -82,6 +84,7 @@ export const EVENT_COLOR = {
   state_effect_burn: '#f97316',
   state_effect_poison: '#84cc16',
   state_effect_freeze: '#38bdf8',
+  state_effect_bleed: '#dc2626',
   targeting_override: '#c084fc',
   targeting_reverted: '#c084fc',
   effect_removed:    '#94a3b8',

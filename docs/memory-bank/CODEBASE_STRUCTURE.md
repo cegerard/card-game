@@ -94,7 +94,7 @@ cards/
     │   ├── healing-result.ts
     │   ├── buff-results.ts
     │   └── shield-result.ts         # { target: CardInfo; shield: Shield }
-    ├── attack/             # Attack and effect types (attack-effect.ts, attack-poison-effect.ts, attack-burn-effect.ts, attack-freeze-effect.ts, attack-stunt-effect.ts, attack-mark-effect.ts)
+    ├── attack/             # Attack and effect types (attack-effect.ts, attack-poison-effect.ts, attack-burn-effect.ts, attack-freeze-effect.ts, attack-stunt-effect.ts, attack-mark-effect.ts, attack-bleed-effect.ts)
     │   └── conditions/     # Attack conditions (always-true-attack-condition.ts)
     ├── alteration/         # Buff/debuff discriminated union
     │   ├── alteration-detail.ts     # AlterationDetail = Buff | Debuff (polarity: 'buff' | 'debuff')
@@ -116,7 +116,7 @@ cards/
     │   ├── damage-type.ts     # DamageType enum (PHYSICAL, FIRE, WATER, EARTH, AIR)
     │   ├── damage-composition.ts # Value object: type + rate pair
     │   └── element.ts         # Element enum for card affinity
-    └── state/              # Card state types (card-state-frozen.ts, card-state-stunted.ts) + status-category.ts (control vs damage-over-time)
+    └── state/              # Card state types (card-state-frozen.ts, card-state-stunted.ts, card-state-bleeding.ts) + status-category.ts (control vs damage-over-time)
 ```
 
 **Special Skills Pattern**: Both `SpecialAttack` and `SpecialHealing` implement the `Special` interface with a unified return type `SpecialResult` containing:
@@ -135,6 +135,8 @@ This allows special attacks to perform their primary action (damage/healing) whi
 **Multi-Effect Attack Pattern**: `SimpleAttack` and `MultipleAttack` accept `effects?: AttackEffect[]`. `MultipleAttack` also accepts `comboFinisherEffects?: AttackEffect[]`, evaluated only on the combo finisher hit. Each effect is evaluated independently per hit; effects with `probability` roll a random check. `SpecialAttack` retains a single `effect?: AttackEffect`. `AttackResult.effects` is `EffectResult[]` to carry all applied effects per hit.
 
 **STUNT State Pattern**: `CardStateStunted` (like `CardStateFrozen`) skips action and applies +20% incoming damage via `applyDamageRate()`. No damage tick. Skip condition: `card.frozenLevel > 0 || card.isStunted`. Does not stack — `StuntAttackEffect` returns early if defender is already frozen or stunted.
+
+**BLEED Status (Stacked)**: `CardStateBleeding` is the one status holding several stacks, each with its own remaining turns, damage (fixed from the source attack at application) and optional termination event. `setState()` merges a new bleeding into the running one, so immunity and resistance apply as for any status; `BleedAttackEffect` enforces `maxStacks` before calling it. `FightingCard.bleedStacks()` exposes the count; the tick reports `remainingStacks`.
 
 **Marked Target Bonus**: `SpecialAttack` accepts an optional `MarkedTargetBonus` (damage type + multiplier). The multiplier is applied to the attack power when the defender already carries a mark of that type, evaluated before the special applies its own effects.
 
@@ -366,7 +368,7 @@ with real logic — hence the one Vitest suite (`js/__tests__/parser.spec.js`),
 which makes the replayer a workspace package covered by `pnpm -r test`.
 
 `snapshots` carry every buffer a card holds: `shield`, `stance`, `protecting`,
-`transformation`, `marks`, `statuses`, `buffs`/`debuffs`. Death clears them all.
+`transformation`, `marks`, `bleedStacks`, `statuses`, `buffs`/`debuffs`. Death clears them all.
 The shield is drawn down per hit from `Damage.shieldAbsorbed` — the report's
 `damage` is the total dealt, so without that field the buffer stayed frozen at
 its applied value (issue #326). `js/icons.js` must carry an icon and a colour

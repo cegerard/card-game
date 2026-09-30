@@ -187,12 +187,13 @@ Simulates a turn-based card battle between two players.
 
 ```typescript
 {
-  type: "POISON" | "BURN" | "FREEZE" | "STUNT" | "MARK",
-  rate: number,               // Damage coefficient per tick (unused for STUNT); amplification per stack for MARK
-  level: 1 | 2 | 3,           // Required except for MARK. Duration: STUNT = 2*level-1 turns; others = level 1=1, 2=3, 3=5 ticks
+  type: "POISON" | "BURN" | "FREEZE" | "STUNT" | "MARK" | "BLEED",
+  rate: number,               // Damage coefficient per tick (unused for STUNT); amplification per stack for MARK; damage of each stack per turn for BLEED
+  level: 1 | 2 | 3,           // Required except for MARK and BLEED. Duration: STUNT = 2*level-1 turns; others = level 1=1, 2=3, 3=5 ticks
+  duration?: number,          // BLEED only (required, >= 1): turns each stack bleeds
   damageType?: "PHYSICAL" | "FIRE" | "WATER" | "EARTH" | "AIR",  // MARK only (required): amplified damage type
-  maxStacks?: number,         // MARK only (required): stack cap
-  stacks?: number,            // MARK only: stacks applied per trigger (default 1)
+  maxStacks?: number,         // MARK and BLEED (required): stack cap
+  stacks?: number,            // MARK and BLEED: stacks applied per trigger (default 1)
   probability?: number,       // 0-1 chance to apply effect on hit; omit for guaranteed application
   triggeredDebuff?: {         // Optional debuff applied on effect hit (not supported on STUNT)
     debuffType: "attack" | "defense" | "agility" | "accuracy" | "speed" | "criticalChance" | "regeneration" | "resistance",
@@ -366,7 +367,21 @@ a besoin de ce champ pour le décrémenter : sans lui le bouclier restait affich
 {
   kind: "status_change",
   card: CardInfo,
-  status: "dead" | "poison" | "burn" | "freeze" | "stunt"
+  status: "dead" | "poison" | "burn" | "freeze" | "stunt" | "bleed",
+  stacks?: number        // bleed only: stack count after this application
+}
+```
+
+**`state_effect` step** (`StateEffectReport`): Emitted at turn-end for each status that ticks.
+```typescript
+{
+  kind: "state_effect",
+  type: "poison" | "burn" | "freeze" | "stunt" | "bleed",
+  card: CardInfo,
+  damage: number,          // bleed: sum of every stack
+  remainingTurns: number,  // bleed: turns left before the last stack expires
+  remainingHealth: number,
+  remainingStacks?: number // bleed only: stacks left after the tick
 }
 ```
 
@@ -573,7 +588,7 @@ Both go through `applyHealing()` (`skills/heal-basis.ts`), shared with `SpecialH
 What a status effect does to its bearer, and therefore what an immunity is granted against. Used by `SpecialDto.stanceActivation.immunities`.
 
 - `control`: takes the turn away — `FREEZE` and `STUNT`
-- `damage-over-time`: only bites — `POISON` and `BURN`
+- `damage-over-time`: only bites — `POISON`, `BURN` and `BLEED`
 
 An elemental `MARK` is not a status effect and no immunity refuses it.
 
@@ -583,6 +598,7 @@ An elemental `MARK` is not a status effect and no immunity refuses it.
 - `BURN`: Damage over time
 - `FREEZE`: Prevents action for 1-5 turns, increases damage taken by 20%
 - `STUNT`: Prevents action for 1-5 turns (2*level-1), increases damage taken by 20%; no damage tick; does not stack with freeze (whichever is active takes precedence)
+- `BLEED`: Cumulative damage over time — each application adds `stacks` stacks, each bleeding `rate × source attack` (fixed when applied) per turn for its own `duration`, so stacks applied at different turns expire independently. Capped at `maxStacks`: extra stacks are lost, and an application at the cap emits no step. Cannot be applied to a frozen card, and a freeze pauses it: no damage and no stack duration spent until the card thaws. Refused as a whole by a `damage-over-time` immunity or a won resistance roll (one roll per application). An end event removes only the stacks it bound
 - `MARK`: Cumulative elemental mark — each stack amplifies the damage the card receives from `damageType` by `rate` (multiplicative on that damage portion, before defense). Stacks up to `maxStacks`, never expires, no damage tick. One independent mark per damage type
 
 ### BuffType

@@ -10,6 +10,7 @@ import { MARK_EFFECT_TYPE } from '../mark/elemental-mark';
 export type StateEffectResult = {
   type: StateEffectType;
   card: FightingCard;
+  stacks?: number;
   triggeredDebuff?: { card: FightingCard; debuff: Debuff };
 };
 

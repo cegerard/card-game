@@ -11,6 +11,7 @@ const CATEGORY_BY_TYPE: Record<StateEffectType, StatusCategory> = {
   stunt: 'control',
   poison: 'damage-over-time',
   burn: 'damage-over-time',
+  bleed: 'damage-over-time',
 };
 
 export function statusCategoryOf(type: StateEffectType): StatusCategory {
