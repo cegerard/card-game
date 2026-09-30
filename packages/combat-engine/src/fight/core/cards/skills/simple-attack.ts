@@ -56,7 +56,7 @@ export class SimpleAttack implements AttackSkill {
         const defender = protector ?? target;
         const interceptedFor = protector ? target : undefined;
 
-        if (defender.dodge(card.actualAccuracy)) {
+        if (defender.dodge(card)) {
           return {
             damage: 0,
             isCritical,

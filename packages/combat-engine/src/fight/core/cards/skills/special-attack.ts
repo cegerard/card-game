@@ -104,7 +104,7 @@ export class SpecialAttack implements Special {
     const target = protector ?? aimedAt;
     const interceptedFor = protector ? aimedAt : undefined;
 
-    if (target.dodge(source.actualAccuracy)) {
+    if (target.dodge(source)) {
       return {
         damage: 0,
         isCritical,

@@ -34,7 +34,8 @@ export type SkillKind =
   | 'SURVIVE'
   | 'TRANSFORMATION'
   | 'DAMAGE_REDUCTION'
-  | 'PROTECTION';
+  | 'PROTECTION'
+  | 'DODGE_BONUS_DENIAL';
 
 export type BuffType =
   | 'attack'
@@ -259,9 +260,9 @@ export interface OtherSkill {
    */
   stackId?: string;
   debuffMaxStacks?: number;
-  /** Absent pour SURVIVE et DAMAGE_REDUCTION. */
+  /** Absent pour SURVIVE, DAMAGE_REDUCTION et DODGE_BONUS_DENIAL. */
   targetingStrategy?: TargetingStrategy;
-  /** Absent pour SHIELD, SURVIVE et DAMAGE_REDUCTION. */
+  /** Absent pour SHIELD, SURVIVE, DAMAGE_REDUCTION et DODGE_BONUS_DENIAL. */
   event?: TriggerEvent;
   /** Le skill n'est actif que si son porteur tient cette posture. */
   requiresStance?: string;

@@ -31,6 +31,7 @@ import { DamageComposition } from '../../src/fight/core/cards/@types/damage/dama
 import { DamageType } from '../../src/fight/core/cards/@types/damage/damage-type';
 import { ShieldApplication } from '../../src/fight/core/cards/@types/shield/shield-application';
 import { Randomizer } from '../../src/fight/core/randomizer';
+import { DodgeBonusDenialSkill } from '../../src/fight/core/cards/skills/dodge-bonus-denial';
 import { MathRandomizer } from '../../src/fight/tools/math-randomizer';
 
 type effect = {
@@ -57,6 +58,7 @@ type FightingCardParams = {
   resistance?: number;
   randomizer?: Randomizer;
   element?: Element;
+  dodgeBonusDenial?: DodgeBonusDenialSkill;
   skills?: {
     simpleAttack?: {
       name?: string;
@@ -514,6 +516,7 @@ export function createFightingCard(
         ...specialParams,
       }),
       others: createsSkills(params.skills?.others ?? []),
+      dodgeBonusDenial: params.dodgeBonusDenial,
     },
     {
       dodge: new SimpleDodge(),

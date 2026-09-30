@@ -77,6 +77,7 @@ export enum SkillKind {
   DAMAGE_REDUCTION = 'DAMAGE_REDUCTION',
   TRANSFORMATION = 'TRANSFORMATION',
   PROTECTION = 'PROTECTION',
+  DODGE_BONUS_DENIAL = 'DODGE_BONUS_DENIAL',
 }
 
 export enum BuffType {
@@ -516,7 +517,8 @@ export class OtherSkillDto {
     (o) =>
       o.kind !== SkillKind.SURVIVE &&
       o.kind !== SkillKind.TRANSFORMATION &&
-      o.kind !== SkillKind.DAMAGE_REDUCTION,
+      o.kind !== SkillKind.DAMAGE_REDUCTION &&
+      o.kind !== SkillKind.DODGE_BONUS_DENIAL,
   )
   @IsDefined()
   @IsEnum(TargetingStrategy)
@@ -527,7 +529,8 @@ export class OtherSkillDto {
       o.kind !== SkillKind.SHIELD &&
       o.kind !== SkillKind.SURVIVE &&
       o.kind !== SkillKind.TRANSFORMATION &&
-      o.kind !== SkillKind.DAMAGE_REDUCTION,
+      o.kind !== SkillKind.DAMAGE_REDUCTION &&
+      o.kind !== SkillKind.DODGE_BONUS_DENIAL,
   )
   @IsDefined()
   @IsEnum(TriggerEvent)

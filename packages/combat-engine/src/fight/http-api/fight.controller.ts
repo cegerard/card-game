@@ -80,6 +80,13 @@ import { ShieldApplication } from '../core/cards/@types/shield/shield-applicatio
 import { SurviveSkill } from '../core/cards/skills/survive';
 import { DebuffStacking } from '../core/cards/@types/alteration/alteration-detail';
 import { DamageReductionSkill } from '../core/cards/skills/damage-reduction';
+import { DodgeBonusDenialSkill } from '../core/cards/skills/dodge-bonus-denial';
+
+const CARD_BOUND_SKILL_KINDS = [
+  SkillKind.SURVIVE,
+  SkillKind.DAMAGE_REDUCTION,
+  SkillKind.DODGE_BONUS_DENIAL,
+];
 
 @Controller()
 @UsePipes(
@@ -252,13 +259,18 @@ export class FightController {
       ? new SurviveSkill(surviveDto.name)
       : undefined;
     const damageReduction = this.buildDamageReduction(cardData.skills.others);
+    const dodgeBonusDenialDto = cardData.skills.others.find(
+      (s) => s.kind === SkillKind.DODGE_BONUS_DENIAL,
+    );
+    const dodgeBonusDenial = dodgeBonusDenialDto
+      ? new DodgeBonusDenialSkill(dodgeBonusDenialDto.name)
+      : undefined;
 
-    // SURVIVE and DAMAGE_REDUCTION carry no trigger and no targeting: they live
-    // on the card itself and are consulted at damage time, so they are pulled
-    // out before the regular skill loop.
+    // SURVIVE, DAMAGE_REDUCTION and DODGE_BONUS_DENIAL carry no trigger and no
+    // targeting: they live on the card itself and are consulted when a hit is
+    // resolved, so they are pulled out before the regular skill loop.
     const triggeredOthers = cardData.skills.others.filter(
-      (s) =>
-        s.kind !== SkillKind.SURVIVE && s.kind !== SkillKind.DAMAGE_REDUCTION,
+      (s) => !CARD_BOUND_SKILL_KINDS.includes(s.kind),
     );
 
     try {
@@ -289,6 +301,7 @@ export class FightController {
         others: otherSkills,
         survive: surviveSkill,
         damageReduction,
+        dodgeBonusDenial,
       },
       {
         dodge: buildDodgeStrategy(cardData.behaviors.dodge),
@@ -770,8 +783,9 @@ export class FightController {
       case SkillKind.SURVIVE:
         throw new Error('SURVIVE skill must not appear in others skill list');
       case SkillKind.DAMAGE_REDUCTION:
+      case SkillKind.DODGE_BONUS_DENIAL:
         throw new Error(
-          'DAMAGE_REDUCTION skill must not appear in others skill list',
+          `${skillData.kind} skill must not appear in others skill list`,
         );
       default:
         throw new Error(`Unknown skill kind: ${skillData.kind}`);

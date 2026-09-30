@@ -10,8 +10,10 @@ import { StateResult } from './@types/action-result/state-result';
 import { CardStateFrozen } from './@types/state/card-state-frozen';
 import { CardStateStunted } from './@types/state/card-state-stunted';
 import { CardStateBleeding } from './@types/state/card-state-bleeding';
+import { DodgeBonusDenialSkill } from './skills/dodge-bonus-denial';
 import { EffectLevel } from './@types/attack/effect-level';
 import {
+  AlterationDetail,
   Buff,
   Debuff,
   DebuffStacking,
@@ -145,6 +147,7 @@ export class FightingCard {
 
   // Damage reduction
   private damageReduction: DamageReductionSkill | null = null;
+  private dodgeBonusDenial: DodgeBonusDenialSkill | null = null;
 
   // Stances
   private stances: Stance[] = [];
@@ -179,6 +182,7 @@ export class FightingCard {
       others: Skill[];
       survive?: SurviveSkill;
       damageReduction?: DamageReductionSkill;
+      dodgeBonusDenial?: DodgeBonusDenialSkill;
     },
     behaviors: {
       dodge: DodgeBehavior;
@@ -205,6 +209,7 @@ export class FightingCard {
     this.skills = skills.others;
     this.surviveSkill = skills.survive ?? null;
     this.damageReduction = skills.damageReduction ?? null;
+    this.dodgeBonusDenial = skills.dodgeBonusDenial ?? null;
   }
 
   public get lastAttacker(): FightingCard | undefined {
@@ -814,8 +819,16 @@ export class FightingCard {
     return healed;
   }
 
-  public dodge(attackerAccuracy: number): boolean {
-    return this.dodgeBehavior.dodge(this.actualAgility, attackerAccuracy);
+  public dodge(attacker: FightingCard): boolean {
+    const agility = attacker.deniesDodgeBonusOf(this)
+      ? this.agilityWithoutBuffs
+      : this.actualAgility;
+
+    return this.dodgeBehavior.dodge(agility, attacker.actualAccuracy);
+  }
+
+  public deniesDodgeBonusOf(defender: FightingCard): boolean {
+    return this.dodgeBonusDenial?.appliesTo(defender) ?? false;
   }
 
   public applyBuff(
@@ -997,13 +1010,14 @@ export class FightingCard {
   }
 
   private computeActualStat(base: number, type: AlterationType): number {
-    const buffsSum = this.buffs
-      .filter((buff) => buff.type === type)
-      .reduce((sum, buff) => sum + buff.value, 0);
-    const debuffsSum = this.debuffs
-      .filter((debuff) => debuff.type === type)
-      .reduce((sum, debuff) => sum + debuff.value, 0);
-    return Math.max(0, base + buffsSum - debuffsSum);
+    return Math.max(
+      0,
+      base + sumOf(this.buffs, type) - sumOf(this.debuffs, type),
+    );
+  }
+
+  private get agilityWithoutBuffs(): number {
+    return Math.max(0, this.agility - sumOf(this.debuffs, 'agility'));
   }
 
   private computeAttributeModifierValue(
@@ -1031,4 +1045,10 @@ export class FightingCard {
         throw new Error(`Unknown attribute type: ${type}`);
     }
   }
+}
+
+function sumOf(alterations: AlterationDetail[], type: AlterationType): number {
+  return alterations
+    .filter((alteration) => alteration.type === type)
+    .reduce((sum, alteration) => sum + alteration.value, 0);
 }
