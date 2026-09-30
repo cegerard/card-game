@@ -183,6 +183,13 @@ export interface MarkedTargetBonus {
   multiplier: number;
 }
 
+export interface BleedStackBonus {
+  minStacks: number;
+  damageType: DamageType;
+  /** Multiplicateur appliqué à la seule part de dégâts de ce type, par exemple 1.2 pour +20%. */
+  multiplier: number;
+}
+
 export interface ShieldApplication {
   rate: number;
   duration: number;
@@ -208,6 +215,8 @@ export interface SpecialSkill {
    * `requiresStance` avec ce nom ne sont actifs que pendant sa durée.
    */
   stanceActivation?: StanceActivation;
+  /** Bonus sur un type de dégâts quand la cible saigne d'au moins `minStacks` piles. */
+  bleedStackBonus?: BleedStackBonus;
 }
 
 export interface SimpleAttackSkill {
@@ -215,6 +224,8 @@ export interface SimpleAttackSkill {
   damages: DamageComposition[];
   targetingStrategy: Exclude<TargetingStrategy, 'targeted-card'>;
   effects?: EffectConfig[];
+  /** Bonus sur un type de dégâts quand la cible saigne d'au moins `minStacks` piles. */
+  bleedStackBonus?: BleedStackBonus;
 }
 
 export interface MultipleAttackSkill {
@@ -227,6 +238,8 @@ export interface MultipleAttackSkill {
   comboFinisher?: DamageComposition[];
   /** Effets appliqués uniquement sur le coup final du combo. */
   comboFinisherEffects?: EffectConfig[];
+  /** Bonus sur un type de dégâts quand la cible saigne d'au moins `minStacks` piles. */
+  bleedStackBonus?: BleedStackBonus;
 }
 
 export interface OtherSkill {

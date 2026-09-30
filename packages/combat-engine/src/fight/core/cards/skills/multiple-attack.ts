@@ -7,6 +7,7 @@ import { FightingCard } from '../fighting-card';
 import { DamageCalculator } from '../damage/damage-calculator';
 import { AttackSkill } from './attack-skill';
 import { NamedAttackResult } from '../@types/action-result/named-attack-result';
+import { BleedStackBonus } from '../@types/attack/bleed-stack-bonus';
 
 export class MultipleAttack implements AttackSkill {
   constructor(
@@ -18,6 +19,7 @@ export class MultipleAttack implements AttackSkill {
     private readonly effects?: AttackEffect[],
     private readonly comboFinisher?: DamageComposition[],
     private readonly comboFinisherEffects?: AttackEffect[],
+    private readonly bleedStackBonus?: BleedStackBonus,
   ) {}
 
   public get targetingId(): string {
@@ -85,7 +87,7 @@ export class MultipleAttack implements AttackSkill {
         }
 
         const { total } = DamageCalculator.calculateDamage(
-          this.damages,
+          this.withBonus(this.damages, defender),
           attackPower * damageMultiplier,
           defender,
         );
@@ -122,7 +124,7 @@ export class MultipleAttack implements AttackSkill {
         if (dodgedTargets.has(defender) || defender.isDead()) continue;
 
         const { total } = DamageCalculator.calculateDamage(
-          this.comboFinisher,
+          this.withBonus(this.comboFinisher, defender),
           card.actualAttack,
           defender,
         );
@@ -153,5 +155,12 @@ export class MultipleAttack implements AttackSkill {
     }
 
     return results;
+  }
+
+  private withBonus(
+    damages: DamageComposition[],
+    defender: FightingCard,
+  ): DamageComposition[] {
+    return this.bleedStackBonus?.applyTo(damages, defender) ?? damages;
   }
 }

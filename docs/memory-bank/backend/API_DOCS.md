@@ -97,6 +97,11 @@ Simulates a turn-based card battle between two players.
     name: string,                         // Stance name that skills reference with requiresStance
     duration: number,                     // Turns it runs; re-casting refreshes instead of stacking
     immunities?: ("control" | "damage-over-time")[]  // Status categories the caster refuses while it runs
+  },
+  bleedStackBonus?: {                     // Optional: boosts one damage type when the target already bleeds
+    minStacks: number,                    // Integer >= 1: bleed stacks the target must carry before the hit
+    damageType: "PHYSICAL" | "FIRE" | "WATER" | "EARTH" | "AIR",  // Only this composition is multiplied
+    multiplier: number                    // Must be > 0, e.g. 1.2 for +20%
   }
 }
 ```
@@ -120,7 +125,12 @@ Simulates a turn-based card battle between two players.
   name: string,
   damages: DamageCompositionDto[],  // Min 1 entry — multi-type damage compositions
   targetingStrategy: TargetingStrategy,
-  effects?: EffectDto[]             // Optional array of status effects (poison, burn, freeze, stunt)
+  effects?: EffectDto[],            // Optional array of status effects (poison, burn, freeze, stunt)
+  bleedStackBonus?: {                     // Optional: boosts one damage type when the target already bleeds
+    minStacks: number,                    // Integer >= 1: bleed stacks the target must carry before the hit
+    damageType: "PHYSICAL" | "FIRE" | "WATER" | "EARTH" | "AIR",  // Only this composition is multiplied
+    multiplier: number                    // Must be > 0, e.g. 1.2 for +20%
+  }   // Same as SpecialDto.bleedStackBonus
 }
 ```
 
@@ -135,7 +145,12 @@ Simulates a turn-based card battle between two players.
   amplifier?: number,               // Optional damage amplifier
   effects?: EffectDto[],            // Optional array of status effects
   comboFinisher?: DamageCompositionDto[],  // Optional finisher hit compositions
-  comboFinisherEffects?: EffectDto[]      // Optional effects applied on the finisher hit only
+  comboFinisherEffects?: EffectDto[],     // Optional effects applied on the finisher hit only
+  bleedStackBonus?: {                     // Optional: boosts one damage type when the target already bleeds
+    minStacks: number,                    // Integer >= 1: bleed stacks the target must carry before the hit
+    damageType: "PHYSICAL" | "FIRE" | "WATER" | "EARTH" | "AIR",  // Only this composition is multiplied
+    multiplier: number                    // Must be > 0, e.g. 1.2 for +20%
+  }   // Same as SpecialDto.bleedStackBonus, finisher included
 }
 ```
 

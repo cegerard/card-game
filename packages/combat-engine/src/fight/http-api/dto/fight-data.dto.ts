@@ -288,6 +288,19 @@ class MarkedTargetBonusDto {
   multiplier: number;
 }
 
+export class BleedStackBonusDto {
+  @IsInt()
+  @Min(1)
+  minStacks: number;
+
+  @IsEnum(DamageType)
+  damageType: DamageType;
+
+  @IsNumber()
+  @IsPositive()
+  multiplier: number;
+}
+
 export enum StatusCategoryDto {
   CONTROL = 'control',
   DAMAGE_OVER_TIME = 'damage-over-time',
@@ -370,6 +383,11 @@ class SpecialDto {
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => StanceActivationDto)
   stanceActivation?: StanceActivationDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => BleedStackBonusDto)
+  bleedStackBonus?: BleedStackBonusDto;
 }
 
 class DamageCompositionDto {
@@ -403,6 +421,11 @@ class SimpleAttackDto {
   @ValidateNested({ each: true })
   @Type(/* istanbul ignore next */ () => EffectDto)
   effects?: EffectDto[];
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => BleedStackBonusDto)
+  bleedStackBonus?: BleedStackBonusDto;
 }
 
 class MultipleAttackDto {
@@ -447,6 +470,11 @@ class MultipleAttackDto {
   @ValidateNested({ each: true })
   @Type(/* istanbul ignore next */ () => EffectDto)
   comboFinisherEffects?: EffectDto[];
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => BleedStackBonusDto)
+  bleedStackBonus?: BleedStackBonusDto;
 }
 
 @ValidatorConstraint({ name: 'targetedCardOnlyForOverride', async: false })
