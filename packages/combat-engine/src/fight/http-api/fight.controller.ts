@@ -14,6 +14,7 @@ import {
   CardSelectorStrategy,
   Effect,
   EffectDto,
+  BleedStackBonusDto,
   FightDataDto,
   FightingCardDto,
   OtherSkillDto,
@@ -47,6 +48,7 @@ import { MarkAttackEffect } from '../core/cards/@types/attack/attack-mark-effect
 import { BleedAttackEffect } from '../core/cards/@types/attack/attack-bleed-effect';
 import { ElementalMark } from '../core/cards/@types/mark/elemental-mark';
 import { MarkedTargetBonus } from '../core/cards/@types/mark/marked-target-bonus';
+import { BleedStackBonus } from '../core/cards/@types/attack/bleed-stack-bonus';
 import { EffectTriggeredDebuff } from '../core/cards/@types/attack/effect-triggered-debuff';
 import { MathRandomizer } from '../tools/math-randomizer';
 import { Alteration } from '../core/cards/@types/alteration/alteration';
@@ -188,6 +190,7 @@ export class FightController {
         markedTargetBonus,
         cardData.skills.special.stanceActivation,
         cardData.skills.special.hits,
+        this.buildBleedStackBonus(cardData.skills.special.bleedStackBonus),
       );
     } else if (cardData.skills.special.kind === SpecialKind.HEALING) {
       special = new SpecialHealing(
@@ -220,6 +223,7 @@ export class FightController {
         maEffects,
         maComboFinisher,
         this.buildEffects(ma.comboFinisherEffects),
+        this.buildBleedStackBonus(ma.bleedStackBonus),
       );
     } else {
       const sa = cardData.skills.simpleAttack;
@@ -237,6 +241,7 @@ export class FightController {
         damages,
         buildTargetingStrategy(sa.targetingStrategy),
         saEffects,
+        this.buildBleedStackBonus(sa.bleedStackBonus),
       );
     }
 
@@ -397,6 +402,14 @@ export class FightController {
           effectDto.terminationEvent,
         );
     }
+  }
+
+  private buildBleedStackBonus(
+    dto: BleedStackBonusDto | undefined,
+  ): BleedStackBonus | undefined {
+    if (!dto) return undefined;
+
+    return new BleedStackBonus(dto.minStacks, dto.damageType, dto.multiplier);
   }
 
   /**

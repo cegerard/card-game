@@ -16,6 +16,7 @@ import { ShieldResult } from '../@types/action-result/shield-result';
 import { MarkedTargetBonus } from '../@types/mark/marked-target-bonus';
 import { Stance, StanceActivation } from '../@types/stance/stance';
 import { AttackResult } from '../@types/action-result/attack-result';
+import { BleedStackBonus } from '../@types/attack/bleed-stack-bonus';
 
 const ENERGY_INCREASE_FACTOR = 10;
 const CRITICAL_RATE = 1.3;
@@ -32,6 +33,7 @@ export class SpecialAttack implements Special {
     private readonly markedTargetBonus?: MarkedTargetBonus,
     private readonly stanceActivation?: StanceActivation,
     private readonly hits: number = 1,
+    private readonly bleedStackBonus?: BleedStackBonus,
   ) {
     if (hits < 1) {
       throw new Error(
@@ -115,8 +117,10 @@ export class SpecialAttack implements Special {
     }
 
     const markedBonus = this.markedTargetBonus?.multiplierFor(target) ?? 1;
+    const damages =
+      this.bleedStackBonus?.applyTo(this.damages, target) ?? this.damages;
     const { total } = DamageCalculator.calculateDamage(
-      this.damages,
+      damages,
       source.actualAttack * damageMultiplier * markedBonus,
       target,
     );

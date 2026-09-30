@@ -6,6 +6,7 @@ import { FightingCard } from '../fighting-card';
 import { DamageCalculator } from '../damage/damage-calculator';
 import { AttackSkill } from './attack-skill';
 import { NamedAttackResult } from '../@types/action-result/named-attack-result';
+import { BleedStackBonus } from '../@types/attack/bleed-stack-bonus';
 
 export class SimpleAttack implements AttackSkill {
   constructor(
@@ -13,6 +14,7 @@ export class SimpleAttack implements AttackSkill {
     private readonly damages: DamageComposition[],
     private readonly targetingStrategy: TargetingCardStrategy,
     private readonly effects?: AttackEffect[],
+    private readonly bleedStackBonus?: BleedStackBonus,
   ) {}
 
   public get targetingId(): string {
@@ -67,7 +69,7 @@ export class SimpleAttack implements AttackSkill {
         }
 
         const { total } = DamageCalculator.calculateDamage(
-          this.damages,
+          this.damagesAgainst(defender),
           card.actualAttack * damageMultiplier,
           defender,
         );
@@ -97,5 +99,11 @@ export class SimpleAttack implements AttackSkill {
         };
       }),
     };
+  }
+
+  private damagesAgainst(defender: FightingCard): DamageComposition[] {
+    return (
+      this.bleedStackBonus?.applyTo(this.damages, defender) ?? this.damages
+    );
   }
 }

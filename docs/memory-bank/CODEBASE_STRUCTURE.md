@@ -94,7 +94,7 @@ cards/
     │   ├── healing-result.ts
     │   ├── buff-results.ts
     │   └── shield-result.ts         # { target: CardInfo; shield: Shield }
-    ├── attack/             # Attack and effect types (attack-effect.ts, attack-poison-effect.ts, attack-burn-effect.ts, attack-freeze-effect.ts, attack-stunt-effect.ts, attack-mark-effect.ts, attack-bleed-effect.ts)
+    ├── attack/             # Attack and effect types (attack-effect.ts, attack-poison-effect.ts, attack-burn-effect.ts, attack-freeze-effect.ts, attack-stunt-effect.ts, attack-mark-effect.ts, attack-bleed-effect.ts, bleed-stack-bonus.ts)
     │   └── conditions/     # Attack conditions (always-true-attack-condition.ts)
     ├── alteration/         # Buff/debuff discriminated union
     │   ├── alteration-detail.ts     # AlterationDetail = Buff | Debuff (polarity: 'buff' | 'debuff')
