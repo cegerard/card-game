@@ -289,6 +289,16 @@ class MarkedTargetBonusDto {
   multiplier: number;
 }
 
+export class EnergyRefundDto {
+  @IsInt()
+  @Min(1)
+  amount: number;
+
+  @IsNumber()
+  @Min(0)
+  minAccuracyMargin: number;
+}
+
 export class BleedStackBonusDto {
   @IsInt()
   @Min(1)
@@ -384,6 +394,11 @@ class SpecialDto {
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => StanceActivationDto)
   stanceActivation?: StanceActivationDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => EnergyRefundDto)
+  energyRefund?: EnergyRefundDto;
 
   @IsOptional()
   @ValidateNested()

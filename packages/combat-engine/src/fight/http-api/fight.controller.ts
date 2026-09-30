@@ -15,6 +15,7 @@ import {
   Effect,
   EffectDto,
   BleedStackBonusDto,
+  EnergyRefundDto,
   FightDataDto,
   FightingCardDto,
   OtherSkillDto,
@@ -49,6 +50,7 @@ import { BleedAttackEffect } from '../core/cards/@types/attack/attack-bleed-effe
 import { ElementalMark } from '../core/cards/@types/mark/elemental-mark';
 import { MarkedTargetBonus } from '../core/cards/@types/mark/marked-target-bonus';
 import { BleedStackBonus } from '../core/cards/@types/attack/bleed-stack-bonus';
+import { EnergyRefund } from '../core/cards/@types/attack/energy-refund';
 import { EffectTriggeredDebuff } from '../core/cards/@types/attack/effect-triggered-debuff';
 import { MathRandomizer } from '../tools/math-randomizer';
 import { Alteration } from '../core/cards/@types/alteration/alteration';
@@ -198,6 +200,7 @@ export class FightController {
         cardData.skills.special.stanceActivation,
         cardData.skills.special.hits,
         this.buildBleedStackBonus(cardData.skills.special.bleedStackBonus),
+        this.buildEnergyRefund(cardData.skills.special.energyRefund),
       );
     } else if (cardData.skills.special.kind === SpecialKind.HEALING) {
       special = new SpecialHealing(
@@ -415,6 +418,14 @@ export class FightController {
           effectDto.terminationEvent,
         );
     }
+  }
+
+  private buildEnergyRefund(
+    dto: EnergyRefundDto | undefined,
+  ): EnergyRefund | undefined {
+    if (!dto) return undefined;
+
+    return new EnergyRefund(dto.amount, dto.minAccuracyMargin);
   }
 
   private buildBleedStackBonus(

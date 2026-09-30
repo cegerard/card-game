@@ -488,8 +488,8 @@ export class FightingCard {
     return this.specialEnergy;
   }
 
-  public resetSpecialEnergy(): number {
-    this.specialEnergy = 0;
+  public resetSpecialEnergy(refund: number = 0): number {
+    this.specialEnergy = refund;
 
     return this.specialEnergy;
   }
@@ -820,11 +820,17 @@ export class FightingCard {
   }
 
   public dodge(attacker: FightingCard): boolean {
-    const agility = attacker.deniesDodgeBonusOf(this)
+    return this.dodgeBehavior.dodge(
+      this.agilityAgainst(attacker),
+      attacker.actualAccuracy,
+    );
+  }
+
+  /** The agility this card dodges that attacker with. */
+  public agilityAgainst(attacker: FightingCard): number {
+    return attacker.deniesDodgeBonusOf(this)
       ? this.agilityWithoutBuffs
       : this.actualAgility;
-
-    return this.dodgeBehavior.dodge(agility, attacker.actualAccuracy);
   }
 
   public deniesDodgeBonusOf(defender: FightingCard): boolean {

@@ -184,6 +184,13 @@ export interface MarkedTargetBonus {
   multiplier: number;
 }
 
+export interface EnergyRefund {
+  /** Énergie conservée après la spéciale au lieu de retomber à 0. */
+  amount: number;
+  /** Écart Précision − Esquive de la cible principale à dépasser strictement. */
+  minAccuracyMargin: number;
+}
+
 export interface BleedStackBonus {
   minStacks: number;
   damageType: DamageType;
@@ -216,6 +223,8 @@ export interface SpecialSkill {
    * `requiresStance` avec ce nom ne sont actifs que pendant sa durée.
    */
   stanceActivation?: StanceActivation;
+  /** ATTACK uniquement : énergie rendue si la Précision dépasse assez l'Esquive de la cible. */
+  energyRefund?: EnergyRefund;
   /** Bonus sur un type de dégâts quand la cible saigne d'au moins `minStacks` piles. */
   bleedStackBonus?: BleedStackBonus;
 }
