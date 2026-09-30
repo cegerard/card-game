@@ -72,7 +72,7 @@ export class MultipleAttack implements AttackSkill {
         const isCritical = Math.random() < card.actualCriticalChance;
         const damageMultiplier = isCritical ? 2 : 1;
 
-        if (defender.dodge(card.actualAccuracy)) {
+        if (defender.dodge(card)) {
           dodgedTargets.add(defender);
           results.results.push({
             damage: 0,
