@@ -48,14 +48,26 @@ describe('Bleeding card', () => {
         }),
       );
     });
+  });
 
-    it('keeps bleeding while frozen', () => {
+  describe('while frozen', () => {
+    beforeEach(() => {
       bleed(3).applyEffect(bleeder, attacker, null);
       bleeder.setState(new CardStateFrozen(1, 1, 0.2));
+    });
 
+    it('does not bleed', () => {
       const ticks = bleeder.applyStateEffects();
 
-      expect(ticks.map((t) => t.type)).toContain('bleed');
+      expect(ticks.map((t) => t.type)).not.toContain('bleed');
+    });
+
+    it('resumes with its stacks duration intact once thawed', () => {
+      bleeder.applyStateEffects();
+
+      const [tick] = bleeder.applyStateEffects();
+
+      expect(tick.remainingTurns).toBe(2);
     });
   });
 

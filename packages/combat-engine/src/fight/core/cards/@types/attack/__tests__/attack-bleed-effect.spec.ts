@@ -110,11 +110,11 @@ describe('BleedAttackEffect', () => {
   });
 
   describe('on a frozen defender', () => {
-    it('still applies the bleed', () => {
+    it('applies nothing', () => {
       defender.setState(new CardStateFrozen(1, 1, 0.2));
       bleed().applyEffect(defender, attacker, null);
 
-      expect(defender.bleedStacks()).toBe(1);
+      expect(defender.bleedStacks()).toBe(0);
     });
   });
 

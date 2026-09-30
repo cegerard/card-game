@@ -39,6 +39,7 @@ export class BleedAttackEffect implements AttackEffect {
       this.randomizer.random() >= this.probability
     )
       return;
+    if (defender.frozenLevel > 0) return;
 
     const room = this.maxStacks - defender.bleedStacks();
     if (room <= 0) return;

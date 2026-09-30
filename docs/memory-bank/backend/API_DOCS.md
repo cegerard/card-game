@@ -598,7 +598,7 @@ An elemental `MARK` is not a status effect and no immunity refuses it.
 - `BURN`: Damage over time
 - `FREEZE`: Prevents action for 1-5 turns, increases damage taken by 20%
 - `STUNT`: Prevents action for 1-5 turns (2*level-1), increases damage taken by 20%; no damage tick; does not stack with freeze (whichever is active takes precedence)
-- `BLEED`: Cumulative damage over time — each application adds `stacks` stacks, each bleeding `rate × source attack` (fixed when applied) per turn for its own `duration`, so stacks applied at different turns expire independently. Capped at `maxStacks`: extra stacks are lost, and an application at the cap emits no step. Keeps ticking on a frozen card, unlike poison. Refused as a whole by a `damage-over-time` immunity or a won resistance roll (one roll per application). An end event removes only the stacks it bound
+- `BLEED`: Cumulative damage over time — each application adds `stacks` stacks, each bleeding `rate × source attack` (fixed when applied) per turn for its own `duration`, so stacks applied at different turns expire independently. Capped at `maxStacks`: extra stacks are lost, and an application at the cap emits no step. Cannot be applied to a frozen card, and a freeze pauses it: no damage and no stack duration spent until the card thaws. Refused as a whole by a `damage-over-time` immunity or a won resistance roll (one roll per application). An end event removes only the stacks it bound
 - `MARK`: Cumulative elemental mark — each stack amplifies the damage the card receives from `damageType` by `rate` (multiplicative on that damage portion, before defense). Stacks up to `maxStacks`, never expires, no damage tick. One independent mark per damage type
 
 ### BuffType

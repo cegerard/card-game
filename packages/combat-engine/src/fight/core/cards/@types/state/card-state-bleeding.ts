@@ -11,7 +11,8 @@ export type BleedStack = {
 /**
  * Unlike the other statuses, a bleed accumulates: every application adds
  * stacks carrying their own duration and damage, and the card bleeds for the
- * sum of its stacks at each turn end.
+ * sum of its stacks at each turn end. A freeze pauses it: no damage, and the
+ * stacks keep their remaining turns until the card thaws.
  */
 export class CardStateBleeding implements CardState {
   public readonly type = 'bleed' as const;
@@ -47,6 +48,8 @@ export class CardStateBleeding implements CardState {
   }
 
   public applyState(card: FightingCard): StateResult {
+    if (card.isFrozen) return;
+
     const bleedDamage = this.stacks.reduce(
       (sum, stack) => sum + stack.damageValue,
       0,
