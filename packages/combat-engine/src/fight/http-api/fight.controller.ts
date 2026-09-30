@@ -187,6 +187,7 @@ export class FightController {
         shieldApplication,
         markedTargetBonus,
         cardData.skills.special.stanceActivation,
+        cardData.skills.special.hits,
       );
     } else if (cardData.skills.special.kind === SpecialKind.HEALING) {
       special = new SpecialHealing(

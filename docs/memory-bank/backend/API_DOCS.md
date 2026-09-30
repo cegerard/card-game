@@ -84,6 +84,7 @@ Simulates a turn-based card battle between two players.
   name: string,
   rate: number,               // Damage/healing multiplier
   energy: number,             // Energy cost to use special
+  hits?: number,              // ATTACK only: number of hits (integer >= 1, default 1). Each hit re-targets the living cards and rolls its own dodge and critical; the effect is tried on every landed hit
   targetingStrategy: TargetingStrategy,
   effect?: EffectDto,         // Optional status effect (poison, burn, freeze)
   buffApplication?: BuffApplicationDto,   // Optional buff application (for special attacks)

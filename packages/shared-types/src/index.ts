@@ -195,6 +195,8 @@ export interface SpecialSkill {
   damages?: DamageComposition[];
   rate?: number;
   energy: number;
+  /** ATTACK uniquement : nombre de coups (défaut 1), l'effet est tenté à chaque coup réussi. */
+  hits?: number;
   targetingStrategy: Exclude<TargetingStrategy, 'targeted-card'>;
   effect?: EffectConfig;
   statAlterations?: StatAlteration[];

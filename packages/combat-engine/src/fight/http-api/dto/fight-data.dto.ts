@@ -5,6 +5,7 @@ import {
   ArrayMaxSize,
   IsArray,
   IsNumber,
+  IsInt,
   IsString,
   IsNotEmpty,
   IsEnum,
@@ -329,6 +330,11 @@ class SpecialDto {
 
   @IsNumber()
   energy: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  hits?: number;
 
   @IsEnum(TargetingStrategy)
   @IsNotIn([TargetingStrategy.TARGETED_CARD], {
