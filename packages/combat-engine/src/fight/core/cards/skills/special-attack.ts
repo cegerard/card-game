@@ -15,6 +15,7 @@ import { ShieldApplication } from '../@types/shield/shield-application';
 import { ShieldResult } from '../@types/action-result/shield-result';
 import { MarkedTargetBonus } from '../@types/mark/marked-target-bonus';
 import { Stance, StanceActivation } from '../@types/stance/stance';
+import { AttackResult } from '../@types/action-result/attack-result';
 
 const ENERGY_INCREASE_FACTOR = 10;
 const CRITICAL_RATE = 1.3;
@@ -30,7 +31,14 @@ export class SpecialAttack implements Special {
     private readonly shieldApplication?: ShieldApplication,
     private readonly markedTargetBonus?: MarkedTargetBonus,
     private readonly stanceActivation?: StanceActivation,
-  ) {}
+    private readonly hits: number = 1,
+  ) {
+    if (hits < 1) {
+      throw new Error(
+        `SpecialAttack hits must be greater than or equal to 1, got ${hits}`,
+      );
+    }
+  }
 
   public ready(actualEnergy: number): boolean {
     return actualEnergy >= this.energyNeeded;
@@ -41,69 +49,24 @@ export class SpecialAttack implements Special {
     context: FightingContext,
     targetingStrategy?: TargetingCardStrategy,
   ): SpecialResult {
-    const isCritical = Math.random() < source.actualCriticalChance;
-    const damageMultiplier = isCritical ? CRITICAL_RATE : 1;
     const targeting =
       targetingStrategy && this.targetingStrategy.id === 'from-position'
         ? targetingStrategy
         : this.targetingStrategy;
-    const targetedCards = targeting.targetedCards(
-      source,
-      context.sourcePlayer,
-      context.opponentPlayer,
-    );
-    const kind = this.damages.map((d) => d.type);
+    const attackResults: AttackResult[] = [];
 
-    const attackResults = targetedCards.map((aimedAt) => {
-      // A guardian standing in front answers with its own dodge, defence and
-      // element, so the swap happens before anything is rolled.
-      const protector = context.opponentPlayer.protectorOf(aimedAt);
-      const target = protector ?? aimedAt;
-      const interceptedFor = protector ? aimedAt : undefined;
+    for (let hit = 0; hit < this.hits; hit++) {
+      const isCritical = Math.random() < source.actualCriticalChance;
+      const targetedCards = targeting
+        .targetedCards(source, context.sourcePlayer, context.opponentPlayer)
+        .filter((card) => !card.isDead());
 
-      if (target.dodge(source.actualAccuracy)) {
-        return {
-          damage: 0,
-          isCritical,
-          dodge: true,
-          defender: target,
-          interceptedFor,
-          kind,
-          remainingHealth: target.actualHealth,
-        };
-      }
-
-      const markedBonus = this.markedTargetBonus?.multiplierFor(target) ?? 1;
-      const { total } = DamageCalculator.calculateDamage(
-        this.damages,
-        source.actualAttack * damageMultiplier * markedBonus,
-        target,
+      attackResults.push(
+        ...targetedCards.map((aimedAt) =>
+          this.strike(source, aimedAt, context, isCritical),
+        ),
       );
-      const finalResult = target.applyFinalDamage(total);
-      const { damageToHealth, shieldAbsorbed } = finalResult;
-
-      let effectResult: EffectResult;
-      if (this.effect) {
-        effectResult = this.effect.applyEffect(target, source, context);
-      }
-
-      return {
-        damage: damageToHealth + shieldAbsorbed,
-        shieldAbsorbed: shieldAbsorbed > 0 ? shieldAbsorbed : undefined,
-        shieldBroken: shieldAbsorbed > 0 && !target.shielded ? true : undefined,
-        isCritical,
-        dodge: false,
-        defender: target,
-        interceptedFor,
-        kind,
-        remainingHealth: target.actualHealth,
-        effects: effectResult ? [effectResult] : undefined,
-        survived: finalResult.survived,
-        survivedSkillName: finalResult.survivedSkillName,
-        mitigated: finalResult.mitigated,
-        mitigatedSkillName: finalResult.mitigatedSkillName,
-      };
-    });
+    }
 
     const alterationResults = this.applyAlterations(source, context);
     const shieldResults = this.applyShield(source, context);
@@ -123,6 +86,64 @@ export class SpecialAttack implements Special {
 
   public getSpecialKind(): string {
     return 'specialAttack';
+  }
+
+  private strike(
+    source: FightingCard,
+    aimedAt: FightingCard,
+    context: FightingContext,
+    isCritical: boolean,
+  ): AttackResult {
+    const damageMultiplier = isCritical ? CRITICAL_RATE : 1;
+    const kind = this.damages.map((d) => d.type);
+    // A guardian standing in front answers with its own dodge, defence and
+    // element, so the swap happens before anything is rolled.
+    const protector = context.opponentPlayer.protectorOf(aimedAt);
+    const target = protector ?? aimedAt;
+    const interceptedFor = protector ? aimedAt : undefined;
+
+    if (target.dodge(source.actualAccuracy)) {
+      return {
+        damage: 0,
+        isCritical,
+        dodge: true,
+        defender: target,
+        interceptedFor,
+        kind,
+        remainingHealth: target.actualHealth,
+      };
+    }
+
+    const markedBonus = this.markedTargetBonus?.multiplierFor(target) ?? 1;
+    const { total } = DamageCalculator.calculateDamage(
+      this.damages,
+      source.actualAttack * damageMultiplier * markedBonus,
+      target,
+    );
+    const finalResult = target.applyFinalDamage(total);
+    const { damageToHealth, shieldAbsorbed } = finalResult;
+
+    let effectResult: EffectResult;
+    if (this.effect) {
+      effectResult = this.effect.applyEffect(target, source, context);
+    }
+
+    return {
+      damage: damageToHealth + shieldAbsorbed,
+      shieldAbsorbed: shieldAbsorbed > 0 ? shieldAbsorbed : undefined,
+      shieldBroken: shieldAbsorbed > 0 && !target.shielded ? true : undefined,
+      isCritical,
+      dodge: false,
+      defender: target,
+      interceptedFor,
+      kind,
+      remainingHealth: target.actualHealth,
+      effects: effectResult ? [effectResult] : undefined,
+      survived: finalResult.survived,
+      survivedSkillName: finalResult.survivedSkillName,
+      mitigated: finalResult.mitigated,
+      mitigatedSkillName: finalResult.mitigatedSkillName,
+    };
   }
 
   private applyAlterations(

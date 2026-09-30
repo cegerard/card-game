@@ -65,7 +65,7 @@ cards/
 │   ├── attack-skill.ts     # Base attack skill
 │   ├── alteration-skill.ts # Stat alteration skill
 │   ├── special.ts          # Ultimate abilities base class
-│   ├── special-attack.ts   # Offensive ultimate (supports optional buff + shield application)
+│   ├── special-attack.ts   # Offensive ultimate (optional hits, buff + shield application)
 │   ├── special-healing.ts  # Healing ultimate
 │   ├── skill.ts            # Event-triggered abilities + SkillKind enum (includes Shield)
 │   ├── healing.ts          # Healing skill
