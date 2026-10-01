@@ -35,7 +35,7 @@ const card = (id: string, attackEffects = [], others = []) => ({
 
 const bleed = { type: 'BLEED', rate: 0.05, duration: 10, maxStacks: 20 };
 const anatomy = (rate = 0.02) => ({
-  kind: 'STACK_SCALING',
+  kind: 'BLEED_STACK_SCALING',
   name: 'Anatomie Prédatrice',
   rate,
   maxRate: 0.3,
@@ -47,7 +47,7 @@ const payload = (others: object[]) => ({
   player2: { name: 'P2', deck: [card('prey')] },
 });
 
-describe('STACK_SCALING skill', () => {
+describe('BLEED_STACK_SCALING skill', () => {
   let app: INestApplication;
 
   const post = (body) => request(app.getHttpServer()).post('/fight').send(body);

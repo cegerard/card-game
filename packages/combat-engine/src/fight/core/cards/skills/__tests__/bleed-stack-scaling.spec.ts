@@ -1,4 +1,4 @@
-import { StackScalingSkill } from '../stack-scaling';
+import { BleedStackScalingSkill } from '../bleed-stack-scaling';
 import { BleedAttackEffect } from '../../@types/attack/attack-bleed-effect';
 import { MathRandomizer } from '../../../../tools/math-randomizer';
 import { Player } from '../../../player';
@@ -27,30 +27,30 @@ function board(allyStacks: number, enemyStacks: number): FightingContext {
   };
 }
 
-describe('StackScalingSkill', () => {
-  const anatomy = new StackScalingSkill('Anatomie Prédatrice', 0.02, 0.3);
+describe('BleedStackScalingSkill', () => {
+  const anatomy = new BleedStackScalingSkill('Anatomie Prédatrice', 0.02, 0.3);
 
   it.each([
-    [0, 0, 0],
-    [0, 5, 0.1],
-    [2, 3, 0.1],
-    [5, 15, 0.3],
+    [0, 0, 1],
+    [0, 5, 1.1],
+    [2, 3, 1.1],
+    [5, 15, 1.3],
   ])(
-    'grants a bonus for %i allied and %i enemy stacks',
-    (allyStacks, enemyStacks, bonus) => {
-      expect(anatomy.bonusFor(board(allyStacks, enemyStacks))).toBeCloseTo(
-        bonus,
+    'multiplies the attack for %i allied and %i enemy stacks',
+    (allyStacks, enemyStacks, multiplier) => {
+      expect(anatomy.multiplierFor(board(allyStacks, enemyStacks))).toBeCloseTo(
+        multiplier,
       );
     },
   );
 
-  it('grants nothing without a fighting context', () => {
-    expect(anatomy.bonusFor(undefined)).toBe(0);
+  it('leaves the attack untouched without a fighting context', () => {
+    expect(anatomy.multiplierFor(undefined)).toBe(1);
   });
 
   it.each([
-    ['perStackRate', () => new StackScalingSkill('Invalid', 0, 0.3)],
-    ['maxRate', () => new StackScalingSkill('Invalid', 0.02, 0)],
+    ['perStackRate', () => new BleedStackScalingSkill('Invalid', 0, 0.3)],
+    ['maxRate', () => new BleedStackScalingSkill('Invalid', 0.02, 0)],
   ])('rejects an invalid %s', (_field, build) => {
     expect(build).toThrow();
   });
@@ -60,7 +60,11 @@ describe('Attack power with a stack scaling', () => {
   it('raises the attack by the bonus of the board', () => {
     const scythra = createFightingCard({
       attack: 100,
-      stackScaling: new StackScalingSkill('Anatomie Prédatrice', 0.02, 0.3),
+      bleedStackScaling: new BleedStackScalingSkill(
+        'Anatomie Prédatrice',
+        0.02,
+        0.3,
+      ),
     });
 
     expect(scythra.attackPower(board(0, 5))).toBeCloseTo(110);
