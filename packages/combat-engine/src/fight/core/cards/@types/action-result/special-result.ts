@@ -11,4 +11,6 @@ export type SpecialResult = {
   shieldResults: ShieldResult[];
   /** Set when the special opened a stance on its caster. */
   stanceStarted?: Stance;
+  /** Energy the caster keeps instead of emptying its gauge. */
+  energyRefund?: number;
 };

@@ -141,7 +141,7 @@ export class ActionStage {
         name: specialResults.name,
         attacker: card.identityInfo,
         damages: [],
-        energy: card.resetSpecialEnergy(),
+        energy: card.resetSpecialEnergy(specialResults.energyRefund),
       },
       statusChanges: [],
       survivedSteps: [],

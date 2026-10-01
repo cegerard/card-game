@@ -17,6 +17,7 @@ import { MarkedTargetBonus } from '../@types/mark/marked-target-bonus';
 import { Stance, StanceActivation } from '../@types/stance/stance';
 import { AttackResult } from '../@types/action-result/attack-result';
 import { BleedStackBonus } from '../@types/attack/bleed-stack-bonus';
+import { EnergyRefund } from '../@types/attack/energy-refund';
 
 const ENERGY_INCREASE_FACTOR = 10;
 const CRITICAL_RATE = 1.3;
@@ -34,6 +35,7 @@ export class SpecialAttack implements Special {
     private readonly stanceActivation?: StanceActivation,
     private readonly hits: number = 1,
     private readonly bleedStackBonus?: BleedStackBonus,
+    private readonly energyRefund?: EnergyRefund,
   ) {
     if (hits < 1) {
       throw new Error(
@@ -79,6 +81,10 @@ export class SpecialAttack implements Special {
       alterationResults,
       shieldResults,
       stanceStarted: this.openStance(source),
+      energyRefund: this.energyRefund?.amountFor(
+        source,
+        attackResults[0]?.defender,
+      ),
     };
   }
 

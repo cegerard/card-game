@@ -98,6 +98,10 @@ Simulates a turn-based card battle between two players.
     duration: number,                     // Turns it runs; re-casting refreshes instead of stacking
     immunities?: ("control" | "damage-over-time")[]  // Status categories the caster refuses while it runs
   },
+  energyRefund?: {                        // ATTACK only: energy kept after the special instead of emptying the gauge
+    amount: number,                       // Integer >= 1, energy the caster keeps (shown in the special_attack step energy)
+    minAccuracyMargin: number             // >= 0: caster accuracy minus the agility of the primary target (first defender struck) must be strictly greater
+  },
   bleedStackBonus?: {                     // Optional: boosts one damage type when the target already bleeds
     minStacks: number,                    // Integer >= 1: bleed stacks the target must carry before the hit
     damageType: "PHYSICAL" | "FIRE" | "WATER" | "EARTH" | "AIR",  // Only this composition is multiplied
