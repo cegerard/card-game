@@ -117,6 +117,7 @@ export enum TriggerEvent {
   DAMAGE_TAKEN = 'damage-taken',
   ANY_ALLY_HEALTH_BELOW = 'any-ally-health-below',
   SELF_DEATH = 'self-death',
+  ENEMY_BLEED_DEATH = 'enemy-bleed-death',
 }
 
 export enum HealBasisDto {

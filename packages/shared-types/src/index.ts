@@ -81,6 +81,7 @@ export type TriggerEvent =
   | 'ally-health-below'
   | 'any-ally-health-below'
   | 'self-death'
+  | 'enemy-bleed-death'
   | 'damage-taken';
 
 export type TargetingStrategy =

@@ -1,5 +1,6 @@
 import { FightingContext } from '../cards/@types/fighting-context';
 import { FightingCard } from '../cards/fighting-card';
+import { StateEffectType } from '../cards/@types/state/state-effect-type';
 import { Player } from '../player';
 import { Step, StepKind } from './@types/step';
 import { CardDeathSubscriber } from './card-death-subscriber';
@@ -139,7 +140,10 @@ export class TurnManager {
     });
 
     if (stateEffects.length > 0 && card.isDead()) {
-      this.notifyDeath(card);
+      // A tick combining several statuses is credited to the bleed as soon as
+      // it bit, so a bleed finishing off a poisoned card still counts.
+      const bled = stateEffects.some((result) => result.type === 'bleed');
+      this.notifyDeath(card, bled ? 'bleed' : stateEffects[0].type);
       steps.push({
         kind: StepKind.StatusChange,
         card: card.identityInfo,
@@ -162,9 +166,9 @@ export class TurnManager {
     };
   }
 
-  private notifyDeath(card: FightingCard): void {
+  private notifyDeath(card: FightingCard, cause: StateEffectType): void {
     this.eventBroker.onCardDeath.forEach((subscriber) =>
-      subscriber.notifyDeath(card),
+      subscriber.notifyDeath(card, undefined, cause),
     );
   }
 }
