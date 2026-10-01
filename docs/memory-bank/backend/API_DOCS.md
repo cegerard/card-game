@@ -164,12 +164,13 @@ Simulates a turn-based card battle between two players.
 
 ```typescript
 {
-  kind: "HEALING" | "BUFF" | "CONDITIONAL_ATTACK" | "TARGETING_OVERRIDE" | "SHIELD" | "SURVIVE" | "DAMAGE_REDUCTION" | "PROTECTION" | "DODGE_BONUS_DENIAL",
+  kind: "HEALING" | "BUFF" | "CONDITIONAL_ATTACK" | "TARGETING_OVERRIDE" | "SHIELD" | "SURVIVE" | "DAMAGE_REDUCTION" | "PROTECTION" | "DODGE_BONUS_DENIAL" | "STACK_SCALING",
   name: string,
-  rate?: number,                // Optional — not required for TARGETING_OVERRIDE or SURVIVE; required for SHIELD and DAMAGE_REDUCTION (share of incoming damage removed, in ]0, 1])
+  rate?: number,                // Optional — not required for TARGETING_OVERRIDE or SURVIVE; required for SHIELD and DAMAGE_REDUCTION (share of incoming damage removed, in ]0, 1]); required for STACK_SCALING (attack bonus per bleed stack, > 0)
+  maxRate?: number,             // STACK_SCALING only (required, > 0): cap of the attack bonus
   probability?: number,         // DAMAGE_REDUCTION only: per-hit roll (0-1); omit for a permanent reduction
-  targetingStrategy?: TargetingStrategy,  // Not required for SHIELD, SURVIVE, DAMAGE_REDUCTION or DODGE_BONUS_DENIAL kinds
-  event?: "turn-end" | "next-action" | "ally-death" | "ally-health-below" | "any-ally-health-below" | "self-death" | "damage-taken",  // When skill triggers; NOT required for SHIELD, SURVIVE, DAMAGE_REDUCTION or DODGE_BONUS_DENIAL kinds
+  targetingStrategy?: TargetingStrategy,  // Not required for SHIELD, SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL or STACK_SCALING kinds
+  event?: "turn-end" | "next-action" | "ally-death" | "ally-health-below" | "any-ally-health-below" | "self-death" | "damage-taken",  // When skill triggers; NOT required for SHIELD, SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL or STACK_SCALING kinds
   targetCardId?: string,        // Required when event=ally-death, ally-health-below or damage-taken (never for any-ally-health-below): id of the monitored card
   requiresStance?: string,      // Skill only fires while its owner holds that stance (see SpecialDto.stanceActivation)
   // SHIELD-specific fields:
@@ -593,6 +594,7 @@ a besoin de ce champ pour le décrémenter : sans lui le bouclier restait affich
 - `DAMAGE_REDUCTION`: Removes a share of every incoming hit — no `event`, no `targetingStrategy`; requires `rate` (share removed, in `]0, 1]`) and accepts an optional `probability` making it a per-hit roll. Like SURVIVE it is extracted from `others[]` and consulted inside `applyFinalDamage()`, so it mitigates the very hit that triggers it. Applies after the freeze/stunt amplifiers and before the shield buffer, so a shield absorbs only the reduced damage. Status effect ticks bypass it, as they bypass the shield
 - `PROTECTION`: Steps in front of one ally for `duration` of the guardian's turns — attacks aimed at that ally are resolved against the guardian instead, with the guardian's own dodge, defence and element. Requires `duration`, plus an `event` and a `targetingStrategy`; it covers the **first** card its targeting returns, so pairing it with `most-wounded-ally` guards whoever is in the worst shape at that moment. A targeting that returns nobody is a no-op and spends no `activationLimit`. Re-casting refreshes the duration or moves the protection, never stacks. A dead guardian protects nobody. `activationLimit` is supported, so "once per fight" is `activationLimit: 1`
 - `DODGE_BONUS_DENIAL`: Passive — no `event`, no `targetingStrategy`, only `name`. Against its owner, a bleeding defender dodges with its base agility minus its debuffs: its agility **buffs** are ignored. Applies to every attack of the owner (simple, multiple, special, triggered attacks). Like SURVIVE it is extracted from `others[]` and stored on the card; it emits no step
+- `STACK_SCALING`: Passive — no `event`, no `targetingStrategy`; requires `rate` (attack bonus per bleed stack) and `maxRate` (cap). Raises its owner attack by `rate` for every bleed stack carried by a living card, both teams counted, up to `maxRate` — `rate: 0.02, maxRate: 0.3` is "+2% attack per stack, at most +30%". Read from the live board each time the owner strikes: attack damage (simple, multiple, special, triggered attacks) and the damage of the poison, burn and bleed it applies on that hit. Heals are not affected. Extracted from `others[]` like SURVIVE; it emits no step
 - `TRANSFORMATION`: One-shot health-reactive transformation — no `event`, no `targetingStrategy`; requires `duration` and an `activationCondition` threshold. Applies its own `statAlterations` and, for the same duration, an optional `lifestealRate` (heals that share of max health on every landed attack) and `statusImmunity`. An optional `endCostRate` charges that share of max health when the transformation ends, never below one health point. Fires once per fight
 
 ### HealBasis

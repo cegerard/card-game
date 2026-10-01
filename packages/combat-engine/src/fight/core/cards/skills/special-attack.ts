@@ -127,7 +127,7 @@ export class SpecialAttack implements Special {
       this.bleedStackBonus?.applyTo(this.damages, target) ?? this.damages;
     const { total } = DamageCalculator.calculateDamage(
       damages,
-      source.actualAttack * damageMultiplier * markedBonus,
+      source.attackPower(context) * damageMultiplier * markedBonus,
       target,
     );
     const finalResult = target.applyFinalDamage(total);

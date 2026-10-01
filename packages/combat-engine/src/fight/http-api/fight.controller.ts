@@ -83,11 +83,13 @@ import { SurviveSkill } from '../core/cards/skills/survive';
 import { DebuffStacking } from '../core/cards/@types/alteration/alteration-detail';
 import { DamageReductionSkill } from '../core/cards/skills/damage-reduction';
 import { DodgeBonusDenialSkill } from '../core/cards/skills/dodge-bonus-denial';
+import { StackScalingSkill } from '../core/cards/skills/stack-scaling';
 
 const CARD_BOUND_SKILL_KINDS = [
   SkillKind.SURVIVE,
   SkillKind.DAMAGE_REDUCTION,
   SkillKind.DODGE_BONUS_DENIAL,
+  SkillKind.STACK_SCALING,
 ];
 
 @Controller()
@@ -268,8 +270,18 @@ export class FightController {
     const dodgeBonusDenial = dodgeBonusDenialDto
       ? new DodgeBonusDenialSkill(dodgeBonusDenialDto.name)
       : undefined;
+    const stackScalingDto = cardData.skills.others.find(
+      (s) => s.kind === SkillKind.STACK_SCALING,
+    );
+    const stackScaling = stackScalingDto
+      ? new StackScalingSkill(
+          stackScalingDto.name,
+          stackScalingDto.rate,
+          stackScalingDto.maxRate,
+        )
+      : undefined;
 
-    // SURVIVE, DAMAGE_REDUCTION and DODGE_BONUS_DENIAL carry no trigger and no
+    // SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL and STACK_SCALING carry no trigger and no
     // targeting: they live on the card itself and are consulted when a hit is
     // resolved, so they are pulled out before the regular skill loop.
     const triggeredOthers = cardData.skills.others.filter(
@@ -305,6 +317,7 @@ export class FightController {
         survive: surviveSkill,
         damageReduction,
         dodgeBonusDenial,
+        stackScaling,
       },
       {
         dodge: buildDodgeStrategy(cardData.behaviors.dodge),
@@ -795,6 +808,7 @@ export class FightController {
         throw new Error('SURVIVE skill must not appear in others skill list');
       case SkillKind.DAMAGE_REDUCTION:
       case SkillKind.DODGE_BONUS_DENIAL:
+      case SkillKind.STACK_SCALING:
         throw new Error(
           `${skillData.kind} skill must not appear in others skill list`,
         );

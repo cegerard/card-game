@@ -35,7 +35,7 @@ export class PoisonAttackEffect implements AttackEffect {
   public applyEffect(
     defender: FightingCard,
     card: FightingCard,
-    _context: FightingContext,
+    context: FightingContext,
   ): StateEffectResult {
     if (
       this.probability !== undefined &&
@@ -48,7 +48,7 @@ export class PoisonAttackEffect implements AttackEffect {
     const poisonedState = new CardStatePoisoned(
       this.level,
       this.computePoisonedTurns(),
-      round2(card.actualAttack * this.rate),
+      round2(card.attackPower(context) * this.rate),
       this.terminationEvent,
     );
     if (!defender.setState(poisonedState)) return;

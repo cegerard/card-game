@@ -32,7 +32,7 @@ export class BleedAttackEffect implements AttackEffect {
   public applyEffect(
     defender: FightingCard,
     card: FightingCard,
-    _context: FightingContext,
+    context: FightingContext,
   ): StateEffectResult {
     if (
       this.probability !== undefined &&
@@ -44,7 +44,7 @@ export class BleedAttackEffect implements AttackEffect {
     const room = this.maxStacks - defender.bleedStacks();
     if (room <= 0) return;
 
-    const damageValue = round2(card.actualAttack * this.rate);
+    const damageValue = round2(card.attackPower(context) * this.rate);
     const bleeding = new CardStateBleeding(
       Array.from({ length: Math.min(this.stacks, room) }, () => ({
         remainingTurns: this.duration,
