@@ -70,7 +70,7 @@ export class SimpleAttack implements AttackSkill {
 
         const { total } = DamageCalculator.calculateDamage(
           this.damagesAgainst(defender),
-          card.actualAttack * damageMultiplier,
+          card.attackPower(context) * damageMultiplier,
           defender,
         );
         const finalResult = defender.applyFinalDamage(total);

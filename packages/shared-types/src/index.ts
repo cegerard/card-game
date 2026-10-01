@@ -35,7 +35,8 @@ export type SkillKind =
   | 'TRANSFORMATION'
   | 'DAMAGE_REDUCTION'
   | 'PROTECTION'
-  | 'DODGE_BONUS_DENIAL';
+  | 'DODGE_BONUS_DENIAL'
+  | 'BLEED_STACK_SCALING';
 
 export type BuffType =
   | 'attack'
@@ -255,8 +256,10 @@ export interface MultipleAttackSkill {
 export interface OtherSkill {
   kind: SkillKind;
   name: string;
-  /** Requis pour HEALING, ALTERATION, SHIELD, DAMAGE_REDUCTION. */
+  /** Requis pour HEALING, ALTERATION, SHIELD, DAMAGE_REDUCTION ; bonus par pile pour BLEED_STACK_SCALING. */
   rate?: number;
+  /** BLEED_STACK_SCALING uniquement (requis) : plafond du bonus d'Attaque. */
+  maxRate?: number;
   /**
    * DAMAGE_REDUCTION uniquement : probabilité du tirage à chaque coup reçu.
    * Omise, la réduction est permanente.
@@ -269,9 +272,9 @@ export interface OtherSkill {
    */
   stackId?: string;
   debuffMaxStacks?: number;
-  /** Absent pour SURVIVE, DAMAGE_REDUCTION et DODGE_BONUS_DENIAL. */
+  /** Absent pour SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL et BLEED_STACK_SCALING. */
   targetingStrategy?: TargetingStrategy;
-  /** Absent pour SHIELD, SURVIVE, DAMAGE_REDUCTION et DODGE_BONUS_DENIAL. */
+  /** Absent pour SHIELD, SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL et BLEED_STACK_SCALING. */
   event?: TriggerEvent;
   /** Le skill n'est actif que si son porteur tient cette posture. */
   requiresStance?: string;

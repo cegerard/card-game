@@ -35,7 +35,7 @@ export class BurnAttackEffect implements AttackEffect {
   public applyEffect(
     defender: FightingCard,
     card: FightingCard,
-    _context: FightingContext,
+    context: FightingContext,
   ): StateEffectResult {
     if (
       this.probability !== undefined &&
@@ -59,7 +59,7 @@ export class BurnAttackEffect implements AttackEffect {
     const burnedState = new CardStateBurned(
       effectLevel,
       this.computeBurnedTurns(effectLevel),
-      round2(card.actualAttack * this.rate),
+      round2(card.attackPower(context) * this.rate),
       this.terminationEvent,
     );
     if (!defender.setState(burnedState)) return;

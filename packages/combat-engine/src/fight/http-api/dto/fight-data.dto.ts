@@ -78,6 +78,7 @@ export enum SkillKind {
   TRANSFORMATION = 'TRANSFORMATION',
   PROTECTION = 'PROTECTION',
   DODGE_BONUS_DENIAL = 'DODGE_BONUS_DENIAL',
+  BLEED_STACK_SCALING = 'BLEED_STACK_SCALING',
 }
 
 export enum BuffType {
@@ -522,18 +523,27 @@ export class OtherSkillDto {
       o.kind === SkillKind.HEALING ||
       o.kind === SkillKind.ALTERATION ||
       o.kind === SkillKind.SHIELD ||
-      o.kind === SkillKind.DAMAGE_REDUCTION,
+      o.kind === SkillKind.DAMAGE_REDUCTION ||
+      o.kind === SkillKind.BLEED_STACK_SCALING,
   )
   @IsDefined()
   @IsNumber()
   rate?: number;
+
+  // BLEED_STACK_SCALING: cap of the attack bonus, `rate` being the bonus per stack
+  @ValidateIf((o) => o.kind === SkillKind.BLEED_STACK_SCALING)
+  @IsDefined()
+  @IsNumber()
+  @IsPositive()
+  maxRate?: number;
 
   @ValidateIf(
     (o) =>
       o.kind !== SkillKind.SURVIVE &&
       o.kind !== SkillKind.TRANSFORMATION &&
       o.kind !== SkillKind.DAMAGE_REDUCTION &&
-      o.kind !== SkillKind.DODGE_BONUS_DENIAL,
+      o.kind !== SkillKind.DODGE_BONUS_DENIAL &&
+      o.kind !== SkillKind.BLEED_STACK_SCALING,
   )
   @IsDefined()
   @IsEnum(TargetingStrategy)
@@ -545,7 +555,8 @@ export class OtherSkillDto {
       o.kind !== SkillKind.SURVIVE &&
       o.kind !== SkillKind.TRANSFORMATION &&
       o.kind !== SkillKind.DAMAGE_REDUCTION &&
-      o.kind !== SkillKind.DODGE_BONUS_DENIAL,
+      o.kind !== SkillKind.DODGE_BONUS_DENIAL &&
+      o.kind !== SkillKind.BLEED_STACK_SCALING,
   )
   @IsDefined()
   @IsEnum(TriggerEvent)

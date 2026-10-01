@@ -32,6 +32,7 @@ import { DamageType } from '../../src/fight/core/cards/@types/damage/damage-type
 import { ShieldApplication } from '../../src/fight/core/cards/@types/shield/shield-application';
 import { Randomizer } from '../../src/fight/core/randomizer';
 import { DodgeBonusDenialSkill } from '../../src/fight/core/cards/skills/dodge-bonus-denial';
+import { BleedStackScalingSkill } from '../../src/fight/core/cards/skills/bleed-stack-scaling';
 import { MathRandomizer } from '../../src/fight/tools/math-randomizer';
 
 type effect = {
@@ -59,6 +60,7 @@ type FightingCardParams = {
   randomizer?: Randomizer;
   element?: Element;
   dodgeBonusDenial?: DodgeBonusDenialSkill;
+  bleedStackScaling?: BleedStackScalingSkill;
   skills?: {
     simpleAttack?: {
       name?: string;
@@ -517,6 +519,7 @@ export function createFightingCard(
       }),
       others: createsSkills(params.skills?.others ?? []),
       dodgeBonusDenial: params.dodgeBonusDenial,
+      bleedStackScaling: params.bleedStackScaling,
     },
     {
       dodge: new SimpleDodge(),

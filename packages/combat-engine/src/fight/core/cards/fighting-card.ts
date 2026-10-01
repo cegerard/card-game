@@ -11,6 +11,7 @@ import { CardStateFrozen } from './@types/state/card-state-frozen';
 import { CardStateStunted } from './@types/state/card-state-stunted';
 import { CardStateBleeding } from './@types/state/card-state-bleeding';
 import { DodgeBonusDenialSkill } from './skills/dodge-bonus-denial';
+import { BleedStackScalingSkill } from './skills/bleed-stack-scaling';
 import { EffectLevel } from './@types/attack/effect-level';
 import {
   AlterationDetail,
@@ -148,6 +149,7 @@ export class FightingCard {
   // Damage reduction
   private damageReduction: DamageReductionSkill | null = null;
   private dodgeBonusDenial: DodgeBonusDenialSkill | null = null;
+  private bleedStackScaling: BleedStackScalingSkill | null = null;
 
   // Stances
   private stances: Stance[] = [];
@@ -183,6 +185,7 @@ export class FightingCard {
       survive?: SurviveSkill;
       damageReduction?: DamageReductionSkill;
       dodgeBonusDenial?: DodgeBonusDenialSkill;
+      bleedStackScaling?: BleedStackScalingSkill;
     },
     behaviors: {
       dodge: DodgeBehavior;
@@ -210,6 +213,7 @@ export class FightingCard {
     this.surviveSkill = skills.survive ?? null;
     this.damageReduction = skills.damageReduction ?? null;
     this.dodgeBonusDenial = skills.dodgeBonusDenial ?? null;
+    this.bleedStackScaling = skills.bleedStackScaling ?? null;
   }
 
   public get lastAttacker(): FightingCard | undefined {
@@ -248,6 +252,16 @@ export class FightingCard {
 
   public get actualAttack(): number {
     return this.computeActualStat(this.attack, 'attack');
+  }
+
+  /**
+   * The attack an action of this card strikes with: the attack stat raised by
+   * the board-dependent bonus of a stack scaling passive, when it has one.
+   */
+  public attackPower(context?: FightingContext): number {
+    const bonus = this.bleedStackScaling?.multiplierFor(context) ?? 1;
+
+    return this.actualAttack * bonus;
   }
 
   public get actualDefense(): number {

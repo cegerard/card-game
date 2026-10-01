@@ -78,6 +78,7 @@ cards/
 │   ├── survive.ts          # SurviveSkill: one-time fatal-blow interception; not a Skill implementor
 │   ├── damage-reduction.ts # DamageReductionSkill: removes a share of each incoming hit; not a Skill implementor
 │   ├── dodge-bonus-denial.ts # DodgeBonusDenialSkill: a bleeding defender dodges its owner without agility buffs; not a Skill implementor
+│   ├── bleed-stack-scaling.ts    # BleedStackScalingSkill: attack bonus per bleed stack on the board, read through FightingCard.attackPower(); not a Skill implementor
 │   ├── transformation.ts   # TransformationSkill: one-shot health-reactive transformation
 │   └── power-id-consistency.ts  # Domain validation for composite power groups
 ├── behaviors/              # Card behavior patterns
