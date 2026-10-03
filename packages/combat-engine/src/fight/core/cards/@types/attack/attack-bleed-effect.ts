@@ -44,8 +44,12 @@ export class BleedAttackEffect implements AttackEffect {
     const room = this.maxStacks - defender.bleedStacks();
     if (room <= 0) return;
 
-    const damageValue = round2(card.attackPower(context) * this.rate);
-    const laidStacks = Math.min(this.stacks, room);
+    const { stacks, rate } = card.empowerBleed({
+      stacks: this.stacks,
+      rate: this.rate,
+    });
+    const damageValue = round2(card.attackPower(context) * rate);
+    const laidStacks = Math.min(stacks, room);
     const bleeding = new CardStateBleeding(
       Array.from({ length: laidStacks }, () => ({
         remainingTurns: this.duration,

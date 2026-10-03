@@ -86,12 +86,14 @@ import { DebuffStacking } from '../core/cards/@types/alteration/alteration-detai
 import { DamageReductionSkill } from '../core/cards/skills/damage-reduction';
 import { DodgeBonusDenialSkill } from '../core/cards/skills/dodge-bonus-denial';
 import { BleedStackScalingSkill } from '../core/cards/skills/bleed-stack-scaling';
+import { BleedEmpowermentSkill } from '../core/cards/skills/bleed-empowerment';
 
 const CARD_BOUND_SKILL_KINDS = [
   SkillKind.SURVIVE,
   SkillKind.DAMAGE_REDUCTION,
   SkillKind.DODGE_BONUS_DENIAL,
   SkillKind.BLEED_STACK_SCALING,
+  SkillKind.BLEED_EMPOWERMENT,
 ];
 
 @Controller()
@@ -282,8 +284,19 @@ export class FightController {
           bleedStackScalingDto.maxRate,
         )
       : undefined;
+    const bleedEmpowermentDto = cardData.skills.others.find(
+      (s) => s.kind === SkillKind.BLEED_EMPOWERMENT,
+    );
+    const bleedEmpowerment = bleedEmpowermentDto
+      ? new BleedEmpowermentSkill(
+          bleedEmpowermentDto.name,
+          bleedEmpowermentDto.requiresStance,
+          bleedEmpowermentDto.extraStacks,
+          bleedEmpowermentDto.rate,
+        )
+      : undefined;
 
-    // SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL and BLEED_STACK_SCALING carry no trigger and no
+    // The CARD_BOUND_SKILL_KINDS carry no trigger and no
     // targeting: they live on the card itself and are consulted when a hit is
     // resolved, so they are pulled out before the regular skill loop.
     const triggeredOthers = cardData.skills.others.filter(
@@ -320,6 +333,7 @@ export class FightController {
         damageReduction,
         dodgeBonusDenial,
         bleedStackScaling,
+        bleedEmpowerment,
       },
       {
         dodge: buildDodgeStrategy(cardData.behaviors.dodge),
@@ -822,6 +836,7 @@ export class FightController {
       case SkillKind.DAMAGE_REDUCTION:
       case SkillKind.DODGE_BONUS_DENIAL:
       case SkillKind.BLEED_STACK_SCALING:
+      case SkillKind.BLEED_EMPOWERMENT:
         throw new Error(
           `${skillData.kind} skill must not appear in others skill list`,
         );
