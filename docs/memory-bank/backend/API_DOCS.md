@@ -206,7 +206,12 @@ Simulates a turn-based card battle between two players.
   comboFinisherEffects?: EffectDto[],  // Effects applied on the finisher hit only
   defensePenetration?: number,  // In [0, 1] (400 outside): share of the defender defense the attack ignores — defense used = actualDefense × (1 − defensePenetration); default 0
   energyCost?: number,          // Integer >= 1: the attack does not fire below that special energy, and spends it only when it strikes somebody
-  bleedDetonation?: { ratePerStack: number }  // > 0: consumes every bleed stack of the target and hits for ratePerStack × consumed stacks of the attack, as a PHYSICAL composition replacing `damages`
+  bleedDetonation?: { ratePerStack: number },  // > 0: consumes every bleed stack of the target and hits for ratePerStack × consumed stacks of the attack, as a PHYSICAL composition replacing `damages`
+  splash?: {                    // Secondary strike after the main one, on the zone centered on the primary target: that target and its two deck neighbors (living only). Centered on the card the attack was aimed at, even when a guardian intercepted it. Runs through the regular attack pipeline (dodge, protection, shield) and is reported as its own `attack` step right after the main one. Fires only when the main strike targeted somebody
+    name: string,               // Name of the splash attack step
+    damages: DamageCompositionDto[],  // Min 1 entry
+    effects?: EffectDto[]
+  }
 }
 ```
 

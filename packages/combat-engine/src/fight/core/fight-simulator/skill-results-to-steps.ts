@@ -106,6 +106,19 @@ export function skillResultsToSteps(
           return perHit;
         });
         steps.push(...hitSteps);
+
+        if (skillResult.splash) {
+          steps.push(
+            ...skillResultsToSteps(card, [
+              {
+                skillKind: SkillKind.Attack,
+                name: skillResult.splash.name,
+                results: skillResult.splash.results,
+                powerId: skillResult.powerId,
+              },
+            ]),
+          );
+        }
         break;
       }
       case SkillKind.TargetingOverride:

@@ -306,6 +306,24 @@ export class EnergyRefundDto {
   minAccuracyMargin: number;
 }
 
+export class SplashDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(/* istanbul ignore next */ () => DamageCompositionDto)
+  damages: DamageCompositionDto[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(/* istanbul ignore next */ () => EffectDto)
+  effects?: EffectDto[];
+}
+
 export class BleedDetonationDto {
   @IsNumber()
   @IsPositive()
@@ -744,6 +762,12 @@ export class OtherSkillDto {
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => BleedDetonationDto)
   bleedDetonation?: BleedDetonationDto;
+
+  // CONDITIONAL_ATTACK: secondary strike on the primary target and its neighbors
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => SplashDto)
+  splash?: SplashDto;
 
   // Required when event is ally-death, enemy-death, ally-health-below or
   // damage-taken

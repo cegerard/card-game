@@ -8,6 +8,7 @@ import { DamageType } from '../../cards/@types/damage/damage-type';
 import { AlwaysTrueAttackCondition } from '../../cards/@types/attack/conditions/always-true-attack-condition';
 import { CardStateFrozen } from '../../cards/@types/state/card-state-frozen';
 import { TurnStart } from '../../trigger/turn-start';
+import { Splash } from '../../cards/@types/attack/splash';
 import { TargetedFromPosition } from '../../targeting-card-strategies/targeted-from-position';
 import { DeathSkillHandler } from '../../fight-simulator/death-skill-handler';
 import { Step, StepKind } from '../../fight-simulator/@types/step';
@@ -15,7 +16,7 @@ import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 
 const ULTIMATE = 'Exsanguination Totale';
 
-const ultimate = () =>
+const ultimate = (splash?: Splash) =>
   new ConditionalAttack(
     ULTIMATE,
     new SimpleAttack(
@@ -28,6 +29,7 @@ const ultimate = () =>
     undefined,
     undefined,
     10,
+    splash,
   );
 
 describe('ActionStage turn-start event', () => {
@@ -80,5 +82,29 @@ describe('ActionStage turn-start event', () => {
     scythra.setState(new CardStateFrozen(1, 1, 0.2));
 
     expect(play()).toEqual([]);
+  });
+
+  it('reports the splash right after the ultimate', () => {
+    scythra = createFightingCard({
+      accuracy: 9999,
+      skills: {
+        simpleAttack: { name: 'Lacération du Zéphyr' },
+        special: { energy: 1000 },
+      },
+      extraSkills: [
+        ultimate(
+          new Splash('Vent Écarlate', [
+            new DamageComposition(DamageType.AIR, 0.6),
+          ]),
+        ),
+      ],
+    });
+    scythra.increaseSpecialEnergy();
+
+    expect(attackNames(play())).toEqual([
+      ULTIMATE,
+      'Vent Écarlate',
+      'Lacération du Zéphyr',
+    ]);
   });
 });

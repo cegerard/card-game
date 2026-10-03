@@ -137,22 +137,31 @@ export class ActionStage {
         (r): r is AttackSkillResults =>
           r.skillKind === SkillKind.Attack && r.results.length > 0,
       )
-      .map((attackSkill) => {
-        const report: AttackReport = {
-          kind: StepKind.Attack,
-          attack: {
-            name: attackSkill.name,
-            attacker: card.identityInfo,
-            damages: [],
-            energy: card.actualEnergy,
-          },
-          statusChanges: [],
-          survivedSteps: [],
-        };
-        this.handleAttackResult(attackSkill.results, report, card);
+      .flatMap((attackSkill) =>
+        [attackSkill, attackSkill.splash]
+          .filter((strike) => strike?.results.length > 0)
+          .map((strike) => this.reportStrike(card, strike)),
+      );
+  }
 
-        return report;
-      });
+  private reportStrike(
+    card: FightingCard,
+    strike: { name?: string; results: AttackResult[] },
+  ): AttackReport {
+    const report: AttackReport = {
+      kind: StepKind.Attack,
+      attack: {
+        name: strike.name,
+        attacker: card.identityInfo,
+        damages: [],
+        energy: card.actualEnergy,
+      },
+      statusChanges: [],
+      survivedSteps: [],
+    };
+    this.handleAttackResult(strike.results, report, card);
+
+    return report;
   }
 
   private launchSpecial(card: FightingCard): ActionReport {
