@@ -169,11 +169,11 @@ Simulates a turn-based card battle between two players.
   rate?: number,                // Optional — not required for TARGETING_OVERRIDE or SURVIVE; required for SHIELD and DAMAGE_REDUCTION (share of incoming damage removed, in ]0, 1]); required for BLEED_STACK_SCALING (attack bonus per bleed stack, > 0); required for BLEED_EMPOWERMENT (bleed rate used during the stance, > 0)
   maxRate?: number,             // BLEED_STACK_SCALING only (required, > 0): cap of the attack bonus
   stanceActivation?: { name: string, duration: number, immunities?: ("control" | "damage-over-time")[] },  // STANCE only (required): stance opened on the owner when its event fires
-  stackThreshold?: number,      // Required when event=bleed-stacks-applied (integer >= 1): bleed stacks the owner must have laid
+  stackThreshold?: number,      // Integer >= 1. Required when event=bleed-stacks-applied (bleed stacks the owner must have laid) and when targetingStrategy=first-bleeding-enemy (bleed stacks the target must carry)
   extraStacks?: number,         // BLEED_EMPOWERMENT only (required, integer >= 0): stacks each bleed of the owner lays on top of its own during the stance
   probability?: number,         // DAMAGE_REDUCTION only: per-hit roll (0-1); omit for a permanent reduction
   targetingStrategy?: TargetingStrategy,  // Not required for SHIELD, SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL, BLEED_STACK_SCALING, BLEED_EMPOWERMENT or STANCE kinds
-  event?: "turn-end" | "next-action" | "ally-death" | "ally-health-below" | "any-ally-health-below" | "self-death" | "enemy-bleed-death" | "bleed-stacks-applied" | "damage-taken",  // When skill triggers; NOT required for SHIELD, SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL, BLEED_STACK_SCALING or BLEED_EMPOWERMENT kinds
+  event?: "turn-end" | "next-action" | "ally-death" | "ally-health-below" | "any-ally-health-below" | "self-death" | "enemy-bleed-death" | "bleed-stacks-applied" | "turn-start" | "damage-taken",  // When skill triggers; NOT required for SHIELD, SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL, BLEED_STACK_SCALING or BLEED_EMPOWERMENT kinds
   targetCardId?: string,        // Required when event=ally-death, ally-health-below or damage-taken (never for any-ally-health-below): id of the monitored card
   requiresStance?: string,      // Skill only fires while its owner holds that stance (see SpecialDto.stanceActivation); required for BLEED_EMPOWERMENT
   // SHIELD-specific fields:
@@ -197,14 +197,16 @@ Simulates a turn-based card battle between two players.
   statusImmunity?: boolean,     // Refuses every status effect while transformed
   endCostRate?: number,         // Share of max health paid when the transformation ends
   // CONDITIONAL_ATTACK fields:
-  damages?: DamageCompositionDto[],
-  hits?: number,
-  interval?: number,            // Turns between two activations; omit for a skill whose cadence is driven by its event (ally-health-below, damage-taken)
+  damages?: DamageCompositionDto[],  // Required unless bleedDetonation is set
+  hits?: number,                // Not allowed with bleedDetonation (400)
+  interval?: number,            // Turns between two activations; omit for a skill whose cadence is driven by its event (ally-health-below, damage-taken, turn-start)
   amplifier?: number,
   effect?: EffectDto,
   comboFinisher?: DamageCompositionDto[],
   comboFinisherEffects?: EffectDto[],  // Effects applied on the finisher hit only
-  defensePenetration?: number   // In [0, 1] (400 outside): share of the defender defense the attack ignores — defense used = actualDefense × (1 − defensePenetration); default 0
+  defensePenetration?: number,  // In [0, 1] (400 outside): share of the defender defense the attack ignores — defense used = actualDefense × (1 − defensePenetration); default 0
+  energyCost?: number,          // Integer >= 1: the attack does not fire below that special energy, and spends it only when it strikes somebody
+  bleedDetonation?: { ratePerStack: number }  // > 0: consumes every bleed stack of the target and hits for ratePerStack × consumed stacks of the attack, as a PHYSICAL composition replacing `damages`
 }
 ```
 
@@ -263,7 +265,7 @@ Simulates a turn-based card battle between two players.
   kind: "attack" | "special_attack",
   name?: string,         // Skill name that triggered the attack
   attacker: CardInfo,
-  damages: { defender: CardInfo, damage: number, isCritical: boolean, dodge: boolean, remainingHealth: number, shieldAbsorbed?: number, survived?: boolean, survivedSkillName?: string }[],
+  damages: { defender: CardInfo, damage: number, isCritical: boolean, dodge: boolean, remainingHealth: number, shieldAbsorbed?: number, survived?: boolean, survivedSkillName?: string, consumedBleedStacks?: number }[],  // consumedBleedStacks: bleed stacks a bleedDetonation consumed
   energy: number
 }
 ```
@@ -562,6 +564,7 @@ a besoin de ce champ pour le décrémenter : sans lui le bouclier restait affich
 - `last-attacker-of-ally`: Targets the card that last attacked a specific ally (requires `targetCardId`); built inline in controller with `LastAttackerOfAllyTargetingStrategy`
 - `protected-ally`: Targets the ally the caster is currently standing in front of (see `PROTECTION`). Needs no `targetCardId` and no threshold — the protection itself says who, and its absence says nobody, so a skill using it is silent outside the power that opened the protection. Returns nothing if that ally is dead; still resolves when the **caster** is dead, which is what a guardian parting gift needs. Built with `ProtectedAllyStrategy`
 - `linked-ally`: Targets a specific ally by ID (requires `targetCardId`); built inline in controller with `AlliedCardByIdStrategy`
+- `first-bleeding-enemy`: Targets the first living enemy, in deck order, carrying at least `stackThreshold` bleed stacks; nobody otherwise. Built with `FirstBleedingEnemyStrategy`
 - `most-wounded-ally`: Targets the caster’s ally in the worst shape among those below `activationCondition.threshold`, resolved against the live board at each launch (requires the threshold, never a `targetCardId`). Excludes the caster and the dead; targets nobody when every ally is above the threshold. Ties keep deck order, so the choice is reproducible. Built with `MostWoundedAllyStrategy`
 
 ### DodgeStrategy
@@ -581,6 +584,7 @@ a besoin de ce champ pour le décrémenter : sans lui le bouclier restait affich
 - `self-death`: Fires on the card that just died, for its own last words — every other death trigger runs on somebody else, since `ally-death` and `enemy-death` only reach the survivors. Needs no `targetCardId`: the trigger is the owner own id. It runs as phase 2 of the death cascade, before the survivors answer, so what the fallen card leaves behind lands first. Pairs with `protected-ally` targeting for a guardian parting gift
 - `enemy-bleed-death`: Fires on the surviving cards of the opposing team when a card dies from its bleed tick at turn end. Needs no `targetCardId`: whoever bled out, the skill answers. A death by an attack, a poison or a burn does not fire it; when a lethal tick combines several statuses, the bleed is credited as soon as it ticked. Runs last in the death cascade, after `enemy-death`. Paired with a `HEALING` on `self` with `healBasis: "target-max-health"`, it is "regain 10% of max health when an enemy bleeds out"
 - `bleed-stacks-applied`: Fires **once per fight**, after the owner attack that brings the bleed stacks it has laid since the fight began to `stackThreshold` (a count jumping over the threshold still fires). Stacks lost at the cap or refused (immunity, resistance) do not count. Checked after every attack the owner makes in its action (simple, next-action, special); stacks laid by a reactive attack count, but are only seen at the owner next action. Each skill on the event keeps its own once-flag, so a STANCE and a BUFF sharing it both fire
+- `turn-start`: Fires on the card about to act, at the start of its turn, before its own action and before its special gauge is checked — so an `energyCost` paid here can delay the special. It adds to the action rather than replacing it (unlike `next-action`), and a card skipping its turn (frozen, stunned) never sees it. Only attack skills on this event are reported (a skill that struck nobody reports nothing), their step preceding the action steps. No `interval` needed
 - `damage-taken`: Fires every time the monitored card takes damage from a landed attack; requires `targetCardId` (the monitored card id). Unlike `ally-health-below` it is not edge-triggered — it fires on each hit, which is what counter attacks and damage-reactive passives need. A card reacts to its own wounds by passing its own id. The event reaches every playable card of the damaged card team, and `FightingContext.lastAttacker` is set, so `last-attacker-of-ally` resolves to the attacker
 - `any-ally-health-below`: Edge-triggered when **any** ally crosses `activationCondition.threshold` downward, where `ally-health-below` watches one ally named up front. Requires the threshold, never a `targetCardId`. Each ally is edge-triggered on its own — the trigger fires once per crossing and rearms for that ally when its health recovers. The owner is skipped, so a card watching its own health still uses `ally-health-below`. Pairs with `most-wounded-ally` targeting for a guardian power on a deck the player composes
 

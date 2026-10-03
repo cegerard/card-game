@@ -25,6 +25,7 @@ import { skillResultsToSteps } from '../fight-simulator/skill-results-to-steps';
 import { effectResultsToSteps } from '../fight-simulator/effect-results-to-steps';
 import { SurvivedReport } from '../fight-simulator/@types/survived-report';
 import { BLEED_STACKS_APPLIED } from '../trigger/bleed-stacks-applied';
+import { TURN_START } from '../trigger/turn-start';
 
 type SplittedSteps = {
   actionSteps: Step[];
@@ -58,6 +59,8 @@ export class ActionStage {
       if (card.frozenLevel > 0 || card.isStunted) return acc;
 
       card.tickSkills();
+
+      acc.push(...this.launchTurnStartSkills(card));
 
       if (card.isSpecialReady()) {
         acc.push(this.launchSpecial(card));
@@ -120,6 +123,36 @@ export class ActionStage {
     this.handleAttackResult(attackSkill.results, result, card);
 
     return result;
+  }
+
+  /**
+   * Attacks fired at the start of the card turn, before its own action and
+   * its special check. They add to the action rather than replace it, and an
+   * attack that struck nobody reports nothing.
+   */
+  private launchTurnStartSkills(card: FightingCard): AttackReport[] {
+    return card
+      .launchSkills(TURN_START, this.getFightingContext(card))
+      .filter(
+        (r): r is AttackSkillResults =>
+          r.skillKind === SkillKind.Attack && r.results.length > 0,
+      )
+      .map((attackSkill) => {
+        const report: AttackReport = {
+          kind: StepKind.Attack,
+          attack: {
+            name: attackSkill.name,
+            attacker: card.identityInfo,
+            damages: [],
+            energy: card.actualEnergy,
+          },
+          statusChanges: [],
+          survivedSteps: [],
+        };
+        this.handleAttackResult(attackSkill.results, report, card);
+
+        return report;
+      });
   }
 
   private launchSpecial(card: FightingCard): ActionReport {
@@ -299,6 +332,7 @@ export class ActionStage {
         remainingHealth: damageDealt.remainingHealth,
         kind: damageDealt.kind,
         shieldAbsorbed: damageDealt.shieldAbsorbed,
+        consumedBleedStacks: damageDealt.consumedBleedStacks,
       });
 
       if (damageDealt.interceptedFor) {

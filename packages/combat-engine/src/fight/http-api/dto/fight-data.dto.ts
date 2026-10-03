@@ -120,6 +120,7 @@ export enum TriggerEvent {
   ANY_ALLY_HEALTH_BELOW = 'any-ally-health-below',
   SELF_DEATH = 'self-death',
   ENEMY_BLEED_DEATH = 'enemy-bleed-death',
+  TURN_START = 'turn-start',
   BLEED_STACKS_APPLIED = 'bleed-stacks-applied',
 }
 
@@ -140,6 +141,7 @@ export enum TargetingStrategy {
   LINKED_ALLY = 'linked-ally',
   MOST_WOUNDED_ALLY = 'most-wounded-ally',
   PROTECTED_ALLY = 'protected-ally',
+  FIRST_BLEEDING_ENEMY = 'first-bleeding-enemy',
 }
 
 export enum CardSelectorStrategy {
@@ -302,6 +304,12 @@ export class EnergyRefundDto {
   @IsNumber()
   @Min(0)
   minAccuracyMargin: number;
+}
+
+export class BleedDetonationDto {
+  @IsNumber()
+  @IsPositive()
+  ratePerStack: number;
 }
 
 export class BleedStackBonusDto {
@@ -563,8 +571,13 @@ export class OtherSkillDto {
   @IsEnum(TargetingStrategy)
   targetingStrategy: TargetingStrategy;
 
-  // bleed-stacks-applied: bleed stacks the owner must have laid before it fires
-  @ValidateIf((o) => o.event === TriggerEvent.BLEED_STACKS_APPLIED)
+  // bleed-stacks-applied: bleed stacks the owner must have laid before it fires;
+  // first-bleeding-enemy: bleed stacks the target must carry
+  @ValidateIf(
+    (o) =>
+      o.event === TriggerEvent.BLEED_STACKS_APPLIED ||
+      o.targetingStrategy === TargetingStrategy.FIRST_BLEEDING_ENEMY,
+  )
   @IsDefined()
   @IsInt()
   @Min(1)
@@ -664,8 +677,10 @@ export class OtherSkillDto {
   @IsPositive()
   endCostRate?: number;
 
-  // Required for CONDITIONAL_ATTACK kind
-  @ValidateIf((o) => o.kind === SkillKind.CONDITIONAL_ATTACK)
+  // Required for CONDITIONAL_ATTACK kind, unless a bleed detonation replaces it
+  @ValidateIf(
+    (o) => o.kind === SkillKind.CONDITIONAL_ATTACK && !o.bleedDetonation,
+  )
   @IsDefined()
   @IsArray()
   @ArrayMinSize(1)
@@ -677,7 +692,8 @@ export class OtherSkillDto {
     (o) =>
       o.kind === SkillKind.CONDITIONAL_ATTACK &&
       o.event !== TriggerEvent.ALLY_HEALTH_BELOW &&
-      o.event !== TriggerEvent.DAMAGE_TAKEN,
+      o.event !== TriggerEvent.DAMAGE_TAKEN &&
+      o.event !== TriggerEvent.TURN_START,
   )
   @IsDefined()
   @IsNumber()
@@ -716,6 +732,18 @@ export class OtherSkillDto {
   @Min(0)
   @Max(1)
   defensePenetration?: number;
+
+  // CONDITIONAL_ATTACK: energy the attack spends, only when it strikes someone
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  energyCost?: number;
+
+  // CONDITIONAL_ATTACK: consumes the target bleed stacks, ratePerStack each
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => BleedDetonationDto)
+  bleedDetonation?: BleedDetonationDto;
 
   // Required when event is ally-death, enemy-death, ally-health-below or
   // damage-taken

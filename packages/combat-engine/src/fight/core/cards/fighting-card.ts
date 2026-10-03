@@ -329,6 +329,14 @@ export class FightingCard {
     return this.bleeding?.stackCount ?? 0;
   }
 
+  /** Removes every bleed stack and tells how many there were. */
+  public consumeBleedStacks(): number {
+    const stacks = this.bleedStacks();
+    this.bleeding = undefined;
+
+    return stacks;
+  }
+
   /** Bleed stacks this card has laid on others since the fight began. */
   public get bleedStacksApplied(): number {
     return this.laidBleedStacks;
@@ -522,6 +530,10 @@ export class FightingCard {
     this.specialEnergy = this.special.increaseEnergy(this.specialEnergy);
 
     return this.specialEnergy;
+  }
+
+  public spendEnergy(amount: number): void {
+    this.specialEnergy -= amount;
   }
 
   public resetSpecialEnergy(refund: number = 0): number {
