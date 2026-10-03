@@ -20,6 +20,7 @@ export class MultipleAttack implements AttackSkill {
     private readonly comboFinisher?: DamageComposition[],
     private readonly comboFinisherEffects?: AttackEffect[],
     private readonly bleedStackBonus?: BleedStackBonus,
+    private readonly defensePenetration?: number,
   ) {}
 
   public get targetingId(): string {
@@ -90,6 +91,7 @@ export class MultipleAttack implements AttackSkill {
           this.withBonus(this.damages, defender),
           attackPower * damageMultiplier,
           defender,
+          this.defensePenetration,
         );
         const finalResult = defender.applyFinalDamage(total);
         const { damageToHealth, shieldAbsorbed } = finalResult;
@@ -127,6 +129,7 @@ export class MultipleAttack implements AttackSkill {
           this.withBonus(this.comboFinisher, defender),
           card.attackPower(context),
           defender,
+          this.defensePenetration,
         );
         const finisherResult = defender.applyFinalDamage(total);
         const { damageToHealth, shieldAbsorbed } = finisherResult;

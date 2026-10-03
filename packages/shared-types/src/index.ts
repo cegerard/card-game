@@ -303,6 +303,8 @@ export interface OtherSkill {
   comboFinisher?: DamageComposition[];
   /** Effets appliqués uniquement sur le coup final du combo. */
   comboFinisherEffects?: EffectConfig[];
+  /** CONDITIONAL_ATTACK : part de la Défense de la cible ignorée, dans [0, 1]. */
+  defensePenetration?: number;
   /**
    * Requis quand event vaut ally-death, enemy-death, ally-health-below ou
    * damage-taken. Jamais pour any-ally-health-below, qui surveille toute

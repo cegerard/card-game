@@ -674,6 +674,8 @@ export class FightController {
             ahDamages,
             new LastAttackerOfAllyTargetingStrategy(skillData.targetCardId),
             ahEffects,
+            undefined,
+            skillData.defensePenetration,
           );
           const ahTrigger = new AllyHealthBelowThresholdTrigger(
             skillData.targetCardId,
@@ -708,12 +710,16 @@ export class FightController {
               caEffects,
               caComboFinisher,
               this.buildEffects(skillData.comboFinisherEffects),
+              undefined,
+              skillData.defensePenetration,
             )
           : new SimpleAttack(
               skillData.name,
               caDamages,
               this.buildSkillTargeting(skillData),
               caEffects,
+              undefined,
+              skillData.defensePenetration,
             );
         return new ConditionalAttack(
           skillData.name,

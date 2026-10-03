@@ -203,7 +203,8 @@ Simulates a turn-based card battle between two players.
   amplifier?: number,
   effect?: EffectDto,
   comboFinisher?: DamageCompositionDto[],
-  comboFinisherEffects?: EffectDto[]  // Effects applied on the finisher hit only
+  comboFinisherEffects?: EffectDto[],  // Effects applied on the finisher hit only
+  defensePenetration?: number   // In [0, 1] (400 outside): share of the defender defense the attack ignores — defense used = actualDefense × (1 − defensePenetration); default 0
 }
 ```
 
