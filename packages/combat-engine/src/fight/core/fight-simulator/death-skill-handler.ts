@@ -1,4 +1,6 @@
 import { SELF_DEATH_PREFIX } from '../trigger/self-death';
+import { ENEMY_BLEED_DEATH } from '../trigger/enemy-bleed-death';
+import { StateEffectType } from '../cards/@types/state/state-effect-type';
 import { FightingCard } from '../cards/fighting-card';
 import { CardDeathSubscriber } from './card-death-subscriber';
 import { Step } from './@types/step';
@@ -22,7 +24,9 @@ import { Player } from '../player';
  * 3. **Ally-death triggers** – skills on the dead card's own team that listen for
  *    `ally-death:<deadCard.id>` are fired next.
  * 4. **Enemy-death triggers** – skills on the opposing team that listen for
- *    `enemy-death:<deadCard.id>` are fired last.
+ *    `enemy-death:<deadCard.id>` are fired next.
+ * 5. **Enemy-bleed-death triggers** – when the card bled out, skills on the
+ *    opposing team that listen for `enemy-bleed-death` are fired last.
  *
  * All resulting steps are accumulated internally. Callers must call `drainSteps()`
  * immediately after each `notifyDeath` invocation to collect them, because the
@@ -52,8 +56,14 @@ export class DeathSkillHandler implements CardDeathSubscriber {
    * @param deadCard - The card that just died.
    * @param killerCard - The card responsible for the kill (forwarded to triggered
    *   skills so they can, for example, target the killer via a `DynamicTrigger`).
+   * @param cause - The status whose tick killed the card, absent for a kill by
+   *   an attack.
    */
-  notifyDeath(deadCard: FightingCard, killerCard?: FightingCard): void {
+  notifyDeath(
+    deadCard: FightingCard,
+    killerCard?: FightingCard,
+    cause?: StateEffectType,
+  ): void {
     const ownerPlayer = this.player1.ownCard(deadCard)
       ? this.player1
       : this.player2;
@@ -100,6 +110,16 @@ export class DeathSkillHandler implements CardDeathSubscriber {
       ownerPlayer,
       killerCard,
     );
+
+    if (cause === 'bleed') {
+      this.fireSkillsOnCards(
+        opponentPlayer.playableCards,
+        ENEMY_BLEED_DEATH,
+        opponentPlayer,
+        ownerPlayer,
+        killerCard,
+      );
+    }
   }
 
   /**

@@ -7,6 +7,7 @@ import { NextAction } from '../../core/trigger/next-action';
 import { DeathTrigger } from '../../core/trigger/death-trigger';
 import { DynamicTrigger } from '../../core/trigger/dynamic-trigger';
 import { DamageTakenTrigger } from '../../core/trigger/damage-taken';
+import { EnemyBleedDeathTrigger } from '../../core/trigger/enemy-bleed-death';
 
 describe('buildTriggerStrategy', () => {
   describe('known simple events', () => {
@@ -32,6 +33,12 @@ describe('buildTriggerStrategy', () => {
       expect(
         buildTriggerStrategy(TriggerEvent.ENEMY_DEATH, 'card-1'),
       ).toBeInstanceOf(DeathTrigger);
+    });
+
+    it('returns EnemyBleedDeathTrigger for enemy-bleed-death event', () => {
+      expect(
+        buildTriggerStrategy(TriggerEvent.ENEMY_BLEED_DEATH),
+      ).toBeInstanceOf(EnemyBleedDeathTrigger);
     });
   });
 
