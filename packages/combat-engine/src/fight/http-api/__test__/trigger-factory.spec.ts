@@ -8,6 +8,7 @@ import { DeathTrigger } from '../../core/trigger/death-trigger';
 import { DynamicTrigger } from '../../core/trigger/dynamic-trigger';
 import { DamageTakenTrigger } from '../../core/trigger/damage-taken';
 import { EnemyBleedDeathTrigger } from '../../core/trigger/enemy-bleed-death';
+import { TurnStart } from '../../core/trigger/turn-start';
 
 describe('buildTriggerStrategy', () => {
   describe('known simple events', () => {
@@ -39,6 +40,12 @@ describe('buildTriggerStrategy', () => {
       expect(
         buildTriggerStrategy(TriggerEvent.ENEMY_BLEED_DEATH),
       ).toBeInstanceOf(EnemyBleedDeathTrigger);
+    });
+
+    it('returns TurnStart for turn-start event', () => {
+      expect(buildTriggerStrategy(TriggerEvent.TURN_START)).toBeInstanceOf(
+        TurnStart,
+      );
     });
   });
 

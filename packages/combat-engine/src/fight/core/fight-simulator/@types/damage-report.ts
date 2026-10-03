@@ -15,6 +15,8 @@ export type Damage = {
    * `shield_applied` and need this to draw it down (issue #326).
    */
   shieldAbsorbed?: number;
+  /** Bleed stacks a detonation consumed on the defender. */
+  consumedBleedStacks?: number;
 };
 
 export type DamageReport = {

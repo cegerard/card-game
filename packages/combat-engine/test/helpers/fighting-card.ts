@@ -64,6 +64,7 @@ type FightingCardParams = {
   dodgeBonusDenial?: DodgeBonusDenialSkill;
   bleedStackScaling?: BleedStackScalingSkill;
   bleedEmpowerment?: BleedEmpowermentSkill;
+  extraSkills?: Skill[];
   skills?: {
     simpleAttack?: {
       name?: string;
@@ -522,7 +523,10 @@ export function createFightingCard(
         name: params.skills?.special?.name,
         ...specialParams,
       }),
-      others: createsSkills(params.skills?.others ?? []),
+      others: [
+        ...createsSkills(params.skills?.others ?? []),
+        ...(params.extraSkills ?? []),
+      ],
       dodgeBonusDenial: params.dodgeBonusDenial,
       bleedStackScaling: params.bleedStackScaling,
       bleedEmpowerment: params.bleedEmpowerment,

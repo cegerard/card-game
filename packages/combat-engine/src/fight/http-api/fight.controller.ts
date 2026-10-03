@@ -74,6 +74,8 @@ import { AnyAllyHealthBelowThresholdTrigger } from '../core/trigger/any-ally-hea
 import { SelfDeathTrigger } from '../core/trigger/self-death';
 import { BleedStacksAppliedTrigger } from '../core/trigger/bleed-stacks-applied';
 import { StanceSkill } from '../core/cards/skills/stance';
+import { FirstBleedingEnemyStrategy } from '../core/targeting-card-strategies/first-bleeding-enemy';
+import { BleedDetonation } from '../core/cards/@types/attack/bleed-detonation';
 import { LastAttackerOfAllyTargetingStrategy } from '../core/targeting-card-strategies/last-attacker-of-ally';
 import { AlliedCardByIdStrategy } from '../core/targeting-card-strategies/allied-card-by-id';
 import { MultipleAttack } from '../core/cards/skills/multiple-attack';
@@ -511,6 +513,11 @@ export class FightController {
    * board from a health threshold, so both are handed over.
    */
   private buildSkillTargeting(skillData: OtherSkillDto) {
+    if (
+      skillData.targetingStrategy === TargetingStrategy.FIRST_BLEEDING_ENEMY
+    ) {
+      return new FirstBleedingEnemyStrategy(skillData.stackThreshold);
+    }
     const threshold =
       skillData.targetingStrategy === TargetingStrategy.MOST_WOUNDED_ALLY
         ? this.requireThreshold(skillData, skillData.targetingStrategy)
@@ -689,7 +696,12 @@ export class FightController {
             skillData.powerId,
           );
         }
-        const caDamages = skillData.damages.map(
+        if (skillData.bleedDetonation && skillData.hits) {
+          throw new BadRequestException(
+            'CONDITIONAL_ATTACK bleedDetonation cannot be combined with hits',
+          );
+        }
+        const caDamages = (skillData.damages ?? []).map(
           (d) => new DamageComposition(d.type, d.rate),
         );
         const caEffects = skillData.effect
@@ -720,6 +732,9 @@ export class FightController {
               caEffects,
               undefined,
               skillData.defensePenetration,
+              skillData.bleedDetonation
+                ? new BleedDetonation(skillData.bleedDetonation.ratePerStack)
+                : undefined,
             );
         return new ConditionalAttack(
           skillData.name,
@@ -730,6 +745,7 @@ export class FightController {
           this.buildTriggerForSkill(skillData, ownerId),
           skillData.powerId,
           skillData.requiresStance,
+          skillData.energyCost,
         );
       case SkillKind.TARGETING_OVERRIDE:
         if (!skillData.terminationEvent) {

@@ -20,4 +20,6 @@ export type AttackResult = {
   survivedSkillName?: string;
   mitigated?: boolean;
   mitigatedSkillName?: string;
+  /** Bleed stacks a detonation consumed on the defender. */
+  consumedBleedStacks?: number;
 };

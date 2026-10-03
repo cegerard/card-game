@@ -5,6 +5,7 @@ import { DynamicTrigger } from '../core/trigger/dynamic-trigger';
 import { SurvivedTrigger } from '../core/trigger/survived';
 import { DamageTakenTrigger } from '../core/trigger/damage-taken';
 import { EnemyBleedDeathTrigger } from '../core/trigger/enemy-bleed-death';
+import { TurnStart } from '../core/trigger/turn-start';
 import { Trigger } from '../core/trigger/trigger';
 import { TriggerEvent } from './dto/fight-data.dto';
 
@@ -13,6 +14,7 @@ const STRATEGY_MAP: Record<string, Trigger> = {
   [TriggerEvent.NEXT_ACTION]: new NextAction(),
   [TriggerEvent.SURVIVED]: new SurvivedTrigger(),
   [TriggerEvent.ENEMY_BLEED_DEATH]: new EnemyBleedDeathTrigger(),
+  [TriggerEvent.TURN_START]: new TurnStart(),
 };
 
 function buildDeathTrigger(

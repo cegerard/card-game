@@ -7,6 +7,7 @@ import { DamageCalculator } from '../damage/damage-calculator';
 import { AttackSkill } from './attack-skill';
 import { NamedAttackResult } from '../@types/action-result/named-attack-result';
 import { BleedStackBonus } from '../@types/attack/bleed-stack-bonus';
+import { BleedDetonation } from '../@types/attack/bleed-detonation';
 
 export class SimpleAttack implements AttackSkill {
   constructor(
@@ -16,6 +17,7 @@ export class SimpleAttack implements AttackSkill {
     private readonly effects?: AttackEffect[],
     private readonly bleedStackBonus?: BleedStackBonus,
     private readonly defensePenetration?: number,
+    private readonly bleedDetonation?: BleedDetonation,
   ) {}
 
   public get targetingId(): string {
@@ -47,7 +49,9 @@ export class SimpleAttack implements AttackSkill {
       context.opponentPlayer,
     );
 
-    const kind = this.damages.map((d) => d.type);
+    const kind = this.bleedDetonation
+      ? [this.bleedDetonation.damageType]
+      : this.damages.map((d) => d.type);
     return {
       name: this.name,
       results: defensiveCards.map((target) => {
@@ -69,8 +73,9 @@ export class SimpleAttack implements AttackSkill {
           };
         }
 
+        const detonation = this.bleedDetonation?.detonate(defender);
         const { total } = DamageCalculator.calculateDamage(
-          this.damagesAgainst(defender),
+          detonation?.damages ?? this.damagesAgainst(defender),
           card.attackPower(context) * damageMultiplier,
           defender,
           this.defensePenetration,
@@ -98,6 +103,7 @@ export class SimpleAttack implements AttackSkill {
           survivedSkillName: finalResult.survivedSkillName,
           mitigated: finalResult.mitigated,
           mitigatedSkillName: finalResult.mitigatedSkillName,
+          consumedBleedStacks: detonation?.consumedStacks,
         };
       }),
     };

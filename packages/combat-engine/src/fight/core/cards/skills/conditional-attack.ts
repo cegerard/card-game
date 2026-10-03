@@ -17,6 +17,7 @@ export class ConditionalAttack implements Skill {
     private readonly trigger: Trigger,
     private readonly powerId?: string,
     public readonly requiredStance?: string,
+    private readonly energyCost?: number,
   ) {}
 
   isTriggered(triggerName: string): boolean {
@@ -30,12 +31,20 @@ export class ConditionalAttack implements Skill {
     context: FightingContext,
     targetingStrategy?: TargetingCardStrategy,
   ): SkillResults {
+    if (this.energyCost && source.actualEnergy < this.energyCost) {
+      return { skillKind: SkillKind.Attack, results: [], name: this.name };
+    }
+
     const attackResults = this.attackSkill.launch(
       source,
       context,
       targetingStrategy,
     );
     this.condition.reset();
+    // An attack that found nobody to strike costs nothing.
+    if (this.energyCost && attackResults.results.length > 0) {
+      source.spendEnergy(this.energyCost);
+    }
 
     return {
       skillKind: SkillKind.Attack,

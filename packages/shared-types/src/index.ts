@@ -84,6 +84,7 @@ export type TriggerEvent =
   | 'any-ally-health-below'
   | 'self-death'
   | 'enemy-bleed-death'
+  | 'turn-start'
   | 'bleed-stacks-applied'
   | 'damage-taken';
 
@@ -98,7 +99,8 @@ export type TargetingStrategy =
   | 'last-attacker-of-ally'
   | 'linked-ally'
   | 'most-wounded-ally'
-  | 'protected-ally';
+  | 'protected-ally'
+  | 'first-bleeding-enemy';
 
 export type CardSelectorStrategy = 'player-by-player' | 'speed-weighted';
 
@@ -266,7 +268,7 @@ export interface OtherSkill {
   maxRate?: number;
   /** STANCE uniquement (requis) : posture ouverte sur le porteur quand l'événement arrive. */
   stanceActivation?: StanceActivation;
-  /** bleed-stacks-applied uniquement (requis) : piles de Saignement à avoir posées. */
+  /** Requis avec bleed-stacks-applied (piles posées par le porteur) et le ciblage first-bleeding-enemy (piles portées par la cible). */
   stackThreshold?: number;
   /** BLEED_EMPOWERMENT uniquement (requis, entier ≥ 0) : piles posées en plus par chaque Saignement pendant la posture. */
   extraStacks?: number;
@@ -305,6 +307,10 @@ export interface OtherSkill {
   comboFinisherEffects?: EffectConfig[];
   /** CONDITIONAL_ATTACK : part de la Défense de la cible ignorée, dans [0, 1]. */
   defensePenetration?: number;
+  /** CONDITIONAL_ATTACK : énergie dépensée, seulement quand l'attaque touche quelqu'un. */
+  energyCost?: number;
+  /** CONDITIONAL_ATTACK : consomme toutes les piles de Saignement de la cible, `ratePerStack` d'Attaque par pile. */
+  bleedDetonation?: { ratePerStack: number };
   /**
    * Requis quand event vaut ally-death, enemy-death, ally-health-below ou
    * damage-taken. Jamais pour any-ally-health-below, qui surveille toute
