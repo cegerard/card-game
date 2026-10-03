@@ -48,6 +48,8 @@ export type DebuffSkillResults = BaseSkillResults & {
 export type AttackSkillResults = BaseSkillResults & {
   skillKind: SkillKind.Attack;
   results: AttackResult[];
+  /** A secondary strike around the primary target, reported on its own. */
+  splash?: { name: string; results: AttackResult[] };
 };
 
 export type TargetingOverrideSkillResults = BaseSkillResults & {

@@ -311,6 +311,8 @@ export interface OtherSkill {
   energyCost?: number;
   /** CONDITIONAL_ATTACK : consomme toutes les piles de Saignement de la cible, `ratePerStack` d'Attaque par pile. */
   bleedDetonation?: { ratePerStack: number };
+  /** CONDITIONAL_ATTACK : frappe secondaire sur la cible principale et ses deux voisins, après la frappe principale. */
+  splash?: { name: string; damages: DamageComposition[]; effects?: EffectConfig[] };
   /**
    * Requis quand event vaut ally-death, enemy-death, ally-health-below ou
    * damage-taken. Jamais pour any-ally-health-below, qui surveille toute

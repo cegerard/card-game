@@ -6,6 +6,7 @@ import { Skill, SkillKind, SkillResults } from './skill';
 import { Trigger } from '../../trigger/trigger';
 import { isActivatableTrigger } from '../../trigger/activatable-trigger';
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
+import { Splash } from '../@types/attack/splash';
 
 export class ConditionalAttack implements Skill {
   public id = 'conditional-attack';
@@ -18,6 +19,7 @@ export class ConditionalAttack implements Skill {
     private readonly powerId?: string,
     public readonly requiredStance?: string,
     private readonly energyCost?: number,
+    private readonly splash?: Splash,
   ) {}
 
   isTriggered(triggerName: string): boolean {
@@ -46,11 +48,23 @@ export class ConditionalAttack implements Skill {
       source.spendEnergy(this.energyCost);
     }
 
+    const [primary] = attackResults.results;
+
     return {
       skillKind: SkillKind.Attack,
       results: attackResults.results,
       name: this.name,
       powerId: this.powerId,
+      // The zone is centered on the card the attack was aimed at, even when
+      // a guardian stepped in front of it.
+      splash:
+        primary && this.splash
+          ? this.splash.strike(
+              source,
+              primary.interceptedFor ?? primary.defender,
+              context,
+            )
+          : undefined,
     };
   }
 
