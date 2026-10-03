@@ -12,6 +12,10 @@ import { CardStateStunted } from './@types/state/card-state-stunted';
 import { CardStateBleeding } from './@types/state/card-state-bleeding';
 import { DodgeBonusDenialSkill } from './skills/dodge-bonus-denial';
 import { BleedStackScalingSkill } from './skills/bleed-stack-scaling';
+import {
+  BleedApplication,
+  BleedEmpowermentSkill,
+} from './skills/bleed-empowerment';
 import { EffectLevel } from './@types/attack/effect-level';
 import {
   AlterationDetail,
@@ -150,6 +154,7 @@ export class FightingCard {
   private damageReduction: DamageReductionSkill | null = null;
   private dodgeBonusDenial: DodgeBonusDenialSkill | null = null;
   private bleedStackScaling: BleedStackScalingSkill | null = null;
+  private bleedEmpowerment: BleedEmpowermentSkill | null = null;
 
   // Stances
   private stances: Stance[] = [];
@@ -187,6 +192,7 @@ export class FightingCard {
       damageReduction?: DamageReductionSkill;
       dodgeBonusDenial?: DodgeBonusDenialSkill;
       bleedStackScaling?: BleedStackScalingSkill;
+      bleedEmpowerment?: BleedEmpowermentSkill;
     },
     behaviors: {
       dodge: DodgeBehavior;
@@ -215,6 +221,7 @@ export class FightingCard {
     this.damageReduction = skills.damageReduction ?? null;
     this.dodgeBonusDenial = skills.dodgeBonusDenial ?? null;
     this.bleedStackScaling = skills.bleedStackScaling ?? null;
+    this.bleedEmpowerment = skills.bleedEmpowerment ?? null;
   }
 
   public get lastAttacker(): FightingCard | undefined {
@@ -329,6 +336,11 @@ export class FightingCard {
 
   public recordBleedStacksApplied(stacks: number): void {
     this.laidBleedStacks += stacks;
+  }
+
+  /** The stacks and rate a bleed this card applies actually carries. */
+  public empowerBleed(application: BleedApplication): BleedApplication {
+    return this.bleedEmpowerment?.empower(this, application) ?? application;
   }
 
   public get shielded(): boolean {
