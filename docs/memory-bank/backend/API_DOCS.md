@@ -164,13 +164,15 @@ Simulates a turn-based card battle between two players.
 
 ```typescript
 {
-  kind: "HEALING" | "BUFF" | "CONDITIONAL_ATTACK" | "TARGETING_OVERRIDE" | "SHIELD" | "SURVIVE" | "DAMAGE_REDUCTION" | "PROTECTION" | "DODGE_BONUS_DENIAL" | "BLEED_STACK_SCALING",
+  kind: "HEALING" | "BUFF" | "CONDITIONAL_ATTACK" | "TARGETING_OVERRIDE" | "SHIELD" | "SURVIVE" | "DAMAGE_REDUCTION" | "PROTECTION" | "DODGE_BONUS_DENIAL" | "BLEED_STACK_SCALING" | "STANCE",
   name: string,
   rate?: number,                // Optional — not required for TARGETING_OVERRIDE or SURVIVE; required for SHIELD and DAMAGE_REDUCTION (share of incoming damage removed, in ]0, 1]); required for BLEED_STACK_SCALING (attack bonus per bleed stack, > 0)
   maxRate?: number,             // BLEED_STACK_SCALING only (required, > 0): cap of the attack bonus
+  stanceActivation?: { name: string, duration: number, immunities?: ("control" | "damage-over-time")[] },  // STANCE only (required): stance opened on the owner when its event fires
+  stackThreshold?: number,      // Required when event=bleed-stacks-applied (integer >= 1): bleed stacks the owner must have laid
   probability?: number,         // DAMAGE_REDUCTION only: per-hit roll (0-1); omit for a permanent reduction
-  targetingStrategy?: TargetingStrategy,  // Not required for SHIELD, SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL or BLEED_STACK_SCALING kinds
-  event?: "turn-end" | "next-action" | "ally-death" | "ally-health-below" | "any-ally-health-below" | "self-death" | "enemy-bleed-death" | "damage-taken",  // When skill triggers; NOT required for SHIELD, SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL or BLEED_STACK_SCALING kinds
+  targetingStrategy?: TargetingStrategy,  // Not required for SHIELD, SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL, BLEED_STACK_SCALING or STANCE kinds
+  event?: "turn-end" | "next-action" | "ally-death" | "ally-health-below" | "any-ally-health-below" | "self-death" | "enemy-bleed-death" | "bleed-stacks-applied" | "damage-taken",  // When skill triggers; NOT required for SHIELD, SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL or BLEED_STACK_SCALING kinds
   targetCardId?: string,        // Required when event=ally-death, ally-health-below or damage-taken (never for any-ally-health-below): id of the monitored card
   requiresStance?: string,      // Skill only fires while its owner holds that stance (see SpecialDto.stanceActivation)
   // SHIELD-specific fields:
@@ -288,7 +290,7 @@ a besoin de ce champ pour le décrémenter : sans lui le bouclier restait affich
 }
 ```
 
-**`stance_started` step** (`StanceStartedReport`): Emitted when a special opens a stance on its caster.
+**`stance_started` step** (`StanceStartedReport`): Emitted when a special or a STANCE skill opens a stance on its caster.
 ```typescript
 {
   kind: "stance_started",
@@ -576,6 +578,7 @@ a besoin de ce champ pour le décrémenter : sans lui le bouclier restait affich
 - `ally-health-below`: Edge-triggered when a monitored ally's health ratio crosses `activationCondition.threshold` downward; requires `targetCardId` (the monitored ally's id) and `activationCondition.threshold`. A card may monitor itself by passing its own id, which is how a health-reactive self buff is declared
 - `self-death`: Fires on the card that just died, for its own last words — every other death trigger runs on somebody else, since `ally-death` and `enemy-death` only reach the survivors. Needs no `targetCardId`: the trigger is the owner own id. It runs as phase 2 of the death cascade, before the survivors answer, so what the fallen card leaves behind lands first. Pairs with `protected-ally` targeting for a guardian parting gift
 - `enemy-bleed-death`: Fires on the surviving cards of the opposing team when a card dies from its bleed tick at turn end. Needs no `targetCardId`: whoever bled out, the skill answers. A death by an attack, a poison or a burn does not fire it; when a lethal tick combines several statuses, the bleed is credited as soon as it ticked. Runs last in the death cascade, after `enemy-death`. Paired with a `HEALING` on `self` with `healBasis: "target-max-health"`, it is "regain 10% of max health when an enemy bleeds out"
+- `bleed-stacks-applied`: Fires **once per fight**, after the owner attack that brings the bleed stacks it has laid since the fight began to `stackThreshold` (a count jumping over the threshold still fires). Stacks lost at the cap or refused (immunity, resistance) do not count. Checked after every attack the owner makes in its action (simple, next-action, special); stacks laid by a reactive attack count, but are only seen at the owner next action. Each skill on the event keeps its own once-flag, so a STANCE and a BUFF sharing it both fire
 - `damage-taken`: Fires every time the monitored card takes damage from a landed attack; requires `targetCardId` (the monitored card id). Unlike `ally-health-below` it is not edge-triggered — it fires on each hit, which is what counter attacks and damage-reactive passives need. A card reacts to its own wounds by passing its own id. The event reaches every playable card of the damaged card team, and `FightingContext.lastAttacker` is set, so `last-attacker-of-ally` resolves to the attacker
 - `any-ally-health-below`: Edge-triggered when **any** ally crosses `activationCondition.threshold` downward, where `ally-health-below` watches one ally named up front. Requires the threshold, never a `targetCardId`. Each ally is edge-triggered on its own — the trigger fires once per crossing and rearms for that ally when its health recovers. The owner is skipped, so a card watching its own health still uses `ally-health-below`. Pairs with `most-wounded-ally` targeting for a guardian power on a deck the player composes
 
@@ -596,6 +599,7 @@ a besoin de ce champ pour le décrémenter : sans lui le bouclier restait affich
 - `PROTECTION`: Steps in front of one ally for `duration` of the guardian's turns — attacks aimed at that ally are resolved against the guardian instead, with the guardian's own dodge, defence and element. Requires `duration`, plus an `event` and a `targetingStrategy`; it covers the **first** card its targeting returns, so pairing it with `most-wounded-ally` guards whoever is in the worst shape at that moment. A targeting that returns nobody is a no-op and spends no `activationLimit`. Re-casting refreshes the duration or moves the protection, never stacks. A dead guardian protects nobody. `activationLimit` is supported, so "once per fight" is `activationLimit: 1`
 - `DODGE_BONUS_DENIAL`: Passive — no `event`, no `targetingStrategy`, only `name`. Against its owner, a bleeding defender dodges with its base agility minus its debuffs: its agility **buffs** are ignored. Applies to every attack of the owner (simple, multiple, special, triggered attacks). Like SURVIVE it is extracted from `others[]` and stored on the card; it emits no step
 - `BLEED_STACK_SCALING`: Passive — no `event`, no `targetingStrategy`; requires `rate` (attack bonus per bleed stack) and `maxRate` (cap). Raises its owner attack by `rate` for every bleed stack carried by a living card, both teams counted, up to `maxRate` — `rate: 0.02, maxRate: 0.3` is "+2% attack per stack, at most +30%". Read from the live board each time the owner strikes: attack damage (simple, multiple, special, triggered attacks) and the damage of the poison, burn and bleed it applies on that hit. Heals are not affected. Extracted from `others[]` like SURVIVE; it emits no step
+- `STANCE`: Opens a stance on its owner when its `event` fires — the triggered counterpart of `SpecialDto.stanceActivation`. Requires `stanceActivation` (`name`, `duration`, optional `immunities`), no `targetingStrategy`. Skills with the matching `requiresStance` then run for its duration; re-opening a running stance refreshes it. Emits `stance_started`, and `stance_ended` at turn end
 - `TRANSFORMATION`: One-shot health-reactive transformation — no `event`, no `targetingStrategy`; requires `duration` and an `activationCondition` threshold. Applies its own `statAlterations` and, for the same duration, an optional `lifestealRate` (heals that share of max health on every landed attack) and `statusImmunity`. An optional `endCostRate` charges that share of max health when the transformation ends, never below one health point. Fires once per fight
 
 ### HealBasis

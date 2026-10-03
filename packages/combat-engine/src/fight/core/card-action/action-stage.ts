@@ -24,6 +24,7 @@ import { triggerReactiveSkills } from '../fight-simulator/reactive-skill-checker
 import { skillResultsToSteps } from '../fight-simulator/skill-results-to-steps';
 import { effectResultsToSteps } from '../fight-simulator/effect-results-to-steps';
 import { SurvivedReport } from '../fight-simulator/@types/survived-report';
+import { BLEED_STACKS_APPLIED } from '../trigger/bleed-stacks-applied';
 
 type SplittedSteps = {
   actionSteps: Step[];
@@ -383,6 +384,24 @@ export class ActionStage {
         energy: attackerCard.actualEnergy,
       });
     }
+
+    report.statusChanges.push(...this.dispatchBleedStacksApplied(attackerCard));
+  }
+
+  /**
+   * Tells the attacker how many bleed stacks it has laid so far, for the
+   * skills waiting on a running total.
+   */
+  private dispatchBleedStacksApplied(attackerCard: FightingCard): Step[] {
+    if (attackerCard.isDead()) return [];
+
+    return skillResultsToSteps(
+      attackerCard,
+      attackerCard.launchSkills(
+        `${BLEED_STACKS_APPLIED}:${attackerCard.bleedStacksApplied}`,
+        this.getFightingContext(attackerCard),
+      ),
+    );
   }
 
   /**

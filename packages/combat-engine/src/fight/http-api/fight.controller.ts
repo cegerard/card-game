@@ -72,6 +72,8 @@ import { AlwaysTrueAttackCondition } from '../core/cards/@types/attack/condition
 import { AllyHealthBelowThresholdTrigger } from '../core/trigger/ally-health-below-threshold-trigger';
 import { AnyAllyHealthBelowThresholdTrigger } from '../core/trigger/any-ally-health-below-threshold-trigger';
 import { SelfDeathTrigger } from '../core/trigger/self-death';
+import { BleedStacksAppliedTrigger } from '../core/trigger/bleed-stacks-applied';
+import { StanceSkill } from '../core/cards/skills/stance';
 import { LastAttackerOfAllyTargetingStrategy } from '../core/targeting-card-strategies/last-attacker-of-ally';
 import { AlliedCardByIdStrategy } from '../core/targeting-card-strategies/allied-card-by-id';
 import { MultipleAttack } from '../core/cards/skills/multiple-attack';
@@ -552,6 +554,10 @@ export class FightController {
       return new SelfDeathTrigger(ownerId);
     }
 
+    if (skillData.event === TriggerEvent.BLEED_STACKS_APPLIED) {
+      return new BleedStacksAppliedTrigger(skillData.stackThreshold);
+    }
+
     if (skillData.event === TriggerEvent.ANY_ALLY_HEALTH_BELOW) {
       return new AnyAllyHealthBelowThresholdTrigger(
         this.requireThreshold(skillData, skillData.event),
@@ -802,6 +808,13 @@ export class FightController {
           this.buildTriggerForSkill(skillData, ownerId),
           this.buildSkillTargeting(skillData),
           skillData.activationLimit,
+          skillData.powerId,
+        );
+      case SkillKind.STANCE:
+        return new StanceSkill(
+          skillData.name,
+          skillData.stanceActivation,
+          this.buildTriggerForSkill(skillData, ownerId),
           skillData.powerId,
         );
       case SkillKind.SURVIVE:
