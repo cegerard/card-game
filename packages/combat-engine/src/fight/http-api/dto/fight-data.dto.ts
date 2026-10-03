@@ -710,6 +710,13 @@ export class OtherSkillDto {
   @Type(/* istanbul ignore next */ () => EffectDto)
   comboFinisherEffects?: EffectDto[];
 
+  // CONDITIONAL_ATTACK: share of the defender defense the attack ignores
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(1)
+  defensePenetration?: number;
+
   // Required when event is ally-death, enemy-death, ally-health-below or
   // damage-taken
   @ValidateIf(

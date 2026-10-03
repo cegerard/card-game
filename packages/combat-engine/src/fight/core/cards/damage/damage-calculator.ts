@@ -14,14 +14,24 @@ export interface DamageCalculationResult {
 }
 
 export class DamageCalculator {
+  /**
+   * @param defensePenetration - Share of the defender defense the attack
+   *   ignores, in [0, 1]; 0 subtracts the whole defense.
+   */
   public static calculateDamage(
     damages: DamageComposition[],
     attackStat: number,
     defender: FightingCard,
+    defensePenetration = 0,
   ): DamageCalculationResult {
+    if (defensePenetration < 0 || defensePenetration > 1) {
+      throw new Error(
+        `defensePenetration must be within [0, 1], got ${defensePenetration}`,
+      );
+    }
     const effectiveDamages = this.getEffectiveDamages(damages);
     const defenderElement = defender.cardElement;
-    const defense = defender.actualDefense;
+    const defense = defender.actualDefense * (1 - defensePenetration);
 
     const breakdown: DamageBreakdown[] = effectiveDamages.map((composition) => {
       const bruteDamage = attackStat * composition.rate;

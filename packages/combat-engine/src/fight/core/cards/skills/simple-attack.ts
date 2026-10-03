@@ -15,6 +15,7 @@ export class SimpleAttack implements AttackSkill {
     private readonly targetingStrategy: TargetingCardStrategy,
     private readonly effects?: AttackEffect[],
     private readonly bleedStackBonus?: BleedStackBonus,
+    private readonly defensePenetration?: number,
   ) {}
 
   public get targetingId(): string {
@@ -72,6 +73,7 @@ export class SimpleAttack implements AttackSkill {
           this.damagesAgainst(defender),
           card.attackPower(context) * damageMultiplier,
           defender,
+          this.defensePenetration,
         );
         const finalResult = defender.applyFinalDamage(total);
         const { damageToHealth, shieldAbsorbed } = finalResult;
