@@ -36,7 +36,8 @@ export type SkillKind =
   | 'DAMAGE_REDUCTION'
   | 'PROTECTION'
   | 'DODGE_BONUS_DENIAL'
-  | 'BLEED_STACK_SCALING';
+  | 'BLEED_STACK_SCALING'
+  | 'STANCE';
 
 export type BuffType =
   | 'attack'
@@ -82,6 +83,7 @@ export type TriggerEvent =
   | 'any-ally-health-below'
   | 'self-death'
   | 'enemy-bleed-death'
+  | 'bleed-stacks-applied'
   | 'damage-taken';
 
 export type TargetingStrategy =
@@ -261,6 +263,10 @@ export interface OtherSkill {
   rate?: number;
   /** BLEED_STACK_SCALING uniquement (requis) : plafond du bonus d'Attaque. */
   maxRate?: number;
+  /** STANCE uniquement (requis) : posture ouverte sur le porteur quand l'événement arrive. */
+  stanceActivation?: StanceActivation;
+  /** bleed-stacks-applied uniquement (requis) : piles de Saignement à avoir posées. */
+  stackThreshold?: number;
   /**
    * DAMAGE_REDUCTION uniquement : probabilité du tirage à chaque coup reçu.
    * Omise, la réduction est permanente.
@@ -273,7 +279,7 @@ export interface OtherSkill {
    */
   stackId?: string;
   debuffMaxStacks?: number;
-  /** Absent pour SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL et BLEED_STACK_SCALING. */
+  /** Absent pour SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL, BLEED_STACK_SCALING et STANCE. */
   targetingStrategy?: TargetingStrategy;
   /** Absent pour SHIELD, SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL et BLEED_STACK_SCALING. */
   event?: TriggerEvent;

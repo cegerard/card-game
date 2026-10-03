@@ -148,6 +148,14 @@ export function skillResultsToSteps(
           });
         });
         break;
+      case SkillKind.Stance:
+        steps.push({
+          kind: StepKind.StanceStarted,
+          name: skillResult.stance.name,
+          card: card.identityInfo,
+          remainingTurns: skillResult.stance.remainingTurns,
+        });
+        break;
       default:
         throw new Error(`Unknown SkillKind: ${(skillResult as any).skillKind}`);
     }

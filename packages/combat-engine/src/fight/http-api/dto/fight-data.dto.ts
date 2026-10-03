@@ -79,6 +79,7 @@ export enum SkillKind {
   PROTECTION = 'PROTECTION',
   DODGE_BONUS_DENIAL = 'DODGE_BONUS_DENIAL',
   BLEED_STACK_SCALING = 'BLEED_STACK_SCALING',
+  STANCE = 'STANCE',
 }
 
 export enum BuffType {
@@ -118,6 +119,7 @@ export enum TriggerEvent {
   ANY_ALLY_HEALTH_BELOW = 'any-ally-health-below',
   SELF_DEATH = 'self-death',
   ENEMY_BLEED_DEATH = 'enemy-bleed-death',
+  BLEED_STACKS_APPLIED = 'bleed-stacks-applied',
 }
 
 export enum HealBasisDto {
@@ -544,11 +546,26 @@ export class OtherSkillDto {
       o.kind !== SkillKind.TRANSFORMATION &&
       o.kind !== SkillKind.DAMAGE_REDUCTION &&
       o.kind !== SkillKind.DODGE_BONUS_DENIAL &&
-      o.kind !== SkillKind.BLEED_STACK_SCALING,
+      o.kind !== SkillKind.BLEED_STACK_SCALING &&
+      o.kind !== SkillKind.STANCE,
   )
   @IsDefined()
   @IsEnum(TargetingStrategy)
   targetingStrategy: TargetingStrategy;
+
+  // bleed-stacks-applied: bleed stacks the owner must have laid before it fires
+  @ValidateIf((o) => o.event === TriggerEvent.BLEED_STACKS_APPLIED)
+  @IsDefined()
+  @IsInt()
+  @Min(1)
+  stackThreshold?: number;
+
+  // STANCE: the stance opened on the skill owner when its event fires
+  @ValidateIf((o) => o.kind === SkillKind.STANCE)
+  @IsDefined()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => StanceActivationDto)
+  stanceActivation?: StanceActivationDto;
 
   @ValidateIf(
     (o) =>

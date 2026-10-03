@@ -163,6 +163,7 @@ export class FightingCard {
   private frozen?: CardState;
   private stunted?: CardState;
   private bleeding?: CardStateBleeding;
+  private laidBleedStacks = 0;
 
   constructor(
     id: string,
@@ -319,6 +320,15 @@ export class FightingCard {
 
   public bleedStacks(): number {
     return this.bleeding?.stackCount ?? 0;
+  }
+
+  /** Bleed stacks this card has laid on others since the fight began. */
+  public get bleedStacksApplied(): number {
+    return this.laidBleedStacks;
+  }
+
+  public recordBleedStacksApplied(stacks: number): void {
+    this.laidBleedStacks += stacks;
   }
 
   public get shielded(): boolean {

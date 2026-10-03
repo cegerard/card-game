@@ -45,14 +45,16 @@ export class BleedAttackEffect implements AttackEffect {
     if (room <= 0) return;
 
     const damageValue = round2(card.attackPower(context) * this.rate);
+    const laidStacks = Math.min(this.stacks, room);
     const bleeding = new CardStateBleeding(
-      Array.from({ length: Math.min(this.stacks, room) }, () => ({
+      Array.from({ length: laidStacks }, () => ({
         remainingTurns: this.duration,
         damageValue,
         terminationEvent: this.terminationEvent,
       })),
     );
     if (!defender.setState(bleeding)) return;
+    card.recordBleedStacksApplied(laidStacks);
 
     const effectResult: StateEffectResult = {
       type: this.type,
