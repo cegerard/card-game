@@ -80,6 +80,7 @@ export enum SkillKind {
   DODGE_BONUS_DENIAL = 'DODGE_BONUS_DENIAL',
   BLEED_STACK_SCALING = 'BLEED_STACK_SCALING',
   STANCE = 'STANCE',
+  BLEED_EMPOWERMENT = 'BLEED_EMPOWERMENT',
 }
 
 export enum BuffType {
@@ -527,11 +528,19 @@ export class OtherSkillDto {
       o.kind === SkillKind.ALTERATION ||
       o.kind === SkillKind.SHIELD ||
       o.kind === SkillKind.DAMAGE_REDUCTION ||
-      o.kind === SkillKind.BLEED_STACK_SCALING,
+      o.kind === SkillKind.BLEED_STACK_SCALING ||
+      o.kind === SkillKind.BLEED_EMPOWERMENT,
   )
   @IsDefined()
   @IsNumber()
   rate?: number;
+
+  // BLEED_EMPOWERMENT: stacks each bleed of the owner lays on top of its own
+  @ValidateIf((o) => o.kind === SkillKind.BLEED_EMPOWERMENT)
+  @IsDefined()
+  @IsInt()
+  @Min(0)
+  extraStacks?: number;
 
   // BLEED_STACK_SCALING: cap of the attack bonus, `rate` being the bonus per stack
   @ValidateIf((o) => o.kind === SkillKind.BLEED_STACK_SCALING)
@@ -547,6 +556,7 @@ export class OtherSkillDto {
       o.kind !== SkillKind.DAMAGE_REDUCTION &&
       o.kind !== SkillKind.DODGE_BONUS_DENIAL &&
       o.kind !== SkillKind.BLEED_STACK_SCALING &&
+      o.kind !== SkillKind.BLEED_EMPOWERMENT &&
       o.kind !== SkillKind.STANCE,
   )
   @IsDefined()
@@ -574,7 +584,8 @@ export class OtherSkillDto {
       o.kind !== SkillKind.TRANSFORMATION &&
       o.kind !== SkillKind.DAMAGE_REDUCTION &&
       o.kind !== SkillKind.DODGE_BONUS_DENIAL &&
-      o.kind !== SkillKind.BLEED_STACK_SCALING,
+      o.kind !== SkillKind.BLEED_STACK_SCALING &&
+      o.kind !== SkillKind.BLEED_EMPOWERMENT,
   )
   @IsDefined()
   @IsEnum(TriggerEvent)
@@ -587,8 +598,12 @@ export class OtherSkillDto {
   @Max(1)
   probability?: number;
 
-  // Only active while its owner holds the named stance
-  @IsOptional()
+  // Only active while its owner holds the named stance; required by BLEED_EMPOWERMENT
+  @ValidateIf(
+    (o) =>
+      o.kind === SkillKind.BLEED_EMPOWERMENT || o.requiresStance !== undefined,
+  )
+  @IsDefined()
   @IsString()
   @IsNotEmpty()
   requiresStance?: string;

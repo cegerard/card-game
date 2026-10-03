@@ -37,7 +37,8 @@ export type SkillKind =
   | 'PROTECTION'
   | 'DODGE_BONUS_DENIAL'
   | 'BLEED_STACK_SCALING'
-  | 'STANCE';
+  | 'STANCE'
+  | 'BLEED_EMPOWERMENT';
 
 export type BuffType =
   | 'attack'
@@ -259,7 +260,7 @@ export interface MultipleAttackSkill {
 export interface OtherSkill {
   kind: SkillKind;
   name: string;
-  /** Requis pour HEALING, ALTERATION, SHIELD, DAMAGE_REDUCTION ; bonus par pile pour BLEED_STACK_SCALING. */
+  /** Requis pour HEALING, ALTERATION, SHIELD, DAMAGE_REDUCTION ; bonus par pile pour BLEED_STACK_SCALING ; taux du Saignement renforcé pour BLEED_EMPOWERMENT. */
   rate?: number;
   /** BLEED_STACK_SCALING uniquement (requis) : plafond du bonus d'Attaque. */
   maxRate?: number;
@@ -267,6 +268,8 @@ export interface OtherSkill {
   stanceActivation?: StanceActivation;
   /** bleed-stacks-applied uniquement (requis) : piles de Saignement à avoir posées. */
   stackThreshold?: number;
+  /** BLEED_EMPOWERMENT uniquement (requis, entier ≥ 0) : piles posées en plus par chaque Saignement pendant la posture. */
+  extraStacks?: number;
   /**
    * DAMAGE_REDUCTION uniquement : probabilité du tirage à chaque coup reçu.
    * Omise, la réduction est permanente.
@@ -279,11 +282,11 @@ export interface OtherSkill {
    */
   stackId?: string;
   debuffMaxStacks?: number;
-  /** Absent pour SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL, BLEED_STACK_SCALING et STANCE. */
+  /** Absent pour SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL, BLEED_STACK_SCALING, BLEED_EMPOWERMENT et STANCE. */
   targetingStrategy?: TargetingStrategy;
-  /** Absent pour SHIELD, SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL et BLEED_STACK_SCALING. */
+  /** Absent pour SHIELD, SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL, BLEED_STACK_SCALING et BLEED_EMPOWERMENT. */
   event?: TriggerEvent;
-  /** Le skill n'est actif que si son porteur tient cette posture. */
+  /** Le skill n'est actif que si son porteur tient cette posture ; requis pour BLEED_EMPOWERMENT. */
   requiresStance?: string;
   /** Requis pour ALTERATION. */
   buffType?: BuffType;

@@ -34,6 +34,7 @@ import { ShieldApplication } from '../../src/fight/core/cards/@types/shield/shie
 import { Randomizer } from '../../src/fight/core/randomizer';
 import { DodgeBonusDenialSkill } from '../../src/fight/core/cards/skills/dodge-bonus-denial';
 import { BleedStackScalingSkill } from '../../src/fight/core/cards/skills/bleed-stack-scaling';
+import { BleedEmpowermentSkill } from '../../src/fight/core/cards/skills/bleed-empowerment';
 import { MathRandomizer } from '../../src/fight/tools/math-randomizer';
 
 type effect = {
@@ -62,6 +63,7 @@ type FightingCardParams = {
   element?: Element;
   dodgeBonusDenial?: DodgeBonusDenialSkill;
   bleedStackScaling?: BleedStackScalingSkill;
+  bleedEmpowerment?: BleedEmpowermentSkill;
   skills?: {
     simpleAttack?: {
       name?: string;
@@ -523,6 +525,7 @@ export function createFightingCard(
       others: createsSkills(params.skills?.others ?? []),
       dodgeBonusDenial: params.dodgeBonusDenial,
       bleedStackScaling: params.bleedStackScaling,
+      bleedEmpowerment: params.bleedEmpowerment,
     },
     {
       dodge: new SimpleDodge(),
