@@ -1,5 +1,5 @@
 ---
-name: performance
+name: refactor-performance
 description: Optimize code for better performance
 ---
 

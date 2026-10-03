@@ -1,5 +1,5 @@
 ---
-name: security-refactor
+name: refactor-security
 description: Identify and fix security vulnerabilities
 ---
 
