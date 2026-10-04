@@ -140,5 +140,12 @@ describe('Scythra full kit', () => {
 
       expect(steps.some((s) => s.name === 'Héritage sanglant')).toBe(true);
     });
+
+    it('tells which stacks Héritage sanglant consumed', async () => {
+      const steps = await fightAgainst(100);
+      const legacy = steps.find((s) => s.name === 'Héritage sanglant');
+
+      expect(legacy.damages[0].consumedBleedStacks).toBeGreaterThan(0);
+    });
   });
 });

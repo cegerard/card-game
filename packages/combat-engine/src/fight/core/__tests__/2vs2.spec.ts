@@ -91,7 +91,7 @@ describe('with only two cards each', () => {
     });
 
     it('wins', () => {
-      expect(res[Object.keys(res).length]).toEqual({
+      expect(res[Object.keys(res).length - 1]).toEqual({
         kind: 'fight_end',
         winner: 'Player 1',
       });
@@ -181,7 +181,7 @@ describe('with only two cards each', () => {
     });
 
     it('loses', () => {
-      expect(res[Object.keys(res).length]).toEqual({
+      expect(res[Object.keys(res).length - 1]).toEqual({
         kind: 'fight_end',
         winner: 'Player 2',
       });

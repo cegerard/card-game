@@ -57,6 +57,10 @@ describe('BleedExplosionSkill', () => {
     expect(bleedingEnemy.bleedStacks()).toBe(0);
   });
 
+  it('reports the stacks each card lost', () => {
+    expect(results.results.map((r) => r.consumedBleedStacks)).toEqual([1, 4]);
+  });
+
   it('runs only inside its stance', () => {
     expect(
       new BleedExplosionSkill(

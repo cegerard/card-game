@@ -20,9 +20,21 @@ function trackFirstHP(firstHP, card, remaining, damage) {
   firstHP[card.id] = (remaining ?? 0) + (damage ?? 0);
 }
 
-function discoverCards(events) {
+/**
+ * The engine opens the report with every card and its maximum health. Older
+ * reports lack it, so a card is then sized from the first hit it takes.
+ */
+function readFightStart(fightStart, meta, firstHP) {
+  fightStart?.cards.forEach(({ card, maxHealth }) => {
+    registerCard(meta, card);
+    firstHP[card.id] = maxHealth;
+  });
+}
+
+function discoverCards(events, fightStart) {
   const meta = {};
   const firstHP = {};
+  readFightStart(fightStart, meta, firstHP);
 
   events.forEach(ev => {
     registerCard(meta, ev.attacker);
@@ -153,6 +165,13 @@ function drainShield(card, absorbed) {
   card.shield = points > 0 ? { points } : null;
 }
 
+/** A detonation spends every stack of its target: the bleed is over. */
+function clearBleed(card) {
+  card.bleedStacks = 0;
+  card.statuses = card.statuses.filter(s => s !== 'bleed');
+  delete card.stateEffects.bleed;
+}
+
 function applyEvent(state, ev) {
   const get = id => state[id];
 
@@ -164,6 +183,7 @@ function applyEvent(state, ev) {
         if (!c) return;
         c.hp = d.remainingHealth;
         drainShield(c, d.shieldAbsorbed);
+        if (d.consumedBleedStacks) clearBleed(c);
       });
       break;
 
@@ -290,7 +310,7 @@ function applyEvent(state, ev) {
         if (!c) return;
         c.statuses = c.statuses.filter(s => s !== r.effectType);
         delete c.stateEffects[r.effectType];
-        if (r.effectType === 'bleed') c.bleedStacks = 0;
+        if (r.effectType === 'bleed') clearBleed(c);
       });
       if (ev.powerId) {
         Object.values(state).forEach(c => {
@@ -395,11 +415,13 @@ function applyEvent(state, ev) {
  * @returns {{ events, snapshots, teams, cardsMeta }}
  */
 export function parseReport(rawJson) {
-  const events = Object.entries(rawJson)
+  const steps = Object.entries(rawJson)
     .sort(([a], [b]) => +a - +b)
     .map(([k, v]) => ({ _step: +k, ...v }));
+  const fightStart = steps.find(s => s.kind === 'fight_start');
+  const events = steps.filter(s => s !== fightStart);
 
-  const { meta: cardsMeta, firstHP } = discoverCards(events);
+  const { meta: cardsMeta, firstHP } = discoverCards(events, fightStart);
   const teams = detectTeams(cardsMeta, events);
 
   // Build snapshot array: index 0 = before any event

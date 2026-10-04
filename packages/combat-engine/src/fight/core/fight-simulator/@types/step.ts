@@ -4,6 +4,7 @@ import { HealingReport } from './healing-report';
 import { StateEffectReport } from './state-effect-report';
 import { StatusChangeReport } from './status-change-report';
 import { WinnerReport } from './winner-report';
+import { FightStartReport } from './fight-start-report';
 import {
   BuffRemovedReport,
   DebuffRemovedReport,
@@ -38,6 +39,7 @@ import {
 } from './transformation-report';
 
 export enum StepKind {
+  FightStart = 'fight_start',
   FightEnd = 'fight_end',
   StatusChange = 'status_change',
   Attack = 'attack',
@@ -74,6 +76,7 @@ export type Step =
   | AttackStepReport
   | SpecialAttackStepReport
   | HealingReport
+  | FightStartReport
   | WinnerReport
   | StateEffectReport
   | BuffReport

@@ -55,7 +55,7 @@ export class Fight implements FightSimulator {
   }
 
   public start(): FightResult {
-    const fightResult: FightResult = {};
+    const fightResult: FightResult = { 0: this.fightStart() };
 
     while (this.bothPlayersCanFight() && this.thereIsTimeLeft()) {
       const nextIterationSteps = this.nextIteration();
@@ -70,6 +70,15 @@ export class Fight implements FightSimulator {
     this.computeWinner(fightResult);
 
     return fightResult;
+  }
+
+  private fightStart(): Step {
+    return {
+      kind: StepKind.FightStart,
+      cards: [...this.player1.allCards, ...this.player2.allCards].map(
+        (card) => ({ card: card.identityInfo, maxHealth: card.maxHealth }),
+      ),
+    };
   }
 
   private bothPlayersCanFight(): boolean {

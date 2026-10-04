@@ -245,4 +245,55 @@ describe('bleed', () => {
 
     expect(finalState(steps, 'aegis').bleedStacks).toBe(0);
   });
+
+  describe('when a detonation consumes the stacks', () => {
+    const detonated = {
+      1: hit(AEGIS, 100, 500),
+      2: bleeding(6),
+      3: hit(AEGIS, 50, 450, { consumedBleedStacks: 6 }),
+    };
+
+    it('clears the stacks', () => {
+      expect(finalState(detonated, 'aegis').bleedStacks).toBe(0);
+    });
+
+    it('drops the bleed status', () => {
+      expect(finalState(detonated, 'aegis').statuses).not.toContain('bleed');
+    });
+  });
+});
+
+describe('fight start', () => {
+  const opening = {
+    0: {
+      kind: 'fight_start',
+      cards: [
+        { card: AEGIS, maxHealth: 650 },
+        { card: KAITO, maxHealth: 220 },
+      ],
+    },
+    1: hit(AEGIS, 100, 550),
+  };
+
+  it('reads the maximum health of a card that is never hit', () => {
+    expect(finalState(opening, 'kaito').maxHP).toBe(220);
+  });
+
+  it('starts that card at full health', () => {
+    expect(finalState(opening, 'kaito').hp).toBe(220);
+  });
+
+  it('prefers the reported maximum over the first hit', () => {
+    const steps = { ...opening, 1: hit(AEGIS, 100, 500) };
+
+    expect(finalState(steps, 'aegis').maxHP).toBe(650);
+  });
+
+  it('lists a card that never appears in any other step', () => {
+    expect(finalState({ 0: opening[0] }, 'kaito').name).toBe('Kaito');
+  });
+
+  it('is not replayed as an event', () => {
+    expect(parseReport(opening).events.map((e) => e.kind)).toEqual(['attack']);
+  });
 });
