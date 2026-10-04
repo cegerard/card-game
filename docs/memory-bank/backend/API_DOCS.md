@@ -211,6 +211,11 @@ Simulates a turn-based card battle between two players.
     name: string,               // Name of the splash attack step
     damages: DamageCompositionDto[],  // Min 1 entry
     effects?: EffectDto[]
+  },
+  onLowHealthAfterHit?: {       // Once the main hit landed (not dodged), debuffs its defender when it is left alive under `threshold` of its health — being under it after the hit is enough, the hit need not cross it. Read before the splash lands. Resistance applies. Reported as a `debuff` step named `name`, right after the main attack step
+    name: string,
+    threshold: number,          // Health ratio in ]0, 1]
+    debuffs: { type: BuffType, rate: number, duration: number }[]  // Min 1; rate > 0, duration integer >= 1
   }
 }
 ```

@@ -107,6 +107,19 @@ export function skillResultsToSteps(
         });
         steps.push(...hitSteps);
 
+        if (skillResult.lowHealthDebuff) {
+          steps.push(
+            ...skillResultsToSteps(card, [
+              {
+                skillKind: SkillKind.Debuff,
+                name: skillResult.lowHealthDebuff.name,
+                results: skillResult.lowHealthDebuff.results,
+                powerId: skillResult.powerId,
+              },
+            ]),
+          );
+        }
+
         if (skillResult.splash) {
           steps.push(
             ...skillResultsToSteps(card, [

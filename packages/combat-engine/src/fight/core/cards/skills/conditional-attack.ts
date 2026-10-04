@@ -7,6 +7,7 @@ import { Trigger } from '../../trigger/trigger';
 import { isActivatableTrigger } from '../../trigger/activatable-trigger';
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 import { Splash } from '../@types/attack/splash';
+import { LowHealthDebuff } from '../@types/attack/low-health-debuff';
 
 export class ConditionalAttack implements Skill {
   public id = 'conditional-attack';
@@ -20,6 +21,7 @@ export class ConditionalAttack implements Skill {
     public readonly requiredStance?: string,
     private readonly energyCost?: number,
     private readonly splash?: Splash,
+    private readonly lowHealthDebuff?: LowHealthDebuff,
   ) {}
 
   isTriggered(triggerName: string): boolean {
@@ -49,6 +51,11 @@ export class ConditionalAttack implements Skill {
     }
 
     const [primary] = attackResults.results;
+    // Read before the splash lands: only the main hit counts.
+    const lowHealthDebuffs =
+      primary && !primary.dodge
+        ? (this.lowHealthDebuff?.apply(primary.defender) ?? [])
+        : [];
 
     return {
       skillKind: SkillKind.Attack,
@@ -57,6 +64,10 @@ export class ConditionalAttack implements Skill {
       powerId: this.powerId,
       // The zone is centered on the card the attack was aimed at, even when
       // a guardian stepped in front of it.
+      lowHealthDebuff:
+        lowHealthDebuffs.length > 0
+          ? { name: this.lowHealthDebuff.name, results: lowHealthDebuffs }
+          : undefined,
       splash:
         primary && this.splash
           ? this.splash.strike(
