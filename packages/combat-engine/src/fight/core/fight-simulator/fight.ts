@@ -24,15 +24,17 @@ export class Fight implements FightSimulator {
 
   constructor(player1: Player, player2: Player, cardSelector: CardSelector) {
     const endEventProcessor = new EndEventProcessor(player1, player2);
+    this.eventBroker = { onCardDeath: [] };
     const deathSkillHandler = new DeathSkillHandler(
       player1,
       player2,
       endEventProcessor,
+      (card, killer) =>
+        this.eventBroker.onCardDeath.forEach((subscriber) =>
+          subscriber.notifyDeath(card, killer),
+        ),
     );
-
-    this.eventBroker = {
-      onCardDeath: [cardSelector, deathSkillHandler],
-    };
+    this.eventBroker.onCardDeath.push(cardSelector, deathSkillHandler);
 
     this.player1 = player1;
     this.player2 = player2;

@@ -81,6 +81,7 @@ export enum SkillKind {
   BLEED_STACK_SCALING = 'BLEED_STACK_SCALING',
   STANCE = 'STANCE',
   BLEED_EMPOWERMENT = 'BLEED_EMPOWERMENT',
+  BLEED_DETONATION = 'BLEED_DETONATION',
 }
 
 export enum BuffType {
@@ -585,7 +586,8 @@ export class OtherSkillDto {
       o.kind === SkillKind.SHIELD ||
       o.kind === SkillKind.DAMAGE_REDUCTION ||
       o.kind === SkillKind.BLEED_STACK_SCALING ||
-      o.kind === SkillKind.BLEED_EMPOWERMENT,
+      o.kind === SkillKind.BLEED_EMPOWERMENT ||
+      o.kind === SkillKind.BLEED_DETONATION,
   )
   @IsDefined()
   @IsNumber()
@@ -613,7 +615,8 @@ export class OtherSkillDto {
       o.kind !== SkillKind.DODGE_BONUS_DENIAL &&
       o.kind !== SkillKind.BLEED_STACK_SCALING &&
       o.kind !== SkillKind.BLEED_EMPOWERMENT &&
-      o.kind !== SkillKind.STANCE,
+      o.kind !== SkillKind.STANCE &&
+      o.kind !== SkillKind.BLEED_DETONATION,
   )
   @IsDefined()
   @IsEnum(TargetingStrategy)
@@ -631,8 +634,11 @@ export class OtherSkillDto {
   @Min(1)
   stackThreshold?: number;
 
-  // STANCE: the stance opened on the skill owner when its event fires
-  @ValidateIf((o) => o.kind === SkillKind.STANCE)
+  // STANCE: the stance opened on the skill owner when its event fires;
+  // CONDITIONAL_ATTACK: the stance it opens on its owner when it strikes
+  @ValidateIf(
+    (o) => o.kind === SkillKind.STANCE || o.stanceActivation !== undefined,
+  )
   @IsDefined()
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => StanceActivationDto)

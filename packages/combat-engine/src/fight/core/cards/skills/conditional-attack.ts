@@ -8,6 +8,7 @@ import { isActivatableTrigger } from '../../trigger/activatable-trigger';
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 import { Splash } from '../@types/attack/splash';
 import { LowHealthDebuff } from '../@types/attack/low-health-debuff';
+import { StanceActivation } from '../@types/stance/stance';
 
 export class ConditionalAttack implements Skill {
   public id = 'conditional-attack';
@@ -22,6 +23,7 @@ export class ConditionalAttack implements Skill {
     private readonly energyCost?: number,
     private readonly splash?: Splash,
     private readonly lowHealthDebuff?: LowHealthDebuff,
+    private readonly stanceActivation?: StanceActivation,
   ) {}
 
   isTriggered(triggerName: string): boolean {
@@ -62,6 +64,14 @@ export class ConditionalAttack implements Skill {
       results: attackResults.results,
       name: this.name,
       powerId: this.powerId,
+      stanceStarted:
+        primary && this.stanceActivation
+          ? source.activateStance(
+              this.stanceActivation.name,
+              this.stanceActivation.duration,
+              this.stanceActivation.immunities,
+            )
+          : undefined,
       // The zone is centered on the card the attack was aimed at, even when
       // a guardian stepped in front of it.
       lowHealthDebuff:

@@ -38,7 +38,8 @@ export type SkillKind =
   | 'DODGE_BONUS_DENIAL'
   | 'BLEED_STACK_SCALING'
   | 'STANCE'
-  | 'BLEED_EMPOWERMENT';
+  | 'BLEED_EMPOWERMENT'
+  | 'BLEED_DETONATION';
 
 export type BuffType =
   | 'attack'
@@ -262,11 +263,11 @@ export interface MultipleAttackSkill {
 export interface OtherSkill {
   kind: SkillKind;
   name: string;
-  /** Requis pour HEALING, ALTERATION, SHIELD, DAMAGE_REDUCTION ; bonus par pile pour BLEED_STACK_SCALING ; taux du Saignement renforcé pour BLEED_EMPOWERMENT. */
+  /** Requis pour HEALING, ALTERATION, SHIELD, DAMAGE_REDUCTION ; bonus par pile pour BLEED_STACK_SCALING ; taux du Saignement renforcé pour BLEED_EMPOWERMENT ; part de l'Attaque infligée par carte pour BLEED_DETONATION. */
   rate?: number;
   /** BLEED_STACK_SCALING uniquement (requis) : plafond du bonus d'Attaque. */
   maxRate?: number;
-  /** STANCE uniquement (requis) : posture ouverte sur le porteur quand l'événement arrive. */
+  /** STANCE (requis) : posture ouverte sur le porteur quand l'événement arrive ; CONDITIONAL_ATTACK (facultatif) : posture ouverte quand l'attaque part. */
   stanceActivation?: StanceActivation;
   /** Requis avec bleed-stacks-applied (piles posées par le porteur) et le ciblage first-bleeding-enemy (piles portées par la cible). */
   stackThreshold?: number;
@@ -284,7 +285,7 @@ export interface OtherSkill {
    */
   stackId?: string;
   debuffMaxStacks?: number;
-  /** Absent pour SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL, BLEED_STACK_SCALING, BLEED_EMPOWERMENT et STANCE. */
+  /** Absent pour SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL, BLEED_STACK_SCALING, BLEED_EMPOWERMENT, STANCE et BLEED_DETONATION. */
   targetingStrategy?: TargetingStrategy;
   /** Absent pour SHIELD, SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL, BLEED_STACK_SCALING et BLEED_EMPOWERMENT. */
   event?: TriggerEvent;

@@ -141,6 +141,14 @@ export class ActionStage {
         const reports = [attackSkill, attackSkill.splash]
           .filter((strike) => strike?.results.length > 0)
           .map((strike) => this.reportStrike(card, strike));
+        if (attackSkill.stanceStarted) {
+          reports[0].stanceStartedReport = {
+            kind: StepKind.StanceStarted,
+            name: attackSkill.stanceStarted.name,
+            card: card.identityInfo,
+            remainingTurns: attackSkill.stanceStarted.remainingTurns,
+          };
+        }
         if (attackSkill.lowHealthDebuff) {
           reports[0].debuffReport = this.buildDebuffReport(
             card,

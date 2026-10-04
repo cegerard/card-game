@@ -54,6 +54,10 @@ export function skillResultsToSteps(
         );
         break;
       case SkillKind.Attack: {
+        // An attack that struck nobody — a bleed explosion on a board where
+        // nothing bleeds — reports nothing, like an empty heal.
+        if (skillResult.results.length === 0) break;
+
         steps.push({
           kind: StepKind.Attack,
           name: skillResult.name,
@@ -118,6 +122,15 @@ export function skillResultsToSteps(
               },
             ]),
           );
+        }
+
+        if (skillResult.stanceStarted) {
+          steps.push({
+            kind: StepKind.StanceStarted,
+            name: skillResult.stanceStarted.name,
+            card: card.identityInfo,
+            remainingTurns: skillResult.stanceStarted.remainingTurns,
+          });
         }
 
         if (skillResult.splash) {
