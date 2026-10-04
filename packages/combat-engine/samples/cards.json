@@ -758,7 +758,7 @@
         },
         {
           "kind": "HEALING",
-          "name": "Anatomie Prédatrice",
+          "name": "Anatomie Prédatrice - Curée",
           "rate": 0.1,
           "event": "enemy-bleed-death",
           "targetingStrategy": "self",
@@ -789,7 +789,7 @@
         },
         {
           "kind": "BLEED_EMPOWERMENT",
-          "name": "Lames du Vent Rouge",
+          "name": "Lames du Vent Rouge - Saignée",
           "requiresStance": "vent-rouge",
           "extraStacks": 1,
           "rate": 0.08

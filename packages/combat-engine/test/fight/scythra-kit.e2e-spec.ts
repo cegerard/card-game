@@ -125,7 +125,7 @@ describe('Scythra full kit', () => {
 
     it('heals with Anatomie Prédatrice when the prey bleeds out', () => {
       expect(
-        named('Anatomie Prédatrice').some((s) => s.kind === 'healing'),
+        named('Anatomie Prédatrice - Curée').some((s) => s.kind === 'healing'),
       ).toBe(true);
     });
 
