@@ -679,5 +679,182 @@
       ]
     },
     "behaviors": { "dodge": "simple-dodge" }
+  },
+  {
+    "id": "scythra",
+    "name": "Scythra",
+    "attack": 85,
+    "defense": 40,
+    "health": 300,
+    "speed": 85,
+    "agility": 65,
+    "accuracy": 109,
+    "criticalChance": 0.13,
+    "regeneration": 25,
+    "resistance": 35,
+    "element": "AIR",
+    "skills": {
+      "special": {
+        "kind": "ATTACK",
+        "name": "Dissection Éolienne",
+        "damages": [
+          {
+            "type": "PHYSICAL",
+            "rate": 0.35
+          }
+        ],
+        "hits": 4,
+        "energy": 30,
+        "targetingStrategy": "position-based",
+        "effect": {
+          "type": "BLEED",
+          "rate": 0.05,
+          "duration": 4,
+          "maxStacks": 8,
+          "stacks": 2
+        },
+        "energyRefund": {
+          "amount": 10,
+          "minAccuracyMargin": 20
+        }
+      },
+      "simpleAttack": {
+        "name": "Lacération du Zéphyr",
+        "damages": [
+          {
+            "type": "PHYSICAL",
+            "rate": 0.6
+          },
+          {
+            "type": "AIR",
+            "rate": 0.4
+          }
+        ],
+        "targetingStrategy": "position-based",
+        "effects": [
+          {
+            "type": "BLEED",
+            "rate": 0.05,
+            "duration": 3,
+            "maxStacks": 8
+          }
+        ],
+        "bleedStackBonus": {
+          "minStacks": 3,
+          "damageType": "PHYSICAL",
+          "multiplier": 1.2
+        }
+      },
+      "others": [
+        {
+          "kind": "DODGE_BONUS_DENIAL",
+          "name": "Aéro-traqueur"
+        },
+        {
+          "kind": "BLEED_STACK_SCALING",
+          "name": "Anatomie Prédatrice",
+          "rate": 0.02,
+          "maxRate": 0.3
+        },
+        {
+          "kind": "HEALING",
+          "name": "Anatomie Prédatrice",
+          "rate": 0.1,
+          "event": "enemy-bleed-death",
+          "targetingStrategy": "self",
+          "healBasis": "target-max-health"
+        },
+        {
+          "kind": "STANCE",
+          "name": "Lames du Vent Rouge",
+          "event": "bleed-stacks-applied",
+          "stackThreshold": 10,
+          "stanceActivation": {
+            "name": "vent-rouge",
+            "duration": 3
+          },
+          "powerId": "lames-du-vent-rouge"
+        },
+        {
+          "kind": "ALTERATION",
+          "name": "Lames du Vent Rouge",
+          "polarity": "buff",
+          "buffType": "speed",
+          "rate": 0.2,
+          "duration": 3,
+          "event": "bleed-stacks-applied",
+          "stackThreshold": 10,
+          "targetingStrategy": "self",
+          "powerId": "lames-du-vent-rouge"
+        },
+        {
+          "kind": "BLEED_EMPOWERMENT",
+          "name": "Lames du Vent Rouge",
+          "requiresStance": "vent-rouge",
+          "extraStacks": 1,
+          "rate": 0.08
+        },
+        {
+          "kind": "CONDITIONAL_ATTACK",
+          "name": "Exsanguination Totale",
+          "event": "turn-start",
+          "targetingStrategy": "first-bleeding-enemy",
+          "stackThreshold": 5,
+          "energyCost": 10,
+          "bleedDetonation": {
+            "ratePerStack": 0.4
+          },
+          "defensePenetration": 0.5,
+          "stanceActivation": {
+            "name": "transe-predatrice",
+            "duration": 2
+          },
+          "onLowHealthAfterHit": {
+            "name": "Choc Hémorragique",
+            "threshold": 0.3,
+            "debuffs": [
+              {
+                "type": "defense",
+                "rate": 0.4,
+                "duration": 4
+              },
+              {
+                "type": "regeneration",
+                "rate": 0.8,
+                "duration": 4
+              }
+            ]
+          },
+          "splash": {
+            "name": "Vent Écarlate",
+            "damages": [
+              {
+                "type": "AIR",
+                "rate": 0.6
+              }
+            ],
+            "effects": [
+              {
+                "type": "BLEED",
+                "rate": 0.05,
+                "duration": 3,
+                "maxStacks": 8,
+                "stacks": 3
+              }
+            ]
+          }
+        },
+        {
+          "kind": "BLEED_DETONATION",
+          "name": "Héritage sanglant",
+          "rate": 0.2,
+          "event": "self-death",
+          "requiresStance": "transe-predatrice"
+        }
+      ]
+    },
+    "behaviors": {
+      "dodge": "simple-dodge"
+    }
   }
 ]

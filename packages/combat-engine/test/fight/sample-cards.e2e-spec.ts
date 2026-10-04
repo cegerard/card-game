@@ -66,6 +66,14 @@ describe('samples/cards.json', () => {
     expect(steps.length).toBeGreaterThan(0);
   });
 
+  it('lets Scythra make her targets bleed', () => {
+    const bleeds = steps.filter(
+      (s) => s.kind === 'status_change' && s.status === 'bleed',
+    );
+
+    expect(bleeds.length).toBeGreaterThan(0);
+  });
+
   it('lets Kaito mark his target with soak', () => {
     const marks = steps.filter(
       (s) => s.kind === 'mark_applied' && s.damageType === 'WATER',
