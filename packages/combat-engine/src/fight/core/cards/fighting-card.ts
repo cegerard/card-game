@@ -99,7 +99,7 @@ export class FightingCard {
   // Fixed Stats
   private readonly attack: number;
   private readonly defense: number;
-  private readonly maxHealth: number;
+  public readonly maxHealth: number;
   private readonly speed: number;
   private readonly agility: number;
   private readonly accuracy: number;

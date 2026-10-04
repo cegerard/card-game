@@ -205,7 +205,9 @@ describe('Simulate fight', () => {
       .send(fightData)
       .expect(200)
       .expect((res) => {
-        expect(res.body[Object.keys(res.body).length].kind).toBe('fight_end');
+        expect(res.body[Object.keys(res.body).length - 1].kind).toBe(
+          'fight_end',
+        );
       });
   });
 });

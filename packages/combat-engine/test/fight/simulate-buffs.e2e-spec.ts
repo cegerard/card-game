@@ -259,7 +259,9 @@ describe('Simulate fight with buffs', () => {
       .send(fightDataWithBuffs)
       .expect(200)
       .then((res) => {
-        expect(res.body[Object.keys(res.body).length].kind).toBe('fight_end');
+        expect(res.body[Object.keys(res.body).length - 1].kind).toBe(
+          'fight_end',
+        );
 
         expect(res.body[3]).toEqual({
           alterations: [
