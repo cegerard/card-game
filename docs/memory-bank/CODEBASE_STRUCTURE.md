@@ -79,6 +79,9 @@ cards/
 │   ├── damage-reduction.ts # DamageReductionSkill: removes a share of each incoming hit; not a Skill implementor
 │   ├── dodge-bonus-denial.ts # DodgeBonusDenialSkill: a bleeding defender dodges its owner without agility buffs; not a Skill implementor
 │   ├── bleed-stack-scaling.ts    # BleedStackScalingSkill: attack bonus per bleed stack on the board, read through FightingCard.attackPower(); not a Skill implementor
+│   ├── bleed-empowerment.ts # BleedEmpowermentSkill: extra stacks and a higher rate for its owner bleeds while a stance runs; not a Skill implementor
+│   ├── bleed-explosion.ts  # BleedExplosionSkill (BLEED_DETONATION): every bleeding card takes a share of the source attack as real damage and loses its stacks
+│   ├── stance.ts           # StanceSkill: opens a stance on its owner when its event fires
 │   ├── transformation.ts   # TransformationSkill: one-shot health-reactive transformation
 │   └── power-id-consistency.ts  # Domain validation for composite power groups
 ├── behaviors/              # Card behavior patterns
@@ -96,7 +99,7 @@ cards/
     │   ├── healing-result.ts
     │   ├── buff-results.ts
     │   └── shield-result.ts         # { target: CardInfo; shield: Shield }
-    ├── attack/             # Attack and effect types (attack-effect.ts, attack-poison-effect.ts, attack-burn-effect.ts, attack-freeze-effect.ts, attack-stunt-effect.ts, attack-mark-effect.ts, attack-bleed-effect.ts, bleed-stack-bonus.ts, energy-refund.ts)
+    ├── attack/             # Attack and effect types (attack-effect.ts, attack-poison-effect.ts, attack-burn-effect.ts, attack-freeze-effect.ts, attack-stunt-effect.ts, attack-mark-effect.ts, attack-bleed-effect.ts, bleed-stack-bonus.ts, energy-refund.ts, bleed-detonation.ts, splash.ts, low-health-debuff.ts)
     │   └── conditions/     # Attack conditions (always-true-attack-condition.ts)
     ├── alteration/         # Buff/debuff discriminated union
     │   ├── alteration-detail.ts     # AlterationDetail = Buff | Debuff (polarity: 'buff' | 'debuff')
@@ -220,7 +223,9 @@ targeting-card-strategies/
 ├── allied-card-by-id.ts       # Targets a specific ally by ID (returns [] if dead)
 ├── last-attacker-of-ally.ts   # Targets the last card that attacked a specific ally (returns [] if dead)
 ├── most-wounded-ally.ts       # Targets the caster ally in the worst shape below a threshold (excludes the caster)
-└── protected-ally.ts          # Targets the ally the caster stands in front of; empty outside a protection
+├── protected-ally.ts          # Targets the ally the caster stands in front of; empty outside a protection
+├── first-bleeding-enemy.ts    # Targets the first enemy in deck order carrying N bleed stacks
+└── target-and-neighbors.ts    # Targets a card chosen at runtime and its two deck neighbors (living only)
 ```
 
 ### HTTP API Layer (`packages/combat-engine/src/fight/http-api/`)
