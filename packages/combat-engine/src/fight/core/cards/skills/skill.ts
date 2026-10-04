@@ -50,6 +50,8 @@ export type AttackSkillResults = BaseSkillResults & {
   results: AttackResult[];
   /** A secondary strike around the primary target, reported on its own. */
   splash?: { name: string; results: AttackResult[] };
+  /** Debuffs the primary target got for being left under a health threshold. */
+  lowHealthDebuff?: { name: string; results: DebuffResult[] };
 };
 
 export type TargetingOverrideSkillResults = BaseSkillResults & {

@@ -77,6 +77,7 @@ import { StanceSkill } from '../core/cards/skills/stance';
 import { FirstBleedingEnemyStrategy } from '../core/targeting-card-strategies/first-bleeding-enemy';
 import { BleedDetonation } from '../core/cards/@types/attack/bleed-detonation';
 import { Splash } from '../core/cards/@types/attack/splash';
+import { LowHealthDebuff } from '../core/cards/@types/attack/low-health-debuff';
 import { LastAttackerOfAllyTargetingStrategy } from '../core/targeting-card-strategies/last-attacker-of-ally';
 import { AlliedCardByIdStrategy } from '../core/targeting-card-strategies/allied-card-by-id';
 import { MultipleAttack } from '../core/cards/skills/multiple-attack';
@@ -754,6 +755,17 @@ export class FightController {
                   (d) => new DamageComposition(d.type, d.rate),
                 ),
                 this.buildEffects(skillData.splash.effects),
+              )
+            : undefined,
+          skillData.onLowHealthAfterHit
+            ? new LowHealthDebuff(
+                skillData.onLowHealthAfterHit.name,
+                skillData.onLowHealthAfterHit.threshold,
+                skillData.onLowHealthAfterHit.debuffs.map((debuff) => ({
+                  type: this.mapAlterationType(debuff.type),
+                  rate: debuff.rate,
+                  duration: debuff.duration,
+                })),
               )
             : undefined,
         );

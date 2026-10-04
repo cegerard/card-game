@@ -306,6 +306,36 @@ export class EnergyRefundDto {
   minAccuracyMargin: number;
 }
 
+class LowHealthDebuffEntryDto {
+  @IsEnum(BuffType)
+  type: BuffType;
+
+  @IsNumber()
+  @IsPositive()
+  rate: number;
+
+  @IsInt()
+  @Min(1)
+  duration: number;
+}
+
+export class LowHealthDebuffDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsNumber()
+  @IsPositive()
+  @Max(1)
+  threshold: number;
+
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(/* istanbul ignore next */ () => LowHealthDebuffEntryDto)
+  debuffs: LowHealthDebuffEntryDto[];
+}
+
 export class SplashDto {
   @IsString()
   @IsNotEmpty()
@@ -768,6 +798,12 @@ export class OtherSkillDto {
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => SplashDto)
   splash?: SplashDto;
+
+  // CONDITIONAL_ATTACK: debuffs the primary target left under a health ratio
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => LowHealthDebuffDto)
+  onLowHealthAfterHit?: LowHealthDebuffDto;
 
   // Required when event is ally-death, enemy-death, ally-health-below or
   // damage-taken

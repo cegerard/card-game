@@ -137,11 +137,20 @@ export class ActionStage {
         (r): r is AttackSkillResults =>
           r.skillKind === SkillKind.Attack && r.results.length > 0,
       )
-      .flatMap((attackSkill) =>
-        [attackSkill, attackSkill.splash]
+      .flatMap((attackSkill) => {
+        const reports = [attackSkill, attackSkill.splash]
           .filter((strike) => strike?.results.length > 0)
-          .map((strike) => this.reportStrike(card, strike)),
-      );
+          .map((strike) => this.reportStrike(card, strike));
+        if (attackSkill.lowHealthDebuff) {
+          reports[0].debuffReport = this.buildDebuffReport(
+            card,
+            attackSkill.lowHealthDebuff.name,
+            attackSkill.lowHealthDebuff.results,
+          );
+        }
+
+        return reports;
+      });
   }
 
   private reportStrike(
@@ -217,19 +226,11 @@ export class ActionStage {
     }
 
     if (debuffs.length > 0) {
-      const debuffReport: DebuffReport = {
-        kind: StepKind.Debuff,
-        name: specialResults.name,
-        source: card.identityInfo,
-        alterations: debuffs.map((debuffResult) => ({
-          target: debuffResult.target,
-          kind: debuffResult.alteration.type,
-          value: debuffResult.alteration.value,
-          remainingTurns: debuffResult.alteration.duration,
-        })),
-        energy: 0,
-      };
-      result.debuffReport = debuffReport;
+      result.debuffReport = this.buildDebuffReport(
+        card,
+        specialResults.name,
+        debuffs,
+      );
     }
 
     if (specialResults.shieldResults.length > 0) {
@@ -487,6 +488,25 @@ export class ActionStage {
     this.eventBroker.onCardDeath.forEach((subscriber) =>
       subscriber.notifyDeath(card, killerCard),
     );
+  }
+
+  private buildDebuffReport(
+    source: FightingCard,
+    name: string,
+    debuffs: DebuffResult[],
+  ): DebuffReport {
+    return {
+      kind: StepKind.Debuff,
+      name,
+      source: source.identityInfo,
+      alterations: debuffs.map((debuffResult) => ({
+        target: debuffResult.target,
+        kind: debuffResult.alteration.type,
+        value: debuffResult.alteration.value,
+        remainingTurns: debuffResult.alteration.duration,
+      })),
+      energy: 0,
+    };
   }
 
   private buildShieldAppliedReport(

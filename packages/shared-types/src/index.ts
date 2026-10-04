@@ -313,6 +313,12 @@ export interface OtherSkill {
   bleedDetonation?: { ratePerStack: number };
   /** CONDITIONAL_ATTACK : frappe secondaire sur la cible principale et ses deux voisins, après la frappe principale. */
   splash?: { name: string; damages: DamageComposition[]; effects?: EffectConfig[] };
+  /** CONDITIONAL_ATTACK : debuffs posés sur la cible principale si elle reste vivante sous `threshold` (ratio de santé) après la frappe principale. */
+  onLowHealthAfterHit?: {
+    name: string;
+    threshold: number;
+    debuffs: { type: BuffType; rate: number; duration: number }[];
+  };
   /**
    * Requis quand event vaut ally-death, enemy-death, ally-health-below ou
    * damage-taken. Jamais pour any-ally-health-below, qui surveille toute
