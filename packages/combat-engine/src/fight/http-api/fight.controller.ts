@@ -74,6 +74,7 @@ import { AnyAllyHealthBelowThresholdTrigger } from '../core/trigger/any-ally-hea
 import { SelfDeathTrigger } from '../core/trigger/self-death';
 import { BleedStacksAppliedTrigger } from '../core/trigger/bleed-stacks-applied';
 import { StanceSkill } from '../core/cards/skills/stance';
+import { BleedExplosionSkill } from '../core/cards/skills/bleed-explosion';
 import { FirstBleedingEnemyStrategy } from '../core/targeting-card-strategies/first-bleeding-enemy';
 import { BleedDetonation } from '../core/cards/@types/attack/bleed-detonation';
 import { Splash } from '../core/cards/@types/attack/splash';
@@ -768,6 +769,7 @@ export class FightController {
                 })),
               )
             : undefined,
+          skillData.stanceActivation,
         );
       case SkillKind.TARGETING_OVERRIDE:
         if (!skillData.terminationEvent) {
@@ -874,6 +876,13 @@ export class FightController {
           skillData.stanceActivation,
           this.buildTriggerForSkill(skillData, ownerId),
           skillData.powerId,
+        );
+      case SkillKind.BLEED_DETONATION:
+        return new BleedExplosionSkill(
+          skillData.name,
+          skillData.rate,
+          this.buildTriggerForSkill(skillData, ownerId),
+          skillData.requiresStance,
         );
       case SkillKind.SURVIVE:
         throw new Error('SURVIVE skill must not appear in others skill list');

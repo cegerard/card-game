@@ -52,6 +52,8 @@ export type AttackSkillResults = BaseSkillResults & {
   splash?: { name: string; results: AttackResult[] };
   /** Debuffs the primary target got for being left under a health threshold. */
   lowHealthDebuff?: { name: string; results: DebuffResult[] };
+  /** The stance the attack opened on its owner when it fired. */
+  stanceStarted?: Stance;
 };
 
 export type TargetingOverrideSkillResults = BaseSkillResults & {
