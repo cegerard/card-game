@@ -378,7 +378,8 @@ which makes the replayer a workspace package covered by `pnpm -r test`.
 `transformation`, `marks`, `bleedStacks`, `statuses`, `buffs`/`debuffs`. Death clears them all.
 The shield is drawn down per hit from `Damage.shieldAbsorbed` — the report's
 `damage` is the total dealt, so without that field the buffer stayed frozen at
-its applied value (issue #326). `js/icons.js` must carry an icon and a colour
+its applied value (issue #326). Likewise a hit carrying `consumedBleedStacks`
+(Scythra's detonation and legacy explosion) clears the target's bleed. `js/icons.js` must carry an icon and a colour
 for every `StepKind`, otherwise `describeEvent()` falls back to a bare `•` and
 the event log row loses its label.
 

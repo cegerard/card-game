@@ -191,12 +191,14 @@ function buildAttackDetail(ev) {
         dodge: false,
         critical: false,
         shieldAbsorbed: 0,
+        consumedBleedStacks: 0,
         finalHP: d.remainingHealth,
       };
     }
     grouped[key].hits.push(d);
     grouped[key].finalHP = d.remainingHealth;
     grouped[key].shieldAbsorbed += d.shieldAbsorbed ?? 0;
+    grouped[key].consumedBleedStacks += d.consumedBleedStacks ?? 0;
     if (d.dodge) grouped[key].dodge = true;
     if (d.isCritical) grouped[key].critical = true;
   });
@@ -218,6 +220,9 @@ function buildAttackDetail(ev) {
           : '',
         g.shieldAbsorbed > 0
           ? `<span class="attack-target__tag attack-target__tag--shield">${ICON.shield_applied} ${Math.round(g.shieldAbsorbed)} absorbed</span>`
+          : '',
+        g.consumedBleedStacks > 0
+          ? `<span class="attack-target__tag">${ICON.bleed} ${g.consumedBleedStacks} stacks consumed</span>`
           : '',
       ]
         .filter(Boolean)

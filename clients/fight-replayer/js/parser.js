@@ -153,6 +153,13 @@ function drainShield(card, absorbed) {
   card.shield = points > 0 ? { points } : null;
 }
 
+/** A detonation spends every stack of its target: the bleed is over. */
+function clearBleed(card) {
+  card.bleedStacks = 0;
+  card.statuses = card.statuses.filter(s => s !== 'bleed');
+  delete card.stateEffects.bleed;
+}
+
 function applyEvent(state, ev) {
   const get = id => state[id];
 
@@ -164,6 +171,7 @@ function applyEvent(state, ev) {
         if (!c) return;
         c.hp = d.remainingHealth;
         drainShield(c, d.shieldAbsorbed);
+        if (d.consumedBleedStacks) clearBleed(c);
       });
       break;
 
@@ -290,7 +298,7 @@ function applyEvent(state, ev) {
         if (!c) return;
         c.statuses = c.statuses.filter(s => s !== r.effectType);
         delete c.stateEffects[r.effectType];
-        if (r.effectType === 'bleed') c.bleedStacks = 0;
+        if (r.effectType === 'bleed') clearBleed(c);
       });
       if (ev.powerId) {
         Object.values(state).forEach(c => {

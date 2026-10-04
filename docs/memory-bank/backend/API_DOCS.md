@@ -275,7 +275,7 @@ Simulates a turn-based card battle between two players.
   kind: "attack" | "special_attack",
   name?: string,         // Skill name that triggered the attack
   attacker: CardInfo,
-  damages: { defender: CardInfo, damage: number, isCritical: boolean, dodge: boolean, remainingHealth: number, shieldAbsorbed?: number, survived?: boolean, survivedSkillName?: string, consumedBleedStacks?: number }[],  // consumedBleedStacks: bleed stacks a bleedDetonation consumed
+  damages: { defender: CardInfo, damage: number, isCritical: boolean, dodge: boolean, remainingHealth: number, shieldAbsorbed?: number, survived?: boolean, survivedSkillName?: string, consumedBleedStacks?: number }[],  // consumedBleedStacks: bleed stacks a bleedDetonation or a BLEED_DETONATION skill consumed
   energy: number
 }
 ```

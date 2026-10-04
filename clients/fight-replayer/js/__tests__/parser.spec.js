@@ -245,4 +245,20 @@ describe('bleed', () => {
 
     expect(finalState(steps, 'aegis').bleedStacks).toBe(0);
   });
+
+  describe('when a detonation consumes the stacks', () => {
+    const detonated = {
+      1: hit(AEGIS, 100, 500),
+      2: bleeding(6),
+      3: hit(AEGIS, 50, 450, { consumedBleedStacks: 6 }),
+    };
+
+    it('clears the stacks', () => {
+      expect(finalState(detonated, 'aegis').bleedStacks).toBe(0);
+    });
+
+    it('drops the bleed status', () => {
+      expect(finalState(detonated, 'aegis').statuses).not.toContain('bleed');
+    });
+  });
 });

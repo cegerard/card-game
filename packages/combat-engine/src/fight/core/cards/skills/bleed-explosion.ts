@@ -41,7 +41,6 @@ export class BleedExplosionSkill implements Skill {
       name: this.name,
       results: bleedingCards.map((card): AttackResult => {
         const dealt = card.addRealDamage(damage);
-        card.consumeBleedStacks();
 
         return {
           damage: dealt,
@@ -49,6 +48,7 @@ export class BleedExplosionSkill implements Skill {
           dodge: false,
           defender: card,
           remainingHealth: card.actualHealth,
+          consumedBleedStacks: card.consumeBleedStacks(),
         };
       }),
     };
