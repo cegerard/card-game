@@ -145,6 +145,7 @@ function buildInitialState(cardsMeta, firstHP) {
       bleedStacks: 0,   // active bleed stacks
       transformation: null, // null | { name, turns }
       stance: null,     // null | { name, turns }
+      concealment: null, // null | { name, turns } — out of the enemy sight
       protecting: null, // null | { name, target, turns } — ally this card covers
       dead: false,
     };
@@ -222,6 +223,7 @@ function applyEvent(state, ev) {
         c.bleedStacks = 0;
         c.transformation = null;
         c.stance = null;
+        c.concealment = null;
         c.protecting = null;
         c.shield = null;
       } else {
@@ -380,6 +382,18 @@ function applyEvent(state, ev) {
     case 'stance_ended': {
       const c = get(ev.card?.id);
       if (c) c.stance = null;
+      break;
+    }
+
+    case 'concealment_started': {
+      const c = get(ev.card?.id);
+      if (c) c.concealment = { name: ev.name, turns: ev.remainingTurns };
+      break;
+    }
+
+    case 'concealment_ended': {
+      const c = get(ev.card?.id);
+      if (c) c.concealment = null;
       break;
     }
 

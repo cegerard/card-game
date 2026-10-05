@@ -37,6 +37,9 @@ export const ICON = {
   /* Stance */
   stance_started:    '🥋',
   stance_ended:      '🔚',
+  /* Concealment */
+  concealment_started: '🌑',
+  concealment_ended:   '👁️',
   /* Protection */
   protection_started: '🫂',
   protection_ended:   '🙌',
@@ -95,6 +98,8 @@ export const EVENT_COLOR = {
   damage_mitigated:  '#7dd3fc',
   stance_started:    '#818cf8',
   stance_ended:      '#94a3b8',
+  concealment_started: '#a78bfa',
+  concealment_ended:   '#94a3b8',
   protection_started: '#38bdf8',
   protection_ended:   '#94a3b8',
   attack_intercepted: '#60a5fa',

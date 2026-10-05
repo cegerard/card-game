@@ -11,6 +11,7 @@ import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting
 import { ShieldResult } from '../@types/action-result/shield-result';
 import { ProtectionResult } from './protection';
 import { Stance } from '../@types/stance/stance';
+import { Concealment } from '../@types/concealment/concealment';
 
 export enum SkillKind {
   Healing = 'healing',
@@ -22,6 +23,7 @@ export enum SkillKind {
   Transformation = 'transformation',
   Protection = 'protection',
   Stance = 'stance',
+  Concealment = 'concealment',
 }
 
 type BaseSkillResults = {
@@ -82,6 +84,11 @@ export type StanceSkillResults = BaseSkillResults & {
   stance: Stance;
 };
 
+export type ConcealmentSkillResults = BaseSkillResults & {
+  skillKind: SkillKind.Concealment;
+  concealment: Concealment;
+};
+
 export type SkillResults =
   | HealingSkillResults
   | BuffSkillResults
@@ -91,7 +98,8 @@ export type SkillResults =
   | ShieldSkillResults
   | TransformationSkillResults
   | ProtectionSkillResults
-  | StanceSkillResults;
+  | StanceSkillResults
+  | ConcealmentSkillResults;
 
 export interface Skill {
   id: string;

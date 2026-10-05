@@ -15,7 +15,7 @@ export class LastAttackerOfAllyTargetingStrategy implements TargetingCardStrateg
     const ally =
       attackingPlayer.allCards.find((c) => c.id === this.allyId) ??
       defendingPlayer.allCards.find((c) => c.id === this.allyId);
-    if (!ally?.lastAttacker || ally.lastAttacker.isDead()) {
+    if (!ally?.lastAttacker?.isTargetable()) {
       return [];
     }
     return [ally.lastAttacker];

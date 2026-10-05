@@ -26,6 +26,7 @@ import { effectResultsToSteps } from '../fight-simulator/effect-results-to-steps
 import { SurvivedReport } from '../fight-simulator/@types/survived-report';
 import { BLEED_STACKS_APPLIED } from '../trigger/bleed-stacks-applied';
 import { TURN_START } from '../trigger/turn-start';
+import { revealAttacker } from '../fight-simulator/concealment-steps';
 
 type SplittedSteps = {
   actionSteps: Step[];
@@ -93,6 +94,7 @@ export class ActionStage {
       },
       statusChanges: [],
       survivedSteps: [],
+      concealmentEndedReports: [],
     };
 
     this.handleAttackResult(attackResults.results, report, card);
@@ -118,6 +120,7 @@ export class ActionStage {
       },
       statusChanges: [],
       survivedSteps: [],
+      concealmentEndedReports: [],
     };
 
     this.handleAttackResult(attackSkill.results, result, card);
@@ -175,6 +178,7 @@ export class ActionStage {
       },
       statusChanges: [],
       survivedSteps: [],
+      concealmentEndedReports: [],
     };
     this.handleAttackResult(strike.results, report, card);
 
@@ -205,6 +209,7 @@ export class ActionStage {
       },
       statusChanges: [],
       survivedSteps: [],
+      concealmentEndedReports: [],
     };
     const actionResults = specialResults.actionResults as AttackResult[];
 
@@ -291,6 +296,7 @@ export class ActionStage {
             kind: report.kind,
             ...report.attack,
           } as Step);
+          acc.actionSteps.push(...report.concealmentEndedReports);
 
           if (report.buffReport) {
             acc.actionSteps.push(report.buffReport);
@@ -332,6 +338,9 @@ export class ActionStage {
     report: AttackReport,
     attackerCard: FightingCard,
   ): void {
+    if (attackResults.length > 0) {
+      report.concealmentEndedReports.push(...revealAttacker(attackerCard));
+    }
     const reportedDeaths = new Set<FightingCard>();
     let stolenLife = 0;
 

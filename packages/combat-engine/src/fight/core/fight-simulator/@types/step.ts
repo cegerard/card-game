@@ -37,6 +37,10 @@ import {
   TransformationStartedReport,
   TransformationEndedReport,
 } from './transformation-report';
+import {
+  ConcealmentStartedReport,
+  ConcealmentEndedReport,
+} from './concealment-report';
 
 export enum StepKind {
   FightStart = 'fight_start',
@@ -69,6 +73,8 @@ export enum StepKind {
   AttackIntercepted = 'attack_intercepted',
   TransformationStarted = 'transformation_started',
   TransformationEnded = 'transformation_ended',
+  ConcealmentStarted = 'concealment_started',
+  ConcealmentEnded = 'concealment_ended',
 }
 
 export type Step =
@@ -101,4 +107,6 @@ export type Step =
   | ProtectionEndedReport
   | AttackInterceptedReport
   | TransformationStartedReport
-  | TransformationEndedReport;
+  | TransformationEndedReport
+  | ConcealmentStartedReport
+  | ConcealmentEndedReport;

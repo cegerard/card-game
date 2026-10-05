@@ -82,6 +82,7 @@ cards/
 │   ├── bleed-empowerment.ts # BleedEmpowermentSkill: extra stacks and a higher rate for its owner bleeds while a stance runs; not a Skill implementor
 │   ├── bleed-explosion.ts  # BleedExplosionSkill (BLEED_DETONATION): every bleeding card takes a share of the source attack as real damage and loses its stacks
 │   ├── stance.ts           # StanceSkill: opens a stance on its owner when its event fires
+│   ├── concealment.ts      # ConcealmentSkill: hides its owner from every enemy targeting until it attacks (or its duration runs out)
 │   ├── transformation.ts   # TransformationSkill: one-shot health-reactive transformation
 │   └── power-id-consistency.ts  # Domain validation for composite power groups
 ├── behaviors/              # Card behavior patterns
@@ -115,6 +116,8 @@ cards/
     │   └── shield-application.ts    # Applies shield to targets via targeting strategy
     ├── stance/             # Stance types
     │   └── stance.ts                # Stance: name + remainingTurns + granted status immunities; StanceActivation
+    ├── concealment/        # Concealment types
+    │   └── concealment.ts           # Concealment: name + optional remainingTurns (none = until the card attacks)
     ├── skill-activation-conditions/  # Reactive skill activation conditions
     │   └── health-threshold-condition.ts  # HealthThresholdCondition: operator ('below'|'above') + threshold ratio
     ├── damage/             # Damage type definitions
@@ -165,6 +168,8 @@ This allows special attacks to perform their primary action (damage/healing) whi
 
 **SHIELD Skill Kind (Reactive)**: `ShieldSkill` implements `HealthReactiveSkill` (interface: `isHealthReactive: true`, `onHealthChanged(card): boolean`). It is edge-triggered: fires once when `card.healthRatio` crosses the `HealthThresholdCondition` threshold downward, then rearms when health goes back above. `OtherSkillDto.event` is **optional** — SHIELD kind has no trigger event. After each HP change, `triggerReactiveSkills()` (in `reactive-skill-checker.ts`) checks all `HealthReactiveSkill` instances on the damaged card and fires those that return `true` from `onHealthChanged()`.
 
+**Concealment Mechanic**: `FightingCard.isTargetable()` (alive and not concealed) replaces `!isDead()` in every strategy reading the defending player, so a concealed card escapes all enemy targeting, area attacks included, while its allies still reach it. `revealAttacker()` (`fight-simulator/concealment-steps.ts`) ends it when the card attacks somebody — from `ActionStage.handleAttackResult()` and `skillResultsToSteps()` — and `TurnManager` ends a timed one. A `CONCEALMENT` skill on the `fight-start` event (launched by `Fight.start()` right after step 0) opens the fight concealed. Emits `concealment_started` and `concealment_ended`.
+
 **Stance Mechanic**: a stance is a named posture a card holds for a number of turns, opened by a special through `stanceActivation` and optionally listing the `StatusCategory` values its bearer refuses while it runs. A skill carrying `requiredStance` only fires while that stance is held — `FightingCard.launchSkills()` filters the others out. Emits `stance_started` and `stance_ended` steps.
 
 **DAMAGE_REDUCTION Skill Kind**: `DamageReductionSkill` mirrors `SurviveSkill` — no event, no targeting strategy, extracted from `others[]` and stored on `FightingCard`. `applyFinalDamage()` calls `tryMitigate(damage)`, which removes `rate` of the incoming damage, or returns `undefined` when its optional `probability` roll fails. It runs after the freeze/stunt amplifiers and before the shield buffer, so the shield only absorbs the reduced damage. Emits a `damage_mitigated` step; status effect ticks bypass it.
@@ -182,6 +187,7 @@ fight-simulator/
 ├── skill-results-to-steps.ts # Pure fn: SkillResults[] → Step[]; shared by ActionStage, TurnManager, DeathSkillHandler
 ├── effect-results-to-steps.ts # Pure fn: EffectResult[] → Step[] (mark_applied vs status_change + triggered debuff); shared by ActionStage and skillResultsToSteps
 ├── reactive-skill-checker.ts # Pure fn: triggers HealthReactiveSkills after HP changes → ShieldSkillResults[]
+├── concealment-steps.ts    # revealAttacker() + concealmentEndedReport(): ends a concealment and reports it
 ├── card-selectors/         # Turn order strategies
 │   ├── card-selector.ts    # Selector interface
 │   ├── player-by-player.ts # Alternating player strategy
@@ -205,6 +211,7 @@ fight-simulator/
     ├── regeneration-report.ts # RegeneratedReport: { kind: 'regenerated', card, healed, remainingHealth }
     ├── protection-report.ts # ProtectionStartedReport + ProtectionEndedReport + AttackInterceptedReport
     ├── transformation-report.ts # TransformationStartedReport + TransformationEndedReport (healthCost on exit)
+    ├── concealment-report.ts # ConcealmentStartedReport + ConcealmentEndedReport (reason: attacked | expired)
     ├── survived-report.ts  # SurvivedReport: { kind: 'survived', name, card }
     ├── damage-mitigated-report.ts # DamageMitigatedReport: { kind: 'damage_mitigated', name, card }
     └── winner-report.ts    # Victory determination
@@ -375,7 +382,7 @@ No build step. `js/parser.js` turns a raw report into `events`, `snapshots`
 with real logic — hence the one Vitest suite (`js/__tests__/parser.spec.js`),
 which makes the replayer a workspace package covered by `pnpm -r test`.
 
-`snapshots` carry every buffer a card holds: `shield`, `stance`, `protecting`,
+`snapshots` carry every buffer a card holds: `shield`, `stance`, `concealment`, `protecting`,
 `transformation`, `marks`, `bleedStacks`, `statuses`, `buffs`/`debuffs`. Death clears them all.
 The shield is drawn down per hit from `Damage.shieldAbsorbed` — the report's
 `damage` is the total dealt, so without that field the buffer stayed frozen at

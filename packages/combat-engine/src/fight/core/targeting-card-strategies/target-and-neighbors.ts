@@ -4,7 +4,7 @@ import { TargetingCardStrategy } from './targeting-card-strategy';
 
 /**
  * Targets a card chosen at runtime and its immediate neighbors in its deck
- * (positions −1, 0, +1), living cards only. Unlike `line-three`, the zone is
+ * (positions −1, 0, +1), targetable cards only. Unlike `line-three`, the zone is
  * centered on that card rather than on the attacker position.
  */
 export class TargetAndNeighborsStrategy implements TargetingCardStrategy {
@@ -19,6 +19,6 @@ export class TargetAndNeighborsStrategy implements TargetingCardStrategy {
   ): FightingCard[] {
     return defendingPlayer
       .threeCardsFromCenter(defendingPlayer.cardPosition(this.center))
-      .filter((card) => !card.isDead());
+      .filter((card) => card.isTargetable());
   }
 }

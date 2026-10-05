@@ -6,6 +6,7 @@ import { SurvivedTrigger } from '../core/trigger/survived';
 import { DamageTakenTrigger } from '../core/trigger/damage-taken';
 import { EnemyBleedDeathTrigger } from '../core/trigger/enemy-bleed-death';
 import { TurnStart } from '../core/trigger/turn-start';
+import { FightStart } from '../core/trigger/fight-start';
 import { Trigger } from '../core/trigger/trigger';
 import { TriggerEvent } from './dto/fight-data.dto';
 
@@ -15,6 +16,7 @@ const STRATEGY_MAP: Record<string, Trigger> = {
   [TriggerEvent.SURVIVED]: new SurvivedTrigger(),
   [TriggerEvent.ENEMY_BLEED_DEATH]: new EnemyBleedDeathTrigger(),
   [TriggerEvent.TURN_START]: new TurnStart(),
+  [TriggerEvent.FIGHT_START]: new FightStart(),
 };
 
 function buildDeathTrigger(

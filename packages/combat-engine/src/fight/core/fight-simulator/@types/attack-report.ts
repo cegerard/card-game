@@ -3,6 +3,7 @@ import { Step, StepKind } from './step';
 import { BuffReport, DebuffReport } from './alteration-report';
 import { ShieldAppliedReport } from './shield-report';
 import { StanceStartedReport } from './stance-report';
+import { ConcealmentEndedReport } from './concealment-report';
 
 export type AttackReport = {
   kind: StepKind.Attack | StepKind.SpecialAttack;
@@ -13,4 +14,5 @@ export type AttackReport = {
   debuffReport?: DebuffReport;
   shieldAppliedReport?: ShieldAppliedReport;
   stanceStartedReport?: StanceStartedReport;
+  concealmentEndedReports: ConcealmentEndedReport[];
 };

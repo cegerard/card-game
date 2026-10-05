@@ -3,7 +3,7 @@ import { Player } from '../player';
 import { TargetingCardStrategy } from './targeting-card-strategy';
 
 /**
- * Targets the first living enemy, in deck order, carrying at least
+ * Targets the first targetable enemy, in deck order, carrying at least
  * `threshold` bleed stacks; nobody when no enemy bleeds that much.
  */
 export class FirstBleedingEnemyStrategy implements TargetingCardStrategy {
@@ -17,7 +17,7 @@ export class FirstBleedingEnemyStrategy implements TargetingCardStrategy {
     defendingPlayer: Player,
   ): FightingCard[] {
     const target = defendingPlayer.playableCards.find(
-      (card) => card.bleedStacks() >= this.threshold,
+      (card) => card.isTargetable() && card.bleedStacks() >= this.threshold,
     );
 
     return target ? [target] : [];

@@ -8,6 +8,7 @@ import { DeathSkillHandler } from './death-skill-handler';
 import { EndEventProcessor } from './end-event-processor';
 import { skillResultsToSteps } from './skill-results-to-steps';
 import { triggerReactiveSkills } from './reactive-skill-checker';
+import { concealmentEndedReport } from './concealment-steps';
 
 export class TurnManager {
   private player1: Player;
@@ -89,6 +90,10 @@ export class TurnManager {
           card: card.identityInfo,
         });
       });
+      const expiredConcealment = card.decreaseConcealmentDuration();
+      if (expiredConcealment) {
+        steps.push(concealmentEndedReport(card, expiredConcealment, 'expired'));
+      }
       this.processCardSkill(card, steps);
       // Regeneration runs before the status ticks: the card mends itself, then
       // the poison bites into what is left.

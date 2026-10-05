@@ -39,7 +39,8 @@ export type SkillKind =
   | 'BLEED_STACK_SCALING'
   | 'STANCE'
   | 'BLEED_EMPOWERMENT'
-  | 'BLEED_DETONATION';
+  | 'BLEED_DETONATION'
+  | 'CONCEALMENT';
 
 export type BuffType =
   | 'attack'
@@ -88,7 +89,8 @@ export type TriggerEvent =
   | 'enemy-bleed-death'
   | 'turn-start'
   | 'bleed-stacks-applied'
-  | 'damage-taken';
+  | 'damage-taken'
+  | 'fight-start';
 
 export type TargetingStrategy =
   | 'position-based'
@@ -296,7 +298,7 @@ export interface OtherSkill {
   requiresStance?: string;
   /** Requis pour ALTERATION. */
   buffType?: BuffType;
-  /** Requis pour ALTERATION et PROTECTION. */
+  /** Requis pour ALTERATION et PROTECTION ; facultatif pour CONCEALMENT (sans durée, jusqu'à la première attaque). */
   duration?: number;
   polarity?: 'buff' | 'debuff';
   activationCondition?: BuffCondition;

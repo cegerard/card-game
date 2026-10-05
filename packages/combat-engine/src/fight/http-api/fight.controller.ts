@@ -92,6 +92,7 @@ import { DamageReductionSkill } from '../core/cards/skills/damage-reduction';
 import { DodgeBonusDenialSkill } from '../core/cards/skills/dodge-bonus-denial';
 import { BleedStackScalingSkill } from '../core/cards/skills/bleed-stack-scaling';
 import { BleedEmpowermentSkill } from '../core/cards/skills/bleed-empowerment';
+import { ConcealmentSkill } from '../core/cards/skills/concealment';
 
 const CARD_BOUND_SKILL_KINDS = [
   SkillKind.SURVIVE,
@@ -878,6 +879,17 @@ export class FightController {
           this.buildTriggerForSkill(skillData, ownerId),
           skillData.powerId,
         );
+      case SkillKind.CONCEALMENT:
+        try {
+          return new ConcealmentSkill(
+            skillData.name,
+            this.buildTriggerForSkill(skillData, ownerId),
+            skillData.duration,
+            skillData.powerId,
+          );
+        } catch (e) {
+          throw new BadRequestException((e as Error).message);
+        }
       case SkillKind.BLEED_DETONATION:
         return new BleedExplosionSkill(
           skillData.name,

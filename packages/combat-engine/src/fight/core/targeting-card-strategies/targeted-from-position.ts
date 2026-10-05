@@ -14,13 +14,15 @@ export class TargetedFromPosition implements TargetingCardStrategy {
     const defendingCards = defendingPlayer.allCards;
     const targetedCard = defendingCards[attackingCardPosition];
 
-    if (!targetedCard || targetedCard.isDead()) {
-      // check if there is a card alive after the dead card and go back to the first alive card
+    if (!targetedCard || !targetedCard.isTargetable()) {
+      // check if there is a targetable card after the missing one and go back to the first targetable card
       const nextCard =
         defendingCards
           .slice(attackingCardPosition + 1)
-          .find((c) => !c.isDead()) ||
-        defendingCards.slice(0, attackingCardPosition).find((c) => !c.isDead());
+          .find((c) => c.isTargetable()) ||
+        defendingCards
+          .slice(0, attackingCardPosition)
+          .find((c) => c.isTargetable());
 
       if (nextCard) {
         return [nextCard];
