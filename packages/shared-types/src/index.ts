@@ -66,11 +66,12 @@ export type EffectType =
 export type StatusCategory = 'control' | 'damage-over-time';
 
 /**
- * Ce dont le taux d'un soin est une part. `source-attack` suit l'attaque du
- * soigneur, `target-max-health` les PV max de la carte soignée — ce que veut
- * dire un kit formulé « l'allié récupère 10 % de ses PV par tour ».
+ * Ce dont le taux d'un soin ou d'un saignement est une part. `source-attack`
+ * suit l'attaque du lanceur, `target-max-health` les PV max de la carte qui
+ * reçoit — ce que veut dire un kit formulé « l'allié récupère 10 % de ses PV
+ * par tour » ou « saigne de 2 % de ses PV max par tour ».
  */
-export type HealBasis = 'source-attack' | 'target-max-health';
+export type RateBasis = 'source-attack' | 'target-max-health';
 
 export type DodgeStrategy = 'simple-dodge' | 'random-dodge';
 
@@ -155,6 +156,8 @@ export interface EffectConfig {
   level?: number;
   /** BLEED uniquement (requis) : tours pendant lesquels chaque pile saigne. */
   duration?: number;
+  /** BLEED uniquement : ce dont `rate` est une part (défaut `source-attack`). */
+  basis?: RateBasis;
   /** MARK uniquement : type de dégâts amplifié par la marque. */
   damageType?: DamageType;
   /** MARK et BLEED (requis) : nombre maximal de cumuls. */
@@ -334,7 +337,7 @@ export interface OtherSkill {
    * HEALING uniquement : ce dont le `rate` est une part. Défaut
    * `source-attack`.
    */
-  healBasis?: HealBasis;
+  healBasis?: RateBasis;
   /** TRANSFORMATION uniquement. */
   statAlterations?: StatAlteration[];
   lifestealRate?: number;

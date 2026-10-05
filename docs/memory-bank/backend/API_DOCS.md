@@ -228,6 +228,7 @@ Simulates a turn-based card battle between two players.
   rate: number,               // Damage coefficient per tick (unused for STUNT); amplification per stack for MARK; damage of each stack per turn for BLEED
   level: 1 | 2 | 3,           // Required except for MARK and BLEED. Duration: STUNT = 2*level-1 turns; others = level 1=1, 2=3, 3=5 ticks
   duration?: number,          // BLEED only (required, >= 1): turns each stack bleeds
+  basis?: "source-attack" | "target-max-health",  // BLEED only: what `rate` is a share of (default source-attack), see RateBasis
   damageType?: "PHYSICAL" | "FIRE" | "WATER" | "EARTH" | "AIR",  // MARK only (required): amplified damage type
   maxStacks?: number,         // MARK and BLEED (required): stack cap
   stacks?: number,            // MARK and BLEED: stacks applied per trigger (default 1)
@@ -628,14 +629,14 @@ a besoin de ce champ pour le décrémenter : sans lui le bouclier restait affich
 - `STANCE`: Opens a stance on its owner when its `event` fires — the triggered counterpart of `SpecialDto.stanceActivation`. Requires `stanceActivation` (`name`, `duration`, optional `immunities`), no `targetingStrategy`. Skills with the matching `requiresStance` then run for its duration; re-opening a running stance refreshes it. Emits `stance_started`, and `stance_ended` at turn end
 - `TRANSFORMATION`: One-shot health-reactive transformation — no `event`, no `targetingStrategy`; requires `duration` and an `activationCondition` threshold. Applies its own `statAlterations` and, for the same duration, an optional `lifestealRate` (heals that share of max health on every landed attack) and `statusImmunity`. An optional `endCostRate` charges that share of max health when the transformation ends, never below one health point. Fires once per fight
 
-### HealBasis
+### RateBasis
 
-What a `HEALING` skill's `rate` is a share of. Defaults to `source-attack`, which every card written before this option keeps.
+What a rate is a share of: the `rate` of a `HEALING` skill (`healBasis`) and of a `BLEED` effect (`basis`). Defaults to `source-attack`, which every card written before this option keeps.
 
-- `source-attack`: the healer's `actualAttack` — the heal grows with the caster, which suits a support whose offence and care scale together
-- `target-max-health`: the receiver's maximum health — the same heal whoever casts it, which is what a kit phrased as "the ally recovers 10% of its health per turn" means
+- `source-attack`: the caster's attack — the heal or the bleed grows with the caster, which suits a support whose offence and care scale together
+- `target-max-health`: the receiver's maximum health — the same amount whoever casts it, which is what a kit phrased as "the ally recovers 10% of its health per turn" or "bleeds 2% of its max health per turn" means
 
-Both go through `applyHealing()` (`skills/heal-basis.ts`), shared with `SpecialHealing`; an unknown basis throws. The heal is capped at the target's maximum health either way.
+Heals go through `applyHealing()` (`skills/heal-basis.ts`), shared with `SpecialHealing`, and are capped at the target's maximum health. A bleed on `target-max-health` reads the bleeding card's maximum health when the stack is laid, so `BLEED_STACK_SCALING` (an attack bonus) does not affect it. An unknown basis throws.
 
 ### StatusCategory
 
@@ -652,7 +653,7 @@ An elemental `MARK` is not a status effect and no immunity refuses it.
 - `BURN`: Damage over time
 - `FREEZE`: Prevents action for 1-5 turns, increases damage taken by 20%
 - `STUNT`: Prevents action for 1-5 turns (2*level-1), increases damage taken by 20%; no damage tick; does not stack with freeze (whichever is active takes precedence)
-- `BLEED`: Cumulative damage over time — each application adds `stacks` stacks, each bleeding `rate × source attack` (fixed when applied) per turn for its own `duration`, so stacks applied at different turns expire independently. Capped at `maxStacks`: extra stacks are lost, and an application at the cap emits no step. Cannot be applied to a frozen card, and a freeze pauses it: no damage and no stack duration spent until the card thaws. Refused as a whole by a `damage-over-time` immunity or a won resistance roll (one roll per application). An end event removes only the stacks it bound
+- `BLEED`: Cumulative damage over time — each application adds `stacks` stacks, each bleeding `rate × source attack` — or `rate × target max health` with `basis: "target-max-health"` — (fixed when applied) per turn for its own `duration`, so stacks applied at different turns expire independently. Capped at `maxStacks`: extra stacks are lost, and an application at the cap emits no step. Cannot be applied to a frozen card, and a freeze pauses it: no damage and no stack duration spent until the card thaws. Refused as a whole by a `damage-over-time` immunity or a won resistance roll (one roll per application). An end event removes only the stacks it bound
 - `MARK`: Cumulative elemental mark — each stack amplifies the damage the card receives from `damageType` by `rate` (multiplicative on that damage portion, before defense). Stacks up to `maxStacks`, never expires, no damage tick. One independent mark per damage type
 
 ### BuffType

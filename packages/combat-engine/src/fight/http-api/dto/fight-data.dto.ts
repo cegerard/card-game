@@ -125,7 +125,7 @@ export enum TriggerEvent {
   BLEED_STACKS_APPLIED = 'bleed-stacks-applied',
 }
 
-export enum HealBasisDto {
+export enum RateBasisDto {
   SOURCE_ATTACK = 'source-attack',
   TARGET_MAX_HEALTH = 'target-max-health',
 }
@@ -210,6 +210,11 @@ export class EffectDto {
   @IsNumber()
   @Min(1)
   duration?: number;
+
+  // BLEED only: what the rate is a share of (default source-attack)
+  @IsOptional()
+  @IsEnum(RateBasisDto)
+  basis?: RateBasisDto;
 
   @ValidateIf((o) => o.type === Effect.MARK)
   @IsDefined()
@@ -842,8 +847,8 @@ export class OtherSkillDto {
 
   // HEALING only: what the rate is a share of. Defaults to source-attack.
   @IsOptional()
-  @IsEnum(HealBasisDto)
-  healBasis?: HealBasisDto;
+  @IsEnum(RateBasisDto)
+  healBasis?: RateBasisDto;
 
   @IsOptional()
   @IsString()

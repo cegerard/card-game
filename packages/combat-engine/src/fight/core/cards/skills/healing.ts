@@ -4,7 +4,8 @@ import { Skill, SkillKind, SkillResults } from './skill';
 import { Trigger } from '../../trigger/trigger';
 import { ActivatableTrigger } from '../../trigger/activatable-trigger';
 import { FightingContext } from '../@types/fighting-context';
-import { HealBasis, applyHealing } from './heal-basis';
+import { applyHealing } from './heal-basis';
+import { RateBasis } from '../@types/rate-basis';
 
 export class Healing implements Skill {
   public id = 'healing-skill';
@@ -16,7 +17,7 @@ export class Healing implements Skill {
   private readonly powerId?: string;
   private readonly activationLimit?: number;
   private readonly endEvent?: string;
-  private readonly healBasis?: HealBasis;
+  private readonly healBasis?: RateBasis;
   private activationCount = 0;
 
   constructor(
@@ -27,7 +28,7 @@ export class Healing implements Skill {
     powerId?: string,
     activationLimit?: number,
     endEvent?: string,
-    healBasis?: HealBasis,
+    healBasis?: RateBasis,
   ) {
     this.name = name;
     this.effectRate = effectRate;

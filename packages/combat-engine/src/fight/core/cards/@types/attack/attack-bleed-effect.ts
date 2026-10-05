@@ -5,6 +5,7 @@ import { EffectTriggeredDebuff } from './effect-triggered-debuff';
 import { CardStateBleeding } from '../state/card-state-bleeding';
 import { round2 } from '../../../../tools/round';
 import { Randomizer } from '../../../randomizer';
+import { RATE_BASES, RateBasis } from '../rate-basis';
 
 export class BleedAttackEffect implements AttackEffect {
   public readonly type = 'bleed' as const;
@@ -18,7 +19,11 @@ export class BleedAttackEffect implements AttackEffect {
     public readonly probability?: number,
     public readonly triggeredDebuff?: EffectTriggeredDebuff,
     public readonly terminationEvent?: string,
+    private readonly basis: RateBasis = 'source-attack',
   ) {
+    if (!RATE_BASES.includes(basis)) {
+      throw new Error(`Unknown bleed basis: ${basis}`);
+    }
     const counts = { duration, maxStacks, stacks };
     Object.entries(counts).forEach(([field, value]) => {
       if (value < 1) {
@@ -48,7 +53,11 @@ export class BleedAttackEffect implements AttackEffect {
       stacks: this.stacks,
       rate: this.rate,
     });
-    const damageValue = round2(card.attackPower(context) * rate);
+    const damageValue = round2(
+      this.basis === 'target-max-health'
+        ? defender.maxHealth * rate
+        : card.attackPower(context) * rate,
+    );
     const laidStacks = Math.min(stacks, room);
     const bleeding = new CardStateBleeding(
       Array.from({ length: laidStacks }, () => ({

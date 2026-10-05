@@ -6,6 +6,7 @@ import { createFightingCard } from '../../../../../../../test/helpers/fighting-c
 import { FightingCard } from '../../../fighting-card';
 import { StateEffectResult } from '../attack-effect';
 import { EffectTriggeredDebuff } from '../effect-triggered-debuff';
+import { RateBasis } from '../../rate-basis';
 
 function bleed(
   params: { stacks?: number; maxStacks?: number; probability?: number } = {},
@@ -140,6 +141,41 @@ describe('BleedAttackEffect', () => {
       const result = effect.applyEffect(defender, attacker, null);
 
       expect(result.triggeredDebuff.debuff.type).toBe('defense');
+    });
+  });
+
+  describe('with a damage basis', () => {
+    const tickDamage = (basis?: RateBasis) => {
+      new BleedAttackEffect(
+        0.05,
+        3,
+        8,
+        null,
+        1,
+        undefined,
+        undefined,
+        undefined,
+        basis,
+      ).applyEffect(defender, attacker, null);
+      return defender.applyStateEffects()[0].damage;
+    };
+
+    it('reads the source attack by default', () => {
+      expect(tickDamage()).toBe(5);
+    });
+
+    it('reads the source attack for source-attack', () => {
+      expect(tickDamage('source-attack')).toBe(5);
+    });
+
+    it('reads the defender max health for target-max-health', () => {
+      expect(tickDamage('target-max-health')).toBe(25);
+    });
+
+    it('rejects an unknown basis', () => {
+      expect(() => tickDamage('whatever' as RateBasis)).toThrow(
+        'Unknown bleed basis: whatever',
+      );
     });
   });
 
