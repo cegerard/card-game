@@ -450,6 +450,7 @@ export class FightController {
           effectDto.probability,
           triggeredDebuff,
           effectDto.terminationEvent,
+          effectDto.basis,
         );
     }
   }

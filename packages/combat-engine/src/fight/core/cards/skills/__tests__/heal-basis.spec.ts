@@ -1,4 +1,5 @@
-import { applyHealing, HealBasis } from '../heal-basis';
+import { applyHealing } from '../heal-basis';
+import { RateBasis } from '../../@types/rate-basis';
 import { createFightingCard } from '../../../../../../test/helpers/fighting-card';
 import { FightingCard } from '../../fighting-card';
 
@@ -49,7 +50,7 @@ describe('applyHealing', () => {
   describe('on an unknown basis', () => {
     it('throws instead of falling back silently', () => {
       expect(() =>
-        applyHealing(source, target, RATE, 'whatever' as HealBasis),
+        applyHealing(source, target, RATE, 'whatever' as RateBasis),
       ).toThrow('Unknown healing basis: whatever');
     });
   });

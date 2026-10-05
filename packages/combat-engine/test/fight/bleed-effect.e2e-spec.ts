@@ -89,6 +89,18 @@ describe('BLEED effect', () => {
     );
   });
 
+  it('bleeds a share of the target max health with target-max-health', async () => {
+    const tick = (
+      await steps({ ...bleedEffect, rate: 0.02, basis: 'target-max-health' })
+    ).find((s) => s.kind === 'state_effect' && s.type === 'bleed');
+
+    expect(tick.damage).toBe(2000);
+  });
+
+  it('returns 400 with an unknown basis', () => {
+    return post(payload({ ...bleedEffect, basis: 'whatever' })).expect(400);
+  });
+
   it('caps the stacks at the maximum', async () => {
     const stacks = (await steps({ ...bleedEffect, maxStacks: 2 }))
       .filter((s) => s.kind === 'state_effect' && s.type === 'bleed')
