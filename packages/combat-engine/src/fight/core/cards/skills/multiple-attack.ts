@@ -7,7 +7,10 @@ import { FightingCard } from '../fighting-card';
 import { DamageCalculator } from '../damage/damage-calculator';
 import { AttackSkill } from './attack-skill';
 import { NamedAttackResult } from '../@types/action-result/named-attack-result';
-import { BleedStackBonus } from '../@types/attack/bleed-stack-bonus';
+import {
+  DamageTypeBonus,
+  applyDamageBonuses,
+} from '../@types/attack/damage-type-bonus';
 
 export class MultipleAttack implements AttackSkill {
   constructor(
@@ -19,7 +22,7 @@ export class MultipleAttack implements AttackSkill {
     private readonly effects?: AttackEffect[],
     private readonly comboFinisher?: DamageComposition[],
     private readonly comboFinisherEffects?: AttackEffect[],
-    private readonly bleedStackBonus?: BleedStackBonus,
+    private readonly damageBonuses: DamageTypeBonus[] = [],
     private readonly defensePenetration?: number,
   ) {}
 
@@ -88,7 +91,7 @@ export class MultipleAttack implements AttackSkill {
         }
 
         const { total } = DamageCalculator.calculateDamage(
-          this.withBonus(this.damages, defender),
+          this.withBonus(this.damages, card, defender),
           attackPower * damageMultiplier,
           defender,
           this.defensePenetration,
@@ -126,7 +129,7 @@ export class MultipleAttack implements AttackSkill {
         if (dodgedTargets.has(defender) || defender.isDead()) continue;
 
         const { total } = DamageCalculator.calculateDamage(
-          this.withBonus(this.comboFinisher, defender),
+          this.withBonus(this.comboFinisher, card, defender),
           card.attackPower(context),
           defender,
           this.defensePenetration,
@@ -162,8 +165,9 @@ export class MultipleAttack implements AttackSkill {
 
   private withBonus(
     damages: DamageComposition[],
+    attacker: FightingCard,
     defender: FightingCard,
   ): DamageComposition[] {
-    return this.bleedStackBonus?.applyTo(damages, defender) ?? damages;
+    return applyDamageBonuses(this.damageBonuses, damages, attacker, defender);
   }
 }

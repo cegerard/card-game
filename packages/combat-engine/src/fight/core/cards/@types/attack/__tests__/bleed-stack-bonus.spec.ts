@@ -23,16 +23,17 @@ function bleedingCard(stacks: number): FightingCard {
 
 describe('BleedStackBonus', () => {
   const bonus = new BleedStackBonus(3, DamageType.PHYSICAL, 1.2);
+  const attacker = createFightingCard({});
 
   it('leaves the damages unchanged below the stack threshold', () => {
-    expect(bonus.applyTo(lacerationDamages, bleedingCard(2))).toEqual(
+    expect(bonus.applyTo(lacerationDamages, attacker, bleedingCard(2))).toEqual(
       lacerationDamages,
     );
   });
 
   it('boosts only the targeted damage type from the threshold on', () => {
     const rates = bonus
-      .applyTo(lacerationDamages, bleedingCard(3))
+      .applyTo(lacerationDamages, attacker, bleedingCard(3))
       .map((d) => d.rate);
 
     expect(rates).toEqual([0.72, 0.4]);

@@ -106,6 +106,10 @@ Simulates a turn-based card battle between two players.
     minStacks: number,                    // Integer >= 1: bleed stacks the target must carry before the hit
     damageType: "PHYSICAL" | "FIRE" | "WATER" | "EARTH" | "AIR",  // Only this composition is multiplied
     multiplier: number                    // Must be > 0, e.g. 1.2 for +20%
+  },
+  concealedBonus?: {                      // Optional: boosts one damage type when the attacker strikes from concealment (see CONCEALMENT)
+    damageType: "PHYSICAL" | "FIRE" | "WATER" | "EARTH" | "AIR",  // Only this composition is multiplied
+    multiplier: number                    // Must be > 0, e.g. 1.5 for +50%
   }
 }
 ```
@@ -134,7 +138,11 @@ Simulates a turn-based card battle between two players.
     minStacks: number,                    // Integer >= 1: bleed stacks the target must carry before the hit
     damageType: "PHYSICAL" | "FIRE" | "WATER" | "EARTH" | "AIR",  // Only this composition is multiplied
     multiplier: number                    // Must be > 0, e.g. 1.2 for +20%
-  }   // Same as SpecialDto.bleedStackBonus
+  },  // Same as SpecialDto.bleedStackBonus
+  concealedBonus?: {                      // Optional: boosts one damage type when the attacker strikes from concealment (see CONCEALMENT)
+    damageType: "PHYSICAL" | "FIRE" | "WATER" | "EARTH" | "AIR",  // Only this composition is multiplied
+    multiplier: number                    // Must be > 0, e.g. 1.5 for +50%
+  }   // Same as SpecialDto.concealedBonus
 }
 ```
 
@@ -154,7 +162,11 @@ Simulates a turn-based card battle between two players.
     minStacks: number,                    // Integer >= 1: bleed stacks the target must carry before the hit
     damageType: "PHYSICAL" | "FIRE" | "WATER" | "EARTH" | "AIR",  // Only this composition is multiplied
     multiplier: number                    // Must be > 0, e.g. 1.2 for +20%
-  }   // Same as SpecialDto.bleedStackBonus, finisher included
+  },  // Same as SpecialDto.bleedStackBonus, finisher included
+  concealedBonus?: {                      // Optional: boosts one damage type when the attacker strikes from concealment (see CONCEALMENT)
+    damageType: "PHYSICAL" | "FIRE" | "WATER" | "EARTH" | "AIR",  // Only this composition is multiplied
+    multiplier: number                    // Must be > 0, e.g. 1.5 for +50%
+  }   // Same as SpecialDto.concealedBonus: every hit of the action, finisher included
 }
 ```
 
@@ -648,7 +660,7 @@ a besoin de ce champ pour le décrémenter : sans lui le bouclier restait affich
 - `BLEED_EMPOWERMENT`: Passive — no `event`, no `targetingStrategy`; requires `requiresStance`, `extraStacks` and `rate`. While its owner holds that stance, every BLEED it applies (simple, multiple, special, triggered attacks) lays `extraStacks` more stacks and bleeds at `rate` instead of the effect own rate, still within the effect `maxStacks`. Outside the stance nothing changes. Extracted from `others[]` like SURVIVE; it emits no step
 - `BLEED_DETONATION`: Makes every bleed on the board burst when its `event` fires — meant for `self-death` with `requiresStance`, a last word while a power runs. Each living card carrying at least one stack, both teams, takes `rate × source attack` once (not per stack) as real damage ignoring defense, then loses all its stacks. Requires `rate`, no `targetingStrategy`. Reported as an `attack` step named after the skill; nothing when no card bleeds. A card it kills goes through its own death cascade (`self-death`, `ally-death`, `enemy-death`…) right away
 - `STANCE`: Opens a stance on its owner when its `event` fires — the triggered counterpart of `SpecialDto.stanceActivation`. Requires `stanceActivation` (`name`, `duration`, optional `immunities`), no `targetingStrategy`. Skills with the matching `requiresStance` then run for its duration; re-opening a running stance refreshes it. Emits `stance_started`, and `stance_ended` at turn end
-- `CONCEALMENT`: Hides its owner from the opponent when its `event` fires — on `fight-start` for a card that opens the fight concealed. Requires `event`, no `targetingStrategy`; `duration` is optional (integer >= 0, 400 otherwise): without it the concealment lasts until the card attacks, with it it also runs out like a stance. A concealed card is left out of **every** enemy targeting strategy, area attacks included (`target-all`, `line-three`, `position-based` falls back to the next targetable card…); its allies still target it. When nobody is targetable, the attack strikes nobody. The concealment ends as soon as the card launches an attack that targets somebody (simple, multiple, special, triggered attacks), even a dodged one; other skills do not end it. Re-concealing refreshes it. Emits `concealment_started` and `concealment_ended`
+- `CONCEALMENT`: Hides its owner from the opponent when its `event` fires — on `fight-start` for a card that opens the fight concealed. Requires `event`, no `targetingStrategy`; `duration` is optional (integer >= 0, 400 otherwise): without it the concealment lasts until the card attacks, with it it also runs out like a stance. A concealed card is left out of **every** enemy targeting strategy, area attacks included (`target-all`, `line-three`, `position-based` falls back to the next targetable card…); its allies still target it. When nobody is targetable, the attack strikes nobody. The concealment ends as soon as the card launches an attack that targets somebody (simple, multiple, special, triggered attacks), even a dodged one; other skills do not end it. That attack still counts as struck from concealment: a `concealedBonus` applies to every hit of it. Re-concealing refreshes it. Emits `concealment_started` and `concealment_ended`
 - `TRANSFORMATION`: One-shot health-reactive transformation — no `event`, no `targetingStrategy`; requires `duration` and an `activationCondition` threshold. Applies its own `statAlterations` and, for the same duration, an optional `lifestealRate` (heals that share of max health on every landed attack) and `statusImmunity`. An optional `endCostRate` charges that share of max health when the transformation ends, never below one health point. Fires once per fight
 
 ### RateBasis

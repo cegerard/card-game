@@ -16,7 +16,10 @@ import { ShieldResult } from '../@types/action-result/shield-result';
 import { MarkedTargetBonus } from '../@types/mark/marked-target-bonus';
 import { Stance, StanceActivation } from '../@types/stance/stance';
 import { AttackResult } from '../@types/action-result/attack-result';
-import { BleedStackBonus } from '../@types/attack/bleed-stack-bonus';
+import {
+  DamageTypeBonus,
+  applyDamageBonuses,
+} from '../@types/attack/damage-type-bonus';
 import { EnergyRefund } from '../@types/attack/energy-refund';
 
 const ENERGY_INCREASE_FACTOR = 10;
@@ -34,7 +37,7 @@ export class SpecialAttack implements Special {
     private readonly markedTargetBonus?: MarkedTargetBonus,
     private readonly stanceActivation?: StanceActivation,
     private readonly hits: number = 1,
-    private readonly bleedStackBonus?: BleedStackBonus,
+    private readonly damageBonuses: DamageTypeBonus[] = [],
     private readonly energyRefund?: EnergyRefund,
   ) {
     if (hits < 1) {
@@ -123,8 +126,12 @@ export class SpecialAttack implements Special {
     }
 
     const markedBonus = this.markedTargetBonus?.multiplierFor(target) ?? 1;
-    const damages =
-      this.bleedStackBonus?.applyTo(this.damages, target) ?? this.damages;
+    const damages = applyDamageBonuses(
+      this.damageBonuses,
+      this.damages,
+      source,
+      target,
+    );
     const { total } = DamageCalculator.calculateDamage(
       damages,
       source.attackPower(context) * damageMultiplier * markedBonus,
