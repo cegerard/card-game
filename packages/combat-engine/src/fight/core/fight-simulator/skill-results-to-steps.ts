@@ -12,6 +12,7 @@ type AlterationSkillResults =
 import { Step, StepKind } from './@types/step';
 import { effectResultsToSteps } from './effect-results-to-steps';
 import { EndEventProcessor } from './end-event-processor';
+import { revealAttacker } from './concealment-steps';
 
 export function skillResultsToSteps(
   card: FightingCard,
@@ -75,6 +76,7 @@ export function skillResultsToSteps(
           energy: card.actualEnergy,
           powerId: skillResult.powerId,
         });
+        steps.push(...revealAttacker(card));
 
         // Same per-hit order as ActionStage.handleAttackResult: what happened
         // on the way to the health pool first, then the outcome.
@@ -194,6 +196,14 @@ export function skillResultsToSteps(
           name: skillResult.stance.name,
           card: card.identityInfo,
           remainingTurns: skillResult.stance.remainingTurns,
+        });
+        break;
+      case SkillKind.Concealment:
+        steps.push({
+          kind: StepKind.ConcealmentStarted,
+          name: skillResult.concealment.name,
+          card: card.identityInfo,
+          remainingTurns: skillResult.concealment.remainingTurns,
         });
         break;
       default:

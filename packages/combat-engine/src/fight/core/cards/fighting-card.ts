@@ -37,6 +37,7 @@ import { round2 } from '../../tools/round';
 import { Randomizer } from '../randomizer';
 import { Shield } from './@types/shield/shield';
 import { Stance } from './@types/stance/stance';
+import { Concealment } from './@types/concealment/concealment';
 import {
   StatusCategory,
   statusCategoryOf,
@@ -158,6 +159,9 @@ export class FightingCard {
 
   // Stances
   private stances: Stance[] = [];
+
+  // Concealment
+  private concealment: Concealment | null = null;
 
   // Targeting overrides
   private targetingOverrides: TargetingOverrideEntry[] = [];
@@ -765,6 +769,44 @@ export class FightingCard {
     const stance: Stance = { name, remainingTurns: duration, immunities };
     this.stances.push(stance);
     return stance;
+  }
+
+  /**
+   * Hides the card from every enemy targeting strategy, or refreshes a
+   * running concealment. Without a duration it lasts until the card attacks.
+   */
+  public conceal(name: string, duration?: number): Concealment {
+    this.concealment = { name, remainingTurns: duration };
+    return this.concealment;
+  }
+
+  public isConcealed(): boolean {
+    return this.concealment !== null;
+  }
+
+  /** Whether an enemy can pick the card as a target. */
+  public isTargetable(): boolean {
+    return !this.isDead() && !this.isConcealed();
+  }
+
+  /** Ends the concealment when the card attacks; returns the one it broke. */
+  public breakConcealment(): Concealment | null {
+    const broken = this.concealment;
+    this.concealment = null;
+    return broken;
+  }
+
+  /**
+   * Decrements a timed concealment and returns it when it just ran out, with
+   * the same clock as a stance.
+   */
+  public decreaseConcealmentDuration(): Concealment | null {
+    if (this.concealment?.remainingTurns === undefined) return null;
+
+    this.concealment.remainingTurns--;
+    if (this.concealment.remainingTurns >= 0) return null;
+
+    return this.breakConcealment();
   }
 
   public hasStance(name: string): boolean {

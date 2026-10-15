@@ -94,6 +94,14 @@ export function buildCardPanel(card, isTeamA, isActive) {
       </div>`
     : '';
 
+  const concealmentHtml = card.concealment
+    ? `<div class="card-panel__concealment">
+        ${ICON.concealment_started} ${esc(card.concealment.name)}${
+          card.concealment.turns != null ? ` (${card.concealment.turns}T)` : ''
+        }
+      </div>`
+    : '';
+
   const protectionHtml = card.protecting
     ? `<div class="card-panel__protection">
         ${ICON.protection_started} covers ${esc(card.protecting.target)}${
@@ -129,6 +137,7 @@ export function buildCardPanel(card, isTeamA, isActive) {
       ${shieldHtml}
       ${transformationHtml}
       ${stanceHtml}
+      ${concealmentHtml}
       ${protectionHtml}
       ${marksHtml}
       ${statusesHtml}
@@ -371,6 +380,14 @@ function buildGenericDetail(ev) {
       return `${esc(ev.name)} held for ${ev.remainingTurns} turn(s)`;
     case 'stance_ended':
       return `${esc(ev.card?.name)} leaves ${esc(ev.name)}`;
+    case 'concealment_started':
+      return ev.remainingTurns != null
+        ? `${esc(ev.name)} hides ${esc(ev.card?.name)} for ${ev.remainingTurns} turn(s)`
+        : `${esc(ev.name)} hides ${esc(ev.card?.name)} until it strikes`;
+    case 'concealment_ended':
+      return ev.reason === 'attacked'
+        ? `${esc(ev.card?.name)} strikes and leaves ${esc(ev.name)}`
+        : `${esc(ev.card?.name)} leaves ${esc(ev.name)}`;
     case 'protection_started':
       return `${esc(ev.card?.name)} stands in front of ${esc(ev.protectedCard?.name)} for ${ev.remainingTurns} turn(s)`;
     case 'protection_ended':
@@ -539,6 +556,18 @@ export function describeEvent(ev, teamBName) {
         icon: ICON.stance_ended,
         text: `${ev.card?.name} — ${ev.name ?? 'Stance'} over`,
         color: EVENT_COLOR.stance_ended,
+      };
+    case 'concealment_started':
+      return {
+        icon: ICON.concealment_started,
+        text: `${ev.card?.name} — ${ev.name ?? 'Concealment'} (HIDDEN)`,
+        color: EVENT_COLOR.concealment_started,
+      };
+    case 'concealment_ended':
+      return {
+        icon: ICON.concealment_ended,
+        text: `${ev.card?.name} — ${ev.name ?? 'Concealment'} over`,
+        color: EVENT_COLOR.concealment_ended,
       };
     case 'protection_started':
       return {

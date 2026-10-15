@@ -15,6 +15,6 @@ export class TargetedLineThree implements TargetingCardStrategy {
       attackingCardPosition,
     );
 
-    return defendingCards.filter((card) => !card.isDead());
+    return defendingCards.filter((card) => card.isTargetable());
   }
 }

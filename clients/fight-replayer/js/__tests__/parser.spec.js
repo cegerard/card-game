@@ -137,6 +137,38 @@ describe('stance', () => {
   });
 });
 
+describe('concealment', () => {
+  const concealed = {
+    0: { kind: 'fight_start', cards: [{ card: AEGIS, maxHealth: 600 }] },
+    1: {
+      kind: 'concealment_started',
+      name: 'Marche Fantôme',
+      card: AEGIS,
+    },
+  };
+
+  it('holds the concealment from the fight start', () => {
+    expect(finalState(concealed, 'aegis').concealment).toEqual({
+      name: 'Marche Fantôme',
+      turns: undefined,
+    });
+  });
+
+  it('clears the concealment when it ends', () => {
+    const steps = {
+      ...concealed,
+      2: {
+        kind: 'concealment_ended',
+        name: 'Marche Fantôme',
+        card: AEGIS,
+        reason: 'attacked',
+      },
+    };
+
+    expect(finalState(steps, 'aegis').concealment).toBeNull();
+  });
+});
+
 describe('protection', () => {
   const started = {
     1: hit(AEGIS, 100, 500),

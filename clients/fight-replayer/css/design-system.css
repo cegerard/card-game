@@ -572,6 +572,7 @@ textarea, input { font-family: var(--font-mono); }
    transformation badge above, one colour per mechanic. */
 .card-panel__shield,
 .card-panel__stance,
+.card-panel__concealment,
 .card-panel__protection {
   margin-top: 6px;
   font-size: 11px;
@@ -589,6 +590,11 @@ textarea, input { font-family: var(--font-mono); }
   color: #e0e7ff;
   background: #312e81;
   border: 1px solid #818cf8;
+}
+.card-panel__concealment {
+  color: #ede9fe;
+  background: #2e1065;
+  border: 1px solid #a78bfa;
 }
 .card-panel__protection {
   color: #cffafe;

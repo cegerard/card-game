@@ -16,7 +16,7 @@ export class TargetedCard implements TargetingCardStrategy {
       (card) => card.id === this.targetCardId,
     );
 
-    if (!target || target.isDead()) {
+    if (!target || !target.isTargetable()) {
       return [];
     }
 

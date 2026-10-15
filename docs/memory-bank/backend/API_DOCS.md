@@ -164,7 +164,7 @@ Simulates a turn-based card battle between two players.
 
 ```typescript
 {
-  kind: "HEALING" | "BUFF" | "CONDITIONAL_ATTACK" | "TARGETING_OVERRIDE" | "SHIELD" | "SURVIVE" | "DAMAGE_REDUCTION" | "PROTECTION" | "DODGE_BONUS_DENIAL" | "BLEED_STACK_SCALING" | "STANCE" | "BLEED_EMPOWERMENT" | "BLEED_DETONATION",
+  kind: "HEALING" | "BUFF" | "CONDITIONAL_ATTACK" | "TARGETING_OVERRIDE" | "SHIELD" | "SURVIVE" | "DAMAGE_REDUCTION" | "PROTECTION" | "DODGE_BONUS_DENIAL" | "BLEED_STACK_SCALING" | "STANCE" | "BLEED_EMPOWERMENT" | "BLEED_DETONATION" | "CONCEALMENT",
   name: string,
   rate?: number,                // Optional — not required for TARGETING_OVERRIDE or SURVIVE; required for SHIELD and DAMAGE_REDUCTION (share of incoming damage removed, in ]0, 1]); required for BLEED_STACK_SCALING (attack bonus per bleed stack, > 0); required for BLEED_EMPOWERMENT (bleed rate used during the stance, > 0); required for BLEED_DETONATION (share of the source attack dealt to each bleeding card, > 0)
   maxRate?: number,             // BLEED_STACK_SCALING only (required, > 0): cap of the attack bonus
@@ -172,14 +172,14 @@ Simulates a turn-based card battle between two players.
   stackThreshold?: number,      // Integer >= 1. Required when event=bleed-stacks-applied (bleed stacks the owner must have laid) and when targetingStrategy=first-bleeding-enemy (bleed stacks the target must carry)
   extraStacks?: number,         // BLEED_EMPOWERMENT only (required, integer >= 0): stacks each bleed of the owner lays on top of its own during the stance
   probability?: number,         // DAMAGE_REDUCTION only: per-hit roll (0-1); omit for a permanent reduction
-  targetingStrategy?: TargetingStrategy,  // Not required for SHIELD, SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL, BLEED_STACK_SCALING, BLEED_EMPOWERMENT, STANCE or BLEED_DETONATION kinds
-  event?: "turn-end" | "next-action" | "ally-death" | "ally-health-below" | "any-ally-health-below" | "self-death" | "enemy-bleed-death" | "bleed-stacks-applied" | "turn-start" | "damage-taken",  // When skill triggers; NOT required for SHIELD, SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL, BLEED_STACK_SCALING or BLEED_EMPOWERMENT kinds
+  targetingStrategy?: TargetingStrategy,  // Not required for SHIELD, SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL, BLEED_STACK_SCALING, BLEED_EMPOWERMENT, STANCE, BLEED_DETONATION or CONCEALMENT kinds
+  event?: "turn-end" | "next-action" | "ally-death" | "ally-health-below" | "any-ally-health-below" | "self-death" | "enemy-bleed-death" | "bleed-stacks-applied" | "turn-start" | "damage-taken" | "fight-start",  // When skill triggers; NOT required for SHIELD, SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL, BLEED_STACK_SCALING or BLEED_EMPOWERMENT kinds
   targetCardId?: string,        // Required when event=ally-death, ally-health-below or damage-taken (never for any-ally-health-below): id of the monitored card
   requiresStance?: string,      // Skill only fires while its owner holds that stance (see SpecialDto.stanceActivation); required for BLEED_EMPOWERMENT
   // SHIELD-specific fields:
   activationCondition?: { type?: "health-threshold" | "ally-presence" | "probability", operator?: "below" | "above", threshold?: number, allyName?: string, probability?: number },  // Health ratio threshold (0–1) for SHIELD/ally-health-below/any-ally-health-below activation and most-wounded-ally targeting; type "probability" gates any triggered ALTERATION skill on a per-event roll. On `any-ally-health-below` the field belongs to the trigger alone and is NOT reused as the skill own activation condition — it says an ally fell low, not that the caster did
   buffType?: "attack" | "defense" | "agility" | "accuracy" | "speed" | "criticalChance" | "regeneration" | "resistance",  // Required if kind=BUFF
-  duration?: number,            // Required if kind=BUFF (0 = infinite: permanent or event-bound)
+  duration?: number,            // Required if kind=BUFF (0 = infinite: permanent or event-bound). CONCEALMENT: optional integer >= 0, omitted = until the card attacks
   stackId?: string,             // ALTERATION debuff: name of the stack pile it counts against
   debuffMaxStacks?: number,     // Cap of that pile; goes with stackId, both or neither
   terminationEvent?: string,    // Event name that removes this skill's buff/targeting override when fired
@@ -264,7 +264,7 @@ Simulates a turn-based card battle between two players.
 ```typescript
 {
   [stepNumber: number]: {
-    kind: "fight_start" | "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "debuff_removed" | "buff_expired" | "debuff_expired" | "effect_removed" | "targeting_override" | "targeting_reverted" | "shield_applied" | "shield_broken" | "shield_expired" | "survived" | "damage_mitigated" | "stance_started" | "stance_ended" | "mark_applied" | "regenerated" | "protection_started" | "protection_ended" | "attack_intercepted" | "transformation_started" | "transformation_ended" | "fight_end",
+    kind: "fight_start" | "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "debuff_removed" | "buff_expired" | "debuff_expired" | "effect_removed" | "targeting_override" | "targeting_reverted" | "shield_applied" | "shield_broken" | "shield_expired" | "survived" | "damage_mitigated" | "stance_started" | "stance_ended" | "mark_applied" | "regenerated" | "protection_started" | "protection_ended" | "attack_intercepted" | "transformation_started" | "transformation_ended" | "concealment_started" | "concealment_ended" | "fight_end",
     // Additional properties vary by step kind
   }
 }
@@ -329,6 +329,26 @@ a besoin de ce champ pour le décrémenter : sans lui le bouclier restait affich
   kind: "stance_ended",
   name: string,
   card: CardInfo
+}
+```
+
+**`concealment_started` step** (`ConcealmentStartedReport`): Emitted when a CONCEALMENT skill hides its owner — right after `fight_start` for a skill on `fight-start`.
+```typescript
+{
+  kind: "concealment_started",
+  name: string,            // Concealment skill name
+  card: CardInfo,          // Card now out of the enemy sight
+  remainingTurns?: number  // Absent when it lasts until the card attacks
+}
+```
+
+**`concealment_ended` step** (`ConcealmentEndedReport`): Emitted when a concealment ends — right after the attack step of the card's first attack that targets somebody (`attacked`), or at turn-end when its duration runs out (`expired`).
+```typescript
+{
+  kind: "concealment_ended",
+  name: string,
+  card: CardInfo,
+  reason: "attacked" | "expired"
 }
 ```
 
@@ -605,6 +625,7 @@ a besoin de ce champ pour le décrémenter : sans lui le bouclier restait affich
 - `bleed-stacks-applied`: Fires **once per fight**, after the owner attack that brings the bleed stacks it has laid since the fight began to `stackThreshold` (a count jumping over the threshold still fires). Stacks lost at the cap or refused (immunity, resistance) do not count. Checked after every attack the owner makes in its action (simple, next-action, special); stacks laid by a reactive attack count, but are only seen at the owner next action. Each skill on the event keeps its own once-flag, so a STANCE and a BUFF sharing it both fire
 - `turn-start`: Fires on the card about to act, at the start of its turn, before its own action and before its special gauge is checked — so an `energyCost` paid here can delay the special. It adds to the action rather than replacing it (unlike `next-action`), and a card skipping its turn (frozen, stunned) never sees it. Only attack skills on this event are reported (a skill that struck nobody reports nothing), their step preceding the action steps. No `interval` needed
 - `damage-taken`: Fires every time the monitored card takes damage from a landed attack; requires `targetCardId` (the monitored card id). Unlike `ally-health-below` it is not edge-triggered — it fires on each hit, which is what counter attacks and damage-reactive passives need. A card reacts to its own wounds by passing its own id. The event reaches every playable card of the damaged card team, and `FightingContext.lastAttacker` is set, so `last-attacker-of-ally` resolves to the attacker
+- `fight-start`: Fires once on every card, right after the `fight_start` step and before the first action — for what a card brings into the fight (Selkhet starts concealed). Needs no `targetCardId`
 - `any-ally-health-below`: Edge-triggered when **any** ally crosses `activationCondition.threshold` downward, where `ally-health-below` watches one ally named up front. Requires the threshold, never a `targetCardId`. Each ally is edge-triggered on its own — the trigger fires once per crossing and rearms for that ally when its health recovers. The owner is skipped, so a card watching its own health still uses `ally-health-below`. Pairs with `most-wounded-ally` targeting for a guardian power on a deck the player composes
 
 ### SpecialKind
@@ -627,6 +648,7 @@ a besoin de ce champ pour le décrémenter : sans lui le bouclier restait affich
 - `BLEED_EMPOWERMENT`: Passive — no `event`, no `targetingStrategy`; requires `requiresStance`, `extraStacks` and `rate`. While its owner holds that stance, every BLEED it applies (simple, multiple, special, triggered attacks) lays `extraStacks` more stacks and bleeds at `rate` instead of the effect own rate, still within the effect `maxStacks`. Outside the stance nothing changes. Extracted from `others[]` like SURVIVE; it emits no step
 - `BLEED_DETONATION`: Makes every bleed on the board burst when its `event` fires — meant for `self-death` with `requiresStance`, a last word while a power runs. Each living card carrying at least one stack, both teams, takes `rate × source attack` once (not per stack) as real damage ignoring defense, then loses all its stacks. Requires `rate`, no `targetingStrategy`. Reported as an `attack` step named after the skill; nothing when no card bleeds. A card it kills goes through its own death cascade (`self-death`, `ally-death`, `enemy-death`…) right away
 - `STANCE`: Opens a stance on its owner when its `event` fires — the triggered counterpart of `SpecialDto.stanceActivation`. Requires `stanceActivation` (`name`, `duration`, optional `immunities`), no `targetingStrategy`. Skills with the matching `requiresStance` then run for its duration; re-opening a running stance refreshes it. Emits `stance_started`, and `stance_ended` at turn end
+- `CONCEALMENT`: Hides its owner from the opponent when its `event` fires — on `fight-start` for a card that opens the fight concealed. Requires `event`, no `targetingStrategy`; `duration` is optional (integer >= 0, 400 otherwise): without it the concealment lasts until the card attacks, with it it also runs out like a stance. A concealed card is left out of **every** enemy targeting strategy, area attacks included (`target-all`, `line-three`, `position-based` falls back to the next targetable card…); its allies still target it. When nobody is targetable, the attack strikes nobody. The concealment ends as soon as the card launches an attack that targets somebody (simple, multiple, special, triggered attacks), even a dodged one; other skills do not end it. Re-concealing refreshes it. Emits `concealment_started` and `concealment_ended`
 - `TRANSFORMATION`: One-shot health-reactive transformation — no `event`, no `targetingStrategy`; requires `duration` and an `activationCondition` threshold. Applies its own `statAlterations` and, for the same duration, an optional `lifestealRate` (heals that share of max health on every landed attack) and `statusImmunity`. An optional `endCostRate` charges that share of max health when the transformation ends, never below one health point. Fires once per fight
 
 ### RateBasis

@@ -8,6 +8,8 @@ import { TurnManager } from './turn-manager';
 import { FightSimulator } from './@types/fight-simulator';
 import { DeathSkillHandler } from './death-skill-handler';
 import { EndEventProcessor } from './end-event-processor';
+import { skillResultsToSteps } from './skill-results-to-steps';
+import { FIGHT_START } from '../trigger/fight-start';
 
 export class Fight implements FightSimulator {
   private player1: Player;
@@ -56,6 +58,9 @@ export class Fight implements FightSimulator {
 
   public start(): FightResult {
     const fightResult: FightResult = { 0: this.fightStart() };
+    this.launchFightStartSkills().forEach((step) => {
+      fightResult[++this.stepCounter] = step;
+    });
 
     while (this.bothPlayersCanFight() && this.thereIsTimeLeft()) {
       const nextIterationSteps = this.nextIteration();
@@ -79,6 +84,20 @@ export class Fight implements FightSimulator {
         (card) => ({ card: card.identityInfo, maxHealth: card.maxHealth }),
       ),
     };
+  }
+
+  private launchFightStartSkills(): Step[] {
+    return [
+      [this.player1, this.player2],
+      [this.player2, this.player1],
+    ].flatMap(([sourcePlayer, opponentPlayer]) =>
+      sourcePlayer.allCards.flatMap((card) =>
+        skillResultsToSteps(
+          card,
+          card.launchSkills(FIGHT_START, { sourcePlayer, opponentPlayer }),
+        ),
+      ),
+    );
   }
 
   private bothPlayersCanFight(): boolean {

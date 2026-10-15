@@ -82,6 +82,7 @@ export enum SkillKind {
   STANCE = 'STANCE',
   BLEED_EMPOWERMENT = 'BLEED_EMPOWERMENT',
   BLEED_DETONATION = 'BLEED_DETONATION',
+  CONCEALMENT = 'CONCEALMENT',
 }
 
 export enum BuffType {
@@ -123,6 +124,7 @@ export enum TriggerEvent {
   ENEMY_BLEED_DEATH = 'enemy-bleed-death',
   TURN_START = 'turn-start',
   BLEED_STACKS_APPLIED = 'bleed-stacks-applied',
+  FIGHT_START = 'fight-start',
 }
 
 export enum RateBasisDto {
@@ -621,7 +623,8 @@ export class OtherSkillDto {
       o.kind !== SkillKind.BLEED_STACK_SCALING &&
       o.kind !== SkillKind.BLEED_EMPOWERMENT &&
       o.kind !== SkillKind.STANCE &&
-      o.kind !== SkillKind.BLEED_DETONATION,
+      o.kind !== SkillKind.BLEED_DETONATION &&
+      o.kind !== SkillKind.CONCEALMENT,
   )
   @IsDefined()
   @IsEnum(TargetingStrategy)
