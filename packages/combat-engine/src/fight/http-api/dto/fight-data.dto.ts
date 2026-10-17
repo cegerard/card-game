@@ -183,6 +183,8 @@ export class EffectTriggeredDebuffDto {
   duration: number;
 
   @IsNumber()
+  @Min(0)
+  @Max(1)
   probability: number;
 
   @IsOptional()

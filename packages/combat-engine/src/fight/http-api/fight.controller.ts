@@ -113,6 +113,13 @@ const STANCE_SPECIAL_FORBIDDEN_FIELDS = [
   'concealedBonus',
 ] as const;
 
+// What only a BLEED_EMPOWERMENT skill can carry
+const BLEED_EMPOWERMENT_ONLY_FIELDS = [
+  'extraStacks',
+  'basis',
+  'triggeredDebuff',
+] as const;
+
 const CARD_BOUND_SKILL_KINDS = [
   SkillKind.SURVIVE,
   SkillKind.DAMAGE_REDUCTION,
@@ -297,6 +304,7 @@ export class FightController {
           bleedStackScalingDto.maxRate,
         )
       : undefined;
+    this.rejectMisplacedBleedEmpowermentFields(cardData.skills.others);
     const bleedEmpowermentDto = cardData.skills.others.find(
       (s) => s.kind === SkillKind.BLEED_EMPOWERMENT,
     );
@@ -460,22 +468,33 @@ export class FightController {
     );
   }
 
+  private rejectMisplacedBleedEmpowermentFields(others: OtherSkillDto[]): void {
+    for (const skill of others) {
+      if (skill.kind === SkillKind.BLEED_EMPOWERMENT) continue;
+      const misplaced = BLEED_EMPOWERMENT_ONLY_FIELDS.filter(
+        (field) => skill[field] !== undefined,
+      );
+      if (misplaced.length > 0) {
+        throw new BadRequestException(
+          `${skill.kind} skill cannot carry: ${misplaced.join(', ')}`,
+        );
+      }
+    }
+  }
+
   private buildBleedEmpowerment(
     dto: OtherSkillDto | undefined,
   ): BleedEmpowermentSkill | undefined {
     if (!dto) return undefined;
 
+    const triggeredDebuff = this.buildTriggeredDebuff(dto.triggeredDebuff);
     try {
       return new BleedEmpowermentSkill(
         dto.name,
         dto.requiresStance,
         dto.extraStacks,
         dto.rate,
-        {
-          duration: dto.duration,
-          basis: dto.basis,
-          triggeredDebuff: this.buildTriggeredDebuff(dto.triggeredDebuff),
-        },
+        { duration: dto.duration, basis: dto.basis, triggeredDebuff },
       );
     } catch (e) {
       throw new BadRequestException((e as Error).message);
