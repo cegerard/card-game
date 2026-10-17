@@ -15,6 +15,7 @@ import {
   Effect,
   EffectDto,
   BleedStackBonusDto,
+  DamageTypeBonusDto,
   EnergyRefundDto,
   FightDataDto,
   FightingCardDto,
@@ -50,6 +51,8 @@ import { BleedAttackEffect } from '../core/cards/@types/attack/attack-bleed-effe
 import { ElementalMark } from '../core/cards/@types/mark/elemental-mark';
 import { MarkedTargetBonus } from '../core/cards/@types/mark/marked-target-bonus';
 import { BleedStackBonus } from '../core/cards/@types/attack/bleed-stack-bonus';
+import { ConcealedBonus } from '../core/cards/@types/attack/concealed-bonus';
+import { DamageTypeBonus } from '../core/cards/@types/attack/damage-type-bonus';
 import { EnergyRefund } from '../core/cards/@types/attack/energy-refund';
 import { EffectTriggeredDebuff } from '../core/cards/@types/attack/effect-triggered-debuff';
 import { MathRandomizer } from '../tools/math-randomizer';
@@ -211,7 +214,7 @@ export class FightController {
         markedTargetBonus,
         cardData.skills.special.stanceActivation,
         cardData.skills.special.hits,
-        this.buildBleedStackBonus(cardData.skills.special.bleedStackBonus),
+        this.buildDamageBonuses(cardData.skills.special),
         this.buildEnergyRefund(cardData.skills.special.energyRefund),
       );
     } else if (cardData.skills.special.kind === SpecialKind.HEALING) {
@@ -245,7 +248,7 @@ export class FightController {
         maEffects,
         maComboFinisher,
         this.buildEffects(ma.comboFinisherEffects),
-        this.buildBleedStackBonus(ma.bleedStackBonus),
+        this.buildDamageBonuses(ma),
       );
     } else {
       const sa = cardData.skills.simpleAttack;
@@ -263,7 +266,7 @@ export class FightController {
         damages,
         buildTargetingStrategy(sa.targetingStrategy),
         saEffects,
-        this.buildBleedStackBonus(sa.bleedStackBonus),
+        this.buildDamageBonuses(sa),
       );
     }
 
@@ -464,12 +467,32 @@ export class FightController {
     return new EnergyRefund(dto.amount, dto.minAccuracyMargin);
   }
 
-  private buildBleedStackBonus(
-    dto: BleedStackBonusDto | undefined,
-  ): BleedStackBonus | undefined {
-    if (!dto) return undefined;
+  private buildDamageBonuses(attack: {
+    bleedStackBonus?: BleedStackBonusDto;
+    concealedBonus?: DamageTypeBonusDto;
+  }): DamageTypeBonus[] {
+    const { bleedStackBonus, concealedBonus } = attack;
+    const bonuses: DamageTypeBonus[] = [];
 
-    return new BleedStackBonus(dto.minStacks, dto.damageType, dto.multiplier);
+    if (bleedStackBonus) {
+      bonuses.push(
+        new BleedStackBonus(
+          bleedStackBonus.minStacks,
+          bleedStackBonus.damageType,
+          bleedStackBonus.multiplier,
+        ),
+      );
+    }
+    if (concealedBonus) {
+      bonuses.push(
+        new ConcealedBonus(
+          concealedBonus.damageType,
+          concealedBonus.multiplier,
+        ),
+      );
+    }
+
+    return bonuses;
   }
 
   /**

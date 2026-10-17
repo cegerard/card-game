@@ -204,11 +204,21 @@ export interface EnergyRefund {
   minAccuracyMargin: number;
 }
 
-export interface BleedStackBonus {
-  minStacks: number;
+export interface DamageTypeBonus {
   damageType: DamageType;
   /** Multiplicateur appliqué à la seule part de dégâts de ce type, par exemple 1.2 pour +20%. */
   multiplier: number;
+}
+
+export interface BleedStackBonus extends DamageTypeBonus {
+  minStacks: number;
+}
+
+export interface AttackBonuses {
+  /** Bonus sur un type de dégâts quand la cible saigne d'au moins `minStacks` piles. */
+  bleedStackBonus?: BleedStackBonus;
+  /** Bonus sur un type de dégâts quand l'attaquant frappe depuis la Dissimulation. */
+  concealedBonus?: DamageTypeBonus;
 }
 
 export interface ShieldApplication {
@@ -217,7 +227,7 @@ export interface ShieldApplication {
   targetingStrategy: Exclude<TargetingStrategy, 'targeted-card'>;
 }
 
-export interface SpecialSkill {
+export interface SpecialSkill extends AttackBonuses {
   kind: SpecialKind;
   name: string;
   damages?: DamageComposition[];
@@ -238,20 +248,16 @@ export interface SpecialSkill {
   stanceActivation?: StanceActivation;
   /** ATTACK uniquement : énergie rendue si la Précision dépasse assez l'Esquive de la cible. */
   energyRefund?: EnergyRefund;
-  /** Bonus sur un type de dégâts quand la cible saigne d'au moins `minStacks` piles. */
-  bleedStackBonus?: BleedStackBonus;
 }
 
-export interface SimpleAttackSkill {
+export interface SimpleAttackSkill extends AttackBonuses {
   name: string;
   damages: DamageComposition[];
   targetingStrategy: Exclude<TargetingStrategy, 'targeted-card'>;
   effects?: EffectConfig[];
-  /** Bonus sur un type de dégâts quand la cible saigne d'au moins `minStacks` piles. */
-  bleedStackBonus?: BleedStackBonus;
 }
 
-export interface MultipleAttackSkill {
+export interface MultipleAttackSkill extends AttackBonuses {
   name: string;
   hits: number;
   damages: DamageComposition[];
@@ -261,8 +267,6 @@ export interface MultipleAttackSkill {
   comboFinisher?: DamageComposition[];
   /** Effets appliqués uniquement sur le coup final du combo. */
   comboFinisherEffects?: EffectConfig[];
-  /** Bonus sur un type de dégâts quand la cible saigne d'au moins `minStacks` piles. */
-  bleedStackBonus?: BleedStackBonus;
 }
 
 export interface OtherSkill {
