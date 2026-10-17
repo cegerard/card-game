@@ -12,7 +12,8 @@ type AlterationSkillResults =
 import { Step, StepKind } from './@types/step';
 import { effectResultsToSteps } from './effect-results-to-steps';
 import { EndEventProcessor } from './end-event-processor';
-import { revealAttacker } from './concealment-steps';
+import { concealmentStartedReport, revealAttacker } from './concealment-steps';
+import { stanceStartedReport } from './stance-steps';
 
 export function skillResultsToSteps(
   card: FightingCard,
@@ -127,12 +128,7 @@ export function skillResultsToSteps(
         }
 
         if (skillResult.stanceStarted) {
-          steps.push({
-            kind: StepKind.StanceStarted,
-            name: skillResult.stanceStarted.name,
-            card: card.identityInfo,
-            remainingTurns: skillResult.stanceStarted.remainingTurns,
-          });
+          steps.push(stanceStartedReport(card, skillResult.stanceStarted));
         }
 
         if (skillResult.splash) {
@@ -191,20 +187,10 @@ export function skillResultsToSteps(
         });
         break;
       case SkillKind.Stance:
-        steps.push({
-          kind: StepKind.StanceStarted,
-          name: skillResult.stance.name,
-          card: card.identityInfo,
-          remainingTurns: skillResult.stance.remainingTurns,
-        });
+        steps.push(stanceStartedReport(card, skillResult.stance));
         break;
       case SkillKind.Concealment:
-        steps.push({
-          kind: StepKind.ConcealmentStarted,
-          name: skillResult.concealment.name,
-          card: card.identityInfo,
-          remainingTurns: skillResult.concealment.remainingTurns,
-        });
+        steps.push(concealmentStartedReport(card, skillResult.concealment));
         break;
       default:
         throw new Error(`Unknown SkillKind: ${(skillResult as any).skillKind}`);
