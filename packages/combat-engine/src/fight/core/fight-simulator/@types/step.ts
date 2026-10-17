@@ -37,6 +37,7 @@ import {
   TransformationStartedReport,
   TransformationEndedReport,
 } from './transformation-report';
+import { SpecialStanceReport } from './special-stance-report';
 import {
   ConcealmentStartedReport,
   ConcealmentEndedReport,
@@ -75,6 +76,7 @@ export enum StepKind {
   TransformationEnded = 'transformation_ended',
   ConcealmentStarted = 'concealment_started',
   ConcealmentEnded = 'concealment_ended',
+  SpecialStance = 'special_stance',
 }
 
 export type Step =
@@ -109,4 +111,5 @@ export type Step =
   | TransformationStartedReport
   | TransformationEndedReport
   | ConcealmentStartedReport
-  | ConcealmentEndedReport;
+  | ConcealmentEndedReport
+  | SpecialStanceReport;

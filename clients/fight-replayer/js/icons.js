@@ -8,6 +8,7 @@ export const ICON = {
   /* Attacks */
   attack:            '⚔️',
   special_attack:    '✨',
+  special_stance:    '🌀',
   /* Healing */
   healing:           '💚',
   /* Buff / Debuff */
@@ -76,6 +77,7 @@ export const STATUS_ICON = {
 export const EVENT_COLOR = {
   attack:            '#fb923c',
   special_attack:    '#f59e0b',
+  special_stance:    '#f59e0b',
   healing:           '#22c55e',
   buff:              '#a3e635',
   debuff:            '#f87171',

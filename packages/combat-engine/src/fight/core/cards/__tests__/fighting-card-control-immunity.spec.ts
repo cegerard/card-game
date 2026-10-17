@@ -15,7 +15,11 @@ describe('FightingCard — control immunity granted by a stance', () => {
 
   describe('while the stance grants control immunity', () => {
     beforeEach(() => {
-      card.activateStance(ANCHOR, 3, ['control']);
+      card.activateStance({
+        name: ANCHOR,
+        duration: 3,
+        immunities: ['control'],
+      });
     });
 
     it('refuses a stunt', () => {
@@ -53,7 +57,11 @@ describe('FightingCard — control immunity granted by a stance', () => {
 
   describe('once the stance runs out', () => {
     it('accepts a stunt again', () => {
-      card.activateStance(ANCHOR, 1, ['control']);
+      card.activateStance({
+        name: ANCHOR,
+        duration: 1,
+        immunities: ['control'],
+      });
       card.decreaseStanceDurations();
       card.decreaseStanceDurations();
 
@@ -61,9 +69,24 @@ describe('FightingCard — control immunity granted by a stance', () => {
     });
   });
 
+  describe('a running stance re-activated without its immunities', () => {
+    beforeEach(() => {
+      card.activateStance({
+        name: ANCHOR,
+        duration: 3,
+        immunities: ['control'],
+      });
+      card.activateStance({ name: ANCHOR, duration: 2 });
+    });
+
+    it('keeps refusing a stunt', () => {
+      expect(card.setState(new CardStateStunted(1, 1))).toBe(false);
+    });
+  });
+
   describe('a stance granting no immunity', () => {
     it('does not protect from control', () => {
-      card.activateStance(ANCHOR, 3);
+      card.activateStance({ name: ANCHOR, duration: 3 });
 
       expect(card.isImmuneTo('control')).toBe(false);
     });

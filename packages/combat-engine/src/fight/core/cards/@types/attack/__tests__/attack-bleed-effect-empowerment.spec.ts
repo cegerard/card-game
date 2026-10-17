@@ -28,7 +28,7 @@ describe('BleedAttackEffect laid by an empowered source', () => {
 
   describe('while the stance runs', () => {
     beforeEach(() => {
-      attacker.activateStance('vent-rouge', 3);
+      attacker.activateStance({ name: 'vent-rouge', duration: 3 });
       bleed().applyEffect(defender, attacker, null);
     });
 
@@ -56,7 +56,7 @@ describe('BleedAttackEffect laid by an empowered source', () => {
   });
 
   it('keeps to the stack cap', () => {
-    attacker.activateStance('vent-rouge', 3);
+    attacker.activateStance({ name: 'vent-rouge', duration: 3 });
 
     bleed(1).applyEffect(defender, attacker, null);
 

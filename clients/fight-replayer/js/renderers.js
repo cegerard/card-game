@@ -380,6 +380,8 @@ function buildGenericDetail(ev) {
       return `${esc(ev.name)} held for ${ev.remainingTurns} turn(s)`;
     case 'stance_ended':
       return `${esc(ev.card?.name)} leaves ${esc(ev.name)}`;
+    case 'special_stance':
+      return `${esc(ev.caster?.name)} enters a stance — energy ${ev.energy}`;
     case 'concealment_started':
       return ev.remainingTurns != null
         ? `${esc(ev.name)} hides ${esc(ev.card?.name)} for ${ev.remainingTurns} turn(s)`
@@ -427,6 +429,12 @@ export function describeEvent(ev, teamBName) {
         icon: ICON.special_attack,
         text: `${ev.attacker?.name} — ${ev.name ?? 'Special'} (SPECIAL)`,
         color: EVENT_COLOR.special_attack,
+      };
+    case 'special_stance':
+      return {
+        icon: ICON.special_stance,
+        text: `${ev.caster?.name} — ${ev.name ?? 'Special'} (SPECIAL)`,
+        color: EVENT_COLOR.special_stance,
       };
     case 'healing':
       return {

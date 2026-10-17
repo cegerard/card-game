@@ -20,11 +20,7 @@ export class StanceSkill implements Skill {
   ) {}
 
   launch(source: FightingCard, _context: FightingContext): SkillResults {
-    const stance = source.activateStance(
-      this.stanceActivation.name,
-      this.stanceActivation.duration,
-      this.stanceActivation.immunities,
-    );
+    const stance = source.activateStance(this.stanceActivation);
 
     return {
       skillKind: SkillKind.Stance,

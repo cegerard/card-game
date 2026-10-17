@@ -66,11 +66,7 @@ export class ConditionalAttack implements Skill {
       powerId: this.powerId,
       stanceStarted:
         primary && this.stanceActivation
-          ? source.activateStance(
-              this.stanceActivation.name,
-              this.stanceActivation.duration,
-              this.stanceActivation.immunities,
-            )
+          ? source.activateStance(this.stanceActivation)
           : undefined,
       // The zone is centered on the card the attack was aimed at, even when
       // a guardian stepped in front of it.

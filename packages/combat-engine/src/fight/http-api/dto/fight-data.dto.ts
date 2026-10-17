@@ -65,6 +65,7 @@ export { DamageType };
 export enum SpecialKind {
   ATTACK = 'ATTACK',
   HEALING = 'HEALING',
+  STANCE = 'STANCE',
 }
 
 export enum SkillKind {
@@ -415,9 +416,20 @@ class StanceActivationDto {
   @ArrayMinSize(1)
   @IsEnum(StatusCategoryDto, { each: true })
   immunities?: StatusCategoryDto[];
+
+  // Lets the bearer target concealed enemies while the stance runs
+  @IsOptional()
+  @IsBoolean()
+  revealsConcealed?: boolean;
 }
 
-class SpecialDto extends AttackBonusesDto {
+class SpecialConcealmentDto {
+  @IsInt()
+  @Min(0)
+  duration: number;
+}
+
+export class SpecialDto extends AttackBonusesDto {
   @IsEnum(SpecialKind)
   kind: SpecialKind;
 
@@ -443,17 +455,24 @@ class SpecialDto extends AttackBonusesDto {
   @Min(1)
   hits?: number;
 
+  @ValidateIf((o) => o.kind !== SpecialKind.STANCE)
   @IsEnum(TargetingStrategy)
   @IsNotIn([TargetingStrategy.TARGETED_CARD], {
     message:
       'targeted-card strategy can only be used with targeting override skills',
   })
-  targetingStrategy: TargetingStrategy;
+  targetingStrategy?: TargetingStrategy;
 
   @IsOptional()
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => EffectDto)
   effect?: EffectDto;
+
+  // STANCE only: conceals the caster for that many turns
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => SpecialConcealmentDto)
+  concealment?: SpecialConcealmentDto;
 
   @IsOptional()
   @IsArray()
@@ -473,7 +492,8 @@ class SpecialDto extends AttackBonusesDto {
 
   // Opens a named stance on the caster for a number of turns; skills carrying
   // requiresStance with that name are only active while it runs
-  @IsOptional()
+  @ValidateIf((o) => o.kind === SpecialKind.STANCE || o.stanceActivation)
+  @IsDefined()
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => StanceActivationDto)
   stanceActivation?: StanceActivationDto;

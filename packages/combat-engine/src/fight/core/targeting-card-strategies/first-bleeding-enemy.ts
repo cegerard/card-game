@@ -12,12 +12,14 @@ export class FirstBleedingEnemyStrategy implements TargetingCardStrategy {
   constructor(private readonly threshold: number) {}
 
   targetedCards(
-    _attackingCard: FightingCard,
+    attackingCard: FightingCard,
     _attackingPlayer: Player,
     defendingPlayer: Player,
   ): FightingCard[] {
     const target = defendingPlayer.playableCards.find(
-      (card) => card.isTargetable() && card.bleedStacks() >= this.threshold,
+      (card) =>
+        card.isTargetableBy(attackingCard) &&
+        card.bleedStacks() >= this.threshold,
     );
 
     return target ? [target] : [];

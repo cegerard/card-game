@@ -81,6 +81,16 @@ describe('Targeting a concealed enemy', () => {
     expect(targetIds(new TargetedFromPosition())).toEqual([]);
   });
 
+  it('is targeted by an attacker whose stance reveals concealed cards', () => {
+    attacker.activateStance({
+      name: 'Sens Sismique',
+      duration: 2,
+      revealsConcealed: true,
+    });
+
+    expect(targetIds(new TargetedAll())).toEqual(['hidden', 'visible']);
+  });
+
   it('can still be targeted by its own allies', () => {
     expect(
       new AllAllies()

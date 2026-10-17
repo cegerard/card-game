@@ -14,15 +14,15 @@ export class TargetedFromPosition implements TargetingCardStrategy {
     const defendingCards = defendingPlayer.allCards;
     const targetedCard = defendingCards[attackingCardPosition];
 
-    if (!targetedCard || !targetedCard.isTargetable()) {
+    if (!targetedCard || !targetedCard.isTargetableBy(attackingCard)) {
       // check if there is a targetable card after the missing one and go back to the first targetable card
       const nextCard =
         defendingCards
           .slice(attackingCardPosition + 1)
-          .find((c) => c.isTargetable()) ||
+          .find((c) => c.isTargetableBy(attackingCard)) ||
         defendingCards
           .slice(0, attackingCardPosition)
-          .find((c) => c.isTargetable());
+          .find((c) => c.isTargetableBy(attackingCard));
 
       if (nextCard) {
         return [nextCard];

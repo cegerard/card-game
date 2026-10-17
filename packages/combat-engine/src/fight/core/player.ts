@@ -23,11 +23,18 @@ export class Player {
   }
 
   /**
-   * The living teammate currently standing in front of that card, if any.
+   * The living teammate currently standing in front of that card, if any, as
+   * far as the attacker can see it: a concealed guardian shields nobody.
    * Attacks aimed at the card are resolved against the protector instead.
    */
-  public protectorOf(card: FightingCard): FightingCard | undefined {
-    return this.playableCards.find((teammate) => teammate.isProtecting(card));
+  public protectorOf(
+    card: FightingCard,
+    attacker: FightingCard,
+  ): FightingCard | undefined {
+    return this.playableCards.find(
+      (teammate) =>
+        teammate.isProtecting(card) && teammate.isTargetableBy(attacker),
+    );
   }
 
   public ownCard(card: FightingCard): boolean {

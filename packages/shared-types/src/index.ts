@@ -23,7 +23,8 @@ export type DamageType = 'PHYSICAL' | 'FIRE' | 'WATER' | 'EARTH' | 'AIR';
  */
 export type Element = DamageType;
 
-export type SpecialKind = 'ATTACK' | 'HEALING';
+/** STANCE : spéciale qui ne frappe ni ne soigne, elle ouvre une posture sur le lanceur. */
+export type SpecialKind = 'ATTACK' | 'HEALING' | 'STANCE';
 
 export type SkillKind =
   | 'HEALING'
@@ -189,6 +190,8 @@ export interface StanceActivation {
   duration: number;
   /** Catégories de statuts refusées par le porteur pendant la posture. */
   immunities?: StatusCategory[];
+  /** Le porteur peut cibler les ennemis dissimulés pendant la posture. */
+  revealsConcealed?: boolean;
 }
 
 export interface MarkedTargetBonus {
@@ -235,8 +238,11 @@ export interface SpecialSkill extends AttackBonuses {
   energy: number;
   /** ATTACK uniquement : nombre de coups (défaut 1), l'effet est tenté à chaque coup réussi. */
   hits?: number;
-  targetingStrategy: Exclude<TargetingStrategy, 'targeted-card'>;
+  /** Requis sauf pour STANCE, qui ne cible personne. */
+  targetingStrategy?: Exclude<TargetingStrategy, 'targeted-card'>;
   effect?: EffectConfig;
+  /** STANCE uniquement : dissimule le lanceur pendant ce nombre de tours. */
+  concealment?: { duration: number };
   statAlterations?: StatAlteration[];
   shieldApplication?: ShieldApplication;
   /** Bonus de dégâts quand la cible porte déjà une marque de ce type. */

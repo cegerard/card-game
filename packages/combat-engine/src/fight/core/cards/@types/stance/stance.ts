@@ -11,6 +11,8 @@ export type Stance = {
   remainingTurns: number;
   /** Status categories the bearer refuses while the stance runs. */
   immunities?: StatusCategory[];
+  /** Lets the bearer target concealed enemies while the stance runs. */
+  revealsConcealed?: boolean;
 };
 
 /** What a special declares to open a stance on its caster. */
@@ -18,4 +20,5 @@ export type StanceActivation = {
   name: string;
   duration: number;
   immunities?: StatusCategory[];
+  revealsConcealed?: boolean;
 };

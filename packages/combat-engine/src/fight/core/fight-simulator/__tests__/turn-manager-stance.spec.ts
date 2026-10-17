@@ -31,7 +31,7 @@ describe('TurnManager stance duration', () => {
 
   beforeEach(() => {
     card = createFightingCard({ accuracy: 0, agility: 0 });
-    card.activateStance(STANCE, 1);
+    card.activateStance({ name: STANCE, duration: 1 });
     manager = buildTurnManager(card);
   });
 

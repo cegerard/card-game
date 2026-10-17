@@ -36,7 +36,7 @@ import { NamedAttackResult } from './@types/action-result/named-attack-result';
 import { round2 } from '../../tools/round';
 import { Randomizer } from '../randomizer';
 import { Shield } from './@types/shield/shield';
-import { Stance } from './@types/stance/stance';
+import { Stance, StanceActivation } from './@types/stance/stance';
 import { Concealment } from './@types/concealment/concealment';
 import {
   StatusCategory,
@@ -752,23 +752,36 @@ export class FightingCard {
 
   /**
    * Opens a stance on the card, or refreshes the duration of one already
-   * running: re-casting the power that grants it must not double its length.
+   * running: re-casting the power that grants it must not double its length,
+   * and what the stance grants is kept unless the refresh states it again.
    */
-  public activateStance(
-    name: string,
-    duration: number,
-    immunities?: StatusCategory[],
-  ): Stance {
+  public activateStance({
+    name,
+    duration,
+    immunities,
+    revealsConcealed,
+  }: StanceActivation): Stance {
     const running = this.stances.find((s) => s.name === name);
     if (running) {
       running.remainingTurns = duration;
-      running.immunities = immunities;
+      running.immunities = immunities ?? running.immunities;
+      running.revealsConcealed = revealsConcealed ?? running.revealsConcealed;
       return running;
     }
 
-    const stance: Stance = { name, remainingTurns: duration, immunities };
+    const stance: Stance = {
+      name,
+      remainingTurns: duration,
+      immunities,
+      revealsConcealed,
+    };
     this.stances.push(stance);
     return stance;
+  }
+
+  /** Whether a running stance lets the card see concealed enemies. */
+  public seesConcealed(): boolean {
+    return this.stances.some((stance) => stance.revealsConcealed);
   }
 
   /**
@@ -784,9 +797,12 @@ export class FightingCard {
     return this.concealment !== null;
   }
 
-  /** Whether an enemy can pick the card as a target. */
-  public isTargetable(): boolean {
-    return !this.isDead() && !this.isConcealed();
+  /**
+   * Whether an enemy can pick the card as a target: alive, and either visible
+   * or facing an attacker whose stance reveals concealed cards.
+   */
+  public isTargetableBy(attacker: FightingCard): boolean {
+    return !this.isDead() && (!this.isConcealed() || attacker.seesConcealed());
   }
 
   /** Ends the concealment when the card attacks; returns the one it broke. */

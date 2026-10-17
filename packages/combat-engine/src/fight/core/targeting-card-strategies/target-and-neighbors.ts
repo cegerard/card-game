@@ -13,12 +13,12 @@ export class TargetAndNeighborsStrategy implements TargetingCardStrategy {
   constructor(private readonly center: FightingCard) {}
 
   targetedCards(
-    _attackingCard: FightingCard,
+    attackingCard: FightingCard,
     _attackingPlayer: Player,
     defendingPlayer: Player,
   ): FightingCard[] {
     return defendingPlayer
       .threeCardsFromCenter(defendingPlayer.cardPosition(this.center))
-      .filter((card) => card.isTargetable());
+      .filter((card) => card.isTargetableBy(attackingCard));
   }
 }

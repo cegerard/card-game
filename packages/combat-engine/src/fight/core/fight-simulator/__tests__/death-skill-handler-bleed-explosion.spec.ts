@@ -58,7 +58,7 @@ describe('DeathSkillHandler bleed explosion on its owner death', () => {
   });
 
   it('explodes while the stance runs, even on the dead owner', () => {
-    scythra.activateStance('transe-predatrice', 2);
+    scythra.activateStance({ name: 'transe-predatrice', duration: 2 });
 
     const explosion = notifyScythraDeath().find(
       (s: any) => s.name === 'Héritage',
@@ -68,7 +68,7 @@ describe('DeathSkillHandler bleed explosion on its owner death', () => {
   });
 
   it('runs the death cascade of a card the explosion kills', () => {
-    scythra.activateStance('transe-predatrice', 2);
+    scythra.activateStance({ name: 'transe-predatrice', duration: 2 });
 
     const healers = notifyScythraDeath()
       .filter((s) => s.kind === StepKind.Healing)

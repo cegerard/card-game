@@ -8,10 +8,7 @@ import { AttackResult } from '../cards/@types/action-result/attack-result';
 import { HealingReport } from '../fight-simulator/@types/healing-report';
 import { HealingResult } from '../cards/@types/action-result/healing-result';
 import { FightingContext } from '../cards/@types/fighting-context';
-import {
-  BuffReport,
-  DebuffReport,
-} from '../fight-simulator/@types/alteration-report';
+import { DebuffReport } from '../fight-simulator/@types/alteration-report';
 import {
   BuffResult,
   DebuffResult,
@@ -26,6 +23,9 @@ import { effectResultsToSteps } from '../fight-simulator/effect-results-to-steps
 import { SurvivedReport } from '../fight-simulator/@types/survived-report';
 import { BLEED_STACKS_APPLIED } from '../trigger/bleed-stacks-applied';
 import { TURN_START } from '../trigger/turn-start';
+import { SpecialStanceActionReport } from '../fight-simulator/@types/special-stance-report';
+import { ConcealmentStartedReport } from '../fight-simulator/@types/concealment-report';
+import { SpecialResult } from '../cards/@types/action-result/special-result';
 import { revealAttacker } from '../fight-simulator/concealment-steps';
 
 type SplittedSteps = {
@@ -194,6 +194,10 @@ export class ActionStage {
       return this.computeSpecialHealingResult(card);
     }
 
+    if (card.specialKind() === 'specialStance') {
+      return this.computeSpecialStanceResult(card);
+    }
+
     throw new Error(`Unknown special kind: ${card.specialKind()}`);
   }
 
@@ -215,6 +219,58 @@ export class ActionStage {
 
     this.handleAttackResult(actionResults, result, card);
 
+    Object.assign(result, this.specialSideReports(card, specialResults));
+
+    return result;
+  }
+
+  private computeSpecialStanceResult(
+    card: FightingCard,
+  ): SpecialStanceActionReport {
+    const specialResults = card.launchSpecial(this.getFightingContext(card));
+    const {
+      stanceStartedReport,
+      buffReport,
+      debuffReport,
+      shieldAppliedReport,
+    } = this.specialSideReports(card, specialResults);
+    const concealmentStartedReport: ConcealmentStartedReport | undefined =
+      specialResults.concealmentStarted && {
+        kind: StepKind.ConcealmentStarted,
+        name: specialResults.concealmentStarted.name,
+        card: card.identityInfo,
+        remainingTurns: specialResults.concealmentStarted.remainingTurns,
+      };
+
+    return {
+      kind: StepKind.SpecialStance,
+      step: {
+        kind: StepKind.SpecialStance,
+        name: specialResults.name,
+        caster: card.identityInfo,
+        energy: card.resetSpecialEnergy(),
+      },
+      followUps: [
+        stanceStartedReport,
+        buffReport,
+        debuffReport,
+        shieldAppliedReport,
+        concealmentStartedReport,
+      ].filter((step) => step !== undefined),
+    };
+  }
+
+  /** The steps a special brings on top of its hits or heals. */
+  private specialSideReports(
+    card: FightingCard,
+    specialResults: SpecialResult,
+  ): Pick<
+    AttackReport,
+    | 'buffReport'
+    | 'debuffReport'
+    | 'shieldAppliedReport'
+    | 'stanceStartedReport'
+  > {
     const buffs = specialResults.alterationResults.filter(
       (r): r is BuffResult => r.alteration.polarity === 'buff',
     );
@@ -222,48 +278,41 @@ export class ActionStage {
       (r): r is DebuffResult => r.alteration.polarity === 'debuff',
     );
 
-    if (buffs.length > 0) {
-      const buffReport: BuffReport = {
-        kind: StepKind.Buff,
-        name: specialResults.name,
-        source: card.identityInfo,
-        alterations: buffs.map((buffResult) => ({
-          target: buffResult.target,
-          kind: buffResult.alteration.type,
-          value: buffResult.alteration.value,
-          remainingTurns: buffResult.alteration.duration,
-        })),
-        energy: 0,
-      };
-      result.buffReport = buffReport;
-    }
-
-    if (debuffs.length > 0) {
-      result.debuffReport = this.buildDebuffReport(
-        card,
-        specialResults.name,
-        debuffs,
-      );
-    }
-
-    if (specialResults.shieldResults.length > 0) {
-      result.shieldAppliedReport = this.buildShieldAppliedReport(
-        card,
-        specialResults.name,
-        specialResults.shieldResults,
-      );
-    }
-
-    if (specialResults.stanceStarted) {
-      result.stanceStartedReport = {
+    return {
+      buffReport:
+        buffs.length > 0
+          ? {
+              kind: StepKind.Buff,
+              name: specialResults.name,
+              source: card.identityInfo,
+              alterations: buffs.map((buffResult) => ({
+                target: buffResult.target,
+                kind: buffResult.alteration.type,
+                value: buffResult.alteration.value,
+                remainingTurns: buffResult.alteration.duration,
+              })),
+              energy: 0,
+            }
+          : undefined,
+      debuffReport:
+        debuffs.length > 0
+          ? this.buildDebuffReport(card, specialResults.name, debuffs)
+          : undefined,
+      shieldAppliedReport:
+        specialResults.shieldResults.length > 0
+          ? this.buildShieldAppliedReport(
+              card,
+              specialResults.name,
+              specialResults.shieldResults,
+            )
+          : undefined,
+      stanceStartedReport: specialResults.stanceStarted && {
         kind: StepKind.StanceStarted,
         name: specialResults.stanceStarted.name,
         card: card.identityInfo,
         remainingTurns: specialResults.stanceStarted.remainingTurns,
-      };
-    }
-
-    return result;
+      },
+    };
   }
 
   private computeSpecialHealingResult(card: FightingCard): ActionReport {
@@ -325,6 +374,10 @@ export class ActionStage {
 
         if (report.kind === 'healing') {
           acc.actionSteps.push(report);
+        }
+
+        if (report.kind === StepKind.SpecialStance) {
+          acc.actionSteps.push(report.step, ...report.followUps);
         }
 
         return acc;
