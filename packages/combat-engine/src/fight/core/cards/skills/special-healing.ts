@@ -1,22 +1,18 @@
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 import { FightingContext } from '../@types/fighting-context';
 import { FightingCard } from '../fighting-card';
-import { Special } from './special';
+import { BaseSpecial } from './special';
 import { SpecialResult } from '../@types/action-result/special-result';
 import { applyHealing } from './heal-basis';
 
-const ENERGY_INCREASE_FACTOR = 10;
-
-export class SpecialHealing implements Special {
+export class SpecialHealing extends BaseSpecial {
   constructor(
-    readonly name: string,
+    name: string,
     private readonly rate: number,
-    private readonly energyNeeded: number,
+    energyNeeded: number,
     private readonly targetingStrategy: TargetingCardStrategy,
-  ) {}
-
-  public ready(actualEnergy: number): boolean {
-    return actualEnergy >= this.energyNeeded;
+  ) {
+    super(name, energyNeeded);
   }
 
   public launch(
@@ -43,10 +39,6 @@ export class SpecialHealing implements Special {
       alterationResults: [],
       shieldResults: [],
     };
-  }
-
-  public increaseEnergy(actualEnergy: number): number {
-    return Math.min(actualEnergy + ENERGY_INCREASE_FACTOR, this.energyNeeded);
   }
 
   public getSpecialKind(): string {

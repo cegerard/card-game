@@ -2,7 +2,7 @@ import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting
 import { FightingContext } from '../@types/fighting-context';
 import { SpecialResult } from '../@types/action-result/special-result';
 import { FightingCard } from '../fighting-card';
-import { Special } from './special';
+import { BaseSpecial } from './special';
 import { AttackEffect, EffectResult } from '../@types/attack/attack-effect';
 import { Alteration } from '../@types/alteration/alteration';
 import { DamageComposition } from '../@types/damage/damage-composition';
@@ -22,14 +22,13 @@ import {
 } from '../@types/attack/damage-type-bonus';
 import { EnergyRefund } from '../@types/attack/energy-refund';
 
-const ENERGY_INCREASE_FACTOR = 10;
 const CRITICAL_RATE = 1.3;
 
-export class SpecialAttack implements Special {
+export class SpecialAttack extends BaseSpecial {
   constructor(
-    readonly name: string,
+    name: string,
     private readonly damages: DamageComposition[],
-    private readonly energyNeeded: number,
+    energyNeeded: number,
     private readonly targetingStrategy: TargetingCardStrategy,
     private readonly effect?: AttackEffect,
     private readonly alterations?: Alteration[],
@@ -40,15 +39,12 @@ export class SpecialAttack implements Special {
     private readonly damageBonuses: DamageTypeBonus[] = [],
     private readonly energyRefund?: EnergyRefund,
   ) {
+    super(name, energyNeeded);
     if (hits < 1) {
       throw new Error(
         `SpecialAttack hits must be greater than or equal to 1, got ${hits}`,
       );
     }
-  }
-
-  public ready(actualEnergy: number): boolean {
-    return actualEnergy >= this.energyNeeded;
   }
 
   public launch(
@@ -89,10 +85,6 @@ export class SpecialAttack implements Special {
         attackResults[0]?.defender,
       ),
     };
-  }
-
-  public increaseEnergy(actualEnergy: number): number {
-    return Math.min(actualEnergy + ENERGY_INCREASE_FACTOR, this.energyNeeded);
   }
 
   public getSpecialKind(): string {

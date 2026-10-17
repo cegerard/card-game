@@ -537,4 +537,89 @@ describe('OtherSkillDto validation', () => {
         .expect(400);
     });
   });
+
+  describe('BLEED_EMPOWERMENT-only fields', () => {
+    const alterationWith = (fields: object) =>
+      basePayload([
+        {
+          kind: 'ALTERATION',
+          name: 'Power Up',
+          rate: 1.5,
+          buffType: 'attack',
+          duration: 3,
+          polarity: 'buff',
+          targetingStrategy: 'self',
+          event: 'turn-end',
+          ...fields,
+        },
+      ] as []);
+
+    it('returns 400 when extraStacks is given on a non-BLEED_EMPOWERMENT skill', () => {
+      return request(app.getHttpServer())
+        .post('/fight')
+        .send(alterationWith({ extraStacks: 1 }))
+        .expect(400);
+    });
+
+    it('returns 400 when basis is given on a non-BLEED_EMPOWERMENT skill', () => {
+      return request(app.getHttpServer())
+        .post('/fight')
+        .send(alterationWith({ basis: 'target-max-health' }))
+        .expect(400);
+    });
+
+    it('returns 400 when triggeredDebuff is given on a non-BLEED_EMPOWERMENT skill', () => {
+      return request(app.getHttpServer())
+        .post('/fight')
+        .send(
+          alterationWith({
+            triggeredDebuff: {
+              debuffType: 'regeneration',
+              debuffRate: 0.5,
+              duration: 4,
+              probability: 1,
+            },
+          }),
+        )
+        .expect(400);
+    });
+
+    it('returns 400 when a BLEED_EMPOWERMENT triggeredDebuff probability is above 1', () => {
+      return request(app.getHttpServer())
+        .post('/fight')
+        .send(
+          basePayload([
+            {
+              kind: 'BLEED_EMPOWERMENT',
+              name: 'Griffures',
+              requiresStance: 'fusion',
+              rate: 0.03,
+              triggeredDebuff: {
+                debuffType: 'regeneration',
+                debuffRate: 0.5,
+                duration: 4,
+                probability: 2,
+              },
+            },
+          ] as []),
+        )
+        .expect(400);
+    });
+
+    it('returns 400 when a BLEED_EMPOWERMENT rate is not positive', () => {
+      return request(app.getHttpServer())
+        .post('/fight')
+        .send(
+          basePayload([
+            {
+              kind: 'BLEED_EMPOWERMENT',
+              name: 'Griffures',
+              requiresStance: 'fusion',
+              rate: 0,
+            },
+          ] as []),
+        )
+        .expect(400);
+    });
+  });
 });

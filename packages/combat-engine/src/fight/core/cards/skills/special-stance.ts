@@ -1,6 +1,6 @@
 import { FightingContext } from '../@types/fighting-context';
 import { FightingCard } from '../fighting-card';
-import { Special } from './special';
+import { BaseSpecial } from './special';
 import { assertConcealmentDuration } from './concealment-duration';
 import { SpecialResult } from '../@types/action-result/special-result';
 import { StanceActivation } from '../@types/stance/stance';
@@ -11,30 +11,25 @@ import {
   DebuffResult,
 } from '../@types/action-result/alteration-result';
 
-const ENERGY_INCREASE_FACTOR = 10;
-
 /**
  * A special that strikes nobody: its caster enters a stance, and may alter
  * stats, shield and conceal itself for its duration. Since it is no attack,
  * it does not lift a concealment, which is how a power can hide its caster.
  */
-export class SpecialStance implements Special {
+export class SpecialStance extends BaseSpecial {
   constructor(
-    readonly name: string,
-    private readonly energyNeeded: number,
+    name: string,
+    energyNeeded: number,
     private readonly stanceActivation: StanceActivation,
     private readonly alterations: Alteration[] = [],
     private readonly shieldApplication?: ShieldApplication,
     private readonly concealmentDuration?: number,
   ) {
+    super(name, energyNeeded);
     if (!stanceActivation) {
       throw new Error('SpecialStance requires a stanceActivation');
     }
     assertConcealmentDuration(concealmentDuration);
-  }
-
-  public ready(actualEnergy: number): boolean {
-    return actualEnergy >= this.energyNeeded;
   }
 
   public launch(source: FightingCard, context: FightingContext): SpecialResult {
@@ -57,10 +52,6 @@ export class SpecialStance implements Special {
       stanceStarted,
       concealmentStarted,
     };
-  }
-
-  public increaseEnergy(actualEnergy: number): number {
-    return Math.min(actualEnergy + ENERGY_INCREASE_FACTOR, this.energyNeeded);
   }
 
   public getSpecialKind(): string {

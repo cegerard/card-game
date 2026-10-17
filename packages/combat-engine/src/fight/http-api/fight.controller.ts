@@ -21,6 +21,7 @@ import {
   FightDataDto,
   FightingCardDto,
   OtherSkillDto,
+  EffectTriggeredDebuffDto,
   SpecialKind,
   SkillKind,
   BuffType,
@@ -110,6 +111,13 @@ const STANCE_SPECIAL_FORBIDDEN_FIELDS = [
   'markedTargetBonus',
   'bleedStackBonus',
   'concealedBonus',
+] as const;
+
+// What only a BLEED_EMPOWERMENT skill can carry
+const BLEED_EMPOWERMENT_ONLY_FIELDS = [
+  'extraStacks',
+  'basis',
+  'triggeredDebuff',
 ] as const;
 
 const CARD_BOUND_SKILL_KINDS = [
@@ -296,17 +304,11 @@ export class FightController {
           bleedStackScalingDto.maxRate,
         )
       : undefined;
+    this.rejectMisplacedBleedEmpowermentFields(cardData.skills.others);
     const bleedEmpowermentDto = cardData.skills.others.find(
       (s) => s.kind === SkillKind.BLEED_EMPOWERMENT,
     );
-    const bleedEmpowerment = bleedEmpowermentDto
-      ? new BleedEmpowermentSkill(
-          bleedEmpowermentDto.name,
-          bleedEmpowermentDto.requiresStance,
-          bleedEmpowermentDto.extraStacks,
-          bleedEmpowermentDto.rate,
-        )
-      : undefined;
+    const bleedEmpowerment = this.buildBleedEmpowerment(bleedEmpowermentDto);
 
     // The CARD_BOUND_SKILL_KINDS carry no trigger and no
     // targeting: they live on the card itself and are consulted when a hit is
@@ -382,22 +384,9 @@ export class FightController {
   }
 
   private buildEffect(effectDto: EffectDto): AttackEffect {
-    const triggeredDebuff = effectDto.triggeredDebuff
-      ? new EffectTriggeredDebuff(
-          effectDto.triggeredDebuff.probability,
-          this.mapAlterationType(effectDto.triggeredDebuff.debuffType),
-          effectDto.triggeredDebuff.debuffRate,
-          effectDto.triggeredDebuff.duration,
-          new MathRandomizer(),
-          effectDto.triggeredDebuff.terminationEvent,
-          effectDto.triggeredDebuff.powerId,
-          this.buildDebuffStacking(
-            effectDto.triggeredDebuff.stackId,
-            effectDto.triggeredDebuff.maxStacks,
-            ` triggeredDebuff`,
-          ),
-        )
-      : undefined;
+    const triggeredDebuff = this.buildTriggeredDebuff(
+      effectDto.triggeredDebuff,
+    );
 
     switch (effectDto.type) {
       case Effect.POISON:
@@ -459,6 +448,56 @@ export class FightController {
           effectDto.terminationEvent,
           effectDto.basis,
         );
+    }
+  }
+
+  private buildTriggeredDebuff(
+    dto: EffectTriggeredDebuffDto | undefined,
+  ): EffectTriggeredDebuff | undefined {
+    if (!dto) return undefined;
+
+    return new EffectTriggeredDebuff(
+      dto.probability,
+      this.mapAlterationType(dto.debuffType),
+      dto.debuffRate,
+      dto.duration,
+      new MathRandomizer(),
+      dto.terminationEvent,
+      dto.powerId,
+      this.buildDebuffStacking(dto.stackId, dto.maxStacks, ` triggeredDebuff`),
+    );
+  }
+
+  private rejectMisplacedBleedEmpowermentFields(others: OtherSkillDto[]): void {
+    for (const skill of others) {
+      if (skill.kind === SkillKind.BLEED_EMPOWERMENT) continue;
+      const misplaced = BLEED_EMPOWERMENT_ONLY_FIELDS.filter(
+        (field) => skill[field] !== undefined,
+      );
+      if (misplaced.length > 0) {
+        throw new BadRequestException(
+          `${skill.kind} skill cannot carry: ${misplaced.join(', ')}`,
+        );
+      }
+    }
+  }
+
+  private buildBleedEmpowerment(
+    dto: OtherSkillDto | undefined,
+  ): BleedEmpowermentSkill | undefined {
+    if (!dto) return undefined;
+
+    const triggeredDebuff = this.buildTriggeredDebuff(dto.triggeredDebuff);
+    try {
+      return new BleedEmpowermentSkill(
+        dto.name,
+        dto.requiresStance,
+        dto.extraStacks,
+        dto.rate,
+        { duration: dto.duration, basis: dto.basis, triggeredDebuff },
+      );
+    } catch (e) {
+      throw new BadRequestException((e as Error).message);
     }
   }
 

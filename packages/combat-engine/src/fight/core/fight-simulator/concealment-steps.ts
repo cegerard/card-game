@@ -3,8 +3,21 @@ import { FightingCard } from '../cards/fighting-card';
 import {
   ConcealmentEndReason,
   ConcealmentEndedReport,
+  ConcealmentStartedReport,
 } from './@types/concealment-report';
 import { StepKind } from './@types/step';
+
+export function concealmentStartedReport(
+  card: FightingCard,
+  concealment: Concealment,
+): ConcealmentStartedReport {
+  return {
+    kind: StepKind.ConcealmentStarted,
+    name: concealment.name,
+    card: card.identityInfo,
+    remainingTurns: concealment.remainingTurns,
+  };
+}
 
 export function concealmentEndedReport(
   card: FightingCard,

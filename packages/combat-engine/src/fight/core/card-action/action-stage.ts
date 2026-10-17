@@ -24,9 +24,12 @@ import { SurvivedReport } from '../fight-simulator/@types/survived-report';
 import { BLEED_STACKS_APPLIED } from '../trigger/bleed-stacks-applied';
 import { TURN_START } from '../trigger/turn-start';
 import { SpecialStanceActionReport } from '../fight-simulator/@types/special-stance-report';
-import { ConcealmentStartedReport } from '../fight-simulator/@types/concealment-report';
 import { SpecialResult } from '../cards/@types/action-result/special-result';
-import { revealAttacker } from '../fight-simulator/concealment-steps';
+import {
+  concealmentStartedReport,
+  revealAttacker,
+} from '../fight-simulator/concealment-steps';
+import { stanceStartedReport } from '../fight-simulator/stance-steps';
 
 type SplittedSteps = {
   actionSteps: Step[];
@@ -145,12 +148,10 @@ export class ActionStage {
           .filter((strike) => strike?.results.length > 0)
           .map((strike) => this.reportStrike(card, strike));
         if (attackSkill.stanceStarted) {
-          reports[0].stanceStartedReport = {
-            kind: StepKind.StanceStarted,
-            name: attackSkill.stanceStarted.name,
-            card: card.identityInfo,
-            remainingTurns: attackSkill.stanceStarted.remainingTurns,
-          };
+          reports[0].stanceStartedReport = stanceStartedReport(
+            card,
+            attackSkill.stanceStarted,
+          );
         }
         if (attackSkill.lowHealthDebuff) {
           reports[0].debuffReport = this.buildDebuffReport(
@@ -234,14 +235,6 @@ export class ActionStage {
       debuffReport,
       shieldAppliedReport,
     } = this.specialSideReports(card, specialResults);
-    const concealmentStartedReport: ConcealmentStartedReport | undefined =
-      specialResults.concealmentStarted && {
-        kind: StepKind.ConcealmentStarted,
-        name: specialResults.concealmentStarted.name,
-        card: card.identityInfo,
-        remainingTurns: specialResults.concealmentStarted.remainingTurns,
-      };
-
     return {
       kind: StepKind.SpecialStance,
       step: {
@@ -255,7 +248,8 @@ export class ActionStage {
         buffReport,
         debuffReport,
         shieldAppliedReport,
-        concealmentStartedReport,
+        specialResults.concealmentStarted &&
+          concealmentStartedReport(card, specialResults.concealmentStarted),
       ].filter((step) => step !== undefined),
     };
   }
@@ -306,12 +300,9 @@ export class ActionStage {
               specialResults.shieldResults,
             )
           : undefined,
-      stanceStartedReport: specialResults.stanceStarted && {
-        kind: StepKind.StanceStarted,
-        name: specialResults.stanceStarted.name,
-        card: card.identityInfo,
-        remainingTurns: specialResults.stanceStarted.remainingTurns,
-      },
+      stanceStartedReport:
+        specialResults.stanceStarted &&
+        stanceStartedReport(card, specialResults.stanceStarted),
     };
   }
 
