@@ -161,7 +161,7 @@ export enum ElementDto {
   AIR = 'AIR',
 }
 
-class EffectTriggeredDebuffDto {
+export class EffectTriggeredDebuffDto {
   // Stack budget: both fields together, or neither
   @IsOptional()
   @IsString()
@@ -620,11 +620,21 @@ export class OtherSkillDto {
   rate?: number;
 
   // BLEED_EMPOWERMENT: stacks each bleed of the owner lays on top of its own
-  @ValidateIf((o) => o.kind === SkillKind.BLEED_EMPOWERMENT)
-  @IsDefined()
+  @IsOptional()
   @IsInt()
   @Min(0)
   extraStacks?: number;
+
+  // BLEED_EMPOWERMENT: replaces the basis of the bleeds laid during the stance
+  @IsOptional()
+  @IsEnum(RateBasisDto)
+  basis?: RateBasisDto;
+
+  // BLEED_EMPOWERMENT: replaces the debuff rolled when a bleed lands during the stance
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => EffectTriggeredDebuffDto)
+  triggeredDebuff?: EffectTriggeredDebuffDto;
 
   // BLEED_STACK_SCALING: cap of the attack bonus, `rate` being the bonus per stack
   @ValidateIf((o) => o.kind === SkillKind.BLEED_STACK_SCALING)

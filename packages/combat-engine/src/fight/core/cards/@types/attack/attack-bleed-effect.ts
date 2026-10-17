@@ -49,19 +49,23 @@ export class BleedAttackEffect implements AttackEffect {
     const room = this.maxStacks - defender.bleedStacks();
     if (room <= 0) return;
 
-    const { stacks, rate } = card.empowerBleed({
-      stacks: this.stacks,
-      rate: this.rate,
-    });
+    const { stacks, rate, duration, basis, triggeredDebuff } =
+      card.empowerBleed({
+        stacks: this.stacks,
+        rate: this.rate,
+        duration: this.duration,
+        basis: this.basis,
+        triggeredDebuff: this.triggeredDebuff,
+      });
     const damageValue = round2(
-      this.basis === 'target-max-health'
+      basis === 'target-max-health'
         ? defender.maxHealth * rate
         : card.attackPower(context) * rate,
     );
     const laidStacks = Math.min(stacks, room);
     const bleeding = new CardStateBleeding(
       Array.from({ length: laidStacks }, () => ({
-        remainingTurns: this.duration,
+        remainingTurns: duration,
         damageValue,
         terminationEvent: this.terminationEvent,
       })),
@@ -74,7 +78,7 @@ export class BleedAttackEffect implements AttackEffect {
       card: defender,
       stacks: defender.bleedStacks(),
     };
-    const appliedDebuff = this.triggeredDebuff?.tryApply(defender);
+    const appliedDebuff = triggeredDebuff?.tryApply(defender);
     if (appliedDebuff) {
       effectResult.triggeredDebuff = { card: defender, debuff: appliedDebuff };
     }

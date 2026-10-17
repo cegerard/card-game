@@ -21,6 +21,7 @@ import {
   FightDataDto,
   FightingCardDto,
   OtherSkillDto,
+  EffectTriggeredDebuffDto,
   SpecialKind,
   SkillKind,
   BuffType,
@@ -299,14 +300,7 @@ export class FightController {
     const bleedEmpowermentDto = cardData.skills.others.find(
       (s) => s.kind === SkillKind.BLEED_EMPOWERMENT,
     );
-    const bleedEmpowerment = bleedEmpowermentDto
-      ? new BleedEmpowermentSkill(
-          bleedEmpowermentDto.name,
-          bleedEmpowermentDto.requiresStance,
-          bleedEmpowermentDto.extraStacks,
-          bleedEmpowermentDto.rate,
-        )
-      : undefined;
+    const bleedEmpowerment = this.buildBleedEmpowerment(bleedEmpowermentDto);
 
     // The CARD_BOUND_SKILL_KINDS carry no trigger and no
     // targeting: they live on the card itself and are consulted when a hit is
@@ -382,22 +376,9 @@ export class FightController {
   }
 
   private buildEffect(effectDto: EffectDto): AttackEffect {
-    const triggeredDebuff = effectDto.triggeredDebuff
-      ? new EffectTriggeredDebuff(
-          effectDto.triggeredDebuff.probability,
-          this.mapAlterationType(effectDto.triggeredDebuff.debuffType),
-          effectDto.triggeredDebuff.debuffRate,
-          effectDto.triggeredDebuff.duration,
-          new MathRandomizer(),
-          effectDto.triggeredDebuff.terminationEvent,
-          effectDto.triggeredDebuff.powerId,
-          this.buildDebuffStacking(
-            effectDto.triggeredDebuff.stackId,
-            effectDto.triggeredDebuff.maxStacks,
-            ` triggeredDebuff`,
-          ),
-        )
-      : undefined;
+    const triggeredDebuff = this.buildTriggeredDebuff(
+      effectDto.triggeredDebuff,
+    );
 
     switch (effectDto.type) {
       case Effect.POISON:
@@ -459,6 +440,45 @@ export class FightController {
           effectDto.terminationEvent,
           effectDto.basis,
         );
+    }
+  }
+
+  private buildTriggeredDebuff(
+    dto: EffectTriggeredDebuffDto | undefined,
+  ): EffectTriggeredDebuff | undefined {
+    if (!dto) return undefined;
+
+    return new EffectTriggeredDebuff(
+      dto.probability,
+      this.mapAlterationType(dto.debuffType),
+      dto.debuffRate,
+      dto.duration,
+      new MathRandomizer(),
+      dto.terminationEvent,
+      dto.powerId,
+      this.buildDebuffStacking(dto.stackId, dto.maxStacks, ` triggeredDebuff`),
+    );
+  }
+
+  private buildBleedEmpowerment(
+    dto: OtherSkillDto | undefined,
+  ): BleedEmpowermentSkill | undefined {
+    if (!dto) return undefined;
+
+    try {
+      return new BleedEmpowermentSkill(
+        dto.name,
+        dto.requiresStance,
+        dto.extraStacks,
+        dto.rate,
+        {
+          duration: dto.duration,
+          basis: dto.basis,
+          triggeredDebuff: this.buildTriggeredDebuff(dto.triggeredDebuff),
+        },
+      );
+    } catch (e) {
+      throw new BadRequestException((e as Error).message);
     }
   }
 

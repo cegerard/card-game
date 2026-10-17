@@ -286,8 +286,12 @@ export interface OtherSkill {
   stanceActivation?: StanceActivation;
   /** Requis avec bleed-stacks-applied (piles posées par le porteur) et le ciblage first-bleeding-enemy (piles portées par la cible). */
   stackThreshold?: number;
-  /** BLEED_EMPOWERMENT uniquement (requis, entier ≥ 0) : piles posées en plus par chaque Saignement pendant la posture. */
+  /** BLEED_EMPOWERMENT uniquement (entier ≥ 0, défaut 0) : piles posées en plus par chaque Saignement pendant la posture. */
   extraStacks?: number;
+  /** BLEED_EMPOWERMENT uniquement : base de calcul des Saignements posés pendant la posture (remplace celle de l'effet). */
+  basis?: RateBasis;
+  /** BLEED_EMPOWERMENT uniquement : debuff roulé quand un Saignement renforcé est posé (remplace celui de l'effet). */
+  triggeredDebuff?: EffectTriggeredDebuff;
   /**
    * DAMAGE_REDUCTION uniquement : probabilité du tirage à chaque coup reçu.
    * Omise, la réduction est permanente.
@@ -308,7 +312,7 @@ export interface OtherSkill {
   requiresStance?: string;
   /** Requis pour ALTERATION. */
   buffType?: BuffType;
-  /** Requis pour ALTERATION et PROTECTION ; facultatif pour CONCEALMENT (sans durée, jusqu'à la première attaque). */
+  /** Requis pour ALTERATION et PROTECTION ; facultatif pour CONCEALMENT (sans durée, jusqu'à la première attaque) et BLEED_EMPOWERMENT (durée des piles posées pendant la posture, entier ≥ 1). */
   duration?: number;
   polarity?: 'buff' | 'debuff';
   activationCondition?: BuffCondition;
