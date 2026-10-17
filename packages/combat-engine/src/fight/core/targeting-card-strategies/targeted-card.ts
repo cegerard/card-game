@@ -8,7 +8,7 @@ export class TargetedCard implements TargetingCardStrategy {
   constructor(private readonly targetCardId: string) {}
 
   public targetedCards(
-    _attackingCard: FightingCard,
+    attackingCard: FightingCard,
     _attackingPlayer: Player,
     defendingPlayer: Player,
   ): FightingCard[] {
@@ -16,7 +16,7 @@ export class TargetedCard implements TargetingCardStrategy {
       (card) => card.id === this.targetCardId,
     );
 
-    if (!target || !target.isTargetable()) {
+    if (!target || !target.isTargetableBy(attackingCard)) {
       return [];
     }
 

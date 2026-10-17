@@ -3,6 +3,7 @@ import { BuffResult, DebuffResult } from './alteration-result';
 import { HealingResult } from './healing-result';
 import { ShieldResult } from './shield-result';
 import { Stance } from '../stance/stance';
+import { Concealment } from '../concealment/concealment';
 
 export type SpecialResult = {
   name: string;
@@ -13,4 +14,6 @@ export type SpecialResult = {
   stanceStarted?: Stance;
   /** Energy the caster keeps instead of emptying its gauge. */
   energyRefund?: number;
+  /** Set when the special concealed its caster. */
+  concealmentStarted?: Concealment;
 };

@@ -6,10 +6,12 @@ export class TargetedAll implements TargetingCardStrategy {
   public id = 'all';
 
   public targetedCards(
-    _attackingCard: FightingCard,
+    attackingCard: FightingCard,
     _attackingPlayer: Player,
     defendingPlayer: Player,
   ): FightingCard[] {
-    return defendingPlayer.playableCards.filter((card) => card.isTargetable());
+    return defendingPlayer.playableCards.filter((card) =>
+      card.isTargetableBy(attackingCard),
+    );
   }
 }

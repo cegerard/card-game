@@ -180,11 +180,7 @@ export class SpecialAttack implements Special {
   private openStance(source: FightingCard): Stance | undefined {
     if (!this.stanceActivation) return undefined;
 
-    return source.activateStance(
-      this.stanceActivation.name,
-      this.stanceActivation.duration,
-      this.stanceActivation.immunities,
-    );
+    return source.activateStance(this.stanceActivation);
   }
 
   private applyShield(

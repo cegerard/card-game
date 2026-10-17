@@ -18,17 +18,19 @@ describe('FightingCard — stances', () => {
     });
 
     it('holds the stance once activated', () => {
-      card.activateStance(FORTRESS, 3);
+      card.activateStance({ name: FORTRESS, duration: 3 });
 
       expect(card.hasStance(FORTRESS)).toBe(true);
     });
 
     it('reports the duration it was opened with', () => {
-      expect(card.activateStance(FORTRESS, 3).remainingTurns).toBe(3);
+      expect(
+        card.activateStance({ name: FORTRESS, duration: 3 }).remainingTurns,
+      ).toBe(3);
     });
 
     it('ignores a stance it does not hold', () => {
-      card.activateStance(FORTRESS, 3);
+      card.activateStance({ name: FORTRESS, duration: 3 });
 
       expect(card.hasStance('another-stance')).toBe(false);
     });
@@ -36,15 +38,17 @@ describe('FightingCard — stances', () => {
 
   describe('re-activating a running stance', () => {
     it('refreshes the duration instead of stacking', () => {
-      card.activateStance(FORTRESS, 3);
+      card.activateStance({ name: FORTRESS, duration: 3 });
       card.decreaseStanceDurations();
 
-      expect(card.activateStance(FORTRESS, 3).remainingTurns).toBe(3);
+      expect(
+        card.activateStance({ name: FORTRESS, duration: 3 }).remainingTurns,
+      ).toBe(3);
     });
 
     it('keeps a single stance of that name', () => {
-      card.activateStance(FORTRESS, 3);
-      card.activateStance(FORTRESS, 3);
+      card.activateStance({ name: FORTRESS, duration: 3 });
+      card.activateStance({ name: FORTRESS, duration: 3 });
       card.decreaseStanceDurations();
       card.decreaseStanceDurations();
       card.decreaseStanceDurations();
@@ -56,7 +60,7 @@ describe('FightingCard — stances', () => {
 
   describe('running out', () => {
     beforeEach(() => {
-      card.activateStance(FORTRESS, 2);
+      card.activateStance({ name: FORTRESS, duration: 2 });
     });
 
     it('still holds it while turns remain', () => {
@@ -88,8 +92,8 @@ describe('FightingCard — stances', () => {
 
   describe('several stances at once', () => {
     it('tracks their durations independently', () => {
-      card.activateStance(FORTRESS, 1);
-      card.activateStance('other', 3);
+      card.activateStance({ name: FORTRESS, duration: 1 });
+      card.activateStance({ name: 'other', duration: 3 });
       card.decreaseStanceDurations();
 
       expect(card.decreaseStanceDurations()).toEqual([FORTRESS]);
@@ -135,14 +139,14 @@ describe('FightingCard — a skill bound to a stance', () => {
 
   it('fires while the stance is held', () => {
     const card = cardWith(stanceBoundSkill(FORTRESS));
-    card.activateStance(FORTRESS, 3);
+    card.activateStance({ name: FORTRESS, duration: 3 });
 
     expect(launch(card)).toHaveLength(1);
   });
 
   it('goes silent again once the stance runs out', () => {
     const card = cardWith(stanceBoundSkill(FORTRESS));
-    card.activateStance(FORTRESS, 1);
+    card.activateStance({ name: FORTRESS, duration: 1 });
     card.decreaseStanceDurations();
     card.decreaseStanceDurations();
 
@@ -157,7 +161,7 @@ describe('FightingCard — a skill bound to a stance', () => {
 
   it('is not unlocked by another stance', () => {
     const card = cardWith(stanceBoundSkill(FORTRESS));
-    card.activateStance('another-stance', 3);
+    card.activateStance({ name: 'another-stance', duration: 3 });
 
     expect(launch(card)).toHaveLength(0);
   });

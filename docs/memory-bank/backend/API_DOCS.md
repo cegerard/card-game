@@ -80,13 +80,14 @@ Simulates a turn-based card battle between two players.
 
 ```typescript
 {
-  kind: "ATTACK" | "HEALING",
+  kind: "ATTACK" | "HEALING" | "STANCE",  // STANCE strikes nobody: see SpecialKind
   name: string,
   rate: number,               // Damage/healing multiplier
   energy: number,             // Energy cost to use special
   hits?: number,              // ATTACK only: number of hits (integer >= 1, default 1). Each hit re-targets the living cards and rolls its own dodge and critical; the effect is tried on every landed hit
-  targetingStrategy: TargetingStrategy,
+  targetingStrategy: TargetingStrategy,  // Required except for STANCE (400 if given)
   effect?: EffectDto,         // Optional status effect (poison, burn, freeze)
+  concealment?: { duration: number },     // STANCE only (400 otherwise): conceals the caster for `duration` turns (integer >= 0), see CONCEALMENT
   buffApplication?: BuffApplicationDto,   // Optional buff application (for special attacks)
   shieldApplication?: ShieldApplicationDto,  // Optional shield application (independent targeting)
   markedTargetBonus?: {                   // Optional damage bonus against an already marked target
@@ -96,8 +97,9 @@ Simulates a turn-based card battle between two players.
   stanceActivation?: {                    // Optional: opens a named stance on the caster
     name: string,                         // Stance name that skills reference with requiresStance
     duration: number,                     // Turns it runs; re-casting refreshes instead of stacking
-    immunities?: ("control" | "damage-over-time")[]  // Status categories the caster refuses while it runs
-  },
+    immunities?: ("control" | "damage-over-time")[],  // Status categories the caster refuses while it runs
+    revealsConcealed?: boolean            // While it runs, the caster's attacks can target concealed enemies (their concealment is not lifted)
+  },  // Required for STANCE
   energyRefund?: {                        // ATTACK only: energy kept after the special instead of emptying the gauge
     amount: number,                       // Integer >= 1, energy the caster keeps (shown in the special_attack step energy)
     minAccuracyMargin: number             // >= 0: caster accuracy minus the agility of the primary target (first defender struck) must be strictly greater
@@ -276,7 +278,7 @@ Simulates a turn-based card battle between two players.
 ```typescript
 {
   [stepNumber: number]: {
-    kind: "fight_start" | "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "debuff_removed" | "buff_expired" | "debuff_expired" | "effect_removed" | "targeting_override" | "targeting_reverted" | "shield_applied" | "shield_broken" | "shield_expired" | "survived" | "damage_mitigated" | "stance_started" | "stance_ended" | "mark_applied" | "regenerated" | "protection_started" | "protection_ended" | "attack_intercepted" | "transformation_started" | "transformation_ended" | "concealment_started" | "concealment_ended" | "fight_end",
+    kind: "fight_start" | "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "debuff_removed" | "buff_expired" | "debuff_expired" | "effect_removed" | "targeting_override" | "targeting_reverted" | "shield_applied" | "shield_broken" | "shield_expired" | "survived" | "damage_mitigated" | "stance_started" | "stance_ended" | "mark_applied" | "regenerated" | "protection_started" | "protection_ended" | "attack_intercepted" | "transformation_started" | "transformation_ended" | "concealment_started" | "concealment_ended" | "special_stance" | "fight_end",
     // Additional properties vary by step kind
   }
 }
@@ -306,6 +308,16 @@ santé, absente quand aucun bouclier n'était sur le chemin. `damage` reste le
 total infligé, donc un consommateur qui suit le tampon depuis `shield_applied`
 a besoin de ce champ pour le décrémenter : sans lui le bouclier restait affiché
 à sa valeur d'application jusqu'à sa rupture.
+
+**`special_stance` step** (`SpecialStanceReport`): Emitted when a STANCE special is cast. It strikes nobody, so it carries no `damages`; it is followed, in this order and when present, by `stance_started`, `buff`, `debuff`, `shield_applied` and `concealment_started`.
+```typescript
+{
+  kind: "special_stance",
+  name: string,          // Special name
+  caster: CardInfo,
+  energy: number         // Gauge after the cast: 0
+}
+```
 
 **`survived` step** (`SurvivedReport`): Emitted immediately after a fatal blow is intercepted by a SURVIVE skill.
 ```typescript
@@ -644,6 +656,7 @@ a besoin de ce champ pour le décrémenter : sans lui le bouclier restait affich
 
 - `ATTACK`: Special ability that deals damage
 - `HEALING`: Special ability that heals
+- `STANCE`: Special ability that strikes nobody — the caster enters a stance (`stanceActivation` required), then gets the optional `statAlterations`, `shieldApplication` and `concealment`. Since it is no attack it does not lift a concealment, which is how Fusion Tectonique hides its caster. `damages`, `rate`, `hits`, `targetingStrategy`, `effect`, `energyRefund`, `markedTargetBonus`, `bleedStackBonus` and `concealedBonus` are refused (400). Reported as `special_stance`; the gauge empties as for any special
 
 ### SkillKind
 
@@ -660,7 +673,7 @@ a besoin de ce champ pour le décrémenter : sans lui le bouclier restait affich
 - `BLEED_EMPOWERMENT`: Passive — no `event`, no `targetingStrategy`; requires `requiresStance`, `extraStacks` and `rate`. While its owner holds that stance, every BLEED it applies (simple, multiple, special, triggered attacks) lays `extraStacks` more stacks and bleeds at `rate` instead of the effect own rate, still within the effect `maxStacks`. Outside the stance nothing changes. Extracted from `others[]` like SURVIVE; it emits no step
 - `BLEED_DETONATION`: Makes every bleed on the board burst when its `event` fires — meant for `self-death` with `requiresStance`, a last word while a power runs. Each living card carrying at least one stack, both teams, takes `rate × source attack` once (not per stack) as real damage ignoring defense, then loses all its stacks. Requires `rate`, no `targetingStrategy`. Reported as an `attack` step named after the skill; nothing when no card bleeds. A card it kills goes through its own death cascade (`self-death`, `ally-death`, `enemy-death`…) right away
 - `STANCE`: Opens a stance on its owner when its `event` fires — the triggered counterpart of `SpecialDto.stanceActivation`. Requires `stanceActivation` (`name`, `duration`, optional `immunities`), no `targetingStrategy`. Skills with the matching `requiresStance` then run for its duration; re-opening a running stance refreshes it. Emits `stance_started`, and `stance_ended` at turn end
-- `CONCEALMENT`: Hides its owner from the opponent when its `event` fires — on `fight-start` for a card that opens the fight concealed. Requires `event`, no `targetingStrategy`; `duration` is optional (integer >= 0, 400 otherwise): without it the concealment lasts until the card attacks, with it it also runs out like a stance. A concealed card is left out of **every** enemy targeting strategy, area attacks included (`target-all`, `line-three`, `position-based` falls back to the next targetable card…); its allies still target it. When nobody is targetable, the attack strikes nobody. The concealment ends as soon as the card launches an attack that targets somebody (simple, multiple, special, triggered attacks), even a dodged one; other skills do not end it. That attack still counts as struck from concealment: a `concealedBonus` applies to every hit of it. Re-concealing refreshes it. Emits `concealment_started` and `concealment_ended`
+- `CONCEALMENT`: Hides its owner from the opponent when its `event` fires — on `fight-start` for a card that opens the fight concealed. Requires `event`, no `targetingStrategy`; `duration` is optional (integer >= 0, 400 otherwise): without it the concealment lasts until the card attacks, with it it also runs out like a stance. A concealed card is left out of **every** enemy targeting strategy, area attacks included — unless the attacker holds a stance with `revealsConcealed` (`target-all`, `line-three`, `position-based` falls back to the next targetable card…); its allies still target it. When nobody is targetable, the attack strikes nobody. The concealment ends as soon as the card launches an attack that targets somebody (simple, multiple, special, triggered attacks), even a dodged one; other skills do not end it. That attack still counts as struck from concealment: a `concealedBonus` applies to every hit of it. Re-concealing refreshes it. Emits `concealment_started` and `concealment_ended`
 - `TRANSFORMATION`: One-shot health-reactive transformation — no `event`, no `targetingStrategy`; requires `duration` and an `activationCondition` threshold. Applies its own `statAlterations` and, for the same duration, an optional `lifestealRate` (heals that share of max health on every landed attack) and `statusImmunity`. An optional `endCostRate` charges that share of max health when the transformation ends, never below one health point. Fires once per fight
 
 ### RateBasis

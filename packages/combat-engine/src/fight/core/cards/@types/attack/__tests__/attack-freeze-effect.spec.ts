@@ -88,7 +88,11 @@ describe('FreezeAttackEffect against a control-immune defender', () => {
   function immuneDefenderCarryingBurn() {
     const defender = createFightingCard({ agility: 0, health: 1000 });
     defender.setState(new CardStateBurned(1, 3, 10));
-    defender.activateStance(ANCHOR, 3, ['control']);
+    defender.activateStance({
+      name: ANCHOR,
+      duration: 3,
+      immunities: ['control'],
+    });
     return defender;
   }
 

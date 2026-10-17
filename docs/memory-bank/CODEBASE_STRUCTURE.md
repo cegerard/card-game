@@ -67,6 +67,7 @@ cards/
 │   ├── special.ts          # Ultimate abilities base class
 │   ├── special-attack.ts   # Offensive ultimate (optional hits, buff + shield application)
 │   ├── special-healing.ts  # Healing ultimate
+│   ├── special-stance.ts   # Special that strikes nobody: stance + alterations + shield + optional concealment of the caster
 │   ├── skill.ts            # Event-triggered abilities + SkillKind enum (includes Shield)
 │   ├── healing.ts          # Healing skill
 │   ├── heal-basis.ts       # applyHealing(), shared with SpecialHealing; reads RateBasis ('source-attack' | 'target-max-health', @types/rate-basis.ts, shared with BLEED)
@@ -127,7 +128,7 @@ cards/
     └── state/              # Card state types (card-state-frozen.ts, card-state-stunted.ts, card-state-bleeding.ts) + status-category.ts (control vs damage-over-time)
 ```
 
-**Special Skills Pattern**: Both `SpecialAttack` and `SpecialHealing` implement the `Special` interface with a unified return type `SpecialResult` containing:
+**Special Skills Pattern**: `SpecialAttack`, `SpecialHealing` and `SpecialStance` (which strikes nobody) implement the `Special` interface with a unified return type `SpecialResult` containing:
 - `name`: Skill name (required)
 - `actionResults`: Array of `AttackResult[]` or `HealingResult[]`
 - `buffResults`: Array of buff applications (can be empty)
@@ -168,7 +169,7 @@ This allows special attacks to perform their primary action (damage/healing) whi
 
 **SHIELD Skill Kind (Reactive)**: `ShieldSkill` implements `HealthReactiveSkill` (interface: `isHealthReactive: true`, `onHealthChanged(card): boolean`). It is edge-triggered: fires once when `card.healthRatio` crosses the `HealthThresholdCondition` threshold downward, then rearms when health goes back above. `OtherSkillDto.event` is **optional** — SHIELD kind has no trigger event. After each HP change, `triggerReactiveSkills()` (in `reactive-skill-checker.ts`) checks all `HealthReactiveSkill` instances on the damaged card and fires those that return `true` from `onHealthChanged()`.
 
-**Concealment Mechanic**: `FightingCard.isTargetable()` (alive and not concealed) replaces `!isDead()` in every strategy reading the defending player, so a concealed card escapes all enemy targeting, area attacks included, while its allies still reach it. `revealAttacker()` (`fight-simulator/concealment-steps.ts`) ends it when the card attacks somebody — from `ActionStage.handleAttackResult()` and `skillResultsToSteps()` — and `TurnManager` ends a timed one. A `CONCEALMENT` skill on the `fight-start` event (launched by `Fight.start()` right after step 0) opens the fight concealed. Emits `concealment_started` and `concealment_ended`.
+**Concealment Mechanic**: `FightingCard.isTargetableBy(attacker)` (alive, and not concealed unless the attacker holds a `revealsConcealed` stance) replaces `!isDead()` in every strategy reading the defending player, so a concealed card escapes all enemy targeting, area attacks included, while its allies still reach it. `revealAttacker()` (`fight-simulator/concealment-steps.ts`) ends it when the card attacks somebody — from `ActionStage.handleAttackResult()` and `skillResultsToSteps()` — and `TurnManager` ends a timed one. A `CONCEALMENT` skill on the `fight-start` event (launched by `Fight.start()` right after step 0) opens the fight concealed. Emits `concealment_started` and `concealment_ended`.
 
 **Stance Mechanic**: a stance is a named posture a card holds for a number of turns, opened by a special through `stanceActivation` and optionally listing the `StatusCategory` values its bearer refuses while it runs. A skill carrying `requiredStance` only fires while that stance is held — `FightingCard.launchSkills()` filters the others out. Emits `stance_started` and `stance_ended` steps.
 
@@ -212,6 +213,7 @@ fight-simulator/
     ├── protection-report.ts # ProtectionStartedReport + ProtectionEndedReport + AttackInterceptedReport
     ├── transformation-report.ts # TransformationStartedReport + TransformationEndedReport (healthCost on exit)
     ├── concealment-report.ts # ConcealmentStartedReport + ConcealmentEndedReport (reason: attacked | expired)
+    ├── special-stance-report.ts # SpecialStanceReport (special_stance step) + SpecialStanceActionReport (step + follow-ups)
     ├── survived-report.ts  # SurvivedReport: { kind: 'survived', name, card }
     ├── damage-mitigated-report.ts # DamageMitigatedReport: { kind: 'damage_mitigated', name, card }
     └── winner-report.ts    # Victory determination

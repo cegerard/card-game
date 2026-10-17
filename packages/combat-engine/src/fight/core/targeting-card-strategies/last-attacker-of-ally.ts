@@ -8,14 +8,14 @@ export class LastAttackerOfAllyTargetingStrategy implements TargetingCardStrateg
   constructor(private readonly allyId: string) {}
 
   targetedCards(
-    _attackingCard: FightingCard,
+    attackingCard: FightingCard,
     attackingPlayer: Player,
     defendingPlayer: Player,
   ): FightingCard[] {
     const ally =
       attackingPlayer.allCards.find((c) => c.id === this.allyId) ??
       defendingPlayer.allCards.find((c) => c.id === this.allyId);
-    if (!ally?.lastAttacker?.isTargetable()) {
+    if (!ally?.lastAttacker?.isTargetableBy(attackingCard)) {
       return [];
     }
     return [ally.lastAttacker];

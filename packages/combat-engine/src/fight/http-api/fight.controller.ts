@@ -16,6 +16,7 @@ import {
   EffectDto,
   BleedStackBonusDto,
   DamageTypeBonusDto,
+  SpecialDto,
   EnergyRefundDto,
   FightDataDto,
   FightingCardDto,
@@ -96,6 +97,20 @@ import { DodgeBonusDenialSkill } from '../core/cards/skills/dodge-bonus-denial';
 import { BleedStackScalingSkill } from '../core/cards/skills/bleed-stack-scaling';
 import { BleedEmpowermentSkill } from '../core/cards/skills/bleed-empowerment';
 import { ConcealmentSkill } from '../core/cards/skills/concealment';
+import { SpecialStance } from '../core/cards/skills/special-stance';
+
+// What only a special that strikes can carry
+const STANCE_SPECIAL_FORBIDDEN_FIELDS = [
+  'damages',
+  'rate',
+  'hits',
+  'targetingStrategy',
+  'effect',
+  'energyRefund',
+  'markedTargetBonus',
+  'bleedStackBonus',
+  'concealedBonus',
+] as const;
 
 const CARD_BOUND_SKILL_KINDS = [
   SkillKind.SURVIVE,
@@ -156,26 +171,17 @@ export class FightController {
       ? this.buildEffect(cardData.skills.special.effect)
       : undefined;
 
-    if (cardData.skills.special.kind === SpecialKind.ATTACK) {
-      const alterations = (cardData.skills.special.statAlterations ?? []).map(
-        (a) => {
-          const condition = a.condition
-            ? buildAlterationCondition(a.condition.type, {
-                allyName: a.condition.allyName,
-              })
-            : undefined;
-          return new Alteration(
-            this.mapAlterationType(a.type),
-            a.rate,
-            a.duration,
-            buildTargetingStrategy(a.targetingStrategy),
-            condition,
-            a.condition?.multiplier,
-            a.terminationEvent,
-            a.polarity,
-          );
-        },
+    if (
+      cardData.skills.special.concealment &&
+      cardData.skills.special.kind !== SpecialKind.STANCE
+    ) {
+      throw new BadRequestException(
+        'Only a STANCE special can conceal its caster: an attack would reveal it at once',
       );
+    }
+
+    if (cardData.skills.special.kind === SpecialKind.ATTACK) {
+      const alterations = this.buildSpecialAlterations(cardData.skills.special);
 
       const rawDamages = cardData.skills.special.damages;
       if (!rawDamages || rawDamages.length === 0) {
@@ -186,14 +192,9 @@ export class FightController {
       const specialDamages = rawDamages.map(
         (d) => new DamageComposition(d.type, d.rate),
       );
-      const shieldDto = cardData.skills.special.shieldApplication;
-      const shieldApplication = shieldDto
-        ? new ShieldApplication(
-            shieldDto.rate,
-            shieldDto.duration,
-            buildTargetingStrategy(shieldDto.targetingStrategy),
-          )
-        : undefined;
+      const shieldApplication = this.buildShieldApplication(
+        cardData.skills.special,
+      );
 
       const markedBonusDto = cardData.skills.special.markedTargetBonus;
       const markedTargetBonus = markedBonusDto
@@ -217,6 +218,8 @@ export class FightController {
         this.buildDamageBonuses(cardData.skills.special),
         this.buildEnergyRefund(cardData.skills.special.energyRefund),
       );
+    } else if (cardData.skills.special.kind === SpecialKind.STANCE) {
+      special = this.buildSpecialStance(cardData.skills.special);
     } else if (cardData.skills.special.kind === SpecialKind.HEALING) {
       special = new SpecialHealing(
         cardData.skills.special.name,
@@ -465,6 +468,59 @@ export class FightController {
     if (!dto) return undefined;
 
     return new EnergyRefund(dto.amount, dto.minAccuracyMargin);
+  }
+
+  private buildSpecialStance(dto: SpecialDto): SpecialStance {
+    const strikingFields = STANCE_SPECIAL_FORBIDDEN_FIELDS.filter(
+      (field) => dto[field] !== undefined,
+    );
+    if (strikingFields.length > 0) {
+      throw new BadRequestException(
+        `STANCE special strikes nobody and cannot carry: ${strikingFields.join(', ')}`,
+      );
+    }
+
+    return new SpecialStance(
+      dto.name,
+      dto.energy,
+      dto.stanceActivation,
+      this.buildSpecialAlterations(dto),
+      this.buildShieldApplication(dto),
+      dto.concealment?.duration,
+    );
+  }
+
+  private buildSpecialAlterations(dto: SpecialDto): Alteration[] {
+    return (dto.statAlterations ?? []).map((a) => {
+      const condition = a.condition
+        ? buildAlterationCondition(a.condition.type, {
+            allyName: a.condition.allyName,
+          })
+        : undefined;
+      return new Alteration(
+        this.mapAlterationType(a.type),
+        a.rate,
+        a.duration,
+        buildTargetingStrategy(a.targetingStrategy),
+        condition,
+        a.condition?.multiplier,
+        a.terminationEvent,
+        a.polarity,
+      );
+    });
+  }
+
+  private buildShieldApplication(
+    dto: SpecialDto,
+  ): ShieldApplication | undefined {
+    const shieldDto = dto.shieldApplication;
+    if (!shieldDto) return undefined;
+
+    return new ShieldApplication(
+      shieldDto.rate,
+      shieldDto.duration,
+      buildTargetingStrategy(shieldDto.targetingStrategy),
+    );
   }
 
   private buildDamageBonuses(attack: {
