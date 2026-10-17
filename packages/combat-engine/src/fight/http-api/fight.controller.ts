@@ -472,20 +472,27 @@ export class FightController {
     concealedBonus?: DamageTypeBonusDto;
   }): DamageTypeBonus[] {
     const { bleedStackBonus, concealedBonus } = attack;
+    const bonuses: DamageTypeBonus[] = [];
 
-    return [
-      bleedStackBonus &&
+    if (bleedStackBonus) {
+      bonuses.push(
         new BleedStackBonus(
           bleedStackBonus.minStacks,
           bleedStackBonus.damageType,
           bleedStackBonus.multiplier,
         ),
-      concealedBonus &&
+      );
+    }
+    if (concealedBonus) {
+      bonuses.push(
         new ConcealedBonus(
           concealedBonus.damageType,
           concealedBonus.multiplier,
         ),
-    ].filter((bonus) => bonus !== undefined);
+      );
+    }
+
+    return bonuses;
   }
 
   /**

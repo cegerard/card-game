@@ -58,8 +58,8 @@ describe('concealedBonus', () => {
 
   const post = (body: object) =>
     request(app.getHttpServer()).post('/fight').send(body);
-  const selkhetHits = async () =>
-    (Object.values((await post(payload(concealedBonus))).body) as any[])
+  const selkhetHits = async (bonus: object | null = concealedBonus) =>
+    (Object.values((await post(payload(bonus))).body) as any[])
       .filter((s) => s.kind === 'attack' && s.attacker.id === 'selkhet')
       .map((s) => s.damages[0].damage);
 
@@ -87,6 +87,12 @@ describe('concealedBonus', () => {
     const [, second] = await selkhetHits();
 
     expect(second).toBe(100);
+  });
+
+  it('ignores a null concealedBonus instead of failing the fight', async () => {
+    const [first] = await selkhetHits(null);
+
+    expect(first).toBe(100);
   });
 
   it('returns 400 with a multiplier that is not positive', () => {
