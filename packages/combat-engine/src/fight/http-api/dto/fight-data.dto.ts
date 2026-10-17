@@ -383,6 +383,18 @@ export class BleedStackBonusDto extends DamageTypeBonusDto {
   minStacks: number;
 }
 
+class AttackBonusesDto {
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => BleedStackBonusDto)
+  bleedStackBonus?: BleedStackBonusDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => DamageTypeBonusDto)
+  concealedBonus?: DamageTypeBonusDto;
+}
+
 export enum StatusCategoryDto {
   CONTROL = 'control',
   DAMAGE_OVER_TIME = 'damage-over-time',
@@ -405,7 +417,7 @@ class StanceActivationDto {
   immunities?: StatusCategoryDto[];
 }
 
-class SpecialDto {
+class SpecialDto extends AttackBonusesDto {
   @IsEnum(SpecialKind)
   kind: SpecialKind;
 
@@ -470,17 +482,6 @@ class SpecialDto {
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => EnergyRefundDto)
   energyRefund?: EnergyRefundDto;
-
-  @IsOptional()
-  @ValidateNested()
-  @Type(/* istanbul ignore next */ () => BleedStackBonusDto)
-  bleedStackBonus?: BleedStackBonusDto;
-
-  // Boosts one damage type while the attacker strikes from concealment
-  @IsOptional()
-  @ValidateNested()
-  @Type(/* istanbul ignore next */ () => DamageTypeBonusDto)
-  concealedBonus?: DamageTypeBonusDto;
 }
 
 class DamageCompositionDto {
@@ -492,7 +493,7 @@ class DamageCompositionDto {
   rate: number;
 }
 
-class SimpleAttackDto {
+class SimpleAttackDto extends AttackBonusesDto {
   @IsString()
   name: string;
 
@@ -514,20 +515,9 @@ class SimpleAttackDto {
   @ValidateNested({ each: true })
   @Type(/* istanbul ignore next */ () => EffectDto)
   effects?: EffectDto[];
-
-  @IsOptional()
-  @ValidateNested()
-  @Type(/* istanbul ignore next */ () => BleedStackBonusDto)
-  bleedStackBonus?: BleedStackBonusDto;
-
-  // Boosts one damage type while the attacker strikes from concealment
-  @IsOptional()
-  @ValidateNested()
-  @Type(/* istanbul ignore next */ () => DamageTypeBonusDto)
-  concealedBonus?: DamageTypeBonusDto;
 }
 
-class MultipleAttackDto {
+class MultipleAttackDto extends AttackBonusesDto {
   @IsString()
   name: string;
 
@@ -569,17 +559,6 @@ class MultipleAttackDto {
   @ValidateNested({ each: true })
   @Type(/* istanbul ignore next */ () => EffectDto)
   comboFinisherEffects?: EffectDto[];
-
-  @IsOptional()
-  @ValidateNested()
-  @Type(/* istanbul ignore next */ () => BleedStackBonusDto)
-  bleedStackBonus?: BleedStackBonusDto;
-
-  // Boosts one damage type while the attacker strikes from concealment
-  @IsOptional()
-  @ValidateNested()
-  @Type(/* istanbul ignore next */ () => DamageTypeBonusDto)
-  concealedBonus?: DamageTypeBonusDto;
 }
 
 @ValidatorConstraint({ name: 'targetedCardOnlyForOverride', async: false })
