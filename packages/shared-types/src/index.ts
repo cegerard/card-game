@@ -204,11 +204,14 @@ export interface EnergyRefund {
   minAccuracyMargin: number;
 }
 
-export interface BleedStackBonus {
-  minStacks: number;
+export interface DamageTypeBonus {
   damageType: DamageType;
   /** Multiplicateur appliqué à la seule part de dégâts de ce type, par exemple 1.2 pour +20%. */
   multiplier: number;
+}
+
+export interface BleedStackBonus extends DamageTypeBonus {
+  minStacks: number;
 }
 
 export interface ShieldApplication {
@@ -240,6 +243,8 @@ export interface SpecialSkill {
   energyRefund?: EnergyRefund;
   /** Bonus sur un type de dégâts quand la cible saigne d'au moins `minStacks` piles. */
   bleedStackBonus?: BleedStackBonus;
+  /** Bonus sur un type de dégâts quand l'attaquant frappe depuis la Dissimulation. */
+  concealedBonus?: DamageTypeBonus;
 }
 
 export interface SimpleAttackSkill {
@@ -249,6 +254,8 @@ export interface SimpleAttackSkill {
   effects?: EffectConfig[];
   /** Bonus sur un type de dégâts quand la cible saigne d'au moins `minStacks` piles. */
   bleedStackBonus?: BleedStackBonus;
+  /** Bonus sur un type de dégâts quand l'attaquant frappe depuis la Dissimulation. */
+  concealedBonus?: DamageTypeBonus;
 }
 
 export interface MultipleAttackSkill {
@@ -263,6 +270,8 @@ export interface MultipleAttackSkill {
   comboFinisherEffects?: EffectConfig[];
   /** Bonus sur un type de dégâts quand la cible saigne d'au moins `minStacks` piles. */
   bleedStackBonus?: BleedStackBonus;
+  /** Bonus sur un type de dégâts quand l'attaquant frappe depuis la Dissimulation. */
+  concealedBonus?: DamageTypeBonus;
 }
 
 export interface OtherSkill {

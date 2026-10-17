@@ -27,7 +27,7 @@ const attacks = {
       damages,
       new TargetedFromPosition(),
       [],
-      bonus,
+      [bonus],
     ),
   multiple: () =>
     new MultipleAttack(
@@ -39,7 +39,7 @@ const attacks = {
       [],
       undefined,
       undefined,
-      bonus,
+      [bonus],
     ),
 };
 
@@ -94,7 +94,7 @@ describe('Attacks with a bleed stack bonus', () => {
       undefined,
       undefined,
       1,
-      bonus,
+      [bonus],
     );
 
     const [result] = special.launch(attacker, contextFor(defender))
@@ -110,7 +110,7 @@ describe('Attacks with a bleed stack bonus', () => {
       damages,
       new TargetedFromPosition(),
       [bleed()],
-      bonus,
+      [bonus],
     );
 
     expect(

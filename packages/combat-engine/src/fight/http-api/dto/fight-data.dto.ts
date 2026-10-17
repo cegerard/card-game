@@ -368,17 +368,19 @@ export class BleedDetonationDto {
   ratePerStack: number;
 }
 
-export class BleedStackBonusDto {
-  @IsInt()
-  @Min(1)
-  minStacks: number;
-
+export class DamageTypeBonusDto {
   @IsEnum(DamageType)
   damageType: DamageType;
 
   @IsNumber()
   @IsPositive()
   multiplier: number;
+}
+
+export class BleedStackBonusDto extends DamageTypeBonusDto {
+  @IsInt()
+  @Min(1)
+  minStacks: number;
 }
 
 export enum StatusCategoryDto {
@@ -473,6 +475,12 @@ class SpecialDto {
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => BleedStackBonusDto)
   bleedStackBonus?: BleedStackBonusDto;
+
+  // Boosts one damage type while the attacker strikes from concealment
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => DamageTypeBonusDto)
+  concealedBonus?: DamageTypeBonusDto;
 }
 
 class DamageCompositionDto {
@@ -511,6 +519,12 @@ class SimpleAttackDto {
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => BleedStackBonusDto)
   bleedStackBonus?: BleedStackBonusDto;
+
+  // Boosts one damage type while the attacker strikes from concealment
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => DamageTypeBonusDto)
+  concealedBonus?: DamageTypeBonusDto;
 }
 
 class MultipleAttackDto {
@@ -560,6 +574,12 @@ class MultipleAttackDto {
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => BleedStackBonusDto)
   bleedStackBonus?: BleedStackBonusDto;
+
+  // Boosts one damage type while the attacker strikes from concealment
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => DamageTypeBonusDto)
+  concealedBonus?: DamageTypeBonusDto;
 }
 
 @ValidatorConstraint({ name: 'targetedCardOnlyForOverride', async: false })
