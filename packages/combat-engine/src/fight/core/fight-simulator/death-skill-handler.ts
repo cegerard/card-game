@@ -1,5 +1,6 @@
 import { SELF_DEATH_PREFIX } from '../trigger/self-death';
 import { ENEMY_BLEED_DEATH } from '../trigger/enemy-bleed-death';
+import { ENEMY_KILLED } from '../trigger/enemy-killed';
 import { StateEffectType } from '../cards/@types/state/state-effect-type';
 import { FightingCard } from '../cards/fighting-card';
 import { CardDeathSubscriber } from './card-death-subscriber';
@@ -29,7 +30,10 @@ import { Player } from '../player';
  * 4. **Enemy-death triggers** – skills on the opposing team that listen for
  *    `enemy-death:<deadCard.id>` are fired next.
  * 5. **Enemy-bleed-death triggers** – when the card bled out, skills on the
- *    opposing team that listen for `enemy-bleed-death` are fired last.
+ *    opposing team that listen for `enemy-bleed-death` are fired next.
+ * 6. **Enemy-killed triggers** – when an enemy dealt the fatal blow and is
+ *    still alive, its own skills listening for `enemy-killed` fire last, with
+ *    the health ratio the victim had just before the blow.
  *
  * A card is processed once: a second notification of the same death is ignored.
  *
@@ -136,6 +140,20 @@ export class DeathSkillHandler implements CardDeathSubscriber {
       this.fireSkillsOnCards(
         opponentPlayer.playableCards,
         ENEMY_BLEED_DEATH,
+        opponentPlayer,
+        ownerPlayer,
+        killerCard,
+      );
+    }
+
+    if (
+      killerCard &&
+      !killerCard.isDead() &&
+      opponentPlayer.ownCard(killerCard)
+    ) {
+      this.fireSkillsOnCards(
+        [killerCard],
+        `${ENEMY_KILLED}:${deadCard.healthRatioBeforeLastDamage}`,
         opponentPlayer,
         ownerPlayer,
         killerCard,

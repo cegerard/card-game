@@ -126,6 +126,7 @@ export enum TriggerEvent {
   TURN_START = 'turn-start',
   BLEED_STACKS_APPLIED = 'bleed-stacks-applied',
   FIGHT_START = 'fight-start',
+  ENEMY_KILLED = 'enemy-killed',
 }
 
 export enum RateBasisDto {

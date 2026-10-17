@@ -163,6 +163,8 @@ export class FightingCard {
   // Concealment
   private concealment: Concealment | null = null;
 
+  private lastPreDamageHealthRatio = 1;
+
   // Targeting overrides
   private targetingOverrides: TargetingOverrideEntry[] = [];
 
@@ -245,6 +247,14 @@ export class FightingCard {
 
   public get healthRatio(): number {
     return this.actualHealth / this.maxHealth;
+  }
+
+  /**
+   * The health ratio the card had just before the last damage it took — for a
+   * dead card, how wounded it was when the fatal blow landed.
+   */
+  public get healthRatioBeforeLastDamage(): number {
+    return this.lastPreDamageHealthRatio;
   }
 
   public get actualSpeed(): number {
@@ -560,6 +570,7 @@ export class FightingCard {
    * exactly as they bypass the shield.
    */
   public applyFinalDamage(damage: number): FinalDamageResult {
+    this.lastPreDamageHealthRatio = this.healthRatio;
     let causedDamages = damage;
     if (this.frozen) {
       causedDamages = (this.frozen as CardStateFrozen).applyDamageRate(
@@ -898,6 +909,7 @@ export class FightingCard {
   }
 
   public addRealDamage(damage: number): number {
+    this.lastPreDamageHealthRatio = this.healthRatio;
     this.receivedDamages += damage;
 
     return damage;
