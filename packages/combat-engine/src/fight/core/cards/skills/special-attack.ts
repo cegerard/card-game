@@ -109,7 +109,7 @@ export class SpecialAttack implements Special {
     const kind = this.damages.map((d) => d.type);
     // A guardian standing in front answers with its own dodge, defence and
     // element, so the swap happens before anything is rolled.
-    const protector = context.opponentPlayer.protectorOf(aimedAt);
+    const protector = context.opponentPlayer.protectorOf(aimedAt, source);
     const target = protector ?? aimedAt;
     const interceptedFor = protector ? aimedAt : undefined;
 

@@ -14,6 +14,22 @@ describe('FightingCard concealment', () => {
     expect(card.isTargetableBy(enemy)).toBe(true);
   });
 
+  describe('an enemy stance re-activated without its reveal', () => {
+    beforeEach(() => {
+      card.conceal('Marche FantÙme');
+      enemy.activateStance({
+        name: 'Sens Sismique',
+        duration: 2,
+        revealsConcealed: true,
+      });
+      enemy.activateStance({ name: 'Sens Sismique', duration: 2 });
+    });
+
+    it('still reveals the concealed card', () => {
+      expect(card.isTargetableBy(enemy)).toBe(true);
+    });
+  });
+
   describe('once concealed', () => {
     beforeEach(() => {
       card.conceal('Marche Fant√¥me');

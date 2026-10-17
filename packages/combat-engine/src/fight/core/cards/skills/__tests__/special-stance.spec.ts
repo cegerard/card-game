@@ -89,6 +89,6 @@ describe('SpecialStance', () => {
   it('rejects a negative concealment duration', () => {
     expect(
       () => new SpecialStance('Fusion', 80, FUSION, [], undefined, -1),
-    ).toThrow('concealment duration must be a non-negative integer');
+    ).toThrow('Concealment duration must be a non-negative integer');
   });
 });

@@ -69,6 +69,21 @@ describe('FightingCard — control immunity granted by a stance', () => {
     });
   });
 
+  describe('a running stance re-activated without its immunities', () => {
+    beforeEach(() => {
+      card.activateStance({
+        name: ANCHOR,
+        duration: 3,
+        immunities: ['control'],
+      });
+      card.activateStance({ name: ANCHOR, duration: 2 });
+    });
+
+    it('keeps refusing a stunt', () => {
+      expect(card.setState(new CardStateStunted(1, 1))).toBe(false);
+    });
+  });
+
   describe('a stance granting no immunity', () => {
     it('does not protect from control', () => {
       card.activateStance({ name: ANCHOR, duration: 3 });

@@ -8,12 +8,14 @@ describe('FightingCard protection', () => {
   let guardian: FightingCard;
   let ally: FightingCard;
   let bystander: FightingCard;
+  let enemy: FightingCard;
   let team: Player;
 
   beforeEach(() => {
     guardian = createFightingCard({ id: 'guardian', health: 1000 });
     ally = createFightingCard({ id: 'ally', health: 1000 });
     bystander = createFightingCard({ id: 'bystander', health: 1000 });
+    enemy = createFightingCard({ id: 'enemy', health: 1000 });
     team = new Player('team', [guardian, ally, bystander]);
   });
 
@@ -35,11 +37,22 @@ describe('FightingCard protection', () => {
     });
 
     it('is found as the protector of that ally', () => {
-      expect(team.protectorOf(ally)).toBe(guardian);
+      expect(team.protectorOf(ally, enemy)).toBe(guardian);
     });
 
     it('leaves the other teammates unprotected', () => {
-      expect(team.protectorOf(bystander)).toBeUndefined();
+      expect(team.protectorOf(bystander, enemy)).toBeUndefined();
+    });
+  });
+
+  describe('when the guardian is concealed from the attacker', () => {
+    beforeEach(() => {
+      guardian.protect(ally, DURATION);
+      guardian.conceal('Marche Fantôme');
+    });
+
+    it('is not found as the protector of its ally', () => {
+      expect(team.protectorOf(ally, enemy)).toBeUndefined();
     });
   });
 
@@ -55,7 +68,7 @@ describe('FightingCard protection', () => {
       guardian.protect(ally, DURATION);
       guardian.addRealDamage(1000);
 
-      expect(team.protectorOf(ally)).toBeUndefined();
+      expect(team.protectorOf(ally, enemy)).toBeUndefined();
     });
   });
 

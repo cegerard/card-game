@@ -68,7 +68,7 @@ export class MultipleAttack implements AttackSkill {
 
         // A guardian standing in front answers with its own dodge, defence
         // and element, so the swap happens before anything is rolled.
-        const protector = context.opponentPlayer.protectorOf(target);
+        const protector = context.opponentPlayer.protectorOf(target, card);
         const defender = protector ?? target;
         const interceptedFor = protector ? target : undefined;
 

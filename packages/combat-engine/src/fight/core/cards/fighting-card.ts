@@ -752,7 +752,8 @@ export class FightingCard {
 
   /**
    * Opens a stance on the card, or refreshes the duration of one already
-   * running: re-casting the power that grants it must not double its length.
+   * running: re-casting the power that grants it must not double its length,
+   * and what the stance grants is kept unless the refresh states it again.
    */
   public activateStance({
     name,
@@ -763,8 +764,8 @@ export class FightingCard {
     const running = this.stances.find((s) => s.name === name);
     if (running) {
       running.remainingTurns = duration;
-      running.immunities = immunities;
-      running.revealsConcealed = revealsConcealed;
+      running.immunities = immunities ?? running.immunities;
+      running.revealsConcealed = revealsConcealed ?? running.revealsConcealed;
       return running;
     }
 

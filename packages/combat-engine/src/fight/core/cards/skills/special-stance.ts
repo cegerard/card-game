@@ -1,6 +1,7 @@
 import { FightingContext } from '../@types/fighting-context';
 import { FightingCard } from '../fighting-card';
 import { Special } from './special';
+import { assertConcealmentDuration } from './concealment-duration';
 import { SpecialResult } from '../@types/action-result/special-result';
 import { StanceActivation } from '../@types/stance/stance';
 import { Alteration } from '../@types/alteration/alteration';
@@ -29,14 +30,7 @@ export class SpecialStance implements Special {
     if (!stanceActivation) {
       throw new Error('SpecialStance requires a stanceActivation');
     }
-    if (
-      concealmentDuration !== undefined &&
-      (!Number.isInteger(concealmentDuration) || concealmentDuration < 0)
-    ) {
-      throw new Error(
-        `SpecialStance concealment duration must be a non-negative integer, got ${concealmentDuration}`,
-      );
-    }
+    assertConcealmentDuration(concealmentDuration);
   }
 
   public ready(actualEnergy: number): boolean {

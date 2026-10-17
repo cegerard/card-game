@@ -2,6 +2,7 @@ import { FightingCard } from '../fighting-card';
 import { FightingContext } from '../@types/fighting-context';
 import { Trigger } from '../../trigger/trigger';
 import { Skill, SkillKind, SkillResults } from './skill';
+import { assertConcealmentDuration } from './concealment-duration';
 
 /**
  * Conceals its owner when its event fires: no enemy can target it until it
@@ -16,14 +17,7 @@ export class ConcealmentSkill implements Skill {
     private readonly duration?: number,
     public readonly powerId?: string,
   ) {
-    if (
-      duration !== undefined &&
-      (!Number.isInteger(duration) || duration < 0)
-    ) {
-      throw new Error(
-        `Concealment duration must be a non-negative integer, got ${duration}`,
-      );
-    }
+    assertConcealmentDuration(duration);
   }
 
   launch(source: FightingCard, _context: FightingContext): SkillResults {
