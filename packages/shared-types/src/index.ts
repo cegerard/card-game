@@ -300,11 +300,13 @@ export interface OtherSkill {
    */
   probability?: number;
   /**
-   * ALTERATION en debuff : nom de la pile de cumul et son plafond. Les deux
-   * champs vont de pair ; une pile est partagée entre tous les skills qui
-   * déclarent le même `stackId`.
+   * ALTERATION (buff ou debuff) : nom de la pile de cumul et son plafond. Les
+   * deux champs vont de pair ; une pile est partagée entre tous les skills de
+   * même polarité qui déclarent le même `stackId`.
    */
   stackId?: string;
+  maxStacks?: number;
+  /** @deprecated Ancien nom de `maxStacks`, toujours accepté. */
   debuffMaxStacks?: number;
   /** Absent pour SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL, BLEED_STACK_SCALING, BLEED_EMPOWERMENT, STANCE et BLEED_DETONATION. */
   targetingStrategy?: TargetingStrategy;

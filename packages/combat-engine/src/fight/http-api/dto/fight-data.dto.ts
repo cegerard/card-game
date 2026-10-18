@@ -715,12 +715,18 @@ export class OtherSkillDto {
   @IsNotEmpty()
   requiresStance?: string;
 
-  // ALTERATION debuff stack budget: both fields together, or neither
+  // ALTERATION stack budget (buff or debuff): stackId and its cap together, or neither
   @IsOptional()
   @IsString()
   @IsNotEmpty()
   stackId?: string;
 
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  maxStacks?: number;
+
+  // Former name of maxStacks, still accepted so existing decks keep working
   @IsOptional()
   @IsNumber()
   @Min(1)
