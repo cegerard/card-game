@@ -83,4 +83,24 @@ describe('FightingCard — buff stack cap', () => {
       expect(card.buffStacks('instinct')).toBe(0);
     });
   });
+
+  describe('with a termination event', () => {
+    const stackWithEvent = () =>
+      card.applyBuff('speed', 0.15, 0, 'rage-end', undefined, INSTINCT);
+
+    it('accumulates stacks up to the cap', () => {
+      stackWithEvent();
+      stackWithEvent();
+
+      expect(card.buffStacks('instinct')).toBe(2);
+    });
+
+    it('refuses the application past the cap', () => {
+      stackWithEvent();
+      stackWithEvent();
+      stackWithEvent();
+
+      expect(stackWithEvent()).toBeUndefined();
+    });
+  });
 });

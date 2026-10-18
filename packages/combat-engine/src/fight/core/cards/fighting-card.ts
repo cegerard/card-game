@@ -988,7 +988,7 @@ export class FightingCard {
       stackId: stacking?.id,
     };
 
-    if (terminationEvent) {
+    if (terminationEvent && !stacking) {
       const existingIndex = this.buffs.findIndex(
         (b) => b.type === buffType && b.terminationEvent === terminationEvent,
       );
