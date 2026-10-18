@@ -100,15 +100,6 @@ export class AlterationSkill implements Skill {
           context.opponentPlayer,
         );
 
-    if (!conditionFailed) {
-      this.activationCount++;
-    }
-
-    const isExhausted =
-      this.activationLimit !== undefined &&
-      this.activationCount >= this.activationLimit;
-    const endEvent = isExhausted ? this.endEvent : undefined;
-
     // A capped alteration refused at its stack limit returns undefined: drop it so
     // no step reports an alteration that was never applied.
     const results = targetedCards
@@ -134,6 +125,17 @@ export class AlterationSkill implements Skill {
               ),
       }))
       .filter((result) => result.alteration !== undefined);
+
+    const refusedByCap = targetedCards.length > 0 && results.length === 0;
+    if (!conditionFailed && !refusedByCap) {
+      this.activationCount++;
+    }
+
+    const isExhausted =
+      this.activationLimit !== undefined &&
+      this.activationCount >= this.activationLimit;
+    const endEvent = isExhausted ? this.endEvent : undefined;
+
     return {
       skillKind: this.polarity === 'buff' ? SkillKind.Buff : SkillKind.Debuff,
       results,

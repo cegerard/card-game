@@ -145,6 +145,43 @@ describe('AlterationSkill lifecycle', () => {
     });
   });
 
+  describe('when its stack cap refuses every application', () => {
+    let source;
+    let skill;
+
+    beforeEach(() => {
+      source = createFightingCard({ health: 100 });
+      source.applyBuff('speed', 0.1, 0, undefined, undefined, {
+        id: 'pile',
+        maxStacks: 1,
+      });
+      skill = new AlterationSkill({
+        name: 'skill',
+        polarity: 'buff',
+        attributeType: 'speed',
+        rate: 0.1,
+        duration: 0,
+        trigger,
+        targetingStrategy: targeting,
+        activationLimit: 1,
+        endEvent: 'test-end',
+        stacking: { id: 'pile', maxStacks: 1 },
+      });
+    });
+
+    it('does not emit the endEvent', () => {
+      const result = skill.launch(source, makeContext(source));
+
+      expect(result.endEvent).toBeUndefined();
+    });
+
+    it('stays triggerable', () => {
+      skill.launch(source, makeContext(source));
+
+      expect(skill.isTriggered('turn-end')).toBe(true);
+    });
+  });
+
   describe('debuff polarity', () => {
     it('returns skillKind Debuff', () => {
       const source = createFightingCard({ health: 100 });
