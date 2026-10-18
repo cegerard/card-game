@@ -19,6 +19,7 @@ import { NextAction } from '../../src/fight/core/trigger/next-action';
 import { DeathTrigger } from '../../src/fight/core/trigger/death-trigger';
 import { SelfDeathTrigger } from '../../src/fight/core/trigger/self-death';
 import { EnemyBleedDeathTrigger } from '../../src/fight/core/trigger/enemy-bleed-death';
+import { EnemyKilledTrigger } from '../../src/fight/core/trigger/enemy-killed';
 import { DynamicTrigger } from '../../src/fight/core/trigger/dynamic-trigger';
 import { Trigger } from '../../src/fight/core/trigger/trigger';
 import { createEffect } from './effect';
@@ -213,6 +214,8 @@ function createTrigger(
       return new SelfDeathTrigger(targetCardId);
     case 'enemy-bleed-death':
       return new EnemyBleedDeathTrigger();
+    case 'enemy-killed':
+      return new EnemyKilledTrigger();
     default:
       throw new Error(`Unknown trigger: ${trigger}`);
   }

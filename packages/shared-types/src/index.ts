@@ -91,7 +91,9 @@ export type TriggerEvent =
   | 'turn-start'
   | 'bleed-stacks-applied'
   | 'damage-taken'
-  | 'fight-start';
+  | 'fight-start'
+  /** Sur la carte qui a porté le coup fatal ; `activationCondition.threshold` : santé de la victime avant le coup. */
+  | 'enemy-killed';
 
 export type TargetingStrategy =
   | 'position-based'

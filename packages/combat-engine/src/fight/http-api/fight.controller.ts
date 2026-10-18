@@ -98,6 +98,7 @@ import { DodgeBonusDenialSkill } from '../core/cards/skills/dodge-bonus-denial';
 import { BleedStackScalingSkill } from '../core/cards/skills/bleed-stack-scaling';
 import { BleedEmpowermentSkill } from '../core/cards/skills/bleed-empowerment';
 import { ConcealmentSkill } from '../core/cards/skills/concealment';
+import { EnemyKilledTrigger } from '../core/trigger/enemy-killed';
 import { SpecialStance } from '../core/cards/skills/special-stance';
 
 // What only a special that strikes can carry
@@ -660,7 +661,10 @@ export class FightController {
    * health — a guardian in perfect shape would never answer its wounded ally.
    */
   private ownsActivationCondition(skillData: OtherSkillDto): boolean {
-    return skillData.event === TriggerEvent.ANY_ALLY_HEALTH_BELOW;
+    return (
+      skillData.event === TriggerEvent.ANY_ALLY_HEALTH_BELOW ||
+      skillData.event === TriggerEvent.ENEMY_KILLED
+    );
   }
 
   private buildSkillActivationCondition(skillData: OtherSkillDto) {
@@ -696,6 +700,23 @@ export class FightController {
     // A card reacting to its own death names nobody: the trigger is its own id.
     if (skillData.event === TriggerEvent.SELF_DEATH) {
       return new SelfDeathTrigger(ownerId);
+    }
+
+    if (skillData.event === TriggerEvent.ENEMY_KILLED) {
+      const conditionType = skillData.activationCondition?.type;
+      if (
+        conditionType !== undefined &&
+        conditionType !== AlterationConditionType.HEALTH_THRESHOLD
+      ) {
+        throw new BadRequestException(
+          'enemy-killed activationCondition must be of type health-threshold',
+        );
+      }
+      try {
+        return new EnemyKilledTrigger(skillData.activationCondition?.threshold);
+      } catch (e) {
+        throw new BadRequestException((e as Error).message);
+      }
     }
 
     if (skillData.event === TriggerEvent.BLEED_STACKS_APPLIED) {

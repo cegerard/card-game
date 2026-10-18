@@ -23,6 +23,15 @@ describe('DeathSkillHandler bleed explosion on its owner death', () => {
     scythra = createFightingCard({
       id: 'scythra',
       attack: 1000,
+      skills: {
+        others: [
+          {
+            effectRate: 0.1,
+            trigger: 'enemy-killed',
+            targetingStrategy: 'self',
+          },
+        ],
+      },
       extraSkills: [
         new BleedExplosionSkill(
           'Héritage',
@@ -75,6 +84,16 @@ describe('DeathSkillHandler bleed explosion on its owner death', () => {
       .map((s: any) => s.source.id);
 
     expect(healers).toEqual(['avenger']);
+  });
+
+  it('does not reward the dead owner for the kills of its explosion', () => {
+    scythra.activateStance({ name: 'transe-predatrice', duration: 2 });
+
+    const healers = notifyScythraDeath()
+      .filter((s) => s.kind === StepKind.Healing)
+      .map((s: any) => s.source.id);
+
+    expect(healers).not.toContain('scythra');
   });
 
   it('stays silent outside the stance', () => {
