@@ -687,6 +687,20 @@ export class FightController {
    * targeting read. Missing, it is malformed input rather than a runtime
    * failure, so it answers 400 like the other domain checks here.
    */
+  private resolveMaxStacks(skillData: OtherSkillDto): number | undefined {
+    const { maxStacks, debuffMaxStacks } = skillData;
+    if (
+      maxStacks !== undefined &&
+      debuffMaxStacks !== undefined &&
+      maxStacks !== debuffMaxStacks
+    ) {
+      throw new BadRequestException(
+        `${skillData.kind} ${skillData.name}: maxStacks and its alias debuffMaxStacks disagree`,
+      );
+    }
+    return maxStacks ?? debuffMaxStacks;
+  }
+
   private requireThreshold(skillData: OtherSkillDto, requiredBy: string) {
     const threshold = skillData.activationCondition?.threshold;
     if (threshold === undefined) {
@@ -707,13 +721,18 @@ export class FightController {
     }
 
     if (skillData.event === TriggerEvent.ENEMY_KILLED) {
-      const conditionType = skillData.activationCondition?.type;
+      const condition = skillData.activationCondition;
       if (
-        conditionType !== undefined &&
-        conditionType !== AlterationConditionType.HEALTH_THRESHOLD
+        condition?.type !== undefined &&
+        condition.type !== AlterationConditionType.HEALTH_THRESHOLD
       ) {
         throw new BadRequestException(
           'enemy-killed activationCondition must be of type health-threshold',
+        );
+      }
+      if (condition?.operator !== undefined || condition?.allyName) {
+        throw new BadRequestException(
+          'enemy-killed activationCondition only accepts type and threshold',
         );
       }
       try {
@@ -807,7 +826,7 @@ export class FightController {
           activationCondition: alterationCondition,
           stacking: this.buildAlterationStacking(
             skillData.stackId,
-            skillData.maxStacks ?? skillData.debuffMaxStacks,
+            this.resolveMaxStacks(skillData),
             `${skillData.kind} ${skillData.name}`,
           ),
           activationLimit: skillData.activationLimit,

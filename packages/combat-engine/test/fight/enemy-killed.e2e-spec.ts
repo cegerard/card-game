@@ -113,6 +113,42 @@ describe('enemy-killed event', () => {
     ).expect(400);
   });
 
+  it('returns 400 when the condition names no type', () => {
+    return post(
+      fight(300, instinct({ activationCondition: { threshold: 0.3 } })),
+    ).expect(400);
+  });
+
+  it('returns 400 when the condition carries an operator', () => {
+    return post(
+      fight(
+        300,
+        instinct({
+          activationCondition: {
+            type: 'health-threshold',
+            operator: 'above',
+            threshold: 0.3,
+          },
+        }),
+      ),
+    ).expect(400);
+  });
+
+  it('returns 400 when the condition carries an ally name', () => {
+    return post(
+      fight(
+        300,
+        instinct({
+          activationCondition: {
+            type: 'health-threshold',
+            allyName: 'prey',
+            threshold: 0.3,
+          },
+        }),
+      ),
+    ).expect(400);
+  });
+
   it('fires on every kill without a threshold', async () => {
     const buffs = await instinctBuffs(
       fight(600, instinct({ activationCondition: undefined })),

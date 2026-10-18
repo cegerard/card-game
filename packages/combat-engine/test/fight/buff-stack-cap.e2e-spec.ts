@@ -97,6 +97,12 @@ describe('buff stack cap', () => {
     );
   });
 
+  it('returns 400 when maxStacks and its alias disagree', () => {
+    return post(
+      payload({ maxStacks: MAX_STACKS, debuffMaxStacks: MAX_STACKS + 2 }),
+    ).expect(400);
+  });
+
   it('returns 400 when the cap is missing', () => {
     return post(payload({})).expect(400);
   });
