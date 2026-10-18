@@ -25,4 +25,18 @@ describe('FightingCard health ratio before the last damage', () => {
 
     expect(card.healthRatioBeforeLastDamage).toBe(0.7);
   });
+
+  it('keeps the ratio of the fatal blow when a dead card is hit again', () => {
+    card.applyFinalDamage(1000);
+    card.applyFinalDamage(100);
+
+    expect(card.healthRatioBeforeLastDamage).toBe(1);
+  });
+
+  it('keeps the ratio of the fatal blow when a dead card takes real damage', () => {
+    card.applyFinalDamage(1000);
+    card.addRealDamage(100);
+
+    expect(card.healthRatioBeforeLastDamage).toBe(1);
+  });
 });

@@ -703,6 +703,15 @@ export class FightController {
     }
 
     if (skillData.event === TriggerEvent.ENEMY_KILLED) {
+      const conditionType = skillData.activationCondition?.type;
+      if (
+        conditionType !== undefined &&
+        conditionType !== AlterationConditionType.HEALTH_THRESHOLD
+      ) {
+        throw new BadRequestException(
+          'enemy-killed activationCondition must be of type health-threshold',
+        );
+      }
       try {
         return new EnemyKilledTrigger(skillData.activationCondition?.threshold);
       } catch (e) {

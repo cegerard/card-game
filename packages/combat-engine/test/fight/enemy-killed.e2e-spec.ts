@@ -102,6 +102,17 @@ describe('enemy-killed event', () => {
     ).expect(400);
   });
 
+  it('returns 400 with a condition that is not a health threshold', () => {
+    return post(
+      fight(
+        300,
+        instinct({
+          activationCondition: { type: 'probability', probability: 0.5 },
+        }),
+      ),
+    ).expect(400);
+  });
+
   it('fires on every kill without a threshold', async () => {
     const buffs = await instinctBuffs(
       fight(600, instinct({ activationCondition: undefined })),

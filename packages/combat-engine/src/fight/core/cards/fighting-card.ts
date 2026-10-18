@@ -570,7 +570,7 @@ export class FightingCard {
    * exactly as they bypass the shield.
    */
   public applyFinalDamage(damage: number): FinalDamageResult {
-    this.lastPreDamageHealthRatio = this.healthRatio;
+    this.recordHealthRatioBeforeDamage();
     let causedDamages = damage;
     if (this.frozen) {
       causedDamages = (this.frozen as CardStateFrozen).applyDamageRate(
@@ -908,8 +908,15 @@ export class FightingCard {
     return this.marks.find((entry) => entry.mark.damageType === damageType);
   }
 
+  // Frozen at the fatal blow: later hits on the corpse must not rewrite it.
+  private recordHealthRatioBeforeDamage() {
+    if (!this.isDead()) {
+      this.lastPreDamageHealthRatio = this.healthRatio;
+    }
+  }
+
   public addRealDamage(damage: number): number {
-    this.lastPreDamageHealthRatio = this.healthRatio;
+    this.recordHealthRatioBeforeDamage();
     this.receivedDamages += damage;
 
     return damage;
