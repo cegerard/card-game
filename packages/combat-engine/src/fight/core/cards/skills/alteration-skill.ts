@@ -12,7 +12,7 @@ import {
   SkillResults,
 } from './skill';
 import { AlterationCondition } from '../@types/alteration/alteration-condition';
-import { DebuffStacking } from '../@types/alteration/alteration-detail';
+import { AlterationStacking } from '../@types/alteration/alteration-detail';
 
 export interface AlterationSkillOptions {
   name: string;
@@ -28,8 +28,8 @@ export interface AlterationSkillOptions {
   endEvent?: string;
   terminationEvent?: string;
   powerId?: string;
-  /** Stack budget shared by every debuff carrying the same id. */
-  stacking?: DebuffStacking;
+  /** Stack budget shared by every alteration of this polarity carrying the same id. */
+  stacking?: AlterationStacking;
 }
 
 export class AlterationSkill implements Skill {
@@ -47,7 +47,7 @@ export class AlterationSkill implements Skill {
   private readonly endEvent?: string;
   private readonly terminationEvent?: string;
   private readonly powerId?: string;
-  private readonly stacking?: DebuffStacking;
+  private readonly stacking?: AlterationStacking;
   private activationCount = 0;
 
   constructor({
@@ -100,16 +100,7 @@ export class AlterationSkill implements Skill {
           context.opponentPlayer,
         );
 
-    if (!conditionFailed) {
-      this.activationCount++;
-    }
-
-    const isExhausted =
-      this.activationLimit !== undefined &&
-      this.activationCount >= this.activationLimit;
-    const endEvent = isExhausted ? this.endEvent : undefined;
-
-    // A capped debuff refused at its stack limit returns undefined: drop it so
+    // A capped alteration refused at its stack limit returns undefined: drop it so
     // no step reports an alteration that was never applied.
     const results = targetedCards
       .map((targetedCard) => ({
@@ -122,6 +113,7 @@ export class AlterationSkill implements Skill {
                 this.duration,
                 this.terminationEvent,
                 this.powerId,
+                this.stacking,
               )
             : targetedCard.applyDebuff(
                 this.attributeType,
@@ -133,6 +125,17 @@ export class AlterationSkill implements Skill {
               ),
       }))
       .filter((result) => result.alteration !== undefined);
+
+    const refusedByCap = targetedCards.length > 0 && results.length === 0;
+    if (!conditionFailed && !refusedByCap) {
+      this.activationCount++;
+    }
+
+    const isExhausted =
+      this.activationLimit !== undefined &&
+      this.activationCount >= this.activationLimit;
+    const endEvent = isExhausted ? this.endEvent : undefined;
+
     return {
       skillKind: this.polarity === 'buff' ? SkillKind.Buff : SkillKind.Debuff,
       results,

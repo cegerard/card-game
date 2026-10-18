@@ -21,7 +21,7 @@ import {
   AlterationDetail,
   Buff,
   Debuff,
-  DebuffStacking,
+  AlterationStacking,
 } from './@types/alteration/alteration-detail';
 import { Skill, SkillResults } from './skills/skill';
 import { HealthReactiveSkill } from './skills/reactive-skill';
@@ -962,13 +962,21 @@ export class FightingCard {
     return this.dodgeBonusDenial?.appliesTo(defender) ?? false;
   }
 
+  /**
+   * Applies a buff and returns it, or returns undefined when `stacking` caps
+   * the pile it belongs to and that pile is already full. A refused
+   * application changes nothing and is reported by nobody.
+   */
   public applyBuff(
     buffType: AlterationType,
     buffRate: number,
     duration: number,
     terminationEvent?: string,
     powerId?: string,
-  ): Buff {
+    stacking?: AlterationStacking,
+  ): Buff | undefined {
+    if (isPileFull(this.buffs, stacking)) return undefined;
+
     const value = this.computeAttributeModifierValue(buffType, buffRate);
     const buff: Buff = {
       polarity: 'buff',
@@ -977,9 +985,10 @@ export class FightingCard {
       duration,
       terminationEvent,
       powerId,
+      stackId: stacking?.id,
     };
 
-    if (terminationEvent) {
+    if (terminationEvent && !stacking) {
       const existingIndex = this.buffs.findIndex(
         (b) => b.type === buffType && b.terminationEvent === terminationEvent,
       );
@@ -1067,6 +1076,10 @@ export class FightingCard {
     return { expiredBuffs, expiredDebuffs };
   }
 
+  public buffStacks(stackId: string): number {
+    return stacksIn(this.buffs, stackId);
+  }
+
   /**
    * Applies a debuff and returns it, or returns undefined when `stacking` caps
    * the pile it belongs to and that pile is already full, or when the card
@@ -1079,11 +1092,9 @@ export class FightingCard {
     duration: number,
     terminationEvent?: string,
     powerId?: string,
-    stacking?: DebuffStacking,
+    stacking?: AlterationStacking,
   ): Debuff | undefined {
-    if (stacking && this.debuffStacks(stacking.id) >= stacking.maxStacks) {
-      return undefined;
-    }
+    if (isPileFull(this.debuffs, stacking)) return undefined;
 
     if (this.resists()) return undefined;
 
@@ -1103,7 +1114,7 @@ export class FightingCard {
   }
 
   public debuffStacks(stackId: string): number {
-    return this.debuffs.filter((d) => d.stackId === stackId).length;
+    return stacksIn(this.debuffs, stackId);
   }
 
   public removeEventBoundDebuffs(
@@ -1176,6 +1187,18 @@ export class FightingCard {
         throw new Error(`Unknown attribute type: ${type}`);
     }
   }
+}
+
+function isPileFull(
+  alterations: AlterationDetail[],
+  stacking?: AlterationStacking,
+): boolean {
+  if (!stacking) return false;
+  return stacksIn(alterations, stacking.id) >= stacking.maxStacks;
+}
+
+function stacksIn(alterations: AlterationDetail[], stackId: string): number {
+  return alterations.filter((a) => a.stackId === stackId).length;
 }
 
 function sumOf(alterations: AlterationDetail[], type: AlterationType): number {

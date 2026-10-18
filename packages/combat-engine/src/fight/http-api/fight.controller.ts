@@ -92,7 +92,7 @@ import { TargetedCard } from '../core/targeting-card-strategies/targeted-card';
 import { validatePowerIdConsistency } from '../core/cards/skills/power-id-consistency';
 import { ShieldApplication } from '../core/cards/@types/shield/shield-application';
 import { SurviveSkill } from '../core/cards/skills/survive';
-import { DebuffStacking } from '../core/cards/@types/alteration/alteration-detail';
+import { AlterationStacking } from '../core/cards/@types/alteration/alteration-detail';
 import { DamageReductionSkill } from '../core/cards/skills/damage-reduction';
 import { DodgeBonusDenialSkill } from '../core/cards/skills/dodge-bonus-denial';
 import { BleedStackScalingSkill } from '../core/cards/skills/bleed-stack-scaling';
@@ -465,7 +465,11 @@ export class FightController {
       new MathRandomizer(),
       dto.terminationEvent,
       dto.powerId,
-      this.buildDebuffStacking(dto.stackId, dto.maxStacks, ` triggeredDebuff`),
+      this.buildAlterationStacking(
+        dto.stackId,
+        dto.maxStacks,
+        ` triggeredDebuff`,
+      ),
     );
   }
 
@@ -617,15 +621,15 @@ export class FightController {
    * A stack budget needs both its id and its cap: half of one is a malformed
    * request, not a silent no-cap, so it is rejected rather than ignored.
    */
-  private buildDebuffStacking(
+  private buildAlterationStacking(
     stackId: string | undefined,
     maxStacks: number | undefined,
     owner: string,
-  ): DebuffStacking | undefined {
+  ): AlterationStacking | undefined {
     if (stackId === undefined && maxStacks === undefined) return undefined;
     if (stackId === undefined || maxStacks === undefined) {
       throw new BadRequestException(
-        `${owner} requires both stackId and a max stacks value to cap a debuff pile`,
+        `${owner} requires both stackId and a max stacks value to cap an alteration pile`,
       );
     }
     return { id: stackId, maxStacks };
@@ -683,6 +687,20 @@ export class FightController {
    * targeting read. Missing, it is malformed input rather than a runtime
    * failure, so it answers 400 like the other domain checks here.
    */
+  private resolveMaxStacks(skillData: OtherSkillDto): number | undefined {
+    const { maxStacks, debuffMaxStacks } = skillData;
+    if (
+      maxStacks !== undefined &&
+      debuffMaxStacks !== undefined &&
+      maxStacks !== debuffMaxStacks
+    ) {
+      throw new BadRequestException(
+        `${skillData.kind} ${skillData.name}: maxStacks and its alias debuffMaxStacks disagree`,
+      );
+    }
+    return maxStacks ?? debuffMaxStacks;
+  }
+
   private requireThreshold(skillData: OtherSkillDto, requiredBy: string) {
     const threshold = skillData.activationCondition?.threshold;
     if (threshold === undefined) {
@@ -703,13 +721,18 @@ export class FightController {
     }
 
     if (skillData.event === TriggerEvent.ENEMY_KILLED) {
-      const conditionType = skillData.activationCondition?.type;
+      const condition = skillData.activationCondition;
       if (
-        conditionType !== undefined &&
-        conditionType !== AlterationConditionType.HEALTH_THRESHOLD
+        condition?.type !== undefined &&
+        condition.type !== AlterationConditionType.HEALTH_THRESHOLD
       ) {
         throw new BadRequestException(
           'enemy-killed activationCondition must be of type health-threshold',
+        );
+      }
+      if (condition?.operator !== undefined || condition?.allyName) {
+        throw new BadRequestException(
+          'enemy-killed activationCondition only accepts type and threshold',
         );
       }
       try {
@@ -801,9 +824,9 @@ export class FightController {
           trigger: this.buildTriggerForSkill(skillData, ownerId),
           targetingStrategy: this.buildSkillTargeting(skillData),
           activationCondition: alterationCondition,
-          stacking: this.buildDebuffStacking(
+          stacking: this.buildAlterationStacking(
             skillData.stackId,
-            skillData.debuffMaxStacks,
+            this.resolveMaxStacks(skillData),
             `${skillData.kind} ${skillData.name}`,
           ),
           activationLimit: skillData.activationLimit,
