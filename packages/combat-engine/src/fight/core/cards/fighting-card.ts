@@ -12,6 +12,7 @@ import { CardStateStunted } from './@types/state/card-state-stunted';
 import { CardStateBleeding } from './@types/state/card-state-bleeding';
 import { DodgeBonusDenialSkill } from './skills/dodge-bonus-denial';
 import { BleedStackScalingSkill } from './skills/bleed-stack-scaling';
+import { LowHealthTargetBonusSkill } from './skills/low-health-target-bonus';
 import {
   BleedApplication,
   BleedEmpowermentSkill,
@@ -155,6 +156,7 @@ export class FightingCard {
   private damageReduction: DamageReductionSkill | null = null;
   private dodgeBonusDenial: DodgeBonusDenialSkill | null = null;
   private bleedStackScaling: BleedStackScalingSkill | null = null;
+  private lowHealthTargetBonus: LowHealthTargetBonusSkill | null = null;
   private bleedEmpowerment: BleedEmpowermentSkill | null = null;
 
   // Stances
@@ -199,6 +201,7 @@ export class FightingCard {
       dodgeBonusDenial?: DodgeBonusDenialSkill;
       bleedStackScaling?: BleedStackScalingSkill;
       bleedEmpowerment?: BleedEmpowermentSkill;
+      lowHealthTargetBonus?: LowHealthTargetBonusSkill;
     },
     behaviors: {
       dodge: DodgeBehavior;
@@ -228,6 +231,7 @@ export class FightingCard {
     this.dodgeBonusDenial = skills.dodgeBonusDenial ?? null;
     this.bleedStackScaling = skills.bleedStackScaling ?? null;
     this.bleedEmpowerment = skills.bleedEmpowerment ?? null;
+    this.lowHealthTargetBonus = skills.lowHealthTargetBonus ?? null;
   }
 
   public get lastAttacker(): FightingCard | undefined {
@@ -280,10 +284,20 @@ export class FightingCard {
    * The attack an action of this card strikes with: the attack stat raised by
    * the board-dependent bonus of a stack scaling passive, when it has one.
    */
-  public attackPower(context?: FightingContext): number {
-    const bonus = this.bleedStackScaling?.multiplierFor(context) ?? 1;
+  /**
+   * The attack an action strikes with. An attack names its `defender`, which
+   * the low health target bonus reads; a status effect names none.
+   */
+  public attackPower(
+    context?: FightingContext,
+    defender?: FightingCard,
+  ): number {
+    const stackBonus = this.bleedStackScaling?.multiplierFor(context) ?? 1;
+    const targetBonus = defender
+      ? (this.lowHealthTargetBonus?.multiplierAgainst(defender) ?? 1)
+      : 1;
 
-    return this.actualAttack * bonus;
+    return this.actualAttack * stackBonus * targetBonus;
   }
 
   public get actualDefense(): number {

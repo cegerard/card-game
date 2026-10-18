@@ -38,6 +38,7 @@ export type SkillKind =
   | 'PROTECTION'
   | 'DODGE_BONUS_DENIAL'
   | 'BLEED_STACK_SCALING'
+  | 'LOW_HEALTH_TARGET_BONUS'
   | 'STANCE'
   | 'BLEED_EMPOWERMENT'
   | 'BLEED_DETONATION'
@@ -280,7 +281,7 @@ export interface MultipleAttackSkill extends AttackBonuses {
 export interface OtherSkill {
   kind: SkillKind;
   name: string;
-  /** Requis pour HEALING, ALTERATION, SHIELD, DAMAGE_REDUCTION ; bonus par pile pour BLEED_STACK_SCALING ; taux du Saignement renforcé pour BLEED_EMPOWERMENT ; part de l'Attaque infligée par carte pour BLEED_DETONATION. */
+  /** Requis pour HEALING, ALTERATION, SHIELD, DAMAGE_REDUCTION ; bonus par pile pour BLEED_STACK_SCALING ; taux du Saignement renforcé pour BLEED_EMPOWERMENT ; part de l'Attaque infligée par carte pour BLEED_DETONATION ; bonus de dégâts contre une cible affaiblie pour LOW_HEALTH_TARGET_BONUS. */
   rate?: number;
   /** BLEED_STACK_SCALING uniquement (requis) : plafond du bonus d'Attaque. */
   maxRate?: number;
@@ -308,9 +309,9 @@ export interface OtherSkill {
   maxStacks?: number;
   /** @deprecated Ancien nom de `maxStacks`, toujours accepté. */
   debuffMaxStacks?: number;
-  /** Absent pour SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL, BLEED_STACK_SCALING, BLEED_EMPOWERMENT, STANCE et BLEED_DETONATION. */
+  /** Absent pour SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL, BLEED_STACK_SCALING, BLEED_EMPOWERMENT, STANCE, BLEED_DETONATION et LOW_HEALTH_TARGET_BONUS. */
   targetingStrategy?: TargetingStrategy;
-  /** Absent pour SHIELD, SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL, BLEED_STACK_SCALING et BLEED_EMPOWERMENT. */
+  /** Absent pour SHIELD, SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL, BLEED_STACK_SCALING, BLEED_EMPOWERMENT et LOW_HEALTH_TARGET_BONUS. */
   event?: TriggerEvent;
   /** Le skill n'est actif que si son porteur tient cette posture ; requis pour BLEED_EMPOWERMENT. */
   requiresStance?: string;
@@ -319,6 +320,7 @@ export interface OtherSkill {
   /** Requis pour ALTERATION et PROTECTION ; facultatif pour CONCEALMENT (sans durée, jusqu'à la première attaque) et BLEED_EMPOWERMENT (durée des piles posées pendant la posture, entier ≥ 1). */
   duration?: number;
   polarity?: 'buff' | 'debuff';
+  /** LOW_HEALTH_TARGET_BONUS (requis) : `threshold` est le ratio de santé sous lequel la cible prend le bonus, lu avant le coup. */
   activationCondition?: BuffCondition;
   /** Requis pour CONDITIONAL_ATTACK. */
   damages?: DamageComposition[];

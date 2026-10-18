@@ -126,7 +126,7 @@ export class SpecialAttack extends BaseSpecial {
     );
     const { total } = DamageCalculator.calculateDamage(
       damages,
-      source.attackPower(context) * damageMultiplier * markedBonus,
+      source.attackPower(context, target) * damageMultiplier * markedBonus,
       target,
     );
     const finalResult = target.applyFinalDamage(total);

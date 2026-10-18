@@ -96,6 +96,7 @@ import { AlterationStacking } from '../core/cards/@types/alteration/alteration-d
 import { DamageReductionSkill } from '../core/cards/skills/damage-reduction';
 import { DodgeBonusDenialSkill } from '../core/cards/skills/dodge-bonus-denial';
 import { BleedStackScalingSkill } from '../core/cards/skills/bleed-stack-scaling';
+import { LowHealthTargetBonusSkill } from '../core/cards/skills/low-health-target-bonus';
 import { BleedEmpowermentSkill } from '../core/cards/skills/bleed-empowerment';
 import { ConcealmentSkill } from '../core/cards/skills/concealment';
 import { EnemyKilledTrigger } from '../core/trigger/enemy-killed';
@@ -127,6 +128,7 @@ const CARD_BOUND_SKILL_KINDS = [
   SkillKind.DODGE_BONUS_DENIAL,
   SkillKind.BLEED_STACK_SCALING,
   SkillKind.BLEED_EMPOWERMENT,
+  SkillKind.LOW_HEALTH_TARGET_BONUS,
 ];
 
 @Controller()
@@ -310,6 +312,11 @@ export class FightController {
       (s) => s.kind === SkillKind.BLEED_EMPOWERMENT,
     );
     const bleedEmpowerment = this.buildBleedEmpowerment(bleedEmpowermentDto);
+    const lowHealthTargetBonus = this.buildLowHealthTargetBonus(
+      cardData.skills.others.find(
+        (s) => s.kind === SkillKind.LOW_HEALTH_TARGET_BONUS,
+      ),
+    );
 
     // The CARD_BOUND_SKILL_KINDS carry no trigger and no
     // targeting: they live on the card itself and are consulted when a hit is
@@ -349,6 +356,7 @@ export class FightController {
         dodgeBonusDenial,
         bleedStackScaling,
         bleedEmpowerment,
+        lowHealthTargetBonus,
       },
       {
         dodge: buildDodgeStrategy(cardData.behaviors.dodge),
@@ -356,6 +364,26 @@ export class FightController {
       new MathRandomizer(),
       this.mapElement(cardData.element),
     );
+  }
+
+  private buildLowHealthTargetBonus(
+    dto: OtherSkillDto | undefined,
+  ): LowHealthTargetBonusSkill | undefined {
+    if (!dto) return undefined;
+    if (dto.activationCondition?.threshold === undefined) {
+      throw new BadRequestException(
+        `${dto.kind} requires activationCondition.threshold`,
+      );
+    }
+    try {
+      return new LowHealthTargetBonusSkill(
+        dto.name,
+        dto.rate,
+        dto.activationCondition.threshold,
+      );
+    } catch (e) {
+      throw new BadRequestException((e as Error).message);
+    }
   }
 
   /**
@@ -1065,6 +1093,7 @@ export class FightController {
       case SkillKind.DODGE_BONUS_DENIAL:
       case SkillKind.BLEED_STACK_SCALING:
       case SkillKind.BLEED_EMPOWERMENT:
+      case SkillKind.LOW_HEALTH_TARGET_BONUS:
         throw new Error(
           `${skillData.kind} skill must not appear in others skill list`,
         );
