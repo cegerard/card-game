@@ -115,12 +115,15 @@ const STANCE_SPECIAL_FORBIDDEN_FIELDS = [
   'concealedBonus',
 ] as const;
 
-// What only a BLEED_EMPOWERMENT skill can carry
-const BLEED_EMPOWERMENT_ONLY_FIELDS = [
-  'extraStacks',
-  'basis',
-  'triggeredDebuff',
-] as const;
+// Fields that only one skill kind can carry
+const KIND_ONLY_FIELDS: { kind: SkillKind; fields: (keyof OtherSkillDto)[] }[] =
+  [
+    {
+      kind: SkillKind.BLEED_EMPOWERMENT,
+      fields: ['extraStacks', 'basis', 'triggeredDebuff'],
+    },
+    { kind: SkillKind.CONDITIONAL_ATTACK, fields: ['requiresUndamaged'] },
+  ];
 
 const CARD_BOUND_SKILL_KINDS = [
   SkillKind.SURVIVE,
@@ -307,7 +310,7 @@ export class FightController {
           bleedStackScalingDto.maxRate,
         )
       : undefined;
-    this.rejectMisplacedBleedEmpowermentFields(cardData.skills.others);
+    this.rejectMisplacedKindOnlyFields(cardData.skills.others);
     const bleedEmpowermentDto = cardData.skills.others.find(
       (s) => s.kind === SkillKind.BLEED_EMPOWERMENT,
     );
@@ -501,12 +504,13 @@ export class FightController {
     );
   }
 
-  private rejectMisplacedBleedEmpowermentFields(others: OtherSkillDto[]): void {
+  private rejectMisplacedKindOnlyFields(others: OtherSkillDto[]): void {
     for (const skill of others) {
-      if (skill.kind === SkillKind.BLEED_EMPOWERMENT) continue;
-      const misplaced = BLEED_EMPOWERMENT_ONLY_FIELDS.filter(
-        (field) => skill[field] !== undefined,
-      );
+      const misplaced = KIND_ONLY_FIELDS.filter(
+        ({ kind }) => kind !== skill.kind,
+      )
+        .flatMap(({ fields }) => fields)
+        .filter((field) => skill[field] !== undefined);
       if (misplaced.length > 0) {
         throw new BadRequestException(
           `${skill.kind} skill cannot carry: ${misplaced.join(', ')}`,
@@ -889,6 +893,12 @@ export class FightController {
             new AlwaysTrueAttackCondition(),
             ahTrigger,
             skillData.powerId,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            skillData.requiresUndamaged,
           );
         }
         if (skillData.bleedDetonation && skillData.hits) {
@@ -962,6 +972,7 @@ export class FightController {
               )
             : undefined,
           skillData.stanceActivation,
+          skillData.requiresUndamaged,
         );
       case SkillKind.TARGETING_OVERRIDE:
         if (!skillData.terminationEvent) {

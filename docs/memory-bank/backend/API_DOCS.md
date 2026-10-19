@@ -223,6 +223,7 @@ Simulates a turn-based card battle between two players.
   comboFinisherEffects?: EffectDto[],  // Effects applied on the finisher hit only
   defensePenetration?: number,  // In [0, 1] (400 outside): share of the defender defense the attack ignores — defense used = actualDefense × (1 − defensePenetration); default 0
   energyCost?: number,          // Integer >= 1: the attack does not fire below that special energy, and spends it only when it strikes somebody
+  requiresUndamaged?: boolean,  // CONDITIONAL_ATTACK only (400 on any other kind): the attack never fires when its owner lost health since the start of its previous action — attacks, status ticks, bleed detonation and transformation cost all count; a hit fully absorbed by a shield or dodged does not. Combined with `interval`, both must hold, and a turn blocked by this condition does not reset the cooldown. On `next-action` the card then makes its plain attack
   bleedDetonation?: { ratePerStack: number },  // > 0: consumes every bleed stack of the target and hits for ratePerStack × consumed stacks of the attack, as a PHYSICAL composition replacing `damages`
   splash?: {                    // Secondary strike after the main one, on the zone centered on the primary target: that target and its two deck neighbors (living only). Centered on the card the attack was aimed at, even when a guardian intercepted it. Runs through the regular attack pipeline (dodge, protection, shield) and is reported as its own `attack` step right after the main one. Fires only when the main strike targeted somebody
     name: string,               // Name of the splash attack step
@@ -736,7 +737,7 @@ Validation errors return 400 Bad Request with detailed error messages.
 
 ## Error Handling
 
-- **400 Bad Request**: Validation failures from `ValidationPipe`, plus the domain checks the controller converts explicitly — composite power consistency (`validatePowerIdConsistency`), the DAMAGE_REDUCTION rate range, and an alteration stack budget given by halves (`stackId` without its cap, or the reverse)
+- **400 Bad Request**: Validation failures from `ValidationPipe`, plus the domain checks the controller converts explicitly — composite power consistency (`validatePowerIdConsistency`), the DAMAGE_REDUCTION rate range, and an alteration stack budget given by halves (`stackId` without its cap, or the reverse), and a field reserved to one skill kind carried by another (`KIND_ONLY_FIELDS`: `extraStacks`, `basis`, `triggeredDebuff` for BLEED_EMPOWERMENT, `requiresUndamaged` for CONDITIONAL_ATTACK)
 - **500 Internal Server Error**: Runtime errors (e.g., unknown skill kind, missing buff properties)
 - No custom error handling middleware - uses NestJS defaults
 

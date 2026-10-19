@@ -24,6 +24,7 @@ export class ConditionalAttack implements Skill {
     private readonly splash?: Splash,
     private readonly lowHealthDebuff?: LowHealthDebuff,
     private readonly stanceActivation?: StanceActivation,
+    public readonly requiresUndamaged?: boolean,
   ) {}
 
   isTriggered(triggerName: string): boolean {

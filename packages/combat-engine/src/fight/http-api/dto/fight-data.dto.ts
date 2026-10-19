@@ -843,6 +843,11 @@ export class OtherSkillDto {
   @Min(1)
   energyCost?: number;
 
+  // CONDITIONAL_ATTACK: never fires when its owner lost health since its previous action
+  @IsOptional()
+  @IsBoolean()
+  requiresUndamaged?: boolean;
+
   // CONDITIONAL_ATTACK: consumes the target bleed stacks, ratePerStack each
   @IsOptional()
   @ValidateNested()

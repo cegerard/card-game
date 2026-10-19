@@ -167,6 +167,10 @@ export class FightingCard {
 
   private lastPreDamageHealthRatio = 1;
 
+  // Health lost between the start of its previous action and this one
+  private receivedDamagesAtActionStart = 0;
+  private damagedBeforeAction = false;
+
   // Targeting overrides
   private targetingOverrides: TargetingOverrideEntry[] = [];
 
@@ -259,6 +263,20 @@ export class FightingCard {
    */
   public get healthRatioBeforeLastDamage(): number {
     return this.lastPreDamageHealthRatio;
+  }
+
+  /**
+   * Whether the card lost health — a shield or a dodge cost it none — between
+   * the start of its previous action and the start of the current one.
+   */
+  public get damagedSinceLastAction(): boolean {
+    return this.damagedBeforeAction;
+  }
+
+  public beginAction(): void {
+    this.damagedBeforeAction =
+      this.receivedDamages > this.receivedDamagesAtActionStart;
+    this.receivedDamagesAtActionStart = this.receivedDamages;
   }
 
   public get actualSpeed(): number {
@@ -499,7 +517,8 @@ export class FightingCard {
       .filter(
         (s) =>
           s.isTriggered(trigger) &&
-          (!s.requiredStance || this.hasStance(s.requiredStance)),
+          (!s.requiredStance || this.hasStance(s.requiredStance)) &&
+          (!s.requiresUndamaged || !this.damagedSinceLastAction),
       )
       .map((skill) =>
         skill.launch(this, context, this.currentTargetingOverride),
