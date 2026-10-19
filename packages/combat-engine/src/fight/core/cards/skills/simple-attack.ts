@@ -79,7 +79,7 @@ export class SimpleAttack implements AttackSkill {
         const detonation = this.bleedDetonation?.detonate(defender);
         const { total } = DamageCalculator.calculateDamage(
           detonation?.damages ?? this.damagesAgainst(card, defender),
-          card.attackPower(context) * damageMultiplier,
+          card.attackPower(context, defender) * damageMultiplier,
           defender,
           this.defensePenetration,
         );

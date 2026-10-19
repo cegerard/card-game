@@ -56,7 +56,7 @@ export class MultipleAttack implements AttackSkill {
     const kind = this.damages.map((d) => d.type);
 
     for (let i = 0; i < this.hits; i++) {
-      const attackPower = card.attackPower(context) * (1 + this.amplifier * i);
+      const amplification = 1 + this.amplifier * i;
       const targets = targeting.targetedCards(
         card,
         context.sourcePlayer,
@@ -92,7 +92,9 @@ export class MultipleAttack implements AttackSkill {
 
         const { total } = DamageCalculator.calculateDamage(
           this.withBonus(this.damages, card, defender),
-          attackPower * damageMultiplier,
+          card.attackPower(context, defender) *
+            amplification *
+            damageMultiplier,
           defender,
           this.defensePenetration,
         );
@@ -130,7 +132,7 @@ export class MultipleAttack implements AttackSkill {
 
         const { total } = DamageCalculator.calculateDamage(
           this.withBonus(this.comboFinisher, card, defender),
-          card.attackPower(context),
+          card.attackPower(context, defender),
           defender,
           this.defensePenetration,
         );

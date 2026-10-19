@@ -84,6 +84,7 @@ export enum SkillKind {
   BLEED_EMPOWERMENT = 'BLEED_EMPOWERMENT',
   BLEED_DETONATION = 'BLEED_DETONATION',
   CONCEALMENT = 'CONCEALMENT',
+  LOW_HEALTH_TARGET_BONUS = 'LOW_HEALTH_TARGET_BONUS',
 }
 
 export enum BuffType {
@@ -616,7 +617,8 @@ export class OtherSkillDto {
       o.kind === SkillKind.DAMAGE_REDUCTION ||
       o.kind === SkillKind.BLEED_STACK_SCALING ||
       o.kind === SkillKind.BLEED_EMPOWERMENT ||
-      o.kind === SkillKind.BLEED_DETONATION,
+      o.kind === SkillKind.BLEED_DETONATION ||
+      o.kind === SkillKind.LOW_HEALTH_TARGET_BONUS,
   )
   @IsDefined()
   @IsNumber()
@@ -656,7 +658,8 @@ export class OtherSkillDto {
       o.kind !== SkillKind.BLEED_EMPOWERMENT &&
       o.kind !== SkillKind.STANCE &&
       o.kind !== SkillKind.BLEED_DETONATION &&
-      o.kind !== SkillKind.CONCEALMENT,
+      o.kind !== SkillKind.CONCEALMENT &&
+      o.kind !== SkillKind.LOW_HEALTH_TARGET_BONUS,
   )
   @IsDefined()
   @IsEnum(TargetingStrategy)
@@ -692,7 +695,8 @@ export class OtherSkillDto {
       o.kind !== SkillKind.DAMAGE_REDUCTION &&
       o.kind !== SkillKind.DODGE_BONUS_DENIAL &&
       o.kind !== SkillKind.BLEED_STACK_SCALING &&
-      o.kind !== SkillKind.BLEED_EMPOWERMENT,
+      o.kind !== SkillKind.BLEED_EMPOWERMENT &&
+      o.kind !== SkillKind.LOW_HEALTH_TARGET_BONUS,
   )
   @IsDefined()
   @IsEnum(TriggerEvent)

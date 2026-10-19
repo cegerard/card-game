@@ -80,6 +80,7 @@ cards/
 │   ├── damage-reduction.ts # DamageReductionSkill: removes a share of each incoming hit; not a Skill implementor
 │   ├── dodge-bonus-denial.ts # DodgeBonusDenialSkill: a bleeding defender dodges its owner without agility buffs; not a Skill implementor
 │   ├── bleed-stack-scaling.ts    # BleedStackScalingSkill: attack bonus per bleed stack on the board, read through FightingCard.attackPower(); not a Skill implementor
+│   ├── low-health-target-bonus.ts # LowHealthTargetBonusSkill: attack bonus against a defender under a health ratio, read through FightingCard.attackPower(context, defender); not a Skill implementor
 │   ├── bleed-empowerment.ts # BleedEmpowermentSkill: extra stacks and a higher rate for its owner bleeds while a stance runs; not a Skill implementor
 │   ├── bleed-explosion.ts  # BleedExplosionSkill (BLEED_DETONATION): every bleeding card takes a share of the source attack as real damage and loses its stacks
 │   ├── stance.ts           # StanceSkill: opens a stance on its owner when its event fires
