@@ -714,11 +714,7 @@ export class FightController {
     });
   }
 
-  /**
-   * The health threshold both the any-ally trigger and the most-wounded-ally
-   * targeting read. Missing, it is malformed input rather than a runtime
-   * failure, so it answers 400 like the other domain checks here.
-   */
+  /** The stack cap of a skill, `debuffMaxStacks` being the former name of `maxStacks`. */
   private resolveMaxStacks(skillData: OtherSkillDto): number | undefined {
     const { maxStacks, debuffMaxStacks } = skillData;
     if (
@@ -733,6 +729,11 @@ export class FightController {
     return maxStacks ?? debuffMaxStacks;
   }
 
+  /**
+   * The health threshold both the any-ally trigger and the most-wounded-ally
+   * targeting read. Missing, it is malformed input rather than a runtime
+   * failure, so it answers 400 like the other domain checks here.
+   */
   private requireThreshold(skillData: OtherSkillDto, requiredBy: string) {
     const threshold = skillData.activationCondition?.threshold;
     if (threshold === undefined) {
