@@ -62,6 +62,7 @@ export class ActionStage {
     const attacksReports = cards.reduce((acc: ActionReport[], card) => {
       if (card.frozenLevel > 0 || card.isStunted) return acc;
 
+      card.beginAction();
       card.tickSkills();
 
       acc.push(...this.launchTurnStartSkills(card));

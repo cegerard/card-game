@@ -33,7 +33,8 @@ import { Player } from '../player';
  *    opposing team that listen for `enemy-bleed-death` are fired next.
  * 6. **Enemy-killed triggers** – when an enemy dealt the fatal blow and is
  *    still alive, its own skills listening for `enemy-killed` fire last, with
- *    the health ratio the victim had just before the blow.
+ *    the health ratio the victim had just before the blow. A card the reward
+ *    kills goes through its own cascade right away, like a self-death kill.
  *
  * A card is processed once: a second notification of the same death is ignored.
  *
@@ -151,13 +152,14 @@ export class DeathSkillHandler implements CardDeathSubscriber {
       !killerCard.isDead() &&
       opponentPlayer.ownCard(killerCard)
     ) {
-      this.fireSkillsOnCards(
+      const reward = this.fireSkillsOnCards(
         [killerCard],
         `${ENEMY_KILLED}:${deadCard.healthRatioBeforeLastDamage}`,
         opponentPlayer,
         ownerPlayer,
         killerCard,
       );
+      killedBy(reward).forEach((killed) => this.notifyKill(killed, killerCard));
     }
   }
 

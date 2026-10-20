@@ -167,6 +167,10 @@ export class FightingCard {
 
   private lastPreDamageHealthRatio = 1;
 
+  // Health lost between the start of its previous action and this one
+  private receivedDamagesAtActionStart = 0;
+  private damagedBeforeAction = false;
+
   // Targeting overrides
   private targetingOverrides: TargetingOverrideEntry[] = [];
 
@@ -261,6 +265,20 @@ export class FightingCard {
     return this.lastPreDamageHealthRatio;
   }
 
+  /**
+   * Whether the card lost health — a shield or a dodge cost it none — between
+   * the start of its previous action and the start of the current one.
+   */
+  public get damagedSinceLastAction(): boolean {
+    return this.damagedBeforeAction;
+  }
+
+  public beginAction(): void {
+    this.damagedBeforeAction =
+      this.receivedDamages > this.receivedDamagesAtActionStart;
+    this.receivedDamagesAtActionStart = this.receivedDamages;
+  }
+
   public get actualSpeed(): number {
     return this.computeActualStat(this.speed, 'speed');
   }
@@ -281,10 +299,6 @@ export class FightingCard {
   }
 
   /**
-   * The attack an action of this card strikes with: the attack stat raised by
-   * the board-dependent bonus of a stack scaling passive, when it has one.
-   */
-  /**
    * The attack an action strikes with. An attack names its `defender`, which
    * the low health target bonus reads; a status effect names none.
    */
@@ -293,11 +307,14 @@ export class FightingCard {
     defender?: FightingCard,
   ): number {
     const stackBonus = this.bleedStackScaling?.multiplierFor(context) ?? 1;
-    const targetBonus = defender
-      ? (this.lowHealthTargetBonus?.multiplierAgainst(defender) ?? 1)
-      : 1;
 
-    return this.actualAttack * stackBonus * targetBonus;
+    return this.actualAttack * stackBonus * this.targetBonusAgainst(defender);
+  }
+
+  /** The bonus the low health target passive grants against that defender. */
+  public targetBonusAgainst(defender?: FightingCard): number {
+    if (!defender) return 1;
+    return this.lowHealthTargetBonus?.multiplierAgainst(defender) ?? 1;
   }
 
   public get actualDefense(): number {
@@ -499,7 +516,8 @@ export class FightingCard {
       .filter(
         (s) =>
           s.isTriggered(trigger) &&
-          (!s.requiredStance || this.hasStance(s.requiredStance)),
+          (!s.requiredStance || this.hasStance(s.requiredStance)) &&
+          (!s.requiresUndamaged || !this.damagedSinceLastAction),
       )
       .map((skill) =>
         skill.launch(this, context, this.currentTargetingOverride),
@@ -1125,6 +1143,17 @@ export class FightingCard {
     this.debuffs.push(debuff);
 
     return debuff;
+  }
+
+  /** Whether the pile of that polarity already holds `maxStacks` alterations. */
+  public isStackCapped(
+    polarity: 'buff' | 'debuff',
+    stacking?: AlterationStacking,
+  ): boolean {
+    return isPileFull(
+      polarity === 'buff' ? this.buffs : this.debuffs,
+      stacking,
+    );
   }
 
   public debuffStacks(stackId: string): number {

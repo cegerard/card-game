@@ -182,6 +182,27 @@ describe('AlterationSkill lifecycle', () => {
     });
   });
 
+  describe('when the target resistance refuses the debuff', () => {
+    it('still spends the activation and emits the endEvent', () => {
+      const source = createFightingCard({ health: 100, resistance: 200 });
+      const skill = new AlterationSkill({
+        name: 'skill',
+        polarity: 'debuff',
+        attributeType: 'speed',
+        rate: 0.1,
+        duration: 2,
+        trigger,
+        targetingStrategy: targeting,
+        activationLimit: 1,
+        endEvent: 'test-end',
+      });
+
+      const result = skill.launch(source, makeContext(source));
+
+      expect(result.endEvent).toBe('test-end');
+    });
+  });
+
   describe('debuff polarity', () => {
     it('returns skillKind Debuff', () => {
       const source = createFightingCard({ health: 100 });

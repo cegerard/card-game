@@ -113,6 +113,13 @@ export interface Skill {
   readonly requiredStance?: string;
 
   /**
+   * Set, the skill never fires when its owner lost health since the start of
+   * its previous action. Gated like `requiredStance`, so a blocked skill is
+   * never launched and keeps its cooldown.
+   */
+  readonly requiresUndamaged?: boolean;
+
+  /**
    * Executes the skill. When `targetingStrategy` is provided, it overrides
    * the skill's own default targeting strategy for this invocation.
    */
