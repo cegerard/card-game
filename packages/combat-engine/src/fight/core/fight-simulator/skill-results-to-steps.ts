@@ -1,5 +1,6 @@
 import { FightingCard } from '../cards/fighting-card';
 import {
+  AttackSkillResults,
   BuffSkillResults,
   DebuffSkillResults,
   SkillKind,
@@ -113,6 +114,10 @@ export function skillResultsToSteps(
           return perHit;
         });
         steps.push(...hitSteps);
+
+        steps.push(
+          ...skillResultsToSteps(card, hitAlterationResults(skillResult)),
+        );
 
         if (skillResult.lowHealthDebuff) {
           steps.push(
@@ -231,4 +236,27 @@ function pushAlterationStep(
     energy: card.actualEnergy,
     powerId: skillResult.powerId,
   });
+}
+
+/** The buff and debuff an attack left on the defenders it hit, as skill results. */
+export function hitAlterationResults(
+  attack: AttackSkillResults,
+): SkillResults[] {
+  if (!attack.hitAlterations) return [];
+  const { name, buffs, debuffs } = attack.hitAlterations;
+
+  return [
+    {
+      skillKind: SkillKind.Buff,
+      name,
+      results: buffs,
+      powerId: attack.powerId,
+    },
+    {
+      skillKind: SkillKind.Debuff,
+      name,
+      results: debuffs,
+      powerId: attack.powerId,
+    },
+  ];
 }

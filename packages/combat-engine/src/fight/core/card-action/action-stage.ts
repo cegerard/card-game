@@ -18,7 +18,10 @@ import { DeathSkillHandler } from '../fight-simulator/death-skill-handler';
 import { ShieldResult } from '../cards/@types/action-result/shield-result';
 import { ShieldAppliedReport } from '../fight-simulator/@types/shield-report';
 import { triggerReactiveSkills } from '../fight-simulator/reactive-skill-checker';
-import { skillResultsToSteps } from '../fight-simulator/skill-results-to-steps';
+import {
+  hitAlterationResults,
+  skillResultsToSteps,
+} from '../fight-simulator/skill-results-to-steps';
 import { effectResultsToSteps } from '../fight-simulator/effect-results-to-steps';
 import { SurvivedReport } from '../fight-simulator/@types/survived-report';
 import { BLEED_STACKS_APPLIED } from '../trigger/bleed-stacks-applied';
@@ -128,6 +131,10 @@ export class ActionStage {
     };
 
     this.handleAttackResult(attackSkill.results, result, card);
+    result.hitAlterationSteps = skillResultsToSteps(
+      card,
+      hitAlterationResults(attackSkill),
+    );
 
     return result;
   }
@@ -148,6 +155,10 @@ export class ActionStage {
         const reports = [attackSkill, attackSkill.splash]
           .filter((strike) => strike?.results.length > 0)
           .map((strike) => this.reportStrike(card, strike));
+        reports[0].hitAlterationSteps = skillResultsToSteps(
+          card,
+          hitAlterationResults(attackSkill),
+        );
         if (attackSkill.stanceStarted) {
           reports[0].stanceStartedReport = stanceStartedReport(
             card,
@@ -338,6 +349,7 @@ export class ActionStage {
             ...report.attack,
           } as Step);
           acc.actionSteps.push(...report.concealmentEndedReports);
+          acc.actionSteps.push(...(report.hitAlterationSteps ?? []));
 
           if (report.buffReport) {
             acc.actionSteps.push(report.buffReport);

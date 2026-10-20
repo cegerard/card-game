@@ -337,6 +337,8 @@ export interface OtherSkill {
   energyCost?: number;
   /** CONDITIONAL_ATTACK : ne part jamais si le porteur a perdu des points de vie depuis le début de sa dernière action (bouclier et esquive exclus). */
   requiresUndamaged?: boolean;
+  /** CONDITIONAL_ATTACK : altérations laissées sur chaque défenseur touché par l'attaque principale (une fois par défenseur, coups esquivés exclus), sans ciblage propre. */
+  hitAlterations?: Omit<StatAlteration, 'targetingStrategy' | 'condition'>[];
   /** CONDITIONAL_ATTACK : consomme toutes les piles de Saignement de la cible, `ratePerStack` d'Attaque par pile. */
   bleedDetonation?: { ratePerStack: number };
   /** CONDITIONAL_ATTACK : frappe secondaire sur la cible principale et ses deux voisins, après la frappe principale. */

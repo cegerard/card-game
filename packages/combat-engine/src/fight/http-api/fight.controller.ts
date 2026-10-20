@@ -97,6 +97,7 @@ import { DamageReductionSkill } from '../core/cards/skills/damage-reduction';
 import { DodgeBonusDenialSkill } from '../core/cards/skills/dodge-bonus-denial';
 import { BleedStackScalingSkill } from '../core/cards/skills/bleed-stack-scaling';
 import { LowHealthTargetBonusSkill } from '../core/cards/skills/low-health-target-bonus';
+import { HitAlterations } from '../core/cards/@types/attack/hit-alterations';
 import { BleedEmpowermentSkill } from '../core/cards/skills/bleed-empowerment';
 import { ConcealmentSkill } from '../core/cards/skills/concealment';
 import { EnemyKilledTrigger } from '../core/trigger/enemy-killed';
@@ -122,7 +123,10 @@ const KIND_ONLY_FIELDS: { kind: SkillKind; fields: (keyof OtherSkillDto)[] }[] =
       kind: SkillKind.BLEED_EMPOWERMENT,
       fields: ['extraStacks', 'basis', 'triggeredDebuff'],
     },
-    { kind: SkillKind.CONDITIONAL_ATTACK, fields: ['requiresUndamaged'] },
+    {
+      kind: SkillKind.CONDITIONAL_ATTACK,
+      fields: ['requiresUndamaged', 'hitAlterations'],
+    },
   ];
 
 const CARD_BOUND_SKILL_KINDS = [
@@ -586,6 +590,20 @@ export class FightController {
     });
   }
 
+  private buildHitAlterations(dto: OtherSkillDto): HitAlterations | undefined {
+    if (!dto.hitAlterations?.length) return undefined;
+
+    return new HitAlterations(
+      dto.hitAlterations.map((a) => ({
+        polarity: a.polarity,
+        type: this.mapAlterationType(a.type),
+        rate: a.rate,
+        duration: a.duration,
+        terminationEvent: a.terminationEvent,
+      })),
+    );
+  }
+
   private buildShieldApplication(
     dto: SpecialDto,
   ): ShieldApplication | undefined {
@@ -900,6 +918,7 @@ export class FightController {
             undefined,
             undefined,
             skillData.requiresUndamaged,
+            this.buildHitAlterations(skillData),
           );
         }
         if (skillData.bleedDetonation && skillData.hits) {
@@ -974,6 +993,7 @@ export class FightController {
             : undefined,
           skillData.stanceActivation,
           skillData.requiresUndamaged,
+          this.buildHitAlterations(skillData),
         );
       case SkillKind.TARGETING_OVERRIDE:
         if (!skillData.terminationEvent) {

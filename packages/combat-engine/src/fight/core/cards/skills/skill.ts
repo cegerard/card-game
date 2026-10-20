@@ -52,6 +52,12 @@ export type AttackSkillResults = BaseSkillResults & {
   results: AttackResult[];
   /** A secondary strike around the primary target, reported on its own. */
   splash?: { name: string; results: AttackResult[] };
+  /** Alterations left on every defender the main attack hit. */
+  hitAlterations?: {
+    name: string;
+    buffs: BuffResult[];
+    debuffs: DebuffResult[];
+  };
   /** Debuffs the primary target got for being left under a health threshold. */
   lowHealthDebuff?: { name: string; results: DebuffResult[] };
   /** The stance the attack opened on its owner when it fired. */

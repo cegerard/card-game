@@ -102,7 +102,7 @@ cards/
     │   ├── healing-result.ts
     │   ├── buff-results.ts
     │   └── shield-result.ts         # { target: CardInfo; shield: Shield }
-    ├── attack/             # Attack and effect types (attack-effect.ts, attack-poison-effect.ts, attack-burn-effect.ts, attack-freeze-effect.ts, attack-stunt-effect.ts, attack-mark-effect.ts, attack-bleed-effect.ts, damage-type-bonus.ts (base of bleed-stack-bonus.ts and concealed-bonus.ts), bleed-stack-bonus.ts, concealed-bonus.ts, energy-refund.ts, bleed-detonation.ts, splash.ts, low-health-debuff.ts)
+    ├── attack/             # Attack and effect types (attack-effect.ts, attack-poison-effect.ts, attack-burn-effect.ts, attack-freeze-effect.ts, attack-stunt-effect.ts, attack-mark-effect.ts, attack-bleed-effect.ts, damage-type-bonus.ts (base of bleed-stack-bonus.ts and concealed-bonus.ts), bleed-stack-bonus.ts, concealed-bonus.ts, energy-refund.ts, bleed-detonation.ts, splash.ts, low-health-debuff.ts, hit-alterations.ts)
     │   └── conditions/     # Attack conditions (always-true-attack-condition.ts)
     ├── alteration/         # Buff/debuff discriminated union
     │   ├── alteration-detail.ts     # AlterationDetail = Buff | Debuff (polarity: 'buff' | 'debuff')

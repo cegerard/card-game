@@ -254,6 +254,26 @@ export class EffectDto {
   probability?: number;
 }
 
+// An alteration an attack leaves on each defender it hit: no targeting of its own
+class HitAlterationDto {
+  @IsEnum(BuffType)
+  type: BuffType;
+
+  @IsNumber()
+  rate: number;
+
+  @IsNumber()
+  duration: number;
+
+  @IsIn(['buff', 'debuff'])
+  polarity: 'buff' | 'debuff';
+
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  terminationEvent?: string;
+}
+
 class StatAlterationDto {
   @IsEnum(BuffType)
   type: BuffType;
@@ -847,6 +867,13 @@ export class OtherSkillDto {
   @IsOptional()
   @IsBoolean()
   requiresUndamaged?: boolean;
+
+  // CONDITIONAL_ATTACK: alterations left on every defender the main attack hit
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(/* istanbul ignore next */ () => HitAlterationDto)
+  hitAlterations?: HitAlterationDto[];
 
   // CONDITIONAL_ATTACK: consumes the target bleed stacks, ratePerStack each
   @IsOptional()
