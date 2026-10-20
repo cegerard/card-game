@@ -299,10 +299,6 @@ export class FightingCard {
   }
 
   /**
-   * The attack an action of this card strikes with: the attack stat raised by
-   * the board-dependent bonus of a stack scaling passive, when it has one.
-   */
-  /**
    * The attack an action strikes with. An attack names its `defender`, which
    * the low health target bonus reads; a status effect names none.
    */
@@ -311,11 +307,14 @@ export class FightingCard {
     defender?: FightingCard,
   ): number {
     const stackBonus = this.bleedStackScaling?.multiplierFor(context) ?? 1;
-    const targetBonus = defender
-      ? (this.lowHealthTargetBonus?.multiplierAgainst(defender) ?? 1)
-      : 1;
 
-    return this.actualAttack * stackBonus * targetBonus;
+    return this.actualAttack * stackBonus * this.targetBonusAgainst(defender);
+  }
+
+  /** The bonus the low health target passive grants against that defender. */
+  public targetBonusAgainst(defender?: FightingCard): number {
+    if (!defender) return 1;
+    return this.lowHealthTargetBonus?.multiplierAgainst(defender) ?? 1;
   }
 
   public get actualDefense(): number {
@@ -1144,6 +1143,17 @@ export class FightingCard {
     this.debuffs.push(debuff);
 
     return debuff;
+  }
+
+  /** Whether the pile of that polarity already holds `maxStacks` alterations. */
+  public isStackCapped(
+    polarity: 'buff' | 'debuff',
+    stacking?: AlterationStacking,
+  ): boolean {
+    return isPileFull(
+      polarity === 'buff' ? this.buffs : this.debuffs,
+      stacking,
+    );
   }
 
   public debuffStacks(stackId: string): number {

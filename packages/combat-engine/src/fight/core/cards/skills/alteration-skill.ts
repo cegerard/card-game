@@ -100,6 +100,12 @@ export class AlterationSkill implements Skill {
           context.opponentPlayer,
         );
 
+    const allCapped =
+      targetedCards.length > 0 &&
+      targetedCards.every((card) =>
+        card.isStackCapped(this.polarity, this.stacking),
+      );
+
     // A capped alteration refused at its stack limit returns undefined: drop it so
     // no step reports an alteration that was never applied.
     const results = targetedCards
@@ -126,8 +132,7 @@ export class AlterationSkill implements Skill {
       }))
       .filter((result) => result.alteration !== undefined);
 
-    const refusedByCap = targetedCards.length > 0 && results.length === 0;
-    if (!conditionFailed && !refusedByCap) {
+    if (!conditionFailed && !allCapped) {
       this.activationCount++;
     }
 
