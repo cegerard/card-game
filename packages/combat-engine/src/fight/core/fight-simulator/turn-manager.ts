@@ -9,6 +9,7 @@ import { EndEventProcessor } from './end-event-processor';
 import { skillResultsToSteps } from './skill-results-to-steps';
 import { triggerReactiveSkills } from './reactive-skill-checker';
 import { concealmentEndedReport } from './concealment-steps';
+import { stanceEndedReport } from './stance-steps';
 
 export class TurnManager {
   private player1: Player;
@@ -84,11 +85,7 @@ export class TurnManager {
         steps.push({ kind: StepKind.ShieldExpired, card: card.identityInfo });
       }
       card.decreaseStanceDurations().forEach((name) => {
-        steps.push({
-          kind: StepKind.StanceEnded,
-          name,
-          card: card.identityInfo,
-        });
+        steps.push(stanceEndedReport(card, name));
       });
       const expiredConcealment = card.decreaseConcealmentDuration();
       if (expiredConcealment) {

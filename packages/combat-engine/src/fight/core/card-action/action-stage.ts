@@ -3,7 +3,11 @@ import { FightingCard } from '../cards/fighting-card';
 import { Player } from '../player';
 import { CardDeathSubscriber } from '../fight-simulator/card-death-subscriber';
 import { Step, StepKind } from '../fight-simulator/@types/step';
-import { ActionReport } from '../fight-simulator/@types/action-report';
+import {
+  ActionReport,
+  SKILL_STEPS,
+  SkillStepsActionReport,
+} from '../fight-simulator/@types/action-report';
 import { AttackResult } from '../cards/@types/action-result/attack-result';
 import { HealingReport } from '../fight-simulator/@types/healing-report';
 import { HealingResult } from '../cards/@types/action-result/healing-result';
@@ -13,7 +17,11 @@ import {
   BuffResult,
   DebuffResult,
 } from '../cards/@types/action-result/alteration-result';
-import { AttackSkillResults, SkillKind } from '../cards/skills/skill';
+import {
+  AttackSkillResults,
+  SkillKind,
+  SkillResults,
+} from '../cards/skills/skill';
 import { DeathSkillHandler } from '../fight-simulator/death-skill-handler';
 import { ShieldResult } from '../cards/@types/action-result/shield-result';
 import { ShieldAppliedReport } from '../fight-simulator/@types/shield-report';
@@ -32,7 +40,10 @@ import {
   concealmentStartedReport,
   revealAttacker,
 } from '../fight-simulator/concealment-steps';
-import { stanceStartedReport } from '../fight-simulator/stance-steps';
+import {
+  stanceEndedReport,
+  stanceStartedReport,
+} from '../fight-simulator/stance-steps';
 
 type SplittedSteps = {
   actionSteps: Step[];
@@ -109,13 +120,13 @@ export class ActionStage {
     return report;
   }
 
-  private launchNextActionSkills(card: FightingCard): AttackReport | null {
+  private launchNextActionSkills(card: FightingCard): ActionReport | null {
     const context = this.getFightingContext(card);
     const skillResults = card.launchSkills('next-action', context);
     const attackSkill = skillResults.find(
       (r): r is AttackSkillResults => r.skillKind === SkillKind.Attack,
     );
-    if (!attackSkill) return null;
+    if (!attackSkill) return this.diveReport(card, skillResults);
 
     const result: AttackReport = {
       kind: StepKind.Attack,
@@ -137,6 +148,22 @@ export class ActionStage {
     );
 
     return result;
+  }
+
+  /**
+   * A concealment fired on `next-action` takes the action instead of the
+   * attack: the card dives out of sight and strikes nobody this turn.
+   */
+  private diveReport(
+    card: FightingCard,
+    skillResults: SkillResults[],
+  ): SkillStepsActionReport | null {
+    const dive = skillResults.find(
+      (r) => r.skillKind === SkillKind.Concealment,
+    );
+    if (!dive) return null;
+
+    return { kind: SKILL_STEPS, steps: skillResultsToSteps(card, [dive]) };
   }
 
   /**
@@ -163,6 +190,12 @@ export class ActionStage {
           reports[0].stanceStartedReport = stanceStartedReport(
             card,
             attackSkill.stanceStarted,
+          );
+        }
+        if (attackSkill.stanceEnded) {
+          reports[0].stanceEndedReport = stanceEndedReport(
+            card,
+            attackSkill.stanceEnded,
           );
         }
         if (attackSkill.lowHealthDebuff) {
@@ -367,6 +400,10 @@ export class ActionStage {
             acc.actionSteps.push(report.stanceStartedReport);
           }
 
+          if (report.stanceEndedReport) {
+            acc.actionSteps.push(report.stanceEndedReport);
+          }
+
           report.survivedSteps.forEach((step) => {
             acc.actionSteps.push(step);
           });
@@ -382,6 +419,10 @@ export class ActionStage {
 
         if (report.kind === StepKind.SpecialStance) {
           acc.actionSteps.push(report.step, ...report.followUps);
+        }
+
+        if (report.kind === SKILL_STEPS) {
+          acc.actionSteps.push(...report.steps);
         }
 
         return acc;

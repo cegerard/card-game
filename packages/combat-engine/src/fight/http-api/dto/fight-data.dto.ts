@@ -814,10 +814,11 @@ export class OtherSkillDto {
 
   @ValidateIf(
     (o) =>
-      o.kind === SkillKind.CONDITIONAL_ATTACK &&
-      o.event !== TriggerEvent.ALLY_HEALTH_BELOW &&
-      o.event !== TriggerEvent.DAMAGE_TAKEN &&
-      o.event !== TriggerEvent.TURN_START,
+      (o.kind === SkillKind.CONDITIONAL_ATTACK &&
+        o.event !== TriggerEvent.ALLY_HEALTH_BELOW &&
+        o.event !== TriggerEvent.DAMAGE_TAKEN &&
+        o.event !== TriggerEvent.TURN_START) ||
+      o.interval !== undefined,
   )
   @IsDefined()
   @IsNumber()
@@ -863,7 +864,12 @@ export class OtherSkillDto {
   @Min(1)
   energyCost?: number;
 
-  // CONDITIONAL_ATTACK: never fires when its owner lost health since its previous action
+  // CONDITIONAL_ATTACK: closes its requiresStance once it struck, so it fires once per stance
+  @IsOptional()
+  @IsBoolean()
+  endsStance?: boolean;
+
+  // CONDITIONAL_ATTACK and CONCEALMENT: never fires when its owner lost health since its previous action
   @IsOptional()
   @IsBoolean()
   requiresUndamaged?: boolean;

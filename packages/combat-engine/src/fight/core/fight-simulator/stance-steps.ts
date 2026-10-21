@@ -1,6 +1,6 @@
 import { Stance } from '../cards/@types/stance/stance';
 import { FightingCard } from '../cards/fighting-card';
-import { StanceStartedReport } from './@types/stance-report';
+import { StanceEndedReport, StanceStartedReport } from './@types/stance-report';
 import { StepKind } from './@types/step';
 
 export function stanceStartedReport(
@@ -13,4 +13,11 @@ export function stanceStartedReport(
     card: card.identityInfo,
     remainingTurns: stance.remainingTurns,
   };
+}
+
+export function stanceEndedReport(
+  card: FightingCard,
+  name: string,
+): StanceEndedReport {
+  return { kind: StepKind.StanceEnded, name, card: card.identityInfo };
 }

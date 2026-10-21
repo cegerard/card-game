@@ -74,6 +74,7 @@ import { DamageComposition } from '../core/cards/@types/damage/damage-compositio
 import { ConditionalAttack } from '../core/cards/skills/conditional-attack';
 import { EveryNTurnsCondition } from '../core/cards/@types/attack/conditions/every-n-turns-condition';
 import { AlwaysTrueAttackCondition } from '../core/cards/@types/attack/conditions/always-true-attack-condition';
+import { AttackCondition } from '../core/cards/@types/attack/attack-condition';
 import { AllyHealthBelowThresholdTrigger } from '../core/trigger/ally-health-below-threshold-trigger';
 import { AnyAllyHealthBelowThresholdTrigger } from '../core/trigger/any-ally-health-below-threshold-trigger';
 import { SelfDeathTrigger } from '../core/trigger/self-death';
@@ -116,18 +117,24 @@ const STANCE_SPECIAL_FORBIDDEN_FIELDS = [
   'concealedBonus',
 ] as const;
 
-// Fields that only one skill kind can carry
-const KIND_ONLY_FIELDS: { kind: SkillKind; fields: (keyof OtherSkillDto)[] }[] =
-  [
-    {
-      kind: SkillKind.BLEED_EMPOWERMENT,
-      fields: ['extraStacks', 'basis', 'triggeredDebuff'],
-    },
-    {
-      kind: SkillKind.CONDITIONAL_ATTACK,
-      fields: ['requiresUndamaged', 'hitAlterations'],
-    },
-  ];
+// Fields that only some skill kinds can carry
+const KIND_ONLY_FIELDS: {
+  kinds: SkillKind[];
+  fields: (keyof OtherSkillDto)[];
+}[] = [
+  {
+    kinds: [SkillKind.BLEED_EMPOWERMENT],
+    fields: ['extraStacks', 'basis', 'triggeredDebuff'],
+  },
+  {
+    kinds: [SkillKind.CONDITIONAL_ATTACK],
+    fields: ['hitAlterations', 'endsStance'],
+  },
+  {
+    kinds: [SkillKind.CONDITIONAL_ATTACK, SkillKind.CONCEALMENT],
+    fields: ['requiresUndamaged'],
+  },
+];
 
 const CARD_BOUND_SKILL_KINDS = [
   SkillKind.SURVIVE,
@@ -511,7 +518,7 @@ export class FightController {
   private rejectMisplacedKindOnlyFields(others: OtherSkillDto[]): void {
     for (const skill of others) {
       const misplaced = KIND_ONLY_FIELDS.filter(
-        ({ kind }) => kind !== skill.kind,
+        ({ kinds }) => !kinds.includes(skill.kind),
       )
         .flatMap(({ fields }) => fields)
         .filter((field) => skill[field] !== undefined);
@@ -588,6 +595,12 @@ export class FightController {
         a.polarity,
       );
     });
+  }
+
+  private buildCooldown(interval?: number): AttackCondition {
+    return interval
+      ? new EveryNTurnsCondition(interval)
+      : new AlwaysTrueAttackCondition();
   }
 
   private buildHitAlterations(dto: OtherSkillDto): HitAlterations | undefined {
@@ -886,6 +899,11 @@ export class FightController {
           powerId: skillData.powerId,
         });
       case SkillKind.CONDITIONAL_ATTACK:
+        if (skillData.endsStance && !skillData.requiresStance) {
+          throw new BadRequestException(
+            'CONDITIONAL_ATTACK endsStance requires requiresStance',
+          );
+        }
         if (skillData.event === TriggerEvent.ALLY_HEALTH_BELOW) {
           this.requireAllyHealthBelowFields(skillData);
           const ahDamages = skillData.damages.map(
@@ -964,9 +982,7 @@ export class FightController {
         return new ConditionalAttack(
           skillData.name,
           caAttackSkill,
-          skillData.interval
-            ? new EveryNTurnsCondition(skillData.interval)
-            : new AlwaysTrueAttackCondition(),
+          this.buildCooldown(skillData.interval),
           this.buildTriggerForSkill(skillData, ownerId),
           skillData.powerId,
           skillData.requiresStance,
@@ -994,6 +1010,7 @@ export class FightController {
           skillData.stanceActivation,
           skillData.requiresUndamaged,
           this.buildHitAlterations(skillData),
+          skillData.endsStance,
         );
       case SkillKind.TARGETING_OVERRIDE:
         if (!skillData.terminationEvent) {
@@ -1108,6 +1125,9 @@ export class FightController {
             this.buildTriggerForSkill(skillData, ownerId),
             skillData.duration,
             skillData.powerId,
+            skillData.stanceActivation,
+            this.buildCooldown(skillData.interval),
+            skillData.requiresUndamaged,
           );
         } catch (e) {
           throw new BadRequestException((e as Error).message);

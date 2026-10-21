@@ -872,6 +872,13 @@ export class FightingCard {
     return this.stances.some((s) => s.name === name);
   }
 
+  /** Closes a running stance before its time; returns whether it was held. */
+  public endStance(name: string): boolean {
+    const held = this.hasStance(name);
+    this.stances = this.stances.filter((s) => s.name !== name);
+    return held;
+  }
+
   /** Decrements every running stance and returns the ones that just ended. */
   public decreaseStanceDurations(): string[] {
     const decremented = this.stances.map((s) => ({
