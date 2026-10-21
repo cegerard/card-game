@@ -1,5 +1,5 @@
 {
-  "extends": "./.svelte-kit/tsconfig.json",
+  "extends": "$app/tsconfig",
   "compilerOptions": {
     "allowJs": true,
     "checkJs": true,
@@ -10,5 +10,11 @@
     "sourceMap": true,
     "strict": true,
     "target": "ES2021"
-  }
+  },
+  "exclude": [
+    "build",
+    "eslint.config.js",
+    "playwright-report",
+    "test-results"
+  ]
 }

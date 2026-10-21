@@ -1,4 +1,5 @@
 import { sveltekit } from '@sveltejs/kit/vite';
+import adapter from '@sveltejs/adapter-static';
 import { defineConfig } from 'vitest/config';
 import { fileURLToPath } from 'node:url';
 
@@ -7,7 +8,16 @@ const svelteClient = fileURLToPath(
 );
 
 export default defineConfig({
-  plugins: [sveltekit()],
+  plugins: [
+    sveltekit({
+      adapter: adapter({
+        fallback: 'index.html',
+      }),
+      alias: {
+        $lib: 'src/lib',
+      },
+    }),
+  ],
   test: {
     environment: 'jsdom',
     include: ['src/**/*.spec.ts'],

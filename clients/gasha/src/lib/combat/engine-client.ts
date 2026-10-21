@@ -1,4 +1,4 @@
-import { PUBLIC_COMBAT_ENGINE_URL } from '$env/static/public';
+import { PUBLIC_COMBAT_ENGINE_URL } from '$app/env/public';
 import type { CardConfig, FightResult } from '$lib/arcade/types.js';
 
 export async function fetchFight(
