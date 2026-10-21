@@ -9,6 +9,7 @@ import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting
 import { Splash } from '../@types/attack/splash';
 import { LowHealthDebuff } from '../@types/attack/low-health-debuff';
 import { StanceActivation } from '../@types/stance/stance';
+import { HitAlterations } from '../@types/attack/hit-alterations';
 
 export class ConditionalAttack implements Skill {
   public id = 'conditional-attack';
@@ -25,6 +26,7 @@ export class ConditionalAttack implements Skill {
     private readonly lowHealthDebuff?: LowHealthDebuff,
     private readonly stanceActivation?: StanceActivation,
     public readonly requiresUndamaged?: boolean,
+    private readonly hitAlterations?: HitAlterations,
   ) {}
 
   isTriggered(triggerName: string): boolean {
@@ -54,6 +56,9 @@ export class ConditionalAttack implements Skill {
     }
 
     const [primary] = attackResults.results;
+    // Applied after the hit effects and before the splash: only the main
+    // attack alters its defenders.
+    const hitAlterations = this.hitAlterations?.apply(attackResults.results);
     // Read before the splash lands: only the main hit counts.
     const lowHealthDebuffs =
       primary && !primary.dodge
@@ -65,6 +70,7 @@ export class ConditionalAttack implements Skill {
       results: attackResults.results,
       name: this.name,
       powerId: this.powerId,
+      hitAlterations: hitAlterations && { name: this.name, ...hitAlterations },
       stanceStarted:
         primary && this.stanceActivation
           ? source.activateStance(this.stanceActivation)

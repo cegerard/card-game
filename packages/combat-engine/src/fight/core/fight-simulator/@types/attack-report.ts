@@ -10,6 +10,8 @@ export type AttackReport = {
   attack: DamageReport;
   statusChanges: Step[];
   survivedSteps: Step[];
+  /** Alterations the attack left on the defenders it hit. */
+  hitAlterationSteps?: Step[];
   buffReport?: BuffReport;
   debuffReport?: DebuffReport;
   shieldAppliedReport?: ShieldAppliedReport;

@@ -15,6 +15,7 @@ describe('DeathSkillHandler enemy killed phase cascade', () => {
     const hunter = createFightingCard({
       id: 'hunter',
       attack: 1000,
+      accuracy: 9999,
       extraSkills: [
         new ConditionalAttack(
           'Chasse',
@@ -33,6 +34,7 @@ describe('DeathSkillHandler enemy killed phase cascade', () => {
       id: 'second',
       health: 1,
       defense: 0,
+      agility: 0,
       skills: {
         others: [
           {
