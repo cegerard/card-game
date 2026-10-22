@@ -8,7 +8,7 @@ import { ExecutionResult } from '../action-result/execution-result';
  */
 export class Execution {
   constructor(private readonly threshold: number) {
-    if (threshold <= 0 || threshold >= 1) {
+    if (!(threshold > 0 && threshold < 1)) {
       throw new Error(
         `Execution threshold must be within ]0, 1[, got ${threshold}`,
       );

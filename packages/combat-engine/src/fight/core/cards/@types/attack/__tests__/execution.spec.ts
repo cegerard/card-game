@@ -81,7 +81,7 @@ describe('Execution', () => {
     });
   });
 
-  it.each([0, 1])('rejects a threshold of %f', (threshold) => {
+  it.each([0, 1, NaN, Infinity])('rejects a threshold of %f', (threshold) => {
     expect(() => new Execution(threshold)).toThrow();
   });
 });
