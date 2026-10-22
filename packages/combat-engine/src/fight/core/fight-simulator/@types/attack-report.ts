@@ -8,6 +8,8 @@ import { ConcealmentEndedReport } from './concealment-report';
 export type AttackReport = {
   kind: StepKind.Attack | StepKind.SpecialAttack;
   attack: DamageReport;
+  /** Reported before the attack: what fired next to it and took no strike. */
+  precedingSteps?: Step[];
   statusChanges: Step[];
   survivedSteps: Step[];
   /** Alterations the attack left on the defenders it hit. */

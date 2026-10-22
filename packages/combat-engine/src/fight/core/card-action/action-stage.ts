@@ -142,12 +142,36 @@ export class ActionStage {
     };
 
     this.handleAttackResult(attackSkill.results, result, card);
+    result.precedingSteps = skillResultsToSteps(
+      card,
+      skillResults.filter((r) => r.skillKind === SkillKind.Concealment),
+    );
     result.hitAlterationSteps = skillResultsToSteps(
       card,
       hitAlterationResults(attackSkill),
     );
+    this.attachStanceReports(card, attackSkill, result);
 
     return result;
+  }
+
+  private attachStanceReports(
+    card: FightingCard,
+    attackSkill: AttackSkillResults,
+    report: AttackReport,
+  ): void {
+    if (attackSkill.stanceStarted) {
+      report.stanceStartedReport = stanceStartedReport(
+        card,
+        attackSkill.stanceStarted,
+      );
+    }
+    if (attackSkill.stanceEnded) {
+      report.stanceEndedReport = stanceEndedReport(
+        card,
+        attackSkill.stanceEnded,
+      );
+    }
   }
 
   /**
@@ -186,18 +210,7 @@ export class ActionStage {
           card,
           hitAlterationResults(attackSkill),
         );
-        if (attackSkill.stanceStarted) {
-          reports[0].stanceStartedReport = stanceStartedReport(
-            card,
-            attackSkill.stanceStarted,
-          );
-        }
-        if (attackSkill.stanceEnded) {
-          reports[0].stanceEndedReport = stanceEndedReport(
-            card,
-            attackSkill.stanceEnded,
-          );
-        }
+        this.attachStanceReports(card, attackSkill, reports[0]);
         if (attackSkill.lowHealthDebuff) {
           reports[0].debuffReport = this.buildDebuffReport(
             card,
@@ -377,6 +390,7 @@ export class ActionStage {
     return attacksReports.reduce(
       (acc: SplittedSteps, report) => {
         if (report.kind === 'attack' || report.kind === 'special_attack') {
+          acc.actionSteps.push(...(report.precedingSteps ?? []));
           acc.actionSteps.push({
             kind: report.kind,
             ...report.attack,
