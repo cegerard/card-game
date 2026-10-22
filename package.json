@@ -25,6 +25,6 @@
     "replayer": "npx serve clients/fight-replayer"
   },
   "devDependencies": {
-    "ts-jest": "^29.4.14"
+    "ts-jest": "^29.4.15"
   }
 }
