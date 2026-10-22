@@ -254,6 +254,12 @@ export class EffectDto {
   probability?: number;
 }
 
+// Finishes off every defender left strictly under `threshold` of its health
+export class ExecutionDto {
+  @IsNumber()
+  threshold: number;
+}
+
 // An alteration an attack leaves on each defender it hit: no targeting of its own
 class HitAlterationDto {
   @IsEnum(BuffType)
@@ -526,6 +532,12 @@ export class SpecialDto extends AttackBonusesDto {
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => EnergyRefundDto)
   energyRefund?: EnergyRefundDto;
+
+  // ATTACK only: finishes off the defenders the special left under a health ratio
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => ExecutionDto)
+  execution?: ExecutionDto;
 }
 
 class DamageCompositionDto {
@@ -880,6 +892,12 @@ export class OtherSkillDto {
   @ValidateNested({ each: true })
   @Type(/* istanbul ignore next */ () => HitAlterationDto)
   hitAlterations?: HitAlterationDto[];
+
+  // CONDITIONAL_ATTACK: finishes off the defenders the main attack left under a health ratio
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => ExecutionDto)
+  execution?: ExecutionDto;
 
   // CONDITIONAL_ATTACK: consumes the target bleed stacks, ratePerStack each
   @IsOptional()

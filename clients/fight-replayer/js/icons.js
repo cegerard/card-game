@@ -33,6 +33,8 @@ export const ICON = {
   shield_expired:    '🔻',
   /* Survive */
   survived:          '🌟',
+  /* Execution */
+  executed:          '⚰️',
   /* Damage reduction */
   damage_mitigated:  '🩹',
   /* Stance */
@@ -97,6 +99,7 @@ export const EVENT_COLOR = {
   shield_broken:     '#f87171',
   shield_expired:    '#94a3b8',
   survived:          '#fbbf24',
+  executed:          '#dc2626',
   damage_mitigated:  '#7dd3fc',
   stance_started:    '#818cf8',
   stance_ended:      '#94a3b8',

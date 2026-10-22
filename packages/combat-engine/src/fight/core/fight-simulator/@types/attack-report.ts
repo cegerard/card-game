@@ -12,6 +12,8 @@ export type AttackReport = {
   precedingSteps?: Step[];
   statusChanges: Step[];
   survivedSteps: Step[];
+  /** Defenders the attack executed, with SURVIVE interceptions. */
+  executionSteps?: Step[];
   /** Alterations the attack left on the defenders it hit. */
   hitAlterationSteps?: Step[];
   buffReport?: BuffReport;

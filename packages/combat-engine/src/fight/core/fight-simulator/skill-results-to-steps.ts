@@ -15,6 +15,7 @@ import { effectResultsToSteps } from './effect-results-to-steps';
 import { EndEventProcessor } from './end-event-processor';
 import { concealmentStartedReport, revealAttacker } from './concealment-steps';
 import { stanceEndedReport, stanceStartedReport } from './stance-steps';
+import { executionSteps } from './execution-steps';
 
 export function skillResultsToSteps(
   card: FightingCard,
@@ -78,6 +79,15 @@ export function skillResultsToSteps(
           energy: card.actualEnergy,
           powerId: skillResult.powerId,
         });
+        if (skillResult.executions) {
+          steps.push(
+            ...executionSteps(
+              card,
+              skillResult.executions.name,
+              skillResult.executions.results,
+            ),
+          );
+        }
         steps.push(...revealAttacker(card));
 
         // Same per-hit order as ActionStage.handleAttackResult: what happened

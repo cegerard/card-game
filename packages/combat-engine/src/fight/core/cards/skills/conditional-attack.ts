@@ -10,6 +10,7 @@ import { Splash } from '../@types/attack/splash';
 import { LowHealthDebuff } from '../@types/attack/low-health-debuff';
 import { StanceActivation } from '../@types/stance/stance';
 import { HitAlterations } from '../@types/attack/hit-alterations';
+import { Execution } from '../@types/attack/execution';
 
 export class ConditionalAttack implements Skill {
   public id = 'conditional-attack';
@@ -28,6 +29,7 @@ export class ConditionalAttack implements Skill {
     public readonly requiresUndamaged?: boolean,
     private readonly hitAlterations?: HitAlterations,
     private readonly endsStance?: boolean,
+    private readonly execution?: Execution,
   ) {
     if (endsStance && !requiredStance) {
       throw new Error('ConditionalAttack endsStance requires requiredStance');
@@ -61,6 +63,8 @@ export class ConditionalAttack implements Skill {
     }
 
     const [primary] = attackResults.results;
+    // Executed first: a defender finished off gets no alteration.
+    const executions = this.execution?.apply(attackResults.results) ?? [];
     // Applied after the hit effects and before the splash: only the main
     // attack alters its defenders.
     const hitAlterations = this.hitAlterations?.apply(attackResults.results);
@@ -75,6 +79,10 @@ export class ConditionalAttack implements Skill {
       results: attackResults.results,
       name: this.name,
       powerId: this.powerId,
+      executions:
+        executions.length > 0
+          ? { name: this.name, results: executions }
+          : undefined,
       hitAlterations: hitAlterations && { name: this.name, ...hitAlterations },
       stanceEnded:
         primary && this.endsStance && source.endStance(this.requiredStance)

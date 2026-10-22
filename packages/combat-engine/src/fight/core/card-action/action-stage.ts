@@ -31,6 +31,8 @@ import {
   skillResultsToSteps,
 } from '../fight-simulator/skill-results-to-steps';
 import { effectResultsToSteps } from '../fight-simulator/effect-results-to-steps';
+import { executionSteps } from '../fight-simulator/execution-steps';
+import { ExecutionResult } from '../cards/@types/action-result/execution-result';
 import { SurvivedReport } from '../fight-simulator/@types/survived-report';
 import { BLEED_STACKS_APPLIED } from '../trigger/bleed-stacks-applied';
 import { TURN_START } from '../trigger/turn-start';
@@ -146,6 +148,11 @@ export class ActionStage {
       card,
       skillResults.filter((r) => r.skillKind === SkillKind.Concealment),
     );
+    result.executionSteps = this.executionReport(
+      card,
+      attackSkill.name,
+      attackSkill.executions?.results ?? [],
+    );
     result.hitAlterationSteps = skillResultsToSteps(
       card,
       hitAlterationResults(attackSkill),
@@ -206,6 +213,11 @@ export class ActionStage {
         const reports = [attackSkill, attackSkill.splash]
           .filter((strike) => strike?.results.length > 0)
           .map((strike) => this.reportStrike(card, strike));
+        reports[0].executionSteps = this.executionReport(
+          card,
+          attackSkill.name,
+          attackSkill.executions?.results ?? [],
+        );
         reports[0].hitAlterationSteps = skillResultsToSteps(
           card,
           hitAlterationResults(attackSkill),
@@ -277,6 +289,11 @@ export class ActionStage {
     const actionResults = specialResults.actionResults as AttackResult[];
 
     this.handleAttackResult(actionResults, result, card);
+    result.executionSteps = this.executionReport(
+      card,
+      specialResults.name,
+      specialResults.executions ?? [],
+    );
 
     Object.assign(result, this.specialSideReports(card, specialResults));
 
@@ -395,6 +412,7 @@ export class ActionStage {
             kind: report.kind,
             ...report.attack,
           } as Step);
+          acc.actionSteps.push(...(report.executionSteps ?? []));
           acc.actionSteps.push(...report.concealmentEndedReports);
           acc.actionSteps.push(...(report.hitAlterationSteps ?? []));
 
@@ -504,13 +522,7 @@ export class ActionStage {
           card: defensiveCard.identityInfo,
         };
         report.survivedSteps.push(survivedReport);
-        const survivedSkillResults = defensiveCard.launchSkills(
-          'survived',
-          this.getFightingContext(defensiveCard),
-        );
-        report.survivedSteps.push(
-          ...skillResultsToSteps(defensiveCard, survivedSkillResults),
-        );
+        report.survivedSteps.push(...this.survivedReactions(defensiveCard));
       }
 
       if (defensiveCard.isDead() && !reportedDeaths.has(defensiveCard)) {
@@ -611,6 +623,26 @@ export class ActionStage {
       sourcePlayer: isPlayer1CardOwner ? this.player1 : this.player2,
       opponentPlayer: isPlayer1CardOwner ? this.player2 : this.player1,
     };
+  }
+
+  /** What the card does after a SURVIVE skill kept it alive. */
+  private survivedReactions(card: FightingCard): Step[] {
+    return skillResultsToSteps(
+      card,
+      card.launchSkills('survived', this.getFightingContext(card)),
+    );
+  }
+
+  /** The executions of an attack, each followed by the reactions it caused. */
+  private executionReport(
+    attacker: FightingCard,
+    name: string,
+    executions: ExecutionResult[],
+  ): Step[] {
+    return executions.flatMap((execution) => [
+      ...executionSteps(attacker, name, [execution]),
+      ...(execution.survived ? this.survivedReactions(execution.card) : []),
+    ]);
   }
 
   private notifyDeath(card: FightingCard, killerCard?: FightingCard): void {

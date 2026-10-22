@@ -21,6 +21,7 @@ import {
   applyDamageBonuses,
 } from '../@types/attack/damage-type-bonus';
 import { EnergyRefund } from '../@types/attack/energy-refund';
+import { Execution } from '../@types/attack/execution';
 
 const CRITICAL_RATE = 1.3;
 
@@ -38,6 +39,7 @@ export class SpecialAttack extends BaseSpecial {
     private readonly hits: number = 1,
     private readonly damageBonuses: DamageTypeBonus[] = [],
     private readonly energyRefund?: EnergyRefund,
+    private readonly execution?: Execution,
   ) {
     super(name, energyNeeded);
     if (hits < 1) {
@@ -71,6 +73,7 @@ export class SpecialAttack extends BaseSpecial {
       );
     }
 
+    const executions = this.execution?.apply(attackResults) ?? [];
     const alterationResults = this.applyAlterations(source, context);
     const shieldResults = this.applyShield(source, context);
 
@@ -79,6 +82,7 @@ export class SpecialAttack extends BaseSpecial {
       actionResults: attackResults,
       alterationResults,
       shieldResults,
+      executions,
       stanceStarted: this.openStance(source),
       energyRefund: this.energyRefund?.amountFor(
         source,

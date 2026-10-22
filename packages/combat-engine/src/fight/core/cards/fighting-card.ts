@@ -954,6 +954,21 @@ export class FightingCard {
     }
   }
 
+  /**
+   * Takes every remaining health point as real damage, shield and damage
+   * reduction ignored. A fatal blow like any other: an unconsumed SURVIVE
+   * leaves the card at 1 HP instead.
+   */
+  public execute(): { survived?: boolean; survivedSkillName?: string } {
+    if (this.surviveSkill?.tryConsume()) {
+      this.addRealDamage(this.actualHealth - 1);
+      return { survived: true, survivedSkillName: this.surviveSkill.name };
+    }
+
+    this.addRealDamage(this.actualHealth);
+    return {};
+  }
+
   public addRealDamage(damage: number): number {
     this.recordHealthRatioBeforeDamage();
     this.receivedDamages += damage;

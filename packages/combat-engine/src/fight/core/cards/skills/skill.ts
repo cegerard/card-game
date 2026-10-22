@@ -1,3 +1,4 @@
+import { ExecutionResult } from '../@types/action-result/execution-result';
 import { FightingCard } from '../fighting-card';
 import { HealingResults } from '../@types/action-result/healing-results';
 import {
@@ -52,6 +53,8 @@ export type AttackSkillResults = BaseSkillResults & {
   results: AttackResult[];
   /** A secondary strike around the primary target, reported on its own. */
   splash?: { name: string; results: AttackResult[] };
+  /** Defenders the main attack finished off under its execution threshold. */
+  executions?: { name: string; results: ExecutionResult[] };
   /** Alterations left on every defender the main attack hit. */
   hitAlterations?: {
     name: string;
