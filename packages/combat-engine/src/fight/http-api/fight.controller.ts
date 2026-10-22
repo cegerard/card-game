@@ -132,7 +132,7 @@ const KIND_ONLY_FIELDS: {
   },
   {
     kinds: [SkillKind.CONDITIONAL_ATTACK, SkillKind.CONCEALMENT],
-    fields: ['requiresUndamaged'],
+    fields: ['requiresUndamaged', 'interval'],
   },
 ];
 
@@ -549,6 +549,14 @@ export class FightController {
     }
   }
 
+  private asBadRequest<T>(build: () => T): T {
+    try {
+      return build();
+    } catch (e) {
+      throw new BadRequestException((e as Error).message);
+    }
+  }
+
   private buildEnergyRefund(
     dto: EnergyRefundDto | undefined,
   ): EnergyRefund | undefined {
@@ -899,11 +907,6 @@ export class FightController {
           powerId: skillData.powerId,
         });
       case SkillKind.CONDITIONAL_ATTACK:
-        if (skillData.endsStance && !skillData.requiresStance) {
-          throw new BadRequestException(
-            'CONDITIONAL_ATTACK endsStance requires requiresStance',
-          );
-        }
         if (skillData.event === TriggerEvent.ALLY_HEALTH_BELOW) {
           this.requireAllyHealthBelowFields(skillData);
           const ahDamages = skillData.damages.map(
@@ -924,19 +927,23 @@ export class FightController {
             skillData.targetCardId,
             skillData.activationCondition.threshold,
           );
-          return new ConditionalAttack(
-            skillData.name,
-            ahAttackSkill,
-            new AlwaysTrueAttackCondition(),
-            ahTrigger,
-            skillData.powerId,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            skillData.requiresUndamaged,
-            this.buildHitAlterations(skillData),
+          return this.asBadRequest(
+            () =>
+              new ConditionalAttack(
+                skillData.name,
+                ahAttackSkill,
+                new AlwaysTrueAttackCondition(),
+                ahTrigger,
+                skillData.powerId,
+                skillData.requiresStance,
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                skillData.requiresUndamaged,
+                this.buildHitAlterations(skillData),
+                skillData.endsStance,
+              ),
           );
         }
         if (skillData.bleedDetonation && skillData.hits) {
@@ -979,38 +986,41 @@ export class FightController {
                 ? new BleedDetonation(skillData.bleedDetonation.ratePerStack)
                 : undefined,
             );
-        return new ConditionalAttack(
-          skillData.name,
-          caAttackSkill,
-          this.buildCooldown(skillData.interval),
-          this.buildTriggerForSkill(skillData, ownerId),
-          skillData.powerId,
-          skillData.requiresStance,
-          skillData.energyCost,
-          skillData.splash
-            ? new Splash(
-                skillData.splash.name,
-                skillData.splash.damages.map(
-                  (d) => new DamageComposition(d.type, d.rate),
-                ),
-                this.buildEffects(skillData.splash.effects),
-              )
-            : undefined,
-          skillData.onLowHealthAfterHit
-            ? new LowHealthDebuff(
-                skillData.onLowHealthAfterHit.name,
-                skillData.onLowHealthAfterHit.threshold,
-                skillData.onLowHealthAfterHit.debuffs.map((debuff) => ({
-                  type: this.mapAlterationType(debuff.type),
-                  rate: debuff.rate,
-                  duration: debuff.duration,
-                })),
-              )
-            : undefined,
-          skillData.stanceActivation,
-          skillData.requiresUndamaged,
-          this.buildHitAlterations(skillData),
-          skillData.endsStance,
+        return this.asBadRequest(
+          () =>
+            new ConditionalAttack(
+              skillData.name,
+              caAttackSkill,
+              this.buildCooldown(skillData.interval),
+              this.buildTriggerForSkill(skillData, ownerId),
+              skillData.powerId,
+              skillData.requiresStance,
+              skillData.energyCost,
+              skillData.splash
+                ? new Splash(
+                    skillData.splash.name,
+                    skillData.splash.damages.map(
+                      (d) => new DamageComposition(d.type, d.rate),
+                    ),
+                    this.buildEffects(skillData.splash.effects),
+                  )
+                : undefined,
+              skillData.onLowHealthAfterHit
+                ? new LowHealthDebuff(
+                    skillData.onLowHealthAfterHit.name,
+                    skillData.onLowHealthAfterHit.threshold,
+                    skillData.onLowHealthAfterHit.debuffs.map((debuff) => ({
+                      type: this.mapAlterationType(debuff.type),
+                      rate: debuff.rate,
+                      duration: debuff.duration,
+                    })),
+                  )
+                : undefined,
+              skillData.stanceActivation,
+              skillData.requiresUndamaged,
+              this.buildHitAlterations(skillData),
+              skillData.endsStance,
+            ),
         );
       case SkillKind.TARGETING_OVERRIDE:
         if (!skillData.terminationEvent) {
