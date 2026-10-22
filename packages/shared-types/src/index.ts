@@ -175,6 +175,11 @@ export interface EffectConfig {
   probability?: number;
 }
 
+/** Exécution : la cible encore en vie sous ce ratio de santé perd toute sa santé restante (dégâts réels). */
+export interface Execution {
+  threshold: number;
+}
+
 export interface StatAlteration {
   type: BuffType;
   rate: number;
@@ -257,6 +262,8 @@ export interface SpecialSkill extends AttackBonuses {
   stanceActivation?: StanceActivation;
   /** ATTACK uniquement : énergie rendue si la Précision dépasse assez l'Esquive de la cible. */
   energyRefund?: EnergyRefund;
+  /** ATTACK uniquement : achève les cibles touchées laissées strictement sous `threshold` de leur santé, dans ]0, 1[. */
+  execution?: Execution;
 }
 
 export interface SimpleAttackSkill extends AttackBonuses {
@@ -342,6 +349,8 @@ export interface OtherSkill {
   endsStance?: boolean;
   /** CONDITIONAL_ATTACK : altérations laissées sur chaque défenseur touché par l'attaque principale (une fois par défenseur, coups esquivés exclus), sans ciblage propre. */
   hitAlterations?: Omit<StatAlteration, 'targetingStrategy' | 'condition'>[];
+  /** CONDITIONAL_ATTACK : achève les cibles touchées par l'attaque principale laissées strictement sous `threshold` de leur santé, dans ]0, 1[ ; SURVIVE l'intercepte. */
+  execution?: Execution;
   /** CONDITIONAL_ATTACK : consomme toutes les piles de Saignement de la cible, `ratePerStack` d'Attaque par pile. */
   bleedDetonation?: { ratePerStack: number };
   /** CONDITIONAL_ATTACK : frappe secondaire sur la cible principale et ses deux voisins, après la frappe principale. */

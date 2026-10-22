@@ -341,6 +341,14 @@ function applyEvent(state, ev) {
       break;
     }
 
+    // The attack step reports the health the hit left; the execution takes
+    // the rest, unless a SURVIVE step right after holds the card at 1 HP.
+    case 'executed': {
+      const c = get(ev.card?.id);
+      if (c) c.hp = 0;
+      break;
+    }
+
     case 'survived': {
       const c = get(ev.card?.id);
       if (c) c.hp = Math.max(c.hp, 1);

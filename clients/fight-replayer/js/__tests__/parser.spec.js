@@ -92,6 +92,26 @@ describe('shield tracking', () => {
   });
 });
 
+describe('execution', () => {
+  const executed = { kind: 'executed', name: 'Jugement', attacker: KAITO, card: AEGIS };
+
+  it('takes the health the hit left', () => {
+    const steps = { 1: hit(AEGIS, 800, 200), 2: executed };
+
+    expect(finalState(steps, 'aegis').hp).toBe(0);
+  });
+
+  it('leaves 1 HP when SURVIVE holds the card', () => {
+    const steps = {
+      1: hit(AEGIS, 800, 200),
+      2: executed,
+      3: { kind: 'survived', name: 'Dernier Souffle', card: AEGIS },
+    };
+
+    expect(finalState(steps, 'aegis').hp).toBe(1);
+  });
+});
+
 describe('regeneration', () => {
   it('raises the card health to the reported value', () => {
     const steps = {

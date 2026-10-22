@@ -102,7 +102,7 @@ cards/
     │   ├── healing-result.ts
     │   ├── buff-results.ts
     │   └── shield-result.ts         # { target: CardInfo; shield: Shield }
-    ├── attack/             # Attack and effect types (attack-effect.ts, attack-poison-effect.ts, attack-burn-effect.ts, attack-freeze-effect.ts, attack-stunt-effect.ts, attack-mark-effect.ts, attack-bleed-effect.ts, damage-type-bonus.ts (base of bleed-stack-bonus.ts and concealed-bonus.ts), bleed-stack-bonus.ts, concealed-bonus.ts, energy-refund.ts, bleed-detonation.ts, splash.ts, low-health-debuff.ts, hit-alterations.ts)
+    ├── attack/             # Attack and effect types (attack-effect.ts, attack-poison-effect.ts, attack-burn-effect.ts, attack-freeze-effect.ts, attack-stunt-effect.ts, attack-mark-effect.ts, attack-bleed-effect.ts, damage-type-bonus.ts (base of bleed-stack-bonus.ts and concealed-bonus.ts), bleed-stack-bonus.ts, concealed-bonus.ts, energy-refund.ts, bleed-detonation.ts, splash.ts, low-health-debuff.ts, hit-alterations.ts, execution.ts)
     │   └── conditions/     # Attack conditions (always-true-attack-condition.ts)
     ├── alteration/         # Buff/debuff discriminated union
     │   ├── alteration-detail.ts     # AlterationDetail = Buff | Debuff (polarity: 'buff' | 'debuff')
@@ -190,6 +190,7 @@ fight-simulator/
 ├── effect-results-to-steps.ts # Pure fn: EffectResult[] → Step[] (mark_applied vs status_change + triggered debuff); shared by ActionStage and skillResultsToSteps
 ├── reactive-skill-checker.ts # Pure fn: triggers HealthReactiveSkills after HP changes → ShieldSkillResults[]
 ├── concealment-steps.ts    # revealAttacker() + concealmentEndedReport(): ends a concealment and reports it
+├── execution-steps.ts      # executionSteps(): an executed step per defender, then survived when SURVIVE held
 ├── card-selectors/         # Turn order strategies
 │   ├── card-selector.ts    # Selector interface
 │   ├── player-by-player.ts # Alternating player strategy
@@ -217,6 +218,7 @@ fight-simulator/
     ├── special-stance-report.ts # SpecialStanceReport (special_stance step) + SpecialStanceActionReport (step + follow-ups)
     ├── survived-report.ts  # SurvivedReport: { kind: 'survived', name, card }
     ├── damage-mitigated-report.ts # DamageMitigatedReport: { kind: 'damage_mitigated', name, card }
+    ├── executed-report.ts  # ExecutedReport: { kind: 'executed', name, attacker, card }
     └── winner-report.ts    # Victory determination
 ```
 

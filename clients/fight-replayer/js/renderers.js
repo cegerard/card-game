@@ -374,6 +374,8 @@ function buildGenericDetail(ev) {
       return esc(ev.card?.name);
     case 'survived':
       return `${esc(ev.card?.name)} survived with 1 HP — skill: ${esc(ev.name ?? '?')}`;
+    case 'executed':
+      return `${esc(ev.attacker?.name)} executed ${esc(ev.card?.name)} — ${esc(ev.name ?? '?')}`;
     case 'damage_mitigated':
       return `${esc(ev.name ?? '?')} removed a share of the incoming hit on ${esc(ev.card?.name)}`;
     case 'stance_started':
@@ -546,6 +548,12 @@ export function describeEvent(ev, teamBName) {
         icon: ICON.survived,
         text: `${ev.card?.name} — Survived (${ev.name ?? 'Survive'})`,
         color: EVENT_COLOR.survived,
+      };
+    case 'executed':
+      return {
+        icon: ICON.executed,
+        text: `${ev.card?.name} — Executed (${ev.name ?? 'Execution'})`,
+        color: EVENT_COLOR.executed,
       };
     case 'damage_mitigated':
       return {

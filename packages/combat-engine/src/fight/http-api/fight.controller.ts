@@ -18,6 +18,7 @@ import {
   DamageTypeBonusDto,
   SpecialDto,
   EnergyRefundDto,
+  ExecutionDto,
   FightDataDto,
   FightingCardDto,
   OtherSkillDto,
@@ -99,6 +100,7 @@ import { DodgeBonusDenialSkill } from '../core/cards/skills/dodge-bonus-denial';
 import { BleedStackScalingSkill } from '../core/cards/skills/bleed-stack-scaling';
 import { LowHealthTargetBonusSkill } from '../core/cards/skills/low-health-target-bonus';
 import { HitAlterations } from '../core/cards/@types/attack/hit-alterations';
+import { Execution } from '../core/cards/@types/attack/execution';
 import { BleedEmpowermentSkill } from '../core/cards/skills/bleed-empowerment';
 import { ConcealmentSkill } from '../core/cards/skills/concealment';
 import { EnemyKilledTrigger } from '../core/trigger/enemy-killed';
@@ -115,6 +117,7 @@ const STANCE_SPECIAL_FORBIDDEN_FIELDS = [
   'markedTargetBonus',
   'bleedStackBonus',
   'concealedBonus',
+  'execution',
 ] as const;
 
 // Fields that only some skill kinds can carry
@@ -128,7 +131,7 @@ const KIND_ONLY_FIELDS: {
   },
   {
     kinds: [SkillKind.CONDITIONAL_ATTACK],
-    fields: ['hitAlterations', 'endsStance'],
+    fields: ['hitAlterations', 'endsStance', 'execution'],
   },
   {
     kinds: [SkillKind.CONDITIONAL_ATTACK, SkillKind.CONCEALMENT],
@@ -242,6 +245,7 @@ export class FightController {
         cardData.skills.special.hits,
         this.buildDamageBonuses(cardData.skills.special),
         this.buildEnergyRefund(cardData.skills.special.energyRefund),
+        this.buildExecution(cardData.skills.special.execution),
       );
     } else if (cardData.skills.special.kind === SpecialKind.STANCE) {
       special = this.buildSpecialStance(cardData.skills.special);
@@ -605,6 +609,10 @@ export class FightController {
     });
   }
 
+  private buildExecution(dto?: ExecutionDto): Execution | undefined {
+    return dto && this.asBadRequest(() => new Execution(dto.threshold));
+  }
+
   private buildCooldown(interval?: number): AttackCondition {
     return interval
       ? new EveryNTurnsCondition(interval)
@@ -943,6 +951,7 @@ export class FightController {
                 skillData.requiresUndamaged,
                 this.buildHitAlterations(skillData),
                 skillData.endsStance,
+                this.buildExecution(skillData.execution),
               ),
           );
         }
@@ -1020,6 +1029,7 @@ export class FightController {
               skillData.requiresUndamaged,
               this.buildHitAlterations(skillData),
               skillData.endsStance,
+              this.buildExecution(skillData.execution),
             ),
         );
       case SkillKind.TARGETING_OVERRIDE:

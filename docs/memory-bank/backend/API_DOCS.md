@@ -112,7 +112,8 @@ Simulates a turn-based card battle between two players.
   concealedBonus?: {                      // Optional: boosts one damage type when the attacker strikes from concealment (see CONCEALMENT)
     damageType: "PHYSICAL" | "FIRE" | "WATER" | "EARTH" | "AIR",  // Only this composition is multiplied
     multiplier: number                    // Must be > 0, e.g. 1.5 for +50%
-  }
+  },
+  execution?: { threshold: number }       // ATTACK only (400 on STANCE): see OtherSkillDto.execution — applied after the last hit
 }
 ```
 
@@ -232,6 +233,7 @@ Simulates a turn-based card battle between two players.
     polarity: "buff" | "debuff",
     terminationEvent?: string
   }[],
+  execution?: { threshold: number },  // CONDITIONAL_ATTACK only (400 on any other kind); threshold in ]0, 1[ (400 outside). Once the main attack is over, every defender it hit (not dodged) and left alive strictly under `threshold` of its health loses all its remaining health as real damage — shield and damage reduction ignored. A fatal blow like any other: an unconsumed SURVIVE holds the defender at 1 HP (`survived` step, then its `survived` skills). Applied before `hitAlterations`, `onLowHealthAfterHit` and the splash, so an executed defender gets none of them. The death runs the usual cascade with the attacker as killer (`status_change: dead`, `ally-death`, `enemy-death`, `enemy-killed`). Reported as an `executed` step right after the attack step
   bleedDetonation?: { ratePerStack: number },  // > 0: consumes every bleed stack of the target and hits for ratePerStack × consumed stacks of the attack, as a PHYSICAL composition replacing `damages`
   splash?: {                    // Secondary strike after the main one, on the zone centered on the primary target: that target and its two deck neighbors (living only). Centered on the card the attack was aimed at, even when a guardian intercepted it. Runs through the regular attack pipeline (dodge, protection, shield) and is reported as its own `attack` step right after the main one. Fires only when the main strike targeted somebody
     name: string,               // Name of the splash attack step
@@ -290,7 +292,7 @@ Simulates a turn-based card battle between two players.
 ```typescript
 {
   [stepNumber: number]: {
-    kind: "fight_start" | "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "debuff_removed" | "buff_expired" | "debuff_expired" | "effect_removed" | "targeting_override" | "targeting_reverted" | "shield_applied" | "shield_broken" | "shield_expired" | "survived" | "damage_mitigated" | "stance_started" | "stance_ended" | "mark_applied" | "regenerated" | "protection_started" | "protection_ended" | "attack_intercepted" | "transformation_started" | "transformation_ended" | "concealment_started" | "concealment_ended" | "special_stance" | "fight_end",
+    kind: "fight_start" | "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "debuff_removed" | "buff_expired" | "debuff_expired" | "effect_removed" | "targeting_override" | "targeting_reverted" | "shield_applied" | "shield_broken" | "shield_expired" | "survived" | "damage_mitigated" | "stance_started" | "stance_ended" | "mark_applied" | "regenerated" | "protection_started" | "protection_ended" | "attack_intercepted" | "transformation_started" | "transformation_ended" | "concealment_started" | "concealment_ended" | "special_stance" | "executed" | "fight_end",
     // Additional properties vary by step kind
   }
 }
@@ -337,6 +339,16 @@ a besoin de ce champ pour le décrémenter : sans lui le bouclier restait affich
   kind: "survived",
   name: string,          // Name of the SURVIVE skill that triggered
   card: CardInfo         // Card that survived the fatal blow (left at 1 HP)
+}
+```
+
+**`executed` step** (`ExecutedReport`): Emitted right after the attack step for each defender an `execution` finished off under its threshold. Followed by a `survived` step when SURVIVE held the defender at 1 HP; otherwise the `status_change: dead` of the attack follows.
+```typescript
+{
+  kind: "executed",
+  name: string,          // Name of the attack that executed
+  attacker: CardInfo,
+  card: CardInfo         // Executed defender
 }
 ```
 
@@ -669,7 +681,7 @@ a besoin de ce champ pour le décrémenter : sans lui le bouclier restait affich
 
 - `ATTACK`: Special ability that deals damage
 - `HEALING`: Special ability that heals
-- `STANCE`: Special ability that strikes nobody — the caster enters a stance (`stanceActivation` required), then gets the optional `statAlterations`, `shieldApplication` and `concealment`. Since it is no attack it does not lift a concealment, which is how Fusion Tectonique hides its caster. `damages`, `rate`, `hits`, `targetingStrategy`, `effect`, `energyRefund`, `markedTargetBonus`, `bleedStackBonus` and `concealedBonus` are refused (400). Reported as `special_stance`; the gauge empties as for any special
+- `STANCE`: Special ability that strikes nobody — the caster enters a stance (`stanceActivation` required), then gets the optional `statAlterations`, `shieldApplication` and `concealment`. Since it is no attack it does not lift a concealment, which is how Fusion Tectonique hides its caster. `damages`, `rate`, `hits`, `targetingStrategy`, `effect`, `energyRefund`, `markedTargetBonus`, `bleedStackBonus`, `concealedBonus` and `execution` are refused (400). Reported as `special_stance`; the gauge empties as for any special
 
 ### SkillKind
 
@@ -745,7 +757,7 @@ Validation errors return 400 Bad Request with detailed error messages.
 
 ## Error Handling
 
-- **400 Bad Request**: Validation failures from `ValidationPipe`, plus the domain checks the controller converts explicitly — composite power consistency (`validatePowerIdConsistency`), the DAMAGE_REDUCTION rate range, and an alteration stack budget given by halves (`stackId` without its cap, or the reverse), and a field reserved to one skill kind carried by another (`KIND_ONLY_FIELDS`: `extraStacks`, `basis`, `triggeredDebuff` for BLEED_EMPOWERMENT, `hitAlterations` and `endsStance` for CONDITIONAL_ATTACK, `requiresUndamaged` for CONDITIONAL_ATTACK and CONCEALMENT)
+- **400 Bad Request**: Validation failures from `ValidationPipe`, plus the domain checks the controller converts explicitly — composite power consistency (`validatePowerIdConsistency`), the DAMAGE_REDUCTION rate range, and an alteration stack budget given by halves (`stackId` without its cap, or the reverse), and a field reserved to one skill kind carried by another (`KIND_ONLY_FIELDS`: `extraStacks`, `basis`, `triggeredDebuff` for BLEED_EMPOWERMENT, `hitAlterations`, `endsStance` and `execution` for CONDITIONAL_ATTACK, `requiresUndamaged` for CONDITIONAL_ATTACK and CONCEALMENT)
 - **500 Internal Server Error**: Runtime errors (e.g., unknown skill kind, missing buff properties)
 - No custom error handling middleware - uses NestJS defaults
 
