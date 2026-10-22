@@ -622,4 +622,45 @@ describe('OtherSkillDto validation', () => {
         .expect(400);
     });
   });
+
+  describe('endsStance', () => {
+    it('returns 400 on an ally-health-below attack without requiresStance', () => {
+      return request(app.getHttpServer())
+        .post('/fight')
+        .send(
+          basePayload([
+            {
+              kind: 'CONDITIONAL_ATTACK',
+              name: 'Riposte',
+              event: 'ally-health-below',
+              targetCardId: 'card-b',
+              activationCondition: { threshold: 0.5 },
+              damages: [{ type: 'PHYSICAL', rate: 1 }],
+              endsStance: true,
+            },
+          ] as []),
+        )
+        .expect(400);
+    });
+  });
+
+  describe('interval', () => {
+    it('returns 400 on a skill kind without a cooldown', () => {
+      return request(app.getHttpServer())
+        .post('/fight')
+        .send(
+          basePayload([
+            {
+              kind: 'HEALING',
+              name: 'Soin',
+              rate: 0.5,
+              event: 'turn-end',
+              targetingStrategy: 'self',
+              interval: 3,
+            },
+          ] as []),
+        )
+        .expect(400);
+    });
+  });
 });

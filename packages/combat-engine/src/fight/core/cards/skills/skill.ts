@@ -62,6 +62,8 @@ export type AttackSkillResults = BaseSkillResults & {
   lowHealthDebuff?: { name: string; results: DebuffResult[] };
   /** The stance the attack opened on its owner when it fired. */
   stanceStarted?: Stance;
+  /** The stance the attack closed on its owner when it fired. */
+  stanceEnded?: string;
 };
 
 export type TargetingOverrideSkillResults = BaseSkillResults & {
@@ -93,6 +95,8 @@ export type StanceSkillResults = BaseSkillResults & {
 export type ConcealmentSkillResults = BaseSkillResults & {
   skillKind: SkillKind.Concealment;
   concealment: Concealment;
+  /** The stance the concealment opened on its owner. */
+  stanceStarted?: Stance;
 };
 
 export type SkillResults =

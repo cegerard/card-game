@@ -285,7 +285,7 @@ export interface OtherSkill {
   rate?: number;
   /** BLEED_STACK_SCALING uniquement (requis) : plafond du bonus d'Attaque. */
   maxRate?: number;
-  /** STANCE (requis) : posture ouverte sur le porteur quand l'événement arrive ; CONDITIONAL_ATTACK (facultatif) : posture ouverte quand l'attaque part. */
+  /** STANCE (requis) : posture ouverte sur le porteur quand l'événement arrive ; CONDITIONAL_ATTACK (facultatif) : posture ouverte quand l'attaque part ; CONCEALMENT (facultatif) : posture ouverte avec la dissimulation. */
   stanceActivation?: StanceActivation;
   /** Requis avec bleed-stacks-applied (piles posées par le porteur) et le ciblage first-bleeding-enemy (piles portées par la cible). */
   stackThreshold?: number;
@@ -324,6 +324,7 @@ export interface OtherSkill {
   activationCondition?: BuffCondition;
   /** Requis pour CONDITIONAL_ATTACK. */
   damages?: DamageComposition[];
+  /** CONDITIONAL_ATTACK et CONCEALMENT : actions entre deux déclenchements (recharge). */
   interval?: number;
   hits?: number;
   amplifier?: number;
@@ -335,8 +336,10 @@ export interface OtherSkill {
   defensePenetration?: number;
   /** CONDITIONAL_ATTACK : énergie dépensée, seulement quand l'attaque touche quelqu'un. */
   energyCost?: number;
-  /** CONDITIONAL_ATTACK : ne part jamais si le porteur a perdu des points de vie depuis le début de sa dernière action (bouclier et esquive exclus). */
+  /** CONDITIONAL_ATTACK et CONCEALMENT : ne part jamais si le porteur a perdu des points de vie depuis le début de sa dernière action (bouclier et esquive exclus). */
   requiresUndamaged?: boolean;
+  /** CONDITIONAL_ATTACK (avec `requiresStance`) : ferme la posture requise une fois l'attaque partie, pour ne frapper qu'une fois par posture. */
+  endsStance?: boolean;
   /** CONDITIONAL_ATTACK : altérations laissées sur chaque défenseur touché par l'attaque principale (une fois par défenseur, coups esquivés exclus), sans ciblage propre. */
   hitAlterations?: Omit<StatAlteration, 'targetingStrategy' | 'condition'>[];
   /** CONDITIONAL_ATTACK : consomme toutes les piles de Saignement de la cible, `ratePerStack` d'Attaque par pile. */

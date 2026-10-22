@@ -2,12 +2,14 @@ import { DamageReport } from './damage-report';
 import { Step, StepKind } from './step';
 import { BuffReport, DebuffReport } from './alteration-report';
 import { ShieldAppliedReport } from './shield-report';
-import { StanceStartedReport } from './stance-report';
+import { StanceEndedReport, StanceStartedReport } from './stance-report';
 import { ConcealmentEndedReport } from './concealment-report';
 
 export type AttackReport = {
   kind: StepKind.Attack | StepKind.SpecialAttack;
   attack: DamageReport;
+  /** Reported before the attack: what fired next to it and took no strike. */
+  precedingSteps?: Step[];
   statusChanges: Step[];
   survivedSteps: Step[];
   /** Alterations the attack left on the defenders it hit. */
@@ -16,5 +18,6 @@ export type AttackReport = {
   debuffReport?: DebuffReport;
   shieldAppliedReport?: ShieldAppliedReport;
   stanceStartedReport?: StanceStartedReport;
+  stanceEndedReport?: StanceEndedReport;
   concealmentEndedReports: ConcealmentEndedReport[];
 };

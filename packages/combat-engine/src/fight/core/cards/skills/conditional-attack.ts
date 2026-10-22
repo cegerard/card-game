@@ -27,7 +27,12 @@ export class ConditionalAttack implements Skill {
     private readonly stanceActivation?: StanceActivation,
     public readonly requiresUndamaged?: boolean,
     private readonly hitAlterations?: HitAlterations,
-  ) {}
+    private readonly endsStance?: boolean,
+  ) {
+    if (endsStance && !requiredStance) {
+      throw new Error('ConditionalAttack endsStance requires requiredStance');
+    }
+  }
 
   isTriggered(triggerName: string): boolean {
     return (
@@ -71,6 +76,10 @@ export class ConditionalAttack implements Skill {
       name: this.name,
       powerId: this.powerId,
       hitAlterations: hitAlterations && { name: this.name, ...hitAlterations },
+      stanceEnded:
+        primary && this.endsStance && source.endStance(this.requiredStance)
+          ? this.requiredStance
+          : undefined,
       stanceStarted:
         primary && this.stanceActivation
           ? source.activateStance(this.stanceActivation)

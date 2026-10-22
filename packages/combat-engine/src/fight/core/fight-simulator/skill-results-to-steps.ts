@@ -14,7 +14,7 @@ import { Step, StepKind } from './@types/step';
 import { effectResultsToSteps } from './effect-results-to-steps';
 import { EndEventProcessor } from './end-event-processor';
 import { concealmentStartedReport, revealAttacker } from './concealment-steps';
-import { stanceStartedReport } from './stance-steps';
+import { stanceEndedReport, stanceStartedReport } from './stance-steps';
 
 export function skillResultsToSteps(
   card: FightingCard,
@@ -136,6 +136,10 @@ export function skillResultsToSteps(
           steps.push(stanceStartedReport(card, skillResult.stanceStarted));
         }
 
+        if (skillResult.stanceEnded) {
+          steps.push(stanceEndedReport(card, skillResult.stanceEnded));
+        }
+
         if (skillResult.splash) {
           steps.push(
             ...skillResultsToSteps(card, [
@@ -196,6 +200,9 @@ export function skillResultsToSteps(
         break;
       case SkillKind.Concealment:
         steps.push(concealmentStartedReport(card, skillResult.concealment));
+        if (skillResult.stanceStarted) {
+          steps.push(stanceStartedReport(card, skillResult.stanceStarted));
+        }
         break;
       default:
         throw new Error(`Unknown SkillKind: ${(skillResult as any).skillKind}`);
