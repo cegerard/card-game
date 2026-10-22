@@ -86,7 +86,6 @@ import { FirstBleedingEnemyStrategy } from '../core/targeting-card-strategies/fi
 import { BleedDetonation } from '../core/cards/@types/attack/bleed-detonation';
 import { Splash } from '../core/cards/@types/attack/splash';
 import { LowHealthDebuff } from '../core/cards/@types/attack/low-health-debuff';
-import { LastAttackerOfAllyTargetingStrategy } from '../core/targeting-card-strategies/last-attacker-of-ally';
 import { AlliedCardByIdStrategy } from '../core/targeting-card-strategies/allied-card-by-id';
 import { MultipleAttack } from '../core/cards/skills/multiple-attack';
 import { AttackSkill } from '../core/cards/skills/attack-skill';
@@ -826,6 +825,14 @@ export class FightController {
       return new BleedStacksAppliedTrigger(skillData.stackThreshold);
     }
 
+    if (skillData.event === TriggerEvent.ALLY_HEALTH_BELOW) {
+      this.requireAllyHealthBelowFields(skillData);
+      return new AllyHealthBelowThresholdTrigger(
+        skillData.targetCardId,
+        skillData.activationCondition.threshold,
+      );
+    }
+
     if (skillData.event === TriggerEvent.ANY_ALLY_HEALTH_BELOW) {
       return new AnyAllyHealthBelowThresholdTrigger(
         this.requireThreshold(skillData, skillData.event),
@@ -915,46 +922,6 @@ export class FightController {
           powerId: skillData.powerId,
         });
       case SkillKind.CONDITIONAL_ATTACK:
-        if (skillData.event === TriggerEvent.ALLY_HEALTH_BELOW) {
-          this.requireAllyHealthBelowFields(skillData);
-          const ahDamages = skillData.damages.map(
-            (d) => new DamageComposition(d.type, d.rate),
-          );
-          const ahEffects = skillData.effect
-            ? [this.buildEffect(skillData.effect)]
-            : undefined;
-          const ahAttackSkill = new SimpleAttack(
-            skillData.name,
-            ahDamages,
-            new LastAttackerOfAllyTargetingStrategy(skillData.targetCardId),
-            ahEffects,
-            undefined,
-            skillData.defensePenetration,
-          );
-          const ahTrigger = new AllyHealthBelowThresholdTrigger(
-            skillData.targetCardId,
-            skillData.activationCondition.threshold,
-          );
-          return this.asBadRequest(
-            () =>
-              new ConditionalAttack(
-                skillData.name,
-                ahAttackSkill,
-                new AlwaysTrueAttackCondition(),
-                ahTrigger,
-                skillData.powerId,
-                skillData.requiresStance,
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                skillData.requiresUndamaged,
-                this.buildHitAlterations(skillData),
-                skillData.endsStance,
-                this.buildExecution(skillData.execution),
-              ),
-          );
-        }
         if (skillData.bleedDetonation && skillData.hits) {
           throw new BadRequestException(
             'CONDITIONAL_ATTACK bleedDetonation cannot be combined with hits',
@@ -1030,6 +997,8 @@ export class FightController {
               this.buildHitAlterations(skillData),
               skillData.endsStance,
               this.buildExecution(skillData.execution),
+              skillData.activationLimit,
+              skillData.endEvent,
             ),
         );
       case SkillKind.TARGETING_OVERRIDE:
