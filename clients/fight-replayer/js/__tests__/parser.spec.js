@@ -112,6 +112,33 @@ describe('execution', () => {
   });
 });
 
+describe('buff transfer', () => {
+  const steps = {
+    1: {
+      kind: 'buff',
+      name: 'Instinct',
+      source: AEGIS,
+      alterations: [{ target: AEGIS, kind: 'speed', value: 30, remainingTurns: null }],
+      energy: 0,
+    },
+    2: {
+      kind: 'buff_transferred',
+      name: 'Héritage',
+      source: AEGIS,
+      target: BAROS,
+      alterations: [{ kind: 'speed', value: 30, remainingTurns: null }],
+    },
+  };
+
+  it('gives the buffs to the receiver', () => {
+    expect(finalState(steps, 'baros').buffs.map((b) => b.kind)).toEqual(['speed']);
+  });
+
+  it('takes them away from the source', () => {
+    expect(finalState(steps, 'aegis').buffs).toEqual([]);
+  });
+});
+
 describe('regeneration', () => {
   it('raises the card health to the reported value', () => {
     const steps = {

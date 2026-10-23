@@ -17,6 +17,7 @@ export const ICON = {
   buff_removed:      '✖️',
   debuff_removed:    '✖️',
   buff_expired:      '⬇️',
+  buff_transferred:  '🎁',
   debuff_expired:    '⬇️',
   /* Status effects */
   burn:              '🔥',
@@ -86,6 +87,7 @@ export const EVENT_COLOR = {
   buff_removed:      '#94a3b8',
   debuff_removed:    '#94a3b8',
   buff_expired:      '#94a3b8',
+  buff_transferred:  '#facc15',
   debuff_expired:    '#94a3b8',
   status_change:     '#f97316',
   state_effect_burn: '#f97316',

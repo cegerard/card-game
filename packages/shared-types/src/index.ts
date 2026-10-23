@@ -42,7 +42,9 @@ export type SkillKind =
   | 'STANCE'
   | 'BLEED_EMPOWERMENT'
   | 'BLEED_DETONATION'
-  | 'CONCEALMENT';
+  | 'CONCEALMENT'
+  /** Transmet à la première cible tous les buffs d'un type que porte son propriétaire. */
+  | 'BUFF_TRANSFER';
 
 export type BuffType =
   | 'attack'
@@ -108,7 +110,9 @@ export type TargetingStrategy =
   | 'linked-ally'
   | 'most-wounded-ally'
   | 'protected-ally'
-  | 'first-bleeding-enemy';
+  | 'first-bleeding-enemy'
+  /** Allié vivant le plus rapide (buffs compris), lanceur exclu ; se résout même lanceur mort. */
+  | 'fastest-ally';
 
 export type CardSelectorStrategy = 'player-by-player' | 'speed-weighted';
 
@@ -322,7 +326,7 @@ export interface OtherSkill {
   event?: TriggerEvent;
   /** Le skill n'est actif que si son porteur tient cette posture ; requis pour BLEED_EMPOWERMENT. */
   requiresStance?: string;
-  /** Requis pour ALTERATION. */
+  /** Requis pour ALTERATION et BUFF_TRANSFER (type des buffs transmis). */
   buffType?: BuffType;
   /** Requis pour ALTERATION et PROTECTION ; facultatif pour CONCEALMENT (sans durée, jusqu'à la première attaque) et BLEED_EMPOWERMENT (durée des piles posées pendant la posture, entier ≥ 1). */
   duration?: number;

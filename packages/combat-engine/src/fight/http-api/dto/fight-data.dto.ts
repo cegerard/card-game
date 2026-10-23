@@ -85,6 +85,7 @@ export enum SkillKind {
   BLEED_DETONATION = 'BLEED_DETONATION',
   CONCEALMENT = 'CONCEALMENT',
   LOW_HEALTH_TARGET_BONUS = 'LOW_HEALTH_TARGET_BONUS',
+  BUFF_TRANSFER = 'BUFF_TRANSFER',
 }
 
 export enum BuffType {
@@ -148,6 +149,7 @@ export enum TargetingStrategy {
   MOST_WOUNDED_ALLY = 'most-wounded-ally',
   PROTECTED_ALLY = 'protected-ally',
   FIRST_BLEEDING_ENEMY = 'first-bleeding-enemy',
+  FASTEST_ALLY = 'fastest-ally',
 }
 
 export enum CardSelectorStrategy {
@@ -768,8 +770,11 @@ export class OtherSkillDto {
   @Min(1)
   debuffMaxStacks?: number;
 
-  // Required for ALTERATION kind
-  @ValidateIf((o) => o.kind === SkillKind.ALTERATION)
+  // Required for ALTERATION and BUFF_TRANSFER kinds
+  @ValidateIf(
+    (o) =>
+      o.kind === SkillKind.ALTERATION || o.kind === SkillKind.BUFF_TRANSFER,
+  )
   @IsDefined()
   @IsEnum(BuffType)
   buffType?: BuffType;

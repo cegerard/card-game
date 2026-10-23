@@ -80,6 +80,7 @@ import { AllyHealthBelowThresholdTrigger } from '../core/trigger/ally-health-bel
 import { AnyAllyHealthBelowThresholdTrigger } from '../core/trigger/any-ally-health-below-threshold-trigger';
 import { SelfDeathTrigger } from '../core/trigger/self-death';
 import { BleedStacksAppliedTrigger } from '../core/trigger/bleed-stacks-applied';
+import { BuffTransferSkill } from '../core/cards/skills/buff-transfer';
 import { StanceSkill } from '../core/cards/skills/stance';
 import { BleedExplosionSkill } from '../core/cards/skills/bleed-explosion';
 import { FirstBleedingEnemyStrategy } from '../core/targeting-card-strategies/first-bleeding-enemy';
@@ -1121,6 +1122,15 @@ export class FightController {
         } catch (e) {
           throw new BadRequestException((e as Error).message);
         }
+      case SkillKind.BUFF_TRANSFER:
+        return new BuffTransferSkill(
+          skillData.name,
+          this.mapAlterationType(skillData.buffType),
+          this.buildTriggerForSkill(skillData, ownerId),
+          this.buildSkillTargeting(skillData),
+          skillData.requiresStance,
+          skillData.powerId,
+        );
       case SkillKind.BLEED_DETONATION:
         return new BleedExplosionSkill(
           skillData.name,

@@ -1130,6 +1130,18 @@ export class FightingCard {
     return { expiredBuffs, expiredDebuffs };
   }
 
+  /** Removes and returns every buff of that type, to hand it to another card. */
+  public takeBuffs(type: AlterationType): Buff[] {
+    const taken = this.buffs.filter((b) => b.type === type);
+    this.buffs = this.buffs.filter((b) => b.type !== type);
+    return taken;
+  }
+
+  /** Takes buffs as they are: value, remaining duration and stack pile. */
+  public receiveBuffs(buffs: Buff[]): void {
+    this.buffs.push(...buffs.map((buff) => ({ ...buff })));
+  }
+
   public buffStacks(stackId: string): number {
     return stacksIn(this.buffs, stackId);
   }

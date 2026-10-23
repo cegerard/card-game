@@ -1,4 +1,5 @@
 import { ExecutedReport } from './executed-report';
+import { BuffTransferredReport } from './buff-transferred-report';
 import { BuffReport, DebuffReport } from './alteration-report';
 import { AttackStepReport, SpecialAttackStepReport } from './damage-report';
 import { HealingReport } from './healing-report';
@@ -79,6 +80,7 @@ export enum StepKind {
   ConcealmentEnded = 'concealment_ended',
   SpecialStance = 'special_stance',
   Executed = 'executed',
+  BuffTransferred = 'buff_transferred',
 }
 
 export type Step =
@@ -115,4 +117,5 @@ export type Step =
   | ConcealmentStartedReport
   | ConcealmentEndedReport
   | SpecialStanceReport
-  | ExecutedReport;
+  | ExecutedReport
+  | BuffTransferredReport;

@@ -83,6 +83,7 @@ cards/
 │   ├── low-health-target-bonus.ts # LowHealthTargetBonusSkill: attack bonus against a defender under a health ratio, read through FightingCard.attackPower(context, defender); not a Skill implementor
 │   ├── bleed-empowerment.ts # BleedEmpowermentSkill: extra stacks and a higher rate for its owner bleeds while a stance runs; not a Skill implementor
 │   ├── bleed-explosion.ts  # BleedExplosionSkill (BLEED_DETONATION): every bleeding card takes a share of the source attack as real damage and loses its stacks
+│   ├── buff-transfer.ts    # BuffTransferSkill: hands its owner buffs of one type, value, duration and stack pile kept, to the first card its targeting returns
 │   ├── stance.ts           # StanceSkill: opens a stance on its owner when its event fires
 │   ├── concealment.ts      # ConcealmentSkill: hides its owner from every enemy targeting until it attacks (or its duration runs out)
 │   ├── transformation.ts   # TransformationSkill: one-shot health-reactive transformation
@@ -218,6 +219,7 @@ fight-simulator/
     ├── special-stance-report.ts # SpecialStanceReport (special_stance step) + SpecialStanceActionReport (step + follow-ups)
     ├── survived-report.ts  # SurvivedReport: { kind: 'survived', name, card }
     ├── damage-mitigated-report.ts # DamageMitigatedReport: { kind: 'damage_mitigated', name, card }
+    ├── buff-transferred-report.ts # BuffTransferredReport: { kind: 'buff_transferred', name, source, target, alterations }
     ├── executed-report.ts  # ExecutedReport: { kind: 'executed', name, attacker, card }
     └── winner-report.ts    # Victory determination
 ```
@@ -237,6 +239,7 @@ targeting-card-strategies/
 ├── last-attacker-of-ally.ts   # Targets the last card that attacked a specific ally (returns [] if dead)
 ├── most-wounded-ally.ts       # Targets the caster ally in the worst shape below a threshold (excludes the caster)
 ├── protected-ally.ts          # Targets the ally the caster stands in front of; empty outside a protection
+├── fastest-ally.ts            # Targets the caster's fastest living ally, buffs included; resolves with a dead caster
 ├── first-bleeding-enemy.ts    # Targets the first enemy in deck order carrying N bleed stacks
 └── target-and-neighbors.ts    # Targets a card chosen at runtime and its two deck neighbors (living only)
 ```
