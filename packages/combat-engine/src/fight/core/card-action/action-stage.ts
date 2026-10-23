@@ -609,12 +609,41 @@ export class ActionStage {
       lastAttacker: attackerCard,
     };
 
-    return damagedCardPlayer.playableCards.flatMap((caster) =>
-      skillResultsToSteps(caster, [
+    return damagedCardPlayer.playableCards.flatMap((caster) => {
+      const reactions = [
         ...caster.launchSkills(`damage-taken-${damagedCard.id}`, context),
         ...caster.launchSkills(`ally-health-${damagedCard.id}`, context),
-      ]),
+      ];
+      return [
+        ...skillResultsToSteps(caster, reactions),
+        ...this.reactionDeathSteps(caster, reactions),
+      ];
+    });
+  }
+
+  /**
+   * A reactive attack can kill too: its victims run the death cascade.
+   * `skillResultsToSteps()` already reported their `dead` status.
+   */
+  private reactionDeathSteps(
+    caster: FightingCard,
+    reactions: SkillResults[],
+  ): Step[] {
+    const struck = reactions.flatMap((reaction) =>
+      reaction.skillKind === SkillKind.Attack
+        ? [
+            ...reaction.results.map((result) => result.defender),
+            ...(reaction.splash?.results ?? []).map((r) => r.defender),
+            ...(reaction.executions?.results ?? []).map((r) => r.card),
+          ]
+        : [],
     );
+    return [...new Set(struck)]
+      .filter((card) => card.isDead())
+      .flatMap((card) => {
+        this.notifyDeath(card, caster);
+        return this.deathSkillHandler.drainSteps();
+      });
   }
 
   private getFightingContext(card: FightingCard): FightingContext {

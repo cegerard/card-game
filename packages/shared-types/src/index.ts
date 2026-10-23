@@ -368,7 +368,14 @@ export interface OtherSkill {
    */
   targetCardId?: string;
   terminationEvent?: string;
+  /**
+   * Nombre maximal de déclenchements (HEALING, TARGETING_OVERRIDE,
+   * CONDITIONAL_ATTACK). Sur CONDITIONAL_ATTACK, seule une attaque qui a
+   * ciblé quelqu'un en consomme un : `1` sur `ally-health-below` donne un
+   * ultime unique par combat, même si un soin réarme le seuil.
+   */
   activationLimit?: number;
+  /** Évènement émis au dernier déclenchement autorisé par `activationLimit`. */
   endEvent?: string;
   powerId?: string;
   /**

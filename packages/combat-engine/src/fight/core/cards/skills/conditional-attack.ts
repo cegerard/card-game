@@ -30,13 +30,18 @@ export class ConditionalAttack implements Skill {
     private readonly hitAlterations?: HitAlterations,
     private readonly endsStance?: boolean,
     private readonly execution?: Execution,
+    private readonly activationLimit?: number,
+    private readonly endEvent?: string,
   ) {
     if (endsStance && !requiredStance) {
       throw new Error('ConditionalAttack endsStance requires requiredStance');
     }
   }
 
+  private activationCount = 0;
+
   isTriggered(triggerName: string): boolean {
+    if (this.isExhausted()) return false;
     return (
       this.trigger.isTriggered(triggerName) && this.condition.isTriggered()
     );
@@ -63,6 +68,8 @@ export class ConditionalAttack implements Skill {
     }
 
     const [primary] = attackResults.results;
+    // Only an attack that struck somebody spends an activation.
+    if (primary) this.activationCount++;
     // Executed first: a defender finished off gets no alteration.
     const executions = this.execution?.apply(attackResults.results) ?? [];
     // Applied after the hit effects and before the splash: only the main
@@ -79,6 +86,7 @@ export class ConditionalAttack implements Skill {
       results: attackResults.results,
       name: this.name,
       powerId: this.powerId,
+      endEvent: primary && this.isExhausted() ? this.endEvent : undefined,
       executions:
         executions.length > 0
           ? { name: this.name, results: executions }
@@ -117,5 +125,17 @@ export class ConditionalAttack implements Skill {
 
   tick(): void {
     this.condition.tick();
+  }
+
+  lifecycleEndEvent(): string | undefined {
+    if (this.isExhausted()) return undefined;
+    return this.endEvent;
+  }
+
+  private isExhausted(): boolean {
+    return (
+      this.activationLimit !== undefined &&
+      this.activationCount >= this.activationLimit
+    );
   }
 }
