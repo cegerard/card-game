@@ -44,7 +44,7 @@ describe('ActionStage next-action event', () => {
   const play = (): Step[] => {
     const player1 = new Player('p1', [card]);
     const player2 = new Player('p2', [
-      createFightingCard({ agility: 0, health: 100000 }),
+      createFightingCard({ agility: 0, defense: 0, health: 100000 }),
     ]);
     return new ActionStage(
       player1,
