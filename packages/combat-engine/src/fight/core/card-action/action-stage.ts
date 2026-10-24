@@ -88,7 +88,7 @@ export class ActionStage {
       } else {
         const skillsResults = this.launchNextActionSkills(card);
         if (skillsResults) {
-          acc.push(skillsResults);
+          acc.push(...skillsResults);
         } else {
           acc.push(this.launchAttack(card));
         }
@@ -122,13 +122,16 @@ export class ActionStage {
     return report;
   }
 
-  private launchNextActionSkills(card: FightingCard): ActionReport | null {
+  private launchNextActionSkills(card: FightingCard): ActionReport[] | null {
     const context = this.getFightingContext(card);
     const skillResults = card.launchSkills('next-action', context);
     const attackSkill = skillResults.find(
       (r): r is AttackSkillResults => r.skillKind === SkillKind.Attack,
     );
-    if (!attackSkill) return this.diveReport(card, skillResults);
+    if (!attackSkill) {
+      const dive = this.diveReport(card, skillResults);
+      return dive && [dive];
+    }
 
     const result: AttackReport = {
       kind: StepKind.Attack,
@@ -158,8 +161,20 @@ export class ActionStage {
       hitAlterationResults(attackSkill),
     );
     this.attachStanceReports(card, attackSkill, result);
+    if (attackSkill.lowHealthDebuff) {
+      result.debuffReport = this.buildDebuffReport(
+        card,
+        attackSkill.lowHealthDebuff.name,
+        attackSkill.lowHealthDebuff.results,
+      );
+    }
 
-    return result;
+    return [
+      result,
+      ...(attackSkill.splash?.results.length > 0
+        ? [this.reportStrike(card, attackSkill.splash)]
+        : []),
+    ];
   }
 
   private attachStanceReports(

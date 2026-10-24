@@ -10,6 +10,8 @@ import { AlwaysTrueAttackCondition } from '../../cards/@types/attack/conditions/
 import { NextAction } from '../../trigger/next-action';
 import { TargetedFromPosition } from '../../targeting-card-strategies/targeted-from-position';
 import { DeathSkillHandler } from '../../fight-simulator/death-skill-handler';
+import { Splash } from '../../cards/@types/attack/splash';
+import { LowHealthDebuff } from '../../cards/@types/attack/low-health-debuff';
 import { Step, StepKind } from '../../fight-simulator/@types/step';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 
@@ -96,6 +98,47 @@ describe('ActionStage next-action event', () => {
         StepKind.ConcealmentStarted,
         StepKind.Attack,
         StepKind.ConcealmentEnded,
+      ]);
+    });
+  });
+
+  describe('with an attack carrying a splash and a low-health debuff', () => {
+    beforeEach(() => {
+      card = createFightingCard({
+        accuracy: 9999,
+        extraSkills: [
+          new ConditionalAttack(
+            'Frappe',
+            new SimpleAttack(
+              'Frappe',
+              [new DamageComposition(DamageType.PHYSICAL, 1)],
+              new TargetedFromPosition(),
+            ),
+            new AlwaysTrueAttackCondition(),
+            new NextAction(),
+            undefined,
+            undefined,
+            undefined,
+            new Splash('Éclat', [new DamageComposition(DamageType.AIR, 0.5)]),
+            new LowHealthDebuff('Choc', 1, [
+              { type: 'defense', rate: 0.1, duration: 2 },
+            ]),
+          ),
+        ],
+      });
+    });
+
+    it('reports the splash as a second attack right after the first', () => {
+      const attacks = play().filter((s) => s.kind === StepKind.Attack);
+
+      expect(attacks.map((s: any) => s.name)).toEqual(['Frappe', 'Éclat']);
+    });
+
+    it('reports the low-health debuff between the two attacks', () => {
+      expect(kinds(play())).toEqual([
+        StepKind.Attack,
+        StepKind.Debuff,
+        StepKind.Attack,
       ]);
     });
   });
