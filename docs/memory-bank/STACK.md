@@ -120,12 +120,12 @@ argument-hint: N/A
 
 ## Containerization
 
-@packages/combat-engine/Dockerfile
+@Dockerfile
 
 ### Docker
 
 - Multi-stage build
-- Base image: `node:24-alpine`
+- Base image: `node:26-alpine`
 - Production dependencies only in final image
 - Exposes port 3000
 - Entry point: `node dist/main`

@@ -131,52 +131,7 @@ cards/
     └── state/              # Card state types (card-state-frozen.ts, card-state-stunted.ts, card-state-bleeding.ts) + status-category.ts (control vs damage-over-time)
 ```
 
-**Special Skills Pattern**: `SpecialAttack`, `SpecialHealing` and `SpecialStance` (which strikes nobody) implement the `Special` interface with a unified return type `SpecialResult` containing:
-- `name`: Skill name (required)
-- `actionResults`: Array of `AttackResult[]` or `HealingResult[]`
-- `buffResults`: Array of buff applications (can be empty)
-
-This allows special attacks to perform their primary action (damage/healing) while optionally applying buffs to a separate set of targets using independent targeting strategies.
-
-**AlterationDetail Discriminated Union**: `Buff` and `Debuff` are members of `AlterationDetail` discriminated by `polarity: 'buff' | 'debuff'`. `AlterationType` covers attack, defense, agility, accuracy, speed, criticalChance, regeneration and resistance; every stat getter runs through `computeActualStat`, and turn order reads `actualSpeed` in both card selectors. Both share `AlterationDetailBase` (type, value, duration, terminationEvent?, powerId?). Located in `@types/alteration/alteration-detail.ts` (not `@types/buff/`).
-
-**Buff Type**: `Buff` has an optional `terminationEvent?: string` field. A buff with this set persists until the named event fires (instead of, or in addition to, a turn duration).
-
-**Skill Lifecycle Pattern**: The `Skill` interface includes optional `tick?()` and `lifecycleEndEvent?()` methods. Skills with a finite `activationLimit` track their count via `tick()` and emit an `endEvent` string via `lifecycleEndEvent()` when exhausted. `SkillResults` carries an optional `endEvent` field so callers (`TurnManager`, `ActionStage`) can invoke `EndEventProcessor` to remove all matching event-bound buffs.
-
-**Multi-Effect Attack Pattern**: `SimpleAttack` and `MultipleAttack` accept `effects?: AttackEffect[]`. `MultipleAttack` also accepts `comboFinisherEffects?: AttackEffect[]`, evaluated only on the combo finisher hit. Each effect is evaluated independently per hit; effects with `probability` roll a random check. `SpecialAttack` retains a single `effect?: AttackEffect`. `AttackResult.effects` is `EffectResult[]` to carry all applied effects per hit.
-
-**STUNT State Pattern**: `CardStateStunted` (like `CardStateFrozen`) skips action and applies +20% incoming damage via `applyDamageRate()`. No damage tick. Skip condition: `card.frozenLevel > 0 || card.isStunted`. Does not stack — `StuntAttackEffect` returns early if defender is already frozen or stunted.
-
-**BLEED Status (Stacked)**: `CardStateBleeding` is the one status holding several stacks, each with its own remaining turns, damage (fixed from the source attack at application) and optional termination event. `setState()` merges a new bleeding into the running one, so immunity and resistance apply as for any status; `BleedAttackEffect` enforces `maxStacks` before calling it. `FightingCard.bleedStacks()` exposes the count; the tick reports `remainingStacks`.
-
-**Marked Target Bonus**: `SpecialAttack` accepts an optional `MarkedTargetBonus` (damage type + multiplier). The multiplier is applied to the attack power when the defender already carries a mark of that type, evaluated before the special applies its own effects.
-
-**Elemental Mark Mechanic**: `MarkAttackEffect` applies an `ElementalMark` (damage type + rate per stack + stack cap) on hit, reusing the `effects?: AttackEffect[]` pipeline and its optional `probability`. `FightingCard` counts stacks per damage type (`applyMark()`, `markStacks()`, `markAmplifier()`) and `DamageCalculator` amplifies only the matching damage compositions. Marks cap at `maxStacks`, never expire, and each application emits a `mark_applied` step. An optional `triggeredDebuff` is rolled when the mark lands.
-
-**Regeneration Stat**: an optional base stat (default 0). `FightingCard.regenerate()` restores `actualRegeneration` raw health points and `TurnManager` calls it at each turn end, before the status ticks, emitting a `regenerated` step when the heal is non-zero. A `regeneration` buff raises it like any other stat.
-
-**Resistance Stat**: an optional base stat (default 0) driving the chance to refuse an incoming status effect or stat debuff — `resistance / 200`. `FightingCard.resists()` is consulted inside `setState()` and `applyDebuff()`, so every source is covered without threading a parameter and a refusal reuses the existing no-op plumbing (no step emitted). Buffs are never opposed. This is why the constructor takes a `Randomizer`; a card without resistance never rolls.
-
-**Dynamic Ally Targeting**: `AnyAllyHealthBelowThresholdTrigger` (event `any-ally-health-below`) fires when **any** ally crosses a health threshold downward, edge-triggered per ally and skipping its owner, where `AllyHealthBelowThresholdTrigger` watches one ally named up front. `MostWoundedAllyStrategy` (targeting `most-wounded-ally`) resolves the target from the live board: the caster's most wounded living ally below the same threshold, caster excluded, nobody on a healthy team. Together they express a guardian power on a deck the player composes, where no `targetCardId` can be hard-coded.
-
-**PROTECTION Skill Kind (Attack Interception)**: `ProtectionSkill` puts its owner in front of one ally (`FightingCard.protect()`), and the three attack skills ask `Player.protectorOf(target, attacker)` right after targeting (a guardian the attacker cannot see — concealed, unless the attacker holds a `revealsConcealed` stance — protects nobody), swapping the defender **before** anything is rolled — so the dodge, defence, element, shield and damage reduction are the guardian's. The buffer lives on the protector, so its duration ticks on the guardian's turns; a dead guardian protects nobody. `AttackResult.interceptedFor` becomes an `attack_intercepted` step. Emits `protection_started` and `protection_ended`.
-
-**Event-Owned Activation Condition**: `any-ally-health-below` uses `activationCondition.threshold` as its trigger threshold, so the generic ALTERATION path no longer reuses it as the skill own condition — that gated the buff on the *caster* health too, and a healthy guardian never answered its wounded ally.
-
-**Self-Death Pattern**: `SelfDeathTrigger` (event `self-death`) fires on the card that just died — `ally-death` and `enemy-death` only reach survivors. `DeathSkillHandler` runs it as a phase before the survivors answer, so a parting gift lands first. With `ProtectedAllyStrategy` (targeting `protected-ally`) a guardian can leave something to the ally it was covering, conditioned on the protection having been running since an absent protection targets nobody.
-
-**Shield Mechanic**: `FightingCard` has an optional shield buffer (`applyShield(rate, duration)` computes `points = rate * maxHealth`). Damage first absorbs shield points before hitting health (`applyFinalDamage()` returns `{ damageToHealth, shieldAbsorbed }`). Shield breaks when points hit 0 → `shield_broken` step. `TurnManager` decrements shield duration each turn; reaching 0 → `shield_expired` step. Special skills can include a `shieldApplication?: ShieldApplicationDto` to apply shields post-action to a separate set of targets.
-
-**TRANSFORMATION Skill Kind (Reactive)**: `TransformationSkill` is a one-shot health-reactive skill. It transforms its owner for a duration, applying stat alterations, an optional lifesteal (heals a share of max health on every landed hit) and an optional status immunity. `TurnManager` ends it, charging an optional health cost that never kills its owner, and emits `transformation_started` then `transformation_ended` steps.
-
-**SHIELD Skill Kind (Reactive)**: `ShieldSkill` implements `HealthReactiveSkill` (interface: `isHealthReactive: true`, `onHealthChanged(card): boolean`). It is edge-triggered: fires once when `card.healthRatio` crosses the `HealthThresholdCondition` threshold downward, then rearms when health goes back above. `OtherSkillDto.event` is **optional** — SHIELD kind has no trigger event. After each HP change, `triggerReactiveSkills()` (in `reactive-skill-checker.ts`) checks all `HealthReactiveSkill` instances on the damaged card and fires those that return `true` from `onHealthChanged()`.
-
-**Concealment Mechanic**: `FightingCard.isTargetableBy(attacker)` (alive, and not concealed unless the attacker holds a `revealsConcealed` stance) replaces `!isDead()` in every strategy reading the defending player, so a concealed card escapes all enemy targeting, area attacks included, while its allies still reach it. `revealAttacker()` (`fight-simulator/concealment-steps.ts`) ends it when the card attacks somebody — from `ActionStage.handleAttackResult()` and `skillResultsToSteps()` — and `TurnManager` ends a timed one. A `CONCEALMENT` skill on the `fight-start` event (launched by `Fight.start()` right after step 0) opens the fight concealed. Emits `concealment_started` and `concealment_ended`.
-
-**Stance Mechanic**: a stance is a named posture a card holds for a number of turns, opened by a special through `stanceActivation` and optionally listing the `StatusCategory` values its bearer refuses while it runs. A skill carrying `requiredStance` only fires while that stance is held — `FightingCard.launchSkills()` filters the others out. Emits `stance_started` and `stance_ended` steps.
-
-**DAMAGE_REDUCTION Skill Kind**: `DamageReductionSkill` mirrors `SurviveSkill` — no event, no targeting strategy, extracted from `others[]` and stored on `FightingCard`. `applyFinalDamage()` calls `tryMitigate(damage)`, which removes `rate` of the incoming damage, or returns `undefined` when its optional `probability` roll fails. It runs after the freeze/stunt amplifiers and before the shield buffer, so the shield only absorbs the reduced damage. Emits a `damage_mitigated` step; status effect ticks bypass it.
+Mechanics (special results, alterations, stances, bleed, shield, protection, death cascade…) are described once, in [backend/ARCHITECTURE.md](backend/ARCHITECTURE.md).
 
 #### Fight Simulator (`packages/combat-engine/src/fight/core/fight-simulator/`)
 
@@ -292,7 +247,7 @@ Unit tests are colocated with source files in `__tests__/` directories.
 - @packages/combat-engine/.prettierrc - Code formatting (single quotes, trailing commas)
 
 ### Containerization
-- @packages/combat-engine/Dockerfile - Multi-stage Docker build (Node 26 Alpine)
+- @Dockerfile - Multi-stage Docker build (Node 26 Alpine)
 
 ### CI/CD
 - @.github/workflows/heroku.yml - Heroku deployment workflow

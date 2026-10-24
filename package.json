@@ -21,7 +21,8 @@
     "lint": "pnpm lint:all",
     "lint:engine": "pnpm --filter combat-engine lint",
     "lint:all": "pnpm -r lint",
-    "verify": "pnpm check && pnpm build:all && pnpm lint:all && pnpm test:all && pnpm test:e2e:engine",
+    "check:memory-bank": "bash scripts/check-memory-bank-size.sh",
+    "verify": "pnpm check:memory-bank && pnpm check && pnpm build:all && pnpm lint:all && pnpm test:all && pnpm test:e2e:engine",
     "replayer": "npx serve clients/fight-replayer"
   },
   "devDependencies": {

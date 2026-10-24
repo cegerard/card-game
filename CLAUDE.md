@@ -107,6 +107,8 @@ The goal is to provide the ASSISTANT with a comprehensive understanding of the p
 
 All information should be kept up to date and reflect the actual state of the project.
 
+Rule: describe each mechanic once, in `backend/ARCHITECTURE.md`; other files only link to it. `pnpm check:memory-bank` fails above 140k chars of loaded instructions (Claude Code warns at 150k).
+
 ### Project Documentation
 
 - @docs/memory-bank/PROJECT_BRIEF.md - Project vision, domain language, features, and user journeys

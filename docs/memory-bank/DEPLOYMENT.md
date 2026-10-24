@@ -32,7 +32,7 @@ argument-hint: N/A
 
 - **Build Process**:
 
-  - Multi-stage Docker build using Node.js 20 Alpine
+  - Multi-stage Docker build using Node.js 26 Alpine
   - Stage 1: Install all dependencies and build TypeScript → JavaScript
   - Stage 2: Production image with only production dependencies and compiled code
   - Output: Optimized container exposing port 3000
