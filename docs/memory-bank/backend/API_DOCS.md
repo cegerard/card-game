@@ -136,16 +136,9 @@ Simulates a turn-based card battle between two players.
   name: string,
   damages: DamageCompositionDto[],  // Min 1 entry — multi-type damage compositions
   targetingStrategy: TargetingStrategy,
-  effects?: EffectDto[],            // Optional array of status effects (poison, burn, freeze, stunt)
-  bleedStackBonus?: {                     // Optional: boosts one damage type when the target already bleeds
-    minStacks: number,                    // Integer >= 1: bleed stacks the target must carry before the hit
-    damageType: "PHYSICAL" | "FIRE" | "WATER" | "EARTH" | "AIR",  // Only this composition is multiplied
-    multiplier: number                    // Must be > 0, e.g. 1.2 for +20%
-  },  // Same as SpecialDto.bleedStackBonus
-  concealedBonus?: {                      // Optional: boosts one damage type when the attacker strikes from concealment (see CONCEALMENT)
-    damageType: "PHYSICAL" | "FIRE" | "WATER" | "EARTH" | "AIR",  // Only this composition is multiplied
-    multiplier: number                    // Must be > 0, e.g. 1.5 for +50%
-  }   // Same as SpecialDto.concealedBonus
+  effects?: EffectDto[],            // Status effects (poison, burn, freeze, stunt, mark, bleed)
+  bleedStackBonus?: ...,            // Same as SpecialDto.bleedStackBonus
+  concealedBonus?: ...              // Same as SpecialDto.concealedBonus
 }
 ```
 
@@ -154,22 +147,15 @@ Simulates a turn-based card battle between two players.
 ```typescript
 {
   name: string,
-  hits: number,                     // Number of hits
+  hits: number,
   damages: DamageCompositionDto[],  // Min 1 entry
   targetingStrategy: TargetingStrategy,
   amplifier?: number,               // Optional damage amplifier
-  effects?: EffectDto[],            // Optional array of status effects
+  effects?: EffectDto[],
   comboFinisher?: DamageCompositionDto[],  // Optional finisher hit compositions
-  comboFinisherEffects?: EffectDto[],     // Optional effects applied on the finisher hit only
-  bleedStackBonus?: {                     // Optional: boosts one damage type when the target already bleeds
-    minStacks: number,                    // Integer >= 1: bleed stacks the target must carry before the hit
-    damageType: "PHYSICAL" | "FIRE" | "WATER" | "EARTH" | "AIR",  // Only this composition is multiplied
-    multiplier: number                    // Must be > 0, e.g. 1.2 for +20%
-  },  // Same as SpecialDto.bleedStackBonus, finisher included
-  concealedBonus?: {                      // Optional: boosts one damage type when the attacker strikes from concealment (see CONCEALMENT)
-    damageType: "PHYSICAL" | "FIRE" | "WATER" | "EARTH" | "AIR",  // Only this composition is multiplied
-    multiplier: number                    // Must be > 0, e.g. 1.5 for +50%
-  }   // Same as SpecialDto.concealedBonus: every hit of the action, finisher included
+  comboFinisherEffects?: EffectDto[],      // Effects applied on the finisher hit only
+  bleedStackBonus?: ...,            // As SpecialDto.bleedStackBonus, finisher included
+  concealedBonus?: ...              // As SpecialDto.concealedBonus: every hit of the action, finisher included
 }
 ```
 
@@ -287,362 +273,42 @@ Simulates a turn-based card battle between two players.
 }
 ```
 
-**Response** (`FightResult`):
+**Response** (`FightResult`): an object `{ [stepNumber]: Step }`. Step `0` is always `fight_start`; the others are numbered from 1. Types: @packages/combat-engine/src/fight/core/fight-simulator/@types/ (`step.ts` holds the `StepKind` enum).
 
-```typescript
-{
-  [stepNumber: number]: {
-    kind: "fight_start" | "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "debuff_removed" | "buff_expired" | "debuff_expired" | "effect_removed" | "targeting_override" | "targeting_reverted" | "shield_applied" | "shield_broken" | "shield_expired" | "survived" | "damage_mitigated" | "stance_started" | "stance_ended" | "mark_applied" | "regenerated" | "protection_started" | "protection_ended" | "attack_intercepted" | "transformation_started" | "transformation_ended" | "concealment_started" | "concealment_ended" | "special_stance" | "executed" | "buff_transferred" | "fight_end",
-    // Additional properties vary by step kind
-  }
-}
-```
+`CardInfo` identifies a card. `name?` carries the generating skill name on `attack`, `special_attack`, `healing`, `buff`, `debuff`, `targeting_override`, `shield_applied`. `powerId?` appears on `buff`, `debuff`, `healing`, `buff_removed`, `debuff_removed`, `targeting_override`, `targeting_reverted` when the skill belongs to a composite power.
 
-**`fight_start` step** (`FightStartReport`): Always step `0`, so every other step keeps its number from 1. Lists every card of both decks, in deck order (player 1 first), with its maximum health — the only place a card that is never hit reports it.
-```typescript
-{
-  kind: "fight_start",
-  cards: { card: CardInfo, maxHealth: number }[]
-}
-```
-
-**`attack` / `special_attack` step** (`DamageReport`): Emitted when a card attacks.
-```typescript
-{
-  kind: "attack" | "special_attack",
-  name?: string,         // Skill name that triggered the attack
-  attacker: CardInfo,
-  damages: { defender: CardInfo, damage: number, isCritical: boolean, dodge: boolean, remainingHealth: number, shieldAbsorbed?: number, survived?: boolean, survivedSkillName?: string, consumedBleedStacks?: number }[],  // consumedBleedStacks: bleed stacks a bleedDetonation or a BLEED_DETONATION skill consumed
-  energy: number
-}
-```
-
-`shieldAbsorbed` est la part de `damage` mangée par le bouclier au lieu de la
-santé, absente quand aucun bouclier n'était sur le chemin. `damage` reste le
-total infligé, donc un consommateur qui suit le tampon depuis `shield_applied`
-a besoin de ce champ pour le décrémenter : sans lui le bouclier restait affiché
-à sa valeur d'application jusqu'à sa rupture.
-
-**`special_stance` step** (`SpecialStanceReport`): Emitted when a STANCE special is cast. It strikes nobody, so it carries no `damages`; it is followed, in this order and when present, by `stance_started`, `buff`, `debuff`, `shield_applied` and `concealment_started`.
-```typescript
-{
-  kind: "special_stance",
-  name: string,          // Special name
-  caster: CardInfo,
-  energy: number         // Gauge after the cast: 0
-}
-```
-
-**`survived` step** (`SurvivedReport`): Emitted immediately after a fatal blow is intercepted by a SURVIVE skill.
-```typescript
-{
-  kind: "survived",
-  name: string,          // Name of the SURVIVE skill that triggered
-  card: CardInfo         // Card that survived the fatal blow (left at 1 HP)
-}
-```
-
-**`executed` step** (`ExecutedReport`): Emitted right after the attack step for each defender an `execution` finished off under its threshold. Followed by a `survived` step when SURVIVE held the defender at 1 HP; otherwise the `status_change: dead` of the attack follows.
-```typescript
-{
-  kind: "executed",
-  name: string,          // Name of the attack that executed
-  attacker: CardInfo,
-  card: CardInfo         // Executed defender
-}
-```
-
-**`buff_transferred` step** (`BuffTransferredReport`): Emitted when a BUFF_TRANSFER skill hands its owner buffs to an ally. Absent when the owner had no buff of that type or nobody was targeted.
-```typescript
-{
-  kind: "buff_transferred",
-  name: string,          // BUFF_TRANSFER skill name
-  source: CardInfo,      // Card that gave its buffs away
-  target: CardInfo,      // Card that received them
-  alterations: { kind: BuffType, value: number, remainingTurns: number }[]  // As they were on the source; a permanent buff reports null
-}
-```
-
-**`damage_mitigated` step** (`DamageMitigatedReport`): Emitted when a DAMAGE_REDUCTION skill removes a share of an incoming hit, before the shield absorbs the rest.
-```typescript
-{
-  kind: "damage_mitigated",
-  name: string,          // Name of the DAMAGE_REDUCTION skill that triggered
-  card: CardInfo         // Card whose incoming damage was reduced
-}
-```
-
-**`stance_started` step** (`StanceStartedReport`): Emitted when a special or a STANCE skill opens a stance on its caster.
-```typescript
-{
-  kind: "stance_started",
-  name: string,          // Stance name
-  card: CardInfo,        // Caster now holding it
-  remainingTurns: number
-}
-```
-
-**`stance_ended` step** (`StanceEndedReport`): Emitted at turn-end when a stance duration runs out.
-```typescript
-{
-  kind: "stance_ended",
-  name: string,
-  card: CardInfo
-}
-```
-
-**`concealment_started` step** (`ConcealmentStartedReport`): Emitted when a CONCEALMENT skill hides its owner — right after `fight_start` for a skill on `fight-start`.
-```typescript
-{
-  kind: "concealment_started",
-  name: string,            // Concealment skill name
-  card: CardInfo,          // Card now out of the enemy sight
-  remainingTurns?: number  // Absent when it lasts until the card attacks
-}
-```
-
-**`concealment_ended` step** (`ConcealmentEndedReport`): Emitted when a concealment ends — right after the attack step of the card's first attack that targets somebody (`attacked`), or at turn-end when its duration runs out (`expired`).
-```typescript
-{
-  kind: "concealment_ended",
-  name: string,
-  card: CardInfo,
-  reason: "attacked" | "expired"
-}
-```
-
-**`healing` step** (`HealingReport`): Emitted when a card heals.
-```typescript
-{
-  kind: "healing",
-  name?: string,         // Skill name that triggered the healing
-  source: CardInfo,
-  heal: { target: CardInfo, healed: number, remainingHealth: number }[],
-  energy: number,
-  powerId?: string
-}
-```
-
-**`buff` step** (`BuffReport`): Emitted when a buff is applied.
-```typescript
-{
-  kind: "buff",
-  name?: string,         // Skill name that applied the buff
-  source: CardInfo,
-  alterations: { target: CardInfo, kind: BuffType, value: number, remainingTurns: number }[],
-  energy: number,
-  powerId?: string
-}
-```
-
-**`debuff` step** (`DebuffReport`): Emitted when a debuff is applied.
-```typescript
-{
-  kind: "debuff",
-  name?: string,         // Skill name that applied the debuff
-  source: CardInfo,
-  alterations: { target: CardInfo, kind: DebuffType, value: number, remainingTurns: number }[],
-  energy: number,
-  powerId?: string
-}
-```
-
-**`buff_removed` step** (`BuffRemovedReport`): Emitted when a skill's end event fires and removes event-bound buffs.
-```typescript
-{
-  kind: "buff_removed",
-  source: CardInfo,      // Card whose skill emitted the end event
-  eventName: string,     // The end event name that triggered removal
-  removed: { target: CardInfo, kind: BuffType, value: number }[],
-  powerId?: string       // Present if the skill that emitted the end event belongs to a composite power
-}
-```
-
-**`debuff_removed` step** (`DebuffRemovedReport`): Emitted when a skill's end event fires and removes event-bound debuffs.
-```typescript
-{
-  kind: "debuff_removed",
-  source: CardInfo,      // Card whose skill emitted the end event
-  eventName: string,     // The end event name that triggered removal
-  removed: { target: CardInfo, kind: DebuffType, value: number }[],
-  powerId?: string       // Present if the skill that emitted the end event belongs to a composite power
-}
-```
-
-**`buff_expired` step** (`BuffExpiredReport`): Emitted at end of turn when a buff's duration reaches 0.
-```typescript
-{
-  kind: "buff_expired",
-  card: CardInfo,        // Card whose buff expired
-  expired: { kind: BuffType, value: number }[]
-}
-```
-
-**`debuff_expired` step** (`DebuffExpiredReport`): Emitted at end of turn when a debuff's duration reaches 0.
-```typescript
-{
-  kind: "debuff_expired",
-  card: CardInfo,        // Card whose debuff expired
-  expired: { kind: DebuffType, value: number }[]
-}
-```
-
-**`status_change` step** (`StatusChangeReport`): Emitted after an attack when a status effect is applied or the card dies.
-```typescript
-{
-  kind: "status_change",
-  card: CardInfo,
-  status: "dead" | "poison" | "burn" | "freeze" | "stunt" | "bleed",
-  stacks?: number        // bleed only: stack count after this application
-}
-```
-
-**`state_effect` step** (`StateEffectReport`): Emitted at turn-end for each status that ticks.
-```typescript
-{
-  kind: "state_effect",
-  type: "poison" | "burn" | "freeze" | "stunt" | "bleed",
-  card: CardInfo,
-  damage: number,          // bleed: sum of every stack
-  remainingTurns: number,  // bleed: turns left before the last stack expires
-  remainingHealth: number,
-  remainingStacks?: number // bleed only: stacks left after the tick
-}
-```
-
-**`effect_removed` step** (`EffectRemovedReport`): Emitted when an end event fires and removes event-bound status effects (poison, burn, freeze, stunt).
-```typescript
-{
-  kind: "effect_removed",
-  source: CardInfo,      // Card whose skill emitted the end event
-  eventName: string,     // The end event name that triggered removal
-  removed: { target: CardInfo, effectType: string }[]
-}
-```
-
-**`mark_applied` step** (`MarkAppliedReport`): Emitted when an elemental mark is applied on hit. Absent when the target already carries the maximum number of stacks.
-```typescript
-{
-  kind: "mark_applied",
-  card: CardInfo,        // Marked card
-  damageType: string,    // Damage type amplified by the mark
-  stacks: number         // Stack count after this application
-}
-```
-
-**`regenerated` step** (`RegeneratedReport`): Emitted at turn-end when a card restores health through its `regeneration` stat. Absent when the card carries no regeneration or is already at full health.
-```typescript
-{
-  kind: "regenerated",
-  card: CardInfo,
-  healed: number,          // Health points actually restored, clamped at max health
-  remainingHealth: number
-}
-```
-
-**`protection_started` step** (`ProtectionStartedReport`): Emitted when a PROTECTION skill puts its owner in front of an ally.
-```typescript
-{
-  kind: "protection_started",
-  name: string,            // Protection skill name
-  card: CardInfo,          // The guardian
-  protectedCard: CardInfo, // The ally it now covers
-  remainingTurns: number
-}
-```
-
-**`protection_ended` step** (`ProtectionEndedReport`): Emitted at turn-end when a protection's duration runs out.
-```typescript
-{
-  kind: "protection_ended",
-  card: CardInfo,          // The guardian
-  protectedCard: CardInfo  // The ally it no longer covers
-}
-```
-
-**`attack_intercepted` step** (`AttackInterceptedReport`): Emitted for each hit a guardian took in place of the ally it protects. It follows the `attack` step that carries the damage, whose `defender` is the guardian.
-```typescript
-{
-  kind: "attack_intercepted",
-  card: CardInfo,          // The guardian that took the hit
-  protectedCard: CardInfo  // The ally the hit was aimed at
-}
-```
-
-**`transformation_started` step** (`TransformationStartedReport`): Emitted when a TRANSFORMATION skill fires.
-```typescript
-{
-  kind: "transformation_started",
-  name: string,          // Transformation skill name
-  card: CardInfo,        // Transformed card
-  remainingTurns: number // Transformation duration
-}
-```
-
-**`transformation_ended` step** (`TransformationEndedReport`): Emitted at turn-end when a transformation duration runs out, after its health cost is charged.
-```typescript
-{
-  kind: "transformation_ended",
-  name: string,
-  card: CardInfo,
-  healthCost: number,      // Health points paid on exit, 0 when the skill has no cost
-  remainingHealth: number
-}
-```
-
-**`targeting_override` step** (`TargetingOverrideReport`): Emitted when a targeting override skill activates.
-```typescript
-{
-  kind: "targeting_override",
-  name?: string,                   // Skill name that pushed the override
-  source: CardInfo,                // Card whose skill pushed the override
-  previousStrategy: string,        // ID of the strategy before override
-  newStrategy: string,             // ID of the new targeting strategy
-  powerId?: string                 // Present if skill belongs to a composite power
-}
-```
-
-**`targeting_reverted` step** (`TargetingRevertedReport`): Emitted when a targeting override is removed via end event.
-```typescript
-{
-  kind: "targeting_reverted",
-  source: CardInfo,                // Card whose override was reverted
-  eventName: string,               // The end event name that triggered the revert
-  revertedStrategy: string,        // ID of the strategy that was removed
-  restoredStrategy: string,        // ID of the strategy restored
-  powerId?: string                 // Present if triggered by a composite power end event
-}
-```
-
-**`shield_applied` step** (`ShieldAppliedReport`): Emitted when a shield is applied to one or more cards.
-```typescript
-{
-  kind: "shield_applied",
-  name?: string,             // Skill name that applied the shield
-  source: CardInfo,
-  targets: { target: CardInfo, points: number }[]
-}
-```
-
-**`shield_broken` step** (`ShieldBrokenReport`): Emitted when a shield's points are depleted mid-damage.
-```typescript
-{
-  kind: "shield_broken",
-  card: CardInfo
-}
-```
-
-**`shield_expired` step** (`ShieldExpiredReport`): Emitted at turn-end when a shield's duration reaches 0.
-```typescript
-{
-  kind: "shield_expired",
-  card: CardInfo
-}
-```
-
-**Note on `name`**: The `name?` field appears on `attack`, `special_attack`, `healing`, `buff`, `debuff`, `targeting_override`, and `shield_applied` step kinds, carrying the name of the skill that generated the step.
-
-**Note on `powerId`**: The `powerId` field appears on `buff`, `debuff`, `healing`, `buff_removed`, `debuff_removed`, `targeting_override`, and `targeting_reverted` step kinds when the originating skill belongs to a composite power group.
+| `kind` | Fields | Emitted |
+|---|---|---|
+| `fight_start` | `cards: { card, maxHealth }[]` | Step 0; every card of both decks in deck order (player 1 first). The only place a never-hit card reports its max health |
+| `attack`, `special_attack` | `name?`, `attacker`, `damages: { defender, damage, isCritical, dodge, remainingHealth, shieldAbsorbed?, survived?, survivedSkillName?, consumedBleedStacks? }[]`, `energy` | A card attacks. `damage` is the total dealt; `shieldAbsorbed` is the part eaten by the shield (absent without shield) — a consumer tracking the shield from `shield_applied` needs it to decrement the buffer. `consumedBleedStacks`: stacks consumed by a `bleedDetonation` or a `BLEED_DETONATION` skill |
+| `special_stance` | `name`, `caster`, `energy` (0) | A STANCE special is cast; no `damages`. Followed, when present, by `stance_started`, `buff`, `debuff`, `shield_applied`, `concealment_started` |
+| `healing` | `name?`, `source`, `heal: { target, healed, remainingHealth }[]`, `energy`, `powerId?` | A card heals |
+| `buff` / `debuff` | `name?`, `source`, `alterations: { target, kind, value, remainingTurns }[]`, `energy`, `powerId?` | An alteration is applied |
+| `buff_removed` / `debuff_removed` | `source`, `eventName`, `removed: { target, kind, value }[]`, `powerId?` | A skill end event removes event-bound alterations |
+| `buff_expired` / `debuff_expired` | `card`, `expired: { kind, value }[]` | Turn end, duration reached 0 |
+| `buff_transferred` | `name`, `source`, `target`, `alterations: { kind, value, remainingTurns }[]` | BUFF_TRANSFER moved buffs (absent if none or nobody targeted); a permanent buff reports a null duration |
+| `status_change` | `card`, `status: dead \| poison \| burn \| freeze \| stunt \| bleed`, `stacks?` | After an attack: status applied or card dead; `stacks` (bleed) = count after application |
+| `state_effect` | `type`, `card`, `damage`, `remainingTurns`, `remainingHealth`, `remainingStacks?` | Turn end, each ticking status. Bleed: `damage` = sum of stacks, `remainingTurns` = until the last stack expires |
+| `effect_removed` | `source`, `eventName`, `removed: { target, effectType }[]` | End event removes event-bound status effects |
+| `mark_applied` | `card`, `damageType`, `stacks` | Elemental mark applied (absent at the stack cap) |
+| `regenerated` | `card`, `healed`, `remainingHealth` | Turn end, non-zero regeneration heal (clamped at max health) |
+| `shield_applied` | `name?`, `source`, `targets: { target, points }[]` | Shield applied |
+| `shield_broken` / `shield_expired` | `card` | Points depleted mid-damage / duration reached 0 at turn end |
+| `survived` | `name`, `card` | Right after a SURVIVE skill intercepts a fatal blow (card left at 1 HP) |
+| `damage_mitigated` | `name`, `card` | DAMAGE_REDUCTION removed a share of a hit, before the shield absorbs the rest |
+| `executed` | `name`, `attacker`, `card` | Right after the attack step, per defender finished by an `execution`; then `survived` if SURVIVE held 1 HP, else the attack `status_change: dead` |
+| `stance_started` | `name`, `card`, `remainingTurns` | A special or STANCE skill opens a stance |
+| `stance_ended` | `name`, `card` | Turn end, stance duration ran out (or an `endsStance` attack closed it) |
+| `concealment_started` | `name`, `card`, `remainingTurns?` | CONCEALMENT hides its owner (right after `fight_start` on `fight-start`); no `remainingTurns` = until it attacks |
+| `concealment_ended` | `name`, `card`, `reason: attacked \| expired` | Right after the attack step of the first attack that targets somebody, or at turn end |
+| `protection_started` | `name`, `card` (guardian), `protectedCard`, `remainingTurns` | PROTECTION puts the guardian in front of an ally |
+| `protection_ended` | `card`, `protectedCard` | Turn end, protection ran out |
+| `attack_intercepted` | `card` (guardian), `protectedCard` | Per hit the guardian took; follows the `attack` step whose `defender` is the guardian |
+| `transformation_started` | `name`, `card`, `remainingTurns` | TRANSFORMATION fires |
+| `transformation_ended` | `name`, `card`, `healthCost`, `remainingHealth` | Turn end, after the health cost is charged (0 without cost) |
+| `targeting_override` | `name?`, `source`, `previousStrategy`, `newStrategy`, `powerId?` | A targeting override activates |
+| `targeting_reverted` | `source`, `eventName`, `revertedStrategy`, `restoredStrategy`, `powerId?` | An end event removes a targeting override |
+| `fight_end` | winner report | End of the fight |
 
 ## Enums
 
@@ -753,18 +419,7 @@ Used by `stanceActivation.immunities`: `control` (`FREEZE`, `STUNT`) and `damage
 
 ## Validation
 
-All DTOs use `class-validator` decorators:
-
-- `@IsString()`: Validates string fields
-- `@IsNumber()`: Validates numeric fields
-- `@IsEnum()`: Validates enum values
-- `@IsArray()`: Validates array fields
-- `@ArrayMinSize(1)`, `@ArrayMaxSize(5)`: Deck size constraints
-- `@ValidateNested()`: Validates nested objects
-- `@IsOptional()`: Marks optional fields
-- `@IsNotEmpty()`: Ensures non-empty values
-
-Validation errors return 400 Bad Request with detailed error messages.
+DTOs use `class-validator` decorators (`@IsString`, `@IsNumber`, `@IsEnum`, `@ValidateNested`, `@IsOptional`, `@ArrayMinSize(1)` / `@ArrayMaxSize(5)` for decks…). Errors return 400 with detailed messages.
 
 ## Error Handling
 
@@ -774,22 +429,4 @@ Validation errors return 400 Bad Request with detailed error messages.
 
 ## Factory Functions
 
-Three factory functions map DTO enums to domain implementations:
-
-- `buildTargetingStrategy()` in @packages/combat-engine/src/fight/http-api/targeting-strategy-factory.ts - Maps `TargetingStrategy` enum to strategy objects
-- `buildDodgeStrategy()` in @packages/combat-engine/src/fight/http-api/dodge-strategy-factory.ts - Maps `DodgeStrategy` enum to behavior objects
-- `buildTriggerStrategy()` in @packages/combat-engine/src/fight/http-api/trigger-factory.ts - Maps `TriggerEvent` enum to trigger objects
-
-## Response Types
-
-See @packages/combat-engine/src/fight/core/fight-simulator/@types/ for complete type definitions:
-
-- `FightResult`: Map of step numbers to `Step` objects
-- `Step`: Union type with `kind` discriminator
-- `DamageReport`, `HealingReport`, `BuffReport`, `DebuffReport`, `StateEffectReport`, `StatusChangeReport`, `WinnerReport`, `BuffRemovedReport`, `EffectRemovedReport`, `TargetingOverrideReport`, `TargetingRevertedReport`: Specific step types
-
-## Dependencies
-
-- `@nestjs/common` v11 - NestJS core framework
-- `class-validator` v0.14 - DTO validation
-- `class-transformer` v0.5 - DTO transformation
+DTO enums map to domain objects in `packages/combat-engine/src/fight/http-api/`: `buildTargetingStrategy()` (`targeting-strategy-factory.ts`), `buildDodgeStrategy()` (`dodge-strategy-factory.ts`), `buildTriggerStrategy()` (`trigger-factory.ts`).

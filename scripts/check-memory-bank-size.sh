@@ -3,7 +3,7 @@
 # CLAUDE.md imports the memory bank with @path, so sum those files and fail early.
 set -euo pipefail
 
-LIMIT=${MEMORY_BANK_LIMIT:-140000}
+LIMIT=${MEMORY_BANK_LIMIT:-100000}
 
 files=(CLAUDE.md $(grep -oE '@docs/[A-Za-z0-9_./-]+\.md' CLAUDE.md | sed 's/^@//' | sort -u))
 total=$(cat "${files[@]}" | wc -m)
