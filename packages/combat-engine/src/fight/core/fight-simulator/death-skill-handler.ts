@@ -5,8 +5,8 @@ import { StateEffectType } from '../cards/@types/state/state-effect-type';
 import { FightingCard } from '../cards/fighting-card';
 import { CardDeathSubscriber } from './card-death-subscriber';
 import { Step } from './@types/step';
-import { SkillKind, SkillResults } from '../cards/skills/skill';
-import { AttackResult } from '../cards/@types/action-result/attack-result';
+import { SkillResults } from '../cards/skills/skill';
+import { defendersKilled } from './defenders-killed';
 import { EndEventProcessor } from './end-event-processor';
 import { FightingContext } from '../cards/@types/fighting-context';
 import { skillResultsToSteps } from './skill-results-to-steps';
@@ -23,8 +23,9 @@ import { Player } from '../player';
  * 2. **Self-death triggers** – the dead card's own skills listening for
  *    `self-death:<deadCard.id>` fire next, so what it leaves behind lands before
  *    anyone answers its death. It is the only phase running on the fallen card.
- *    A card those skills kill goes through its own cascade right away, through
- *    `notifyKill` so every death subscriber hears of it.
+ *    A card a reactive attack kills in any phase goes through its own cascade
+ *    right away, through `notifyKill` so every death subscriber hears of it,
+ *    credited to the card that fired the attack.
  * 3. **Ally-death triggers** – skills on the dead card's own team that listen for
  *    `ally-death:<deadCard.id>` are fired next.
  * 4. **Enemy-death triggers** – skills on the opposing team that listen for
@@ -110,14 +111,13 @@ export class DeathSkillHandler implements CardDeathSubscriber {
     // The fallen card speaks first: what it leaves behind must land before the
     // survivors react to its death, so an ally's answer builds on the legacy
     // rather than racing it.
-    const lastWords = this.fireSkillsOnCards(
+    this.fireSkillsOnCards(
       [deadCard],
       `${SELF_DEATH_PREFIX}:${deadCard.id}`,
       ownerPlayer,
       opponentPlayer,
       killerCard,
     );
-    killedBy(lastWords).forEach((killed) => this.notifyKill(killed, deadCard));
 
     const allyTriggerId = `ally-death:${deadCard.id}`;
     this.fireSkillsOnCards(
@@ -152,14 +152,13 @@ export class DeathSkillHandler implements CardDeathSubscriber {
       !killerCard.isDead() &&
       opponentPlayer.ownCard(killerCard)
     ) {
-      const reward = this.fireSkillsOnCards(
+      this.fireSkillsOnCards(
         [killerCard],
         `${ENEMY_KILLED}:${deadCard.healthRatioBeforeLastDamage}`,
         opponentPlayer,
         ownerPlayer,
         killerCard,
       );
-      killedBy(reward).forEach((killed) => this.notifyKill(killed, killerCard));
     }
   }
 
@@ -180,8 +179,8 @@ export class DeathSkillHandler implements CardDeathSubscriber {
     sourcePlayer: Player,
     opponentPlayer: Player,
     killerCard?: FightingCard,
-  ): SkillResults[] {
-    return cards.flatMap((card) => {
+  ): void {
+    cards.forEach((card) => {
       const context: FightingContext = {
         sourcePlayer,
         opponentPlayer,
@@ -190,7 +189,11 @@ export class DeathSkillHandler implements CardDeathSubscriber {
 
       const skillResults = card.launchSkills(triggerId, context);
       this.convertSkillResultsToSteps(card, skillResults);
-      return skillResults;
+      // A reactive attack can kill too: its victims run their own cascade,
+      // credited to the card that fired it.
+      defendersKilled(skillResults).forEach((killed) =>
+        this.notifyKill(killed, card),
+      );
     });
   }
 
@@ -202,12 +205,4 @@ export class DeathSkillHandler implements CardDeathSubscriber {
       ...skillResultsToSteps(card, skillResults, this.endEventProcessor),
     );
   }
-}
-
-function killedBy(skillResults: SkillResults[]): FightingCard[] {
-  return skillResults
-    .filter((r) => r.skillKind === SkillKind.Attack)
-    .flatMap((r) => r.results as AttackResult[])
-    .map((r) => r.defender)
-    .filter((card) => card.isDead());
 }

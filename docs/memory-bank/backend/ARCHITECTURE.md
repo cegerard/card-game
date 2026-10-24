@@ -115,7 +115,7 @@ Phases on each death, in order: end events of lifecycle-limited skills → `self
 - `notifyDeath(player, card, cause?)`: `cause` is the `StateEffectType` of a lethal tick (bleed credited as soon as it ticked); a status tick has no killer. A card already notified is ignored.
 - Steps accumulate and callers drain them with `drainSteps()` right after each death, which keeps ordering inside the action phase. `ActionStage` also takes `EndEventProcessor` (optional last parameter).
 - `enemy-killed` ratio is `healthRatioBeforeLastDamage` (set at the start of `applyFinalDamage()`/`addRealDamage()`); the trigger fires only strictly under its optional threshold.
-- `notifyKill`: defenders killed by the self-death phase (Legacy Bleed Explosion) start their own cascade through the whole event broker.
+- **Reactive kills**: `defendersKilled()` (main strike, splash, executions) lists the cards a reactive attack left dead. Every path that launches skills runs their cascade with the firing card as killer: each `DeathSkillHandler` phase (through `notifyKill`, the whole event broker), `ActionStage` reactions, `survived` and `bleed-stacks-applied` skills, `turn-end` skills (`TurnManager`) and `fight-start` skills (`Fight`).
 - A dead card keeps its stances and buffs until turn end, so `self-death` skills with `requiresStance` still run. `ProtectedAllyStrategy` and `FastestAllyStrategy` deliberately do not check the caster is alive.
 
 ## Reactive Events (`ActionStage`)

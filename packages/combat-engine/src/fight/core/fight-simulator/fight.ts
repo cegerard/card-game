@@ -8,6 +8,7 @@ import { TurnManager } from './turn-manager';
 import { FightSimulator } from './@types/fight-simulator';
 import { DeathSkillHandler } from './death-skill-handler';
 import { EndEventProcessor } from './end-event-processor';
+import { defendersKilled } from './defenders-killed';
 import { skillResultsToSteps } from './skill-results-to-steps';
 import { FIGHT_START } from '../trigger/fight-start';
 
@@ -20,6 +21,7 @@ export class Fight implements FightSimulator {
   private actionManager: ActionStage;
   private turnManager: TurnManager;
   private cardSelector: CardSelector;
+  private deathSkillHandler: DeathSkillHandler;
   private eventBroker: {
     onCardDeath: CardDeathSubscriber[];
   };
@@ -27,7 +29,7 @@ export class Fight implements FightSimulator {
   constructor(player1: Player, player2: Player, cardSelector: CardSelector) {
     const endEventProcessor = new EndEventProcessor(player1, player2);
     this.eventBroker = { onCardDeath: [] };
-    const deathSkillHandler = new DeathSkillHandler(
+    this.deathSkillHandler = new DeathSkillHandler(
       player1,
       player2,
       endEventProcessor,
@@ -36,7 +38,7 @@ export class Fight implements FightSimulator {
           subscriber.notifyDeath(card, killer),
         ),
     );
-    this.eventBroker.onCardDeath.push(cardSelector, deathSkillHandler);
+    this.eventBroker.onCardDeath.push(cardSelector, this.deathSkillHandler);
 
     this.player1 = player1;
     this.player2 = player2;
@@ -44,14 +46,14 @@ export class Fight implements FightSimulator {
       player1,
       player2,
       this.eventBroker,
-      deathSkillHandler,
+      this.deathSkillHandler,
       endEventProcessor,
     );
     this.turnManager = new TurnManager(
       player1,
       player2,
       this.eventBroker,
-      deathSkillHandler,
+      this.deathSkillHandler,
       endEventProcessor,
     );
     this.cardSelector = cardSelector;
@@ -92,12 +94,22 @@ export class Fight implements FightSimulator {
       [this.player1, this.player2],
       [this.player2, this.player1],
     ].flatMap(([sourcePlayer, opponentPlayer]) =>
-      sourcePlayer.allCards.flatMap((card) =>
-        skillResultsToSteps(
-          card,
-          card.launchSkills(FIGHT_START, { sourcePlayer, opponentPlayer }),
-        ),
-      ),
+      sourcePlayer.allCards.flatMap((card) => {
+        const results = card.launchSkills(FIGHT_START, {
+          sourcePlayer,
+          opponentPlayer,
+        });
+
+        return [
+          ...skillResultsToSteps(card, results),
+          ...defendersKilled(results).flatMap((killed) => {
+            this.eventBroker.onCardDeath.forEach((subscriber) =>
+              subscriber.notifyDeath(killed, card),
+            );
+            return this.deathSkillHandler.drainSteps();
+          }),
+        ];
+      }),
     );
   }
 
