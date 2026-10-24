@@ -129,7 +129,7 @@ Unit tests next to the source in `__tests__/`; e2e in `packages/combat-engine/te
 
 ### Configuration
 
-`packages/combat-engine/`: `package.json`, `tsconfig.json`, `tsconfig.build.json`, `nest-cli.json`, `eslint.config.js`, `.prettierrc`. Root: `Dockerfile`, `.github/workflows/`, `AGENTS.md` (cross-agent guidelines), `.devcontainer/devcontainer.json`, `.vscode/settings.json`, `.claude/` (commands, templates).
+`packages/combat-engine/`: `package.json`, `tsconfig.json`, `tsconfig.build.json`, `nest-cli.json`, `eslint.config.js`, `.prettierrc`. Root: `Dockerfile`, `.github/workflows/`, `AGENTS.md` (single agent entry point, `CLAUDE.md` is a symlink to it), `.devcontainer/devcontainer.json`, `.vscode/settings.json`, `.claude/` (commands, templates).
 
 ## Gasha Client (`clients/gasha/src/`)
 
