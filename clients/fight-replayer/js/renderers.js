@@ -641,7 +641,7 @@ export function describeEvent(ev, teamBName) {
       const bossWins = ev.winner && ev.winner === teamBName;
       return {
         icon: ev.winner && !bossWins ? ICON.fight_end : ICON.fight_end_loss,
-        text: `FIGHT END — ${ev.winner ? `Winner: ${ev.winner}` : 'Draw'}`,
+        text: `FIGHT END — ${ev.winner ? `${bossWins ? 'Defeat' : 'Victory'} — Winner: ${ev.winner}` : 'Draw'}`,
         color: bossWins ? '#f43f5e' : '#22c55e',
       };
     }

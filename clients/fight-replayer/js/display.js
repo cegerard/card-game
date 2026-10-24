@@ -34,7 +34,7 @@ export function updateDisplay() {
       const col =
         winner === teamBName ? 'var(--col-end-loss)' : 'var(--col-end-win)';
       extra = ` <span style="color:${col};margin-left:12px">
-        ${winner === teamBName ? '💀' : '🏆'} ${esc(winner)} wins
+        ${winner === teamBName ? '💀 Defeat' : '🏆 Victory'} — ${esc(winner)} wins
       </span>`;
     }
     counter.innerHTML = `${step} / ${total}${extra}`;
