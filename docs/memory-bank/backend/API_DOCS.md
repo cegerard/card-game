@@ -217,7 +217,7 @@ Simulates a turn-based card battle between two players.
   // CONDITIONAL_ATTACK fields:
   damages?: DamageCompositionDto[],  // Required unless bleedDetonation is set
   hits?: number,                // Not allowed with bleedDetonation (400)
-  interval?: number,            // Turns between two activations (integer >= 1); omit for a skill whose cadence is driven by its event (ally-health-below, damage-taken, turn-start). CONCEALMENT accepts it too, as the cooldown of a dive
+  interval?: number,            // CONDITIONAL_ATTACK and CONCEALMENT only (400 on any other kind). Turns between two activations (integer >= 1); omit for a skill whose cadence is driven by its event (ally-health-below, damage-taken, turn-start). CONCEALMENT accepts it too, as the cooldown of a dive
   amplifier?: number,
   effect?: EffectDto,
   comboFinisher?: DamageCompositionDto[],
@@ -770,7 +770,7 @@ Validation errors return 400 Bad Request with detailed error messages.
 
 ## Error Handling
 
-- **400 Bad Request**: Validation failures from `ValidationPipe`, plus the domain checks the controller converts explicitly — composite power consistency (`validatePowerIdConsistency`), the DAMAGE_REDUCTION rate range, and an alteration stack budget given by halves (`stackId` without its cap, or the reverse), and a field reserved to one skill kind carried by another (`KIND_ONLY_FIELDS`: `extraStacks`, `basis`, `triggeredDebuff` for BLEED_EMPOWERMENT, `hitAlterations`, `endsStance` and `execution` for CONDITIONAL_ATTACK, `requiresUndamaged` for CONDITIONAL_ATTACK and CONCEALMENT)
+- **400 Bad Request**: Validation failures from `ValidationPipe`, plus the domain checks the controller converts explicitly — composite power consistency (`validatePowerIdConsistency`), the DAMAGE_REDUCTION rate range, and an alteration stack budget given by halves (`stackId` without its cap, or the reverse), and a field reserved to one skill kind carried by another (`KIND_ONLY_FIELDS`: `extraStacks`, `basis`, `triggeredDebuff` for BLEED_EMPOWERMENT, `hitAlterations`, `endsStance` and `execution` for CONDITIONAL_ATTACK, `requiresUndamaged` and `interval` for CONDITIONAL_ATTACK and CONCEALMENT — an `interval` on any other kind used to be ignored silently and is now refused)
 - **500 Internal Server Error**: Runtime errors (e.g., unknown skill kind, missing buff properties)
 - No custom error handling middleware - uses NestJS defaults
 
