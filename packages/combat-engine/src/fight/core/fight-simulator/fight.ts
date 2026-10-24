@@ -45,6 +45,7 @@ export class Fight implements FightSimulator {
       player2,
       this.eventBroker,
       deathSkillHandler,
+      endEventProcessor,
     );
     this.turnManager = new TurnManager(
       player1,
