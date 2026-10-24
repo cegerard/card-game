@@ -1,109 +1,20 @@
----
-name: deployment
-description: Infrastructure and deployment documentation
-argument-hint: N/A
----
-
 # Deployment
 
-## CI/CD Pipeline
+## CI/CD
 
-### Heroku Deployment
+- **CI** (`.github/workflows/node.js.yml`, push and PR on `main`): memory-bank size check, install, `pnpm build:all`, `pnpm lint:all`, `pnpm test:all`, `pnpm test:e2e:engine`
+- **Deploy** (`.github/workflows/heroku.yml`, push on `main`): `akhileshns/heroku-deploy` builds the root `Dockerfile`, pushes it to the Heroku Container Registry and releases it
 
-- **Steps**:
+## Container
 
-  1. Push to `main` branch triggers GitHub Actions workflow
-  2. Checkout repository code
-  3. Build Docker container using Dockerfile
-  4. Push container to Heroku Container Registry
-  5. Release container on Heroku
+Multi-stage `Dockerfile` at the repo root:
 
-- **Test Automation**:
+1. Build stage (`node:26-alpine`): install the combat-engine workspace dependencies, build TypeScript → `packages/combat-engine/dist`
+2. Production stage (`node:26-alpine`): production dependencies and compiled `dist/` only, `EXPOSE 3000`, `node packages/combat-engine/dist/main`
 
-  - Unit tests: Run manually with `npm run test`
-  - Integration tests: Not configured in CI/CD
-  - E2E tests: Run manually with `npm run test:e2e`
+## Configuration
 
-- **Deployment Triggers**:
-  - Manual deployments: Push to `main` branch
-  - Automated deployments: Every push to `main` branch triggers deployment
-
-## Deployment Process
-
-- **Build Process**:
-
-  - Multi-stage Docker build using Node.js 20 Alpine
-  - Stage 1: Install all dependencies and build TypeScript → JavaScript
-  - Stage 2: Production image with only production dependencies and compiled code
-  - Output: Optimized container exposing port 3000
-
-- **Application Startup**:
-  - Production: `node dist/main` runs compiled application
-  - Port: Uses `process.env.PORT` or defaults to 3000
-
-# Infrastructure
-
-## Project Structure
-
-```plaintext
-card-game/                             # Mono-repo root
-├── packages/combat-engine/
-│   ├── dist/                          # Compiled JavaScript output (Docker production)
-│   ├── src/                           # TypeScript source code
-│   │   └── main.ts                    # Application entry point
-│   ├── test/                          # End-to-end tests
-│   └── Dockerfile                     # Multi-stage production build
-├── .github/workflows/                 # CI/CD configuration
-│   └── heroku.yml                     # Heroku deployment workflow
-└── package.json                       # Root workspace scripts
-```
-
-## Environment Variables
-
-### Environment Files
-
-- No environment files in repository
-- Environment variables configured in Heroku dashboard
-
-### Required Environment Variables
-
-- `PORT`: Application port (defaults to 3000 if not set)
-- `HEROKU_EMAIL`: Heroku account email (GitHub secret)
-- `HEROKU_API_KEY`: Heroku API key (GitHub secret)
-- `HEROKU_APP_NAME`: Heroku application name (GitHub secret)
-
-## URLs
-
-- **Development**:
-
-  - URL: http://localhost:3000
-  - Purpose: Local development and testing
-
-- **Production**:
-  - URL: Configured via Heroku app name
-  - Platform: Heroku Container Registry
-  - Deployment: Automated via GitHub Actions
-
-## Containerization
-
-```mermaid
-graph TB
-    subgraph "Build Stage"
-        A[node:26-alpine] --> B[Install all dependencies]
-        B --> C[Copy source code]
-        C --> D[npm run build]
-        D --> E[TypeScript → JavaScript in /app/dist]
-    end
-
-    subgraph "Production Stage"
-        F[node:26-alpine] --> G[Install production deps only]
-        E --> H[Copy dist/ from builder]
-        G --> I[Final Image]
-        H --> I
-        I --> J[EXPOSE 3000]
-        J --> K[CMD: node dist/main]
-    end
-
-    K --> L[Heroku Container Registry]
-    L --> M[Deployed App]
-```
+- `PORT`: application port, default 3000
+- GitHub secrets: `HEROKU_EMAIL`, `HEROKU_API_KEY`, `HEROKU_APP_NAME`
+- No environment file in the repository; runtime variables are set in the Heroku dashboard
+- Development URL: http://localhost:3000; production URL depends on the Heroku app name

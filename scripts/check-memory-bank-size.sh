@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Claude Code warns when the instruction files it loads exceed 150k chars.
+# CLAUDE.md (a symlink to AGENTS.md) imports the memory bank with @path, so sum those files and fail early.
+set -euo pipefail
+
+LIMIT=${MEMORY_BANK_LIMIT:-100000}
+
+if [ "$(readlink CLAUDE.md)" != "AGENTS.md" ]; then
+  echo "CLAUDE.md must be a symlink to AGENTS.md (single entry point): ln -sf AGENTS.md CLAUDE.md" >&2
+  exit 1
+fi
+
+files=(CLAUDE.md $(grep -oE '@docs/[A-Za-z0-9_./-]+\.md' CLAUDE.md | sed 's/^@//' | sort -u))
+total=$(cat "${files[@]}" | wc -m)
+
+echo "Instruction files: ${#files[@]}, ${total} chars (limit ${LIMIT})"
+if [ "$total" -gt "$LIMIT" ]; then
+  echo "Memory bank too large: condense the biggest files (see ARCHITECTURE.md, API_DOCS.md)" >&2
+  exit 1
+fi

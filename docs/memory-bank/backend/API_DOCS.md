@@ -136,16 +136,9 @@ Simulates a turn-based card battle between two players.
   name: string,
   damages: DamageCompositionDto[],  // Min 1 entry — multi-type damage compositions
   targetingStrategy: TargetingStrategy,
-  effects?: EffectDto[],            // Optional array of status effects (poison, burn, freeze, stunt)
-  bleedStackBonus?: {                     // Optional: boosts one damage type when the target already bleeds
-    minStacks: number,                    // Integer >= 1: bleed stacks the target must carry before the hit
-    damageType: "PHYSICAL" | "FIRE" | "WATER" | "EARTH" | "AIR",  // Only this composition is multiplied
-    multiplier: number                    // Must be > 0, e.g. 1.2 for +20%
-  },  // Same as SpecialDto.bleedStackBonus
-  concealedBonus?: {                      // Optional: boosts one damage type when the attacker strikes from concealment (see CONCEALMENT)
-    damageType: "PHYSICAL" | "FIRE" | "WATER" | "EARTH" | "AIR",  // Only this composition is multiplied
-    multiplier: number                    // Must be > 0, e.g. 1.5 for +50%
-  }   // Same as SpecialDto.concealedBonus
+  effects?: EffectDto[],            // Status effects (poison, burn, freeze, stunt, mark, bleed)
+  bleedStackBonus?: ...,            // Same as SpecialDto.bleedStackBonus
+  concealedBonus?: ...              // Same as SpecialDto.concealedBonus
 }
 ```
 
@@ -154,22 +147,15 @@ Simulates a turn-based card battle between two players.
 ```typescript
 {
   name: string,
-  hits: number,                     // Number of hits
+  hits: number,
   damages: DamageCompositionDto[],  // Min 1 entry
   targetingStrategy: TargetingStrategy,
   amplifier?: number,               // Optional damage amplifier
-  effects?: EffectDto[],            // Optional array of status effects
+  effects?: EffectDto[],
   comboFinisher?: DamageCompositionDto[],  // Optional finisher hit compositions
-  comboFinisherEffects?: EffectDto[],     // Optional effects applied on the finisher hit only
-  bleedStackBonus?: {                     // Optional: boosts one damage type when the target already bleeds
-    minStacks: number,                    // Integer >= 1: bleed stacks the target must carry before the hit
-    damageType: "PHYSICAL" | "FIRE" | "WATER" | "EARTH" | "AIR",  // Only this composition is multiplied
-    multiplier: number                    // Must be > 0, e.g. 1.2 for +20%
-  },  // Same as SpecialDto.bleedStackBonus, finisher included
-  concealedBonus?: {                      // Optional: boosts one damage type when the attacker strikes from concealment (see CONCEALMENT)
-    damageType: "PHYSICAL" | "FIRE" | "WATER" | "EARTH" | "AIR",  // Only this composition is multiplied
-    multiplier: number                    // Must be > 0, e.g. 1.5 for +50%
-  }   // Same as SpecialDto.concealedBonus: every hit of the action, finisher included
+  comboFinisherEffects?: EffectDto[],      // Effects applied on the finisher hit only
+  bleedStackBonus?: ...,            // As SpecialDto.bleedStackBonus, finisher included
+  concealedBonus?: ...              // As SpecialDto.concealedBonus: every hit of the action, finisher included
 }
 ```
 
@@ -287,362 +273,42 @@ Simulates a turn-based card battle between two players.
 }
 ```
 
-**Response** (`FightResult`):
+**Response** (`FightResult`): an object `{ [stepNumber]: Step }`. Step `0` is always `fight_start`; the others are numbered from 1. Types: @packages/combat-engine/src/fight/core/fight-simulator/@types/ (`step.ts` holds the `StepKind` enum).
 
-```typescript
-{
-  [stepNumber: number]: {
-    kind: "fight_start" | "attack" | "special_attack" | "healing" | "status_change" | "state_effect" | "buff" | "debuff" | "buff_removed" | "debuff_removed" | "buff_expired" | "debuff_expired" | "effect_removed" | "targeting_override" | "targeting_reverted" | "shield_applied" | "shield_broken" | "shield_expired" | "survived" | "damage_mitigated" | "stance_started" | "stance_ended" | "mark_applied" | "regenerated" | "protection_started" | "protection_ended" | "attack_intercepted" | "transformation_started" | "transformation_ended" | "concealment_started" | "concealment_ended" | "special_stance" | "executed" | "buff_transferred" | "fight_end",
-    // Additional properties vary by step kind
-  }
-}
-```
+`CardInfo` identifies a card. `name?` carries the generating skill name on `attack`, `special_attack`, `healing`, `buff`, `debuff`, `targeting_override`, `shield_applied`. `powerId?` appears on `buff`, `debuff`, `healing`, `buff_removed`, `debuff_removed`, `targeting_override`, `targeting_reverted` when the skill belongs to a composite power.
 
-**`fight_start` step** (`FightStartReport`): Always step `0`, so every other step keeps its number from 1. Lists every card of both decks, in deck order (player 1 first), with its maximum health — the only place a card that is never hit reports it.
-```typescript
-{
-  kind: "fight_start",
-  cards: { card: CardInfo, maxHealth: number }[]
-}
-```
-
-**`attack` / `special_attack` step** (`DamageReport`): Emitted when a card attacks.
-```typescript
-{
-  kind: "attack" | "special_attack",
-  name?: string,         // Skill name that triggered the attack
-  attacker: CardInfo,
-  damages: { defender: CardInfo, damage: number, isCritical: boolean, dodge: boolean, remainingHealth: number, shieldAbsorbed?: number, survived?: boolean, survivedSkillName?: string, consumedBleedStacks?: number }[],  // consumedBleedStacks: bleed stacks a bleedDetonation or a BLEED_DETONATION skill consumed
-  energy: number
-}
-```
-
-`shieldAbsorbed` est la part de `damage` mangée par le bouclier au lieu de la
-santé, absente quand aucun bouclier n'était sur le chemin. `damage` reste le
-total infligé, donc un consommateur qui suit le tampon depuis `shield_applied`
-a besoin de ce champ pour le décrémenter : sans lui le bouclier restait affiché
-à sa valeur d'application jusqu'à sa rupture.
-
-**`special_stance` step** (`SpecialStanceReport`): Emitted when a STANCE special is cast. It strikes nobody, so it carries no `damages`; it is followed, in this order and when present, by `stance_started`, `buff`, `debuff`, `shield_applied` and `concealment_started`.
-```typescript
-{
-  kind: "special_stance",
-  name: string,          // Special name
-  caster: CardInfo,
-  energy: number         // Gauge after the cast: 0
-}
-```
-
-**`survived` step** (`SurvivedReport`): Emitted immediately after a fatal blow is intercepted by a SURVIVE skill.
-```typescript
-{
-  kind: "survived",
-  name: string,          // Name of the SURVIVE skill that triggered
-  card: CardInfo         // Card that survived the fatal blow (left at 1 HP)
-}
-```
-
-**`executed` step** (`ExecutedReport`): Emitted right after the attack step for each defender an `execution` finished off under its threshold. Followed by a `survived` step when SURVIVE held the defender at 1 HP; otherwise the `status_change: dead` of the attack follows.
-```typescript
-{
-  kind: "executed",
-  name: string,          // Name of the attack that executed
-  attacker: CardInfo,
-  card: CardInfo         // Executed defender
-}
-```
-
-**`buff_transferred` step** (`BuffTransferredReport`): Emitted when a BUFF_TRANSFER skill hands its owner buffs to an ally. Absent when the owner had no buff of that type or nobody was targeted.
-```typescript
-{
-  kind: "buff_transferred",
-  name: string,          // BUFF_TRANSFER skill name
-  source: CardInfo,      // Card that gave its buffs away
-  target: CardInfo,      // Card that received them
-  alterations: { kind: BuffType, value: number, remainingTurns: number }[]  // As they were on the source; a permanent buff reports null
-}
-```
-
-**`damage_mitigated` step** (`DamageMitigatedReport`): Emitted when a DAMAGE_REDUCTION skill removes a share of an incoming hit, before the shield absorbs the rest.
-```typescript
-{
-  kind: "damage_mitigated",
-  name: string,          // Name of the DAMAGE_REDUCTION skill that triggered
-  card: CardInfo         // Card whose incoming damage was reduced
-}
-```
-
-**`stance_started` step** (`StanceStartedReport`): Emitted when a special or a STANCE skill opens a stance on its caster.
-```typescript
-{
-  kind: "stance_started",
-  name: string,          // Stance name
-  card: CardInfo,        // Caster now holding it
-  remainingTurns: number
-}
-```
-
-**`stance_ended` step** (`StanceEndedReport`): Emitted at turn-end when a stance duration runs out.
-```typescript
-{
-  kind: "stance_ended",
-  name: string,
-  card: CardInfo
-}
-```
-
-**`concealment_started` step** (`ConcealmentStartedReport`): Emitted when a CONCEALMENT skill hides its owner — right after `fight_start` for a skill on `fight-start`.
-```typescript
-{
-  kind: "concealment_started",
-  name: string,            // Concealment skill name
-  card: CardInfo,          // Card now out of the enemy sight
-  remainingTurns?: number  // Absent when it lasts until the card attacks
-}
-```
-
-**`concealment_ended` step** (`ConcealmentEndedReport`): Emitted when a concealment ends — right after the attack step of the card's first attack that targets somebody (`attacked`), or at turn-end when its duration runs out (`expired`).
-```typescript
-{
-  kind: "concealment_ended",
-  name: string,
-  card: CardInfo,
-  reason: "attacked" | "expired"
-}
-```
-
-**`healing` step** (`HealingReport`): Emitted when a card heals.
-```typescript
-{
-  kind: "healing",
-  name?: string,         // Skill name that triggered the healing
-  source: CardInfo,
-  heal: { target: CardInfo, healed: number, remainingHealth: number }[],
-  energy: number,
-  powerId?: string
-}
-```
-
-**`buff` step** (`BuffReport`): Emitted when a buff is applied.
-```typescript
-{
-  kind: "buff",
-  name?: string,         // Skill name that applied the buff
-  source: CardInfo,
-  alterations: { target: CardInfo, kind: BuffType, value: number, remainingTurns: number }[],
-  energy: number,
-  powerId?: string
-}
-```
-
-**`debuff` step** (`DebuffReport`): Emitted when a debuff is applied.
-```typescript
-{
-  kind: "debuff",
-  name?: string,         // Skill name that applied the debuff
-  source: CardInfo,
-  alterations: { target: CardInfo, kind: DebuffType, value: number, remainingTurns: number }[],
-  energy: number,
-  powerId?: string
-}
-```
-
-**`buff_removed` step** (`BuffRemovedReport`): Emitted when a skill's end event fires and removes event-bound buffs.
-```typescript
-{
-  kind: "buff_removed",
-  source: CardInfo,      // Card whose skill emitted the end event
-  eventName: string,     // The end event name that triggered removal
-  removed: { target: CardInfo, kind: BuffType, value: number }[],
-  powerId?: string       // Present if the skill that emitted the end event belongs to a composite power
-}
-```
-
-**`debuff_removed` step** (`DebuffRemovedReport`): Emitted when a skill's end event fires and removes event-bound debuffs.
-```typescript
-{
-  kind: "debuff_removed",
-  source: CardInfo,      // Card whose skill emitted the end event
-  eventName: string,     // The end event name that triggered removal
-  removed: { target: CardInfo, kind: DebuffType, value: number }[],
-  powerId?: string       // Present if the skill that emitted the end event belongs to a composite power
-}
-```
-
-**`buff_expired` step** (`BuffExpiredReport`): Emitted at end of turn when a buff's duration reaches 0.
-```typescript
-{
-  kind: "buff_expired",
-  card: CardInfo,        // Card whose buff expired
-  expired: { kind: BuffType, value: number }[]
-}
-```
-
-**`debuff_expired` step** (`DebuffExpiredReport`): Emitted at end of turn when a debuff's duration reaches 0.
-```typescript
-{
-  kind: "debuff_expired",
-  card: CardInfo,        // Card whose debuff expired
-  expired: { kind: DebuffType, value: number }[]
-}
-```
-
-**`status_change` step** (`StatusChangeReport`): Emitted after an attack when a status effect is applied or the card dies.
-```typescript
-{
-  kind: "status_change",
-  card: CardInfo,
-  status: "dead" | "poison" | "burn" | "freeze" | "stunt" | "bleed",
-  stacks?: number        // bleed only: stack count after this application
-}
-```
-
-**`state_effect` step** (`StateEffectReport`): Emitted at turn-end for each status that ticks.
-```typescript
-{
-  kind: "state_effect",
-  type: "poison" | "burn" | "freeze" | "stunt" | "bleed",
-  card: CardInfo,
-  damage: number,          // bleed: sum of every stack
-  remainingTurns: number,  // bleed: turns left before the last stack expires
-  remainingHealth: number,
-  remainingStacks?: number // bleed only: stacks left after the tick
-}
-```
-
-**`effect_removed` step** (`EffectRemovedReport`): Emitted when an end event fires and removes event-bound status effects (poison, burn, freeze, stunt).
-```typescript
-{
-  kind: "effect_removed",
-  source: CardInfo,      // Card whose skill emitted the end event
-  eventName: string,     // The end event name that triggered removal
-  removed: { target: CardInfo, effectType: string }[]
-}
-```
-
-**`mark_applied` step** (`MarkAppliedReport`): Emitted when an elemental mark is applied on hit. Absent when the target already carries the maximum number of stacks.
-```typescript
-{
-  kind: "mark_applied",
-  card: CardInfo,        // Marked card
-  damageType: string,    // Damage type amplified by the mark
-  stacks: number         // Stack count after this application
-}
-```
-
-**`regenerated` step** (`RegeneratedReport`): Emitted at turn-end when a card restores health through its `regeneration` stat. Absent when the card carries no regeneration or is already at full health.
-```typescript
-{
-  kind: "regenerated",
-  card: CardInfo,
-  healed: number,          // Health points actually restored, clamped at max health
-  remainingHealth: number
-}
-```
-
-**`protection_started` step** (`ProtectionStartedReport`): Emitted when a PROTECTION skill puts its owner in front of an ally.
-```typescript
-{
-  kind: "protection_started",
-  name: string,            // Protection skill name
-  card: CardInfo,          // The guardian
-  protectedCard: CardInfo, // The ally it now covers
-  remainingTurns: number
-}
-```
-
-**`protection_ended` step** (`ProtectionEndedReport`): Emitted at turn-end when a protection's duration runs out.
-```typescript
-{
-  kind: "protection_ended",
-  card: CardInfo,          // The guardian
-  protectedCard: CardInfo  // The ally it no longer covers
-}
-```
-
-**`attack_intercepted` step** (`AttackInterceptedReport`): Emitted for each hit a guardian took in place of the ally it protects. It follows the `attack` step that carries the damage, whose `defender` is the guardian.
-```typescript
-{
-  kind: "attack_intercepted",
-  card: CardInfo,          // The guardian that took the hit
-  protectedCard: CardInfo  // The ally the hit was aimed at
-}
-```
-
-**`transformation_started` step** (`TransformationStartedReport`): Emitted when a TRANSFORMATION skill fires.
-```typescript
-{
-  kind: "transformation_started",
-  name: string,          // Transformation skill name
-  card: CardInfo,        // Transformed card
-  remainingTurns: number // Transformation duration
-}
-```
-
-**`transformation_ended` step** (`TransformationEndedReport`): Emitted at turn-end when a transformation duration runs out, after its health cost is charged.
-```typescript
-{
-  kind: "transformation_ended",
-  name: string,
-  card: CardInfo,
-  healthCost: number,      // Health points paid on exit, 0 when the skill has no cost
-  remainingHealth: number
-}
-```
-
-**`targeting_override` step** (`TargetingOverrideReport`): Emitted when a targeting override skill activates.
-```typescript
-{
-  kind: "targeting_override",
-  name?: string,                   // Skill name that pushed the override
-  source: CardInfo,                // Card whose skill pushed the override
-  previousStrategy: string,        // ID of the strategy before override
-  newStrategy: string,             // ID of the new targeting strategy
-  powerId?: string                 // Present if skill belongs to a composite power
-}
-```
-
-**`targeting_reverted` step** (`TargetingRevertedReport`): Emitted when a targeting override is removed via end event.
-```typescript
-{
-  kind: "targeting_reverted",
-  source: CardInfo,                // Card whose override was reverted
-  eventName: string,               // The end event name that triggered the revert
-  revertedStrategy: string,        // ID of the strategy that was removed
-  restoredStrategy: string,        // ID of the strategy restored
-  powerId?: string                 // Present if triggered by a composite power end event
-}
-```
-
-**`shield_applied` step** (`ShieldAppliedReport`): Emitted when a shield is applied to one or more cards.
-```typescript
-{
-  kind: "shield_applied",
-  name?: string,             // Skill name that applied the shield
-  source: CardInfo,
-  targets: { target: CardInfo, points: number }[]
-}
-```
-
-**`shield_broken` step** (`ShieldBrokenReport`): Emitted when a shield's points are depleted mid-damage.
-```typescript
-{
-  kind: "shield_broken",
-  card: CardInfo
-}
-```
-
-**`shield_expired` step** (`ShieldExpiredReport`): Emitted at turn-end when a shield's duration reaches 0.
-```typescript
-{
-  kind: "shield_expired",
-  card: CardInfo
-}
-```
-
-**Note on `name`**: The `name?` field appears on `attack`, `special_attack`, `healing`, `buff`, `debuff`, `targeting_override`, and `shield_applied` step kinds, carrying the name of the skill that generated the step.
-
-**Note on `powerId`**: The `powerId` field appears on `buff`, `debuff`, `healing`, `buff_removed`, `debuff_removed`, `targeting_override`, and `targeting_reverted` step kinds when the originating skill belongs to a composite power group.
+| `kind` | Fields | Emitted |
+|---|---|---|
+| `fight_start` | `cards: { card, maxHealth }[]` | Step 0; every card of both decks in deck order (player 1 first). The only place a never-hit card reports its max health |
+| `attack`, `special_attack` | `name?`, `attacker`, `damages: { defender, damage, isCritical, dodge, remainingHealth, shieldAbsorbed?, survived?, survivedSkillName?, consumedBleedStacks? }[]`, `energy` | A card attacks. `damage` is the total dealt; `shieldAbsorbed` is the part eaten by the shield (absent without shield) — a consumer tracking the shield from `shield_applied` needs it to decrement the buffer. `consumedBleedStacks`: stacks consumed by a `bleedDetonation` or a `BLEED_DETONATION` skill |
+| `special_stance` | `name`, `caster`, `energy` (0) | A STANCE special is cast; no `damages`. Followed, when present, by `stance_started`, `buff`, `debuff`, `shield_applied`, `concealment_started` |
+| `healing` | `name?`, `source`, `heal: { target, healed, remainingHealth }[]`, `energy`, `powerId?` | A card heals |
+| `buff` / `debuff` | `name?`, `source`, `alterations: { target, kind, value, remainingTurns }[]`, `energy`, `powerId?` | An alteration is applied |
+| `buff_removed` / `debuff_removed` | `source`, `eventName`, `removed: { target, kind, value }[]`, `powerId?` | A skill end event removes event-bound alterations |
+| `buff_expired` / `debuff_expired` | `card`, `expired: { kind, value }[]` | Turn end, duration reached 0 |
+| `buff_transferred` | `name`, `source`, `target`, `alterations: { kind, value, remainingTurns }[]` | BUFF_TRANSFER moved buffs (absent if none or nobody targeted); a permanent buff reports a null duration |
+| `status_change` | `card`, `status: dead \| poison \| burn \| freeze \| stunt \| bleed`, `stacks?` | After an attack: status applied or card dead; `stacks` (bleed) = count after application |
+| `state_effect` | `type`, `card`, `damage`, `remainingTurns`, `remainingHealth`, `remainingStacks?` | Turn end, each ticking status. Bleed: `damage` = sum of stacks, `remainingTurns` = until the last stack expires |
+| `effect_removed` | `source`, `eventName`, `removed: { target, effectType }[]` | End event removes event-bound status effects |
+| `mark_applied` | `card`, `damageType`, `stacks` | Elemental mark applied (absent at the stack cap) |
+| `regenerated` | `card`, `healed`, `remainingHealth` | Turn end, non-zero regeneration heal (clamped at max health) |
+| `shield_applied` | `name?`, `source`, `targets: { target, points }[]` | Shield applied |
+| `shield_broken` / `shield_expired` | `card` | Points depleted mid-damage / duration reached 0 at turn end |
+| `survived` | `name`, `card` | Right after a SURVIVE skill intercepts a fatal blow (card left at 1 HP) |
+| `damage_mitigated` | `name`, `card` | DAMAGE_REDUCTION removed a share of a hit, before the shield absorbs the rest |
+| `executed` | `name`, `attacker`, `card` | Right after the attack step, per defender finished by an `execution`; then `survived` if SURVIVE held 1 HP, else the attack `status_change: dead` |
+| `stance_started` | `name`, `card`, `remainingTurns` | A special or STANCE skill opens a stance |
+| `stance_ended` | `name`, `card` | Turn end, stance duration ran out (or an `endsStance` attack closed it) |
+| `concealment_started` | `name`, `card`, `remainingTurns?` | CONCEALMENT hides its owner (right after `fight_start` on `fight-start`); no `remainingTurns` = until it attacks |
+| `concealment_ended` | `name`, `card`, `reason: attacked \| expired` | Right after the attack step of the first attack that targets somebody, or at turn end |
+| `protection_started` | `name`, `card` (guardian), `protectedCard`, `remainingTurns` | PROTECTION puts the guardian in front of an ally |
+| `protection_ended` | `card`, `protectedCard` | Turn end, protection ran out |
+| `attack_intercepted` | `card` (guardian), `protectedCard` | Per hit the guardian took; follows the `attack` step whose `defender` is the guardian |
+| `transformation_started` | `name`, `card`, `remainingTurns` | TRANSFORMATION fires |
+| `transformation_ended` | `name`, `card`, `healthCost`, `remainingHealth` | Turn end, after the health cost is charged (0 without cost) |
+| `targeting_override` | `name?`, `source`, `previousStrategy`, `newStrategy`, `powerId?` | A targeting override activates |
+| `targeting_reverted` | `source`, `eventName`, `revertedStrategy`, `restoredStrategy`, `powerId?` | An end event removes a targeting override |
+| `fight_end` | winner report | End of the fight |
 
 ## Enums
 
@@ -673,65 +339,63 @@ a besoin de ce champ pour le décrémenter : sans lui le bouclier restait affich
 
 ### TriggerEvent
 
-- `turn-end`: Skill triggers at end of turn
-- `next-action`: Skill triggers on the next action turn
-- `ally-death`: Skill triggers when a specific ally dies (requires `targetCardId` matching the dead card's `id`)
-- `enemy-death`: Skill triggers when a specific enemy dies (requires `targetCardId` matching the dead card's `id`)
-- `dormant`: Skill starts inactive; requires `activationEvent`, `activationTargetCardId`, and `replacementEvent` to define when and how the trigger activates mid-battle. The replacement trigger's target card ID is resolved dynamically at activation time from the killer card's ID
-- `survived`: Skill triggers after the owning card survives a fatal blow via SURVIVE skill
-- `ally-health-below`: Edge-triggered when a monitored ally's health ratio crosses `activationCondition.threshold` downward; requires `targetCardId` (the monitored ally's id) and `activationCondition.threshold`. A card may monitor itself by passing its own id, which is how a health-reactive self buff is declared. A `CONDITIONAL_ATTACK` on it goes through the regular attack path — since Selkhet 13/15 it is no longer forced onto `last-attacker-of-ally` and no longer drops `hits` or `effect`, so a card wanting the counter-attack on its aggressor must now say `targetingStrategy: "last-attacker-of-ally"` itself (`targetingStrategy` stays required for every CONDITIONAL_ATTACK, validation unchanged) — its own `targetingStrategy`, `hits`, `splash`, `hitAlterations`, `execution`, `stanceActivation` — and fires during the enemy action that dealt the hit; the cards it kills run the full death cascade (`status_change: dead`, `ally-death`, `enemy-death`, `enemy-killed`) right away
-- `self-death`: Fires on the card that just died, for its own last words — every other death trigger runs on somebody else, since `ally-death` and `enemy-death` only reach the survivors. Needs no `targetCardId`: the trigger is the owner own id. It runs as phase 2 of the death cascade, before the survivors answer, so what the fallen card leaves behind lands first. Pairs with `protected-ally` targeting for a guardian parting gift
-- `enemy-bleed-death`: Fires on the surviving cards of the opposing team when a card dies from its bleed tick at turn end. Needs no `targetCardId`: whoever bled out, the skill answers. A death by an attack, a poison or a burn does not fire it; when a lethal tick combines several statuses, the bleed is credited as soon as it ticked. Runs last in the death cascade, after `enemy-death`. Paired with a `HEALING` on `self` with `healBasis: "target-max-health"`, it is "regain 10% of max health when an enemy bleeds out"
-- `enemy-killed`: Fires on the card that dealt the fatal blow, when it is still alive and belongs to the opposing team — never on its allies. Needs no `targetCardId`. An optional `activationCondition { type: "health-threshold", threshold }` (in `]0, 1]`, 400 outside) restricts it to victims whose health ratio just before that blow was strictly below `threshold` — "an enemy executed under 30%"; without it every kill fires it. A death from a status tick has no killer and never fires it. Runs last in the death cascade, after `enemy-bleed-death`
-- `bleed-stacks-applied`: Fires **once per fight**, after the owner attack that brings the bleed stacks it has laid since the fight began to `stackThreshold` (a count jumping over the threshold still fires). Stacks lost at the cap or refused (immunity, resistance) do not count. Checked after every attack the owner makes in its action (simple, next-action, special); stacks laid by a reactive attack count, but are only seen at the owner next action. Each skill on the event keeps its own once-flag, so a STANCE and a BUFF sharing it both fire
-- `turn-start`: Fires on the card about to act, at the start of its turn, before its own action and before its special gauge is checked — so an `energyCost` paid here can delay the special. It adds to the action rather than replacing it (unlike `next-action`), and a card skipping its turn (frozen, stunned) never sees it. Only attack skills on this event are reported (a skill that struck nobody reports nothing), their step preceding the action steps. No `interval` needed
-- `damage-taken`: Fires every time the monitored card takes damage from a landed attack; requires `targetCardId` (the monitored card id). Unlike `ally-health-below` it is not edge-triggered — it fires on each hit, which is what counter attacks and damage-reactive passives need. A card reacts to its own wounds by passing its own id. The event reaches every playable card of the damaged card team, and `FightingContext.lastAttacker` is set, so `last-attacker-of-ally` resolves to the attacker
-- `fight-start`: Fires once on every card, right after the `fight_start` step and before the first action — for what a card brings into the fight (Selkhet starts concealed). Needs no `targetCardId`
-- `any-ally-health-below`: Edge-triggered when **any** ally crosses `activationCondition.threshold` downward, where `ally-health-below` watches one ally named up front. Requires the threshold, never a `targetCardId`. Each ally is edge-triggered on its own — the trigger fires once per crossing and rearms for that ally when its health recovers. The owner is skipped, so a card watching its own health still uses `ally-health-below`. Pairs with `most-wounded-ally` targeting for a guardian power on a deck the player composes
+Mechanics behind each event: see [ARCHITECTURE.md](ARCHITECTURE.md) (Death Cascade, Reactive Events).
+
+- `turn-end`: end of turn
+- `next-action`: replaces the card plain attack on its next action (skipped when the special is ready)
+- `turn-start`: on the card about to act, before its action and its special check; adds to the action. A card skipping its turn never sees it. Only attack skills that struck are reported, before the action steps
+- `fight-start`: once on every card, right after `fight_start`, before the first action. No `targetCardId`
+- `ally-death` / `enemy-death`: when a specific card dies; require `targetCardId` (the dead card id)
+- `self-death`: on the card that just died (own id implied). Runs before the survivors answer, so what the card leaves lands first. Pairs with `protected-ally` or `fastest-ally`
+- `enemy-bleed-death`: on the opposing survivors when a card dies from its bleed tick. No `targetCardId`. Runs after `enemy-death`
+- `enemy-killed`: on the living killer only. Optional `activationCondition { type: "health-threshold", threshold }` in `]0, 1]` restricts it to victims strictly under that health ratio before the blow. A status tick has no killer. Runs last in the cascade
+- `survived`: after the owner survives a fatal blow through SURVIVE
+- `dormant`: starts inactive; requires `activationEvent`, `activationTargetCardId`, `replacementEvent` (its target id resolved from the killer at activation)
+- `ally-health-below`: edge-triggered when one monitored ally crosses `activationCondition.threshold` downward; requires `targetCardId` and the threshold. A card monitors itself with its own id. A `CONDITIONAL_ATTACK` on it uses the regular attack path (its own `targetingStrategy`, `hits`, `splash`, …) and must say `last-attacker-of-ally` itself to counter its aggressor; cards it kills run the full death cascade
+- `any-ally-health-below`: same for any ally except the owner, each ally edge-triggered on its own. Requires the threshold, never a `targetCardId`; the field belongs to the trigger alone. Pairs with `most-wounded-ally`
+- `damage-taken`: on every landed hit on the monitored card (not edge-triggered); requires `targetCardId`; `last-attacker-of-ally` then resolves to the attacker
+- `bleed-stacks-applied`: once per fight, after the owner attack that brings the stacks it has **laid** to `stackThreshold` (a jump over it still fires). Stacks lost at the cap or refused do not count. Each skill on the event has its own once-flag
 
 ### SpecialKind
 
-- `ATTACK`: Special ability that deals damage
-- `HEALING`: Special ability that heals
-- `STANCE`: Special ability that strikes nobody — the caster enters a stance (`stanceActivation` required), then gets the optional `statAlterations`, `shieldApplication` and `concealment`. Since it is no attack it does not lift a concealment, which is how Fusion Tectonique hides its caster. `damages`, `rate`, `hits`, `targetingStrategy`, `effect`, `energyRefund`, `markedTargetBonus`, `bleedStackBonus`, `concealedBonus` and `execution` are refused (400). Reported as `special_stance`; the gauge empties as for any special
+- `ATTACK`: deals damage
+- `HEALING`: heals
+- `STANCE`: strikes nobody. `stanceActivation` required; optional `statAlterations`, `shieldApplication`, `concealment`. Being no attack, it does not lift a concealment. `damages`, `rate`, `hits`, `targetingStrategy`, `effect`, `energyRefund`, `markedTargetBonus`, `bleedStackBonus`, `concealedBonus` and `execution` are refused (400). Reported as `special_stance`; the gauge empties as for any special
 
 ### SkillKind
 
-- `HEALING`: Healing skill
-- `BUFF`: Temporary stat boost
-- `CONDITIONAL_ATTACK`: Attack skill triggered conditionally by an event
-- `TARGETING_OVERRIDE`: Overrides the card's attack targeting strategy (requires `terminationEvent`)
-- `SHIELD`: Health-reactive shield skill — no `event` field; triggers when card's health ratio crosses `activationCondition.threshold` downward (edge-triggered, rearms on recovery)
-- `SURVIVE`: One-time fatal-blow interception — no `event`, no `targetingStrategy`; only `name` required; extracted from `others[]` before normal skill loop
-- `DAMAGE_REDUCTION`: Removes a share of every incoming hit — no `event`, no `targetingStrategy`; requires `rate` (share removed, in `]0, 1]`) and accepts an optional `probability` making it a per-hit roll. Like SURVIVE it is extracted from `others[]` and consulted inside `applyFinalDamage()`, so it mitigates the very hit that triggers it. Applies after the freeze/stunt amplifiers and before the shield buffer, so a shield absorbs only the reduced damage. Status effect ticks bypass it, as they bypass the shield
-- `PROTECTION`: Steps in front of one ally for `duration` of the guardian's turns — attacks aimed at that ally are resolved against the guardian instead, with the guardian's own dodge, defence and element. Requires `duration`, plus an `event` and a `targetingStrategy`; it covers the **first** card its targeting returns, so pairing it with `most-wounded-ally` guards whoever is in the worst shape at that moment. A targeting that returns nobody is a no-op and spends no `activationLimit`. Re-casting refreshes the duration or moves the protection, never stacks. A dead guardian protects nobody, and neither does a concealed one (see `CONCEALMENT`): it intercepts only attackers able to see it, i.e. holding a stance with `revealsConcealed`. `activationLimit` is supported, so "once per fight" is `activationLimit: 1`
-- `DODGE_BONUS_DENIAL`: Passive — no `event`, no `targetingStrategy`, only `name`. Against its owner, a bleeding defender dodges with its base agility minus its debuffs: its agility **buffs** are ignored. Applies to every attack of the owner (simple, multiple, special, triggered attacks). Like SURVIVE it is extracted from `others[]` and stored on the card; it emits no step
-- `BLEED_STACK_SCALING`: Passive — no `event`, no `targetingStrategy`; requires `rate` (attack bonus per bleed stack) and `maxRate` (cap). Raises its owner attack by `rate` for every bleed stack carried by a living card, both teams counted, up to `maxRate` — `rate: 0.02, maxRate: 0.3` is "+2% attack per stack, at most +30%". Read from the live board each time the owner strikes: attack damage (simple, multiple, special, triggered attacks) and the damage of the poison, burn and bleed it applies on that hit. Heals are not affected. Extracted from `others[]` like SURVIVE; it emits no step
-- `BLEED_EMPOWERMENT`: Passive — no `event`, no `targetingStrategy`; requires `requiresStance` and `rate`. While its owner holds that stance, every BLEED it applies (simple, multiple, special, triggered attacks) lays `extraStacks` more stacks (default 0) and bleeds at `rate` instead of the effect own rate, still within the effect `maxStacks`; when given, `duration`, `basis` and `triggeredDebuff` replace the effect own ones — Griffures is `{ rate: 0.03, duration: 4, triggeredDebuff: regeneration −50% }` on a bleed with `basis: "target-max-health"`. Outside the stance nothing changes. Extracted from `others[]` like SURVIVE; it emits no step
-- `BLEED_DETONATION`: Makes every bleed on the board burst when its `event` fires — meant for `self-death` with `requiresStance`, a last word while a power runs. Each living card carrying at least one stack, both teams, takes `rate × source attack` once (not per stack) as real damage ignoring defense, then loses all its stacks. Requires `rate`, no `targetingStrategy`. Reported as an `attack` step named after the skill; nothing when no card bleeds. A card it kills goes through its own death cascade (`self-death`, `ally-death`, `enemy-death`…) right away
-- `LOW_HEALTH_TARGET_BONUS`: Passive — no `event`, no `targetingStrategy`; requires `rate` (> 0) and `activationCondition.threshold` (health ratio in `]0, 1]`, 400 otherwise). Multiplies its owner attack by `1 + rate` against a defender whose health ratio is strictly below the threshold **before the hit** — `rate: 0.25, threshold: 0.4` is "+25% damage against targets under 40% health". Applies to every attack of the owner (simple, multiple, special, triggered attacks), each defender judged on its own, and multiplies with the other attack bonuses. Status effects, heals and a `BLEED_DETONATION` are not affected. Extracted from `others[]` like SURVIVE; it emits no step
-- `BUFF_TRANSFER`: Hands every buff of `buffType` its owner holds to the first card its `targetingStrategy` returns, each with its value, remaining duration and `stackId` — so they count against the receiver's stack pile. Requires `event`, `targetingStrategy` and `buffType`; accepts `requiresStance`. Nothing to hand over, or nobody targeted, and nothing happens: no step, the owner keeps its buffs. Selkhet's Héritage de la Panthère is one on `self-death` with `fastest-ally` and `requiresStance` on the stance her ultimate opens. Emits `buff_transferred`
-- `STANCE`: Opens a stance on its owner when its `event` fires — the triggered counterpart of `SpecialDto.stanceActivation`. Requires `stanceActivation` (`name`, `duration`, optional `immunities`), no `targetingStrategy`. Skills with the matching `requiresStance` then run for its duration; re-opening a running stance refreshes it. Emits `stance_started`, and `stance_ended` at turn end
-- `CONCEALMENT`: Hides its owner from the opponent when its `event` fires — on `fight-start` for a card that opens the fight concealed. Requires `event`, no `targetingStrategy`; `duration` is optional (integer >= 0, 400 otherwise): without it the concealment lasts until the card attacks, with it it also runs out like a stance. A concealed card is left out of **every** enemy targeting strategy, area attacks included — unless the attacker holds a stance with `revealsConcealed` (`target-all`, `line-three`, `position-based` falls back to the next targetable card…); its allies still target it. When nobody is targetable, the attack strikes nobody. The concealment ends as soon as the card launches an attack that targets somebody (simple, multiple, special, triggered attacks), even a dodged one; other skills do not end it. That attack still counts as struck from concealment: a `concealedBonus` applies to every hit of it. Re-concealing refreshes it. Emits `concealment_started` and `concealment_ended`. It also accepts a `stanceActivation` (opened on its owner with the concealment, reported as `stance_started` right after `concealment_started`), an `interval` cooldown restarted each time it fires, and `requiresUndamaged`. On `next-action` it **takes the action**: the card dives out of sight and makes no attack that turn. Embuscade Tectonique is such a dive (`interval: 4`, `requiresUndamaged`, stance « Sous terre » for 1 turn) paired with a `CONDITIONAL_ATTACK` on `turn-start` with `requiresStance` and `endsStance`: the strike opens the next turn, lifts the concealment and closes the stance; a card stunned or frozen underground never sees `turn-start`, so its stance runs out without a strike
-- `TRANSFORMATION`: One-shot health-reactive transformation — no `event`, no `targetingStrategy`; requires `duration` and an `activationCondition` threshold. Applies its own `statAlterations` and, for the same duration, an optional `lifestealRate` (heals that share of max health on every landed attack) and `statusImmunity`. An optional `endCostRate` charges that share of max health when the transformation ends, never below one health point. Fires once per fight
+Skills marked *passive* have no `event` and no `targetingStrategy` and emit no step; they are extracted from `others[]` and stored on the card.
+
+- `HEALING`: heals; `healBasis`, `activationLimit`, `endEvent` supported
+- `BUFF`: temporary stat boost (`buffType`, `duration` required; 0 = permanent or event-bound)
+- `CONDITIONAL_ATTACK`: attack on an event, through the regular attack path. Optional add-ons: `splash`, `onLowHealthAfterHit`, `hitAlterations`, `execution`, `bleedDetonation`, `defensePenetration`, `energyCost`, `stanceActivation`, `endsStance`, `requiresUndamaged`, `interval`
+- `TARGETING_OVERRIDE`: overrides the card attack targeting (requires `terminationEvent`)
+- `SHIELD`: no `event`; fires when health crosses `activationCondition.threshold` downward (edge-triggered, rearms on recovery)
+- `SURVIVE`: *passive*, `name` only; absorbs one fatal blow, leaves 1 HP
+- `DAMAGE_REDUCTION`: *passive*; `rate` in `]0, 1]` = share of each hit removed; optional per-hit `probability`. Applies before the shield; status ticks bypass it
+- `PROTECTION`: requires `duration`, `event`, `targetingStrategy`; covers the first card targeted; recasting refreshes or moves it. Dead or unseen (concealed) guardian protects nobody. `activationLimit` supported
+- `DODGE_BONUS_DENIAL`: *passive*; a bleeding defender dodges its owner with base agility minus debuffs
+- `BLEED_STACK_SCALING`: *passive*; `rate` per bleed stack on any living card, capped at `maxRate` (e.g. `0.02` / `0.3`). Heals unaffected
+- `BLEED_EMPOWERMENT`: *passive*; requires `requiresStance` and `rate`. While the stance runs, every bleed the owner lays adds `extraStacks` (default 0) and uses `rate`; `duration`, `basis`, `triggeredDebuff` replace the effect values. Still capped by `maxStacks`
+- `BLEED_DETONATION`: no `targetingStrategy`; requires `rate`. When its `event` fires (meant for `self-death` + `requiresStance`), every living bleeding card of both teams takes `rate × source attack` once as real damage (defense ignored) and loses its stacks. Reported as an `attack` step; nothing when nobody bleeds
+- `LOW_HEALTH_TARGET_BONUS`: *passive*; requires `rate` > 0 and `activationCondition.threshold` in `]0, 1]`. × `1 + rate` against a defender strictly under the threshold before the hit. Status effects, heals and `BLEED_DETONATION` unaffected
+- `BUFF_TRANSFER`: requires `event`, `targetingStrategy`, `buffType`; hands every buff of that type to the first card targeted, keeping value, remaining duration and `stackId`. Nothing to give or nobody targeted: no step. Emits `buff_transferred`
+- `STANCE`: opens `stanceActivation` on its owner when its `event` fires; no `targetingStrategy`. Emits `stance_started`, then `stance_ended` at turn end
+- `CONCEALMENT`: hides its owner from every enemy targeting (area attacks included) unless the attacker holds a `revealsConcealed` stance; allies still target it. `duration` optional (integer >= 0): without it, until the card attacks somebody; ends at the first attack that targets somebody, even dodged (a `concealedBonus` still applies to every hit of it). Accepts `stanceActivation`, `interval` cooldown, `requiresUndamaged`. On `next-action` it takes the action (no attack that turn). Emits `concealment_started` / `concealment_ended`
+- `TRANSFORMATION`: no `event` or `targetingStrategy`; requires `duration` and an `activationCondition` threshold; applies `statAlterations`, optional `lifestealRate`, `statusImmunity`, `endCostRate` (never below 1 HP). Once per fight
 
 ### RateBasis
 
-What a rate is a share of: the `rate` of a `HEALING` skill (`healBasis`) and of a `BLEED` effect (`basis`). Defaults to `source-attack`, which every card written before this option keeps.
+What a `HEALING` `healBasis` or a `BLEED` `basis` is a share of; default `source-attack`.
 
-- `source-attack`: the caster's attack — the heal or the bleed grows with the caster, which suits a support whose offence and care scale together
-- `target-max-health`: the receiver's maximum health — the same amount whoever casts it, which is what a kit phrased as "the ally recovers 10% of its health per turn" or "bleeds 2% of its max health per turn" means
+- `source-attack`: the caster attack
+- `target-max-health`: the receiver maximum health (same amount whoever casts; the bleed reads it when the stack is laid)
 
-Heals go through `applyHealing()` (`skills/heal-basis.ts`), shared with `SpecialHealing`, and are capped at the target's maximum health. A bleed on `target-max-health` reads the bleeding card's maximum health when the stack is laid, so `BLEED_STACK_SCALING` (an attack bonus) does not affect it. An unknown basis throws.
+An unknown basis throws. Heals are capped at the target maximum health.
 
 ### StatusCategory
 
-What a status effect does to its bearer, and therefore what an immunity is granted against. Used by `SpecialDto.stanceActivation.immunities`.
-
-- `control`: takes the turn away — `FREEZE` and `STUNT`
-- `damage-over-time`: only bites — `POISON`, `BURN` and `BLEED`
-
-An elemental `MARK` is not a status effect and no immunity refuses it.
+Used by `stanceActivation.immunities`: `control` (`FREEZE`, `STUNT`) and `damage-over-time` (`POISON`, `BURN`, `BLEED`). An elemental `MARK` is not a status and no immunity refuses it.
 
 ### Effect
 
@@ -755,18 +419,7 @@ An elemental `MARK` is not a status effect and no immunity refuses it.
 
 ## Validation
 
-All DTOs use `class-validator` decorators:
-
-- `@IsString()`: Validates string fields
-- `@IsNumber()`: Validates numeric fields
-- `@IsEnum()`: Validates enum values
-- `@IsArray()`: Validates array fields
-- `@ArrayMinSize(1)`, `@ArrayMaxSize(5)`: Deck size constraints
-- `@ValidateNested()`: Validates nested objects
-- `@IsOptional()`: Marks optional fields
-- `@IsNotEmpty()`: Ensures non-empty values
-
-Validation errors return 400 Bad Request with detailed error messages.
+DTOs use `class-validator` decorators (`@IsString`, `@IsNumber`, `@IsEnum`, `@ValidateNested`, `@IsOptional`, `@ArrayMinSize(1)` / `@ArrayMaxSize(5)` for decks…). Errors return 400 with detailed messages.
 
 ## Error Handling
 
@@ -776,22 +429,4 @@ Validation errors return 400 Bad Request with detailed error messages.
 
 ## Factory Functions
 
-Three factory functions map DTO enums to domain implementations:
-
-- `buildTargetingStrategy()` in @packages/combat-engine/src/fight/http-api/targeting-strategy-factory.ts - Maps `TargetingStrategy` enum to strategy objects
-- `buildDodgeStrategy()` in @packages/combat-engine/src/fight/http-api/dodge-strategy-factory.ts - Maps `DodgeStrategy` enum to behavior objects
-- `buildTriggerStrategy()` in @packages/combat-engine/src/fight/http-api/trigger-factory.ts - Maps `TriggerEvent` enum to trigger objects
-
-## Response Types
-
-See @packages/combat-engine/src/fight/core/fight-simulator/@types/ for complete type definitions:
-
-- `FightResult`: Map of step numbers to `Step` objects
-- `Step`: Union type with `kind` discriminator
-- `DamageReport`, `HealingReport`, `BuffReport`, `DebuffReport`, `StateEffectReport`, `StatusChangeReport`, `WinnerReport`, `BuffRemovedReport`, `EffectRemovedReport`, `TargetingOverrideReport`, `TargetingRevertedReport`: Specific step types
-
-## Dependencies
-
-- `@nestjs/common` v10 - NestJS core framework
-- `class-validator` v0.14 - DTO validation
-- `class-transformer` v0.5 - DTO transformation
+DTO enums map to domain objects in `packages/combat-engine/src/fight/http-api/`: `buildTargetingStrategy()` (`targeting-strategy-factory.ts`), `buildDodgeStrategy()` (`dodge-strategy-factory.ts`), `buildTriggerStrategy()` (`trigger-factory.ts`).

@@ -1,161 +1,46 @@
----
-name: coding-assertions
-description: Code quality verification checklist
-argument-hint: N/A
----
-
 # Coding Guidelines
 
-> Those rules must be minimal because the MUST be checked after EVERY CODE GENERATION.
+> Minimal on purpose: these rules are checked after EVERY code generation. A feature is complete only when all steps below are green.
 
-## Requirements to complete a feature
+## Steps
 
-**A feature is really completed if ALL of the above are satisfied: if not, iterate to fix all until all are green.**
+1. Check there is no duplication; reuse existing code
+2. From `packages/combat-engine/`, run in order: `npm run format` → `npm run lint` (auto-fix) → `npm run test:cov` → `npm run build`
+3. From the root, `pnpm verify` runs the whole chain, memory-bank size check included
 
-## Steps to follow
+## Style
 
-1. Check their is no duplication
-2. Ensure code is re-used
-3. Run all those commands, in order to ensure code is perfect:
+- Prettier: single quotes, trailing commas, 2 spaces
+- ESLint (`@typescript-eslint/recommended` + prettier): unused variables error unless prefixed `_`; explicit return types and `any` are allowed
+- TypeScript: ES2021, CommonJS, decorators on, strict null checks and implicit any off
 
-```markdown
-| Order | Command            | Description                          |
-| ----- | ------------------ | ------------------------------------ |
-| 1     | `npm run format`   | Format code with Prettier            |
-| 2     | `npm run lint`     | Run ESLint with auto-fix             |
-| 3     | `npm run test:cov` | Run tests with coverage verification |
-| 4     | `npm run build`    | Build the NestJS application         |
-```
+## Naming
 
-## TypeScript Configuration
+- Files kebab-case: `*.module.ts`, `*.controller.ts`, `*.dto.ts`, `*-factory.ts`, tests `*.spec.ts` in `__tests__`, type directories `@types/`
+- Variables and functions camelCase; classes, interfaces (no `I` prefix) and enums PascalCase with `UPPER_CASE` values; `UPPER_CASE` constants; private fields without underscore
 
-- Target: `ES2021`
-- Module: `commonjs`
-- Decorators: `experimentalDecorators` and `emitDecoratorMetadata` enabled
-- Strict mode disabled: `strictNullChecks: false`, `noImplicitAny: false`
-- Declaration files generated on build
+## Architecture
 
-## Code Style
+- NestJS decorators, constructor injection (`@Inject()` for custom providers), DTOs with `class-validator` / `class-transformer`, global `ValidationPipe` with `transform: true`
+- Domain in `src/fight/core/`, HTTP in `src/fight/http-api/`; DTOs never leak into the domain, factories convert them
+- Group by feature, not by type; tests next to the source
+- Imports from `src/`: external modules first, then internal
+- Classes: `readonly` for immutable properties; `get` keyword for getters (`get actualHealth()`), no `get`/`set` prefix on public methods (`isDead()`, `heal()`); private methods at the bottom; object destructuring for complex constructor configs
 
-### Formatting (Prettier)
+## Specials with optional effects
 
-- Use single quotes for strings
-- Add trailing commas in multi-line structures
-- Default indentation: 2 spaces
+- Optional constructor parameters per effect (type, rate, duration, targeting); if one is missing, skip the whole effect
+- Apply effects after the primary action, with their own targeting strategy (e.g. hit enemies, buff allies)
+- Return `{ actionResults: [], buffResults: [] }`, empty arrays for unused effects
+- `buffApplication` is a `BuffApplication[]` (zero, one or many); its optional `condition` + `conditionMultiplier` multiply the rate when the condition holds at application time
 
-### Linting (ESLint)
+## Comments
 
-- Based on `@typescript-eslint/recommended`
-- Integrated with Prettier via `plugin:prettier/recommended`
-- Unused variables: Error, except when prefixed with `_`
-- No explicit return types required (`explicit-function-return-type: off`)
-- No explicit module boundary types (`explicit-module-boundary-types: off`)
-- Allow `any` type (`no-explicit-any: off`)
+JSDoc for public interfaces and complex methods; inline comments only for tricky logic; none on self-explanatory code.
 
-## Naming Conventions
+## Testing
 
-### Files and Directories
-
-- Source files: `kebab-case.ts` (e.g., `fighting-card.ts`, `simple-attack.ts`)
-- Test files: `*.spec.ts` in `__tests__`
-- Module files: `*.module.ts` (e.g., `app.module.ts`, `fight.module.ts`)
-- Controller files: `*.controller.ts` (e.g., `fight.controller.ts`)
-- DTO files: `*.dto.ts` (e.g., `fight-data.dto.ts`)
-- Factory files: `*-factory.ts` (e.g., `targeting-strategy-factory.ts`)
-- Type directories: Use `@types/` for type definitions
-
-### Code Identifiers
-
-- Variables and functions: `camelCase`
-- Classes: `PascalCase` (e.g., `FightingCard`, `SimpleAttack`)
-- Interfaces: `PascalCase`, no `I` prefix
-- Enums: `PascalCase` with `UPPER_CASE` values
-- Constants: `UPPER_CASE` for true constants, `camelCase` for config objects
-- Private fields: `camelCase` without underscore prefix
-
-## Architecture Patterns
-
-### NestJS Structure
-
-- Use decorators: `@Controller()`, `@Injectable()`, `@Module()`, etc.
-- Dependency injection via constructor with `@Inject()` for custom providers
-- DTOs with `class-validator` and `class-transformer` decorators
-- Global `ValidationPipe` with `transform: true`
-
-### Domain Organization
-
-- Core domain logic in `src/fight/core/`
-- HTTP API layer in `src/fight/http-api/`
-- Domain entities separate from DTOs
-- Factory functions to convert DTOs to domain objects
-
-### File Organization
-
-- Group related files in feature directories
-- Tests alongside source in `__tests__` directories
-- Type definitions in `@types/` subdirectories
-- Group by feature, not by type (controllers, services, etc.)
-
-## Testing Standards
-
-### Test Structure
-
-- Test files: `*.spec.ts` using Jest
-- Test location: `__tests__` directories
-- Test regex: `.*\.spec\.ts$`
-- Use `describe` blocks for test organization
-- Use `beforeEach` for test setup
-- Helper functions in `test/helpers/` directory
-- Only one expectation by `it` block
-- Maximum 10 lines for a `it` block
-
-### Coverage Requirements
-
-- Exclude: `*.module.ts`, `logger-middleware.ts`, `main.ts`
-- Coverage directory: `../coverage`
-- Test environment: `node`
-
-### Test Commands
-
-- `npm run test` - Run all tests
-- `npm run test:watch` - Watch mode
-- `npm run test:cov` - With coverage
-- `npm run test:e2e` - End-to-end tests
-- `npm run test -- path/to/test.spec.ts` - Single test file
-
-## Import Conventions
-
-- Use absolute imports from `src/`
-- Order: External modules, then internal modules
-- NestJS decorators from `@nestjs/common`, `@nestjs/core`, etc.
-- Validators from `class-validator`, transformers from `class-transformer`
-
-## Class Design
-
-- Use `readonly` for immutable properties
-- Getter methods with `get` keyword (e.g., `get actualHealth()`)
-- Public API methods without `get`/`set` prefix (e.g., `isDead()`, `heal()`)
-- Constructor parameters use object destructuring for complex configs
-- Private methods at bottom of class
-
-### Special Skills with Optional Effects
-
-When implementing special skills (attacks or healing) that can optionally apply secondary effects like buffs:
-
-- Use optional parameters in constructor for effect configuration (type, rate, duration, targeting)
-- All related optional parameters must be checked together (if one is missing, skip the entire effect)
-- Apply effects after primary action completes
-- Use independent targeting strategies for primary action vs secondary effects
-  - Example: Special attack targets enemies (primary), buffs target allies (secondary)
-  - This dual-targeting pattern allows rich combat mechanics (damage enemies while buffing team)
-- `buffApplication` is `BuffApplication[]` (array) — supports zero, one, or multiple simultaneous buffs
-- Return unified result structure: `{ actionResults: [], buffResults: [] }`
-- Empty arrays for unused effects (e.g., `buffResults: []` when no buffs configured)
-- `BuffApplication` supports optional `condition: BuffCondition` + `conditionMultiplier`: when the condition evaluates to true at application time, the buff rate is multiplied by `conditionMultiplier`
-
-## Comments and Documentation
-
-- Use JSDoc comments for public interfaces and complex methods
-- Inline comments for complex logic explanations
-- No redundant comments for self-explanatory code
-- Document parameters with `@param`, returns with `@returns`
+- Jest, `describe` per unit, `beforeEach` for setup, helpers in `test/helpers/`
+- One expectation and at most 10 lines per `it`
+- Coverage excludes `*.module.ts`, `logger-middleware.ts`, `main.ts`
+- Commands: `npm run test`, `test:watch`, `test:cov`, `test:e2e`, `npm run test -- path/to/test.spec.ts`

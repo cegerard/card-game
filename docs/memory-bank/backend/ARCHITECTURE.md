@@ -1,174 +1,26 @@
----
-name: architecture
-description: Module architecture and structure
-argument-hint: N/A
----
-
 # Architecture
-
-- [Architecture](#architecture)
-  - [Language/Framework](#languageframework)
-    - [Backend](#backend)
-  - [Full project structure](#full-project-structure)
-    - [Naming Conventions](#naming-conventions)
-  - [Services communication](#services-communication)
-    - [Fight Simulation Flow](#fight-simulation-flow)
 
 ## Language/Framework
 
-### Backend
-
-- **Language/Framework**: Node.js with NestJS 11 → @packages/combat-engine/package.json
-- **API Style**: REST - Single endpoint for fight simulation
-- **Architecture**: Domain-Driven Design with hexagonal architecture - Core domain logic separated from HTTP layer
-- **ORM**: None - No database, in-memory battle simulation
-- **Schema path**: @packages/combat-engine/src/fight/http-api/dto/fight-data.dto.ts - DTOs with class-validator decorators
-- **Endpoints**: @packages/combat-engine/src/fight/http-api/fight.controller.ts - Single POST /fight endpoint
-- **Database**: None - Stateless battle simulator
-- **Caching**: None
-- **Testing**: Jest with unit tests alongside source files in `__tests__` directories
-
-## Full project structure
-
-```text
-packages/combat-engine/src/
-├── main.ts                           # Application entry point with NestJS bootstrap
-├── app.module.ts                     # Root module importing FightModule
-├── logger-middleware.ts              # HTTP request logging middleware
-└── fight/                            # Fight domain module
-    ├── fight.module.ts               # NestJS module with DI configuration
-    ├── http-api/                     # HTTP layer (adapters)
-    │   ├── fight.controller.ts       # POST /fight endpoint
-    │   ├── dto/
-    │   │   └── fight-data.dto.ts     # Request DTOs with validation
-    │   ├── targeting-strategy-factory.ts  # DTO enum → domain object mapping
-    │   ├── dodge-strategy-factory.ts
-    │   └── trigger-factory.ts
-    ├── core/                         # Domain logic (pure business logic)
-    │   ├── player.ts                 # Player entity managing deck of cards
-    │   ├── randomizer.ts             # Random number generation interface
-    │   ├── fight-simulator/          # Fight orchestration
-    │   │   ├── fight.ts              # Main fight orchestrator
-    │   │   ├── turn-manager.ts       # Turn-end effects processor; decrements shield duration
-    │   │   ├── card-death-subscriber.ts  # Event listener interface
-    │   │   ├── death-skill-handler.ts    # Triggers ally-death skills; accumulates + drains steps
-    │   │   ├── end-event-processor.ts    # Removes event-bound buffs when a skill end event fires
-    │   │   ├── skill-results-to-steps.ts # Standalone fn: SkillResults[] → Step[] (shared by ActionStage, TurnManager, DeathSkillHandler)
-    │   │   ├── stance-steps.ts          # stanceStartedReport() + stanceEndedReport(): shared by ActionStage and TurnManager
-    │   │   ├── effect-results-to-steps.ts # Pure fn: EffectResult[] → Step[] (mark_applied vs status_change + triggered debuff); shared by ActionStage and skillResultsToSteps
-    │   │   ├── reactive-skill-checker.ts # Pure fn: fires HealthReactiveSkills after each HP change → ShieldSkillResults[]
-    │   │   ├── @types/               # Fight result types
-    │   │   └── card-selectors/       # Turn order strategies
-    │   │       ├── card-selector.ts
-    │   │       ├── player-by-player.ts
-    │   │       └── speed-weighted-card-pool.ts
-    │   ├── card-action/
-    │   │   └── action_stage.ts       # Action resolution logic
-    │   ├── cards/                    # Card domain
-    │   │   ├── fighting-card.ts      # Main card entity (shield buffer, getHealthReactiveSkills(), lastAttacker, surviveSkill)
-    │   │   ├── @types/               # Card-related types
-    │   │   │   ├── card-info.ts
-    │   │   │   ├── fighting-context.ts
-    │   │   │   ├── action-result/    # Action result types (+ shield-result.ts)
-    │   │   │   ├── attack/           # Attack effects (poison, burn, freeze, stunt, mark, bleed)
-    │   │   │   ├── state/            # Status effect state
-    │   │   │   ├── alteration/       # Buff/debuff discriminated union (AlterationDetail = Buff|Debuff via polarity)
-    │   │   │   ├── shield/           # Shield value type + ShieldApplication
-    │   │   │   ├── stance/           # Stance (name + remainingTurns + granted immunities) + StanceActivation
-    │   │   │   ├── mark/             # ElementalMark + MarkedTargetBonus value objects
-    │   │   │   ├── skill-activation-conditions/  # HealthThresholdCondition
-    │   │   │   └── damage/           # Damage types (DamageType, DamageComposition, Element)
-    │   │   ├── skills/               # Card abilities
-    │   │   │   ├── simple-attack.ts
-    │   │   │   ├── multiple-attack.ts    # Multi-hit attack
-    │   │   │   ├── attack-skill.ts       # Base attack skill
-    │   │   │   ├── alteration-skill.ts   # Stat alteration skill
-    │   │   │   ├── special.ts        # Abstract special skill
-    │   │   │   ├── special-attack.ts
-    │   │   │   ├── special-healing.ts
-    │   │   │   ├── special-stance.ts # SpecialStance: a special that strikes nobody — stance, alterations, shield, concealment
-    │   │   │   ├── skill.ts          # Event-triggered skill interface + SkillKind enum (includes Shield)
-    │   │   │   ├── healing.ts
-    │   │   │   ├── heal-basis.ts     # applyHealing(): the one place a heal amount is computed (RateBasis lives in @types/rate-basis.ts)
-    │   │   │   ├── conditional-attack.ts # Attack triggered conditionally by event
-    │   │   │   ├── targeting-override.ts # Overrides card attack targeting strategy
-    │   │   │   ├── shield.ts         # ShieldSkill: HealthReactiveSkill, edge-triggered on health threshold
-    │   │   │   ├── low-health-target-bonus.ts # LowHealthTargetBonusSkill: attack bonus against a defender under a health ratio
-    │   │   │   ├── bleed-empowerment.ts # BleedEmpowermentSkill: extra stacks and a higher rate for its owner bleeds during a stance
-    │   │   │   ├── bleed-explosion.ts # BleedExplosionSkill: every bleeding card takes a share of the source attack as real damage and loses its stacks
-    │   │   │   ├── buff-transfer.ts  # BuffTransferSkill: hands its owner buffs of one type to the first card its targeting returns
-    │   │   │   ├── stance.ts         # StanceSkill: opens a stance on its owner when its event fires
-    │   │   │   ├── concealment.ts    # ConcealmentSkill: hides its owner from every enemy targeting until it attacks
-    │   │   │   ├── concealment-duration.ts # assertConcealmentDuration(): a concealment lasts a non-negative integer of turns, or until its owner attacks
-    │   │   │   ├── protection.ts     # ProtectionSkill: puts its owner in front of one ally for a duration
-    │   │   │   ├── reactive-skill.ts # HealthReactiveSkill interface
-    │   │   │   ├── survive.ts        # SurviveSkill: one-time fatal-blow interception; not a Skill implementor
-    │   │   │   ├── damage-reduction.ts # DamageReductionSkill: removes a share of each incoming hit; not a Skill implementor
-    │   │   │   ├── transformation.ts # TransformationSkill: one-shot health-reactive transformation
-    │   │   │   └── power-id-consistency.ts # Domain validation: skills with same powerId must share event + terminationEvent
-    │   │   ├── behaviors/            # Card behaviors
-    │   │   │   ├── dodge-behaviors.ts
-    │   │   │   ├── simple-dodge.ts
-    │   │   │   └── random-dodge.ts
-    │   │   └── damage/              # Damage calculation engine
-    │   │       ├── damage-calculator.ts   # Multi-type damage computation
-    │   │       └── elemental-matrix.ts    # Element effectiveness multipliers
-    │   ├── targeting-card-strategies/  # Targeting logic
-    │   │   ├── targeting-card-strategy.ts
-    │   │   ├── targeted-all.ts
-    │   │   ├── targeted-from-position.ts
-    │   │   ├── targeted-line-three.ts
-    │   │   ├── all-owner-cards.ts
-    │   │   ├── all-allies.ts
-    │   │   ├── launcher.ts
-    │   │   ├── allied-card-by-id.ts  # Targets a specific ally by ID; returns [] if dead
-    │   │   ├── last-attacker-of-ally.ts # Targets lastAttacker of a specific ally; returns [] if dead
-    │   │   ├── most-wounded-ally.ts   # Targets the ally in the worst shape below a threshold; excludes the caster
-    │   │   ├── target-and-neighbors.ts # Targets a card chosen at runtime and its two deck neighbors (living only)
-    │   │   ├── first-bleeding-enemy.ts # Targets the first enemy in deck order carrying N bleed stacks
-    │   │   ├── fastest-ally.ts        # Targets the caster's fastest living ally (buffs included); resolves with a dead caster
-    │   │   └── protected-ally.ts      # Targets the ally the caster stands in front of; empty outside a protection
-    │   └── trigger/                  # Skill trigger events
-    │       ├── trigger.ts
-    │       ├── activatable-trigger.ts  # Interface extending Trigger with activate(triggerId, context)
-    │       ├── turn-end.ts
-    │       ├── turn-start.ts         # TurnStart: fires on the acting card before its action and its special check
-    │       ├── fight-start.ts        # FightStart: fires once on every card right after fight_start, before the first action
-    │       ├── death-trigger.ts      # Parameterized trigger matching 'ally-death:<cardId>' or 'enemy-death:<cardId>'
-    │       ├── dynamic-trigger.ts    # Dormant→active trigger wrapper (composes activation + replacement triggers)
-    │       ├── bleed-stacks-applied.ts # BleedStacksAppliedTrigger: fires once when its owner has laid N bleed stacks
-    │       ├── enemy-bleed-death.ts  # EnemyBleedDeathTrigger: fires on the opposing survivors when a card bleeds out
-    │       ├── enemy-killed.ts       # EnemyKilledTrigger: fires on the killer, optionally under a victim health ratio
-    │       ├── survived.ts           # SurvivedTrigger: id='survived', fires after a card survives a fatal blow
-    │       ├── ally-health-below-threshold-trigger.ts # Edge-triggered on ally health crossing threshold downward
-    │       ├── any-ally-health-below-threshold-trigger.ts # Same, for any ally; edge-triggered per ally, skips the owner
-    │       └── damage-taken.ts       # DamageTakenTrigger: fires on every landed hit on the monitored card
-    └── tools/                        # Utility implementations
-        └── math-randomizer.ts
-```
+- **Stack**: Node.js, NestJS 11 → @packages/combat-engine/package.json
+- **API**: REST, a single `POST /fight` endpoint (@packages/combat-engine/src/fight/http-api/fight.controller.ts)
+- **Style**: DDD / hexagonal — domain (`src/fight/core/`) isolated from HTTP (`src/fight/http-api/`)
+- **State**: none. No database, no cache; a fight is simulated in memory per request
+- **DTOs**: `class-validator` decorators in `http-api/dto/fight-data.dto.ts`
+- **Tests**: Jest, unit tests in `__tests__` next to the source
+- **File tree**: see [CODEBASE_STRUCTURE.md](../CODEBASE_STRUCTURE.md) (single source for paths)
 
 ### Naming Conventions
 
-- **Files**: kebab-case
-- **Classes**: PascalCase
-- **Functions**: camelCase
-- **Variables**: camelCase
-- **Constants**: UPPER_CASE (for maps and enums)
-- **Types/Interfaces**: PascalCase
-- **Private methods**: camelCase with private keyword
+Files kebab-case · classes/types PascalCase · functions/variables camelCase · constants UPPER_CASE · private methods camelCase with `private`.
 
-## Services communication
-
-### Fight Simulation Flow
-
-HTTP Request flows from controller through domain layers using dependency injection and factory pattern.
+## Fight Simulation Flow
 
 ```mermaid
 sequenceDiagram
     participant Client
     participant Controller as FightController
-    participant Factory as FIGHT_SIMULATOR_BUILDER
-    participant Fight as Fight Orchestrator
+    participant Fight as Fight
     participant ActionStage as ActionStage
     participant TurnManager as TurnManager
     participant CardSelector as CardSelector
@@ -176,136 +28,124 @@ sequenceDiagram
     participant DeathHandler as DeathSkillHandler
 
     Client->>Controller: POST /fight (FightDataDto)
-    Controller->>Controller: Convert DTOs to domain objects
-    Controller->>Controller: Create Players with decks
-    Controller->>Factory: Build Fight instance
-    Factory-->>Controller: Fight simulator
-    Controller->>Fight: start()
+    Controller->>Controller: DTOs -> domain objects, Players with decks
+    Controller->>Fight: build via FIGHT_SIMULATOR_BUILDER, start()
 
     loop Until winner or 100 turns
         Fight->>CardSelector: nextCards()
-        CardSelector-->>Fight: Selected cards
-
         Fight->>ActionStage: computeNextAction(cards)
         loop For each non-frozen card
-            ActionStage->>Card: isSpecialReady() / launchAttack() / launchSpecial()
-            Card-->>ActionStage: AttackResult[] / HealingResult[]
-            ActionStage->>ActionStage: Apply damage/healing to targets
-            ActionStage->>ActionStage: Check for deaths
+            ActionStage->>Card: launchAttack() / launchSpecial()
+            ActionStage->>ActionStage: apply damage/healing, check deaths
             ActionStage->>DeathHandler: notifyDeath(player, deadCard)
-            DeathHandler->>Card: launchSkill('ally-death:<id>') on survivors
-            DeathHandler->>DeathHandler: processEndEvent() via EndEventProcessor (if skill emits endEvent)
-            ActionStage->>DeathHandler: drainSteps()
-            DeathHandler-->>ActionStage: Death-triggered skill steps + buff_removed steps
+            DeathHandler->>Card: launch death skills on survivors (+ end events)
+            DeathHandler-->>ActionStage: drainSteps()
         end
-        ActionStage-->>Fight: Action steps
-
         Fight->>TurnManager: endTurn(cards)
         loop For each card
-            TurnManager->>Card: decreaseBuffAndDebuffDuration()
-            TurnManager->>Card: launchSkill('turn-end')
-            TurnManager->>Card: applyStateEffects() (poison, burn, freeze)
-            TurnManager->>TurnManager: Check for deaths
-            TurnManager->>DeathHandler: notifyDeath(player, deadCard)
-            DeathHandler->>Card: launchSkill('ally-death:<id>') on survivors
-            DeathHandler->>DeathHandler: processEndEvent() via EndEventProcessor (if skill emits endEvent)
-            TurnManager->>DeathHandler: drainSteps()
-            DeathHandler-->>TurnManager: Death-triggered skill steps + buff_removed steps
+            TurnManager->>Card: durations, 'turn-end' skills, regeneration, status ticks
+            TurnManager->>DeathHandler: notifyDeath(...) + drainSteps()
         end
-        TurnManager-->>Fight: Turn-end steps
-
-        Fight->>Fight: Append steps to FightResult
     end
-
-    Fight->>Fight: computeWinner()
-    Fight-->>Controller: FightResult
-    Controller-->>Client: JSON response with step-by-step fight log
+    Fight-->>Controller: FightResult (step-by-step log)
+    Controller-->>Client: JSON
 ```
 
-**Key architectural patterns:**
+## Key Patterns
 
-- **Hexagonal Architecture**: Core domain (`src/fight/core/`) isolated from HTTP layer (`src/fight/http-api/`)
-- **Factory Pattern**: `FIGHT_SIMULATOR_BUILDER` injectable factory creates Fight instances with dependencies
-- **Strategy Pattern**:
-  - Card selection strategies (`PlayerByPlayerCardSelector`, `SpeedWeightedCardSelector`)
-  - Targeting strategies (position-based, all-enemies, line-three, etc.)
-  - Dodge behaviors (simple, random)
-- **Observer Pattern**: `CardDeathSubscriber` interface for death notifications. `DeathSkillHandler` implements it: on each death it fires `ally-death:<cardId>` skill triggers on the dead card's team's surviving cards AND `enemy-death:<cardId>` triggers on the opponent team's surviving cards. Accumulates resulting steps and exposes `drainSteps()` for callers (`ActionStage`, `TurnManager`) to collect them immediately after each death event. Handles all three skill kinds: **Healing** → `StepKind.Healing`, **Buff** → `StepKind.Buff`, **Debuff** → `StepKind.Debuff`. Also processes `endEvent` from skill results via `EndEventProcessor`, emitting `buff_removed` steps inline
-- **Dependency Injection**: NestJS provider system for `FIGHT_SIMULATOR_BUILDER`
-- **Value Objects**: Immutable types for attack effects, buffs, debuffs, damage compositions
-- **Rich Domain Model**: `FightingCard` encapsulates stats, behaviors, element, and state mutations
-- **Multi-Damage System**: `DamageCalculator` computes damage from multiple `DamageComposition` entries (type + rate), applying `ElementalMatrix` multipliers based on attacker damage types vs defender element
-- **Buff Condition System**: `BuffApplication` has optional `condition: BuffCondition` and `conditionMultiplier`. If the condition evaluates to true at buff application time, the rate is multiplied. `buff-condition-factory.ts` maps `BuffConditionType` enum → `BuffCondition` instance. First implementation: `AllyPresenceCondition` checks that a named ally is alive in the source player's team.
-- **Probability Activation Condition**: `ProbabilityCondition` is an `AlterationCondition` that rolls its chance at each evaluation and reads neither source nor context — it is the activation chance of the skill itself, the counterpart of `AttackEffect.probability` for event-driven skills. Passed as `AlterationSkill.activationCondition`, it makes a triggered alteration fire only a share of the times its event fires: a failed roll targets nobody, does not count towards `activationLimit`, and emits no step. Reaches the domain through `buildAlterationCondition()`, which takes an optional `Randomizer` so tests can inject a fake. Only `AlterationSkill` carries an `activationCondition` today, so `HEALING` and `CONDITIONAL_ATTACK` cannot be gated this way yet.
-- **Event-Driven**: Skills triggered by events (`turn-end`, `next-action`, `ally-death:<cardId>`, `enemy-death:<cardId>`, `damage-taken-<cardId>`), extensible trigger system. `DeathTrigger` is a single parameterized class replacing the former `AllyDeath`/`EnemyDeath` classes — instantiated with a `DeathPrefix` (`'ally-death'` or `'enemy-death'`) and a `targetCardId`, matching the pattern `<prefix>:<targetCardId>`
-- **Dynamic Trigger**: `DynamicTrigger` wraps an activation trigger and a replacement trigger. Starts dormant (all `isTriggered()` return false). When the activation event is observed, flips to active and delegates to the replacement trigger. Enables skills that start inactive and become triggered mid-battle (e.g., healing skill dormant until an ally dies, then triggers on enemy death)
-- **Unified Special Result**: `Special.launch()` returns `SpecialResult` containing both `actionResults` (AttackResult[] or HealingResult[]) and `buffResults` (BuffResults) for consistent handling across attack and healing specials
-- **Event-Bound Buff Termination**: `Buff` type has optional `terminationEvent?: string`. Skills have optional `activationLimit` and `endEvent`. When a skill reaches its activation limit (or its owner dies), it emits its `endEvent`. `EndEventProcessor` scans all playable cards and removes buffs matching that event name, emitting a `StepKind.BuffRemoved` step. `SkillResults` carries an optional `endEvent` field so callers know to trigger `EndEventProcessor`.
-- **Event-Bound Effect Termination**: `CardState` (poison, burn, freeze) has optional `terminationEvent?: string`. When `EndEventProcessor` fires an end event, it also scans all living cards for status effects matching that event and removes them, emitting a `StepKind.EffectRemoved` step. The `terminationEvent` flows from `EffectDto` → `AttackEffect` → `CardState`.
-- **Skill Lifecycle Interface**: `Skill` interface has two optional lifecycle methods: `tick?()` (advance internal state each turn) and `lifecycleEndEvent?()` (return end event name if skill is active and lifecycle-limited). `Healing` fully implements this: it tracks `activationCount`, stops triggering after `activationLimit` is reached, and emits `endEvent` on the last activation. `ConditionalAttack` does the same, but counts only an attack that struck somebody, so a fire that found nobody keeps its activation — `activationLimit: 1` on `ally-health-below` is a once-per-fight ultimate, the edge trigger rearming on a heal no longer firing it twice.
-- **Skill `launch()` signature**: All `Skill` implementations accept an optional third parameter `targetingStrategy?: TargetingCardStrategy`. When provided, it overrides the skill's own default targeting strategy. Currently used to propagate active targeting overrides from `FightingCard` down to attack/skill launches.
-- **`TargetingOverrideSkill` null-safe strategy resolution**: When the `strategyResolver` returns `null` (e.g., `killerCard` absent in context), the skill returns empty results instead of throwing. Callers must handle the no-op gracefully.
-- **`ActionStage` constructor requires `DeathSkillHandler`**: `ActionStage` now receives `DeathSkillHandler` directly so it can drain death-skill steps inline after each kill, ensuring correct step ordering within the action phase.
-- **`AttackResult.remainingHealth`**: `AttackResult` carries an explicit `remainingHealth` snapshot taken at damage-calculation time, used in reports instead of re-reading the card's current health (which may have been mutated by subsequent hits).
-- **Multi-Effect Attack System**: `SimpleAttack` and `MultipleAttack` accept `effects?: AttackEffect[]` (array, replaces former single `effect?`). `MultipleAttack` additionally accepts `comboFinisherEffects?: AttackEffect[]`, applied only on the combo finisher hit, so a combo can carry an effect its regular hits do not. `SpecialAttack` retains a single `effect?: AttackEffect`. Each effect in the array is evaluated independently; effects with `probability` set are skipped when the random roll fails.
-- **STUNT Status Effect**: `CardStateStunted` prevents the card from acting (same skip condition as freeze: `card.frozenLevel > 0 || card.isStunted`) and amplifies incoming damage by 20% via `applyDamageRate()`. No damage tick. Does not stack — `StuntAttackEffect.applyEffect()` returns early if the defender is already frozen or stunted. Duration: `2 * level - 1` turns.
-- **`AttackEffect.probability`**: Optional `0-1` field on the `AttackEffect` interface. Effect classes guard `applyEffect()` with `if (probability !== undefined && randomizer.random() >= probability) return`. Randomizer is injected via constructor, not via `FightingContext`.
-- **`skill-results-to-steps.ts`**: Standalone pure function extracted from `ActionStage`, mapping `SkillResults[]` to `Step[]` for reuse across `ActionStage`, `TurnManager`, and `DeathSkillHandler`.
-- **`effect-results-to-steps.ts`**: Pure function mapping the `EffectResult[]` of one hit to its steps — `StepKind.MarkApplied` for an elemental mark, `StepKind.StatusChange` for the status effects, followed by a `StepKind.Debuff` step when the effect rolled a `triggeredDebuff`, credited to the attacker. `ActionStage` and `skillResultsToSteps()` both route through it, so a reactive attack (counter attack, death-triggered attack) reports its effects exactly like a regular one.
-- **BLEED Status (Stacked)**: every other status holds one slot per card and a new application overwrites it; a bleed accumulates. `CardStateBleeding` keeps a list of stacks, each with its own remaining turns, damage (`rate × source attack`, or `rate × target max health` when the effect `basis` is `target-max-health` — fixed at application like poison) and termination event, and ticks for their sum at turn end, dropping the expired ones — so stacks applied at different turns expire independently. `setState()` merges a new bleeding into the running one, which keeps the immunity (`damage-over-time`) and resistance checks in one place; the cap lives in `BleedAttackEffect`, which trims the stacks to the room left and returns nothing at the cap, the way a mark does. A frozen card cannot receive a bleed, and a freeze pauses a running one — no damage and no stack duration spent until the card thaws, the way a poison waits. `status_change` carries the stack count after application and `state_effect` the `remainingStacks`; an end event removes only the stacks it bound.
-- **Multi-Hit Special**: `SpecialAttack` takes an optional `hits` (default 1, so every existing special keeps its behaviour). Each hit re-targets the living cards, rolls one critical shared by the cards it strikes (exactly what a single-hit special did) and resolves each of them through `strike()` — protector swap, dodge, damage, then the special `effect` on a landed hit. The alterations, shield and stance still apply once, after the last hit.
-- **DODGE_BONUS_DENIAL Skill Pattern**: `DodgeBonusDenialSkill` follows the SURVIVE plumbing — no event, no targeting, extracted from `others[]` (the controller lists these card-bound kinds in `CARD_BOUND_SKILL_KINDS`) and stored on the attacker's `FightingCard`. `FightingCard.dodge()` now takes the **attacker** rather than its accuracy, so the defender can ask `attacker.deniesDodgeBonusOf(this)` and, when it bleeds, dodge with `agilityWithoutBuffs` (base agility minus debuffs) instead of `actualAgility`. The rule belongs to the attacker but the roll to the defender, which is why it sits in `dodge()` and not in each attack skill.
-- **BLEED_STACK_SCALING Skill Pattern (Attack Power)**: `BleedStackScalingSkill` is the fourth card-bound passive (`CARD_BOUND_SKILL_KINDS`). It is dedicated to the bleed, the one stacked status, rather than parameterised by status. Its multiplier depends on the whole board — every bleed stack on a living card of either team — which the card cannot see on its own, so it is read through `FightingCard.attackPower(context)`: `actualAttack × multiplierFor(context)`, the multiplier being 1 when nothing bleeds. Every place an action reads its striker's attack goes through it — the three attack skills and the poison, burn and bleed effects (whose `context` parameter is now used) — so the bonus follows the stacks as they are applied and expire, without a buff to refresh. A card without the passive, or a call without a context, gets its plain `actualAttack`. Heals still read `actualAttack`.
-- **LOW_HEALTH_TARGET_BONUS Skill Pattern (Attack Power against a Defender)**: `LowHealthTargetBonusSkill` is the sixth card-bound passive (`CARD_BOUND_SKILL_KINDS`). Its bonus depends on the defender, so `FightingCard.attackPower(context, defender?)` takes an optional defender and multiplies by `multiplierAgainst(defender)` — `1 + rate` when `defender.healthRatio < threshold`, read before the hit lands. The three attack skills pass their defender (`MultipleAttack` now reads the power per defender, finisher included, its amplifier applied on top), so triggered attacks built on them get it too; the poison, burn and bleed effects and `BleedExplosionSkill` pass none and keep the plain power, and heals still read `actualAttack`. It multiplies with `BLEED_STACK_SCALING` and with the special own `MarkedTargetBonus`.
-- **BLEED_EMPOWERMENT Skill Pattern**: `BleedEmpowermentSkill` is the fifth card-bound passive (`CARD_BOUND_SKILL_KINDS`). It reads its owner stance itself (`empower(owner, { stacks, rate })`), since a card-bound passive is never filtered by `launchSkills()`. `BleedAttackEffect` asks the **source** through `FightingCard.empowerBleed()` before computing the damage and the room left, so the extra stacks still stop at `maxStacks` and count in `bleedStacksApplied`. The rate is replaced, not added to. The `BleedApplication` the effect hands over carries its stacks, rate, duration, basis and triggered debuff; the skill returns it with the extra stacks, its own rate and whichever of `duration`, `basis` and `triggeredDebuff` its `BleedEmpowermentOverrides` set (Selkhet's Griffures: 4 turns and a regeneration debuff on top of a 3% rate), the rest kept from the effect.
-- **Special Energy Refund**: `EnergyRefund` (`amount` + `minAccuracyMargin`, `@types/attack/energy-refund.ts`) is an optional `SpecialAttack` parameter. After the hits, `amountFor(source, target)` compares the caster accuracy with the agility of the primary target — the first defender struck, protector included — and reports `SpecialResult.energyRefund` when the margin is strictly exceeded. `ActionStage` hands it to `resetSpecialEnergy(refund)`, which sets the gauge to the refund instead of 0, so the `special_attack` step energy shows it. The agility read is `FightingCard.agilityAgainst(attacker)`, the very value `dodge()` rolls with, so a DODGE_BONUS_DENIAL owner measures its margin against the bonus-free agility too.
-- **Defense Penetration**: `DamageCalculator.calculateDamage()` takes an optional `defensePenetration` in `[0, 1]` (it throws outside) and subtracts `actualDefense × (1 − defensePenetration)` from each composition, so 0 — the default every existing attack keeps — subtracts the whole defense and 1 ignores it. `SimpleAttack` and `MultipleAttack` (finisher included) carry it as an optional last constructor parameter; only `CONDITIONAL_ATTACK` exposes it through its DTO today.
-- **Turn-Start Ultimate (Exsanguination)**: Scythra already spends her one special, so her ultimate is a `CONDITIONAL_ATTACK` on `turn-start`. `ActionStage.launchTurnStartSkills()` launches that event on each acting card right after `tickSkills()` and **before** `isSpecialReady()`, keeping only attack results that struck somebody, each turned into its own `AttackReport` through `handleAttackResult()` — so deaths, reactions and effects behave like any attack — placed before the action report. `next-action` could not serve: it replaces the attack and is skipped when the special is ready. `ConditionalAttack.energyCost` refuses to fire below the cost and spends it (`FightingCard.spendEnergy()`) only when the attack struck somebody, which is why paying it before the special check can delay the special. `FirstBleedingEnemyStrategy` picks the first enemy in deck order at `stackThreshold` stacks. `BleedDetonation` (`@types/attack/bleed-detonation.ts`, `SimpleAttack` only) consumes every stack of the defender after the dodge roll (`FightingCard.consumeBleedStacks()`) and replaces the attack compositions with one PHYSICAL composition of `ratePerStack × consumed stacks`, reported as `AttackResult.consumedBleedStacks`; it combines with `defensePenetration`.
-- **Undamaged Since Last Action (Embuscade Tectonique)**: `FightingCard.beginAction()` — called by `ActionStage.computeNextAction()` before `tickSkills()`, so a frozen or stunned card does not begin one — compares `receivedDamages` with its snapshot from the previous action start, which is why every health loss counts (attacks, status ticks, bleed detonation, transformation cost) and a hit the shield absorbed or a dodge never does. The answer, `damagedSinceLastAction`, holds for the whole action. The `Skill` interface gains an optional `requiresUndamaged`, gated in `FightingCard.launchSkills()` beside `requiredStance`: a blocked skill is never launched, so `EveryNTurnsCondition` keeps its counter and the skill fires at the first eligible action, and on `next-action` the card falls back to its plain attack. `ConditionalAttack` and `ConcealmentSkill` set it; the controller refuses it on any other kind through `KIND_ONLY_FIELDS` (each entry lists the kinds allowed to carry its fields).
-- **Hit Alterations (Fracture, Terrain d’Obsidienne)**: `HitAlterations` (`@types/attack/hit-alterations.ts`: a list of `{ polarity, type, rate, duration, terminationEvent? }`) is an optional `ConditionalAttack` parameter. It carries no targeting: `apply(results)` alters each distinct defender of the main attack that did not dodge and is still alive, so a multi-hit attack alters a defender once, and debuffs go through `applyDebuff()` (resistance applies). It runs after the hit effects and before the low-health debuff and the splash, and comes back as `AttackSkillResults.hitAlterations` (named after the skill). `hitAlterationResults()` (`skill-results-to-steps.ts`) turns it into a Buff and a Debuff skill result, reported right after the attack step by `skillResultsToSteps()` and, through `AttackReport.hitAlterationSteps`, by both `ActionStage` paths (turn-start and next-action); an empty side reports nothing. A dedicated `hitAlterations` field, not `statAlterations`, because `StatAlterationDto` requires a targeting and the TRANSFORMATION skill already uses that field.
-- **Dive and Delayed Strike (Embuscade Tectonique)**: rather than a delayed attack, the ambush composes two skills. The dive is a `ConcealmentSkill` that also takes a `stanceActivation`, a cooldown `AttackCondition` (`EveryNTurnsCondition` from `interval`, ticked by `tickSkills()` and reset on launch) and `requiresUndamaged`; its result carries `stanceStarted`, reported after `concealment_started`. On `next-action`, `ActionStage.launchNextActionSkills()` falls back to `diveReport()` when no attack fired but a concealment did: the action is a `SkillStepsActionReport` (`kind: skill_steps`, its steps from `skillResultsToSteps()`), so the card does not attack and stays concealed. The strike is a `ConditionalAttack` on `turn-start` requiring that stance with `endsStance`: once it targeted somebody it calls `FightingCard.endStance()` and reports `AttackSkillResults.stanceEnded` (`stanceEndedReport()`, shared with `TurnManager`), so it fires once per dive; striking lifts the concealment through `revealAttacker()` as any attack does. With a one-turn stance, a card stunned or frozen underground skips `turn-start` and the stance runs out at turn end without a strike.
-- **Execution (Jugement de l’Obsidienne)**: `Execution` (`@types/attack/execution.ts`, threshold in `]0, 1[`) is an optional parameter of `ConditionalAttack` and `SpecialAttack`. Once the main attack is over, `apply(results)` finishes off each distinct defender it hit, not dodged, still alive and strictly under the threshold, through `FightingCard.execute()`: every remaining health point as real damage (`addRealDamage()`, so shield and damage reduction are bypassed, and the health ratio before the blow is recorded for `enemy-killed`), unless an unconsumed SURVIVE holds it at 1 HP. It runs inside `launch()`, before `handleAttackResult()`, which is why the death needs no new plumbing: the defender is already dead when its result is read, so `status_change: dead` and the cascade follow with the attacker as killer. The `ExecutionResult[]` come back as `AttackSkillResults.executions` / `SpecialResult.executions`; `executionSteps()` (`fight-simulator/execution-steps.ts`) reports an `executed` step per defender plus `survived` when SURVIVE held, placed right after the attack step by `skillResultsToSteps()` and, through `AttackReport.executionSteps`, by the turn-start, next-action and special paths of `ActionStage`, which also launch the `survived` skills of a defender SURVIVE kept (`survivedReactions()`, shared with `handleAttackResult()`). In `ConditionalAttack` it is applied before the hit alterations, so an executed defender is not altered.
-- **Splash (Vent Écarlate)**: `Splash` (`@types/attack/splash.ts`: name + damages + effects) is an optional `ConditionalAttack` parameter. Once the main strike targeted somebody, it builds a `SimpleAttack` on `TargetAndNeighborsStrategy(center)` — the primary target (`interceptedFor ?? defender`) and its neighbors through `Player.threeCardsFromCenter()` — so dodge, protection and shields apply as for any hit, and returns it as `AttackSkillResults.splash`. `ActionStage` (turn-start path) and `skillResultsToSteps()` report it as a second attack step right after the main one, and so does the `next-action` path (a low-health debuff is reported there as on turn-start). Following a `BleedDetonation`, the target gets its new stacks after losing the old ones.
-- **Low-Health Debuff (Choc Hémorragique)**: `LowHealthDebuff` (`@types/attack/low-health-debuff.ts`: name + threshold + debuff specs) is an optional `ConditionalAttack` parameter. After the main hit, and **before** the splash so only that hit counts, it debuffs the main defender (when not dodged) if it is alive with `healthRatio < threshold` — already being under the threshold is enough. Debuffs go through `applyDebuff()`, so resistance applies. Returned as `AttackSkillResults.lowHealthDebuff` and reported as a `debuff` step between the main attack step and the splash, through `ActionStage.buildDebuffReport()` (shared with the special) and `skillResultsToSteps()`.
-- **Legacy Bleed Explosion (Héritage)**: `ConditionalAttack` takes an optional `stanceActivation`, opened only when the attack fires (`AttackSkillResults.stanceStarted`, reported as `stance_started` after the attack step), so the ultimate opens « Transe prédatrice » itself. `BleedExplosionSkill` (`BLEED_DETONATION`) on `self-death` with `requiresStance` runs on the dead owner: a dead card keeps its stances until turn end, so `launchSkills()` still lets it through. Every living bleeding card of both teams takes `rate × attackPower(context)` via `addRealDamage()` (defense ignored, once per card) and loses its stacks, reported as `AttackResult.consumedBleedStacks` like a `BleedDetonation`. `DeathSkillHandler` collects the defenders its self-death phase killed and announces them through `notifyKill` — wired by `Fight` to the whole event broker, the card selector included — so each runs its own cascade; `notifyDeath()` ignores a card already notified, which keeps a death reported again by the attack that started the cascade from running twice. `skillResultsToSteps()` now skips an attack that struck nobody.
-- **Bleed Stack Bonus**: `BleedStackBonus` (`minStacks` + `damageType` + `multiplier`, `@types/attack/bleed-stack-bonus.ts`) is an optional parameter of `SimpleAttack`, `MultipleAttack` (finisher included) and `SpecialAttack`. When the defender already bleeds from at least `minStacks` stacks, `applyTo()` returns the attack compositions with the rate of that damage type multiplied, and leaves the others untouched — so only the physical share of a mixed physical/wind hit grows. It rewrites the compositions rather than the attack power, which is why `DamageCalculator` needed no change, and unlike `MarkedTargetBonus` (whole power, specials only) it targets one damage type. It is read before the hit applies its own effects, so the stacks that hit is about to add do not count.
-- **Damage Type Bonuses**: `BleedStackBonus` and `ConcealedBonus` (`concealedBonus`, Selkhet's « depuis la Dissimulation ») share the abstract `DamageTypeBonus` (`@types/attack/damage-type-bonus.ts`): a damage type, a multiplier (> 0, it throws otherwise) and the rewrite of the compositions; each subclass only says when it is earned — `isEarned(attacker, defender)`, the defender's bleed stacks for one, the attacker's concealment for the other. `SimpleAttack`, `MultipleAttack` and `SpecialAttack` take a `damageBonuses: DamageTypeBonus[]` (default `[]`) applied in order through `applyDamageBonuses()`, so two bonuses on the same type multiply. The concealment is read during the attack and lifted only after it by `revealAttacker()`, which is why every hit of a multi-hit action struck from concealment gets the bonus.
-- **Marked Target Bonus**: `MarkedTargetBonus` (`damageType` + `multiplier`) is an optional `SpecialAttack` parameter. `multiplierFor(defender)` returns the multiplier when the defender already carries a mark of that damage type, otherwise 1; it multiplies the attack power before `DamageCalculator` runs, and is evaluated before the special applies its own effect.
-- **Elemental Mark Mechanic**: `MarkAttackEffect` (an `AttackEffect`, so it plugs into `effects?: AttackEffect[]` with an optional `probability`) applies an `ElementalMark` (`damageType` + `ratePerStack` + `maxStacks`) on the defender. `FightingCard` keeps one independent stack counter per damage type (`applyMark()`, `markStacks()`, `markAmplifier()`); `DamageCalculator` multiplies each damage composition by the defender amplifier for that type, after the elemental matrix and before defense. Marks never expire and cap at `maxStacks`; an application at the cap is a no-op and emits no step. Each application emits a `StepKind.MarkApplied` step carrying the resulting stack count. Like the status effects, a mark accepts an optional `triggeredDebuff` rolled when it lands, which powers "apply a debuff when the mark is applied" passives.
-- **Shield Mechanic**: `FightingCard` maintains an optional shield buffer (`{ points, duration }`). `applyShield(rate, duration)` sets `points = rate * maxHealth`. All damage flows through `applyFinalDamage()` returning `{ damageToHealth, shieldAbsorbed }` — shield absorbs first. Shield breaks on depleted points → `shield_broken` step. `TurnManager.decreaseShieldDuration()` called each turn; expiry → `shield_expired` step. Specials can apply shields post-action via `shieldApplication?: ShieldApplicationDto` (independent targeting).
-- **Stance Mechanic**: a stance is a named posture a card holds for a number of turns (`FightingCard.activateStance()`, `hasStance()`, `decreaseStanceDurations()`), optionally carrying the status categories its bearer refuses while it runs, and the `Skill` interface carries an optional `requiredStance`. `FightingCard.launchSkills()` filters out skills whose stance is not running, so a skill bound to one stays silent outside it — gating there rather than in `isTriggered()` keeps triggers about events only and emits no empty step for a skill that did not run. `SpecialAttack` opens a stance through `stanceActivation` and reports it as `SpecialResult.stanceStarted`, which `ActionStage` turns into a `StepKind.StanceStarted` step; `TurnManager` decrements every stance at turn end and emits `StepKind.StanceEnded`. Re-activating a running stance refreshes its duration instead of stacking, so re-casting the granting power does not double its length. This is how an ability lasts exactly as long as the power that granted it — a counter attack answering only the hits taken while its special runs. A `STANCE` skill (`StanceSkill`) opens one from any event — the triggered counterpart of `stanceActivation` — and reports `SkillKind.Stance`, mapped to the same `stance_started` step. Only `ConditionalAttack` and `BLEED_EMPOWERMENT` can require a stance today.
-- **TRANSFORMATION Skill Kind (Reactive)**: `TransformationSkill implements HealthReactiveSkill`, reusing the SHIELD plumbing. It is one-shot: once consumed it never fires again in the fight. On launch it calls `startTransformation(name, duration, endCostRate)` on its owner, applies its `Alteration[]`, and turns on `applyLifesteal()` and `applyStatusImmunity()` for the same duration. `TurnManager` decrements all four counters at each turn end; when the transformation runs out it charges the end cost (clamped so the owner keeps at least one health point) and emits `transformation_ended`. The launch itself emits `transformation_started` plus the usual buff step, both mapped from the new `SkillKind.Transformation` results.
-- **An Event Owning its `activationCondition`**: `any-ally-health-below` reads `activationCondition.threshold` as the trigger's own threshold, so the generic `ALTERATION` path must **not** build an `AlterationCondition` from the same field — doing so gated the skill a second time on the *caster's* health, and a guardian in perfect shape never answered its wounded ally. `ownsActivationCondition()` names the events that claim the field; `ally-health-below` was already safe through its own early-return branch. Only `AlterationSkill` carries an `activationCondition`, so it is the only kind that could collide.
-- **Bleed Stacks Applied (running total)**: `FightingCard` counts the bleed stacks it has **laid** (`bleedStacksApplied`, fed by `BleedAttackEffect` after `setState()` accepted them, so stacks lost at the cap or refused never count). After every attack of its action, `ActionStage.dispatchBleedStacksApplied()` launches `bleed-stacks-applied:<count>` on the living attacker; `BleedStacksAppliedTrigger` fires once when the count reaches its threshold, carried by `OtherSkillDto.stackThreshold` (not `activationCondition`, which is a health ratio). Each trigger instance holds its own once-flag, so every skill of a composite power on that event fires.
-- **Death Cause (Enemy Bleed Death)**: `CardDeathSubscriber.notifyDeath()` takes an optional `cause` — the `StateEffectType` whose tick killed the card, absent for a kill by an attack. Only `TurnManager` knows it, so it passes it on; a lethal tick combining several statuses is credited to the bleed as soon as the bleed ticked. `DeathSkillHandler` adds a fifth phase after `enemy-death`: on a `bleed` cause it fires `enemy-bleed-death` on the opposing survivors. `EnemyBleedDeathTrigger` names nobody, so a predator answers whoever bled out.
-- **Enemy Killed (the killer's reward)**: `DeathSkillHandler` adds a sixth phase, last in the cascade: when an attack killed the card and its killer is alive on the opposing team, it fires `enemy-killed:<ratio>` on the killer alone, `<ratio>` being `FightingCard.healthRatioBeforeLastDamage` — the victim health ratio recorded at the start of `applyFinalDamage()` and `addRealDamage()`, since its health is already 0 when the death is reported. `EnemyKilledTrigger` takes an optional threshold (owned by the event through `ownsActivationCondition()`, like `any-ally-health-below`) and fires only when that ratio is strictly below it, which is how "kill an enemy under 30%" is expressed. A status tick carries no killer, so it never fires the event.
-- **Self-Death Pattern (a card's last words)**: every other death trigger runs on somebody else — `DeathSkillHandler` fires `ally-death` and `enemy-death` on `playableCards`, so the fallen card never acts on its own death. `SelfDeathTrigger` (event `self-death`, matching `self-death:<ownerId>`) closes that gap, and the handler gains a phase running on the dead card alone, placed **after** the lifecycle end-events and **before** the survivors answer: what a card leaves behind must land first, so an ally's reaction builds on the legacy rather than racing it. Paired with `ProtectedAllyStrategy` (targeting `protected-ally`, reading `source.protectedAlly`), it expresses a guardian's parting gift without naming anybody: the protection itself says who, and its absence says nobody, so the gift is automatically conditioned on the power having been running. That strategy deliberately does **not** check whether the caster is alive — the caster is precisely the card that just died — but it does drop a dead target.
-- **Empty Skill Results Report Nothing**: `skillResultsToSteps()` skips the step when a skill's results are empty, for healings and attacks as it already did for alterations and shields. Targeting that legitimately comes back empty is now ordinary — a protected ally when no protection runs, a linked ally already dead — and an empty `heal: []` step in the log would be noise.
-- **PROTECTION Skill Kind (Attack Interception)**: a guardian steps in front of one ally, and attacks aimed at that ally are resolved against the guardian. The redirect happens at **targeting** time, not damage time: each of the three attack skills (`SimpleAttack`, `MultipleAttack`, `SpecialAttack`) asks `context.opponentPlayer.protectorOf(target, attacker)` right after its targeting strategy returns, and swaps the defender before anything is rolled — so the dodge, the defence, the element, the shield and the damage reduction are all the guardian's, which is what stepping in front means. Redirecting after the roll would have computed the numbers against the ally and charged them to the guardian. `Player.protectorOf()` scans the living teammates for one whose protection names that card, so a dead guardian stops protecting with no bookkeeping — and so does a concealed one the attacker cannot see (it asks each teammate `isTargetableBy(attacker)`), which is why a PROTECTION plus CONCEALMENT card only intercepts attackers holding a `revealsConcealed` stance. The protection buffer lives on the **protector** (`protect()`, `isProtecting()`, `protectedAlly`, `decreaseProtectionDuration()`), so its duration ticks on the guardian's own turns like the stance and the shield, matching the clock of the power that granted it; re-casting refreshes or moves it rather than stacking. `AttackResult.interceptedFor` carries the ally the hit was aimed at, which `ActionStage` turns into a `StepKind.AttackIntercepted` step beside `survived` and `damage_mitigated`. One consequence worth knowing: an attack on all hits the guardian twice — once for itself, once for its ward — which is the literal reading of intercepting every attack aimed at the ally. `ProtectionSkill` covers the first card its targeting returns and treats an empty targeting as a no-op that spends no `activationLimit`, so a guardian whose team is healthy keeps its one shot.
-- **Heal Basis**: `applyHealing(source, target, rate, basis?)` (`skills/heal-basis.ts`) is the one place a heal amount is computed, shared by `Healing` and `SpecialHealing` — the `source.actualAttack * rate` formula used to be duplicated in both. `RateBasis` (`@types/rate-basis.ts`, shared with the bleed) says what the rate is a share of: `source-attack` (the default, so every existing card keeps its behaviour) or `target-max-health`, which reads the receiver through `FightingCard.healShareOfMaxHealth()` and is how "the ally recovers 10% of its health per turn" is expressed — a heal the same size whoever casts it. Keeping the multiplication inside the card, like the shield and lifesteal buffers already do, means no caller needs the maximum health itself. An unknown basis throws rather than falling back. Only `HEALING` exposes the choice through its DTO today; `SpecialHealing` passes the default.
-- **Lifesteal**: `FightingCard` holds an optional `{ name, rate, remainingTurns }` buffer. `ActionStage` calls `stealLife()` once per landed hit of an attack and pushes a single aggregated healing step named after the granting skill.
-- **Status Immunity**: `FightingCard.setState()` returns whether the state was accepted, and refuses a status when `isImmuneTo()` covers its category. `StatusCategory` (`/state/status-category.ts`) classes the four statuses by what they do to their bearer — `freeze` and `stunt` are `control`, `poison` and `burn` are `damage-over-time` — through the pure `statusCategoryOf()` mapping, so the state classes carry no category of their own. `isImmuneTo(category)` is true when a blanket immunity is running (a transformation, which covers every category) or when a running stance lists that category in its `immunities`, which is how a power grants immunity to control alone for exactly its own duration. The four status effects report nothing when refused. `FreezeAttackEffect` checks the immunity **before** its burn interaction, so an immune card does not lose its burn to a freeze that cannot land. Elemental marks are not status effects and no immunity refuses them.
-- **SHIELD Skill Kind (Reactive)**: `SkillKind.Shield` with `ShieldSkill implements HealthReactiveSkill`. The `HealthReactiveSkill` interface adds `isHealthReactive: true` and `onHealthChanged(card): boolean`. `ShieldSkill` is edge-triggered: fires once when `card.healthRatio` crosses the `HealthThresholdCondition` threshold downward, rearms when health goes back above. `triggerReactiveSkills()` (`reactive-skill-checker.ts`) is a pure function called after each HP change in `ActionStage`. `OtherSkillDto.event` is optional — SHIELD kind has no event trigger.
-- **Regeneration Stat**: an optional base stat (default 0) restoring raw health points at each turn end. `FightingCard.regenerate()` heals `actualRegeneration`, so a `regeneration` buff raises it like any other stat, and returns what was actually healed — 0 at full health or on a dead card, where nothing is reported. `TurnManager` calls it **before** `processCardEffectStates()`: the card mends itself, then the poison bites into what is left. A non-zero heal emits a `StepKind.Regenerated` step.
-- **Resistance Stat**: an optional base stat (default 0) driving the chance to refuse an incoming status effect or stat debuff — `resistance / RESISTANCE_REFUSAL_DIVISOR` (200), so the 20-80 design range spans 10% to 40%. The roll lives on the defender: `FightingCard.resists()` is consulted inside `setState()` (after the immunity check) and inside `applyDebuff()` (after the stack cap), which is why every existing source — the four `Attack*Effect` classes, `EffectTriggeredDebuff`, `AlterationSkill`, `Alteration` — gets it without threading a parameter, and why a refusal reuses the plumbing already in place (`false` / `undefined`, no step emitted). Buffs are never opposed, and a `resistance` debuff lowers the refusal chance like any other stat. This is the one reason `FightingCard` takes a `Randomizer` in its constructor; a card with no resistance never touches it, keeping every existing test deterministic.
-- **AlterationDetail Discriminated Union**: `Buff` and `Debuff` are unified under `AlterationDetail = Buff | Debuff` discriminated by `polarity: 'buff' | 'debuff'`. `AlterationType` is `attack | defense | agility | accuracy | speed | criticalChance | regeneration | resistance` (the critical rate is capped at 1 by its getter); `FightingCard.actualSpeed` and `fasterThan()` go through `computeActualStat`, so a speed alteration changes turn order for `PlayerByPlayerCardSelector` and the weights of `SpeedWeightedCardSelector` (the latter at its next pool refill). Located in `@types/alteration/alteration-detail.ts` (former `@types/buff/` directory removed).
-- **Debuff Stack Cap**: `Debuff` carries an optional `stackId` naming the pile it belongs to, and `applyDebuff()` takes an optional `AlterationStacking` (`{ id, maxStacks }`). An application whose pile already holds `maxStacks` debuffs is refused: `applyDebuff()` returns `undefined`, nothing changes and no step reports it — the same no-op an elemental mark does at its cap. The pile is keyed by `stackId`, not by alteration type, so two skills declaring the same id share one budget (two cards slowing the same target with the same named debuff) while unrelated debuffs on the same stat keep their own. Reached from `EffectTriggeredDebuff` (an effect rolling a debuff on hit) and `AlterationSkill` (a triggered alteration); `Alteration` on specials does not cap but still drops a refused application. A debuff with no `stackId` is uncapped, which is the behaviour every existing card keeps. `strictNullChecks` is off, so the `undefined` return is filtered explicitly at each call site rather than caught by the compiler.
-- **Buff Stack Cap**: the same budget caps buffs — `stackId` lives on `AlterationDetailBase` and `DebuffStacking` became `AlterationStacking`, taken by `applyBuff()` too. A pile is counted within its own polarity (`isPileFull()` over the buffs or the debuffs), so a buff and a debuff sharing an id never eat each other's budget. Only `AlterationSkill` passes a budget to `applyBuff()`; a buff at its cap returns `undefined` and is filtered out like a refused debuff, which is how « +15% de Vitesse, cumulable jusqu'à 3 fois » is a permanent BUFF on `enemy-killed` with `maxStacks: 3`. `OtherSkillDto.maxStacks` replaces `debuffMaxStacks`, still read as an alias.
-- **SURVIVE Skill Pattern**: `SurviveSkill` is not a `Skill` implementor — it has no event trigger and no targeting strategy. It is extracted from `others[]` before the normal skill loop in the controller and stored on `FightingCard` as `surviveSkill: SurviveSkill | null`. `tryConsume()` is called inside `applyFinalDamage()` when a fatal blow would kill the card: if unconsumed, absorbs all excess damage and leaves the card at 1 HP, setting `AttackResult.survived = true` + `survivedSkillName`. Emits a `StepKind.Survived` step. One-time use per card.
-- **DAMAGE_REDUCTION Skill Pattern**: `DamageReductionSkill` follows the SURVIVE plumbing — no event trigger, no targeting strategy, extracted from `others[]` in the controller and stored on `FightingCard` as `damageReduction`. `tryMitigate(damage)` is called inside `applyFinalDamage()` and returns the reduced damage, or `undefined` when its optional per-hit `probability` roll fails. Mitigation therefore applies to the very hit that triggers it, and sits between the freeze/stunt amplifiers and the shield buffer: the shield absorbs only what the reduction left, so both layers stack instead of competing. `FinalDamageResult` and `AttackResult` carry `mitigated` + `mitigatedSkillName`, which `ActionStage` turns into a `StepKind.DamageMitigated` step. Status effect ticks use `addRealDamage()` and bypass the reduction, exactly as they bypass the shield.
-- **`FightingCard.lastAttacker`**: Optional field (`lastAttacker?: FightingCard`) set by `ActionStage` after each successful hit. Used by `LastAttackerOfAllyTargetingStrategy` to resolve the target dynamically at skill launch time.
-- **Dynamic Ally Targeting**: a guardian power cannot name the ally it protects when the player composes the deck, so both halves resolve at runtime. `AnyAllyHealthBelowThresholdTrigger` answers the same `ally-health-<id>` event as its single-ally sibling but matches any id, keeping one edge state per ally (a `Map` of who was above the threshold) so it fires once per crossing and rearms for that ally alone; it skips its owner, since a card watching its own health already has `AllyHealthBelowThresholdTrigger`. `MostWoundedAllyStrategy` then picks the target from the live board: the caster's most wounded living ally below the same threshold, the caster excluded, nobody when the team is healthy. The two are wired independently through `buildTriggerForSkill()` and `buildSkillTargeting()`, so any triggered skill kind can mix them with the existing events and strategies. Both read the board rather than a stashed reference, which is why neither `FightingContext` nor `TargetingCardStrategy` needed a new field; the cost is that when two allies sit below the threshold at once the strategy takes the worst rather than the one that just crossed, ties going to deck order.
-- **AllyHealthBelowThreshold Pattern**: `ActionStage` fires the synthetic event `ally-health-${card.id}` (via `ActivatableTrigger.activate()`) after each damage application. The event reaches every playable card of the damaged card team, the damaged card included, so a card monitoring its own id gets a health-reactive self buff. `AllyHealthBelowThresholdTrigger` monitors a named ally's health ratio: fires once when it crosses the threshold downward (edge-triggered), rearms when health recovers above. Requires `FightingContext.lastAttacker` to resolve player ownership. Used with `AlliedCardByIdStrategy` (buff the injured ally) or `LastAttackerOfAllyTargetingStrategy` (attack the attacker).
-- **Reactive Kills (Jugement de l’Obsidienne)**: a reactive attack (`damage-taken`, `ally-health-below`) is launched from `dispatchDamageReactions()`, outside `handleAttackResult()`, so its victims used to die unannounced — the card selector kept handing out a dead card. `reactionDeathSteps()` now notifies every dead defender of a reactive attack result (main hit, splash, execution) with the caster as killer and drains the death cascade; `skillResultsToSteps()` already reported their `dead` status. `ActionStage` takes the `EndEventProcessor` (optional last constructor parameter, wired by `Fight`): the `endEvent` of an exhausted skill is processed on the reactive, turn-start and next-action paths too, its `buff_removed` / `effect_removed` / `targeting_reverted` steps following the attack steps.
-- **Buff Transfer (Héritage de la Panthère)**: `BuffTransferSkill` moves buffs instead of computing new ones: `FightingCard.takeBuffs(type)` removes and returns every buff of that type, `receiveBuffs()` pushes copies on the heir, so value, remaining duration and `stackId` survive the trip and the buffs count against the heir's stack pile — no `AlterationStacking` is passed, the cap belonging to the next application. The owner is asked only once a target exists, so a targeting that returns nobody leaves its buffs in place. On `self-death` it runs on the dead card, which still holds its buffs and stances until turn end; `FastestAllyStrategy` (`fastest-ally`), like `ProtectedAllyStrategy`, does not check the caster is alive. Reported as `StepKind.BuffTransferred`, nothing when no buff moved.
-- **DamageTaken Pattern**: `ActionStage.dispatchDamageReactions()` fires the synthetic event `damage-taken-${card.id}` on every landed (non-dodged) hit, immediately before `ally-health-${card.id}` and through the same context, so both reach every playable card of the damaged card team with `FightingContext.lastAttacker` set. `DamageTakenTrigger` matches a single monitored card id and is deliberately **not** edge-triggered: it fires on each hit, which is what counter attacks and damage-reactive passives need, where `AllyHealthBelowThresholdTrigger` fires once per threshold crossing. A counter attack is a `CONDITIONAL_ATTACK` on this event targeting `last-attacker-of-ally` with the owner own id. Reactions are launched through `AttackSkill.launch()` directly, never back through `handleAttackResult()`, so a counter attack cannot re-enter the dispatch and recurse.
-- **Concealment (Selkhet)**: a concealed card is out of the opponent's sight. `FightingCard` holds an optional `Concealment` (`name` + optional `remainingTurns`, `@types/concealment/`) through `conceal()`, `isConcealed()`, `breakConcealment()` and `decreaseConcealmentDuration()`, and exposes `isTargetableBy(attacker)` — alive, and not concealed unless the attacker sees concealed cards (see Stance Special). The rule lives in the targeting strategies rather than in the attack skills: every strategy reading the **defending** player (`targeted-from-position`, `targeted-all`, `targeted-line-three`, `target-and-neighbors`, `targeted-card`, `first-bleeding-enemy`, `last-attacker-of-ally`) asks `isTargetableBy(attackingCard)` where it used to ask `!isDead()`, so area attacks skip the card too and a position-based attack falls back to the next targetable card, exactly as it skips a dead one. Strategies reading the caster's own player are untouched, so allies still heal and buff a concealed card. The concealment ends when the card attacks somebody: `revealAttacker()` (`fight-simulator/concealment-steps.ts`) is called by `ActionStage.handleAttackResult()` for every action strike (simple, next-action, turn-start, special, splash) and by `skillResultsToSteps()` for reactive attacks, emitting `concealment_ended` (`attacked`) right after the attack step — after the hits, so a bonus read during the attack still sees the card concealed. `TurnManager` decrements a timed concealment like a stance and emits `concealment_ended` (`expired`). `CONCEALMENT` (`ConcealmentSkill`) conceals its owner when its event fires; the new `fight-start` event, launched by `Fight.start()` on every card right after step 0, is how a card opens the fight concealed, so no card-bound special case was needed.
-- **Stance Special (Fusion Tectonique)**: `SpecialStance` is the third `Special`, beside `SpecialAttack` and `SpecialHealing`: it strikes nobody, opens its required `stanceActivation`, then applies its `Alteration[]`, `ShieldApplication` and an optional concealment of its caster (named after the special), reported as `SpecialResult.stanceStarted` / `concealmentStarted`. Being no attack, it never goes through `handleAttackResult()`, so it does not lift the concealment it grants. `ActionStage.computeSpecialStanceResult()` reports a `special_stance` step followed by the steps the stance brought; the buff, debuff, shield and stance reports are shared with the attack special through `specialSideReports()`. The controller refuses on a STANCE special every field only a strike can carry (`STANCE_SPECIAL_FORBIDDEN_FIELDS`), and a `concealment` on a striking special, which would be lifted at once. `FightingCard.activateStance()` now takes the `StanceActivation` itself, whose new `revealsConcealed` makes `seesConcealed()` true while the stance runs: the enemy strategies ask `isTargetableBy(attackingCard)` (alive, and visible or seen), so Sens Sismique lets Selkhet strike a concealed enemy without lifting its concealment.
-- **Separation of Concerns**:
-  - `Fight` orchestrates battle flow
-  - `ActionStage` handles attack/heal resolution, triggers reactive skills after each HP change, fires damage-taken and ally-health events
-  - `TurnManager` handles turn-end effects including shield duration
-  - `CardSelector` determines turn order
-  - `EndEventProcessor` handles event-bound buff and effect removal across all cards
-  - `skillResultsToSteps()` converts skill results to report steps (shared utility)
-  - `triggerReactiveSkills()` fires health-reactive skills post-damage (shared utility)
+- **Factory**: `FIGHT_SIMULATOR_BUILDER` builds `Fight` with its dependencies. `buildTargetingStrategy()`, `buildDodgeStrategy()`, `buildTriggerStrategy()` map DTO enums to domain objects.
+- **Strategy**: card selectors (`PlayerByPlayer`, `SpeedWeighted`), targeting strategies, dodge behaviors.
+- **Observer**: `CardDeathSubscriber`; `DeathSkillHandler` implements it (see Death cascade).
+- **Value objects**: immutable attack effects, buffs, debuffs, damage compositions.
+- **Rich domain model**: `FightingCard` owns stats, behaviors, element and every state mutation (shield, stance, concealment, protection, marks, bleed…).
+- **Separation of concerns**: `Fight` orchestrates · `ActionStage` resolves attacks/heals, fires reactive skills and damage events · `TurnManager` handles turn end · `CardSelector` orders turns · `EndEventProcessor` removes event-bound buffs/effects · `skillResultsToSteps()` and `triggerReactiveSkills()` are shared pure functions.
+- **Fail fast**: invalid input throws (unknown kind, unknown basis, missing property); no silent fallback.
+
+## Damage and Stats
+
+- **Multi-damage**: `DamageCalculator` sums `DamageComposition` (type + rate); `ElementalMatrix` multiplies per attacker type vs defender element; the defender mark amplifier applies after the matrix and before defense.
+- **Defense penetration**: optional `defensePenetration` in `[0, 1]` (throws outside); defense subtracted = `actualDefense × (1 − p)`. Default 0. Only `CONDITIONAL_ATTACK` exposes it.
+- **Damage type bonuses**: `DamageTypeBonus` (abstract, multiplier > 0) rewrites the composition rate of one damage type. Subclasses say when it is earned: `BleedStackBonus` (defender bleed stacks ≥ `minStacks`), `ConcealedBonus` (attacker concealed). `damageBonuses[]` on `SimpleAttack`/`MultipleAttack` (finisher included)/`SpecialAttack`, applied in order, so two bonuses on one type multiply. Read before the hit applies its own effects.
+- **Attack power**: every read of the striker attack goes through `FightingCard.attackPower(context, defender?)` = `actualAttack × multipliers`. Heals read `actualAttack`. Poison/burn/bleed effects and `BleedExplosionSkill` pass no defender.
+- **Alterations**: `AlterationDetail = Buff | Debuff` (`polarity`), types attack/defense/agility/accuracy/speed/criticalChance/regeneration/resistance, all through `computeActualStat` (critical rate capped at 1; speed changes turn order). `terminationEvent?` keeps a buff until an event fires.
+- **Stack caps**: `stackId` on an alteration names a pile; `applyBuff()`/`applyDebuff()` take `AlterationStacking { id, maxStacks }`. At the cap the application returns `undefined`, nothing changes, no step. Piles are counted per polarity. No `stackId` = uncapped. Only `AlterationSkill` and `EffectTriggeredDebuff` pass a budget.
+- **Conditional buffs**: `BuffApplication.condition` + `conditionMultiplier` multiply the rate when true at application time (`buff-condition-factory.ts`, e.g. `AllyPresenceCondition`). `ProbabilityCondition` gates a triggered `AlterationSkill` per event (failed roll: no target, no activation spent, no step).
+- **Regeneration**: optional base stat; `FightingCard.regenerate()` heals `actualRegeneration` at turn end, before status ticks; emits `regenerated` when non-zero.
+- **Resistance**: optional base stat; chance to refuse a status or debuff = `resistance / 200`. `FightingCard.resists()` is checked in `setState()` (after immunity) and `applyDebuff()` (after the stack cap), so every source is covered. Buffs are never opposed. The roll is why `FightingCard` takes a `Randomizer`.
+
+## Skills and Events
+
+- **Triggers**: events are strings (`turn-end`, `turn-start`, `next-action`, `fight-start`, `ally-death:<id>`, `enemy-death:<id>`, `self-death:<ownerId>`, `damage-taken-<id>`, `ally-health-<id>`, …). `DeathTrigger` is one class parameterized by prefix and card id. `DynamicTrigger` wraps an activation and a replacement trigger and stays dormant until the activation event.
+- **Skill interface**: optional `tick()` and `lifecycleEndEvent()`; `launch()` takes an optional targeting override. Skills with `activationLimit` stop at the limit and emit their `endEvent`; `SkillResults.endEvent` makes the caller run `EndEventProcessor`, which removes matching buffs (`buff_removed`) and status effects (`effect_removed`) and reverts targeting overrides.
+- **Gating in `launchSkills()`**: `requiredStance` and `requiresUndamaged` filter skills there rather than in `isTriggered()` — triggers stay about events and a blocked skill emits no empty step. A blocked cooldown keeps its counter.
+- **Empty results report nothing**: `skillResultsToSteps()` skips empty heals/attacks/alterations/shields and attacks that struck nobody (legitimate when targeting is empty).
+- **Card-bound passives** are extracted from `others[]` in the controller (`CARD_BOUND_SKILL_KINDS`), stored on `FightingCard`, and have no event or targeting: SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL, BLEED_STACK_SCALING, BLEED_EMPOWERMENT, LOW_HEALTH_TARGET_BONUS.
+- **Controller guard**: `KIND_ONLY_FIELDS` lists which kinds may carry each reserved field; any other kind gets a 400. `STANCE_SPECIAL_FORBIDDEN_FIELDS` does the same for STANCE specials.
+- **Event owning its `activationCondition`**: `any-ally-health-below` and `enemy-killed` read `activationCondition.threshold` as their own trigger threshold (`ownsActivationCondition()`), so the generic ALTERATION path must not also build a condition from it (it would gate the skill on the caster health).
+- **Reactive health skills**: `HealthReactiveSkill` (`isHealthReactive`, `onHealthChanged(card)`) is edge-triggered on `healthRatio` crossing a threshold, rearming on recovery. `triggerReactiveSkills()` runs after every HP change. Implemented by `ShieldSkill` and `TransformationSkill`.
+- **Special result**: `Special.launch()` returns `SpecialResult { name, actionResults, buffResults, … }` for `SpecialAttack`, `SpecialHealing` and `SpecialStance`. Optional effects (buffs, shield) use their own targeting, apply after the primary action, and are skipped as a whole if one parameter is missing.
+- **Multi-effect attacks**: `SimpleAttack`/`MultipleAttack` take `effects?: AttackEffect[]` (`MultipleAttack` also `comboFinisherEffects`); each effect rolls its optional `probability` independently (randomizer injected in the effect). `SpecialAttack` keeps one `effect`. `AttackResult.effects` carries every applied effect; `effect-results-to-steps.ts` maps them to steps.
+- **Multi-hit special**: `SpecialAttack.hits` (default 1); each hit re-targets, rolls one shared critical and resolves through `strike()` (protector swap, dodge, damage, effect). Alterations, shield and stance apply once after the last hit.
+- **Energy refund**: `EnergyRefund { amount, minAccuracyMargin }` on `SpecialAttack`; if caster accuracy − `FightingCard.agilityAgainst(attacker)` of the primary target (first defender struck, protector included) is strictly above the margin, the gauge is set to `amount` instead of 0 (`SpecialResult.energyRefund`).
+- **Marked target bonus**: `MarkedTargetBonus` multiplies a special attack power when the defender already carries a mark of that type, read before the special applies its own effects.
+- **Lifesteal**: `{ name, rate, remainingTurns }` buffer; `ActionStage` calls `stealLife()` per landed hit and emits one aggregated healing step.
+- **Heal basis**: `applyHealing(source, target, rate, basis?)` (`skills/heal-basis.ts`) is the only heal computation. `RateBasis` (`source-attack` default | `target-max-health`) is shared with the bleed; unknown value throws. Only `HEALING` exposes it.
+
+## Status Effects
+
+- POISON/BURN tick damage; FREEZE and STUNT skip the action (`frozenLevel > 0 || isStunted`) and add +20% incoming damage via `applyDamageRate()`. STUNT lasts `2 × level − 1` turns, has no tick, and does not apply to a frozen or stunted card.
+- **Immunity**: `setState()` returns whether the state was accepted. `StatusCategory` (`control` = freeze/stunt, `damage-over-time` = poison/burn/bleed, via `statusCategoryOf()`). `isImmuneTo()` is true under a transformation (all) or a stance listing the category. Refusals emit nothing. `FreezeAttackEffect` checks immunity before its burn interaction.
+- **BLEED (stacked)**: the only status holding several stacks. `CardStateBleeding` keeps per-stack remaining turns, damage (`rate × source attack`, or `× target max health` with basis `target-max-health`, fixed at application) and termination event. It ticks the sum at turn end and drops expired stacks. `setState()` merges into the running bleed; `BleedAttackEffect` trims to `maxStacks` (nothing at the cap). A frozen card cannot receive a bleed and a freeze pauses it. `status_change` carries the stack count, `state_effect` the `remainingStacks`; an end event removes only the stacks it bound. `FightingCard.bleedStacksApplied` counts stacks actually laid.
+- **Elemental mark**: `MarkAttackEffect` applies an `ElementalMark` (type, `ratePerStack`, `maxStacks`); `FightingCard` keeps one counter per type (`applyMark`, `markStacks`, `markAmplifier`). Never expires; at the cap it is a no-op. Emits `mark_applied`. It may carry a `triggeredDebuff`. Marks are not statuses: no immunity refuses them.
+
+## Defensive Buffers (on `FightingCard`)
+
+- **Shield**: `applyShield(rate, duration)` gives `rate × maxHealth` points. `applyFinalDamage()` returns `{ damageToHealth, shieldAbsorbed }`; the shield absorbs first. Emits `shield_broken` at 0 and `shield_expired` when `TurnManager` runs the duration out. Specials apply shields through `shieldApplication` (own targeting).
+- **SURVIVE**: `SurviveSkill.tryConsume()` inside `applyFinalDamage()` absorbs a fatal blow once and leaves 1 HP (`AttackResult.survived`, `survived` step). Fires `survived` skills of the defender.
+- **DAMAGE_REDUCTION**: `tryMitigate(damage)` inside `applyFinalDamage()` removes `rate` of the hit (or `undefined` when its `probability` roll fails). Order: freeze/stunt amplifiers → reduction → shield. Status ticks use `addRealDamage()` and bypass shield and reduction. Emits `damage_mitigated`.
+- **PROTECTION**: `ProtectionSkill` puts its owner in front of one ally (`protect()`). The three attack skills call `Player.protectorOf(target, attacker)` right after targeting and swap the defender **before** any roll, so dodge, defense, element, shield and reduction are the guardian's. A dead guardian, or one concealed and unseen by the attacker, protects nobody. The buffer ticks on the guardian turns; recasting refreshes or moves it. An attack on all hits the guardian and its ward separately. `AttackResult.interceptedFor` → `attack_intercepted`. Emits `protection_started` / `protection_ended`. Empty targeting is a no-op that spends no `activationLimit`.
+- **TRANSFORMATION**: one-shot `HealthReactiveSkill`; applies its alterations, optional lifesteal and status immunity for its duration. `TurnManager` ends it and charges an optional `endCostRate` (never below 1 HP). Emits `transformation_started` / `transformation_ended`.
+- **Stance**: a named posture held for N turns (`activateStance()`, `hasStance()`, `decreaseStanceDurations()`), optionally granting immunities and `revealsConcealed`. Reactivating refreshes. Opened by a special (`stanceActivation`, `SpecialResult.stanceStarted`) or a `STANCE` skill. `TurnManager` decrements it and emits `stance_ended`. `endStance()` closes it early.
+- **Concealment**: `FightingCard.isTargetableBy(attacker)` (alive, and not concealed unless the attacker holds a `revealsConcealed` stance) replaces `!isDead()` in every strategy reading the defending player, so area attacks skip it, a position attack falls back to the next card, and allies still reach it. `revealAttacker()` (`concealment-steps.ts`) ends it when the card attacks somebody (even a dodged hit); a bonus read during the attack still sees it concealed. `TurnManager` ends a timed one (`expired`). `fight-start` (launched by `Fight.start()` after step 0) opens a fight concealed.
+
+## Death Cascade (`DeathSkillHandler`)
+
+Phases on each death, in order: end events of lifecycle-limited skills → `self-death` on the dead card alone (what it leaves lands first) → `ally-death:<id>` on its surviving allies → `enemy-death:<id>` on the opposing survivors → `enemy-bleed-death` on the opposing survivors if a bleed tick killed it → `enemy-killed:<ratio>` on the living killer.
+
+- `notifyDeath(player, card, cause?)`: `cause` is the `StateEffectType` of a lethal tick (bleed credited as soon as it ticked); a status tick has no killer. A card already notified is ignored.
+- Steps accumulate and callers drain them with `drainSteps()` right after each death, which keeps ordering inside the action phase. `ActionStage` also takes `EndEventProcessor` (optional last parameter).
+- `enemy-killed` ratio is `healthRatioBeforeLastDamage` (set at the start of `applyFinalDamage()`/`addRealDamage()`); the trigger fires only strictly under its optional threshold.
+- `notifyKill`: defenders killed by the self-death phase (Legacy Bleed Explosion) start their own cascade through the whole event broker.
+- A dead card keeps its stances and buffs until turn end, so `self-death` skills with `requiresStance` still run. `ProtectedAllyStrategy` and `FastestAllyStrategy` deliberately do not check the caster is alive.
+
+## Reactive Events (`ActionStage`)
+
+- After each landed hit, `dispatchDamageReactions()` fires `damage-taken-<id>` then `ally-health-<id>` on every playable card of the damaged team, with `FightingContext.lastAttacker` set. `DamageTakenTrigger` fires on every hit (not edge-triggered); `AllyHealthBelowThresholdTrigger` fires once per downward crossing of one named ally, `AnyAllyHealthBelowThresholdTrigger` once per crossing for any ally except its owner.
+- Reactions launch through `AttackSkill.launch()` directly, never `handleAttackResult()`, so a counter attack cannot recurse. `reactionDeathSteps()` notifies deaths caused by a reactive attack (main hit, splash, execution) with the caster as killer.
+- `FightingCard.lastAttacker` is set after each hit; `LastAttackerOfAllyTargetingStrategy` resolves it at launch.
+- **Dynamic ally targeting**: `MostWoundedAllyStrategy` picks the caster's most wounded living ally below the threshold (caster excluded, ties in deck order, nobody on a healthy team). Paired with `any-ally-health-below` it builds a guardian power without a hard-coded id.
+- **Bleed stacks applied**: after each attack of its action, `dispatchBleedStacksApplied()` launches `bleed-stacks-applied:<count>`; `BleedStacksAppliedTrigger` fires once at `stackThreshold` (own once-flag per skill instance).
+- **Turn-start**: `launchTurnStartSkills()` runs after `tickSkills()` and before `isSpecialReady()`; only attacks that struck are kept, each turned into its own `AttackReport` through `handleAttackResult()`, placed before the action report. A card skipping its turn never sees it. `ConditionalAttack.energyCost` refuses below the cost and spends it only when the attack struck.
+- **Undamaged since last action**: `FightingCard.beginAction()` (before `tickSkills()`) compares `receivedDamages` to its previous snapshot; `damagedSinceLastAction` holds for the whole action. Shield-absorbed hits and dodges do not count.
+
+## Attack Add-ons (all on `ConditionalAttack` unless noted)
+
+Order after the main hit: hit effects → execution → hit alterations → low-health debuff → splash.
+
+- **Hit alterations**: `HitAlterations` buff/debuff each distinct defender that was hit, not dodged and still alive, once per defender (debuffs through `applyDebuff()`). Reported as `buff`/`debuff` steps after the attack step. Dedicated field because `statAlterations` requires targeting.
+- **Execution** (`ConditionalAttack` and `SpecialAttack`; threshold in `]0, 1[`): each distinct defender hit, not dodged and strictly under the threshold, loses all remaining health through `execute()` → `addRealDamage()` (shield and reduction ignored) unless an unconsumed SURVIVE holds 1 HP. Runs inside `launch()`, so the defender is already dead when the result is read and the cascade follows with the attacker as killer. Reports `executed` (+ `survived`) via `executionSteps()`.
+- **Low-health debuff**: debuffs the main defender (not dodged, alive, `healthRatio < threshold` after the hit) before the splash; resistance applies; reported as a `debuff` step.
+- **Splash**: builds a `SimpleAttack` on `TargetAndNeighborsStrategy(center)` (primary target `interceptedFor ?? defender` and its deck neighbors, living only) when the main strike targeted somebody; dodge, protection and shield apply; reported as a second attack step.
+- **Bleed detonation** (`SimpleAttack` only): after the dodge roll, `consumeBleedStacks()` and replace the compositions with one PHYSICAL composition of `ratePerStack × stacks` (`AttackResult.consumedBleedStacks`); combines with `defensePenetration`. `FirstBleedingEnemyStrategy` picks the first enemy in deck order at `stackThreshold` stacks.
+- **Stance on fire**: optional `stanceActivation` opens only when the attack fires; `endsStance` closes `requiresStance` after the attack (`stanceEnded`), so it fires once per stance.
+- **Dive and strike**: the dive is a `ConcealmentSkill` with `stanceActivation`, an `interval` cooldown and `requiresUndamaged`; on `next-action` `diveReport()` makes the action a `skill_steps` report (no attack, stays concealed). The strike is a `turn-start` `ConditionalAttack` with `requiresStance` + `endsStance`; striking lifts the concealment. A card stunned or frozen underground skips `turn-start`.
+- **Activation limit**: `ConditionalAttack` counts only attacks that struck somebody (`activationLimit: 1` on `ally-health-below` = once per fight).
+
+## Card-Bound Passive Details
+
+- **DODGE_BONUS_DENIAL**: `FightingCard.dodge(attacker)` asks `attacker.deniesDodgeBonusOf(this)`; a bleeding defender then dodges with `agilityWithoutBuffs`. `agilityAgainst(attacker)` is the same value `dodge()` rolls with.
+- **BLEED_STACK_SCALING**: attack × (1 + `rate` × every bleed stack on a living card of either team, capped at `maxRate`), read via `attackPower(context)`.
+- **LOW_HEALTH_TARGET_BONUS**: × `1 + rate` when `defender.healthRatio < threshold` before the hit; `MultipleAttack` reads it per defender, finisher included. Multiplies with the other bonuses.
+- **BLEED_EMPOWERMENT**: reads its owner stance itself (`empower(owner, { stacks, rate })`). `BleedAttackEffect` asks the **source** via `empowerBleed()` before computing damage and room; extra stacks stop at `maxStacks`; the rate is replaced, and `duration`, `basis`, `triggeredDebuff` overrides replace the effect values.
+- **BUFF_TRANSFER**: `takeBuffs(type)` removes, `receiveBuffs()` copies on the heir (value, remaining duration, `stackId` kept; the heir stack pile counts them). Target resolved first: nobody targeted, buffs stay.
+- **Bleed explosion (`BLEED_DETONATION` skill)**: every living bleeding card takes `rate × attackPower(context)` via `addRealDamage()` (defense ignored, once per card) and loses its stacks, reported as `consumedBleedStacks`.

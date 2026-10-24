@@ -30,6 +30,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
+      - run: pnpm check:memory-bank
       - run: pnpm install
       - run: pnpm build:all
       - run: pnpm lint:all
