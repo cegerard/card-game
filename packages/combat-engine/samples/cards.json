@@ -856,5 +856,211 @@
     "behaviors": {
       "dodge": "simple-dodge"
     }
+  },
+  {
+    "id": "selkhet",
+    "name": "Selkhet",
+    "attack": 80,
+    "defense": 35,
+    "health": 300,
+    "speed": 92,
+    "agility": 82,
+    "accuracy": 85,
+    "criticalChance": 0.14,
+    "regeneration": 20,
+    "resistance": 30,
+    "element": "EARTH",
+    "skills": {
+      "special": {
+        "kind": "STANCE",
+        "name": "Fusion Tectonique",
+        "energy": 80,
+        "stanceActivation": {
+          "name": "fusion-tectonique",
+          "duration": 2,
+          "revealsConcealed": true
+        },
+        "statAlterations": [
+          {
+            "type": "accuracy",
+            "rate": 0.3,
+            "duration": 2,
+            "targetingStrategy": "self",
+            "polarity": "buff"
+          }
+        ],
+        "concealment": {
+          "duration": 2
+        }
+      },
+      "simpleAttack": {
+        "name": "Lacération Silencieuse",
+        "damages": [
+          {
+            "type": "PHYSICAL",
+            "rate": 0.75
+          },
+          {
+            "type": "EARTH",
+            "rate": 0.45
+          }
+        ],
+        "targetingStrategy": "position-based",
+        "effects": [
+          {
+            "type": "BLEED",
+            "rate": 0.02,
+            "duration": 3,
+            "maxStacks": 4,
+            "basis": "target-max-health"
+          }
+        ],
+        "concealedBonus": {
+          "damageType": "PHYSICAL",
+          "multiplier": 1.5
+        }
+      },
+      "others": [
+        {
+          "kind": "CONCEALMENT",
+          "name": "Marche Fantôme",
+          "event": "fight-start"
+        },
+        {
+          "kind": "CONCEALMENT",
+          "name": "Marche Fantôme",
+          "event": "enemy-killed",
+          "duration": 1
+        },
+        {
+          "kind": "BLEED_EMPOWERMENT",
+          "name": "Griffures",
+          "requiresStance": "fusion-tectonique",
+          "rate": 0.03,
+          "duration": 4,
+          "triggeredDebuff": {
+            "debuffType": "regeneration",
+            "debuffRate": 0.5,
+            "duration": 4,
+            "probability": 1
+          }
+        },
+        {
+          "kind": "LOW_HEALTH_TARGET_BONUS",
+          "name": "Instinct de Chasseresse",
+          "rate": 0.25,
+          "activationCondition": {
+            "type": "health-threshold",
+            "threshold": 0.4
+          }
+        },
+        {
+          "kind": "ALTERATION",
+          "name": "Instinct de Chasseresse - Vitesse",
+          "polarity": "buff",
+          "buffType": "speed",
+          "rate": 0.15,
+          "duration": 0,
+          "targetingStrategy": "self",
+          "event": "enemy-killed",
+          "activationCondition": {
+            "type": "health-threshold",
+            "threshold": 0.3
+          },
+          "stackId": "instinct-de-chasseresse",
+          "maxStacks": 3
+        },
+        {
+          "kind": "CONCEALMENT",
+          "name": "Embuscade Tectonique",
+          "event": "next-action",
+          "interval": 4,
+          "requiresUndamaged": true,
+          "stanceActivation": {
+            "name": "sous-terre",
+            "duration": 1
+          }
+        },
+        {
+          "kind": "CONDITIONAL_ATTACK",
+          "name": "Embuscade Tectonique - Attaque surprise",
+          "event": "turn-start",
+          "targetingStrategy": "position-based",
+          "requiresStance": "sous-terre",
+          "endsStance": true,
+          "damages": [
+            {
+              "type": "PHYSICAL",
+              "rate": 1.5
+            },
+            {
+              "type": "EARTH",
+              "rate": 0.8
+            }
+          ],
+          "effect": {
+            "type": "STUNT",
+            "rate": 0,
+            "level": 1
+          },
+          "hitAlterations": [
+            {
+              "type": "defense",
+              "rate": 0.3,
+              "duration": 2,
+              "polarity": "debuff"
+            }
+          ]
+        },
+        {
+          "kind": "CONDITIONAL_ATTACK",
+          "name": "Jugement de l’Obsidienne",
+          "event": "ally-health-below",
+          "targetCardId": "selkhet",
+          "activationCondition": {
+            "type": "health-threshold",
+            "threshold": 0.4
+          },
+          "targetingStrategy": "target-all",
+          "damages": [
+            {
+              "type": "PHYSICAL",
+              "rate": 2.0
+            },
+            {
+              "type": "EARTH",
+              "rate": 1.2
+            }
+          ],
+          "hitAlterations": [
+            {
+              "type": "agility",
+              "rate": 0.5,
+              "duration": 3,
+              "polarity": "debuff"
+            }
+          ],
+          "execution": {
+            "threshold": 0.25
+          },
+          "stanceActivation": {
+            "name": "heritage-de-la-panthere",
+            "duration": 3
+          },
+          "activationLimit": 1
+        },
+        {
+          "kind": "BUFF_TRANSFER",
+          "name": "Héritage de la Panthère",
+          "event": "self-death",
+          "targetingStrategy": "fastest-ally",
+          "buffType": "speed",
+          "requiresStance": "heritage-de-la-panthere"
+        }
+      ]
+    },
+    "behaviors": {
+      "dodge": "simple-dodge"
+    }
   }
 ]

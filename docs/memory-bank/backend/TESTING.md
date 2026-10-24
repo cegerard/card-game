@@ -52,6 +52,7 @@ This document outlines the testing strategies and guidelines for the card game b
 - Test full fight simulation via HTTP API
 - Validates complete flow from DTO to fight result
 - Tests integration of all components
+- `samples/cards.json` is the official roster: `sample-cards.e2e-spec.ts` makes it fight itself, and each card has a `<card>-kit.e2e-spec.ts` (Scythra, Selkhet) checking every part of its kit appears in the report. The roster outgrew a deck (5 cards at most): the mirror match keeps the five cards its checks were written for, and Selkhet fights in a second match of her own — her ultimate can wipe a team in one blow, which would leave Aegis no time to show his kit
 
 ### Integration Tests
 
