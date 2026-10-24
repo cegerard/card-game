@@ -117,7 +117,14 @@ most-wounded-ally.ts, fastest-ally.ts, protected-ally.ts, first-bleeding-enemy.t
 
 ```
 http-api/
-├── fight.controller.ts            # POST /fight
+├── fight.controller.ts            # POST /fight (startFight only)
+├── fighting-card-factory.ts       # FightingCardDto → FightingCard, KIND_ONLY_FIELDS guard, CARD_BOUND_SKILL_KINDS
+├── special-factory.ts, attack-skill-factory.ts   # Special / simple-multiple attack builders (+ damage bonuses, energy refund, execution)
+├── attack-effect-factory.ts       # EffectDto → AttackEffect, triggered debuff
+├── card-bound-skill-factory.ts    # Passives kept on the card (survive, reduction, dodge denial, bleed scaling/empowerment, low-health bonus)
+├── other-skill-factory.ts         # createOtherSkill: one builder per SkillKind
+├── skill-wiring-factory.ts        # Shared skill helpers: triggers, targeting, activation condition, stacking, alteration type, asBadRequest
+├── card-selector-factory.ts       # CardSelectorStrategy → CardSelector
 ├── dto/fight-data.dto.ts          # Request validation
 ├── dodge-strategy-factory.ts, targeting-strategy-factory.ts, trigger-factory.ts
 └── buff-condition-factory.ts      # BuffConditionType → BuffCondition
