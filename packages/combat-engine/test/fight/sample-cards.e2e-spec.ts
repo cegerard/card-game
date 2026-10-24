@@ -8,9 +8,25 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = join(fileURLToPath(import.meta.url), '..');
 
-const sampleCards = JSON.parse(
+const roster: any[] = JSON.parse(
   readFileSync(join(__dirname, '../../samples/cards.json'), 'utf-8'),
 );
+
+// The roster outgrew a deck (5 cards at most). The mirror match keeps the five
+// cards these checks were written for: Selkhet's ultimate can wipe a team in
+// one blow, leaving Aegis no time to show his kit. She fights on her own below.
+const without = (id: string) => roster.filter((card) => card.id !== id);
+const sampleCards = without('selkhet');
+
+const fight = (app: INestApplication, player1: object[], player2: object[]) =>
+  request(app.getHttpServer())
+    .post('/fight')
+    .send({
+      cardSelectorStrategy: 'player-by-player',
+      player1: { name: 'P1', deck: player1 },
+      player2: { name: 'P2', deck: player2 },
+    })
+    .expect(200);
 
 describe('samples/cards.json', () => {
   let app: INestApplication;
@@ -25,14 +41,7 @@ describe('samples/cards.json', () => {
     app.useLogger(false);
     await app.init();
 
-    const response = await request(app.getHttpServer())
-      .post('/fight')
-      .send({
-        cardSelectorStrategy: 'player-by-player',
-        player1: { name: 'P1', deck: sampleCards },
-        player2: { name: 'P2', deck: sampleCards },
-      })
-      .expect(200);
+    const response = await fight(app, sampleCards, sampleCards);
     steps = Object.values(response.body);
   });
 
@@ -173,5 +182,40 @@ describe('samples/cards.json', () => {
     );
 
     expect(shared.length).toBeGreaterThan(0);
+  });
+});
+
+describe('samples/cards.json with Selkhet in a deck', () => {
+  let app: INestApplication;
+  let steps: any[];
+
+  beforeEach(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    app.useLogger(false);
+    await app.init();
+
+    const response = await fight(app, without('kaelion'), sampleCards);
+    steps = Object.values(response.body);
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  it('is a deck the engine accepts and can fight with', () => {
+    expect(steps[steps.length - 1].kind).toBe('fight_end');
+  });
+
+  it('lets Selkhet open the fight concealed', () => {
+    expect(steps[1]).toEqual(
+      expect.objectContaining({
+        kind: 'concealment_started',
+        name: 'Marche Fantôme',
+      }),
+    );
   });
 });

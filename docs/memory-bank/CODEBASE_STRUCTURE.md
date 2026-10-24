@@ -387,8 +387,10 @@ Home page uses `<a href="/arcade" role="button">` (and `/deck`) instead of `<but
 Static ES-module app, served with `pnpm replayer`; the fight JSON is pasted in.
 No build step. `js/parser.js` turns a raw report into `events`, `snapshots`
 (card state after each step), `teams` and `cardsMeta`, and is the only part
-with real logic — hence the one Vitest suite (`js/__tests__/parser.spec.js`),
+with real logic — hence its Vitest suite (`js/__tests__/parser.spec.js`),
 which makes the replayer a workspace package covered by `pnpm -r test`.
+`js/__tests__/describe-event.spec.js` reads the engine `StepKind` enum from
+`step.ts` and fails when a step kind has no icon in `describeEvent()`.
 
 `snapshots` carry every buffer a card holds: `shield`, `stance`, `concealment`, `protecting`,
 `transformation`, `marks`, `bleedStacks`, `statuses`, `buffs`/`debuffs`. Death clears them all.
