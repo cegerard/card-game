@@ -53,6 +53,22 @@ describe('Execution', () => {
     expect(judgement().apply([hit(prey), hit(prey)])).toHaveLength(1);
   });
 
+  it('shows the executed defender dead in the hit that preceded the blow', () => {
+    const prey = atHealthRatio(0.2);
+    const strike = hit(prey);
+    judgement().apply([strike]);
+
+    expect(strike.remainingHealth).toBe(0);
+  });
+
+  it('shows the 1 HP a SURVIVE kept in the hit that preceded the blow', () => {
+    const prey = atHealthRatio(0.2, new SurviveSkill('Last stand'));
+    const strike = hit(prey);
+    judgement().apply([strike]);
+
+    expect(strike.remainingHealth).toBe(1);
+  });
+
   it('ignores the shield', () => {
     const prey = atHealthRatio(0.2);
     prey.applyShield(1, 3);
