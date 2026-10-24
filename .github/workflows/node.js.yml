@@ -32,6 +32,7 @@ jobs:
           cache: 'pnpm'
       - run: pnpm check:memory-bank
       - run: pnpm install
+      - run: pnpm check
       - run: pnpm build:all
       - run: pnpm lint:all
       - run: pnpm test:all
