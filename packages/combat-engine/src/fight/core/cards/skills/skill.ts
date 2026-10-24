@@ -13,6 +13,7 @@ import { ShieldResult } from '../@types/action-result/shield-result';
 import { ProtectionResult } from './protection';
 import { Stance } from '../@types/stance/stance';
 import { Concealment } from '../@types/concealment/concealment';
+import { Buff } from '../@types/alteration/alteration-detail';
 
 export enum SkillKind {
   Healing = 'healing',
@@ -25,6 +26,7 @@ export enum SkillKind {
   Protection = 'protection',
   Stance = 'stance',
   Concealment = 'concealment',
+  BuffTransfer = 'buff_transfer',
 }
 
 type BaseSkillResults = {
@@ -90,6 +92,12 @@ export type ProtectionSkillResults = BaseSkillResults & {
   results: ProtectionResult[];
 };
 
+export type BuffTransferSkillResults = BaseSkillResults & {
+  skillKind: SkillKind.BuffTransfer;
+  /** At most one: the card that received the buffs, empty when none moved. */
+  results: { target: FightingCard; buffs: Buff[] }[];
+};
+
 export type StanceSkillResults = BaseSkillResults & {
   skillKind: SkillKind.Stance;
   stance: Stance;
@@ -112,6 +120,7 @@ export type SkillResults =
   | TransformationSkillResults
   | ProtectionSkillResults
   | StanceSkillResults
+  | BuffTransferSkillResults
   | ConcealmentSkillResults;
 
 export interface Skill {

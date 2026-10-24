@@ -361,6 +361,10 @@ function buildGenericDetail(ev) {
       return (ev.removed ?? [])
         .map((r) => `${esc(r.kind)} from ${esc(r.target?.name)}`)
         .join(', ');
+    case 'buff_transferred': {
+      const types = (ev.alterations ?? []).map((a) => esc(a.kind)).join(', ');
+      return `${esc(ev.source?.name)} hands ${types} to ${esc(ev.target?.name)}`;
+    }
     case 'effect_removed':
       return (ev.removed ?? [])
         .map((r) => `${esc(r.effectType)} removed from ${esc(r.target?.name)}`)
@@ -467,6 +471,12 @@ export function describeEvent(ev, teamBName) {
         icon: ICON.debuff_removed,
         text: `Debuff removed — ${ev.eventName ?? ''}`,
         color: EVENT_COLOR.debuff_removed,
+      };
+    case 'buff_transferred':
+      return {
+        icon: ICON.buff_transferred,
+        text: `${ev.source?.name} — ${ev.name ?? 'Buff transfer'}`,
+        color: EVENT_COLOR.buff_transferred,
       };
     case 'buff_expired': {
       const types =

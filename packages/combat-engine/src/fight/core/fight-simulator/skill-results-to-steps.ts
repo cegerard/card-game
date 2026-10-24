@@ -214,6 +214,21 @@ export function skillResultsToSteps(
           steps.push(stanceStartedReport(card, skillResult.stanceStarted));
         }
         break;
+      case SkillKind.BuffTransfer:
+        skillResult.results.forEach((result) => {
+          steps.push({
+            kind: StepKind.BuffTransferred,
+            name: skillResult.name,
+            source: card.identityInfo,
+            target: result.target.identityInfo,
+            alterations: result.buffs.map((buff) => ({
+              kind: buff.type,
+              value: buff.value,
+              remainingTurns: buff.duration,
+            })),
+          });
+        });
+        break;
       default:
         throw new Error(`Unknown SkillKind: ${(skillResult as any).skillKind}`);
     }

@@ -8,6 +8,7 @@ import { AlliedCardByIdStrategy } from '../core/targeting-card-strategies/allied
 import { LastAttackerOfAllyTargetingStrategy } from '../core/targeting-card-strategies/last-attacker-of-ally';
 import { MostWoundedAllyStrategy } from '../core/targeting-card-strategies/most-wounded-ally';
 import { ProtectedAllyStrategy } from '../core/targeting-card-strategies/protected-ally';
+import { FastestAllyStrategy } from '../core/targeting-card-strategies/fastest-ally';
 import { TargetingStrategy } from './dto/fight-data.dto';
 import { TargetingCardStrategy } from '../core/targeting-card-strategies/targeting-card-strategy';
 
@@ -17,6 +18,7 @@ const STATIC_STRATEGY_MAP: Record<string, TargetingCardStrategy> = {
   [TargetingStrategy.LINE_THREE]: new TargetedLineThree(),
   [TargetingStrategy.POSITION_BASED]: new TargetedFromPosition(),
   [TargetingStrategy.PROTECTED_ALLY]: new ProtectedAllyStrategy(),
+  [TargetingStrategy.FASTEST_ALLY]: new FastestAllyStrategy(),
   [TargetingStrategy.SELF]: new Launcher(),
   [TargetingStrategy.TARGET_ALL]: new TargetedAll(),
 };

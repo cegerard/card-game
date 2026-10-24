@@ -49,6 +49,7 @@ function discoverCards(events, fightStart) {
     ev.removed?.forEach(r => registerCard(meta, r.target));
     ev.targets?.forEach(t => registerCard(meta, t.target));
     registerCard(meta, ev.protectedCard);
+    registerCard(meta, ev.target);
     if (ev.kind === 'state_effect') {
       trackFirstHP(firstHP, ev.card, ev.remainingHealth, ev.damage);
     }
@@ -248,6 +249,22 @@ function applyEvent(state, ev) {
         }];
       });
       break;
+
+    case 'buff_transferred': {
+      const from = get(ev.source?.id);
+      const to = get(ev.target?.id);
+      if (!to) break;
+      const kinds = (ev.alterations ?? []).map(a => a.kind);
+      if (from) from.buffs = from.buffs.filter(b => !kinds.includes(b.kind));
+      to.buffs = [...to.buffs, ...(ev.alterations ?? []).map(a => ({
+        kind: a.kind,
+        value: a.value,
+        turns: a.remainingTurns,
+        name: ev.name ?? '',
+        powerId: null,
+      }))];
+      break;
+    }
 
     case 'debuff':
       ev.alterations?.forEach(b => {
