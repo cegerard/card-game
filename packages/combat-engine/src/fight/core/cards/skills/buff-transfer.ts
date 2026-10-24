@@ -3,7 +3,7 @@ import { FightingContext } from '../@types/fighting-context';
 import { AlterationType } from '../@types/alteration/alteration-type';
 import { Trigger } from '../../trigger/trigger';
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
-import { Skill, SkillKind, SkillResults } from './skill';
+import { BuffTransferSkillResults, Skill, SkillKind } from './skill';
 
 /**
  * Hands every buff of one type its owner holds to the first card its targeting
@@ -22,7 +22,10 @@ export class BuffTransferSkill implements Skill {
     private readonly powerId?: string,
   ) {}
 
-  launch(source: FightingCard, context: FightingContext): SkillResults {
+  launch(
+    source: FightingCard,
+    context: FightingContext,
+  ): BuffTransferSkillResults {
     const [heir] = this.targetingStrategy.targetedCards(
       source,
       context.sourcePlayer,

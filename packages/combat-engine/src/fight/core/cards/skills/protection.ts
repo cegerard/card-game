@@ -3,7 +3,7 @@ import { FightingContext } from '../@types/fighting-context';
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 import { Trigger } from '../../trigger/trigger';
 import { ActivatableTrigger } from '../../trigger/activatable-trigger';
-import { Skill, SkillKind, SkillResults } from './skill';
+import { ProtectionSkillResults, Skill, SkillKind } from './skill';
 
 export type ProtectionResult = {
   protectedCard: FightingCard;
@@ -36,7 +36,7 @@ export class ProtectionSkill implements Skill {
     source: FightingCard,
     context: FightingContext,
     _targetingOverride?: TargetingCardStrategy,
-  ): SkillResults {
+  ): ProtectionSkillResults {
     const [protectedCard] = this.targetingStrategy.targetedCards(
       source,
       context.sourcePlayer,

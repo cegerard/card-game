@@ -1,6 +1,6 @@
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 import { FightingCard } from '../fighting-card';
-import { Skill, SkillKind, SkillResults } from './skill';
+import { HealingSkillResults, Skill, SkillKind } from './skill';
 import { Trigger } from '../../trigger/trigger';
 import { ActivatableTrigger } from '../../trigger/activatable-trigger';
 import { FightingContext } from '../@types/fighting-context';
@@ -44,7 +44,7 @@ export class Healing implements Skill {
     source: FightingCard,
     context: FightingContext,
     _targetingOverride?: TargetingCardStrategy,
-  ): SkillResults {
+  ): HealingSkillResults {
     const targetedCards = this.targetingStrategy.targetedCards(
       source,
       context.sourcePlayer,

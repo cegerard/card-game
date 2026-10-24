@@ -2,7 +2,7 @@ import { FightingCard } from '../fighting-card';
 import { FightingContext } from '../@types/fighting-context';
 import { AttackCondition } from '../@types/attack/attack-condition';
 import { AttackSkill } from './attack-skill';
-import { Skill, SkillKind, SkillResults } from './skill';
+import { AttackSkillResults, Skill, SkillKind } from './skill';
 import { Trigger } from '../../trigger/trigger';
 import { isActivatableTrigger } from '../../trigger/activatable-trigger';
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
@@ -51,7 +51,7 @@ export class ConditionalAttack implements Skill {
     source: FightingCard,
     context: FightingContext,
     targetingStrategy?: TargetingCardStrategy,
-  ): SkillResults {
+  ): AttackSkillResults {
     if (this.energyCost && source.actualEnergy < this.energyCost) {
       return { skillKind: SkillKind.Attack, results: [], name: this.name };
     }
