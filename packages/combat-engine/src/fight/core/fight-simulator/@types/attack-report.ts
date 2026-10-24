@@ -16,6 +16,8 @@ export type AttackReport = {
   executionSteps?: Step[];
   /** Alterations the attack left on the defenders it hit. */
   hitAlterationSteps?: Step[];
+  /** Event-bound buffs and effects released by a skill this attack exhausted. */
+  endEventSteps?: Step[];
   buffReport?: BuffReport;
   debuffReport?: DebuffReport;
   shieldAppliedReport?: ShieldAppliedReport;

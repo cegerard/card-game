@@ -1,3 +1,4 @@
+import { FightingCard } from '../../fighting-card';
 import { AttackResult } from '../action-result/attack-result';
 import { ExecutionResult } from '../action-result/execution-result';
 
@@ -23,6 +24,18 @@ export class Execution {
         .filter((defender) => defender.healthRatio < this.threshold),
     );
 
-    return [...condemned].map((card) => ({ card, ...card.execute() }));
+    return [...condemned].map((card) => {
+      const execution = { card, ...card.execute() };
+      this.lastHitOn(card, results).remainingHealth = card.actualHealth;
+
+      return execution;
+    });
+  }
+
+  /** The hit snapshot is taken before the blow: the last one must show it. */
+  private lastHitOn(card: FightingCard, results: AttackResult[]): AttackResult {
+    const hits = results.filter((r) => r.defender === card);
+
+    return hits[hits.length - 1];
   }
 }

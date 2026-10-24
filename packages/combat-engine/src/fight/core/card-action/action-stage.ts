@@ -31,6 +31,7 @@ import {
   skillResultsToSteps,
 } from '../fight-simulator/skill-results-to-steps';
 import { effectResultsToSteps } from '../fight-simulator/effect-results-to-steps';
+import { EndEventProcessor } from '../fight-simulator/end-event-processor';
 import { executionSteps } from '../fight-simulator/execution-steps';
 import { ExecutionResult } from '../cards/@types/action-result/execution-result';
 import { SurvivedReport } from '../fight-simulator/@types/survived-report';
@@ -59,6 +60,7 @@ export class ActionStage {
     onCardDeath: CardDeathSubscriber[];
   };
   private deathSkillHandler: DeathSkillHandler;
+  private endEventProcessor?: EndEventProcessor;
 
   public constructor(
     player1: Player,
@@ -67,11 +69,13 @@ export class ActionStage {
       onCardDeath: CardDeathSubscriber[];
     },
     deathSkillHandler: DeathSkillHandler,
+    endEventProcessor?: EndEventProcessor,
   ) {
     this.player1 = player1;
     this.player2 = player2;
     this.eventBroker = eventBroker;
     this.deathSkillHandler = deathSkillHandler;
+    this.endEventProcessor = endEventProcessor;
   }
 
   public computeNextAction(cards: FightingCard[]): Step[] {
@@ -88,7 +92,7 @@ export class ActionStage {
       } else {
         const skillsResults = this.launchNextActionSkills(card);
         if (skillsResults) {
-          acc.push(skillsResults);
+          acc.push(...skillsResults);
         } else {
           acc.push(this.launchAttack(card));
         }
@@ -122,13 +126,16 @@ export class ActionStage {
     return report;
   }
 
-  private launchNextActionSkills(card: FightingCard): ActionReport | null {
+  private launchNextActionSkills(card: FightingCard): ActionReport[] | null {
     const context = this.getFightingContext(card);
     const skillResults = card.launchSkills('next-action', context);
     const attackSkill = skillResults.find(
       (r): r is AttackSkillResults => r.skillKind === SkillKind.Attack,
     );
-    if (!attackSkill) return this.diveReport(card, skillResults);
+    if (!attackSkill) {
+      const dive = this.diveReport(card, skillResults);
+      return dive && [dive];
+    }
 
     const result: AttackReport = {
       kind: StepKind.Attack,
@@ -158,8 +165,32 @@ export class ActionStage {
       hitAlterationResults(attackSkill),
     );
     this.attachStanceReports(card, attackSkill, result);
+    result.endEventSteps = this.endEventSteps(card, attackSkill);
+    if (attackSkill.lowHealthDebuff) {
+      result.debuffReport = this.buildDebuffReport(
+        card,
+        attackSkill.lowHealthDebuff.name,
+        attackSkill.lowHealthDebuff.results,
+      );
+    }
 
-    return result;
+    return [
+      result,
+      ...(attackSkill.splash?.results.length > 0
+        ? [this.reportStrike(card, attackSkill.splash)]
+        : []),
+    ];
+  }
+
+  /** What an exhausted skill lets go of: its event-bound buffs and effects. */
+  private endEventSteps(card: FightingCard, skill: SkillResults): Step[] {
+    if (!skill.endEvent || !this.endEventProcessor) return [];
+
+    return this.endEventProcessor.processEndEvent(
+      skill.endEvent,
+      card.identityInfo,
+      skill.powerId,
+    );
   }
 
   private attachStanceReports(
@@ -223,6 +254,7 @@ export class ActionStage {
           hitAlterationResults(attackSkill),
         );
         this.attachStanceReports(card, attackSkill, reports[0]);
+        reports[0].endEventSteps = this.endEventSteps(card, attackSkill);
         if (attackSkill.lowHealthDebuff) {
           reports[0].debuffReport = this.buildDebuffReport(
             card,
@@ -436,6 +468,8 @@ export class ActionStage {
             acc.actionSteps.push(report.stanceEndedReport);
           }
 
+          acc.actionSteps.push(...(report.endEventSteps ?? []));
+
           report.survivedSteps.forEach((step) => {
             acc.actionSteps.push(step);
           });
@@ -615,7 +649,7 @@ export class ActionStage {
         ...caster.launchSkills(`ally-health-${damagedCard.id}`, context),
       ];
       return [
-        ...skillResultsToSteps(caster, reactions),
+        ...skillResultsToSteps(caster, reactions, this.endEventProcessor),
         ...this.reactionDeathSteps(caster, reactions),
       ];
     });

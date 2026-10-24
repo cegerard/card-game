@@ -86,6 +86,7 @@ cards/
 │   ├── buff-transfer.ts    # BuffTransferSkill: hands its owner buffs of one type, value, duration and stack pile kept, to the first card its targeting returns
 │   ├── stance.ts           # StanceSkill: opens a stance on its owner when its event fires
 │   ├── concealment.ts      # ConcealmentSkill: hides its owner from every enemy targeting until it attacks (or its duration runs out)
+│   ├── concealment-duration.ts # assertConcealmentDuration(): a concealment lasts a non-negative integer of turns, or until its owner attacks
 │   ├── transformation.ts   # TransformationSkill: one-shot health-reactive transformation
 │   └── power-id-consistency.ts  # Domain validation for composite power groups
 ├── behaviors/              # Card behavior patterns
@@ -159,7 +160,7 @@ This allows special attacks to perform their primary action (damage/healing) whi
 
 **Dynamic Ally Targeting**: `AnyAllyHealthBelowThresholdTrigger` (event `any-ally-health-below`) fires when **any** ally crosses a health threshold downward, edge-triggered per ally and skipping its owner, where `AllyHealthBelowThresholdTrigger` watches one ally named up front. `MostWoundedAllyStrategy` (targeting `most-wounded-ally`) resolves the target from the live board: the caster's most wounded living ally below the same threshold, caster excluded, nobody on a healthy team. Together they express a guardian power on a deck the player composes, where no `targetCardId` can be hard-coded.
 
-**PROTECTION Skill Kind (Attack Interception)**: `ProtectionSkill` puts its owner in front of one ally (`FightingCard.protect()`), and the three attack skills ask `Player.protectorOf(target)` right after targeting, swapping the defender **before** anything is rolled — so the dodge, defence, element, shield and damage reduction are the guardian's. The buffer lives on the protector, so its duration ticks on the guardian's turns; a dead guardian protects nobody. `AttackResult.interceptedFor` becomes an `attack_intercepted` step. Emits `protection_started` and `protection_ended`.
+**PROTECTION Skill Kind (Attack Interception)**: `ProtectionSkill` puts its owner in front of one ally (`FightingCard.protect()`), and the three attack skills ask `Player.protectorOf(target, attacker)` right after targeting (a guardian the attacker cannot see — concealed, unless the attacker holds a `revealsConcealed` stance — protects nobody), swapping the defender **before** anything is rolled — so the dodge, defence, element, shield and damage reduction are the guardian's. The buffer lives on the protector, so its duration ticks on the guardian's turns; a dead guardian protects nobody. `AttackResult.interceptedFor` becomes an `attack_intercepted` step. Emits `protection_started` and `protection_ended`.
 
 **Event-Owned Activation Condition**: `any-ally-health-below` uses `activationCondition.threshold` as its trigger threshold, so the generic ALTERATION path no longer reuses it as the skill own condition — that gated the buff on the *caster* health too, and a healthy guardian never answered its wounded ally.
 
@@ -191,6 +192,7 @@ fight-simulator/
 ├── effect-results-to-steps.ts # Pure fn: EffectResult[] → Step[] (mark_applied vs status_change + triggered debuff); shared by ActionStage and skillResultsToSteps
 ├── reactive-skill-checker.ts # Pure fn: triggers HealthReactiveSkills after HP changes → ShieldSkillResults[]
 ├── concealment-steps.ts    # revealAttacker() + concealmentEndedReport(): ends a concealment and reports it
+├── stance-steps.ts         # stanceStartedReport() + stanceEndedReport(): report a stance opened or closed, shared by ActionStage and TurnManager
 ├── execution-steps.ts      # executionSteps(): an executed step per defender, then survived when SURVIVE held
 ├── card-selectors/         # Turn order strategies
 │   ├── card-selector.ts    # Selector interface
