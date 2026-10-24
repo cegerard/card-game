@@ -3,7 +3,7 @@ import { FightingCard } from '../fighting-card';
 import { Trigger } from '../../trigger/trigger';
 import { ActivatableTrigger } from '../../trigger/activatable-trigger';
 import { FightingContext } from '../@types/fighting-context';
-import { Skill, SkillKind, SkillResults } from './skill';
+import { Skill, SkillKind, TargetingOverrideSkillResults } from './skill';
 import { TargetingOverrideReport } from '../../fight-simulator/@types/targeting-override-report';
 import { StepKind } from '../../fight-simulator/@types/step';
 
@@ -25,7 +25,7 @@ export class TargetingOverrideSkill implements Skill {
     source: FightingCard,
     context: FightingContext,
     _targetingOverride?: TargetingCardStrategy,
-  ): SkillResults {
+  ): TargetingOverrideSkillResults {
     const previousStrategy = source.attackTargetingId;
 
     const strategy = this.strategyResolver
