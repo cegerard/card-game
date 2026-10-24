@@ -376,3 +376,30 @@ describe('fight start', () => {
     expect(parseReport(opening).events.map((e) => e.kind)).toEqual(['attack']);
   });
 });
+
+describe('teams', () => {
+  const P1_CARD = { id: '2', name: 'Aegis', deckIdentity: 'Alice-1' };
+  const P2_CARD = { id: '1', name: 'Kaito', deckIdentity: 'Bob-1' };
+  const report = {
+    0: {
+      kind: 'fight_start',
+      cards: [
+        { card: P1_CARD, maxHealth: 500 },
+        { card: P2_CARD, maxHealth: 500 },
+      ],
+    },
+    1: {
+      kind: 'attack',
+      attacker: P2_CARD,
+      damages: [{ defender: P1_CARD, damage: 10, remainingHealth: 490 }],
+    },
+  };
+
+  it('puts the first player of the fight on the left side', () => {
+    expect(parseReport(report).teams.A.name).toBe('Alice');
+  });
+
+  it('puts the second player of the fight on the right side', () => {
+    expect(parseReport(report).teams.B.name).toBe('Bob');
+  });
+});

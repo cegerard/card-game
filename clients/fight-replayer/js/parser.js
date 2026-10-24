@@ -4,7 +4,8 @@
  * Transforms a raw fight-result JSON object into:
  *   - events[]     — sorted array of step objects
  *   - snapshots[]  — card-state after each event (index 0 = initial)
- *   - teams        — { A: { ids: Set, name }, B: { ids: Set, name } }
+ *   - teams        — { A: { ids: Set, name }, B: { ids: Set, name } }; A is the
+ *                    attacker (first player), shown on the left
  *   - cardsMeta    — { [id]: { id, name, deckIdentity } }
  */
 
@@ -60,8 +61,18 @@ function discoverCards(events, fightStart) {
 
 // ── Team detection ─────────────────────────────────────────────
 
-function detectTeams(cardsMeta, events) {
-  const ids = Object.keys(cardsMeta);
+/**
+ * Team A is the attacker (first player), team B the defender. `fight_start`
+ * lists the first player's cards first; an object key order cannot be trusted
+ * for that, as integer-like ids are sorted.
+ */
+function orderedCardIds(cardsMeta, fightStart) {
+  const declared = fightStart?.cards.map(({ card }) => card.id) ?? [];
+  return [...new Set([...declared, ...Object.keys(cardsMeta)])];
+}
+
+function detectTeams(cardsMeta, events, fightStart) {
+  const ids = orderedCardIds(cardsMeta, fightStart);
 
   // Strategy 1: group by deckIdentity prefix (strip trailing "-N" or " N")
   const groups = {};
@@ -461,7 +472,7 @@ export function parseReport(rawJson) {
   const events = steps.filter(s => s !== fightStart);
 
   const { meta: cardsMeta, firstHP } = discoverCards(events, fightStart);
-  const teams = detectTeams(cardsMeta, events);
+  const teams = detectTeams(cardsMeta, events, fightStart);
 
   // Build snapshot array: index 0 = before any event
   const snapshots = [];
