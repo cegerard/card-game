@@ -26,13 +26,14 @@ describe('ConditionalAttack with a low-health debuff', () => {
       ),
       new AlwaysTrueAttackCondition(),
       new TurnStart(),
-      undefined,
-      undefined,
-      undefined,
-      new Splash('Vent Écarlate', [new DamageComposition(DamageType.AIR, 7)]),
-      new LowHealthDebuff('Choc Hémorragique', 0.3, [
-        { type: 'defense', rate: 0.4, duration: 4 },
-      ]),
+      {
+        splash: new Splash('Vent Écarlate', [
+          new DamageComposition(DamageType.AIR, 7),
+        ]),
+        lowHealthDebuff: new LowHealthDebuff('Choc Hémorragique', 0.3, [
+          { type: 'defense', rate: 0.4, duration: 4 },
+        ]),
+      },
     ).launch(owner, {
       sourcePlayer: new Player('p1', [owner]),
       opponentPlayer: new Player('p2', [target]),

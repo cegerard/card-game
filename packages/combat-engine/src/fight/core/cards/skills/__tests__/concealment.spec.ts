@@ -21,10 +21,9 @@ describe('ConcealmentSkill', () => {
     let result: SkillResults;
 
     beforeEach(() => {
-      result = new ConcealmentSkill('Camouflage', new FightStart(), 2).launch(
-        owner,
-        null,
-      );
+      result = new ConcealmentSkill('Camouflage', new FightStart(), {
+        duration: 2,
+      }).launch(owner, null);
     });
 
     it('conceals its owner', () => {
@@ -42,7 +41,7 @@ describe('ConcealmentSkill', () => {
 
   it.each([-1, 1.5])('rejects a duration of %s', (duration) => {
     expect(
-      () => new ConcealmentSkill('Camouflage', new FightStart(), duration),
+      () => new ConcealmentSkill('Camouflage', new FightStart(), { duration }),
     ).toThrow('Concealment duration must be a non-negative integer');
   });
 });

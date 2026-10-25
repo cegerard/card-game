@@ -28,15 +28,7 @@ describe('ConditionalAttack ending its required stance', () => {
       ),
       new AlwaysTrueAttackCondition(),
       new TurnStart(),
-      undefined,
-      'Sous terre',
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      true,
+      { requiredStance: 'Sous terre', endsStance: true },
     ).launch(owner, {
       sourcePlayer: new Player('p1', [owner]),
       opponentPlayer: new Player('p2', [

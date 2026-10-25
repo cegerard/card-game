@@ -30,9 +30,7 @@ describe('ConditionalAttack with an energy cost', () => {
       ),
       new AlwaysTrueAttackCondition(),
       new TurnStart(),
-      undefined,
-      undefined,
-      10,
+      { energyCost: 10 },
     );
   const launch = (skill: ConditionalAttack) =>
     skill.launch(owner, {

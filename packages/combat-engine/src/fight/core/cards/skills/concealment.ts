@@ -15,19 +15,34 @@ import { AlwaysTrueAttackCondition } from '../@types/attack/conditions/always-tr
  * requiring that stance turns into a strike — and wait for a cooldown
  * (`condition`), restarted each time it fires.
  */
+export interface ConcealmentOptions {
+  duration?: number;
+  powerId?: string;
+  stanceActivation?: StanceActivation;
+  condition?: AttackCondition;
+  requiresUndamaged?: boolean;
+}
+
 export class ConcealmentSkill implements Skill {
   public readonly id = 'concealment-skill';
+
+  public readonly powerId?: string;
+  public readonly requiresUndamaged?: boolean;
+  private readonly duration?: number;
+  private readonly stanceActivation?: StanceActivation;
+  private readonly condition: AttackCondition;
 
   constructor(
     public readonly name: string,
     private readonly trigger: Trigger,
-    private readonly duration?: number,
-    public readonly powerId?: string,
-    private readonly stanceActivation?: StanceActivation,
-    private readonly condition: AttackCondition = new AlwaysTrueAttackCondition(),
-    public readonly requiresUndamaged?: boolean,
+    options: ConcealmentOptions = {},
   ) {
-    assertConcealmentDuration(duration);
+    assertConcealmentDuration(options.duration);
+    this.duration = options.duration;
+    this.powerId = options.powerId;
+    this.stanceActivation = options.stanceActivation;
+    this.condition = options.condition ?? new AlwaysTrueAttackCondition();
+    this.requiresUndamaged = options.requiresUndamaged;
   }
 
   launch(source: FightingCard, _context: FightingContext): SkillResults {

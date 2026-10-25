@@ -29,18 +29,7 @@ describe('ConditionalAttack with an activation limit', () => {
       ),
       new AlwaysTrueAttackCondition(),
       new AllyHealthBelowThresholdTrigger('selkhet', 0.5),
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      1,
-      'jugement-end',
+      { activationLimit: 1, endEvent: 'jugement-end' },
     );
 
   const dropBelowThreshold = () => {

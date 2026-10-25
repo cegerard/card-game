@@ -28,12 +28,7 @@ describe('ConditionalAttack opening a stance', () => {
       ),
       new AlwaysTrueAttackCondition(),
       new TurnStart(),
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      { name: 'transe-predatrice', duration: 2 },
+      { stanceActivation: { name: 'transe-predatrice', duration: 2 } },
     ).launch(owner, {
       sourcePlayer: new Player('p1', [owner]),
       opponentPlayer: new Player('p2', [
