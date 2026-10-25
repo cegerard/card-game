@@ -9,6 +9,10 @@ import { DeathTrigger } from '../../trigger/death-trigger';
 import { Player } from '../../player';
 import { DeathSkillHandler } from '../death-skill-handler';
 import { Step, StepKind } from '../@types/step';
+import {
+  attackers,
+  executioner,
+} from '../../../../../test/helpers/reactive-kill';
 
 describe('DeathSkillHandler kill by a reactive attack', () => {
   let handler: DeathSkillHandler;
@@ -64,5 +68,39 @@ describe('DeathSkillHandler kill by a reactive attack', () => {
         .filter((s) => s.kind === StepKind.Healing)
         .map((s: any) => s.source.id),
     ).toContain('victim');
+  });
+});
+
+describe('DeathSkillHandler ally killed by the answer to a reactive kill', () => {
+  let steps: Step[];
+
+  beforeEach(() => {
+    const fallen = createFightingCard({ id: 'fallen' });
+    const first = executioner(
+      new DeathTrigger('ally-death', 'fallen'),
+      'first',
+    );
+    const doomed = executioner(
+      new DeathTrigger('ally-death', 'fallen'),
+      'doomed',
+      1,
+    );
+    const victim = createFightingCard({ id: 'victim', health: 1, defense: 0 });
+    const avenger = executioner(
+      new DeathTrigger('ally-death', 'victim'),
+      'avenger',
+      1e9,
+    );
+    const handler = new DeathSkillHandler(
+      new Player('p1', [fallen, first, doomed]),
+      new Player('p2', [victim, avenger]),
+    );
+    fallen.addRealDamage(100000);
+    handler.notifyDeath(fallen);
+    steps = handler.drainSteps();
+  });
+
+  it('does not launch the skills of the dead ally', () => {
+    expect(attackers(steps)).not.toContain('doomed');
   });
 });

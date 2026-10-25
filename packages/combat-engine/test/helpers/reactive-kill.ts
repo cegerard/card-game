@@ -12,9 +12,14 @@ import {
 } from '../../src/fight/core/fight-simulator/@types/step';
 
 /** A one-shot killer of every enemy, fired by `trigger`. */
-export const executioner = (trigger: Trigger) =>
+export const executioner = (
+  trigger: Trigger,
+  id = 'executioner',
+  health?: number,
+) =>
   createFightingCard({
-    id: 'executioner',
+    id,
+    health,
     attack: 1000,
     accuracy: 9999,
     extraSkills: [
@@ -49,6 +54,11 @@ export const fragileWithLastBreath = () =>
       ],
     },
   });
+
+export const attackers = (steps: Step[]): string[] =>
+  steps
+    .filter((s) => s.kind === StepKind.Attack)
+    .map((s: any) => s.attacker.id);
 
 export const healingSources = (steps: Step[]): string[] =>
   steps.filter((s) => s.kind === StepKind.Healing).map((s: any) => s.source.id);

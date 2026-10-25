@@ -95,6 +95,8 @@ export class Fight implements FightSimulator {
       [this.player2, this.player1],
     ].flatMap(([sourcePlayer, opponentPlayer]) =>
       sourcePlayer.allCards.flatMap((card) => {
+        if (card.isDead()) return [];
+
         const results = card.launchSkills(FIGHT_START, {
           sourcePlayer,
           opponentPlayer,
