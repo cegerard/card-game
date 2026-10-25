@@ -12,6 +12,8 @@ import { Step, StepKind } from '../@types/step';
 import {
   attackers,
   executioner,
+  fragileWithLastBreath,
+  healingSources,
 } from '../../../../../test/helpers/reactive-kill';
 
 describe('DeathSkillHandler kill by a reactive attack', () => {
@@ -102,5 +104,29 @@ describe('DeathSkillHandler ally killed by the answer to a reactive kill', () =>
 
   it('does not launch the skills of the dead ally', () => {
     expect(attackers(steps)).not.toContain('doomed');
+  });
+});
+
+describe('DeathSkillHandler kill by an enemy-death reaction', () => {
+  let steps: Step[];
+
+  beforeEach(() => {
+    const fallen = createFightingCard({ id: 'fallen' });
+    const victim = fragileWithLastBreath();
+    const avenger = executioner(
+      new DeathTrigger('enemy-death', 'fallen'),
+      'avenger',
+    );
+    const handler = new DeathSkillHandler(
+      new Player('p1', [fallen, victim]),
+      new Player('p2', [avenger]),
+    );
+    fallen.addRealDamage(100000);
+    handler.notifyDeath(fallen);
+    steps = handler.drainSteps();
+  });
+
+  it('runs the self-death skills of the card the reaction killed', () => {
+    expect(healingSources(steps)).toContain('victim');
   });
 });
