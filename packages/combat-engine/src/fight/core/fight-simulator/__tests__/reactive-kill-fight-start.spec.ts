@@ -6,7 +6,7 @@ import {
   executioner,
   fragileWithLastBreath,
   healingSources,
-} from './reactive-kill-fixtures';
+} from '../../../../../test/helpers/reactive-kill';
 
 describe('Fight kill by a fight-start attack', () => {
   it('runs the self-death skills of the card killed', () => {

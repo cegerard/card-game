@@ -7,7 +7,7 @@ import {
   executioner,
   fragileWithLastBreath,
   healingSources,
-} from './reactive-kill-fixtures';
+} from '../../../../../test/helpers/reactive-kill';
 
 describe('TurnManager kill by a turn-end attack', () => {
   it('runs the self-death skills of the card killed', () => {
