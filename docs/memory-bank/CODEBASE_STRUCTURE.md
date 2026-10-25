@@ -94,6 +94,7 @@ fight-simulator/
 ├── end-event-processor.ts  # Removes event-bound buffs/effects on end events
 ├── skill-results-to-steps.ts, effect-results-to-steps.ts   # Pure fns → Step[]
 ├── reactive-skill-checker.ts   # triggerReactiveSkills()
+├── reactive-kill-steps.ts      # reactiveKillSteps(): death cascade of the cards a reactive attack killed
 ├── concealment-steps.ts, stance-steps.ts, execution-steps.ts  # Step helpers
 ├── card-selectors/         # card-selector.ts, player-by-player.ts, speed-weighted-card-pool.ts
 └── @types/                 # fight-result, fight-start-report, step (StepKind), winner-report, action/attack/healing/buff/debuff/state-effect/damage/status-change reports, and one report file per mechanic (shield, mark, regeneration, protection, transformation, concealment, special-stance, survived, damage-mitigated, buff-transferred, executed, buff/effect-removed)

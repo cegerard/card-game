@@ -1,3 +1,4 @@
+import { reactiveKillSteps } from '../fight-simulator/reactive-kill-steps';
 import { AttackReport } from '../fight-simulator/@types/attack-report';
 import { FightingCard } from '../cards/fighting-card';
 import { Player } from '../player';
@@ -614,13 +615,20 @@ export class ActionStage {
   private dispatchBleedStacksApplied(attackerCard: FightingCard): Step[] {
     if (attackerCard.isDead()) return [];
 
-    return skillResultsToSteps(
-      attackerCard,
-      attackerCard.launchSkills(
-        `${BLEED_STACKS_APPLIED}:${attackerCard.bleedStacksApplied}`,
-        this.getFightingContext(attackerCard),
-      ),
+    const reactions = attackerCard.launchSkills(
+      `${BLEED_STACKS_APPLIED}:${attackerCard.bleedStacksApplied}`,
+      this.getFightingContext(attackerCard),
     );
+
+    return [
+      ...skillResultsToSteps(attackerCard, reactions),
+      ...reactiveKillSteps(
+        reactions,
+        attackerCard,
+        this.eventBroker,
+        this.deathSkillHandler,
+      ),
+    ];
   }
 
   /**
@@ -650,34 +658,14 @@ export class ActionStage {
       ];
       return [
         ...skillResultsToSteps(caster, reactions, this.endEventProcessor),
-        ...this.reactionDeathSteps(caster, reactions),
+        ...reactiveKillSteps(
+          reactions,
+          caster,
+          this.eventBroker,
+          this.deathSkillHandler,
+        ),
       ];
     });
-  }
-
-  /**
-   * A reactive attack can kill too: its victims run the death cascade.
-   * `skillResultsToSteps()` already reported their `dead` status.
-   */
-  private reactionDeathSteps(
-    caster: FightingCard,
-    reactions: SkillResults[],
-  ): Step[] {
-    const struck = reactions.flatMap((reaction) =>
-      reaction.skillKind === SkillKind.Attack
-        ? [
-            ...reaction.results.map((result) => result.defender),
-            ...(reaction.splash?.results ?? []).map((r) => r.defender),
-            ...(reaction.executions?.results ?? []).map((r) => r.card),
-          ]
-        : [],
-    );
-    return [...new Set(struck)]
-      .filter((card) => card.isDead())
-      .flatMap((card) => {
-        this.notifyDeath(card, caster);
-        return this.deathSkillHandler.drainSteps();
-      });
   }
 
   private getFightingContext(card: FightingCard): FightingContext {
@@ -690,10 +678,20 @@ export class ActionStage {
 
   /** What the card does after a SURVIVE skill kept it alive. */
   private survivedReactions(card: FightingCard): Step[] {
-    return skillResultsToSteps(
-      card,
-      card.launchSkills('survived', this.getFightingContext(card)),
+    const reactions = card.launchSkills(
+      'survived',
+      this.getFightingContext(card),
     );
+
+    return [
+      ...skillResultsToSteps(card, reactions),
+      ...reactiveKillSteps(
+        reactions,
+        card,
+        this.eventBroker,
+        this.deathSkillHandler,
+      ),
+    ];
   }
 
   /** The executions of an attack, each followed by the reactions it caused. */
