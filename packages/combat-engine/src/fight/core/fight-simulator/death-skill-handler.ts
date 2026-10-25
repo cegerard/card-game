@@ -117,6 +117,7 @@ export class DeathSkillHandler implements CardDeathSubscriber {
       ownerPlayer,
       opponentPlayer,
       killerCard,
+      true,
     );
 
     const allyTriggerId = `ally-death:${deadCard.id}`;
@@ -179,11 +180,12 @@ export class DeathSkillHandler implements CardDeathSubscriber {
     sourcePlayer: Player,
     opponentPlayer: Player,
     killerCard?: FightingCard,
+    includeDeadCards = false,
   ): void {
     cards.forEach((card) => {
       // A reactive kill earlier in the loop can have felled this card; only the
       // self-death phase speaks for a dead one.
-      if (card.isDead() && !triggerId.startsWith(SELF_DEATH_PREFIX)) return;
+      if (card.isDead() && !includeDeadCards) return;
 
       const context: FightingContext = {
         sourcePlayer,
