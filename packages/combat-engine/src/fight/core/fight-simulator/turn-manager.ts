@@ -6,7 +6,7 @@ import { Step, StepKind } from './@types/step';
 import { CardDeathSubscriber } from './card-death-subscriber';
 import { DeathSkillHandler } from './death-skill-handler';
 import { EndEventProcessor } from './end-event-processor';
-import { defendersKilled } from './defenders-killed';
+import { reactiveKillSteps } from './reactive-kill-steps';
 import { skillResultsToSteps } from './skill-results-to-steps';
 import { triggerReactiveSkills } from './reactive-skill-checker';
 import { concealmentEndedReport } from './concealment-steps';
@@ -112,10 +112,14 @@ export class TurnManager {
     steps.push(
       ...skillResultsToSteps(card, appliedSkills, this.endEventProcessor),
     );
-    defendersKilled(appliedSkills).forEach((killed) => {
-      this.notifyDeath(killed, undefined, card);
-      steps.push(...this.deathSkillHandler.drainSteps());
-    });
+    steps.push(
+      ...reactiveKillSteps(
+        appliedSkills,
+        card,
+        this.eventBroker,
+        this.deathSkillHandler,
+      ),
+    );
   }
 
   private processCardRegeneration(card: FightingCard, steps: Step[]) {

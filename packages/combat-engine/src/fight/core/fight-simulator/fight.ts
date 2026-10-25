@@ -8,7 +8,7 @@ import { TurnManager } from './turn-manager';
 import { FightSimulator } from './@types/fight-simulator';
 import { DeathSkillHandler } from './death-skill-handler';
 import { EndEventProcessor } from './end-event-processor';
-import { defendersKilled } from './defenders-killed';
+import { reactiveKillSteps } from './reactive-kill-steps';
 import { skillResultsToSteps } from './skill-results-to-steps';
 import { FIGHT_START } from '../trigger/fight-start';
 
@@ -104,12 +104,12 @@ export class Fight implements FightSimulator {
 
         return [
           ...skillResultsToSteps(card, results),
-          ...defendersKilled(results).flatMap((killed) => {
-            this.eventBroker.onCardDeath.forEach((subscriber) =>
-              subscriber.notifyDeath(killed, card),
-            );
-            return this.deathSkillHandler.drainSteps();
-          }),
+          ...reactiveKillSteps(
+            results,
+            card,
+            this.eventBroker,
+            this.deathSkillHandler,
+          ),
         ];
       }),
     );

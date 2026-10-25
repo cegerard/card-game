@@ -1,4 +1,4 @@
-import { defendersKilled } from '../fight-simulator/defenders-killed';
+import { reactiveKillSteps } from '../fight-simulator/reactive-kill-steps';
 import { AttackReport } from '../fight-simulator/@types/attack-report';
 import { FightingCard } from '../cards/fighting-card';
 import { Player } from '../player';
@@ -622,7 +622,12 @@ export class ActionStage {
 
     return [
       ...skillResultsToSteps(attackerCard, reactions),
-      ...this.reactionDeathSteps(attackerCard, reactions),
+      ...reactiveKillSteps(
+        reactions,
+        attackerCard,
+        this.eventBroker,
+        this.deathSkillHandler,
+      ),
     ];
   }
 
@@ -653,22 +658,13 @@ export class ActionStage {
       ];
       return [
         ...skillResultsToSteps(caster, reactions, this.endEventProcessor),
-        ...this.reactionDeathSteps(caster, reactions),
+        ...reactiveKillSteps(
+          reactions,
+          caster,
+          this.eventBroker,
+          this.deathSkillHandler,
+        ),
       ];
-    });
-  }
-
-  /**
-   * A reactive attack can kill too: its victims run the death cascade.
-   * `skillResultsToSteps()` already reported their `dead` status.
-   */
-  private reactionDeathSteps(
-    caster: FightingCard,
-    reactions: SkillResults[],
-  ): Step[] {
-    return defendersKilled(reactions).flatMap((card) => {
-      this.notifyDeath(card, caster);
-      return this.deathSkillHandler.drainSteps();
     });
   }
 
@@ -689,7 +685,12 @@ export class ActionStage {
 
     return [
       ...skillResultsToSteps(card, reactions),
-      ...this.reactionDeathSteps(card, reactions),
+      ...reactiveKillSteps(
+        reactions,
+        card,
+        this.eventBroker,
+        this.deathSkillHandler,
+      ),
     ];
   }
 
