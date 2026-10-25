@@ -27,15 +27,11 @@ const strike = (stanceActivation?, endsStance?) =>
     ),
     new AlwaysTrueAttackCondition(),
     new NextAction(),
-    undefined,
-    endsStance ? UNDERGROUND.name : undefined,
-    undefined,
-    undefined,
-    undefined,
-    stanceActivation,
-    undefined,
-    undefined,
-    endsStance,
+    {
+      requiredStance: endsStance ? UNDERGROUND.name : undefined,
+      stanceActivation,
+      endsStance,
+    },
   );
 
 describe('ActionStage next-action event', () => {
@@ -116,13 +112,14 @@ describe('ActionStage next-action event', () => {
             ),
             new AlwaysTrueAttackCondition(),
             new NextAction(),
-            undefined,
-            undefined,
-            undefined,
-            new Splash('Éclat', [new DamageComposition(DamageType.AIR, 0.5)]),
-            new LowHealthDebuff('Choc', 1, [
-              { type: 'defense', rate: 0.1, duration: 2 },
-            ]),
+            {
+              splash: new Splash('Éclat', [
+                new DamageComposition(DamageType.AIR, 0.5),
+              ]),
+              lowHealthDebuff: new LowHealthDebuff('Choc', 1, [
+                { type: 'defense', rate: 0.1, duration: 2 },
+              ]),
+            },
           ),
         ],
       });

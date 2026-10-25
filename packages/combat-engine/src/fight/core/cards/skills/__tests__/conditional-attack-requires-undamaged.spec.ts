@@ -19,13 +19,7 @@ const ambush = (interval = 1) =>
     ),
     new EveryNTurnsCondition(interval),
     new TurnStart(),
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    true,
+    { requiresUndamaged: true },
   );
 
 describe('ConditionalAttack requiring its owner undamaged', () => {

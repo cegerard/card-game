@@ -26,10 +26,7 @@ const ultimate = (splash?: Splash) =>
     ),
     new AlwaysTrueAttackCondition(),
     new TurnStart(),
-    undefined,
-    undefined,
-    10,
-    splash,
+    { energyCost: 10, splash },
   );
 
 describe('ActionStage turn-start event', () => {

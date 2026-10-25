@@ -30,10 +30,11 @@ describe('ConditionalAttack with a splash', () => {
       ),
       new AlwaysTrueAttackCondition(),
       new TurnStart(),
-      undefined,
-      undefined,
-      undefined,
-      new Splash('Vent Écarlate', [new DamageComposition(DamageType.AIR, 0.6)]),
+      {
+        splash: new Splash('Vent Écarlate', [
+          new DamageComposition(DamageType.AIR, 0.6),
+        ]),
+      },
     ).launch(owner, {
       sourcePlayer: new Player('p1', [owner]),
       opponentPlayer: new Player('p2', enemies),

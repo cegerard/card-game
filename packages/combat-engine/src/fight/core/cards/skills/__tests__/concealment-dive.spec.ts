@@ -8,15 +8,11 @@ import { EveryNTurnsCondition } from '../../@types/attack/conditions/every-n-tur
 const UNDERGROUND = { name: 'Sous terre', duration: 1 };
 
 const dive = (interval = 1) =>
-  new ConcealmentSkill(
-    'Plongée Tectonique',
-    new NextAction(),
-    undefined,
-    undefined,
-    UNDERGROUND,
-    new EveryNTurnsCondition(interval),
-    true,
-  );
+  new ConcealmentSkill('Plongée Tectonique', new NextAction(), {
+    stanceActivation: UNDERGROUND,
+    condition: new EveryNTurnsCondition(interval),
+    requiresUndamaged: true,
+  });
 
 describe('ConcealmentSkill opening a stance on a cooldown', () => {
   let owner: FightingCard;

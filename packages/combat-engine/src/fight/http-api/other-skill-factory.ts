@@ -188,36 +188,38 @@ function buildConditionalAttack(
         attackSkill,
         buildCooldown(skillData.interval),
         buildTriggerForSkill(skillData, ownerId),
-        skillData.powerId,
-        skillData.requiresStance,
-        skillData.energyCost,
-        skillData.splash
-          ? new Splash(
-              skillData.splash.name,
-              skillData.splash.damages.map(
-                (d) => new DamageComposition(d.type, d.rate),
-              ),
-              buildEffects(skillData.splash.effects),
-            )
-          : undefined,
-        skillData.onLowHealthAfterHit
-          ? new LowHealthDebuff(
-              skillData.onLowHealthAfterHit.name,
-              skillData.onLowHealthAfterHit.threshold,
-              skillData.onLowHealthAfterHit.debuffs.map((debuff) => ({
-                type: mapAlterationType(debuff.type),
-                rate: debuff.rate,
-                duration: debuff.duration,
-              })),
-            )
-          : undefined,
-        skillData.stanceActivation,
-        skillData.requiresUndamaged,
-        buildHitAlterations(skillData),
-        skillData.endsStance,
-        buildExecution(skillData.execution),
-        skillData.activationLimit,
-        skillData.endEvent,
+        {
+          powerId: skillData.powerId,
+          requiredStance: skillData.requiresStance,
+          energyCost: skillData.energyCost,
+          splash: skillData.splash
+            ? new Splash(
+                skillData.splash.name,
+                skillData.splash.damages.map(
+                  (d) => new DamageComposition(d.type, d.rate),
+                ),
+                buildEffects(skillData.splash.effects),
+              )
+            : undefined,
+          lowHealthDebuff: skillData.onLowHealthAfterHit
+            ? new LowHealthDebuff(
+                skillData.onLowHealthAfterHit.name,
+                skillData.onLowHealthAfterHit.threshold,
+                skillData.onLowHealthAfterHit.debuffs.map((debuff) => ({
+                  type: mapAlterationType(debuff.type),
+                  rate: debuff.rate,
+                  duration: debuff.duration,
+                })),
+              )
+            : undefined,
+          stanceActivation: skillData.stanceActivation,
+          requiresUndamaged: skillData.requiresUndamaged,
+          hitAlterations: buildHitAlterations(skillData),
+          endsStance: skillData.endsStance,
+          execution: buildExecution(skillData.execution),
+          activationLimit: skillData.activationLimit,
+          endEvent: skillData.endEvent,
+        },
       ),
   );
 }
@@ -381,11 +383,13 @@ function buildConcealment(
     return new ConcealmentSkill(
       skillData.name,
       buildTriggerForSkill(skillData, ownerId),
-      skillData.duration,
-      skillData.powerId,
-      skillData.stanceActivation,
-      buildCooldown(skillData.interval),
-      skillData.requiresUndamaged,
+      {
+        duration: skillData.duration,
+        powerId: skillData.powerId,
+        stanceActivation: skillData.stanceActivation,
+        condition: buildCooldown(skillData.interval),
+        requiresUndamaged: skillData.requiresUndamaged,
+      },
     );
   } catch (e) {
     throw new BadRequestException((e as Error).message);

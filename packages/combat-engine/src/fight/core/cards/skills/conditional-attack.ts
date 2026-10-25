@@ -12,28 +12,46 @@ import { StanceActivation } from '../@types/stance/stance';
 import { HitAlterations } from '../@types/attack/hit-alterations';
 import { Execution } from '../@types/attack/execution';
 
+export interface ConditionalAttackOptions {
+  powerId?: string;
+  requiredStance?: string;
+  energyCost?: number;
+  splash?: Splash;
+  lowHealthDebuff?: LowHealthDebuff;
+  stanceActivation?: StanceActivation;
+  requiresUndamaged?: boolean;
+  hitAlterations?: HitAlterations;
+  endsStance?: boolean;
+  execution?: Execution;
+  activationLimit?: number;
+  endEvent?: string;
+}
+
 export class ConditionalAttack implements Skill {
   public id = 'conditional-attack';
+
+  public readonly requiredStance?: string;
+  public readonly requiresUndamaged?: boolean;
+  private readonly powerId?: string;
+  private readonly energyCost?: number;
+  private readonly splash?: Splash;
+  private readonly lowHealthDebuff?: LowHealthDebuff;
+  private readonly stanceActivation?: StanceActivation;
+  private readonly hitAlterations?: HitAlterations;
+  private readonly endsStance?: boolean;
+  private readonly execution?: Execution;
+  private readonly activationLimit?: number;
+  private readonly endEvent?: string;
 
   constructor(
     public readonly name: string,
     private readonly attackSkill: AttackSkill,
     private readonly condition: AttackCondition,
     private readonly trigger: Trigger,
-    private readonly powerId?: string,
-    public readonly requiredStance?: string,
-    private readonly energyCost?: number,
-    private readonly splash?: Splash,
-    private readonly lowHealthDebuff?: LowHealthDebuff,
-    private readonly stanceActivation?: StanceActivation,
-    public readonly requiresUndamaged?: boolean,
-    private readonly hitAlterations?: HitAlterations,
-    private readonly endsStance?: boolean,
-    private readonly execution?: Execution,
-    private readonly activationLimit?: number,
-    private readonly endEvent?: string,
+    options: ConditionalAttackOptions = {},
   ) {
-    if (endsStance && !requiredStance) {
+    Object.assign(this, options);
+    if (this.endsStance && !this.requiredStance) {
       throw new Error('ConditionalAttack endsStance requires requiredStance');
     }
   }

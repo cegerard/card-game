@@ -26,16 +26,11 @@ describe('ConditionalAttack altering the defenders it hits', () => {
       ),
       new AlwaysTrueAttackCondition(),
       new TurnStart(),
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      new HitAlterations([
-        { polarity: 'debuff', type: 'agility', rate: 0.5, duration: 3 },
-      ]),
+      {
+        hitAlterations: new HitAlterations([
+          { polarity: 'debuff', type: 'agility', rate: 0.5, duration: 3 },
+        ]),
+      },
     ).launch(owner, {
       sourcePlayer: new Player('p1', [owner]),
       opponentPlayer: new Player('p2', enemies),

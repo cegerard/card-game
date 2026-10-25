@@ -28,18 +28,7 @@ const oneShotAttack = (trigger: Trigger) =>
     ),
     new AlwaysTrueAttackCondition(),
     trigger,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    1,
-    END_EVENT,
+    { activationLimit: 1, endEvent: END_EVENT },
   );
 
 describe('ActionStage end event of an exhausted conditional attack', () => {
