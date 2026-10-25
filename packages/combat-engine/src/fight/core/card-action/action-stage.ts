@@ -35,6 +35,10 @@ import { effectResultsToSteps } from '../fight-simulator/effect-results-to-steps
 import { EndEventProcessor } from '../fight-simulator/end-event-processor';
 import { executionSteps } from '../fight-simulator/execution-steps';
 import { ExecutionResult } from '../cards/@types/action-result/execution-result';
+import {
+  SurvivedReactor,
+  fightSurvivedReactor,
+} from '../fight-simulator/survived-reactions';
 import { SurvivedReport } from '../fight-simulator/@types/survived-report';
 import { BLEED_STACKS_APPLIED } from '../trigger/bleed-stacks-applied';
 import { TURN_START } from '../trigger/turn-start';
@@ -62,6 +66,8 @@ export class ActionStage {
   };
   private deathSkillHandler: DeathSkillHandler;
   private endEventProcessor?: EndEventProcessor;
+  /** What a card does after a SURVIVE skill kept it alive. */
+  private readonly survivedReactor: SurvivedReactor;
 
   public constructor(
     player1: Player,
@@ -77,6 +83,11 @@ export class ActionStage {
     this.eventBroker = eventBroker;
     this.deathSkillHandler = deathSkillHandler;
     this.endEventProcessor = endEventProcessor;
+    this.survivedReactor = fightSurvivedReactor(
+      (card) => this.getFightingContext(card),
+      eventBroker,
+      deathSkillHandler,
+    );
   }
 
   public computeNextAction(cards: FightingCard[]): Step[] {
@@ -557,7 +568,7 @@ export class ActionStage {
           card: defensiveCard.identityInfo,
         };
         report.survivedSteps.push(survivedReport);
-        report.survivedSteps.push(...this.survivedReactions(defensiveCard));
+        report.survivedSteps.push(...this.survivedReactor(defensiveCard));
       }
 
       if (defensiveCard.isDead() && !reportedDeaths.has(defensiveCard)) {
@@ -621,7 +632,12 @@ export class ActionStage {
     );
 
     return [
-      ...skillResultsToSteps(attackerCard, reactions),
+      ...skillResultsToSteps(
+        attackerCard,
+        reactions,
+        undefined,
+        this.survivedReactor,
+      ),
       ...reactiveKillSteps(
         reactions,
         attackerCard,
@@ -657,7 +673,12 @@ export class ActionStage {
         ...caster.launchSkills(`ally-health-${damagedCard.id}`, context),
       ];
       return [
-        ...skillResultsToSteps(caster, reactions, this.endEventProcessor),
+        ...skillResultsToSteps(
+          caster,
+          reactions,
+          this.endEventProcessor,
+          this.survivedReactor,
+        ),
         ...reactiveKillSteps(
           reactions,
           caster,
@@ -676,24 +697,6 @@ export class ActionStage {
     };
   }
 
-  /** What the card does after a SURVIVE skill kept it alive. */
-  private survivedReactions(card: FightingCard): Step[] {
-    const reactions = card.launchSkills(
-      'survived',
-      this.getFightingContext(card),
-    );
-
-    return [
-      ...skillResultsToSteps(card, reactions),
-      ...reactiveKillSteps(
-        reactions,
-        card,
-        this.eventBroker,
-        this.deathSkillHandler,
-      ),
-    ];
-  }
-
   /** The executions of an attack, each followed by the reactions it caused. */
   private executionReport(
     attacker: FightingCard,
@@ -702,7 +705,7 @@ export class ActionStage {
   ): Step[] {
     return executions.flatMap((execution) => [
       ...executionSteps(attacker, name, [execution]),
-      ...(execution.survived ? this.survivedReactions(execution.card) : []),
+      ...(execution.survived ? this.survivedReactor(execution.card) : []),
     ]);
   }
 

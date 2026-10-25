@@ -8,6 +8,7 @@ import { DeathSkillHandler } from './death-skill-handler';
 import { EndEventProcessor } from './end-event-processor';
 import { reactiveKillSteps } from './reactive-kill-steps';
 import { skillResultsToSteps } from './skill-results-to-steps';
+import { fightSurvivedReactor, SurvivedReactor } from './survived-reactions';
 import { triggerReactiveSkills } from './reactive-skill-checker';
 import { concealmentEndedReport } from './concealment-steps';
 import { stanceEndedReport } from './stance-steps';
@@ -20,6 +21,7 @@ export class TurnManager {
   };
   private deathSkillHandler: DeathSkillHandler;
   private endEventProcessor: EndEventProcessor;
+  private readonly survivedReactor: SurvivedReactor;
 
   public constructor(
     player1: Player,
@@ -35,6 +37,11 @@ export class TurnManager {
     this.eventBroker = eventBroker;
     this.deathSkillHandler = deathSkillHandler;
     this.endEventProcessor = endEventProcessor;
+    this.survivedReactor = fightSurvivedReactor(
+      (card) => this.getFightingContext(card),
+      eventBroker,
+      deathSkillHandler,
+    );
   }
 
   public endTurn(cards: FightingCard[]): Step[] {
@@ -110,7 +117,12 @@ export class TurnManager {
       this.getFightingContext(card),
     );
     steps.push(
-      ...skillResultsToSteps(card, appliedSkills, this.endEventProcessor),
+      ...skillResultsToSteps(
+        card,
+        appliedSkills,
+        this.endEventProcessor,
+        this.survivedReactor,
+      ),
     );
     steps.push(
       ...reactiveKillSteps(

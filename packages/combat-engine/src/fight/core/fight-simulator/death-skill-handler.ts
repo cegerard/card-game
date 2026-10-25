@@ -11,6 +11,7 @@ import { EndEventProcessor } from './end-event-processor';
 import { FightingContext } from '../cards/@types/fighting-context';
 import { skillResultsToSteps } from './skill-results-to-steps';
 import { Player } from '../player';
+import { SurvivedReactor, survivedReactions } from './survived-reactions';
 
 /**
  * Handles the cascade of effects that must fire immediately after a card dies.
@@ -194,11 +195,22 @@ export class DeathSkillHandler implements CardDeathSubscriber {
       };
 
       const skillResults = card.launchSkills(triggerId, context);
-      this.convertSkillResultsToSteps(card, skillResults);
+      const survivedKills: [FightingCard, FightingCard][] = [];
+      this.convertSkillResultsToSteps(card, skillResults, (survivor) =>
+        survivedReactions(survivor, this.contextOf(survivor), (reactions) => {
+          defendersKilled(reactions).forEach((killed) =>
+            survivedKills.push([killed, survivor]),
+          );
+          return [];
+        }),
+      );
       // A reactive attack can kill too: its victims run their own cascade,
       // credited to the card that fired it.
       defendersKilled(skillResults).forEach((killed) =>
         this.notifyKill(killed, card),
+      );
+      survivedKills.forEach(([killed, killer]) =>
+        this.notifyKill(killed, killer),
       );
     });
   }
@@ -206,9 +218,24 @@ export class DeathSkillHandler implements CardDeathSubscriber {
   private convertSkillResultsToSteps(
     card: FightingCard,
     skillResults: SkillResults[],
+    survivedReactor: SurvivedReactor,
   ): void {
     this.steps.push(
-      ...skillResultsToSteps(card, skillResults, this.endEventProcessor),
+      ...skillResultsToSteps(
+        card,
+        skillResults,
+        this.endEventProcessor,
+        survivedReactor,
+      ),
     );
+  }
+
+  private contextOf(card: FightingCard): FightingContext {
+    const owner = this.player1.ownCard(card) ? this.player1 : this.player2;
+
+    return {
+      sourcePlayer: owner,
+      opponentPlayer: owner === this.player1 ? this.player2 : this.player1,
+    };
   }
 }

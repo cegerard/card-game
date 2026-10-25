@@ -1,6 +1,8 @@
 import { FightResult } from './@types/fight-result';
 import { ActionStage } from '../card-action/action-stage';
 import { Player } from '../player';
+import { FightingCard } from '../cards/fighting-card';
+import { FightingContext } from '../cards/@types/fighting-context';
 import { CardSelector } from './card-selectors/card-selector';
 import { CardDeathSubscriber } from './card-death-subscriber';
 import { Step, StepKind } from './@types/step';
@@ -10,6 +12,7 @@ import { DeathSkillHandler } from './death-skill-handler';
 import { EndEventProcessor } from './end-event-processor';
 import { reactiveKillSteps } from './reactive-kill-steps';
 import { skillResultsToSteps } from './skill-results-to-steps';
+import { fightSurvivedReactor } from './survived-reactions';
 import { FIGHT_START } from '../trigger/fight-start';
 
 export class Fight implements FightSimulator {
@@ -89,7 +92,21 @@ export class Fight implements FightSimulator {
     };
   }
 
+  private contextOf(card: FightingCard): FightingContext {
+    const owner = this.player1.ownCard(card) ? this.player1 : this.player2;
+
+    return {
+      sourcePlayer: owner,
+      opponentPlayer: owner === this.player1 ? this.player2 : this.player1,
+    };
+  }
+
   private launchFightStartSkills(): Step[] {
+    const survivedReactor = fightSurvivedReactor(
+      (card) => this.contextOf(card),
+      this.eventBroker,
+      this.deathSkillHandler,
+    );
     return [
       [this.player1, this.player2],
       [this.player2, this.player1],
@@ -103,7 +120,7 @@ export class Fight implements FightSimulator {
         });
 
         return [
-          ...skillResultsToSteps(card, results),
+          ...skillResultsToSteps(card, results, undefined, survivedReactor),
           ...reactiveKillSteps(
             results,
             card,

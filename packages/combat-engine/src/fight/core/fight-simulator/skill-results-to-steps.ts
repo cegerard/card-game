@@ -16,11 +16,13 @@ import { EndEventProcessor } from './end-event-processor';
 import { concealmentStartedReport, revealAttacker } from './concealment-steps';
 import { stanceEndedReport, stanceStartedReport } from './stance-steps';
 import { executionSteps } from './execution-steps';
+import type { SurvivedReactor } from './survived-reactions';
 
 export function skillResultsToSteps(
   card: FightingCard,
   skillResults: SkillResults[],
   endEventProcessor?: EndEventProcessor,
+  survivedReactor?: SurvivedReactor,
 ): Step[] {
   const steps: Step[] = [];
 
@@ -79,15 +81,14 @@ export function skillResultsToSteps(
           energy: card.actualEnergy,
           powerId: skillResult.powerId,
         });
-        if (skillResult.executions) {
+        skillResult.executions?.results.forEach((execution) => {
           steps.push(
-            ...executionSteps(
-              card,
-              skillResult.executions.name,
-              skillResult.executions.results,
-            ),
+            ...executionSteps(card, skillResult.executions.name, [execution]),
+            ...(execution.survived
+              ? (survivedReactor?.(execution.card) ?? [])
+              : []),
           );
-        }
+        });
         steps.push(...revealAttacker(card));
 
         // Same per-hit order as ActionStage.handleAttackResult: what happened
@@ -108,6 +109,17 @@ export function skillResultsToSteps(
               kind: StepKind.ShieldBroken,
               card: r.defender.identityInfo,
             });
+          }
+
+          if (r.survived) {
+            perHit.push(
+              {
+                kind: StepKind.Survived,
+                name: r.survivedSkillName,
+                card: r.defender.identityInfo,
+              },
+              ...(survivedReactor?.(r.defender) ?? []),
+            );
           }
 
           if (r.defender.isDead()) {
@@ -152,14 +164,19 @@ export function skillResultsToSteps(
 
         if (skillResult.splash) {
           steps.push(
-            ...skillResultsToSteps(card, [
-              {
-                skillKind: SkillKind.Attack,
-                name: skillResult.splash.name,
-                results: skillResult.splash.results,
-                powerId: skillResult.powerId,
-              },
-            ]),
+            ...skillResultsToSteps(
+              card,
+              [
+                {
+                  skillKind: SkillKind.Attack,
+                  name: skillResult.splash.name,
+                  results: skillResult.splash.results,
+                  powerId: skillResult.powerId,
+                },
+              ],
+              undefined,
+              survivedReactor,
+            ),
           );
         }
         break;
