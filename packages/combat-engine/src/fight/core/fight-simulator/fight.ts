@@ -25,12 +25,14 @@ export class Fight implements FightSimulator {
   private turnManager: TurnManager;
   private cardSelector: CardSelector;
   private deathSkillHandler: DeathSkillHandler;
+  private endEventProcessor: EndEventProcessor;
   private eventBroker: {
     onCardDeath: CardDeathSubscriber[];
   };
 
   constructor(player1: Player, player2: Player, cardSelector: CardSelector) {
     const endEventProcessor = new EndEventProcessor(player1, player2);
+    this.endEventProcessor = endEventProcessor;
     this.eventBroker = { onCardDeath: [] };
     this.deathSkillHandler = new DeathSkillHandler(
       player1,
@@ -106,6 +108,7 @@ export class Fight implements FightSimulator {
       (card) => this.contextOf(card),
       this.eventBroker,
       this.deathSkillHandler,
+      this.endEventProcessor,
     );
     return [
       [this.player1, this.player2],
