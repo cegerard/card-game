@@ -196,14 +196,20 @@ export class DeathSkillHandler implements CardDeathSubscriber {
 
       const skillResults = card.launchSkills(triggerId, context);
       const survivedKills: [FightingCard, FightingCard][] = [];
-      this.convertSkillResultsToSteps(card, skillResults, (survivor) =>
-        survivedReactions(survivor, this.contextOf(survivor), (reactions) => {
-          defendersKilled(reactions).forEach((killed) =>
-            survivedKills.push([killed, survivor]),
-          );
-          return [];
-        }),
-      );
+      const reactToSurvival: SurvivedReactor = (survivor) =>
+        survivedReactions(
+          survivor,
+          this.contextOf(survivor),
+          (reactions) => {
+            defendersKilled(reactions).forEach((killed) =>
+              survivedKills.push([killed, survivor]),
+            );
+            return [];
+          },
+          this.endEventProcessor,
+          reactToSurvival,
+        );
+      this.convertSkillResultsToSteps(card, skillResults, reactToSurvival);
       // A reactive attack can kill too: its victims run their own cascade,
       // credited to the card that fired it.
       defendersKilled(skillResults).forEach((killed) =>

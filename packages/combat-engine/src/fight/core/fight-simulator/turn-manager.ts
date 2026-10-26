@@ -41,6 +41,7 @@ export class TurnManager {
       (card) => this.getFightingContext(card),
       eventBroker,
       deathSkillHandler,
+      endEventProcessor,
     );
   }
 

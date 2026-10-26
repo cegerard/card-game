@@ -87,6 +87,7 @@ export class ActionStage {
       (card) => this.getFightingContext(card),
       eventBroker,
       deathSkillHandler,
+      endEventProcessor,
     );
   }
 
