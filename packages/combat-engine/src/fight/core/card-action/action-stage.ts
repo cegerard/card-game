@@ -93,31 +93,46 @@ export class ActionStage {
   }
 
   public computeNextAction(cards: FightingCard[]): Step[] {
-    const attacksReports = cards.reduce((acc: ActionReport[], card) => {
-      if (card.frozenLevel > 0 || card.isStunted) return acc;
+    const steps: SplittedSteps = { actionSteps: [], statusChangeSteps: [] };
+
+    cards.forEach((card) => {
+      if (card.frozenLevel > 0 || card.isStunted) return;
 
       card.beginAction();
       card.tickSkills();
 
-      acc.push(...this.launchTurnStartSkills(card));
+      const turnStartReports = this.launchTurnStartSkills(card);
+      steps.actionSteps.push(...this.flatSteps(turnStartReports));
+      if (turnStartReports.length > 0 && !this.canAct(card)) return;
 
-      if (card.isSpecialReady()) {
-        acc.push(this.launchSpecial(card));
-      } else {
-        const skillsResults = this.launchNextActionSkills(card);
-        if (skillsResults) {
-          acc.push(...skillsResults);
-        } else {
-          acc.push(this.launchAttack(card));
-        }
-      }
+      const { actionSteps, statusChangeSteps } = this.convertIntoSteps(
+        this.launchAction(card),
+      );
+      steps.actionSteps.push(...actionSteps);
+      steps.statusChangeSteps.push(...statusChangeSteps);
+    });
 
-      return acc;
-    }, []);
+    return [...steps.actionSteps, ...steps.statusChangeSteps];
+  }
 
-    const resultSteps = this.convertIntoSteps(attacksReports);
+  private launchAction(card: FightingCard): ActionReport[] {
+    if (card.isSpecialReady()) return [this.launchSpecial(card)];
 
-    return [...resultSteps.actionSteps, ...resultSteps.statusChangeSteps];
+    return this.launchNextActionSkills(card) ?? [this.launchAttack(card)];
+  }
+
+  /** A strike at the start of the turn may have killed the card or its last opponent. */
+  private canAct(card: FightingCard): boolean {
+    const opponent = this.player1.ownCard(card) ? this.player2 : this.player1;
+
+    return !card.isDead() && opponent.playableCards.length > 0;
+  }
+
+  /** Steps of reports whose deaths must follow them right away. */
+  private flatSteps(reports: ActionReport[]): Step[] {
+    const { actionSteps, statusChangeSteps } = this.convertIntoSteps(reports);
+
+    return [...actionSteps, ...statusChangeSteps];
   }
 
   private launchAttack(card: FightingCard): AttackReport {
