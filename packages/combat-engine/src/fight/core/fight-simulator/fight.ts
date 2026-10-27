@@ -1,3 +1,4 @@
+import { fightingContextOf } from './fighting-context-of';
 import { FightResult } from './@types/fight-result';
 import { ActionStage } from '../card-action/action-stage';
 import { Player } from '../player';
@@ -10,6 +11,7 @@ import { DeathSkillHandler } from './death-skill-handler';
 import { EndEventProcessor } from './end-event-processor';
 import { reactiveKillSteps } from './reactive-kill-steps';
 import { skillResultsToSteps } from './skill-results-to-steps';
+import { fightSurvivedReactor } from './survived-reactions';
 import { FIGHT_START } from '../trigger/fight-start';
 
 export class Fight implements FightSimulator {
@@ -22,12 +24,14 @@ export class Fight implements FightSimulator {
   private turnManager: TurnManager;
   private cardSelector: CardSelector;
   private deathSkillHandler: DeathSkillHandler;
+  private endEventProcessor: EndEventProcessor;
   private eventBroker: {
     onCardDeath: CardDeathSubscriber[];
   };
 
   constructor(player1: Player, player2: Player, cardSelector: CardSelector) {
     const endEventProcessor = new EndEventProcessor(player1, player2);
+    this.endEventProcessor = endEventProcessor;
     this.eventBroker = { onCardDeath: [] };
     this.deathSkillHandler = new DeathSkillHandler(
       player1,
@@ -90,6 +94,12 @@ export class Fight implements FightSimulator {
   }
 
   private launchFightStartSkills(): Step[] {
+    const survivedReactor = fightSurvivedReactor(
+      (card) => fightingContextOf(card, this.player1, this.player2),
+      this.eventBroker,
+      this.deathSkillHandler,
+      this.endEventProcessor,
+    );
     return [
       [this.player1, this.player2],
       [this.player2, this.player1],
@@ -103,7 +113,7 @@ export class Fight implements FightSimulator {
         });
 
         return [
-          ...skillResultsToSteps(card, results),
+          ...skillResultsToSteps(card, results, undefined, survivedReactor),
           ...reactiveKillSteps(
             results,
             card,

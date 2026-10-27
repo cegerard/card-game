@@ -1,3 +1,4 @@
+import { fightingContextOf } from './fighting-context-of';
 import { SELF_DEATH_PREFIX } from '../trigger/self-death';
 import { ENEMY_BLEED_DEATH } from '../trigger/enemy-bleed-death';
 import { ENEMY_KILLED } from '../trigger/enemy-killed';
@@ -11,6 +12,7 @@ import { EndEventProcessor } from './end-event-processor';
 import { FightingContext } from '../cards/@types/fighting-context';
 import { skillResultsToSteps } from './skill-results-to-steps';
 import { Player } from '../player';
+import { SurvivedReactor, survivedReactions } from './survived-reactions';
 
 /**
  * Handles the cascade of effects that must fire immediately after a card dies.
@@ -194,11 +196,30 @@ export class DeathSkillHandler implements CardDeathSubscriber {
       };
 
       const skillResults = card.launchSkills(triggerId, context);
-      this.convertSkillResultsToSteps(card, skillResults);
+      // Notified after the steps are pushed: a cascade started while the
+      // reactions are being converted would drain steps ahead of them.
+      const survivedKills: [FightingCard, FightingCard][] = [];
+      const reactToSurvival: SurvivedReactor = (survivor) =>
+        survivedReactions(
+          survivor,
+          fightingContextOf(survivor, this.player1, this.player2),
+          (reactions) => {
+            defendersKilled(reactions).forEach((killed) =>
+              survivedKills.push([killed, survivor]),
+            );
+            return [];
+          },
+          this.endEventProcessor,
+          reactToSurvival,
+        );
+      this.convertSkillResultsToSteps(card, skillResults, reactToSurvival);
       // A reactive attack can kill too: its victims run their own cascade,
       // credited to the card that fired it.
       defendersKilled(skillResults).forEach((killed) =>
         this.notifyKill(killed, card),
+      );
+      survivedKills.forEach(([killed, killer]) =>
+        this.notifyKill(killed, killer),
       );
     });
   }
@@ -206,9 +227,15 @@ export class DeathSkillHandler implements CardDeathSubscriber {
   private convertSkillResultsToSteps(
     card: FightingCard,
     skillResults: SkillResults[],
+    survivedReactor: SurvivedReactor,
   ): void {
     this.steps.push(
-      ...skillResultsToSteps(card, skillResults, this.endEventProcessor),
+      ...skillResultsToSteps(
+        card,
+        skillResults,
+        this.endEventProcessor,
+        survivedReactor,
+      ),
     );
   }
 }
