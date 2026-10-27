@@ -105,3 +105,38 @@ describe('ActionStage turn-start event', () => {
     ]);
   });
 });
+
+describe('ActionStage turn-start strike killing the last enemy', () => {
+  let steps: Step[];
+
+  beforeEach(() => {
+    const striker = createFightingCard({
+      accuracy: 9999,
+      attack: 100000,
+      extraSkills: [ultimate()],
+    });
+    striker.increaseSpecialEnergy();
+    striker.increaseSpecialEnergy();
+    const player1 = new Player('p1', [striker]);
+    const player2 = new Player('p2', [
+      createFightingCard({ agility: 0, health: 1, defense: 0 }),
+    ]);
+    steps = new ActionStage(
+      player1,
+      player2,
+      { onCardDeath: [] },
+      new DeathSkillHandler(player1, player2),
+    ).computeNextAction([striker]);
+  });
+
+  it('reports the death right after the strike', () => {
+    expect(steps[1].kind).toBe(StepKind.StatusChange);
+  });
+
+  it('does not launch an empty attack afterwards', () => {
+    expect(steps.map((s) => s.kind)).toEqual([
+      StepKind.Attack,
+      StepKind.StatusChange,
+    ]);
+  });
+});
