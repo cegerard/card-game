@@ -1,3 +1,4 @@
+import { fightingContextOf } from './fighting-context-of';
 import { SELF_DEATH_PREFIX } from '../trigger/self-death';
 import { ENEMY_BLEED_DEATH } from '../trigger/enemy-bleed-death';
 import { ENEMY_KILLED } from '../trigger/enemy-killed';
@@ -195,11 +196,13 @@ export class DeathSkillHandler implements CardDeathSubscriber {
       };
 
       const skillResults = card.launchSkills(triggerId, context);
+      // Notified after the steps are pushed: a cascade started while the
+      // reactions are being converted would drain steps ahead of them.
       const survivedKills: [FightingCard, FightingCard][] = [];
       const reactToSurvival: SurvivedReactor = (survivor) =>
         survivedReactions(
           survivor,
-          this.contextOf(survivor),
+          fightingContextOf(survivor, this.player1, this.player2),
           (reactions) => {
             defendersKilled(reactions).forEach((killed) =>
               survivedKills.push([killed, survivor]),
@@ -234,14 +237,5 @@ export class DeathSkillHandler implements CardDeathSubscriber {
         survivedReactor,
       ),
     );
-  }
-
-  private contextOf(card: FightingCard): FightingContext {
-    const owner = this.player1.ownCard(card) ? this.player1 : this.player2;
-
-    return {
-      sourcePlayer: owner,
-      opponentPlayer: owner === this.player1 ? this.player2 : this.player1,
-    };
   }
 }

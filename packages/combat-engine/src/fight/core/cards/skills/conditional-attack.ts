@@ -50,7 +50,18 @@ export class ConditionalAttack implements Skill {
     private readonly trigger: Trigger,
     options: ConditionalAttackOptions = {},
   ) {
-    Object.assign(this, options);
+    this.powerId = options.powerId;
+    this.requiredStance = options.requiredStance;
+    this.energyCost = options.energyCost;
+    this.splash = options.splash;
+    this.lowHealthDebuff = options.lowHealthDebuff;
+    this.stanceActivation = options.stanceActivation;
+    this.requiresUndamaged = options.requiresUndamaged;
+    this.hitAlterations = options.hitAlterations;
+    this.endsStance = options.endsStance;
+    this.execution = options.execution;
+    this.activationLimit = options.activationLimit;
+    this.endEvent = options.endEvent;
     if (this.endsStance && !this.requiredStance) {
       throw new Error('ConditionalAttack endsStance requires requiredStance');
     }

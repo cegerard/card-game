@@ -1,3 +1,4 @@
+import { fightingContextOf } from '../fight-simulator/fighting-context-of';
 import { reactiveKillSteps } from '../fight-simulator/reactive-kill-steps';
 import { AttackReport } from '../fight-simulator/@types/attack-report';
 import { FightingCard } from '../cards/fighting-card';
@@ -84,7 +85,7 @@ export class ActionStage {
     this.deathSkillHandler = deathSkillHandler;
     this.endEventProcessor = endEventProcessor;
     this.survivedReactor = fightSurvivedReactor(
-      (card) => this.getFightingContext(card),
+      (card) => fightingContextOf(card, this.player1, this.player2),
       eventBroker,
       deathSkillHandler,
       endEventProcessor,
@@ -120,7 +121,9 @@ export class ActionStage {
   }
 
   private launchAttack(card: FightingCard): AttackReport {
-    const attackResults = card.launchAttack(this.getFightingContext(card));
+    const attackResults = card.launchAttack(
+      fightingContextOf(card, this.player1, this.player2),
+    );
     const report: AttackReport = {
       kind: StepKind.Attack,
       attack: {
@@ -140,7 +143,7 @@ export class ActionStage {
   }
 
   private launchNextActionSkills(card: FightingCard): ActionReport[] | null {
-    const context = this.getFightingContext(card);
+    const context = fightingContextOf(card, this.player1, this.player2);
     const skillResults = card.launchSkills('next-action', context);
     const attackSkill = skillResults.find(
       (r): r is AttackSkillResults => r.skillKind === SkillKind.Attack,
@@ -248,7 +251,10 @@ export class ActionStage {
    */
   private launchTurnStartSkills(card: FightingCard): AttackReport[] {
     return card
-      .launchSkills(TURN_START, this.getFightingContext(card))
+      .launchSkills(
+        TURN_START,
+        fightingContextOf(card, this.player1, this.player2),
+      )
       .filter(
         (r): r is AttackSkillResults =>
           r.skillKind === SkillKind.Attack && r.results.length > 0,
@@ -318,7 +324,9 @@ export class ActionStage {
   }
 
   private computeSpecialAttackResult(card: FightingCard): AttackReport {
-    const specialResults = card.launchSpecial(this.getFightingContext(card));
+    const specialResults = card.launchSpecial(
+      fightingContextOf(card, this.player1, this.player2),
+    );
     const result: AttackReport = {
       kind: StepKind.SpecialAttack,
       attack: {
@@ -348,7 +356,9 @@ export class ActionStage {
   private computeSpecialStanceResult(
     card: FightingCard,
   ): SpecialStanceActionReport {
-    const specialResults = card.launchSpecial(this.getFightingContext(card));
+    const specialResults = card.launchSpecial(
+      fightingContextOf(card, this.player1, this.player2),
+    );
     const {
       stanceStartedReport,
       buffReport,
@@ -427,7 +437,9 @@ export class ActionStage {
   }
 
   private computeSpecialHealingResult(card: FightingCard): ActionReport {
-    const specialResults = card.launchSpecial(this.getFightingContext(card));
+    const specialResults = card.launchSpecial(
+      fightingContextOf(card, this.player1, this.player2),
+    );
     const result: HealingReport = {
       kind: StepKind.Healing,
       name: specialResults.name,
@@ -593,7 +605,7 @@ export class ActionStage {
         );
         const reactiveResults = triggerReactiveSkills(
           defensiveCard,
-          this.getFightingContext(defensiveCard),
+          fightingContextOf(defensiveCard, this.player1, this.player2),
         );
         report.statusChanges.push(
           ...skillResultsToSteps(defensiveCard, reactiveResults),
@@ -629,7 +641,7 @@ export class ActionStage {
 
     const reactions = attackerCard.launchSkills(
       `${BLEED_STACKS_APPLIED}:${attackerCard.bleedStacksApplied}`,
-      this.getFightingContext(attackerCard),
+      fightingContextOf(attackerCard, this.player1, this.player2),
     );
 
     return [
@@ -688,14 +700,6 @@ export class ActionStage {
         ),
       ];
     });
-  }
-
-  private getFightingContext(card: FightingCard): FightingContext {
-    const isPlayer1CardOwner = this.player1.ownCard(card);
-    return {
-      sourcePlayer: isPlayer1CardOwner ? this.player1 : this.player2,
-      opponentPlayer: isPlayer1CardOwner ? this.player2 : this.player1,
-    };
   }
 
   /** The executions of an attack, each followed by the reactions it caused. */

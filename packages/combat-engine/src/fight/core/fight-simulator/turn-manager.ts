@@ -1,4 +1,4 @@
-import { FightingContext } from '../cards/@types/fighting-context';
+import { fightingContextOf } from './fighting-context-of';
 import { FightingCard } from '../cards/fighting-card';
 import { StateEffectType } from '../cards/@types/state/state-effect-type';
 import { Player } from '../player';
@@ -38,7 +38,7 @@ export class TurnManager {
     this.deathSkillHandler = deathSkillHandler;
     this.endEventProcessor = endEventProcessor;
     this.survivedReactor = fightSurvivedReactor(
-      (card) => this.getFightingContext(card),
+      (card) => fightingContextOf(card, this.player1, this.player2),
       eventBroker,
       deathSkillHandler,
       endEventProcessor,
@@ -115,7 +115,7 @@ export class TurnManager {
   private processCardSkill(card: FightingCard, steps: Step[]) {
     const appliedSkills = card.launchSkills(
       'turn-end',
-      this.getFightingContext(card),
+      fightingContextOf(card, this.player1, this.player2),
     );
     steps.push(
       ...skillResultsToSteps(
@@ -176,27 +176,15 @@ export class TurnManager {
     } else if (stateEffects.length > 0) {
       const reactiveResults = triggerReactiveSkills(
         card,
-        this.getFightingContext(card),
+        fightingContextOf(card, this.player1, this.player2),
       );
       steps.push(...skillResultsToSteps(card, reactiveResults));
     }
   }
 
-  private getFightingContext(card: FightingCard): FightingContext {
-    const isPlayer1CardOwner = this.player1.ownCard(card);
-    return {
-      sourcePlayer: isPlayer1CardOwner ? this.player1 : this.player2,
-      opponentPlayer: isPlayer1CardOwner ? this.player2 : this.player1,
-    };
-  }
-
-  private notifyDeath(
-    card: FightingCard,
-    cause?: StateEffectType,
-    killer?: FightingCard,
-  ): void {
+  private notifyDeath(card: FightingCard, cause?: StateEffectType): void {
     this.eventBroker.onCardDeath.forEach((subscriber) =>
-      subscriber.notifyDeath(card, killer, cause),
+      subscriber.notifyDeath(card, undefined, cause),
     );
   }
 }
