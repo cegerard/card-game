@@ -614,6 +614,13 @@ export class ActionStage {
           report.statusChanges.push(
             ...this.dispatchDamageReactions(defensiveCard, attackerCard),
           );
+        } else {
+          defensiveCard.lastDodgedAttacker = attackerCard;
+          report.statusChanges.push(
+            ...this.dispatchTeamReactions(defensiveCard, attackerCard, [
+              `dodge-${defensiveCard.id}`,
+            ]),
+          );
         }
         report.statusChanges.push(
           ...effectResultsToSteps(attackerCard, damageDealt.effects),
@@ -679,27 +686,44 @@ export class ActionStage {
    * Fires the reactive events of a landed hit on the damaged card team:
    * `damage-taken-<id>` on every hit, then `ally-health-<id>` for the
    * threshold-based reactions. Both reach the damaged card itself, so a card
-   * reacts to its own wounds by monitoring its own id.
+   * reacts to its own wounds by monitoring its own id. The hit first ends
+   * whatever is bound to `damage-taken-<id>`.
    */
   private dispatchDamageReactions(
     damagedCard: FightingCard,
     attackerCard: FightingCard,
   ): Step[] {
-    const damagedCardPlayer = this.player1.ownCard(damagedCard)
-      ? this.player1
-      : this.player2;
+    const damageTaken = `damage-taken-${damagedCard.id}`;
+
+    return [
+      ...(this.endEventProcessor?.processEndEvent(
+        damageTaken,
+        damagedCard.identityInfo,
+      ) ?? []),
+      ...this.dispatchTeamReactions(damagedCard, attackerCard, [
+        damageTaken,
+        `ally-health-${damagedCard.id}`,
+      ]),
+    ];
+  }
+
+  /** Fires the events about one card on every playable card of its team. */
+  private dispatchTeamReactions(
+    card: FightingCard,
+    attackerCard: FightingCard,
+    events: string[],
+  ): Step[] {
+    const cardPlayer = this.player1.ownCard(card) ? this.player1 : this.player2;
     const context: FightingContext = {
-      sourcePlayer: damagedCardPlayer,
-      opponentPlayer:
-        damagedCardPlayer === this.player1 ? this.player2 : this.player1,
+      sourcePlayer: cardPlayer,
+      opponentPlayer: cardPlayer === this.player1 ? this.player2 : this.player1,
       lastAttacker: attackerCard,
     };
 
-    return damagedCardPlayer.playableCards.flatMap((caster) => {
-      const reactions = [
-        ...caster.launchSkills(`damage-taken-${damagedCard.id}`, context),
-        ...caster.launchSkills(`ally-health-${damagedCard.id}`, context),
-      ];
+    return cardPlayer.playableCards.flatMap((caster) => {
+      const reactions = events.flatMap((event) =>
+        caster.launchSkills(event, context),
+      );
       return [
         ...skillResultsToSteps(
           caster,

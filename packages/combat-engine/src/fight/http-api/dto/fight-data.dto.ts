@@ -86,6 +86,9 @@ export enum SkillKind {
   CONCEALMENT = 'CONCEALMENT',
   LOW_HEALTH_TARGET_BONUS = 'LOW_HEALTH_TARGET_BONUS',
   BUFF_TRANSFER = 'BUFF_TRANSFER',
+  POISONED_ENEMY_AGILITY = 'POISONED_ENEMY_AGILITY',
+  REAL_DAMAGE = 'REAL_DAMAGE',
+  AFFLICTION = 'AFFLICTION',
 }
 
 export enum BuffType {
@@ -129,6 +132,8 @@ export enum TriggerEvent {
   BLEED_STACKS_APPLIED = 'bleed-stacks-applied',
   FIGHT_START = 'fight-start',
   ENEMY_KILLED = 'enemy-killed',
+  DODGE = 'dodge',
+  POISONED_ENEMY_DEATH = 'poisoned-enemy-death',
 }
 
 export enum RateBasisDto {
@@ -150,6 +155,7 @@ export enum TargetingStrategy {
   PROTECTED_ALLY = 'protected-ally',
   FIRST_BLEEDING_ENEMY = 'first-bleeding-enemy',
   FASTEST_ALLY = 'fastest-ally',
+  LAST_DODGED_ATTACKER = 'last-dodged-attacker',
 }
 
 export enum CardSelectorStrategy {
@@ -202,6 +208,10 @@ export class EffectTriggeredDebuffDto {
   powerId?: string;
 }
 
+function isStackedPoison(o: EffectDto): boolean {
+  return o.type === Effect.POISON && o.maxStacks !== undefined;
+}
+
 export class EffectDto {
   @IsEnum(Effect)
   type: Effect;
@@ -209,18 +219,21 @@ export class EffectDto {
   @IsNumber()
   rate: number;
 
-  @ValidateIf((o) => o.type !== Effect.MARK && o.type !== Effect.BLEED)
+  @ValidateIf(
+    (o) =>
+      o.type !== Effect.MARK && o.type !== Effect.BLEED && !isStackedPoison(o),
+  )
   @IsDefined()
   @IsNumber()
   level?: number;
 
-  @ValidateIf((o) => o.type === Effect.BLEED)
+  @ValidateIf((o) => o.type === Effect.BLEED || isStackedPoison(o))
   @IsDefined()
   @IsNumber()
   @Min(1)
   duration?: number;
 
-  // BLEED only: what the rate is a share of (default source-attack)
+  // BLEED and stacked POISON: what the rate is a share of (default source-attack)
   @IsOptional()
   @IsEnum(RateBasisDto)
   basis?: RateBasisDto;
@@ -230,11 +243,29 @@ export class EffectDto {
   @IsEnum(DamageType)
   damageType?: DamageType;
 
-  @ValidateIf((o) => o.type === Effect.MARK || o.type === Effect.BLEED)
+  // POISON: given, the poison is counted in stacks instead of levels
+  @ValidateIf(
+    (o) =>
+      o.type === Effect.MARK ||
+      o.type === Effect.BLEED ||
+      o.maxStacks !== undefined,
+  )
   @IsDefined()
   @IsNumber()
   @Min(1)
   maxStacks?: number;
+
+  // Stacked POISON only: what each stack multiplies the tick by
+  @ValidateIf((o) => isStackedPoison(o))
+  @IsDefined()
+  @IsNumber()
+  @IsPositive()
+  stackMultiplier?: number;
+
+  // Stacked POISON only: lays the poison through a damage-over-time immunity
+  @IsOptional()
+  @IsBoolean()
+  ignoresImmunity?: boolean;
 
   @IsOptional()
   @IsNumber()
@@ -453,6 +484,40 @@ class StanceActivationDto {
   @IsOptional()
   @IsBoolean()
   revealsConcealed?: boolean;
+
+  // Chance an attack aimed at the bearer misses outright, before the dodge roll
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(1)
+  evasionChance?: number;
+}
+
+// Raises every stacked poison to `stacks` at least and multiplies its damage
+export class PoisonSurgeDto {
+  @IsInt()
+  @Min(1)
+  stacks: number;
+
+  @IsNumber()
+  @IsPositive()
+  damageMultiplier: number;
+}
+
+// A per-event chance that grows each time it does not fire, back to 0 once it does
+export class RampingChanceDto {
+  @IsNumber()
+  @Min(0)
+  @Max(1)
+  startChance: number;
+
+  @IsNumber()
+  @Min(0)
+  increment: number;
+
+  @IsInt()
+  @Min(1)
+  fromTurn: number;
 }
 
 class SpecialConcealmentDto {
@@ -540,6 +605,18 @@ export class SpecialDto extends AttackBonusesDto {
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => ExecutionDto)
   execution?: ExecutionDto;
+
+  // ATTACK only: share of the defender defense the special ignores
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(1)
+  defensePenetration?: number;
+
+  // ATTACK only: no dodge roll, no evasion
+  @IsOptional()
+  @IsBoolean()
+  undodgeable?: boolean;
 }
 
 class DamageCompositionDto {
@@ -652,7 +729,9 @@ export class OtherSkillDto {
       o.kind === SkillKind.BLEED_STACK_SCALING ||
       o.kind === SkillKind.BLEED_EMPOWERMENT ||
       o.kind === SkillKind.BLEED_DETONATION ||
-      o.kind === SkillKind.LOW_HEALTH_TARGET_BONUS,
+      o.kind === SkillKind.LOW_HEALTH_TARGET_BONUS ||
+      o.kind === SkillKind.POISONED_ENEMY_AGILITY ||
+      o.kind === SkillKind.REAL_DAMAGE,
   )
   @IsDefined()
   @IsNumber()
@@ -664,7 +743,8 @@ export class OtherSkillDto {
   @Min(0)
   extraStacks?: number;
 
-  // BLEED_EMPOWERMENT: replaces the basis of the bleeds laid during the stance
+  // BLEED_EMPOWERMENT: replaces the basis of the bleeds laid during the stance;
+  // REAL_DAMAGE: what the rate is a share of (default source-attack)
   @IsOptional()
   @IsEnum(RateBasisDto)
   basis?: RateBasisDto;
@@ -675,8 +755,12 @@ export class OtherSkillDto {
   @Type(/* istanbul ignore next */ () => EffectTriggeredDebuffDto)
   triggeredDebuff?: EffectTriggeredDebuffDto;
 
-  // BLEED_STACK_SCALING: cap of the attack bonus, `rate` being the bonus per stack
-  @ValidateIf((o) => o.kind === SkillKind.BLEED_STACK_SCALING)
+  // BLEED_STACK_SCALING and POISONED_ENEMY_AGILITY: cap of the bonus, `rate` being its step
+  @ValidateIf(
+    (o) =>
+      o.kind === SkillKind.BLEED_STACK_SCALING ||
+      o.kind === SkillKind.POISONED_ENEMY_AGILITY,
+  )
   @IsDefined()
   @IsNumber()
   @IsPositive()
@@ -693,7 +777,8 @@ export class OtherSkillDto {
       o.kind !== SkillKind.STANCE &&
       o.kind !== SkillKind.BLEED_DETONATION &&
       o.kind !== SkillKind.CONCEALMENT &&
-      o.kind !== SkillKind.LOW_HEALTH_TARGET_BONUS,
+      o.kind !== SkillKind.LOW_HEALTH_TARGET_BONUS &&
+      o.kind !== SkillKind.POISONED_ENEMY_AGILITY,
   )
   @IsDefined()
   @IsEnum(TargetingStrategy)
@@ -721,6 +806,12 @@ export class OtherSkillDto {
   @Type(/* istanbul ignore next */ () => StanceActivationDto)
   stanceActivation?: StanceActivationDto;
 
+  // STANCE only: the stance opens on that chance, never while it runs
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => RampingChanceDto)
+  rampingChance?: RampingChanceDto;
+
   @ValidateIf(
     (o) =>
       o.kind !== SkillKind.SHIELD &&
@@ -730,7 +821,8 @@ export class OtherSkillDto {
       o.kind !== SkillKind.DODGE_BONUS_DENIAL &&
       o.kind !== SkillKind.BLEED_STACK_SCALING &&
       o.kind !== SkillKind.BLEED_EMPOWERMENT &&
-      o.kind !== SkillKind.LOW_HEALTH_TARGET_BONUS,
+      o.kind !== SkillKind.LOW_HEALTH_TARGET_BONUS &&
+      o.kind !== SkillKind.POISONED_ENEMY_AGILITY,
   )
   @IsDefined()
   @IsEnum(TriggerEvent)
@@ -818,6 +910,19 @@ export class OtherSkillDto {
   @IsPositive()
   endCostRate?: number;
 
+  // TRANSFORMATION: stances opened on the owner, each for its own duration
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(/* istanbul ignore next */ () => StanceActivationDto)
+  stanceActivations?: StanceActivationDto[];
+
+  // TRANSFORMATION: raises every stacked poison on the board and multiplies its damage
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => PoisonSurgeDto)
+  poisonSurge?: PoisonSurgeDto;
+
   // Required for CONDITIONAL_ATTACK kind, unless a bleed detonation replaces it
   @ValidateIf(
     (o) => o.kind === SkillKind.CONDITIONAL_ATTACK && !o.bleedDetonation,
@@ -834,6 +939,7 @@ export class OtherSkillDto {
       (o.kind === SkillKind.CONDITIONAL_ATTACK &&
         o.event !== TriggerEvent.ALLY_HEALTH_BELOW &&
         o.event !== TriggerEvent.DAMAGE_TAKEN &&
+        o.event !== TriggerEvent.DODGE &&
         o.event !== TriggerEvent.TURN_START) ||
       o.interval !== undefined,
   )
@@ -850,7 +956,9 @@ export class OtherSkillDto {
   @IsNumber()
   amplifier?: number;
 
-  @IsOptional()
+  // CONDITIONAL_ATTACK: effect of the hit; AFFLICTION (required): effect laid on its targets
+  @ValidateIf((o) => o.kind === SkillKind.AFFLICTION || o.effect !== undefined)
+  @IsDefined()
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => EffectDto)
   effect?: EffectDto;
@@ -929,7 +1037,8 @@ export class OtherSkillDto {
       o.event === TriggerEvent.ALLY_DEATH ||
       o.event === TriggerEvent.ENEMY_DEATH ||
       o.event === TriggerEvent.ALLY_HEALTH_BELOW ||
-      o.event === TriggerEvent.DAMAGE_TAKEN,
+      o.event === TriggerEvent.DAMAGE_TAKEN ||
+      o.event === TriggerEvent.DODGE,
   )
   @IsDefined()
   @IsString()

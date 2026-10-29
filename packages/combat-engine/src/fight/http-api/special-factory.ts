@@ -31,6 +31,8 @@ const STANCE_SPECIAL_FORBIDDEN_FIELDS = [
   'bleedStackBonus',
   'concealedBonus',
   'execution',
+  'defensePenetration',
+  'undodgeable',
 ] as const;
 
 export function buildSpecial(dto: SpecialDto): Special {
@@ -96,6 +98,8 @@ function buildSpecialAttack(
     buildDamageBonuses(dto),
     buildEnergyRefund(dto.energyRefund),
     buildExecution(dto.execution),
+    dto.defensePenetration,
+    dto.undodgeable,
   );
 }
 

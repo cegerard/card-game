@@ -3,6 +3,7 @@ import {
   AlterationConditionType,
   OtherSkillDto,
   SkillKind,
+  RateBasisDto,
   TriggerEvent,
   TargetingStrategy,
 } from './dto/fight-data.dto';
@@ -25,7 +26,11 @@ import { AttackCondition } from '../core/cards/@types/attack/attack-condition';
 import { AllyHealthBelowThresholdTrigger } from '../core/trigger/ally-health-below-threshold-trigger';
 import { BuffTransferSkill } from '../core/cards/skills/buff-transfer';
 import { StanceSkill } from '../core/cards/skills/stance';
+import { RampingChance } from '../core/cards/@types/stance/ramping-chance';
+import { MathRandomizer } from '../tools/math-randomizer';
 import { BleedExplosionSkill } from '../core/cards/skills/bleed-explosion';
+import { RealDamageSkill } from '../core/cards/skills/real-damage';
+import { AfflictionSkill } from '../core/cards/skills/affliction';
 import { BleedDetonation } from '../core/cards/@types/attack/bleed-detonation';
 import { Splash } from '../core/cards/@types/attack/splash';
 import { LowHealthDebuff } from '../core/cards/@types/attack/low-health-debuff';
@@ -69,12 +74,7 @@ export function createOtherSkill(
     case SkillKind.PROTECTION:
       return buildProtection(skillData, ownerId);
     case SkillKind.STANCE:
-      return new StanceSkill(
-        skillData.name,
-        skillData.stanceActivation,
-        buildTriggerForSkill(skillData, ownerId),
-        skillData.powerId,
-      );
+      return buildStance(skillData, ownerId);
     case SkillKind.CONCEALMENT:
       return buildConcealment(skillData, ownerId);
     case SkillKind.BUFF_TRANSFER:
@@ -93,6 +93,26 @@ export function createOtherSkill(
         buildTriggerForSkill(skillData, ownerId),
         skillData.requiresStance,
       );
+    case SkillKind.REAL_DAMAGE:
+      return asBadRequest(
+        () =>
+          new RealDamageSkill(
+            skillData.name,
+            skillData.rate,
+            skillData.basis ?? RateBasisDto.SOURCE_ATTACK,
+            buildTriggerForSkill(skillData, ownerId),
+            buildSkillTargeting(skillData),
+            skillData.requiresStance,
+          ),
+      );
+    case SkillKind.AFFLICTION:
+      return new AfflictionSkill(
+        skillData.name,
+        buildEffect(skillData.effect),
+        buildTriggerForSkill(skillData, ownerId),
+        buildSkillTargeting(skillData),
+        skillData.requiresStance,
+      );
     case SkillKind.SURVIVE:
       throw new Error('SURVIVE skill must not appear in others skill list');
     case SkillKind.DAMAGE_REDUCTION:
@@ -100,6 +120,7 @@ export function createOtherSkill(
     case SkillKind.BLEED_STACK_SCALING:
     case SkillKind.BLEED_EMPOWERMENT:
     case SkillKind.LOW_HEALTH_TARGET_BONUS:
+    case SkillKind.POISONED_ENEMY_AGILITY:
       throw new Error(
         `${skillData.kind} skill must not appear in others skill list`,
       );
@@ -173,6 +194,7 @@ function buildAlteration(
     endEvent: skillData.endEvent,
     terminationEvent: skillData.terminationEvent,
     powerId: skillData.powerId,
+    requiredStance: skillData.requiresStance,
   });
 }
 
@@ -308,23 +330,54 @@ function buildTransformation(skillData: OtherSkillDto): TransformationSkill {
       threshold,
     ),
     duration: skillData.duration,
-    alterations: (skillData.statAlterations ?? []).map(
-      (a) =>
-        new Alteration(
-          mapAlterationType(a.type),
-          a.rate,
-          a.duration,
-          buildTargetingStrategy(a.targetingStrategy),
-          undefined,
-          undefined,
-          a.terminationEvent,
-          a.polarity,
-        ),
-    ),
+    alterations: buildStatAlterations(skillData),
     lifestealRate: skillData.lifestealRate,
     statusImmunity: skillData.statusImmunity,
     endCostRate: skillData.endCostRate,
+    stanceActivations: skillData.stanceActivations,
+    poisonSurge: skillData.poisonSurge,
   });
+}
+
+function buildStatAlterations(skillData: OtherSkillDto): Alteration[] {
+  return (skillData.statAlterations ?? []).map(
+    (a) =>
+      new Alteration(
+        mapAlterationType(a.type),
+        a.rate,
+        a.duration,
+        buildTargetingStrategy(a.targetingStrategy),
+        undefined,
+        undefined,
+        a.terminationEvent,
+        a.polarity,
+      ),
+  );
+}
+
+function buildStance(skillData: OtherSkillDto, ownerId: string): StanceSkill {
+  const ramping = skillData.rampingChance;
+
+  return asBadRequest(
+    () =>
+      new StanceSkill(
+        skillData.name,
+        skillData.stanceActivation,
+        buildTriggerForSkill(skillData, ownerId),
+        {
+          powerId: skillData.powerId,
+          alterations: buildStatAlterations(skillData),
+          chance: ramping
+            ? new RampingChance(
+                ramping.startChance,
+                ramping.increment,
+                ramping.fromTurn,
+                new MathRandomizer(),
+              )
+            : undefined,
+        },
+      ),
+  );
 }
 
 function buildShield(skillData: OtherSkillDto): ShieldSkill {

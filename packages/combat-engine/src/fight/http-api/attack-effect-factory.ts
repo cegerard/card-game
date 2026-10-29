@@ -14,7 +14,9 @@ import { BleedAttackEffect } from '../core/cards/@types/attack/attack-bleed-effe
 import { ElementalMark } from '../core/cards/@types/mark/elemental-mark';
 import { EffectTriggeredDebuff } from '../core/cards/@types/attack/effect-triggered-debuff';
 import { MathRandomizer } from '../tools/math-randomizer';
+import { StackedPoisonAttackEffect } from '../core/cards/@types/attack/attack-stacked-poison-effect';
 import {
+  asBadRequest,
   buildAlterationStacking,
   mapAlterationType,
 } from './skill-wiring-factory';
@@ -31,6 +33,9 @@ export function buildEffect(effectDto: EffectDto): AttackEffect {
 
   switch (effectDto.type) {
     case Effect.POISON:
+      if (effectDto.maxStacks !== undefined) {
+        return buildStackedPoison(effectDto, triggeredDebuff);
+      }
       return new PoisonAttackEffect(
         effectDto.rate,
         effectDto.level as EffectLevel,
@@ -90,6 +95,30 @@ export function buildEffect(effectDto: EffectDto): AttackEffect {
         effectDto.basis,
       );
   }
+}
+
+function buildStackedPoison(
+  effectDto: EffectDto,
+  triggeredDebuff: EffectTriggeredDebuff | undefined,
+): StackedPoisonAttackEffect {
+  return asBadRequest(
+    () =>
+      new StackedPoisonAttackEffect(
+        effectDto.rate,
+        effectDto.duration,
+        effectDto.maxStacks,
+        effectDto.stackMultiplier,
+        new MathRandomizer(),
+        {
+          stacks: effectDto.stacks,
+          basis: effectDto.basis,
+          probability: effectDto.probability,
+          triggeredDebuff,
+          terminationEvent: effectDto.terminationEvent,
+          ignoresImmunity: effectDto.ignoresImmunity,
+        },
+      ),
+  );
 }
 
 export function buildTriggeredDebuff(

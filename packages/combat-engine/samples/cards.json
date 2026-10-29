@@ -1062,5 +1062,241 @@
     "behaviors": {
       "dodge": "simple-dodge"
     }
+  },
+  {
+    "id": "vespera",
+    "name": "Vespera",
+    "attack": 80,
+    "defense": 40,
+    "health": 480,
+    "speed": 95,
+    "agility": 75,
+    "accuracy": 90,
+    "criticalChance": 0.13,
+    "regeneration": 30,
+    "resistance": 35,
+    "element": "EARTH",
+    "skills": {
+      "special": {
+        "kind": "ATTACK",
+        "name": "Nuée de Cristaux",
+        "energy": 40,
+        "damages": [
+          {
+            "type": "PHYSICAL",
+            "rate": 1
+          }
+        ],
+        "targetingStrategy": "line-three",
+        "effect": {
+          "type": "POISON",
+          "rate": 0.03,
+          "basis": "target-max-health",
+          "duration": 3,
+          "stacks": 2,
+          "maxStacks": 3,
+          "stackMultiplier": 2
+        },
+        "defensePenetration": 0.3,
+        "undodgeable": true
+      },
+      "simpleAttack": {
+        "name": "Dard du Crépuscule",
+        "damages": [
+          {
+            "type": "PHYSICAL",
+            "rate": 0.8
+          },
+          {
+            "type": "EARTH",
+            "rate": 0.6
+          }
+        ],
+        "targetingStrategy": "position-based",
+        "effects": [
+          {
+            "type": "POISON",
+            "rate": 0.03,
+            "basis": "target-max-health",
+            "duration": 3,
+            "stacks": 1,
+            "maxStacks": 3,
+            "stackMultiplier": 2
+          }
+        ]
+      },
+      "others": [
+        {
+          "kind": "ALTERATION",
+          "name": "Carapace de Sable",
+          "polarity": "buff",
+          "buffType": "defense",
+          "rate": 0.08,
+          "duration": 0,
+          "targetingStrategy": "self",
+          "event": "dodge",
+          "targetCardId": "vespera",
+          "stackId": "carapace-de-sable-defense",
+          "maxStacks": 5,
+          "terminationEvent": "damage-taken-vespera"
+        },
+        {
+          "kind": "ALTERATION",
+          "name": "Carapace de Sable",
+          "polarity": "buff",
+          "buffType": "agility",
+          "rate": 0.03,
+          "duration": 0,
+          "targetingStrategy": "self",
+          "event": "dodge",
+          "targetCardId": "vespera",
+          "stackId": "carapace-de-sable-agility",
+          "maxStacks": 5,
+          "terminationEvent": "damage-taken-vespera"
+        },
+        {
+          "kind": "POISONED_ENEMY_AGILITY",
+          "name": "Instinct de Guêpe",
+          "rate": 0.02,
+          "maxRate": 0.1
+        },
+        {
+          "kind": "HEALING",
+          "name": "Instinct de Guêpe",
+          "rate": 0.15,
+          "healBasis": "target-max-health",
+          "targetingStrategy": "self",
+          "event": "poisoned-enemy-death"
+        },
+        {
+          "kind": "STANCE",
+          "name": "Danse du Désert",
+          "event": "turn-end",
+          "stanceActivation": {
+            "name": "danse-du-desert",
+            "duration": 2,
+            "evasionChance": 0.5
+          },
+          "statAlterations": [
+            {
+              "type": "agility",
+              "rate": 0.4,
+              "duration": 2,
+              "targetingStrategy": "self",
+              "polarity": "buff"
+            }
+          ],
+          "rampingChance": {
+            "startChance": 0.25,
+            "increment": 0.1,
+            "fromTurn": 3
+          }
+        },
+        {
+          "kind": "CONDITIONAL_ATTACK",
+          "name": "Danse du Désert - Dard du Crépuscule",
+          "event": "dodge",
+          "targetCardId": "vespera",
+          "requiresStance": "danse-du-desert",
+          "targetingStrategy": "last-dodged-attacker",
+          "damages": [
+            {
+              "type": "PHYSICAL",
+              "rate": 0.8
+            },
+            {
+              "type": "EARTH",
+              "rate": 0.6
+            }
+          ],
+          "effect": {
+            "type": "POISON",
+            "rate": 0.03,
+            "basis": "target-max-health",
+            "duration": 3,
+            "stacks": 1,
+            "maxStacks": 3,
+            "stackMultiplier": 2
+          }
+        },
+        {
+          "kind": "TRANSFORMATION",
+          "name": "Reine du Crépuscule",
+          "duration": 4,
+          "activationCondition": {
+            "type": "health-threshold",
+            "operator": "below",
+            "threshold": 0.5
+          },
+          "stanceActivations": [
+            {
+              "name": "reine-du-crepuscule",
+              "duration": 4
+            },
+            {
+              "name": "intouchable",
+              "duration": 1,
+              "immunities": [
+                "control"
+              ],
+              "evasionChance": 1
+            }
+          ],
+          "poisonSurge": {
+            "stacks": 3,
+            "damageMultiplier": 2
+          },
+          "statAlterations": [
+            {
+              "type": "agility",
+              "rate": 0.2,
+              "duration": 4,
+              "targetingStrategy": "target-all",
+              "polarity": "debuff"
+            }
+          ]
+        },
+        {
+          "kind": "REAL_DAMAGE",
+          "name": "Reine du Crépuscule - Zone toxique",
+          "rate": 0.05,
+          "basis": "target-max-health",
+          "event": "turn-end",
+          "targetingStrategy": "target-all",
+          "requiresStance": "reine-du-crepuscule"
+        },
+        {
+          "kind": "AFFLICTION",
+          "name": "Reine du Crépuscule - Explosion de venin",
+          "event": "self-death",
+          "requiresStance": "reine-du-crepuscule",
+          "targetingStrategy": "target-all",
+          "effect": {
+            "type": "POISON",
+            "rate": 0.03,
+            "basis": "target-max-health",
+            "duration": 3,
+            "stacks": 5,
+            "maxStacks": 5,
+            "stackMultiplier": 2,
+            "ignoresImmunity": true
+          }
+        },
+        {
+          "kind": "ALTERATION",
+          "name": "Reine du Crépuscule - Explosion de venin",
+          "polarity": "debuff",
+          "buffType": "accuracy",
+          "rate": 0.4,
+          "duration": 0,
+          "targetingStrategy": "target-all",
+          "event": "self-death",
+          "requiresStance": "reine-du-crepuscule"
+        }
+      ]
+    },
+    "behaviors": {
+      "dodge": "simple-dodge"
+    }
   }
 ]
