@@ -14,9 +14,11 @@ const roster: any[] = JSON.parse(
 
 // The roster outgrew a deck (5 cards at most). The mirror match keeps the five
 // cards these checks were written for: Selkhet's ultimate can wipe a team in
-// one blow, leaving Aegis no time to show his kit. She fights on her own below.
-const without = (id: string) => roster.filter((card) => card.id !== id);
-const sampleCards = without('selkhet');
+// one blow, leaving Aegis no time to show his kit. Selkhet and Vespera each
+// fight in a deck of their own below.
+const without = (...ids: string[]) =>
+  roster.filter((card) => !ids.includes(card.id));
+const sampleCards = without('selkhet', 'vespera');
 
 const fight = (app: INestApplication, player1: object[], player2: object[]) =>
   request(app.getHttpServer())
@@ -198,7 +200,11 @@ describe('samples/cards.json with Selkhet in a deck', () => {
     app.useLogger(false);
     await app.init();
 
-    const response = await fight(app, without('kaelion'), sampleCards);
+    const response = await fight(
+      app,
+      without('kaelion', 'vespera'),
+      sampleCards,
+    );
     steps = Object.values(response.body);
   });
 
@@ -217,5 +223,43 @@ describe('samples/cards.json with Selkhet in a deck', () => {
         name: 'Marche Fantôme',
       }),
     );
+  });
+});
+
+describe('samples/cards.json with Vespera in a deck', () => {
+  let app: INestApplication;
+  let steps: any[];
+
+  beforeEach(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    app.useLogger(false);
+    await app.init();
+
+    const response = await fight(
+      app,
+      without('kaelion', 'selkhet'),
+      sampleCards,
+    );
+    steps = Object.values(response.body);
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  it('is a deck the engine accepts and can fight with', () => {
+    expect(steps[steps.length - 1].kind).toBe('fight_end');
+  });
+
+  it('lets Vespera poison with her stings', () => {
+    const venoms = steps.filter(
+      (s) => s.kind === 'status_change' && s.status === 'poison',
+    );
+
+    expect(venoms.length).toBeGreaterThan(0);
   });
 });
