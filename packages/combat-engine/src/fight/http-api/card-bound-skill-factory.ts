@@ -7,6 +7,7 @@ import { DodgeBonusDenialSkill } from '../core/cards/skills/dodge-bonus-denial';
 import { BleedStackScalingSkill } from '../core/cards/skills/bleed-stack-scaling';
 import { LowHealthTargetBonusSkill } from '../core/cards/skills/low-health-target-bonus';
 import { BleedEmpowermentSkill } from '../core/cards/skills/bleed-empowerment';
+import { PoisonedEnemyAgilitySkill } from '../core/cards/skills/poisoned-enemy-agility';
 import { buildTriggeredDebuff } from './attack-effect-factory';
 
 function findSkill(
@@ -97,6 +98,19 @@ export function buildLowHealthTargetBonus(
       dto.rate,
       dto.activationCondition.threshold,
     );
+  } catch (e) {
+    throw new BadRequestException((e as Error).message);
+  }
+}
+
+export function buildPoisonedEnemyAgility(
+  others: OtherSkillDto[],
+): PoisonedEnemyAgilitySkill | undefined {
+  const dto = findSkill(others, SkillKind.POISONED_ENEMY_AGILITY);
+  if (!dto) return undefined;
+
+  try {
+    return new PoisonedEnemyAgilitySkill(dto.name, dto.rate, dto.maxRate);
   } catch (e) {
     throw new BadRequestException((e as Error).message);
   }

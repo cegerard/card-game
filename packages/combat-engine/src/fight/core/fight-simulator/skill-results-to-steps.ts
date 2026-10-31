@@ -11,6 +11,10 @@ import {
 type AlterationSkillResults =
   BuffSkillResults | DebuffSkillResults | TransformationSkillResults;
 import { Step, StepKind } from './@types/step';
+import {
+  BuffResult,
+  DebuffResult,
+} from '../cards/@types/action-result/alteration-result';
 import { effectResultsToSteps } from './effect-results-to-steps';
 import { EndEventProcessor } from './end-event-processor';
 import { concealmentStartedReport, revealAttacker } from './concealment-steps';
@@ -196,7 +200,18 @@ export function skillResultsToSteps(
           card: card.identityInfo,
           remainingTurns: skillResult.remainingTurns,
         });
-        pushAlterationStep(steps, card, StepKind.Buff, skillResult);
+        pushAlterationsByPolarity(steps, card, skillResult);
+        skillResult.stancesStarted?.forEach((stance) =>
+          steps.push(stanceStartedReport(card, stance)),
+        );
+        skillResult.poisonSurged?.forEach((surged) =>
+          steps.push({
+            kind: StepKind.StatusChange,
+            status: 'poison',
+            card: surged.identityInfo,
+            stacks: surged.poisonStacks(),
+          }),
+        );
         break;
       case SkillKind.Shield:
         if (skillResult.results.length > 0) {
@@ -223,13 +238,22 @@ export function skillResultsToSteps(
         });
         break;
       case SkillKind.Stance:
+        if (!skillResult.stance) break;
+
         steps.push(stanceStartedReport(card, skillResult.stance));
+        pushAlterationsByPolarity(steps, card, {
+          ...skillResult,
+          results: skillResult.alterations ?? [],
+        });
         break;
       case SkillKind.Concealment:
         steps.push(concealmentStartedReport(card, skillResult.concealment));
         if (skillResult.stanceStarted) {
           steps.push(stanceStartedReport(card, skillResult.stanceStarted));
         }
+        break;
+      case SkillKind.Affliction:
+        steps.push(...effectResultsToSteps(card, skillResult.results));
         break;
       case SkillKind.BuffTransfer:
         skillResult.results.forEach((result) => {
@@ -285,6 +309,31 @@ function pushAlterationStep(
     energy: card.actualEnergy,
     powerId: skillResult.powerId,
   });
+}
+
+/** One `buff` step for the buffs, then one `debuff` step for the debuffs. */
+function pushAlterationsByPolarity(
+  steps: Step[],
+  card: FightingCard,
+  skillResult: {
+    name?: string;
+    powerId?: string;
+    results: (BuffResult | DebuffResult)[];
+  },
+): void {
+  (['buff', 'debuff'] as const).forEach((polarity) =>
+    pushAlterationStep(
+      steps,
+      card,
+      polarity === 'buff' ? StepKind.Buff : StepKind.Debuff,
+      {
+        ...skillResult,
+        results: skillResult.results.filter(
+          (r) => r.alteration.polarity === polarity,
+        ),
+      } as AlterationSkillResults,
+    ),
+  );
 }
 
 /** The buff and debuff an attack left on the defenders it hit, as skill results. */
