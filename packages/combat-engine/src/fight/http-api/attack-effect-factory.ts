@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import {
   Effect,
   EffectDto,
@@ -28,7 +29,41 @@ export function buildEffects(
   return effectDtos.map((dto) => buildEffect(dto));
 }
 
+const STACKED_POISON_ONLY_FIELDS = [
+  'stackMultiplier',
+  'ignoresImmunity',
+] as const;
+const STACK_CAPPED_EFFECTS = [Effect.MARK, Effect.BLEED, Effect.POISON];
+
+/**
+ * A field the effect would silently ignore is a malformed request: stack caps
+ * belong to MARK, BLEED and the stacked POISON, and a stacked poison counts
+ * stacks, not levels.
+ */
+function rejectMisplacedFields(effectDto: EffectDto): void {
+  const stackedPoison =
+    effectDto.type === Effect.POISON && effectDto.maxStacks !== undefined;
+  const misplaced: string[] = [
+    ...(stackedPoison
+      ? []
+      : STACKED_POISON_ONLY_FIELDS.filter(
+          (field) => effectDto[field] !== undefined,
+        )),
+    ...(effectDto.maxStacks !== undefined &&
+    !STACK_CAPPED_EFFECTS.includes(effectDto.type)
+      ? ['maxStacks']
+      : []),
+    ...(stackedPoison && effectDto.level !== undefined ? ['level'] : []),
+  ];
+  if (misplaced.length > 0) {
+    throw new BadRequestException(
+      `${effectDto.type} effect cannot carry: ${misplaced.join(', ')}`,
+    );
+  }
+}
+
 export function buildEffect(effectDto: EffectDto): AttackEffect {
+  rejectMisplacedFields(effectDto);
   const triggeredDebuff = buildTriggeredDebuff(effectDto.triggeredDebuff);
 
   switch (effectDto.type) {

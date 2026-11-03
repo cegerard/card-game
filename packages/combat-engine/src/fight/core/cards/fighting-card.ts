@@ -330,6 +330,11 @@ export class FightingCard {
     return this.computeActualStat(this.defense, 'defense');
   }
 
+  /**
+   * Agility after buffs and debuffs. The `POISONED_ENEMY_AGILITY` bonus is
+   * added on top, outside the agility debuffs, as a bonus of the card own
+   * kit rather than a buff it could lose.
+   */
   public get actualAgility(): number {
     const poisonBonus = round2(
       this.agility *
@@ -608,7 +613,8 @@ export class FightingCard {
     }
 
     this.frozen = this.frozen?.remainingTurns ? this.frozen : undefined;
-    // A card the poison just killed keeps it: the death cascade reads who laid it.
+    // A dead card keeps its poison whatever its remaining turns: the death
+    // cascade reads who laid it, and that must not depend on who killed it.
     this.poisoned =
       this.poisoned?.remainingTurns || this.isDead()
         ? this.poisoned

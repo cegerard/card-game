@@ -956,8 +956,12 @@ export class OtherSkillDto {
   @IsNumber()
   amplifier?: number;
 
-  // CONDITIONAL_ATTACK: effect of the hit; AFFLICTION (required): effect laid on its targets
-  @ValidateIf((o) => o.kind === SkillKind.AFFLICTION || o.effect !== undefined)
+  // CONDITIONAL_ATTACK: effect of the hit (null or absent: none); AFFLICTION (required): effect laid on its targets
+  @ValidateIf(
+    (o) =>
+      o.kind === SkillKind.AFFLICTION ||
+      (o.effect !== undefined && o.effect !== null),
+  )
   @IsDefined()
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => EffectDto)
