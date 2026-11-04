@@ -2,6 +2,7 @@ import { fightingContextOf } from './fighting-context-of';
 import { SELF_DEATH_PREFIX } from '../trigger/self-death';
 import { ENEMY_BLEED_DEATH } from '../trigger/enemy-bleed-death';
 import { ENEMY_KILLED } from '../trigger/enemy-killed';
+import { POISONED_ENEMY_DEATH } from '../trigger/poisoned-enemy-death';
 import { StateEffectType } from '../cards/@types/state/state-effect-type';
 import { FightingCard } from '../cards/fighting-card';
 import { CardDeathSubscriber } from './card-death-subscriber';
@@ -34,7 +35,9 @@ import { SurvivedReactor, survivedReactions } from './survived-reactions';
  *    `enemy-death:<deadCard.id>` are fired next.
  * 5. **Enemy-bleed-death triggers** – when the card bled out, skills on the
  *    opposing team that listen for `enemy-bleed-death` are fired next.
- * 6. **Enemy-killed triggers** – when an enemy dealt the fatal blow and is
+ * 6. **Poisoned-enemy-death triggers** – when the card carried a stacked
+ *    poison, the living enemy that laid it hears of the death, whoever killed.
+ * 7. **Enemy-killed triggers** – when an enemy dealt the fatal blow and is
  *    still alive, its own skills listening for `enemy-killed` fire last, with
  *    the health ratio the victim had just before the blow. A card the reward
  *    kills goes through its own cascade right away, like a self-death kill.
@@ -144,6 +147,17 @@ export class DeathSkillHandler implements CardDeathSubscriber {
       this.fireSkillsOnCards(
         opponentPlayer.playableCards,
         ENEMY_BLEED_DEATH,
+        opponentPlayer,
+        ownerPlayer,
+        killerCard,
+      );
+    }
+
+    const poisoner = deadCard.poisoner;
+    if (poisoner && !poisoner.isDead() && opponentPlayer.ownCard(poisoner)) {
+      this.fireSkillsOnCards(
+        [poisoner],
+        POISONED_ENEMY_DEATH,
         opponentPlayer,
         ownerPlayer,
         killerCard,

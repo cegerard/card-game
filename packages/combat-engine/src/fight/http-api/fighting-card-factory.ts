@@ -20,6 +20,7 @@ import {
   buildDamageReduction,
   buildDodgeBonusDenialSkill,
   buildLowHealthTargetBonus,
+  buildPoisonedEnemyAgility,
   buildSurviveSkill,
 } from './card-bound-skill-factory';
 
@@ -30,7 +31,15 @@ const KIND_ONLY_FIELDS: {
 }[] = [
   {
     kinds: [SkillKind.BLEED_EMPOWERMENT],
-    fields: ['extraStacks', 'basis', 'triggeredDebuff'],
+    fields: ['extraStacks', 'triggeredDebuff'],
+  },
+  {
+    kinds: [SkillKind.BLEED_EMPOWERMENT, SkillKind.REAL_DAMAGE],
+    fields: ['basis'],
+  },
+  {
+    kinds: [SkillKind.TRANSFORMATION],
+    fields: ['stanceActivations', 'poisonSurge'],
   },
   {
     kinds: [SkillKind.CONDITIONAL_ATTACK],
@@ -39,6 +48,10 @@ const KIND_ONLY_FIELDS: {
   {
     kinds: [SkillKind.CONDITIONAL_ATTACK, SkillKind.CONCEALMENT],
     fields: ['requiresUndamaged', 'interval'],
+  },
+  {
+    kinds: [SkillKind.STANCE],
+    fields: ['rampingChance'],
   },
 ];
 
@@ -49,6 +62,7 @@ const CARD_BOUND_SKILL_KINDS = [
   SkillKind.BLEED_STACK_SCALING,
   SkillKind.BLEED_EMPOWERMENT,
   SkillKind.LOW_HEALTH_TARGET_BONUS,
+  SkillKind.POISONED_ENEMY_AGILITY,
 ];
 
 export function buildFightingCard(cardData: FightingCardDto): FightingCard {
@@ -63,6 +77,7 @@ export function buildFightingCard(cardData: FightingCardDto): FightingCard {
   rejectMisplacedKindOnlyFields(others);
   const bleedEmpowerment = buildBleedEmpowerment(others);
   const lowHealthTargetBonus = buildLowHealthTargetBonus(others);
+  const poisonedEnemyAgility = buildPoisonedEnemyAgility(others);
 
   // The CARD_BOUND_SKILL_KINDS carry no trigger and no
   // targeting: they live on the card itself and are consulted when a hit is
@@ -103,6 +118,7 @@ export function buildFightingCard(cardData: FightingCardDto): FightingCard {
       bleedStackScaling,
       bleedEmpowerment,
       lowHealthTargetBonus,
+      poisonedEnemyAgility,
     },
     {
       dodge: buildDodgeStrategy(cardData.behaviors.dodge),

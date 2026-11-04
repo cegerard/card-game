@@ -14,6 +14,7 @@ import { ProtectionResult } from './protection';
 import { Stance } from '../@types/stance/stance';
 import { Concealment } from '../@types/concealment/concealment';
 import { Buff } from '../@types/alteration/alteration-detail';
+import { EffectResult } from '../@types/attack/attack-effect';
 
 export enum SkillKind {
   Healing = 'healing',
@@ -27,6 +28,7 @@ export enum SkillKind {
   Stance = 'stance',
   Concealment = 'concealment',
   BuffTransfer = 'buff_transfer',
+  Affliction = 'affliction',
 }
 
 type BaseSkillResults = {
@@ -83,8 +85,11 @@ export type ShieldSkillResults = BaseSkillResults & {
 
 export type TransformationSkillResults = BaseSkillResults & {
   skillKind: SkillKind.Transformation;
-  results: BuffResult[];
+  results: (BuffResult | DebuffResult)[];
   remainingTurns: number;
+  stancesStarted?: Stance[];
+  /** Cards whose stacked poison the transformation surged. */
+  poisonSurged?: FightingCard[];
 };
 
 export type ProtectionSkillResults = BaseSkillResults & {
@@ -98,9 +103,16 @@ export type BuffTransferSkillResults = BaseSkillResults & {
   results: { target: FightingCard; buffs: Buff[] }[];
 };
 
+export type AfflictionSkillResults = BaseSkillResults & {
+  skillKind: SkillKind.Affliction;
+  results: EffectResult[];
+};
+
 export type StanceSkillResults = BaseSkillResults & {
   skillKind: SkillKind.Stance;
-  stance: Stance;
+  /** Absent when the skill chance did not fire. */
+  stance?: Stance;
+  alterations?: (BuffResult | DebuffResult)[];
 };
 
 export type ConcealmentSkillResults = BaseSkillResults & {
@@ -121,6 +133,7 @@ export type SkillResults =
   | ProtectionSkillResults
   | StanceSkillResults
   | BuffTransferSkillResults
+  | AfflictionSkillResults
   | ConcealmentSkillResults;
 
 export interface Skill {

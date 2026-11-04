@@ -44,7 +44,13 @@ export type SkillKind =
   | 'BLEED_DETONATION'
   | 'CONCEALMENT'
   /** Transmet à la première cible tous les buffs d'un type que porte son propriétaire. */
-  | 'BUFF_TRANSFER';
+  | 'BUFF_TRANSFER'
+  /** Passif : Esquive +`rate` (part de l'Esquive de base) par carte vivante portant un Poison à charges du propriétaire, plafonné à `maxRate`. */
+  | 'POISONED_ENEMY_AGILITY'
+  /** Dégâts réels (ni esquive, ni défense, ni bouclier) : `rate` de `basis` à chaque cible. */
+  | 'REAL_DAMAGE'
+  /** Pose `effect` sur chaque cible, sans attaque. */
+  | 'AFFLICTION';
 
 export type BuffType =
   | 'attack'
@@ -96,7 +102,11 @@ export type TriggerEvent =
   | 'damage-taken'
   | 'fight-start'
   /** Sur la carte qui a porté le coup fatal ; `activationCondition.threshold` : santé de la victime avant le coup. */
-  | 'enemy-killed';
+  | 'enemy-killed'
+  /** Chaque attaque esquivée par la carte surveillée (`targetCardId`), évasion comprise. */
+  | 'dodge'
+  /** Sur la carte qui a posé le Poison à charges que portait l'ennemi mort, quel que soit le tueur. */
+  | 'poisoned-enemy-death';
 
 export type TargetingStrategy =
   | 'position-based'
@@ -112,7 +122,9 @@ export type TargetingStrategy =
   | 'protected-ally'
   | 'first-bleeding-enemy'
   /** Allié vivant le plus rapide (buffs compris), lanceur exclu ; se résout même lanceur mort. */
-  | 'fastest-ally';
+  | 'fastest-ally'
+  /** Dernier attaquant esquivé par la carte `targetCardId` : la riposte à un coup manqué. */
+  | 'last-dodged-attacker';
 
 export type CardSelectorStrategy = 'player-by-player' | 'speed-weighted';
 
@@ -164,16 +176,20 @@ export interface EffectConfig {
   rate: number;
   /** Requis sauf pour MARK et BLEED. */
   level?: number;
-  /** BLEED uniquement (requis) : tours pendant lesquels chaque pile saigne. */
+  /** BLEED (requis) : tours pendant lesquels chaque pile saigne ; POISON à charges (requis) : durée relancée à chaque pose. */
   duration?: number;
-  /** BLEED uniquement : ce dont `rate` est une part (défaut `source-attack`). */
+  /** BLEED et POISON à charges : ce dont `rate` est une part (défaut `source-attack`). */
   basis?: RateBasis;
   /** MARK uniquement : type de dégâts amplifié par la marque. */
   damageType?: DamageType;
-  /** MARK et BLEED (requis) : nombre maximal de cumuls. */
+  /** MARK et BLEED (requis) : nombre maximal de cumuls ; sur POISON, en fait un Poison à charges. */
   maxStacks?: number;
-  /** MARK et BLEED : cumuls appliqués par déclenchement (défaut 1). */
+  /** MARK et BLEED : cumuls appliqués par déclenchement (défaut 1) ; POISON à charges aussi. */
   stacks?: number;
+  /** POISON avec `maxStacks` (requis) : facteur appliqué au tick à chaque charge (2 : 3 %, 6 %, 12 %). */
+  stackMultiplier?: number;
+  /** POISON à charges : se pose malgré une immunité aux dégâts sur la durée. */
+  ignoresImmunity?: boolean;
   triggeredDebuff?: EffectTriggeredDebuff;
   terminationEvent?: string;
   probability?: number;
@@ -204,6 +220,8 @@ export interface StanceActivation {
   immunities?: StatusCategory[];
   /** Le porteur peut cibler les ennemis dissimulés pendant la posture. */
   revealsConcealed?: boolean;
+  /** Chance qu'une attaque visant le porteur le manque d'emblée, avant le jet d'esquive. */
+  evasionChance?: number;
 }
 
 export interface MarkedTargetBonus {
@@ -268,6 +286,10 @@ export interface SpecialSkill extends AttackBonuses {
   energyRefund?: EnergyRefund;
   /** ATTACK uniquement : achève les cibles touchées laissées strictement sous `threshold` de leur santé, dans ]0, 1[. */
   execution?: Execution;
+  /** ATTACK uniquement : part de la Défense de la cible ignorée, dans [0, 1]. */
+  defensePenetration?: number;
+  /** ATTACK uniquement : ni jet d'esquive ni évasion. */
+  undodgeable?: boolean;
 }
 
 export interface SimpleAttackSkill extends AttackBonuses {
@@ -302,7 +324,7 @@ export interface OtherSkill {
   stackThreshold?: number;
   /** BLEED_EMPOWERMENT uniquement (entier ≥ 0, défaut 0) : piles posées en plus par chaque Saignement pendant la posture. */
   extraStacks?: number;
-  /** BLEED_EMPOWERMENT uniquement : base de calcul des Saignements posés pendant la posture (remplace celle de l'effet). */
+  /** BLEED_EMPOWERMENT : base de calcul des Saignements posés pendant la posture (remplace celle de l'effet) ; REAL_DAMAGE : ce dont `rate` est une part (défaut `source-attack`). */
   basis?: RateBasis;
   /** BLEED_EMPOWERMENT uniquement : debuff roulé quand un Saignement renforcé est posé (remplace celui de l'effet). */
   triggeredDebuff?: EffectTriggeredDebuff;
@@ -339,6 +361,7 @@ export interface OtherSkill {
   interval?: number;
   hits?: number;
   amplifier?: number;
+  /** CONDITIONAL_ATTACK : effet du coup ; AFFLICTION (requis) : effet posé sur chaque cible. */
   effect?: EffectConfig;
   comboFinisher?: DamageComposition[];
   /** Effets appliqués uniquement sur le coup final du combo. */
@@ -387,11 +410,17 @@ export interface OtherSkill {
    * `source-attack`.
    */
   healBasis?: RateBasis;
-  /** TRANSFORMATION uniquement. */
+  /** TRANSFORMATION, et STANCE (appliquées à l'ouverture de la posture). */
   statAlterations?: StatAlteration[];
   lifestealRate?: number;
   statusImmunity?: boolean;
   endCostRate?: number;
+  /** TRANSFORMATION : postures ouvertes sur le porteur, chacune pour sa durée. */
+  stanceActivations?: StanceActivation[];
+  /** TRANSFORMATION : porte chaque Poison à charges du terrain à `stacks` au moins et multiplie ses dégâts. */
+  poisonSurge?: { stacks: number; damageMultiplier: number };
+  /** STANCE : chance d'ouverture, nulle avant `fromTurn`, +`increment` à chaque échec, 0 après ouverture ; jamais pendant la posture. */
+  rampingChance?: { startChance: number; increment: number; fromTurn: number };
   /** Requis quand event vaut dormant. */
   activationEvent?: TriggerEvent;
   activationTargetCardId?: string;

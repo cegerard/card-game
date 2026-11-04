@@ -13,6 +13,8 @@ export type Stance = {
   immunities?: StatusCategory[];
   /** Lets the bearer target concealed enemies while the stance runs. */
   revealsConcealed?: boolean;
+  /** Chance an attack aimed at the bearer misses outright, before the dodge roll. */
+  evasionChance?: number;
 };
 
 /** What a special declares to open a stance on its caster. */
@@ -21,4 +23,5 @@ export type StanceActivation = {
   duration: number;
   immunities?: StatusCategory[];
   revealsConcealed?: boolean;
+  evasionChance?: number;
 };

@@ -3,9 +3,13 @@ import { FightingContext } from '../@types/fighting-context';
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 import { HealthThresholdCondition } from '../@types/skill-activation-conditions/health-threshold-condition';
 import { Alteration } from '../@types/alteration/alteration';
-import { BuffResult } from '../@types/action-result/alteration-result';
+import {
+  BuffResult,
+  DebuffResult,
+} from '../@types/action-result/alteration-result';
 import { HealthReactiveSkill } from './reactive-skill';
 import { SkillKind, TransformationSkillResults } from './skill';
+import { StanceActivation } from '../@types/stance/stance';
 
 export type TransformationConfig = {
   name: string;
@@ -15,6 +19,10 @@ export type TransformationConfig = {
   lifestealRate?: number;
   statusImmunity?: boolean;
   endCostRate?: number;
+  /** Stances opened on the owner for their own durations. */
+  stanceActivations?: StanceActivation[];
+  /** Raises every stacked poison on the board and multiplies its damage. */
+  poisonSurge?: { stacks: number; damageMultiplier: number };
 };
 
 /**
@@ -63,12 +71,19 @@ export class TransformationSkill implements HealthReactiveSkill {
     }
 
     const results = (this.config.alterations ?? []).flatMap(
-      (alteration) => alteration.apply(source, context) as BuffResult[],
+      (alteration) =>
+        alteration.apply(source, context) as (BuffResult | DebuffResult)[],
+    );
+
+    const stancesStarted = (this.config.stanceActivations ?? []).map(
+      (activation) => source.activateStance(activation),
     );
 
     return {
       skillKind: SkillKind.Transformation,
       results,
+      stancesStarted,
+      poisonSurged: this.surgePoisons(context),
       name: this.name,
       remainingTurns: this.config.duration,
     };
@@ -76,5 +91,15 @@ export class TransformationSkill implements HealthReactiveSkill {
 
   isTriggered(_triggerName: string): boolean {
     return false;
+  }
+
+  private surgePoisons(context: FightingContext): FightingCard[] {
+    const surge = this.config.poisonSurge;
+    if (!surge) return [];
+
+    return [
+      ...context.sourcePlayer.playableCards,
+      ...context.opponentPlayer.playableCards,
+    ].filter((card) => card.surgePoison(surge.stacks, surge.damageMultiplier));
   }
 }
