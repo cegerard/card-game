@@ -5,7 +5,10 @@ import { AllOwnerCards } from '../core/targeting-card-strategies/all-owner-cards
 import { AllAllies } from '../core/targeting-card-strategies/all-allies';
 import { Launcher } from '../core/targeting-card-strategies/launcher';
 import { AlliedCardByIdStrategy } from '../core/targeting-card-strategies/allied-card-by-id';
-import { LastAttackerOfAllyTargetingStrategy } from '../core/targeting-card-strategies/last-attacker-of-ally';
+import {
+  LastAttackerOfAllyTargetingStrategy,
+  LastDodgedAttackerStrategy,
+} from '../core/targeting-card-strategies/last-attacker-of-ally';
 import { MostWoundedAllyStrategy } from '../core/targeting-card-strategies/most-wounded-ally';
 import { ProtectedAllyStrategy } from '../core/targeting-card-strategies/protected-ally';
 import { FastestAllyStrategy } from '../core/targeting-card-strategies/fastest-ally';
@@ -40,10 +43,15 @@ export function buildTargetingStrategy(
       throw new Error(`${strategyName} strategy requires targetCardId`);
     return new AlliedCardByIdStrategy(targetCardId);
   }
-  if (strategyName === TargetingStrategy.LAST_ATTACKER_OF_ALLY) {
+  if (
+    strategyName === TargetingStrategy.LAST_ATTACKER_OF_ALLY ||
+    strategyName === TargetingStrategy.LAST_DODGED_ATTACKER
+  ) {
     if (!targetCardId)
       throw new Error(`${strategyName} strategy requires targetCardId`);
-    return new LastAttackerOfAllyTargetingStrategy(targetCardId);
+    return strategyName === TargetingStrategy.LAST_DODGED_ATTACKER
+      ? new LastDodgedAttackerStrategy(targetCardId)
+      : new LastAttackerOfAllyTargetingStrategy(targetCardId);
   }
   const strategy = STATIC_STRATEGY_MAP[strategyName];
   if (!strategy) throw new Error(`Unknown targeting strategy: ${strategyName}`);

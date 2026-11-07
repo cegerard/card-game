@@ -30,6 +30,8 @@ export interface AlterationSkillOptions {
   powerId?: string;
   /** Stack budget shared by every alteration of this polarity carrying the same id. */
   stacking?: AlterationStacking;
+  /** Stance its owner must hold for the skill to fire. */
+  requiredStance?: string;
 }
 
 export class AlterationSkill implements Skill {
@@ -48,6 +50,7 @@ export class AlterationSkill implements Skill {
   private readonly terminationEvent?: string;
   private readonly powerId?: string;
   private readonly stacking?: AlterationStacking;
+  public readonly requiredStance?: string;
   private activationCount = 0;
 
   constructor({
@@ -64,6 +67,7 @@ export class AlterationSkill implements Skill {
     terminationEvent,
     powerId,
     stacking,
+    requiredStance,
   }: AlterationSkillOptions) {
     if (polarity !== 'buff' && polarity !== 'debuff') {
       throw new Error(`Invalid polarity: ${polarity}`);
@@ -81,6 +85,7 @@ export class AlterationSkill implements Skill {
     this.terminationEvent = terminationEvent;
     this.powerId = powerId;
     this.stacking = stacking;
+    this.requiredStance = requiredStance;
   }
 
   launch(

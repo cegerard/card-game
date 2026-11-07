@@ -40,6 +40,8 @@ export class SpecialAttack extends BaseSpecial {
     private readonly damageBonuses: DamageTypeBonus[] = [],
     private readonly energyRefund?: EnergyRefund,
     private readonly execution?: Execution,
+    private readonly defensePenetration?: number,
+    private readonly undodgeable = false,
   ) {
     super(name, energyNeeded);
     if (hits < 1) {
@@ -109,7 +111,7 @@ export class SpecialAttack extends BaseSpecial {
     const target = protector ?? aimedAt;
     const interceptedFor = protector ? aimedAt : undefined;
 
-    if (target.dodge(source)) {
+    if (!this.undodgeable && target.dodge(source)) {
       return {
         damage: 0,
         isCritical,
@@ -132,6 +134,7 @@ export class SpecialAttack extends BaseSpecial {
       damages,
       source.attackPower(context, target) * damageMultiplier * markedBonus,
       target,
+      this.defensePenetration,
     );
     const finalResult = target.applyFinalDamage(total);
     const { damageToHealth, shieldAbsorbed } = finalResult;

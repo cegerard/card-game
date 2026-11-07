@@ -10,8 +10,10 @@ import { StateResult } from './@types/action-result/state-result';
 import { CardStateFrozen } from './@types/state/card-state-frozen';
 import { CardStateStunted } from './@types/state/card-state-stunted';
 import { CardStateBleeding } from './@types/state/card-state-bleeding';
+import { CardStateStackedPoison } from './@types/state/card-state-stacked-poison';
 import { DodgeBonusDenialSkill } from './skills/dodge-bonus-denial';
 import { BleedStackScalingSkill } from './skills/bleed-stack-scaling';
+import { PoisonedEnemyAgilitySkill } from './skills/poisoned-enemy-agility';
 import { LowHealthTargetBonusSkill } from './skills/low-health-target-bonus';
 import {
   BleedApplication,
@@ -158,6 +160,7 @@ export class FightingCard {
   private bleedStackScaling: BleedStackScalingSkill | null = null;
   private lowHealthTargetBonus: LowHealthTargetBonusSkill | null = null;
   private bleedEmpowerment: BleedEmpowermentSkill | null = null;
+  private poisonedEnemyAgility: PoisonedEnemyAgilitySkill | null = null;
 
   // Stances
   private stances: Stance[] = [];
@@ -181,6 +184,7 @@ export class FightingCard {
   private stunted?: CardState;
   private bleeding?: CardStateBleeding;
   private laidBleedStacks = 0;
+  private readonly poisonedCards = new Set<FightingCard>();
 
   constructor(
     id: string,
@@ -206,6 +210,7 @@ export class FightingCard {
       bleedStackScaling?: BleedStackScalingSkill;
       bleedEmpowerment?: BleedEmpowermentSkill;
       lowHealthTargetBonus?: LowHealthTargetBonusSkill;
+      poisonedEnemyAgility?: PoisonedEnemyAgilitySkill;
     },
     behaviors: {
       dodge: DodgeBehavior;
@@ -236,6 +241,7 @@ export class FightingCard {
     this.bleedStackScaling = skills.bleedStackScaling ?? null;
     this.bleedEmpowerment = skills.bleedEmpowerment ?? null;
     this.lowHealthTargetBonus = skills.lowHealthTargetBonus ?? null;
+    this.poisonedEnemyAgility = skills.poisonedEnemyAgility ?? null;
   }
 
   public get lastAttacker(): FightingCard | undefined {
@@ -245,6 +251,9 @@ export class FightingCard {
   public set lastAttacker(card: FightingCard) {
     this._lastAttacker = card;
   }
+
+  /** The last card whose attack this card dodged. */
+  public lastDodgedAttacker?: FightingCard;
 
   public get actualHealth(): number {
     return Math.max(
@@ -321,8 +330,18 @@ export class FightingCard {
     return this.computeActualStat(this.defense, 'defense');
   }
 
+  /**
+   * Agility after buffs and debuffs. The `POISONED_ENEMY_AGILITY` bonus is
+   * added on top, outside the agility debuffs, as a bonus of the card own
+   * kit rather than a buff it could lose.
+   */
   public get actualAgility(): number {
-    return this.computeActualStat(this.agility, 'agility');
+    const poisonBonus = round2(
+      this.agility *
+        (this.poisonedEnemyAgility?.rateFor(this.poisonedCardCount) ?? 0),
+    );
+
+    return this.computeActualStat(this.agility, 'agility') + poisonBonus;
   }
 
   /** Health points the card restores to itself at each turn end. */
@@ -352,6 +371,40 @@ export class FightingCard {
 
   public get poisonLevel(): EffectLevel {
     return this.poisoned?.level ?? 0;
+  }
+
+  public poisonStacks(): number {
+    return this.stackedPoison?.stacks ?? 0;
+  }
+
+  /** The card that laid the stacked poison this card carries, if any. */
+  public get poisoner(): FightingCard | undefined {
+    return this.stackedPoison?.source;
+  }
+
+  /** Raises a stacked poison to `stacks` and multiplies its damage; false without one. */
+  public surgePoison(stacks: number, damageMultiplier: number): boolean {
+    if (!this.stackedPoison) return false;
+
+    this.stackedPoison.surge(stacks, damageMultiplier);
+    return true;
+  }
+
+  public recordPoisonedCard(card: FightingCard): void {
+    this.poisonedCards.add(card);
+  }
+
+  /** Living cards still carrying a stacked poison this card laid. */
+  public get poisonedCardCount(): number {
+    return [...this.poisonedCards].filter(
+      (card) => !card.isDead() && card.poisoner === this,
+    ).length;
+  }
+
+  private get stackedPoison(): CardStateStackedPoison | undefined {
+    return this.poisoned instanceof CardStateStackedPoison
+      ? this.poisoned
+      : undefined;
   }
 
   public get frozenLevel(): EffectLevel {
@@ -406,14 +459,22 @@ export class FightingCard {
 
   /**
    * Applies a status state on the card. Returns false when the card refuses
-   * it, because it is dead, because it is immune to that status category, or
-   * because its resistance won the roll.
+   * it, because it is dead, because it is immune to that status category
+   * (unless `ignoresImmunity`), or because its resistance won the roll.
    */
-  public setState(newState: CardState): boolean {
-    if (this.isDead() || this.isImmuneTo(statusCategoryOf(newState.type)))
+  public setState(
+    newState: CardState,
+    { ignoresImmunity = false }: { ignoresImmunity?: boolean } = {},
+  ): boolean {
+    if (this.isDead()) return false;
+    if (!ignoresImmunity && this.isImmuneTo(statusCategoryOf(newState.type)))
       return false;
 
     if (this.resists()) return false;
+
+    if (newState instanceof CardStateStackedPoison) {
+      newState.carryOver(this.poisoned);
+    }
 
     if (newState.type === 'poison') {
       this.poisoned = newState;
@@ -552,7 +613,12 @@ export class FightingCard {
     }
 
     this.frozen = this.frozen?.remainingTurns ? this.frozen : undefined;
-    this.poisoned = this.poisoned?.remainingTurns ? this.poisoned : undefined;
+    // A dead card keeps its poison whatever its remaining turns: the death
+    // cascade reads who laid it, and that must not depend on who killed it.
+    this.poisoned =
+      this.poisoned?.remainingTurns || this.isDead()
+        ? this.poisoned
+        : undefined;
     this.burned = this.burned?.remainingTurns ? this.burned : undefined;
     this.stunted = this.stunted?.remainingTurns ? this.stunted : undefined;
     this.bleeding = this.bleeding?.stackCount ? this.bleeding : undefined;
@@ -803,12 +869,14 @@ export class FightingCard {
     duration,
     immunities,
     revealsConcealed,
+    evasionChance,
   }: StanceActivation): Stance {
     const running = this.stances.find((s) => s.name === name);
     if (running) {
       running.remainingTurns = duration;
       running.immunities = immunities ?? running.immunities;
       running.revealsConcealed = revealsConcealed ?? running.revealsConcealed;
+      running.evasionChance = evasionChance ?? running.evasionChance;
       return running;
     }
 
@@ -817,6 +885,7 @@ export class FightingCard {
       remainingTurns: duration,
       immunities,
       revealsConcealed,
+      evasionChance,
     };
     this.stances.push(stance);
     return stance;
@@ -999,10 +1068,23 @@ export class FightingCard {
   }
 
   public dodge(attacker: FightingCard): boolean {
+    if (this.evades()) return true;
+
     return this.dodgeBehavior.dodge(
       this.agilityAgainst(attacker),
       attacker.actualAccuracy,
     );
+  }
+
+  /** One roll against the best evasion chance among the running stances. */
+  private evades(): boolean {
+    const chance = Math.max(
+      0,
+      ...this.stances.map((s) => s.evasionChance ?? 0),
+    );
+    if (chance <= 0) return false;
+
+    return this.randomizer.random() < chance;
   }
 
   /** The agility this card dodges that attacker with. */

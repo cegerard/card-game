@@ -4,9 +4,11 @@ import { DeathTrigger } from '../core/trigger/death-trigger';
 import { DynamicTrigger } from '../core/trigger/dynamic-trigger';
 import { SurvivedTrigger } from '../core/trigger/survived';
 import { DamageTakenTrigger } from '../core/trigger/damage-taken';
+import { DodgeTrigger } from '../core/trigger/dodge';
 import { EnemyBleedDeathTrigger } from '../core/trigger/enemy-bleed-death';
 import { TurnStart } from '../core/trigger/turn-start';
 import { FightStart } from '../core/trigger/fight-start';
+import { PoisonedEnemyDeathTrigger } from '../core/trigger/poisoned-enemy-death';
 import { Trigger } from '../core/trigger/trigger';
 import { TriggerEvent } from './dto/fight-data.dto';
 
@@ -17,6 +19,7 @@ const STRATEGY_MAP: Record<string, Trigger> = {
   [TriggerEvent.ENEMY_BLEED_DEATH]: new EnemyBleedDeathTrigger(),
   [TriggerEvent.TURN_START]: new TurnStart(),
   [TriggerEvent.FIGHT_START]: new FightStart(),
+  [TriggerEvent.POISONED_ENEMY_DEATH]: new PoisonedEnemyDeathTrigger(),
 };
 
 function buildDeathTrigger(
@@ -36,11 +39,13 @@ function buildSimpleTrigger(
   if (event === TriggerEvent.ALLY_DEATH || event === TriggerEvent.ENEMY_DEATH) {
     return buildDeathTrigger(event, targetCardId);
   }
-  if (event === TriggerEvent.DAMAGE_TAKEN) {
+  if (event === TriggerEvent.DAMAGE_TAKEN || event === TriggerEvent.DODGE) {
     if (!targetCardId) {
       throw new Error(`${event} trigger requires targetCardId`);
     }
-    return new DamageTakenTrigger(targetCardId);
+    return event === TriggerEvent.DODGE
+      ? new DodgeTrigger(targetCardId)
+      : new DamageTakenTrigger(targetCardId);
   }
   const trigger = STRATEGY_MAP[event];
   if (!trigger) {
