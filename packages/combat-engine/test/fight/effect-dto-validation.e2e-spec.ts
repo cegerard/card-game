@@ -143,4 +143,122 @@ describe('EffectDto validation', () => {
         200,
       ));
   });
+
+  describe('WEAK_POINT', () => {
+    const weakPoint = (fields: object = {}) => ({
+      type: 'WEAK_POINT',
+      rate: 0,
+      weakPoint: { name: 'Marque', ...fields },
+    });
+
+    it('refuses a weak point without its description', () =>
+      post(withEffect({ type: 'WEAK_POINT', rate: 0 })).expect(400));
+
+    it('refuses a weak point description on another effect', () =>
+      post(
+        withEffect({
+          type: 'BURN',
+          rate: 0.1,
+          level: 1,
+          weakPoint: { name: 'Marque' },
+        }),
+      ).expect(400));
+
+    it('refuses a duration outside the weak point description', () =>
+      post(withEffect({ ...weakPoint(), duration: 2 })).expect(400));
+
+    it('refuses an exploit effect on a weak point never consumed', () =>
+      post(
+        withEffect(
+          weakPoint({
+            exploitEffect: { type: 'HYPOTHERMIA', rate: 0.15, duration: 3 },
+          }),
+        ),
+      ).expect(400));
+
+    it('accepts a consumable weak point with its exploit effect', () =>
+      post(
+        withEffect(
+          weakPoint({
+            consumable: true,
+            exploitEffect: { type: 'HYPOTHERMIA', rate: 0.15, duration: 3 },
+          }),
+        ),
+      ).expect(200));
+  });
+
+  describe('HYPOTHERMIA', () => {
+    it('refuses a hypothermia without duration', () =>
+      post(withEffect({ type: 'HYPOTHERMIA', rate: 0.15 })).expect(400));
+  });
+
+  describe('FREEZE duration', () => {
+    it('refuses a duration below one turn', () =>
+      post(
+        withEffect({ type: 'FREEZE', rate: 0.2, level: 1, duration: 0 }),
+      ).expect(400));
+  });
+
+  describe('Svana skills', () => {
+    const analysis = (fields: object = {}) => ({
+      kind: 'ANALYSIS',
+      name: 'Analyse',
+      event: 'enemy-attack',
+      effect: {
+        type: 'WEAK_POINT',
+        rate: 0,
+        weakPoint: { name: 'Point Faible' },
+      },
+      ...fields,
+    });
+
+    it('refuses an ANALYSIS without its charge cap', () =>
+      post([card('card-a', { others: [analysis()] })]).expect(400));
+
+    it('accepts an ANALYSIS with its charge cap', () =>
+      post([card('card-a', { others: [analysis({ maxStacks: 3 })] })]).expect(
+        200,
+      ));
+
+    it('refuses an AFTERSHOCK without damages', () =>
+      post([
+        card('card-a', {
+          others: [
+            { kind: 'AFTERSHOCK', name: 'Cristaux', event: 'after-attack' },
+          ],
+        }),
+      ]).expect(400));
+
+    it('refuses a weakPointPenetration outside a CONDITIONAL_ATTACK', () =>
+      post([
+        card('card-a', {
+          others: [
+            {
+              kind: 'REAL_DAMAGE',
+              name: 'Zone',
+              rate: 0.1,
+              event: 'turn-end',
+              targetingStrategy: 'target-all',
+              weakPointPenetration: 0.4,
+            },
+          ],
+        }),
+      ]).expect(400));
+
+    it('refuses a criticalDamageRate outside a TRANSFORMATION', () =>
+      post([
+        card('card-a', {
+          others: [
+            {
+              kind: 'REAL_DAMAGE',
+              name: 'Zone',
+              rate: 0.1,
+              event: 'turn-end',
+              targetingStrategy: 'target-all',
+              criticalDamageRate: 0.3,
+            },
+          ],
+        }),
+      ]).expect(400));
+  });
 });

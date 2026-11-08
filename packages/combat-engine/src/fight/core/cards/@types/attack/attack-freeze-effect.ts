@@ -22,7 +22,13 @@ export class FreezeAttackEffect implements AttackEffect {
     triggeredDebuff?: EffectTriggeredDebuff,
     terminationEvent?: string,
     probability?: number,
+    private readonly duration?: number,
   ) {
+    if (duration !== undefined && duration < 1) {
+      throw new Error(
+        `FreezeAttackEffect duration must be greater than or equal to 1, got ${duration}`,
+      );
+    }
     this.rate = rate;
     this.level = level;
     this.randomizer = randomizer;
@@ -78,6 +84,6 @@ export class FreezeAttackEffect implements AttackEffect {
   }
 
   private computeFrozenTurns(effectLevel: EffectLevel): number {
-    return 2 * effectLevel - 1;
+    return this.duration ?? 2 * effectLevel - 1;
   }
 }

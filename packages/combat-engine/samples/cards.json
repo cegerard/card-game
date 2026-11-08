@@ -1298,5 +1298,170 @@
     "behaviors": {
       "dodge": "simple-dodge"
     }
+  },
+  {
+    "id": "svana",
+    "name": "Svana",
+    "attack": 75,
+    "defense": 50,
+    "health": 510,
+    "speed": 70,
+    "agility": 74.75,
+    "accuracy": 80,
+    "criticalChance": 0.07,
+    "regeneration": 45,
+    "resistance": 55,
+    "element": "AIR",
+    "skills": {
+      "special": {
+        "kind": "ATTACK",
+        "name": "Étreinte du Cygne Glacé",
+        "energy": 45,
+        "damages": [{ "type": "AIR", "rate": 0 }],
+        "targetingStrategy": "position-based",
+        "effects": [
+          { "type": "FREEZE", "rate": 0.2, "level": 1, "duration": 2 },
+          {
+            "type": "WEAK_POINT",
+            "rate": 0,
+            "weakPoint": {
+              "name": "Point Faible Critique",
+              "damageMultiplier": 1.6,
+              "consumable": true,
+              "exploitEffect": { "type": "HYPOTHERMIA", "rate": 0.15, "duration": 3 }
+            }
+          }
+        ],
+        "statAlterations": [
+          {
+            "type": "attack",
+            "rate": 0.25,
+            "duration": 4,
+            "targetingStrategy": "position-based",
+            "polarity": "debuff"
+          }
+        ]
+      },
+      "simpleAttack": {
+        "name": "Souffle Cristallin",
+        "damages": [
+          { "type": "PHYSICAL", "rate": 0.7 },
+          { "type": "AIR", "rate": 0.7 }
+        ],
+        "targetingStrategy": "position-based",
+        "effects": [
+          {
+            "type": "WEAK_POINT",
+            "rate": 0,
+            "weakPoint": {
+              "name": "Marque Thermique",
+              "duration": 2,
+              "criticalChanceBonus": 0.1
+            }
+          }
+        ],
+        "frozenTargetBonus": { "multiplier": 1.2 }
+      },
+      "others": [
+        {
+          "kind": "ANALYSIS",
+          "name": "Analyse Aérienne",
+          "event": "enemy-attack",
+          "maxStacks": 3,
+          "effect": {
+            "type": "WEAK_POINT",
+            "rate": 0,
+            "weakPoint": {
+              "name": "Point Faible",
+              "revealerAccuracyRate": 0.4,
+              "revealerAttackRate": 0.3
+            }
+          }
+        },
+        {
+          "kind": "CONDITIONAL_ATTACK",
+          "name": "Grâce Trompeuse - Éclat de Givre",
+          "event": "dodge",
+          "targetCardId": "svana",
+          "targetingStrategy": "last-dodged-attacker",
+          "damages": [{ "type": "AIR", "rate": 0.7 }],
+          "effect": { "type": "FREEZE", "rate": 0.2, "level": 1, "probability": 0.33 }
+        },
+        {
+          "kind": "CONDITIONAL_ATTACK",
+          "name": "Tempête Focalisée",
+          "event": "next-action",
+          "interval": 4,
+          "targetingStrategy": "position-based",
+          "damages": [{ "type": "AIR", "rate": 1.2 }],
+          "effect": { "type": "FREEZE", "rate": 0.2, "level": 2, "duration": 2 },
+          "weakPointPenetration": 0.4
+        },
+        {
+          "kind": "TRANSFORMATION",
+          "name": "Valse du Cygne Noir",
+          "duration": 3,
+          "activationCondition": {
+            "type": "health-threshold",
+            "operator": "below",
+            "threshold": 0.2
+          },
+          "activationEvent": "enemies-analysed",
+          "statAlterations": [
+            { "type": "accuracy", "rate": 0.5, "duration": 3, "targetingStrategy": "self", "polarity": "buff" },
+            { "type": "speed", "rate": 0.35, "duration": 3, "targetingStrategy": "self", "polarity": "buff" }
+          ],
+          "criticalDamageRate": 0.3,
+          "stanceActivations": [{ "name": "valse-du-cygne-noir", "duration": 3 }]
+        },
+        {
+          "kind": "AFFLICTION",
+          "name": "Valse du Cygne Noir - Gel de Masse",
+          "event": "transformed",
+          "targetingStrategy": "target-all",
+          "effect": { "type": "FREEZE", "rate": 0.2, "level": 1, "duration": 1 }
+        },
+        {
+          "kind": "ALTERATION",
+          "name": "Valse du Cygne Noir - Gel de Masse",
+          "event": "transformed",
+          "targetingStrategy": "target-all",
+          "polarity": "debuff",
+          "buffType": "defense",
+          "rate": 0.25,
+          "duration": 3
+        },
+        {
+          "kind": "AFFLICTION",
+          "name": "Valse du Cygne Noir - Omniscience Tactique",
+          "event": "transformed",
+          "targetingStrategy": "target-all",
+          "effect": {
+            "type": "WEAK_POINT",
+            "rate": 0,
+            "weakPoint": {
+              "name": "Omniscience Tactique",
+              "duration": 3,
+              "revealerDamageRate": 0.15
+            }
+          }
+        },
+        {
+          "kind": "AFTERSHOCK",
+          "name": "Valse du Cygne Noir - Tempête de Cristaux",
+          "event": "after-attack",
+          "requiresStance": "valse-du-cygne-noir",
+          "damages": [{ "type": "AIR", "rate": 0.6 }]
+        },
+        {
+          "kind": "WEAK_POINT_LEGACY",
+          "name": "Valse du Cygne Noir - Héritage du Cygne",
+          "event": "self-death",
+          "requiresStance": "valse-du-cygne-noir",
+          "rate": 0.25
+        }
+      ]
+    },
+    "behaviors": { "dodge": "simple-dodge" }
   }
 ]

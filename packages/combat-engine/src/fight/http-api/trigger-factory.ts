@@ -9,6 +9,10 @@ import { EnemyBleedDeathTrigger } from '../core/trigger/enemy-bleed-death';
 import { TurnStart } from '../core/trigger/turn-start';
 import { FightStart } from '../core/trigger/fight-start';
 import { PoisonedEnemyDeathTrigger } from '../core/trigger/poisoned-enemy-death';
+import { EnemyAttackTrigger } from '../core/trigger/enemy-attack';
+import { AfterAttackTrigger } from '../core/trigger/after-attack';
+import { TransformedTrigger } from '../core/trigger/transformed';
+import { EnemiesAnalysedTrigger } from '../core/trigger/enemies-analysed';
 import { Trigger } from '../core/trigger/trigger';
 import { TriggerEvent } from './dto/fight-data.dto';
 
@@ -20,6 +24,10 @@ const STRATEGY_MAP: Record<string, Trigger> = {
   [TriggerEvent.TURN_START]: new TurnStart(),
   [TriggerEvent.FIGHT_START]: new FightStart(),
   [TriggerEvent.POISONED_ENEMY_DEATH]: new PoisonedEnemyDeathTrigger(),
+  [TriggerEvent.ENEMY_ATTACK]: new EnemyAttackTrigger(),
+  [TriggerEvent.AFTER_ATTACK]: new AfterAttackTrigger(),
+  [TriggerEvent.TRANSFORMED]: new TransformedTrigger(),
+  [TriggerEvent.ENEMIES_ANALYSED]: new EnemiesAnalysedTrigger(),
 };
 
 function buildDeathTrigger(

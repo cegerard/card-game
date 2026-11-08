@@ -44,6 +44,11 @@ import {
   ConcealmentStartedReport,
   ConcealmentEndedReport,
 } from './concealment-report';
+import {
+  AnalysisChargedReport,
+  WeakPointEndedReport,
+  WeakPointRevealedReport,
+} from './weak-point-report';
 
 export enum StepKind {
   FightStart = 'fight_start',
@@ -81,6 +86,9 @@ export enum StepKind {
   SpecialStance = 'special_stance',
   Executed = 'executed',
   BuffTransferred = 'buff_transferred',
+  WeakPointRevealed = 'weak_point_revealed',
+  WeakPointEnded = 'weak_point_ended',
+  AnalysisCharged = 'analysis_charged',
 }
 
 export type Step =
@@ -118,4 +126,7 @@ export type Step =
   | ConcealmentEndedReport
   | SpecialStanceReport
   | ExecutedReport
-  | BuffTransferredReport;
+  | BuffTransferredReport
+  | WeakPointRevealedReport
+  | WeakPointEndedReport
+  | AnalysisChargedReport;

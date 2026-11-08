@@ -8,14 +8,16 @@ import { TargetAndNeighborsStrategy } from '../../../targeting-card-strategies/t
 
 /**
  * A secondary strike hitting the zone centered on the primary target — that
- * target and its two neighbors — with its own damages and effects. It runs
- * through the regular attack pipeline, so dodge, protection and shields apply.
+ * target and its two neighbors, or the neighbors alone — with its own damages
+ * and effects. It runs through the regular attack pipeline, so dodge,
+ * protection and shields apply.
  */
 export class Splash {
   constructor(
     public readonly name: string,
     private readonly damages: DamageComposition[],
     private readonly effects?: AttackEffect[],
+    private readonly includesCenter = true,
   ) {}
 
   public strike(
@@ -26,7 +28,7 @@ export class Splash {
     return new SimpleAttack(
       this.name,
       this.damages,
-      new TargetAndNeighborsStrategy(center),
+      new TargetAndNeighborsStrategy(center, this.includesCenter),
       this.effects,
     ).launch(source, context);
   }

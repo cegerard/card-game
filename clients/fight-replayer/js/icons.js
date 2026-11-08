@@ -25,6 +25,7 @@ export const ICON = {
   freeze:            '❄️',
   stunt:             '💫',
   bleed:             '🩸',
+  hypothermia:       '🥶',
   dead:              '💀',
   status_change:     '⚡',
   state_effect:      '💢',
@@ -52,6 +53,10 @@ export const ICON = {
   regenerated:       '♻️',
   /* Elemental mark */
   mark_applied:      '💠',
+  /* Weak points */
+  weak_point_revealed: '🔍',
+  weak_point_ended:    '🫥',
+  analysis_charged:    '🧠',
   /* Transformation */
   transformation_started: '🌀',
   transformation_ended:   '💤',
@@ -74,6 +79,7 @@ export const STATUS_ICON = {
   freeze: ICON.freeze,
   stunt:  ICON.stunt,
   bleed:  ICON.bleed,
+  hypothermia: ICON.hypothermia,
 };
 
 /** Primary colour per event kind */
@@ -94,6 +100,7 @@ export const EVENT_COLOR = {
   state_effect_poison: '#84cc16',
   state_effect_freeze: '#38bdf8',
   state_effect_bleed: '#dc2626',
+  state_effect_hypothermia: '#7dd3fc',
   targeting_override: '#c084fc',
   targeting_reverted: '#c084fc',
   effect_removed:    '#94a3b8',
@@ -112,6 +119,9 @@ export const EVENT_COLOR = {
   attack_intercepted: '#60a5fa',
   regenerated:       '#4ade80',
   mark_applied:      '#22d3ee',
+  weak_point_revealed: '#e0f2fe',
+  weak_point_ended:    '#94a3b8',
+  analysis_charged:    '#bae6fd',
   transformation_started: '#a855f7',
   transformation_ended:   '#94a3b8',
   fight_end:         '#22c55e',

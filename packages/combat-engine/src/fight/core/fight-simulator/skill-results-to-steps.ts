@@ -255,6 +255,18 @@ export function skillResultsToSteps(
       case SkillKind.Affliction:
         steps.push(...effectResultsToSteps(card, skillResult.results));
         break;
+      case SkillKind.Analysis:
+        skillResult.results.forEach(({ target, charges }) =>
+          steps.push({
+            kind: StepKind.AnalysisCharged,
+            name: skillResult.name,
+            source: card.identityInfo,
+            card: target.identityInfo,
+            charges,
+          }),
+        );
+        steps.push(...effectResultsToSteps(card, skillResult.revealed));
+        break;
       case SkillKind.BuffTransfer:
         skillResult.results.forEach((result) => {
           steps.push({
@@ -272,6 +284,17 @@ export function skillResultsToSteps(
         break;
       default:
         throw new Error(`Unknown SkillKind: ${(skillResult as any).skillKind}`);
+    }
+
+    if (skillResult.followUps) {
+      steps.push(
+        ...skillResultsToSteps(
+          card,
+          skillResult.followUps,
+          endEventProcessor,
+          survivedReactor,
+        ),
+      );
     }
 
     if (skillResult.endEvent && endEventProcessor) {

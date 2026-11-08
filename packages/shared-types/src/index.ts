@@ -50,7 +50,13 @@ export type SkillKind =
   /** Dégâts réels (ni esquive, ni défense, ni bouclier) : `rate` de `basis` à chaque cible. */
   | 'REAL_DAMAGE'
   /** Pose `effect` sur chaque cible, sans attaque. */
-  | 'AFFLICTION';
+  | 'AFFLICTION'
+  /** Pose une charge sur l'ennemi qui vient d'attaquer (`maxStacks` par ennemi) ; la charge qui le remplit pose `effect`. */
+  | 'ANALYSIS'
+  /** Frappe les voisins de la carte visée par l'attaque du porteur (sans elle) ; pensé pour `after-attack`. */
+  | 'AFTERSHOCK'
+  /** Rend permanents les Points Faibles révélés par le porteur et amplifie de `rate` les coups qu'ils subissent ; pensé pour `self-death`. */
+  | 'WEAK_POINT_LEGACY';
 
 export type BuffType =
   | 'attack'
@@ -68,7 +74,11 @@ export type EffectType =
   | 'FREEZE'
   | 'STUNT'
   | 'MARK'
-  | 'BLEED';
+  | 'BLEED'
+  /** Révèle un Point Faible (`weakPoint`) : ni statut, ni immunité, ni résistance. */
+  | 'WEAK_POINT'
+  /** Dégâts sur la durée : `rate` de la santé max de la cible par tour pendant `duration` ; se pose et mord sur une carte gelée. */
+  | 'HYPOTHERMIA';
 
 /**
  * Ce que fait un statut à sa cible, et donc ce contre quoi une immunité est
@@ -106,7 +116,15 @@ export type TriggerEvent =
   /** Chaque attaque esquivée par la carte surveillée (`targetCardId`), évasion comprise. */
   | 'dodge'
   /** Sur la carte qui a posé le Poison à charges que portait l'ennemi mort, quel que soit le tueur. */
-  | 'poisoned-enemy-death';
+  | 'poisoned-enemy-death'
+  /** Sur toute l'équipe attaquée, une fois par attaque ennemie (touchée ou esquivée), `lastAttacker` = l'attaquant. */
+  | 'enemy-attack'
+  /** Sur l'attaquant après chacune de ses attaques ayant ciblé quelqu'un, avec la carte visée. */
+  | 'after-attack'
+  /** Sur la carte qui vient de se transformer. */
+  | 'transformed'
+  /** Sur la carte dont l'ANALYSIS a rempli tous les ennemis vivants. */
+  | 'enemies-analysed';
 
 export type TargetingStrategy =
   | 'position-based'
@@ -174,9 +192,9 @@ export interface EffectConfig {
    * pour BLEED, dégâts de chaque pile par tour.
    */
   rate: number;
-  /** Requis sauf pour MARK et BLEED. */
+  /** Requis sauf pour MARK, BLEED, POISON à charges, WEAK_POINT et HYPOTHERMIA. */
   level?: number;
-  /** BLEED (requis) : tours pendant lesquels chaque pile saigne ; POISON à charges (requis) : durée relancée à chaque pose. */
+  /** BLEED (requis) : tours pendant lesquels chaque pile saigne ; POISON à charges (requis) : durée relancée à chaque pose ; HYPOTHERMIA (requis) ; FREEZE : remplace la durée du niveau. */
   duration?: number;
   /** BLEED et POISON à charges : ce dont `rate` est une part (défaut `source-attack`). */
   basis?: RateBasis;
@@ -193,6 +211,30 @@ export interface EffectConfig {
   triggeredDebuff?: EffectTriggeredDebuff;
   terminationEvent?: string;
   probability?: number;
+  /** WEAK_POINT uniquement (requis). */
+  weakPoint?: WeakPoint;
+}
+
+/** Faiblesse révélée sur la cible, l'attaquant en étant le révélateur. */
+export interface WeakPoint {
+  /** Révéler à nouveau le même nom remplace le Point Faible. */
+  name: string;
+  /** Tours de présence ; sans durée, il n'expire jamais. */
+  duration?: number;
+  /** Multiplie les dégâts de chaque coup reçu par le porteur (défaut 1). */
+  damageMultiplier?: number;
+  /** Ajouté à la chance de critique de chaque attaquant du porteur. */
+  criticalChanceBonus?: number;
+  /** Disparaît à la prochaine attaque visant le porteur, touchée ou esquivée. */
+  consumable?: boolean;
+  /** Révélateur seul : part de sa Précision de base ajoutée contre le porteur. */
+  revealerAccuracyRate?: number;
+  /** Révélateur seul : son Attaque contre le porteur est multipliée par 1 + rate. */
+  revealerAttackRate?: number;
+  /** Révélateur seul : ses coups sur le porteur sont multipliés par 1 + rate. */
+  revealerDamageRate?: number;
+  /** Consommable uniquement : effet posé par le révélateur quand un coup le touche. */
+  exploitEffect?: EffectConfig;
 }
 
 /** Exécution : la cible encore en vie sous ce ratio de santé perd toute sa santé restante (dégâts réels). */
@@ -252,6 +294,8 @@ export interface AttackBonuses {
   bleedStackBonus?: BleedStackBonus;
   /** Bonus sur un type de dégâts quand l'attaquant frappe depuis la Dissimulation. */
   concealedBonus?: DamageTypeBonus;
+  /** Bonus contre une cible déjà gelée, sur tous les types de dégâts sans `damageType`. */
+  frozenTargetBonus?: { damageType?: DamageType; multiplier: number };
 }
 
 export interface ShieldApplication {
@@ -271,6 +315,8 @@ export interface SpecialSkill extends AttackBonuses {
   /** Requis sauf pour STANCE, qui ne cible personne. */
   targetingStrategy?: Exclude<TargetingStrategy, 'targeted-card'>;
   effect?: EffectConfig;
+  /** ATTACK uniquement : effets supplémentaires tentés à chaque coup réussi, après `effect`. */
+  effects?: EffectConfig[];
   /** STANCE uniquement : dissimule le lanceur pendant ce nombre de tours. */
   concealment?: { duration: number };
   statAlterations?: StatAlteration[];
@@ -314,7 +360,7 @@ export interface MultipleAttackSkill extends AttackBonuses {
 export interface OtherSkill {
   kind: SkillKind;
   name: string;
-  /** Requis pour HEALING, ALTERATION, SHIELD, DAMAGE_REDUCTION ; bonus par pile pour BLEED_STACK_SCALING ; taux du Saignement renforcé pour BLEED_EMPOWERMENT ; part de l'Attaque infligée par carte pour BLEED_DETONATION ; bonus de dégâts contre une cible affaiblie pour LOW_HEALTH_TARGET_BONUS. */
+  /** Requis pour HEALING, ALTERATION, SHIELD, DAMAGE_REDUCTION ; bonus par pile pour BLEED_STACK_SCALING ; taux du Saignement renforcé pour BLEED_EMPOWERMENT ; part de l'Attaque infligée par carte pour BLEED_DETONATION ; bonus de dégâts contre une cible affaiblie pour LOW_HEALTH_TARGET_BONUS ; amplification des Points Faibles hérités pour WEAK_POINT_LEGACY. */
   rate?: number;
   /** BLEED_STACK_SCALING uniquement (requis) : plafond du bonus d'Attaque. */
   maxRate?: number;
@@ -339,10 +385,11 @@ export interface OtherSkill {
    * même polarité qui déclarent le même `stackId`.
    */
   stackId?: string;
+  /** ANALYSIS (requis) : charges posées sur chaque ennemi avant que `effect` ne tombe. */
   maxStacks?: number;
   /** @deprecated Ancien nom de `maxStacks`, toujours accepté. */
   debuffMaxStacks?: number;
-  /** Absent pour SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL, BLEED_STACK_SCALING, BLEED_EMPOWERMENT, STANCE, BLEED_DETONATION et LOW_HEALTH_TARGET_BONUS. */
+  /** Absent pour SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL, BLEED_STACK_SCALING, BLEED_EMPOWERMENT, STANCE, BLEED_DETONATION, LOW_HEALTH_TARGET_BONUS, ANALYSIS (cible l'attaquant), AFTERSHOCK et WEAK_POINT_LEGACY. */
   targetingStrategy?: TargetingStrategy;
   /** Absent pour SHIELD, SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL, BLEED_STACK_SCALING, BLEED_EMPOWERMENT et LOW_HEALTH_TARGET_BONUS. */
   event?: TriggerEvent;
@@ -361,13 +408,15 @@ export interface OtherSkill {
   interval?: number;
   hits?: number;
   amplifier?: number;
-  /** CONDITIONAL_ATTACK : effet du coup ; AFFLICTION (requis) : effet posé sur chaque cible. */
+  /** CONDITIONAL_ATTACK et AFTERSHOCK : effet du coup ; AFFLICTION (requis) : effet posé sur chaque cible ; ANALYSIS (requis) : effet posé sur un ennemi rempli. */
   effect?: EffectConfig;
   comboFinisher?: DamageComposition[];
   /** Effets appliqués uniquement sur le coup final du combo. */
   comboFinisherEffects?: EffectConfig[];
   /** CONDITIONAL_ATTACK : part de la Défense de la cible ignorée, dans [0, 1]. */
   defensePenetration?: number;
+  /** CONDITIONAL_ATTACK : part de la Défense ignorée à la place contre une cible portant un Point Faible, dans [0, 1]. */
+  weakPointPenetration?: number;
   /** CONDITIONAL_ATTACK : énergie dépensée, seulement quand l'attaque touche quelqu'un. */
   energyCost?: number;
   /** CONDITIONAL_ATTACK et CONCEALMENT : ne part jamais si le porteur a perdu des points de vie depuis le début de sa dernière action (bouclier et esquive exclus). */
@@ -417,11 +466,13 @@ export interface OtherSkill {
   endCostRate?: number;
   /** TRANSFORMATION : postures ouvertes sur le porteur, chacune pour sa durée. */
   stanceActivations?: StanceActivation[];
+  /** TRANSFORMATION : multiplie les dégâts de ses coups critiques par 1 + rate. */
+  criticalDamageRate?: number;
   /** TRANSFORMATION : porte chaque Poison à charges du terrain à `stacks` au moins et multiplie ses dégâts. */
   poisonSurge?: { stacks: number; damageMultiplier: number };
   /** STANCE : chance d'ouverture, nulle avant `fromTurn`, +`increment` à chaque échec, 0 après ouverture ; jamais pendant la posture. */
   rampingChance?: { startChance: number; increment: number; fromTurn: number };
-  /** Requis quand event vaut dormant. */
+  /** Requis quand event vaut dormant ; TRANSFORMATION : événement qui la déclenche aussi, une fois par combat. */
   activationEvent?: TriggerEvent;
   activationTargetCardId?: string;
   replacementEvent?: TriggerEvent;

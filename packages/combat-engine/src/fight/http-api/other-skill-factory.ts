@@ -40,6 +40,10 @@ import { AttackSkill } from '../core/cards/skills/attack-skill';
 import { TargetedCard } from '../core/targeting-card-strategies/targeted-card';
 import { HitAlterations } from '../core/cards/@types/attack/hit-alterations';
 import { ConcealmentSkill } from '../core/cards/skills/concealment';
+import { AnalysisSkill } from '../core/cards/skills/analysis';
+import { AftershockSkill } from '../core/cards/skills/aftershock';
+import { WeakPointLegacySkill } from '../core/cards/skills/weak-point-legacy';
+import { buildTriggerStrategy } from './trigger-factory';
 import { buildEffect, buildEffects } from './attack-effect-factory';
 import { buildExecution } from './attack-skill-factory';
 import {
@@ -112,6 +116,38 @@ export function createOtherSkill(
         buildTriggerForSkill(skillData, ownerId),
         buildSkillTargeting(skillData),
         skillData.requiresStance,
+      );
+    case SkillKind.ANALYSIS:
+      return asBadRequest(
+        () =>
+          new AnalysisSkill(
+            skillData.name,
+            skillData.maxStacks,
+            buildEffect(skillData.effect),
+            buildTriggerForSkill(skillData, ownerId),
+          ),
+      );
+    case SkillKind.AFTERSHOCK:
+      return new AftershockSkill(
+        skillData.name,
+        new Splash(
+          skillData.name,
+          buildDamages(skillData),
+          skillData.effect ? [buildEffect(skillData.effect)] : undefined,
+          false,
+        ),
+        buildTriggerForSkill(skillData, ownerId),
+        skillData.requiresStance,
+      );
+    case SkillKind.WEAK_POINT_LEGACY:
+      return asBadRequest(
+        () =>
+          new WeakPointLegacySkill(
+            skillData.name,
+            skillData.rate,
+            buildTriggerForSkill(skillData, ownerId),
+            skillData.requiresStance,
+          ),
       );
     case SkillKind.SURVIVE:
       throw new Error('SURVIVE skill must not appear in others skill list');
@@ -252,9 +288,7 @@ function buildConditionalAttackSkill(skillData: OtherSkillDto): AttackSkill {
       'CONDITIONAL_ATTACK bleedDetonation cannot be combined with hits',
     );
   }
-  const caDamages = (skillData.damages ?? []).map(
-    (d) => new DamageComposition(d.type, d.rate),
-  );
+  const caDamages = buildDamages(skillData);
   const caEffects = skillData.effect
     ? [buildEffect(skillData.effect)]
     : undefined;
@@ -273,6 +307,7 @@ function buildConditionalAttackSkill(skillData: OtherSkillDto): AttackSkill {
         buildEffects(skillData.comboFinisherEffects),
         undefined,
         skillData.defensePenetration,
+        skillData.weakPointPenetration,
       )
     : new SimpleAttack(
         skillData.name,
@@ -284,7 +319,14 @@ function buildConditionalAttackSkill(skillData: OtherSkillDto): AttackSkill {
         skillData.bleedDetonation
           ? new BleedDetonation(skillData.bleedDetonation.ratePerStack)
           : undefined,
+        skillData.weakPointPenetration,
       );
+}
+
+function buildDamages(skillData: OtherSkillDto): DamageComposition[] {
+  return (skillData.damages ?? []).map(
+    (d) => new DamageComposition(d.type, d.rate),
+  );
 }
 
 function buildTargetingOverride(
@@ -336,6 +378,10 @@ function buildTransformation(skillData: OtherSkillDto): TransformationSkill {
     endCostRate: skillData.endCostRate,
     stanceActivations: skillData.stanceActivations,
     poisonSurge: skillData.poisonSurge,
+    activationTrigger:
+      skillData.activationEvent &&
+      asBadRequest(() => buildTriggerStrategy(skillData.activationEvent)),
+    criticalDamageRate: skillData.criticalDamageRate,
   });
 }
 

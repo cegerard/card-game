@@ -1,6 +1,7 @@
 import {
   BleedStackBonusDto,
   DamageTypeBonusDto,
+  FrozenTargetBonusDto,
   EnergyRefundDto,
   ExecutionDto,
   FightingCardDto,
@@ -9,6 +10,7 @@ import { SimpleAttack } from '../core/cards/skills/simple-attack';
 import { buildTargetingStrategy } from './targeting-strategy-factory';
 import { BleedStackBonus } from '../core/cards/@types/attack/bleed-stack-bonus';
 import { ConcealedBonus } from '../core/cards/@types/attack/concealed-bonus';
+import { FrozenTargetBonus } from '../core/cards/@types/attack/frozen-target-bonus';
 import { DamageTypeBonus } from '../core/cards/@types/attack/damage-type-bonus';
 import { EnergyRefund } from '../core/cards/@types/attack/energy-refund';
 import { DamageComposition } from '../core/cards/@types/damage/damage-composition';
@@ -73,8 +75,9 @@ export function buildExecution(dto?: ExecutionDto): Execution | undefined {
 export function buildDamageBonuses(attack: {
   bleedStackBonus?: BleedStackBonusDto;
   concealedBonus?: DamageTypeBonusDto;
+  frozenTargetBonus?: FrozenTargetBonusDto;
 }): DamageTypeBonus[] {
-  const { bleedStackBonus, concealedBonus } = attack;
+  const { bleedStackBonus, concealedBonus, frozenTargetBonus } = attack;
   const bonuses: DamageTypeBonus[] = [];
 
   if (bleedStackBonus) {
@@ -89,6 +92,14 @@ export function buildDamageBonuses(attack: {
   if (concealedBonus) {
     bonuses.push(
       new ConcealedBonus(concealedBonus.damageType, concealedBonus.multiplier),
+    );
+  }
+  if (frozenTargetBonus) {
+    bonuses.push(
+      new FrozenTargetBonus(
+        frozenTargetBonus.damageType,
+        frozenTargetBonus.multiplier,
+      ),
     );
   }
 

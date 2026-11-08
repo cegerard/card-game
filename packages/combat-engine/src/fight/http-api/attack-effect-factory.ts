@@ -16,6 +16,8 @@ import { ElementalMark } from '../core/cards/@types/mark/elemental-mark';
 import { EffectTriggeredDebuff } from '../core/cards/@types/attack/effect-triggered-debuff';
 import { MathRandomizer } from '../tools/math-randomizer';
 import { StackedPoisonAttackEffect } from '../core/cards/@types/attack/attack-stacked-poison-effect';
+import { WeakPointAttackEffect } from '../core/cards/@types/attack/attack-weak-point-effect';
+import { HypothermiaAttackEffect } from '../core/cards/@types/attack/attack-hypothermia-effect';
 import {
   asBadRequest,
   buildAlterationStacking,
@@ -54,6 +56,14 @@ function rejectMisplacedFields(effectDto: EffectDto): void {
       ? ['maxStacks']
       : []),
     ...(stackedPoison && effectDto.level !== undefined ? ['level'] : []),
+    ...(effectDto.type !== Effect.WEAK_POINT &&
+    effectDto.weakPoint !== undefined
+      ? ['weakPoint']
+      : []),
+    // A weak point carries its duration itself
+    ...(effectDto.type === Effect.WEAK_POINT && effectDto.duration !== undefined
+      ? ['duration']
+      : []),
   ];
   if (misplaced.length > 0) {
     throw new BadRequestException(
@@ -96,6 +106,7 @@ export function buildEffect(effectDto: EffectDto): AttackEffect {
         triggeredDebuff,
         effectDto.terminationEvent,
         effectDto.probability,
+        effectDto.duration,
       );
     case Effect.STUNT:
       return new StuntAttackEffect(
@@ -129,7 +140,45 @@ export function buildEffect(effectDto: EffectDto): AttackEffect {
         effectDto.terminationEvent,
         effectDto.basis,
       );
+    case Effect.WEAK_POINT:
+      return buildWeakPoint(effectDto);
+    case Effect.HYPOTHERMIA:
+      return asBadRequest(
+        () =>
+          new HypothermiaAttackEffect(
+            effectDto.rate,
+            effectDto.duration,
+            new MathRandomizer(),
+            effectDto.probability,
+            effectDto.terminationEvent,
+          ),
+      );
   }
+}
+
+function buildWeakPoint(effectDto: EffectDto): WeakPointAttackEffect {
+  const dto = effectDto.weakPoint;
+
+  return asBadRequest(
+    () =>
+      new WeakPointAttackEffect(
+        {
+          name: dto.name,
+          duration: dto.duration,
+          damageMultiplier: dto.damageMultiplier,
+          criticalChanceBonus: dto.criticalChanceBonus,
+          consumable: dto.consumable,
+          revealerBonus: {
+            accuracyRate: dto.revealerAccuracyRate,
+            attackRate: dto.revealerAttackRate,
+            damageRate: dto.revealerDamageRate,
+          },
+          exploitEffect: dto.exploitEffect && buildEffect(dto.exploitEffect),
+        },
+        new MathRandomizer(),
+        effectDto.probability,
+      ),
+  );
 }
 
 function buildStackedPoison(

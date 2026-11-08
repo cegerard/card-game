@@ -11,6 +11,10 @@ import {
   applyDamageBonuses,
 } from '../@types/attack/damage-type-bonus';
 import { BleedDetonation } from '../@types/attack/bleed-detonation';
+import {
+  nonEmpty,
+  penetrationAgainst,
+} from '../@types/weak-point/weak-point-strike';
 
 export class SimpleAttack implements AttackSkill {
   constructor(
@@ -21,6 +25,7 @@ export class SimpleAttack implements AttackSkill {
     private readonly damageBonuses: DamageTypeBonus[] = [],
     private readonly defensePenetration?: number,
     private readonly bleedDetonation?: BleedDetonation,
+    private readonly weakPointPenetration?: number,
   ) {}
 
   public get targetingId(): string {
@@ -44,8 +49,7 @@ export class SimpleAttack implements AttackSkill {
     context: FightingContext,
     targeting: TargetingCardStrategy,
   ): NamedAttackResult {
-    const isCritical = Math.random() < card.actualCriticalChance;
-    const damageMultiplier = isCritical ? 2 : 1;
+    const criticalRoll = Math.random();
     const defensiveCards = targeting.targetedCards(
       card,
       context.sourcePlayer,
@@ -63,6 +67,8 @@ export class SimpleAttack implements AttackSkill {
         const protector = context.opponentPlayer.protectorOf(target, card);
         const defender = protector ?? target;
         const interceptedFor = protector ? target : undefined;
+        const isCritical = criticalRoll < card.criticalChanceAgainst(defender);
+        const damageMultiplier = isCritical ? card.criticalMultiplier(2) : 1;
 
         if (defender.dodge(card)) {
           return {
@@ -73,6 +79,7 @@ export class SimpleAttack implements AttackSkill {
             interceptedFor,
             kind,
             remainingHealth: defender.actualHealth,
+            effects: nonEmpty(defender.strikeWeakPoints(context, false)),
           };
         }
 
@@ -81,14 +88,24 @@ export class SimpleAttack implements AttackSkill {
           detonation?.damages ?? this.damagesAgainst(card, defender),
           card.attackPower(context, defender) * damageMultiplier,
           defender,
-          this.defensePenetration,
+          penetrationAgainst(
+            defender,
+            this.defensePenetration,
+            this.weakPointPenetration,
+          ),
         );
-        const finalResult = defender.applyFinalDamage(total);
+        const finalResult = defender.applyFinalDamage(
+          defender.exposedDamage(total, card),
+        );
+        const weakPointEffects = defender.strikeWeakPoints(context, true);
         const { damageToHealth, shieldAbsorbed } = finalResult;
 
-        const effects = this.effects
-          ?.map((e) => e.applyEffect(defender, card, context))
-          .filter((r): r is EffectResult => r != null);
+        const effects = [
+          ...weakPointEffects,
+          ...(this.effects ?? [])
+            .map((e) => e.applyEffect(defender, card, context))
+            .filter((r): r is EffectResult => r != null),
+        ];
 
         return {
           damage: damageToHealth + shieldAbsorbed,
@@ -99,7 +116,7 @@ export class SimpleAttack implements AttackSkill {
           dodge: false,
           defender,
           interceptedFor,
-          effects: effects?.length ? effects : undefined,
+          effects: nonEmpty(effects),
           kind,
           remainingHealth: defender.actualHealth,
           survived: finalResult.survived,

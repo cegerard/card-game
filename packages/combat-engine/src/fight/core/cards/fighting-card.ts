@@ -45,6 +45,13 @@ import {
   StatusCategory,
   statusCategoryOf,
 } from './@types/state/status-category';
+import {
+  WEAK_POINT_ENDED_TYPE,
+  WeakPoint,
+  WeakPointEndReason,
+} from './@types/weak-point/weak-point';
+import { WeakPoints } from './@types/weak-point/weak-points';
+import { EffectResult } from './@types/attack/attack-effect';
 
 /**
  * Turns the resistance stat into a refusal chance. Chosen so the 20-80 design
@@ -65,6 +72,7 @@ type Transformation = {
   name: string;
   remainingTurns: number;
   endCostRate?: number;
+  criticalDamageRate?: number;
 };
 
 export type TransformationEnd = {
@@ -183,6 +191,8 @@ export class FightingCard {
   private frozen?: CardState;
   private stunted?: CardState;
   private bleeding?: CardStateBleeding;
+  private hypothermic?: CardState;
+  private readonly weakPoints = new WeakPoints();
   private laidBleedStacks = 0;
   private readonly poisonedCards = new Set<FightingCard>();
 
@@ -320,10 +330,38 @@ export class FightingCard {
     return this.actualAttack * stackBonus * this.targetBonusAgainst(defender);
   }
 
-  /** The bonus the low health target passive grants against that defender. */
+  /**
+   * The bonus the low health target passive and the weak points this card
+   * revealed on that defender grant against it.
+   */
   public targetBonusAgainst(defender?: FightingCard): number {
     if (!defender) return 1;
-    return this.lowHealthTargetBonus?.multiplierAgainst(defender) ?? 1;
+    const lowHealthBonus =
+      this.lowHealthTargetBonus?.multiplierAgainst(defender) ?? 1;
+
+    return (
+      lowHealthBonus * (1 + defender.weakPoints.bonusOf(this, 'attackRate'))
+    );
+  }
+
+  /** The critical chance against that defender, its weak points included. */
+  public criticalChanceAgainst(defender: FightingCard): number {
+    return Math.min(
+      1,
+      this.actualCriticalChance + defender.weakPoints.criticalChanceBonus,
+    );
+  }
+
+  /** What a critical hit multiplies `base` by, a transformation included. */
+  public criticalMultiplier(base: number): number {
+    return base * (1 + (this.transformation?.criticalDamageRate ?? 0));
+  }
+
+  /** The accuracy this card strikes that defender with, its weak points included. */
+  public accuracyAgainst(defender: FightingCard): number {
+    const weakPointRate = defender.weakPoints.bonusOf(this, 'accuracyRate');
+
+    return this.actualAccuracy + round2(this.accuracy * weakPointRate);
   }
 
   public get actualDefense(): number {
@@ -492,6 +530,10 @@ export class FightingCard {
       this.stunted = newState;
     }
 
+    if (newState.type === 'hypothermia') {
+      this.hypothermic = newState;
+    }
+
     if (newState instanceof CardStateBleeding) {
       if (this.bleeding) this.bleeding.addStacks(newState);
       else this.bleeding = newState;
@@ -612,6 +654,10 @@ export class FightingCard {
       stateResults.push(this.bleeding.applyState(this));
     }
 
+    if (this.hypothermic) {
+      stateResults.push(this.hypothermic.applyState(this));
+    }
+
     this.frozen = this.frozen?.remainingTurns ? this.frozen : undefined;
     // A dead card keeps its poison whatever its remaining turns: the death
     // cascade reads who laid it, and that must not depend on who killed it.
@@ -622,6 +668,9 @@ export class FightingCard {
     this.burned = this.burned?.remainingTurns ? this.burned : undefined;
     this.stunted = this.stunted?.remainingTurns ? this.stunted : undefined;
     this.bleeding = this.bleeding?.stackCount ? this.bleeding : undefined;
+    this.hypothermic = this.hypothermic?.remainingTurns
+      ? this.hypothermic
+      : undefined;
 
     return stateResults.filter((result) => result !== undefined);
   }
@@ -758,8 +807,14 @@ export class FightingCard {
     name: string,
     duration: number,
     endCostRate?: number,
+    criticalDamageRate?: number,
   ): void {
-    this.transformation = { name, remainingTurns: duration, endCostRate };
+    this.transformation = {
+      name,
+      remainingTurns: duration,
+      endCostRate,
+      criticalDamageRate,
+    };
   }
 
   public get isTransformed(): boolean {
@@ -1012,6 +1067,79 @@ export class FightingCard {
     return 1 + entry.stacks * entry.mark.ratePerStack;
   }
 
+  /** Reveals a weak point on the card; a dead card reveals nothing. */
+  public revealWeakPoint(weakPoint: WeakPoint): WeakPoint | undefined {
+    if (this.isDead()) return undefined;
+
+    this.weakPoints.reveal(weakPoint);
+    return weakPoint;
+  }
+
+  public hasWeakPoint(): boolean {
+    return !this.weakPoints.isEmpty;
+  }
+
+  /** The damage of a hit from that attacker, amplified by the card weak points. */
+  public exposedDamage(damage: number, attacker: FightingCard): number {
+    return Math.round(damage * this.weakPoints.damageMultiplierFor(attacker));
+  }
+
+  /**
+   * An attack aimed at the card uses up its consumable weak points, landed or
+   * dodged. A landed one lays its exploit effect, credited to its revealer.
+   */
+  public strikeWeakPoints(
+    context: FightingContext,
+    landed: boolean,
+  ): EffectResult[] {
+    return this.weakPoints.consume().flatMap((weakPoint) => {
+      const ended = this.weakPointEnded(
+        weakPoint,
+        landed ? 'struck' : 'dodged',
+      );
+      const exploit =
+        landed && !this.isDead()
+          ? weakPoint.exploitEffect?.applyEffect(
+              this,
+              weakPoint.revealer,
+              context,
+            )
+          : undefined;
+
+      return exploit ? [ended, exploit] : [ended];
+    });
+  }
+
+  /** Ticks the timed weak points and reports the ones that ran out. */
+  public decreaseWeakPointDurations(): EffectResult[] {
+    return this.weakPoints
+      .tick()
+      .map((weakPoint) => this.weakPointEnded(weakPoint, 'expired'));
+  }
+
+  /** Makes every weak point that revealer laid here permanent and amplified. */
+  public persistWeakPointsOf(
+    revealer: FightingCard,
+    damageRate: number,
+  ): WeakPoint[] {
+    const persisted = this.weakPoints.revealedBy(revealer);
+    persisted.forEach((weakPoint) => weakPoint.persist(damageRate));
+
+    return persisted;
+  }
+
+  private weakPointEnded(
+    weakPoint: WeakPoint,
+    reason: WeakPointEndReason,
+  ): EffectResult {
+    return {
+      type: WEAK_POINT_ENDED_TYPE,
+      card: this,
+      name: weakPoint.name,
+      reason,
+    };
+  }
+
   private findMark(damageType: DamageType): MarkEntry | undefined {
     return this.marks.find((entry) => entry.mark.damageType === damageType);
   }
@@ -1072,7 +1200,7 @@ export class FightingCard {
 
     return this.dodgeBehavior.dodge(
       this.agilityAgainst(attacker),
-      attacker.actualAccuracy,
+      attacker.accuracyAgainst(this),
     );
   }
 
@@ -1163,6 +1291,11 @@ export class FightingCard {
     if (this.stunted?.terminationEvent === eventName) {
       removed.push({ type: this.stunted.type, card });
       this.stunted = undefined;
+    }
+
+    if (this.hypothermic?.terminationEvent === eventName) {
+      removed.push({ type: this.hypothermic.type, card });
+      this.hypothermic = undefined;
     }
 
     if (this.bleeding?.removeStacksBoundTo(eventName)) {
