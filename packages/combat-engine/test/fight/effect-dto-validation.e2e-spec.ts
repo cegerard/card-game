@@ -192,13 +192,6 @@ describe('EffectDto validation', () => {
       post(withEffect({ type: 'HYPOTHERMIA', rate: 0.15 })).expect(400));
   });
 
-  describe('FREEZE duration', () => {
-    it('refuses a duration below one turn', () =>
-      post(
-        withEffect({ type: 'FREEZE', rate: 0.2, level: 1, duration: 0 }),
-      ).expect(400));
-  });
-
   describe('Svana skills', () => {
     const analysis = (fields: object = {}) => ({
       kind: 'ANALYSIS',

@@ -106,7 +106,6 @@ export function buildEffect(effectDto: EffectDto): AttackEffect {
         triggeredDebuff,
         effectDto.terminationEvent,
         effectDto.probability,
-        effectDto.duration,
       );
     case Effect.STUNT:
       return new StuntAttackEffect(

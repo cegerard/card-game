@@ -253,7 +253,7 @@ Simulates a turn-based card battle between two players.
   weakPoint?: { name, duration?, damageMultiplier?, criticalChanceBonus?, consumable?, revealerAccuracyRate?, revealerAttackRate?, revealerDamageRate?, exploitEffect?: EffectDto },  // WEAK_POINT (required): see Effect
   rate: number,               // Damage coefficient per tick (unused for STUNT); amplification per stack for MARK; damage of each stack per turn for BLEED
   level: 1 | 2 | 3,           // Required except for MARK, BLEED and stacked POISON. Duration: STUNT = 2*level-1 turns; others = level 1=1, 2=3, 3=5 ticks
-  duration?: number,          // FREEZE (optional, replaces the level duration), HYPOTHERMIA, BLEED and stacked POISON (required, >= 1): turns each stack bleeds / the poison lasts, restarted at each application
+  duration?: number,          // HYPOTHERMIA, BLEED and stacked POISON (required, >= 1): turns each stack bleeds / the poison lasts, restarted at each application
   basis?: "source-attack" | "target-max-health",  // BLEED and stacked POISON: what `rate` is a share of (default source-attack), see RateBasis
   damageType?: "PHYSICAL" | "FIRE" | "WATER" | "EARTH" | "AIR",  // MARK only (required): amplified damage type
   maxStacks?: number,         // MARK and BLEED (required): stack cap; on POISON, makes it a stacked poison

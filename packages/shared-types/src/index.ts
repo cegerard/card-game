@@ -194,7 +194,7 @@ export interface EffectConfig {
   rate: number;
   /** Requis sauf pour MARK, BLEED, POISON à charges, WEAK_POINT et HYPOTHERMIA. */
   level?: number;
-  /** BLEED (requis) : tours pendant lesquels chaque pile saigne ; POISON à charges (requis) : durée relancée à chaque pose ; HYPOTHERMIA (requis) ; FREEZE : remplace la durée du niveau. */
+  /** BLEED (requis) : tours pendant lesquels chaque pile saigne ; POISON à charges (requis) : durée relancée à chaque pose ; HYPOTHERMIA (requis). */
   duration?: number;
   /** BLEED et POISON à charges : ce dont `rate` est une part (défaut `source-attack`). */
   basis?: RateBasis;

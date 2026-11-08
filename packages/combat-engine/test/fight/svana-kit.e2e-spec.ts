@@ -62,6 +62,15 @@ const focused = {
   },
 };
 
+// Without Tempête Focalisée, no earlier freeze holds the target the special aims at.
+const embracing = {
+  ...focused,
+  skills: {
+    ...focused.skills,
+    others: focused.skills.others.filter((skill) => skill.name !== STORM),
+  },
+};
+
 const named = (steps: any[], kind: string, name: string) =>
   steps.filter((s) => s.kind === kind && s.name === name);
 
@@ -121,6 +130,16 @@ describe('Svana full kit', () => {
     await app.close();
   });
 
+  describe('opening the fight', () => {
+    it('raises her agility for the whole fight with Grâce Trompeuse', async () => {
+      const steps = await fight([focused], [card('prey')]);
+
+      expect(named(steps, 'buff', 'Grâce Trompeuse')[0].alterations).toEqual([
+        expect.objectContaining({ kind: 'agility', remainingTurns: null }),
+      ]);
+    });
+  });
+
   describe('breathing Souffle Cristallin', () => {
     let steps: any[];
 
@@ -145,7 +164,7 @@ describe('Svana full kit', () => {
     let steps: any[];
 
     beforeEach(async () => {
-      steps = await fight([focused], [card('prey')]);
+      steps = await fight([embracing], [card('prey')]);
     });
 
     it('drains the attack, freezes and reveals a critical weak point', () => {

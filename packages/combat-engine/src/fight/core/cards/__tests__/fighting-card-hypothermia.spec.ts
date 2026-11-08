@@ -6,23 +6,14 @@ import { MathRandomizer } from '../../../tools/math-randomizer';
 import { Player } from '../../player';
 import { FightingContext } from '../@types/fighting-context';
 
-describe('Hypothermia and timed freeze', () => {
+describe('Hypothermia', () => {
   let source: FightingCard;
   let target: FightingCard;
   let context: FightingContext;
 
   const hypothermia = () =>
     new HypothermiaAttackEffect(0.15, 3, new MathRandomizer());
-  const freeze = (duration?: number) =>
-    new FreezeAttackEffect(
-      0.2,
-      1,
-      new MathRandomizer(),
-      undefined,
-      undefined,
-      undefined,
-      duration,
-    );
+  const freeze = () => new FreezeAttackEffect(0.2, 1, new MathRandomizer());
 
   beforeEach(() => {
     source = createFightingCard();
@@ -70,15 +61,5 @@ describe('Hypothermia and timed freeze', () => {
     expect(
       () => new HypothermiaAttackEffect(0, 3, new MathRandomizer()),
     ).toThrow('rate');
-  });
-
-  it('freezes for the given duration instead of the level one', () => {
-    freeze(2).applyEffect(target, source, context);
-
-    expect(target.applyStateEffects()[0].remainingTurns).toBe(1);
-  });
-
-  it('rejects a freeze duration below one turn', () => {
-    expect(() => freeze(0)).toThrow('duration');
   });
 });

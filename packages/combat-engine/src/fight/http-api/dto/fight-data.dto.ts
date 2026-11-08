@@ -300,13 +300,12 @@ export class EffectDto {
   @IsNumber()
   level?: number;
 
-  // Required for BLEED, stacked POISON and HYPOTHERMIA; optional for FREEZE
+  // Required for BLEED, stacked POISON and HYPOTHERMIA
   @ValidateIf(
     (o) =>
       o.type === Effect.BLEED ||
       o.type === Effect.HYPOTHERMIA ||
-      isStackedPoison(o) ||
-      o.duration !== undefined,
+      isStackedPoison(o),
   )
   @IsDefined()
   @IsNumber()
