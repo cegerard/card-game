@@ -6,7 +6,8 @@ import { Randomizer } from '../../../randomizer';
 
 /**
  * Lays a hypothermia ticking `rate` of the defender max health for `duration`
- * turns. It lands on a frozen card, and a new one replaces the running one.
+ * turns, at least one point. It lands on a frozen card, and a new one replaces
+ * the running one.
  */
 export class HypothermiaAttackEffect implements AttackEffect {
   public readonly type = 'hypothermia' as const;
@@ -43,7 +44,7 @@ export class HypothermiaAttackEffect implements AttackEffect {
 
     const state = new CardStateHypothermia(
       this.duration,
-      Math.round(this.rate * defender.maxHealth),
+      Math.max(1, Math.round(this.rate * defender.maxHealth)),
       this.terminationEvent,
     );
     if (!defender.setState(state)) return;

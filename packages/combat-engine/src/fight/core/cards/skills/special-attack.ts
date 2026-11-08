@@ -3,7 +3,11 @@ import { FightingContext } from '../@types/fighting-context';
 import { SpecialResult } from '../@types/action-result/special-result';
 import { FightingCard } from '../fighting-card';
 import { BaseSpecial } from './special';
-import { AttackEffect, EffectResult } from '../@types/attack/attack-effect';
+import {
+  AttackEffect,
+  EffectResult,
+  nonEmpty,
+} from '../@types/attack/attack-effect';
 import { Alteration } from '../@types/alteration/alteration';
 import { DamageComposition } from '../@types/damage/damage-composition';
 import { DamageCalculator } from '../damage/damage-calculator';
@@ -22,7 +26,6 @@ import {
 } from '../@types/attack/damage-type-bonus';
 import { EnergyRefund } from '../@types/attack/energy-refund';
 import { Execution } from '../@types/attack/execution';
-import { nonEmpty } from '../@types/weak-point/weak-point-strike';
 
 const CRITICAL_RATE = 1.3;
 

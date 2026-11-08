@@ -3,6 +3,7 @@ import { WeakPoints } from '../weak-points';
 import { createFightingCard } from '../../../../../../../test/helpers/fighting-card';
 import { FightingCard } from '../../../fighting-card';
 import { HypothermiaAttackEffect } from '../../attack/attack-hypothermia-effect';
+import { WeakPointAttackEffect } from '../../attack/attack-weak-point-effect';
 import { MathRandomizer } from '../../../../../tools/math-randomizer';
 
 describe('WeakPoint', () => {
@@ -93,6 +94,18 @@ describe('WeakPoint', () => {
     expect(
       () => new WeakPoint({ name: 'Marque', damageMultiplier: 0 }, revealer),
     ).toThrow('damageMultiplier');
+  });
+});
+
+describe('WeakPointAttackEffect', () => {
+  it('rejects an invalid weak point when built, not at the first hit', () => {
+    expect(
+      () =>
+        new WeakPointAttackEffect(
+          { name: 'Marque', duration: 0 },
+          new MathRandomizer(),
+        ),
+    ).toThrow('duration');
   });
 });
 

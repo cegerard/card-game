@@ -57,6 +57,13 @@ describe('Hypothermia', () => {
     expect(hypothermia().applyEffect(target, source, context)).toBeUndefined();
   });
 
+  it('bites at least one point on a card with little health', () => {
+    const frail = createFightingCard({ health: 3 });
+    hypothermia().applyEffect(frail, source, context);
+
+    expect(frail.applyStateEffects()[0].damage).toBe(1);
+  });
+
   it('rejects a rate that is not positive', () => {
     expect(
       () => new HypothermiaAttackEffect(0, 3, new MathRandomizer()),

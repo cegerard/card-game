@@ -6,6 +6,7 @@ import {
   WEAK_POINT_EFFECT_TYPE,
   WeakPoint,
   WeakPointSpec,
+  validateWeakPointSpec,
 } from '../weak-point/weak-point';
 
 /**
@@ -21,8 +22,7 @@ export class WeakPointAttackEffect implements AttackEffect {
     private readonly randomizer: Randomizer,
     public readonly probability?: number,
   ) {
-    // Fails fast on an invalid spec rather than at the first hit.
-    new WeakPoint(spec, undefined);
+    validateWeakPointSpec(spec);
   }
 
   public applyEffect(

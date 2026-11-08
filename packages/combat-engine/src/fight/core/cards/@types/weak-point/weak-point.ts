@@ -32,6 +32,25 @@ export type WeakPointSpec = {
 
 export type WeakPointEndReason = 'struck' | 'dodged' | 'expired';
 
+/** Throws on a spec no weak point could be built from. */
+export function validateWeakPointSpec(spec: WeakPointSpec): void {
+  if ((spec.damageMultiplier ?? 1) <= 0) {
+    throw new Error(
+      `WeakPoint damageMultiplier must be greater than 0, got ${spec.damageMultiplier}`,
+    );
+  }
+  if (spec.exploitEffect && !spec.consumable) {
+    throw new Error(
+      `WeakPoint ${spec.name}: only a consumable weak point is exploited`,
+    );
+  }
+  if (spec.duration !== undefined && spec.duration < 1) {
+    throw new Error(
+      `WeakPoint duration must be greater than or equal to 1, got ${spec.duration}`,
+    );
+  }
+}
+
 /**
  * A weakness revealed on a card: it is no status, so no immunity or
  * resistance refuses it. Every attacker reads its damage and critical bonuses;
@@ -50,21 +69,7 @@ export class WeakPoint {
     spec: WeakPointSpec,
     public readonly revealer: FightingCard,
   ) {
-    if ((spec.damageMultiplier ?? 1) <= 0) {
-      throw new Error(
-        `WeakPoint damageMultiplier must be greater than 0, got ${spec.damageMultiplier}`,
-      );
-    }
-    if (spec.exploitEffect && !spec.consumable) {
-      throw new Error(
-        `WeakPoint ${spec.name}: only a consumable weak point is exploited`,
-      );
-    }
-    if (spec.duration !== undefined && spec.duration < 1) {
-      throw new Error(
-        `WeakPoint duration must be greater than or equal to 1, got ${spec.duration}`,
-      );
-    }
+    validateWeakPointSpec(spec);
     this.name = spec.name;
     this.turnsLeft = spec.duration;
     this.damageMultiplier = spec.damageMultiplier ?? 1;

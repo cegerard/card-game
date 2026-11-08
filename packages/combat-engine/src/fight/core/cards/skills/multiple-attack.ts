@@ -1,7 +1,11 @@
 import { DamageComposition } from '../@types/damage/damage-composition';
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 import { AttackResult } from '../@types/action-result/attack-result';
-import { AttackEffect, EffectResult } from '../@types/attack/attack-effect';
+import {
+  AttackEffect,
+  EffectResult,
+  nonEmpty,
+} from '../@types/attack/attack-effect';
 import { FightingContext } from '../@types/fighting-context';
 import { FightingCard } from '../fighting-card';
 import { DamageCalculator } from '../damage/damage-calculator';
@@ -11,10 +15,7 @@ import {
   DamageTypeBonus,
   applyDamageBonuses,
 } from '../@types/attack/damage-type-bonus';
-import {
-  nonEmpty,
-  penetrationAgainst,
-} from '../@types/weak-point/weak-point-strike';
+import { penetrationAgainst } from '../@types/weak-point/weak-point-strike';
 
 export class MultipleAttack implements AttackSkill {
   constructor(

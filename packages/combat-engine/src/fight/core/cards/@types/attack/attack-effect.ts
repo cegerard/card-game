@@ -47,6 +47,11 @@ export type EffectResult =
   | WeakPointEffectResult
   | WeakPointEndedResult;
 
+/** The effects a hit reports, none being reported as absent. */
+export function nonEmpty(effects: EffectResult[]): EffectResult[] | undefined {
+  return effects.length > 0 ? effects : undefined;
+}
+
 export interface AttackEffect {
   rate: number;
   level?: EffectLevel;
