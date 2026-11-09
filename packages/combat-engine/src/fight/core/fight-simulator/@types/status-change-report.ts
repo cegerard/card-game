@@ -1,7 +1,8 @@
 import { CardInfo } from '../../cards/@types/card-info';
 import { StepKind } from './step';
 
-export type status = 'dead' | 'poison' | 'burn' | 'freeze' | 'stunt' | 'bleed';
+export type status =
+  'dead' | 'poison' | 'burn' | 'freeze' | 'stunt' | 'bleed' | 'hypothermia';
 
 export type StatusChangeReport = {
   kind: StepKind.StatusChange;

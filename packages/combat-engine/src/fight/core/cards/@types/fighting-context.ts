@@ -6,4 +6,6 @@ export type FightingContext = {
   opponentPlayer: Player;
   killerCard?: FightingCard;
   lastAttacker?: FightingCard;
+  /** The card the attack that fired `after-attack` was aimed at. */
+  attackTarget?: FightingCard;
 };

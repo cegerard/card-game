@@ -12,6 +12,7 @@ import { fightSurvivedReactor, SurvivedReactor } from './survived-reactions';
 import { triggerReactiveSkills } from './reactive-skill-checker';
 import { concealmentEndedReport } from './concealment-steps';
 import { stanceEndedReport } from './stance-steps';
+import { effectResultsToSteps } from './effect-results-to-steps';
 
 export class TurnManager {
   private player1: Player;
@@ -96,6 +97,9 @@ export class TurnManager {
       card.decreaseStanceDurations().forEach((name) => {
         steps.push(stanceEndedReport(card, name));
       });
+      steps.push(
+        ...effectResultsToSteps(card, card.decreaseWeakPointDurations()),
+      );
       const expiredConcealment = card.decreaseConcealmentDuration();
       if (expiredConcealment) {
         steps.push(concealmentEndedReport(card, expiredConcealment, 'expired'));

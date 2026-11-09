@@ -4,13 +4,13 @@ import { DamageType } from '../damage/damage-type';
 
 /**
  * Multiplies the share of one damage type in an attack when a condition on
- * the attacker or the defender holds. It rewrites the attack compositions
- * rather than the attack power, so the other damage types of a mixed hit are
- * left untouched.
+ * the attacker or the defender holds — of every type when none is named. It
+ * rewrites the attack compositions rather than the attack power, so the other
+ * damage types of a mixed hit are left untouched.
  */
 export abstract class DamageTypeBonus {
   constructor(
-    public readonly damageType: DamageType,
+    public readonly damageType: DamageType | undefined,
     public readonly multiplier: number,
   ) {
     if (multiplier <= 0) {
@@ -33,7 +33,7 @@ export abstract class DamageTypeBonus {
     if (!this.isEarned(attacker, defender)) return damages;
 
     return damages.map((damage) =>
-      damage.type === this.damageType
+      this.damageType === undefined || damage.type === this.damageType
         ? new DamageComposition(damage.type, damage.rate * this.multiplier)
         : damage,
     );

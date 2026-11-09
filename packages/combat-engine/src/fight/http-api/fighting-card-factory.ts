@@ -39,11 +39,16 @@ const KIND_ONLY_FIELDS: {
   },
   {
     kinds: [SkillKind.TRANSFORMATION],
-    fields: ['stanceActivations', 'poisonSurge'],
+    fields: ['stanceActivations', 'poisonSurge', 'criticalDamageRate'],
   },
   {
     kinds: [SkillKind.CONDITIONAL_ATTACK],
-    fields: ['hitAlterations', 'endsStance', 'execution'],
+    fields: [
+      'hitAlterations',
+      'endsStance',
+      'execution',
+      'weakPointPenetration',
+    ],
   },
   {
     kinds: [SkillKind.CONDITIONAL_ATTACK, SkillKind.CONCEALMENT],

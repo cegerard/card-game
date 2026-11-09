@@ -406,6 +406,14 @@ function buildGenericDetail(ev) {
       return `+${(ev.healed ?? 0).toFixed(1)} HP → ${(ev.remainingHealth ?? 0).toFixed(1)} HP`;
     case 'mark_applied':
       return `${esc(ev.card?.name)} carries ${ev.stacks} ${esc(ev.damageType)} mark(s)`;
+    case 'weak_point_revealed':
+      return ev.remainingTurns != null
+        ? `${esc(ev.source?.name)} reveals ${esc(ev.name)} on ${esc(ev.card?.name)} for ${ev.remainingTurns} turn(s)`
+        : `${esc(ev.source?.name)} reveals ${esc(ev.name)} on ${esc(ev.card?.name)}`;
+    case 'weak_point_ended':
+      return `${esc(ev.name)} on ${esc(ev.card?.name)} ends (${esc(ev.reason)})`;
+    case 'analysis_charged':
+      return `${esc(ev.source?.name)} analyses ${esc(ev.card?.name)} — ${ev.charges} charge(s)`;
     case 'transformation_started':
       return `Transformed for ${ev.remainingTurns} turn(s)`;
     case 'transformation_ended':
@@ -582,6 +590,24 @@ export function describeEvent(ev, teamBName) {
         icon: ICON.stance_ended,
         text: `${ev.card?.name} — ${ev.name ?? 'Stance'} over`,
         color: EVENT_COLOR.stance_ended,
+      };
+    case 'weak_point_revealed':
+      return {
+        icon: ICON.weak_point_revealed,
+        text: `${ev.card?.name} — ${ev.name ?? 'Weak point'} revealed`,
+        color: EVENT_COLOR.weak_point_revealed,
+      };
+    case 'weak_point_ended':
+      return {
+        icon: ICON.weak_point_ended,
+        text: `${ev.card?.name} — ${ev.name ?? 'Weak point'} gone`,
+        color: EVENT_COLOR.weak_point_ended,
+      };
+    case 'analysis_charged':
+      return {
+        icon: ICON.analysis_charged,
+        text: `${ev.card?.name} — analysed ×${ev.charges}`,
+        color: EVENT_COLOR.analysis_charged,
       };
     case 'concealment_started':
       return {

@@ -89,6 +89,9 @@ export enum SkillKind {
   POISONED_ENEMY_AGILITY = 'POISONED_ENEMY_AGILITY',
   REAL_DAMAGE = 'REAL_DAMAGE',
   AFFLICTION = 'AFFLICTION',
+  ANALYSIS = 'ANALYSIS',
+  AFTERSHOCK = 'AFTERSHOCK',
+  WEAK_POINT_LEGACY = 'WEAK_POINT_LEGACY',
 }
 
 export enum BuffType {
@@ -109,6 +112,8 @@ export enum Effect {
   STUNT = 'STUNT',
   MARK = 'MARK',
   BLEED = 'BLEED',
+  WEAK_POINT = 'WEAK_POINT',
+  HYPOTHERMIA = 'HYPOTHERMIA',
 }
 
 export enum DodgeStrategy {
@@ -134,6 +139,10 @@ export enum TriggerEvent {
   ENEMY_KILLED = 'enemy-killed',
   DODGE = 'dodge',
   POISONED_ENEMY_DEATH = 'poisoned-enemy-death',
+  ENEMY_ATTACK = 'enemy-attack',
+  AFTER_ATTACK = 'after-attack',
+  TRANSFORMED = 'transformed',
+  ENEMIES_ANALYSED = 'enemies-analysed',
 }
 
 export enum RateBasisDto {
@@ -212,6 +221,73 @@ function isStackedPoison(o: EffectDto): boolean {
   return o.type === Effect.POISON && o.maxStacks !== undefined;
 }
 
+// Effects counted without a level
+const LEVELLESS_EFFECTS = [
+  Effect.MARK,
+  Effect.BLEED,
+  Effect.WEAK_POINT,
+  Effect.HYPOTHERMIA,
+];
+
+// Declared below: an alias keeps the decorator metadata from reading
+// EffectDto before the class exists (the two DTOs nest each other).
+type ExploitEffectDto = EffectDto;
+
+// A weakness revealed on the defender, the attacker being its revealer
+export class WeakPointDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  // Turns it lasts; omitted, it never expires
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  duration?: number;
+
+  // Multiplies the damage of every hit on the bearer
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  damageMultiplier?: number;
+
+  // Added to the critical chance of every attacker of the bearer
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(1)
+  criticalChanceBonus?: number;
+
+  // Gone at the next attack aimed at the bearer, landed or dodged
+  @IsOptional()
+  @IsBoolean()
+  consumable?: boolean;
+
+  // Revealer only: share of its base accuracy added against the bearer
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  revealerAccuracyRate?: number;
+
+  // Revealer only: its attack against the bearer is multiplied by 1 + rate
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  revealerAttackRate?: number;
+
+  // Revealer only: its hits on the bearer are multiplied by 1 + rate
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  revealerDamageRate?: number;
+
+  // Consumable only: laid by the revealer when a hit lands on it
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => EffectDto)
+  exploitEffect?: ExploitEffectDto;
+}
+
 export class EffectDto {
   @IsEnum(Effect)
   type: Effect;
@@ -219,15 +295,18 @@ export class EffectDto {
   @IsNumber()
   rate: number;
 
-  @ValidateIf(
-    (o) =>
-      o.type !== Effect.MARK && o.type !== Effect.BLEED && !isStackedPoison(o),
-  )
+  @ValidateIf((o) => !LEVELLESS_EFFECTS.includes(o.type) && !isStackedPoison(o))
   @IsDefined()
   @IsNumber()
   level?: number;
 
-  @ValidateIf((o) => o.type === Effect.BLEED || isStackedPoison(o))
+  // Required for BLEED, stacked POISON and HYPOTHERMIA
+  @ValidateIf(
+    (o) =>
+      o.type === Effect.BLEED ||
+      o.type === Effect.HYPOTHERMIA ||
+      isStackedPoison(o),
+  )
   @IsDefined()
   @IsNumber()
   @Min(1)
@@ -285,6 +364,12 @@ export class EffectDto {
   @IsOptional()
   @IsNumber()
   probability?: number;
+
+  @ValidateIf((o) => o.type === Effect.WEAK_POINT)
+  @IsDefined()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => WeakPointDto)
+  weakPoint?: WeakPointDto;
 }
 
 // Finishes off every defender left strictly under `threshold` of its health
@@ -441,6 +526,17 @@ export class DamageTypeBonusDto {
   multiplier: number;
 }
 
+// Boosts every damage type, or only `damageType`, against a frozen defender
+export class FrozenTargetBonusDto {
+  @IsOptional()
+  @IsEnum(DamageType)
+  damageType?: DamageType;
+
+  @IsNumber()
+  @IsPositive()
+  multiplier: number;
+}
+
 export class BleedStackBonusDto extends DamageTypeBonusDto {
   @IsInt()
   @Min(1)
@@ -457,6 +553,11 @@ class AttackBonusesDto {
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => DamageTypeBonusDto)
   concealedBonus?: DamageTypeBonusDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => FrozenTargetBonusDto)
+  frozenTargetBonus?: FrozenTargetBonusDto;
 }
 
 export enum StatusCategoryDto {
@@ -564,6 +665,13 @@ export class SpecialDto extends AttackBonusesDto {
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => EffectDto)
   effect?: EffectDto;
+
+  // ATTACK only: more effects tried on every landed hit, after `effect`
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(/* istanbul ignore next */ () => EffectDto)
+  effects?: EffectDto[];
 
   // STANCE only: conceals the caster for that many turns
   @IsOptional()
@@ -731,7 +839,8 @@ export class OtherSkillDto {
       o.kind === SkillKind.BLEED_DETONATION ||
       o.kind === SkillKind.LOW_HEALTH_TARGET_BONUS ||
       o.kind === SkillKind.POISONED_ENEMY_AGILITY ||
-      o.kind === SkillKind.REAL_DAMAGE,
+      o.kind === SkillKind.REAL_DAMAGE ||
+      o.kind === SkillKind.WEAK_POINT_LEGACY,
   )
   @IsDefined()
   @IsNumber()
@@ -778,7 +887,10 @@ export class OtherSkillDto {
       o.kind !== SkillKind.BLEED_DETONATION &&
       o.kind !== SkillKind.CONCEALMENT &&
       o.kind !== SkillKind.LOW_HEALTH_TARGET_BONUS &&
-      o.kind !== SkillKind.POISONED_ENEMY_AGILITY,
+      o.kind !== SkillKind.POISONED_ENEMY_AGILITY &&
+      o.kind !== SkillKind.ANALYSIS &&
+      o.kind !== SkillKind.AFTERSHOCK &&
+      o.kind !== SkillKind.WEAK_POINT_LEGACY,
   )
   @IsDefined()
   @IsEnum(TargetingStrategy)
@@ -851,7 +963,9 @@ export class OtherSkillDto {
   @IsNotEmpty()
   stackId?: string;
 
-  @IsOptional()
+  // ANALYSIS (required): charges laid on each enemy before the effect lands
+  @ValidateIf((o) => o.kind === SkillKind.ANALYSIS || o.maxStacks !== undefined)
+  @IsDefined()
   @IsNumber()
   @Min(1)
   maxStacks?: number;
@@ -917,15 +1031,23 @@ export class OtherSkillDto {
   @Type(/* istanbul ignore next */ () => StanceActivationDto)
   stanceActivations?: StanceActivationDto[];
 
+  // TRANSFORMATION: what its critical hits deal is multiplied by 1 + rate
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  criticalDamageRate?: number;
+
   // TRANSFORMATION: raises every stacked poison on the board and multiplies its damage
   @IsOptional()
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => PoisonSurgeDto)
   poisonSurge?: PoisonSurgeDto;
 
-  // Required for CONDITIONAL_ATTACK kind, unless a bleed detonation replaces it
+  // Required for CONDITIONAL_ATTACK kind, unless a bleed detonation replaces it, and AFTERSHOCK
   @ValidateIf(
-    (o) => o.kind === SkillKind.CONDITIONAL_ATTACK && !o.bleedDetonation,
+    (o) =>
+      (o.kind === SkillKind.CONDITIONAL_ATTACK && !o.bleedDetonation) ||
+      o.kind === SkillKind.AFTERSHOCK,
   )
   @IsDefined()
   @IsArray()
@@ -956,10 +1078,12 @@ export class OtherSkillDto {
   @IsNumber()
   amplifier?: number;
 
-  // CONDITIONAL_ATTACK: effect of the hit (null or absent: none); AFFLICTION (required): effect laid on its targets
+  // CONDITIONAL_ATTACK and AFTERSHOCK: effect of the hit (null or absent: none);
+  // AFFLICTION (required): effect laid on its targets; ANALYSIS (required): effect laid on a full enemy
   @ValidateIf(
     (o) =>
       o.kind === SkillKind.AFFLICTION ||
+      o.kind === SkillKind.ANALYSIS ||
       (o.effect !== undefined && o.effect !== null),
   )
   @IsDefined()
@@ -986,6 +1110,13 @@ export class OtherSkillDto {
   @Min(0)
   @Max(1)
   defensePenetration?: number;
+
+  // CONDITIONAL_ATTACK: share of defense ignored instead against a defender carrying a weak point
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(1)
+  weakPointPenetration?: number;
 
   // CONDITIONAL_ATTACK: energy the attack spends, only when it strikes someone
   @IsOptional()
@@ -1074,7 +1205,10 @@ export class OtherSkillDto {
   @IsNotEmpty()
   powerId?: string;
 
-  @ValidateIf((o) => o.event === TriggerEvent.DORMANT)
+  // DORMANT: event waking the skill; TRANSFORMATION: event setting it off besides its threshold
+  @ValidateIf(
+    (o) => o.event === TriggerEvent.DORMANT || o.activationEvent !== undefined,
+  )
   @IsDefined()
   @IsEnum(TriggerEvent)
   activationEvent?: TriggerEvent;

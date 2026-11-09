@@ -43,6 +43,8 @@ import {
 import { SurvivedReport } from '../fight-simulator/@types/survived-report';
 import { BLEED_STACKS_APPLIED } from '../trigger/bleed-stacks-applied';
 import { TURN_START } from '../trigger/turn-start';
+import { ENEMY_ATTACK } from '../trigger/enemy-attack';
+import { AFTER_ATTACK } from '../trigger/after-attack';
 import { SpecialStanceActionReport } from '../fight-simulator/@types/special-stance-report';
 import { SpecialResult } from '../cards/@types/action-result/special-result';
 import {
@@ -651,7 +653,35 @@ export class ActionStage {
       });
     }
 
-    report.statusChanges.push(...this.dispatchBleedStacksApplied(attackerCard));
+    report.statusChanges.push(
+      ...this.dispatchAttackEvents(attackResults, attackerCard),
+      ...this.dispatchBleedStacksApplied(attackerCard),
+    );
+  }
+
+  /**
+   * Tells the defending team an enemy attacked it, then the attacker which
+   * card its attack was aimed at, for the skills answering every attack.
+   */
+  private dispatchAttackEvents(
+    attackResults: AttackResult[],
+    attackerCard: FightingCard,
+  ): Step[] {
+    const [primary] = attackResults;
+    if (!primary) return [];
+
+    const steps = this.dispatchTeamReactions(primary.defender, attackerCard, [
+      ENEMY_ATTACK,
+    ]);
+    if (attackerCard.isDead()) return steps;
+
+    return [
+      ...steps,
+      ...this.launchOwnReactions(attackerCard, AFTER_ATTACK, {
+        ...fightingContextOf(attackerCard, this.player1, this.player2),
+        attackTarget: primary.interceptedFor ?? primary.defender,
+      }),
+    ];
   }
 
   /**
@@ -661,21 +691,26 @@ export class ActionStage {
   private dispatchBleedStacksApplied(attackerCard: FightingCard): Step[] {
     if (attackerCard.isDead()) return [];
 
-    const reactions = attackerCard.launchSkills(
+    return this.launchOwnReactions(
+      attackerCard,
       `${BLEED_STACKS_APPLIED}:${attackerCard.bleedStacksApplied}`,
       fightingContextOf(attackerCard, this.player1, this.player2),
     );
+  }
+
+  /** The skills one card launches on an event about itself, deaths included. */
+  private launchOwnReactions(
+    card: FightingCard,
+    event: string,
+    context: FightingContext,
+  ): Step[] {
+    const reactions = card.launchSkills(event, context);
 
     return [
-      ...skillResultsToSteps(
-        attackerCard,
-        reactions,
-        undefined,
-        this.survivedReactor,
-      ),
+      ...skillResultsToSteps(card, reactions, undefined, this.survivedReactor),
       ...reactiveKillSteps(
         reactions,
-        attackerCard,
+        card,
         this.eventBroker,
         this.deathSkillHandler,
       ),

@@ -3,7 +3,11 @@ import { FightingContext } from '../@types/fighting-context';
 import { SpecialResult } from '../@types/action-result/special-result';
 import { FightingCard } from '../fighting-card';
 import { BaseSpecial } from './special';
-import { AttackEffect, EffectResult } from '../@types/attack/attack-effect';
+import {
+  AttackEffect,
+  EffectResult,
+  nonEmpty,
+} from '../@types/attack/attack-effect';
 import { Alteration } from '../@types/alteration/alteration';
 import { DamageComposition } from '../@types/damage/damage-composition';
 import { DamageCalculator } from '../damage/damage-calculator';
@@ -26,12 +30,14 @@ import { Execution } from '../@types/attack/execution';
 const CRITICAL_RATE = 1.3;
 
 export class SpecialAttack extends BaseSpecial {
+  private readonly effects: AttackEffect[];
+
   constructor(
     name: string,
     private readonly damages: DamageComposition[],
     energyNeeded: number,
     private readonly targetingStrategy: TargetingCardStrategy,
-    private readonly effect?: AttackEffect,
+    effects?: AttackEffect | AttackEffect[],
     private readonly alterations?: Alteration[],
     private readonly shieldApplication?: ShieldApplication,
     private readonly markedTargetBonus?: MarkedTargetBonus,
@@ -44,6 +50,7 @@ export class SpecialAttack extends BaseSpecial {
     private readonly undodgeable = false,
   ) {
     super(name, energyNeeded);
+    this.effects = [effects ?? []].flat();
     if (hits < 1) {
       throw new Error(
         `SpecialAttack hits must be greater than or equal to 1, got ${hits}`,
@@ -63,14 +70,14 @@ export class SpecialAttack extends BaseSpecial {
     const attackResults: AttackResult[] = [];
 
     for (let hit = 0; hit < this.hits; hit++) {
-      const isCritical = Math.random() < source.actualCriticalChance;
+      const criticalRoll = Math.random();
       const targetedCards = targeting
         .targetedCards(source, context.sourcePlayer, context.opponentPlayer)
         .filter((card) => !card.isDead());
 
       attackResults.push(
         ...targetedCards.map((aimedAt) =>
-          this.strike(source, aimedAt, context, isCritical),
+          this.strike(source, aimedAt, context, criticalRoll),
         ),
       );
     }
@@ -101,15 +108,18 @@ export class SpecialAttack extends BaseSpecial {
     source: FightingCard,
     aimedAt: FightingCard,
     context: FightingContext,
-    isCritical: boolean,
+    criticalRoll: number,
   ): AttackResult {
-    const damageMultiplier = isCritical ? CRITICAL_RATE : 1;
     const kind = this.damages.map((d) => d.type);
     // A guardian standing in front answers with its own dodge, defence and
     // element, so the swap happens before anything is rolled.
     const protector = context.opponentPlayer.protectorOf(aimedAt, source);
     const target = protector ?? aimedAt;
     const interceptedFor = protector ? aimedAt : undefined;
+    const isCritical = criticalRoll < source.criticalChanceAgainst(target);
+    const damageMultiplier = isCritical
+      ? source.criticalMultiplier(CRITICAL_RATE)
+      : 1;
 
     if (!this.undodgeable && target.dodge(source)) {
       return {
@@ -120,6 +130,7 @@ export class SpecialAttack extends BaseSpecial {
         interceptedFor,
         kind,
         remainingHealth: target.actualHealth,
+        effects: nonEmpty(target.strikeWeakPoints(context, false)),
       };
     }
 
@@ -136,13 +147,17 @@ export class SpecialAttack extends BaseSpecial {
       target,
       this.defensePenetration,
     );
-    const finalResult = target.applyFinalDamage(total);
+    const finalResult = target.applyFinalDamage(
+      target.exposedDamage(total, source),
+    );
     const { damageToHealth, shieldAbsorbed } = finalResult;
 
-    let effectResult: EffectResult;
-    if (this.effect) {
-      effectResult = this.effect.applyEffect(target, source, context);
-    }
+    const effects = [
+      ...target.strikeWeakPoints(context, true),
+      ...this.effects
+        .map((effect) => effect.applyEffect(target, source, context))
+        .filter((r): r is EffectResult => r != null),
+    ];
 
     return {
       damage: damageToHealth + shieldAbsorbed,
@@ -154,7 +169,7 @@ export class SpecialAttack extends BaseSpecial {
       interceptedFor,
       kind,
       remainingHealth: target.actualHealth,
-      effects: effectResult ? [effectResult] : undefined,
+      effects: nonEmpty(effects),
       survived: finalResult.survived,
       survivedSkillName: finalResult.survivedSkillName,
       mitigated: finalResult.mitigated,

@@ -29,12 +29,15 @@ export enum SkillKind {
   Concealment = 'concealment',
   BuffTransfer = 'buff_transfer',
   Affliction = 'affliction',
+  Analysis = 'analysis',
 }
 
 type BaseSkillResults = {
   name?: string;
   endEvent?: string;
   powerId?: string;
+  /** Skills of the owner this one set off, reported right after it. */
+  followUps?: SkillResults[];
 };
 
 export type HealingSkillResults = BaseSkillResults & {
@@ -108,6 +111,14 @@ export type AfflictionSkillResults = BaseSkillResults & {
   results: EffectResult[];
 };
 
+export type AnalysisSkillResults = BaseSkillResults & {
+  skillKind: SkillKind.Analysis;
+  /** The enemy charged and its charge count, empty when nothing was laid. */
+  results: { target: FightingCard; charges: number }[];
+  /** The weak point the charge filling the enemy revealed. */
+  revealed: EffectResult[];
+};
+
 export type StanceSkillResults = BaseSkillResults & {
   skillKind: SkillKind.Stance;
   /** Absent when the skill chance did not fire. */
@@ -134,6 +145,7 @@ export type SkillResults =
   | StanceSkillResults
   | BuffTransferSkillResults
   | AfflictionSkillResults
+  | AnalysisSkillResults
   | ConcealmentSkillResults;
 
 export interface Skill {

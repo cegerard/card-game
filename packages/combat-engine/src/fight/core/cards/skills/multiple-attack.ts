@@ -1,7 +1,11 @@
 import { DamageComposition } from '../@types/damage/damage-composition';
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 import { AttackResult } from '../@types/action-result/attack-result';
-import { AttackEffect, EffectResult } from '../@types/attack/attack-effect';
+import {
+  AttackEffect,
+  EffectResult,
+  nonEmpty,
+} from '../@types/attack/attack-effect';
 import { FightingContext } from '../@types/fighting-context';
 import { FightingCard } from '../fighting-card';
 import { DamageCalculator } from '../damage/damage-calculator';
@@ -11,6 +15,7 @@ import {
   DamageTypeBonus,
   applyDamageBonuses,
 } from '../@types/attack/damage-type-bonus';
+import { penetrationAgainst } from '../@types/weak-point/weak-point-strike';
 
 export class MultipleAttack implements AttackSkill {
   constructor(
@@ -24,6 +29,7 @@ export class MultipleAttack implements AttackSkill {
     private readonly comboFinisherEffects?: AttackEffect[],
     private readonly damageBonuses: DamageTypeBonus[] = [],
     private readonly defensePenetration?: number,
+    private readonly weakPointPenetration?: number,
   ) {}
 
   public get targetingId(): string {
@@ -74,8 +80,8 @@ export class MultipleAttack implements AttackSkill {
         const interceptedFor = protector ? target : undefined;
 
         hitTargets.add(defender);
-        const isCritical = Math.random() < card.actualCriticalChance;
-        const damageMultiplier = isCritical ? 2 : 1;
+        const isCritical = Math.random() < card.criticalChanceAgainst(defender);
+        const damageMultiplier = isCritical ? card.criticalMultiplier(2) : 1;
 
         if (defender.dodge(card)) {
           dodgedTargets.add(defender);
@@ -87,6 +93,7 @@ export class MultipleAttack implements AttackSkill {
             interceptedFor,
             remainingHealth: defender.actualHealth,
             kind,
+            effects: nonEmpty(defender.strikeWeakPoints(context, false)),
           });
           continue;
         }
@@ -95,14 +102,19 @@ export class MultipleAttack implements AttackSkill {
           this.withBonus(this.damages, card, defender),
           attackPower * card.targetBonusAgainst(defender) * damageMultiplier,
           defender,
-          this.defensePenetration,
+          this.defensePenetrationAgainst(defender),
         );
-        const finalResult = defender.applyFinalDamage(total);
+        const finalResult = defender.applyFinalDamage(
+          defender.exposedDamage(total, card),
+        );
         const { damageToHealth, shieldAbsorbed } = finalResult;
 
-        const effects = this.effects
-          ?.map((e) => e.applyEffect(defender, card, context))
-          .filter((r): r is EffectResult => r != null);
+        const effects = [
+          ...defender.strikeWeakPoints(context, true),
+          ...(this.effects ?? [])
+            .map((e) => e.applyEffect(defender, card, context))
+            .filter((r): r is EffectResult => r != null),
+        ];
 
         results.results.push({
           damage: damageToHealth + shieldAbsorbed,
@@ -114,7 +126,7 @@ export class MultipleAttack implements AttackSkill {
           defender,
           interceptedFor,
           remainingHealth: defender.actualHealth,
-          effects: effects?.length ? effects : undefined,
+          effects: nonEmpty(effects),
           kind,
           survived: finalResult.survived,
           survivedSkillName: finalResult.survivedSkillName,
@@ -133,14 +145,19 @@ export class MultipleAttack implements AttackSkill {
           this.withBonus(this.comboFinisher, card, defender),
           card.attackPower(context, defender),
           defender,
-          this.defensePenetration,
+          this.defensePenetrationAgainst(defender),
         );
-        const finisherResult = defender.applyFinalDamage(total);
+        const finisherResult = defender.applyFinalDamage(
+          defender.exposedDamage(total, card),
+        );
         const { damageToHealth, shieldAbsorbed } = finisherResult;
 
-        const finisherEffects = this.comboFinisherEffects
-          ?.map((e) => e.applyEffect(defender, card, context))
-          .filter((r): r is EffectResult => r != null);
+        const finisherEffects = [
+          ...defender.strikeWeakPoints(context, true),
+          ...(this.comboFinisherEffects ?? [])
+            .map((e) => e.applyEffect(defender, card, context))
+            .filter((r): r is EffectResult => r != null),
+        ];
 
         results.results.push({
           damage: damageToHealth + shieldAbsorbed,
@@ -151,7 +168,7 @@ export class MultipleAttack implements AttackSkill {
           dodge: false,
           defender,
           remainingHealth: defender.actualHealth,
-          effects: finisherEffects?.length ? finisherEffects : undefined,
+          effects: nonEmpty(finisherEffects),
           kind: finisherKind,
           survived: finisherResult.survived,
           survivedSkillName: finisherResult.survivedSkillName,
@@ -162,6 +179,16 @@ export class MultipleAttack implements AttackSkill {
     }
 
     return results;
+  }
+
+  private defensePenetrationAgainst(
+    defender: FightingCard,
+  ): number | undefined {
+    return penetrationAgainst(
+      defender,
+      this.defensePenetration,
+      this.weakPointPenetration,
+    );
   }
 
   private withBonus(

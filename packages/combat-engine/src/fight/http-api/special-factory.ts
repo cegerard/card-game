@@ -5,7 +5,6 @@ import { buildTargetingStrategy } from './targeting-strategy-factory';
 import { buildAlterationCondition } from './alteration-condition-factory';
 import { Special } from '../core/cards/skills/special';
 import { SpecialHealing } from '../core/cards/skills/special-healing';
-import { AttackEffect } from '../core/cards/@types/attack/attack-effect';
 import { MarkedTargetBonus } from '../core/cards/@types/mark/marked-target-bonus';
 import { Alteration } from '../core/cards/@types/alteration/alteration';
 import { DamageComposition } from '../core/cards/@types/damage/damage-composition';
@@ -26,6 +25,7 @@ const STANCE_SPECIAL_FORBIDDEN_FIELDS = [
   'hits',
   'targetingStrategy',
   'effect',
+  'effects',
   'energyRefund',
   'markedTargetBonus',
   'bleedStackBonus',
@@ -36,8 +36,6 @@ const STANCE_SPECIAL_FORBIDDEN_FIELDS = [
 ] as const;
 
 export function buildSpecial(dto: SpecialDto): Special {
-  const specialEffect = dto.effect ? buildEffect(dto.effect) : undefined;
-
   if (dto.concealment && dto.kind !== SpecialKind.STANCE) {
     throw new BadRequestException(
       'Only a STANCE special can conceal its caster: an attack would reveal it at once',
@@ -45,7 +43,7 @@ export function buildSpecial(dto: SpecialDto): Special {
   }
 
   if (dto.kind === SpecialKind.ATTACK) {
-    return buildSpecialAttack(dto, specialEffect);
+    return buildSpecialAttack(dto);
   }
   if (dto.kind === SpecialKind.STANCE) {
     return buildSpecialStance(dto);
@@ -61,10 +59,7 @@ export function buildSpecial(dto: SpecialDto): Special {
   throw new Error(`Unknown SpecialKind: ${dto.kind}`);
 }
 
-function buildSpecialAttack(
-  dto: SpecialDto,
-  specialEffect: AttackEffect | undefined,
-): SpecialAttack {
+function buildSpecialAttack(dto: SpecialDto): SpecialAttack {
   const alterations = buildSpecialAlterations(dto);
 
   const rawDamages = dto.damages;
@@ -89,7 +84,9 @@ function buildSpecialAttack(
     specialDamages,
     dto.energy,
     buildTargetingStrategy(dto.targetingStrategy),
-    specialEffect,
+    [dto.effect, ...(dto.effects ?? [])]
+      .filter((effect) => effect != null)
+      .map(buildEffect),
     alterations.length > 0 ? alterations : undefined,
     shieldApplication,
     markedTargetBonus,
