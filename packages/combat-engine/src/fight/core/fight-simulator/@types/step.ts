@@ -49,6 +49,18 @@ import {
   WeakPointEndedReport,
   WeakPointRevealedReport,
 } from './weak-point-report';
+import {
+  AttackEmpoweredReport,
+  BattlefieldEndedReport,
+  BattlefieldExtendedReport,
+  BattlefieldStartedReport,
+  RevivedReport,
+} from './battlefield-report';
+import {
+  DamageSharedReport,
+  EffectCleansedReport,
+  EnergyGainedReport,
+} from './support-report';
 
 export enum StepKind {
   FightStart = 'fight_start',
@@ -89,6 +101,14 @@ export enum StepKind {
   WeakPointRevealed = 'weak_point_revealed',
   WeakPointEnded = 'weak_point_ended',
   AnalysisCharged = 'analysis_charged',
+  BattlefieldStarted = 'battlefield_started',
+  BattlefieldExtended = 'battlefield_extended',
+  BattlefieldEnded = 'battlefield_ended',
+  Revived = 'revived',
+  AttackEmpowered = 'attack_empowered',
+  DamageShared = 'damage_shared',
+  EnergyGained = 'energy_gained',
+  EffectCleansed = 'effect_cleansed',
 }
 
 export type Step =
@@ -129,4 +149,12 @@ export type Step =
   | BuffTransferredReport
   | WeakPointRevealedReport
   | WeakPointEndedReport
-  | AnalysisChargedReport;
+  | AnalysisChargedReport
+  | BattlefieldStartedReport
+  | BattlefieldExtendedReport
+  | BattlefieldEndedReport
+  | RevivedReport
+  | AttackEmpoweredReport
+  | DamageSharedReport
+  | EnergyGainedReport
+  | EffectCleansedReport;

@@ -9,7 +9,10 @@ import {
   LastAttackerOfAllyTargetingStrategy,
   LastDodgedAttackerStrategy,
 } from '../core/targeting-card-strategies/last-attacker-of-ally';
-import { MostWoundedAllyStrategy } from '../core/targeting-card-strategies/most-wounded-ally';
+import {
+  LowestHealthAllyStrategy,
+  MostWoundedAllyStrategy,
+} from '../core/targeting-card-strategies/most-wounded-ally';
 import { ProtectedAllyStrategy } from '../core/targeting-card-strategies/protected-ally';
 import { FastestAllyStrategy } from '../core/targeting-card-strategies/fastest-ally';
 import { TargetingStrategy } from './dto/fight-data.dto';
@@ -24,6 +27,7 @@ const STATIC_STRATEGY_MAP: Record<string, TargetingCardStrategy> = {
   [TargetingStrategy.FASTEST_ALLY]: new FastestAllyStrategy(),
   [TargetingStrategy.SELF]: new Launcher(),
   [TargetingStrategy.TARGET_ALL]: new TargetedAll(),
+  [TargetingStrategy.LOWEST_HEALTH_ALLY]: new LowestHealthAllyStrategy(),
 };
 
 export function buildTargetingStrategy(

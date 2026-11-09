@@ -13,6 +13,11 @@ import {
 } from './skill';
 import { AlterationCondition } from '../@types/alteration/alteration-condition';
 import { AlterationStacking } from '../@types/alteration/alteration-detail';
+import { LiveRate } from '../@types/alteration/live-rate';
+import { Player } from '../../player';
+
+/** Builds the live rate of an alteration for the team of the card it lands on. */
+export type LiveRateFactory = (team: Player) => LiveRate;
 
 export interface AlterationSkillOptions {
   name: string;
@@ -32,6 +37,8 @@ export interface AlterationSkillOptions {
   stacking?: AlterationStacking;
   /** Stance its owner must hold for the skill to fire. */
   requiredStance?: string;
+  /** Set, the alteration value follows the board rather than `rate` alone. */
+  liveRate?: LiveRateFactory;
 }
 
 export class AlterationSkill implements Skill {
@@ -51,6 +58,7 @@ export class AlterationSkill implements Skill {
   private readonly powerId?: string;
   private readonly stacking?: AlterationStacking;
   public readonly requiredStance?: string;
+  private readonly liveRate?: LiveRateFactory;
   private activationCount = 0;
 
   constructor({
@@ -68,6 +76,7 @@ export class AlterationSkill implements Skill {
     powerId,
     stacking,
     requiredStance,
+    liveRate,
   }: AlterationSkillOptions) {
     if (polarity !== 'buff' && polarity !== 'debuff') {
       throw new Error(`Invalid polarity: ${polarity}`);
@@ -86,6 +95,7 @@ export class AlterationSkill implements Skill {
     this.powerId = powerId;
     this.stacking = stacking;
     this.requiredStance = requiredStance;
+    this.liveRate = liveRate;
   }
 
   launch(
@@ -114,27 +124,34 @@ export class AlterationSkill implements Skill {
     // A capped alteration refused at its stack limit returns undefined: drop it so
     // no step reports an alteration that was never applied.
     const results = targetedCards
-      .map((targetedCard) => ({
-        target: targetedCard.identityInfo,
-        alteration:
-          this.polarity === 'buff'
-            ? targetedCard.applyBuff(
-                this.attributeType,
-                this.rate,
-                this.duration,
-                this.terminationEvent,
-                this.powerId,
-                this.stacking,
-              )
-            : targetedCard.applyDebuff(
-                this.attributeType,
-                this.rate,
-                this.duration,
-                this.terminationEvent,
-                this.powerId,
-                this.stacking,
-              ),
-      }))
+      .map((targetedCard) => {
+        const options = {
+          live: this.liveRate?.(teamOf(targetedCard, context)),
+        };
+        return {
+          target: targetedCard.identityInfo,
+          alteration:
+            this.polarity === 'buff'
+              ? targetedCard.applyBuff(
+                  this.attributeType,
+                  this.rate,
+                  this.duration,
+                  this.terminationEvent,
+                  this.powerId,
+                  this.stacking,
+                  options,
+                )
+              : targetedCard.applyDebuff(
+                  this.attributeType,
+                  this.rate,
+                  this.duration,
+                  this.terminationEvent,
+                  this.powerId,
+                  this.stacking,
+                  options,
+                ),
+        };
+      })
       .filter((result) => result.alteration !== undefined);
 
     if (!conditionFailed && !allCapped) {
@@ -177,4 +194,10 @@ export class AlterationSkill implements Skill {
       this.activationCount >= this.activationLimit
     );
   }
+}
+
+function teamOf(card: FightingCard, context: FightingContext): Player {
+  return context.sourcePlayer.ownCard(card)
+    ? context.sourcePlayer
+    : context.opponentPlayer;
 }

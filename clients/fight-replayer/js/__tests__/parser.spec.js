@@ -403,3 +403,42 @@ describe('teams', () => {
     expect(parseReport(report).teams.B.name).toBe('Bob');
   });
 });
+
+describe('revived', () => {
+  const steps = {
+    1: hit(AEGIS, 600, 0),
+    2: { kind: 'status_change', card: AEGIS, status: 'dead' },
+    3: {
+      kind: 'revived',
+      name: "Tempête de l'Empereur",
+      source: BAROS,
+      card: AEGIS,
+      remainingHealth: 180,
+    },
+  };
+
+  it('brings the card back to life', () => {
+    expect(finalState(steps, 'aegis').dead).toBe(false);
+  });
+
+  it('gives it the health it came back with', () => {
+    expect(finalState(steps, 'aegis').hp).toBe(180);
+  });
+});
+
+describe('damage_shared', () => {
+  it('lowers the health of the cards that carried a share', () => {
+    const steps = {
+      1: hit(BAROS, 0, 500),
+      2: hit(AEGIS, 80, 520),
+      3: {
+        kind: 'damage_shared',
+        name: 'Cercle de la Colonie',
+        card: AEGIS,
+        shares: [{ card: BAROS, damage: 5, remainingHealth: 495 }],
+      },
+    };
+
+    expect(finalState(steps, 'baros').hp).toBe(495);
+  });
+});

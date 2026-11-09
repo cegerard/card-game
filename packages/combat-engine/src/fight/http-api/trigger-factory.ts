@@ -14,6 +14,8 @@ import { AfterAttackTrigger } from '../core/trigger/after-attack';
 import { TransformedTrigger } from '../core/trigger/transformed';
 import { EnemiesAnalysedTrigger } from '../core/trigger/enemies-analysed';
 import { Trigger } from '../core/trigger/trigger';
+import { AnyAllyDeathTrigger } from '../core/trigger/any-ally-death';
+import { AllySkillUsedTrigger } from '../core/trigger/ally-skill-used';
 import { TriggerEvent } from './dto/fight-data.dto';
 
 const STRATEGY_MAP: Record<string, Trigger> = {
@@ -28,6 +30,8 @@ const STRATEGY_MAP: Record<string, Trigger> = {
   [TriggerEvent.AFTER_ATTACK]: new AfterAttackTrigger(),
   [TriggerEvent.TRANSFORMED]: new TransformedTrigger(),
   [TriggerEvent.ENEMIES_ANALYSED]: new EnemiesAnalysedTrigger(),
+  [TriggerEvent.ANY_ALLY_DEATH]: new AnyAllyDeathTrigger(),
+  [TriggerEvent.ALLY_SKILL_USED]: new AllySkillUsedTrigger(),
 };
 
 function buildDeathTrigger(

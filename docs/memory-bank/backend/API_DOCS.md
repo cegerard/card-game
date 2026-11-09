@@ -117,7 +117,8 @@ Simulates a turn-based card battle between two players.
   },
   execution?: { threshold: number }       // ATTACK only (400 on STANCE): see OtherSkillDto.execution — applied after the last hit
   defensePenetration?: number,            // ATTACK only (400 on STANCE): see OtherSkillDto.defensePenetration
-  undodgeable?: boolean                   // ATTACK only (400 on STANCE): no dodge roll and no stance evasion
+  undodgeable?: boolean,                  // ATTACK only (400 on STANCE): no dodge roll and no stance evasion
+  battlefield?: BattlefieldDto            // STANCE only (400 otherwise): see ARCHITECTURE (Battlefield)
 }
 ```
 
@@ -130,8 +131,6 @@ Simulates a turn-based card battle between two players.
   targetingStrategy: TargetingStrategy  // Cannot be targeted-card
 }
 ```
-
-**Note on Buff/Shield Application**: Buff and shield targeting is independent from the primary attack targeting, allowing combos like "attack all enemies while shielding all allies".
 
 **SimpleAttackDto**:
 
@@ -170,7 +169,7 @@ Simulates a turn-based card battle between two players.
 
 ```typescript
 {
-  kind: "HEALING" | "BUFF" | "CONDITIONAL_ATTACK" | "TARGETING_OVERRIDE" | "SHIELD" | "SURVIVE" | "DAMAGE_REDUCTION" | "PROTECTION" | "DODGE_BONUS_DENIAL" | "BLEED_STACK_SCALING" | "STANCE" | "BLEED_EMPOWERMENT" | "BLEED_DETONATION" | "CONCEALMENT" | "LOW_HEALTH_TARGET_BONUS" | "BUFF_TRANSFER" | "POISONED_ENEMY_AGILITY" | "REAL_DAMAGE" | "AFFLICTION" | "ANALYSIS" | "AFTERSHOCK" | "WEAK_POINT_LEGACY",
+  kind: "HEALING" | "BUFF" | "CONDITIONAL_ATTACK" | "TARGETING_OVERRIDE" | "SHIELD" | "SURVIVE" | "DAMAGE_REDUCTION" | "PROTECTION" | "DODGE_BONUS_DENIAL" | "BLEED_STACK_SCALING" | "STANCE" | "BLEED_EMPOWERMENT" | "BLEED_DETONATION" | "CONCEALMENT" | "LOW_HEALTH_TARGET_BONUS" | "BUFF_TRANSFER" | "POISONED_ENEMY_AGILITY" | "REAL_DAMAGE" | "AFFLICTION" | "ANALYSIS" | "AFTERSHOCK" | "WEAK_POINT_LEGACY" | "SUPPORT" | "ENERGY_GAIN",
   name: string,
   rate?: number,                // Optional — not required for TARGETING_OVERRIDE or SURVIVE; required for SHIELD and DAMAGE_REDUCTION (share of incoming damage removed, in ]0, 1]); required for BLEED_STACK_SCALING (attack bonus per bleed stack, > 0); required for BLEED_EMPOWERMENT (bleed rate used during the stance, > 0); required for BLEED_DETONATION (share of the source attack dealt to each bleeding card, > 0); required for LOW_HEALTH_TARGET_BONUS (damage bonus against a weakened target, > 0)
   maxRate?: number,             // BLEED_STACK_SCALING only (required, > 0): cap of the attack bonus
@@ -182,7 +181,7 @@ Simulates a turn-based card battle between two players.
   triggeredDebuff?: { debuffType, debuffRate, duration, probability, stackId?, maxStacks?, terminationEvent? },  // BLEED_EMPOWERMENT only: same shape as EffectDto.triggeredDebuff; replaces the debuff rolled when a bleed lands during the stance
   probability?: number,         // DAMAGE_REDUCTION only: per-hit roll (0-1); omit for a permanent reduction
   targetingStrategy?: TargetingStrategy,  // Not required for SHIELD, SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL, BLEED_STACK_SCALING, BLEED_EMPOWERMENT, STANCE, BLEED_DETONATION, CONCEALMENT or LOW_HEALTH_TARGET_BONUS kinds
-  event?: "turn-end" | "next-action" | "ally-death" | "ally-health-below" | "any-ally-health-below" | "self-death" | "enemy-bleed-death" | "bleed-stacks-applied" | "turn-start" | "damage-taken" | "fight-start" | "enemy-killed" | "enemy-attack" | "after-attack" | "transformed" | "enemies-analysed",  // When skill triggers; NOT required for SHIELD, SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL, BLEED_STACK_SCALING, BLEED_EMPOWERMENT or LOW_HEALTH_TARGET_BONUS kinds
+  event?: "turn-end" | "next-action" | "ally-death" | "ally-health-below" | "any-ally-health-below" | "self-death" | "enemy-bleed-death" | "bleed-stacks-applied" | "turn-start" | "damage-taken" | "fight-start" | "enemy-killed" | "enemy-attack" | "after-attack" | "transformed" | "enemies-analysed" | "any-ally-death" | "ally-skill-used",  // When skill triggers; NOT required for SHIELD, SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL, BLEED_STACK_SCALING, BLEED_EMPOWERMENT or LOW_HEALTH_TARGET_BONUS kinds
   targetCardId?: string,        // Required when event=ally-death, ally-health-below, damage-taken or dodge, and for the last-attacker-of-ally and last-dodged-attacker targetings (never for any-ally-health-below): id of the monitored card
   requiresStance?: string,      // Skill only fires while its owner holds that stance (see SpecialDto.stanceActivation); required for BLEED_EMPOWERMENT
   // SHIELD-specific fields:
@@ -193,7 +192,7 @@ Simulates a turn-based card battle between two players.
   maxStacks?: number,           // Cap of that pile (>= 1); goes with stackId, both or neither (400). An application at the cap is refused and emits no step
   debuffMaxStacks?: number,     // Former name of maxStacks, still accepted
   terminationEvent?: string,    // Event name that removes this skill's buff/targeting override when fired
-  activationLimit?: number,     // Max activations (>=1) before skill lifecycle ends — supported for HEALING, TARGETING_OVERRIDE and CONDITIONAL_ATTACK kinds. On CONDITIONAL_ATTACK only an attack that struck somebody spends one, so `activationLimit: 1` on `ally-health-below` is "once per fight under a health threshold": a heal back above it and a second drop do not fire it again
+  activationLimit?: number,     // Max activations (>=1) before the lifecycle ends — HEALING, TARGETING_OVERRIDE, CONDITIONAL_ATTACK (only an attack that struck spends one)
   endEvent?: string,            // Event emitted when activation limit is reached — supported for HEALING, TARGETING_OVERRIDE and CONDITIONAL_ATTACK kinds
   healBasis?: "source-attack" | "target-max-health",  // HEALING only: what the rate is a share of (default source-attack)
   powerId?: string,             // Groups multiple skills as a composite power (must share same event + terminationEvent)
@@ -210,10 +209,16 @@ Simulates a turn-based card battle between two players.
   criticalDamageRate?: number,  // TRANSFORMATION only: critical multiplier x (1 + rate) while it runs
   activationEvent?: TriggerEvent, // DORMANT (above); TRANSFORMATION: an event setting it off too, still once
   poisonSurge?: { stacks: number, damageMultiplier: number },  // TRANSFORMATION only: every living stacked poison on the board rises to `stacks` (at least) and its damage is multiplied, reported as `status_change: poison` per card
+  battlefield?: BattlefieldDto, // TRANSFORMATION only: laid when it starts
+  activationEventThreshold?: number,  // TRANSFORMATION, required with activationEvent any-ally-health-below: the ally health ratio
+  perLivingAlly?: { maxRate },  // ALTERATION only: `rate` per living ally of the bearer (bearer excluded), capped, read live
+  whileHealthBelow?: number,    // ALTERATION only (not with perLivingAlly): counts only while the bearer health ratio is under it
+  amount?: number,              // ENERGY_GAIN (required, integer >= 1)
+  shield?: { rate, duration }, cleanse?: number, alterations?: { type, rate, duration, polarity }[],  // SUPPORT only: shield of rate × caster max health, statuses removed at random, alterations — on each target
   // CONDITIONAL_ATTACK fields:
   damages?: DamageCompositionDto[],  // Required unless bleedDetonation is set
   hits?: number,                // Not allowed with bleedDetonation (400)
-  interval?: number,            // CONDITIONAL_ATTACK and CONCEALMENT only (400 on any other kind). Turns between two activations (integer >= 1); omit for a skill whose cadence is driven by its event (ally-health-below, damage-taken, turn-start). CONCEALMENT accepts it too, as the cooldown of a dive
+  interval?: number,            // CONDITIONAL_ATTACK, CONCEALMENT and SUPPORT only (400 elsewhere): turns between two activations (integer >= 1)
   amplifier?: number,
   effect?: EffectDto,           // CONDITIONAL_ATTACK: effect of the hit; AFFLICTION (required): effect laid on every target
   comboFinisher?: DamageCompositionDto[],
@@ -222,22 +227,22 @@ Simulates a turn-based card battle between two players.
   defensePenetration?: number,  // In [0, 1] (400 outside): share of the defender defense the attack ignores — defense used = actualDefense × (1 − defensePenetration); default 0
   energyCost?: number,          // Integer >= 1: the attack does not fire below that special energy, and spends it only when it strikes somebody
   endsStance?: boolean,         // CONDITIONAL_ATTACK only (400 on any other kind, and without `requiresStance`): once the attack fired (somebody targeted), closes its `requiresStance` on its owner and reports `stance_ended` — so it fires once per stance
-  requiresUndamaged?: boolean,  // CONDITIONAL_ATTACK and CONCEALMENT only (400 on any other kind): the skill never fires when its owner lost health since the start of its previous action — attacks, status ticks, bleed detonation and transformation cost all count; a hit fully absorbed by a shield or dodged does not. Combined with `interval`, both must hold, and a turn blocked by this condition does not reset the cooldown. On `next-action` the card then makes its plain attack
-  hitAlterations?: {           // CONDITIONAL_ATTACK only (400 on any other kind): alterations left on every defender the main attack hit — once per defender however many hits landed, none on a dodged hit or a defender the hit killed, a guardian that intercepted getting them in place of its ward. No targeting of their own. Debuffs go through resistance. Applied after the hit effects and before `onLowHealthAfterHit` and the splash; reported as a `buff` and/or `debuff` step named after the skill, right after the attack step (turn-start, next-action and reactive paths alike)
+  requiresUndamaged?: boolean,  // CONDITIONAL_ATTACK and CONCEALMENT only: never fires when its owner lost health since its previous action (see ARCHITECTURE); with `interval`, both must hold
+  hitAlterations?: {           // CONDITIONAL_ATTACK only: see ARCHITECTURE (Attack Add-ons)
     type: BuffType,
     rate: number,
     duration: number,
     polarity: "buff" | "debuff",
     terminationEvent?: string
   }[],
-  execution?: { threshold: number },  // CONDITIONAL_ATTACK only (400 on any other kind); threshold in ]0, 1[ (400 outside). Once the main attack is over, every defender it hit (not dodged) and left alive strictly under `threshold` of its health loses all its remaining health as real damage — shield and damage reduction ignored. A fatal blow like any other: an unconsumed SURVIVE holds the defender at 1 HP (`survived` step, then its `survived` skills). Applied before `hitAlterations`, `onLowHealthAfterHit` and the splash, so an executed defender gets none of them. The death runs the usual cascade with the attacker as killer (`status_change: dead`, `ally-death`, `enemy-death`, `enemy-killed`). Reported as an `executed` step right after the attack step
+  execution?: { threshold: number },  // CONDITIONAL_ATTACK only, threshold in ]0, 1[: see ARCHITECTURE (Attack Add-ons); reported as `executed`
   bleedDetonation?: { ratePerStack: number },  // > 0: consumes every bleed stack of the target and hits for ratePerStack × consumed stacks of the attack, as a PHYSICAL composition replacing `damages`
-  splash?: {                    // Secondary strike after the main one, on the zone centered on the primary target: that target and its two deck neighbors (living only). Centered on the card the attack was aimed at, even when a guardian intercepted it. Runs through the regular attack pipeline (dodge, protection, shield) and is reported as its own `attack` step right after the main one. Fires only when the main strike targeted somebody
+  splash?: {                    // Secondary strike around the primary target: see ARCHITECTURE (Attack Add-ons)
     name: string,               // Name of the splash attack step
     damages: DamageCompositionDto[],  // Min 1 entry
     effects?: EffectDto[]
   },
-  onLowHealthAfterHit?: {       // Once the main hit landed (not dodged), debuffs its defender when it is left alive under `threshold` of its health — being under it after the hit is enough, the hit need not cross it. Read before the splash lands. Resistance applies. Reported as a `debuff` step named `name`, right after the main attack step
+  onLowHealthAfterHit?: {       // Debuffs the main defender left alive under `threshold`: see ARCHITECTURE (Attack Add-ons)
     name: string,
     threshold: number,          // Health ratio in ]0, 1]
     debuffs: { type: BuffType, rate: number, duration: number }[]  // Min 1; rate > 0, duration integer >= 1
@@ -272,6 +277,19 @@ Simulates a turn-based card battle between two players.
   },
   terminationEvent?: string   // Event name that removes this effect when fired
 }
+```
+
+**BattlefieldDto** (mechanics: ARCHITECTURE, Battlefield):
+
+```typescript
+{
+  name: string, duration: number,  // integer >= 1
+  allies?: { alterations?: BattlefieldAlterationDto[], healRate?: number, damageSharing?: { rate: number, maxShareRate: number } },
+  enemies?: { alterations?: BattlefieldAlterationDto[], damage?: { rate: number, damageType: DamageType } },
+  revival?: { rate: number, withinTurns: number },
+  legacy?: { duration: number, empowerment?: { name: string, rate: number } }
+}
+// BattlefieldAlterationDto: { type: BuffType, rate: number, polarity: "buff" | "debuff", perLivingAlly?: { maxRate } }
 ```
 
 **BuffApplicationDto**:
@@ -325,6 +343,14 @@ Simulates a turn-based card battle between two players.
 | `weak_point_revealed` | `name`, `source` (revealer), `card`, `remainingTurns?` | A weak point is revealed (absent duration: never expires) |
 | `weak_point_ended` | `name`, `card`, `reason: struck \| dodged \| expired` | A consumable one used by an attack, or a timed one at turn end |
 | `analysis_charged` | `name`, `source`, `card`, `charges` | ANALYSIS lays a charge |
+| `battlefield_started` | `name`, `source`, `remainingTurns` | A battlefield is laid; then `revived`, `buff`, `debuff` |
+| `battlefield_extended` | `name`, `source`, `extraTurns` | Its caster fell under it (legacy) |
+| `battlefield_ended` | `name`, `card` | Turn end, it ran out on that card. Its heals and hits are `healing` / `attack` steps |
+| `revived` | `name`, `source`, `card`, `remainingHealth` | A dead ally comes back |
+| `attack_empowered` | `name`, `source`, `cards` | Legacy: their next attack is empowered |
+| `damage_shared` | `name`, `card`, `shares: { card, damage, remainingHealth }[]` | After the hit, the share each partner carried |
+| `energy_gained` | `name`, `card`, `amount`, `energy` | ENERGY_GAIN (absent on a full gauge) |
+| `effect_cleansed` | `name`, `source`, `card`, `effectType` | SUPPORT removed a status |
 | `fight_end` | winner report | End of the fight |
 
 ## Enums
@@ -343,12 +369,13 @@ Simulates a turn-based card battle between two players.
 - `all-allies`: Targets all allied cards
 - `self`: Targets the card itself
 - `last-attacker-of-ally`: Targets the card that last attacked a specific ally (requires `targetCardId`); built inline in controller with `LastAttackerOfAllyTargetingStrategy`
-- `protected-ally`: Targets the ally the caster is currently standing in front of (see `PROTECTION`). Needs no `targetCardId` and no threshold — the protection itself says who, and its absence says nobody, so a skill using it is silent outside the power that opened the protection. Returns nothing if that ally is dead; still resolves when the **caster** is dead, which is what a guardian parting gift needs. Built with `ProtectedAllyStrategy`
+- `protected-ally`: the ally the caster stands in front of (see `PROTECTION`); nobody without a protection or if that ally is dead; resolves even when the caster is dead (guardian parting gift). `ProtectedAllyStrategy`
 - `linked-ally`: Targets a specific ally by ID (requires `targetCardId`); built inline in controller with `AlliedCardByIdStrategy`
 - `first-bleeding-enemy`: Targets the first living enemy, in deck order, carrying at least `stackThreshold` bleed stacks; nobody otherwise. Built with `FirstBleedingEnemyStrategy`
-- `fastest-ally`: Targets the caster's living ally with the highest speed, speed buffs included; the caster is excluded and ties keep deck order. Like `protected-ally`, it still resolves when the **caster** is dead, which is what a legacy left on death needs. Built with `FastestAllyStrategy`
+- `fastest-ally`: the caster's fastest living ally (speed buffs included, caster excluded, ties in deck order); resolves even when the caster is dead. `FastestAllyStrategy`
 - `last-dodged-attacker`: the card whose attack the `targetCardId` card dodged last (`FightingCard.lastDodgedAttacker`); nobody if it cannot be targeted. Pairs with `dodge`. Built with `LastDodgedAttackerStrategy`
-- `most-wounded-ally`: Targets the caster’s ally in the worst shape among those below `activationCondition.threshold`, resolved against the live board at each launch (requires the threshold, never a `targetCardId`). Excludes the caster and the dead; targets nobody when every ally is above the threshold. Ties keep deck order, so the choice is reproducible. Built with `MostWoundedAllyStrategy`
+- `lowest-health-ally`: like `most-wounded-ally` without threshold: nobody only when the caster stands alone
+- `most-wounded-ally`: the caster's ally in the worst shape below `activationCondition.threshold` (required, never a `targetCardId`), on the live board; caster and dead excluded, nobody when every ally is above, ties in deck order. `MostWoundedAllyStrategy`
 
 ### DodgeStrategy
 
@@ -375,6 +402,8 @@ Mechanics behind each event: see [ARCHITECTURE.md](ARCHITECTURE.md) (Death Casca
 - `bleed-stacks-applied`: once per fight, after the owner attack that brings the stacks it has **laid** to `stackThreshold` (a jump over it still fires). Stacks lost at the cap or refused do not count. Each skill on the event has its own once-flag
 - `dodge`: every dodge of the monitored card (`targetCardId`), stance evasion included, fired on its whole team with `lastAttacker` set
 - `enemy-attack` / `after-attack` / `transformed` / `enemies-analysed`: see ARCHITECTURE (Weak Points, Reactive Events); no `targetCardId`
+- `any-ally-death`: on the surviving allies of any card that dies, after `ally-death:<id>`
+- `ally-skill-used`: on the living allies of a card whose action is not its plain attack (special, `next-action` skill, `turn-start` strike)
 - `poisoned-enemy-death`: on the living card that laid the stacked poison a dead enemy carried, whoever killed it. No `targetCardId`. Runs after `enemy-bleed-death`, before `enemy-killed`
 
 ### SpecialKind
@@ -410,6 +439,8 @@ Skills marked *passive* have no `event` and no `targetingStrategy` and emit no s
 - `ANALYSIS`: requires `event`, `maxStacks`, `effect`; no `targetingStrategy`. One charge per event on `lastAttacker`, the filling charge lays `effect`
 - `AFTERSHOCK`: requires `event`, `damages`; optional `effect`, `requiresStance`. Strikes the neighbors of `attackTarget` (not itself)
 - `WEAK_POINT_LEGACY`: requires `event`, `rate`; optional `requiresStance`. Makes the weak points of its owner permanent, hits through them x (1 + rate)
+- `SUPPORT`: requires `event`, `targetingStrategy` and a `shield`, `cleanse` or `alterations`; optional `interval`. On `next-action` it takes the action (charges the special) when it targets somebody, else the card attacks and keeps the cooldown
+- `ENERGY_GAIN`: requires `event`, `amount`; no targeting: fills its owner gauge, never past the special cost
 
 ### RateBasis
 
@@ -452,10 +483,6 @@ DTOs use `class-validator` decorators (`@IsString`, `@IsNumber`, `@IsEnum`, `@Va
 
 ## Error Handling
 
-- **400 Bad Request**: Validation failures from `ValidationPipe`, plus the domain checks the controller converts explicitly — composite power consistency (`validatePowerIdConsistency`), the DAMAGE_REDUCTION rate range, and an alteration stack budget given by halves (`stackId` without its cap, or the reverse), and a field reserved to one skill kind carried by another (`KIND_ONLY_FIELDS`: `extraStacks`, `triggeredDebuff` for BLEED_EMPOWERMENT, `basis` for BLEED_EMPOWERMENT and REAL_DAMAGE, `rampingChance` for STANCE, `stanceActivations` and `poisonSurge` for TRANSFORMATION, and, for effects, `maxStacks` outside MARK/BLEED/POISON, `stackMultiplier` and `ignoresImmunity` outside a stacked POISON, `level` on a stacked POISON, `hitAlterations`, `endsStance` and `execution` for CONDITIONAL_ATTACK, `requiresUndamaged` and `interval` for CONDITIONAL_ATTACK and CONCEALMENT — an `interval` on any other kind used to be ignored silently and is now refused)
+- **400 Bad Request**: Validation failures from `ValidationPipe`, plus the domain checks the controller converts explicitly — composite power consistency (`validatePowerIdConsistency`), the DAMAGE_REDUCTION rate range, an alteration stack budget given by halves (`stackId` without its cap, or the reverse), and a field reserved to some skill kinds carried by another (`KIND_ONLY_FIELDS` in `fighting-card-factory.ts` is the list; effects have their own guards)
 - **500 Internal Server Error**: Runtime errors (e.g., unknown skill kind, missing buff properties)
 - No custom error handling middleware - uses NestJS defaults
-
-## Factory Functions
-
-DTO enums map to domain objects in `packages/combat-engine/src/fight/http-api/`: `buildTargetingStrategy()` (`targeting-strategy-factory.ts`), `buildDodgeStrategy()` (`dodge-strategy-factory.ts`), `buildTriggerStrategy()` (`trigger-factory.ts`).

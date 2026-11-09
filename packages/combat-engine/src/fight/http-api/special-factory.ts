@@ -17,6 +17,7 @@ import {
   buildExecution,
 } from './attack-skill-factory';
 import { mapAlterationType } from './skill-wiring-factory';
+import { buildBattlefield } from './battlefield-factory';
 
 // What only a special that strikes can carry
 const STANCE_SPECIAL_FORBIDDEN_FIELDS = [
@@ -39,6 +40,11 @@ export function buildSpecial(dto: SpecialDto): Special {
   if (dto.concealment && dto.kind !== SpecialKind.STANCE) {
     throw new BadRequestException(
       'Only a STANCE special can conceal its caster: an attack would reveal it at once',
+    );
+  }
+  if (dto.battlefield && dto.kind !== SpecialKind.STANCE) {
+    throw new BadRequestException(
+      'Only a STANCE special can lay a battlefield',
     );
   }
 
@@ -117,6 +123,7 @@ function buildSpecialStance(dto: SpecialDto): SpecialStance {
     buildSpecialAlterations(dto),
     buildShieldApplication(dto),
     dto.concealment?.duration,
+    buildBattlefield(dto.battlefield),
   );
 }
 

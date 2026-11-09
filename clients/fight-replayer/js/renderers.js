@@ -414,6 +414,24 @@ function buildGenericDetail(ev) {
       return `${esc(ev.name)} on ${esc(ev.card?.name)} ends (${esc(ev.reason)})`;
     case 'analysis_charged':
       return `${esc(ev.source?.name)} analyses ${esc(ev.card?.name)} — ${ev.charges} charge(s)`;
+    case 'battlefield_started':
+      return `${esc(ev.source?.name)} lays ${esc(ev.name)} for ${ev.remainingTurns} turn(s)`;
+    case 'battlefield_extended':
+      return `${esc(ev.name)} outlives ${esc(ev.source?.name)} by ${ev.extraTurns} turn(s)`;
+    case 'battlefield_ended':
+      return `${esc(ev.name)} leaves ${esc(ev.card?.name)}`;
+    case 'revived':
+      return `${esc(ev.card?.name)} comes back with ${(ev.remainingHealth ?? 0).toFixed(1)} HP`;
+    case 'attack_empowered':
+      return `${(ev.cards ?? []).map((c) => esc(c.name)).join(', ')} — next attack empowered`;
+    case 'damage_shared':
+      return (ev.shares ?? [])
+        .map((s) => `${esc(s.card?.name)} −${(s.damage ?? 0).toFixed(1)} HP`)
+        .join(', ');
+    case 'energy_gained':
+      return `+${ev.amount} energy → ${ev.energy}`;
+    case 'effect_cleansed':
+      return `${esc(ev.source?.name)} cleanses ${esc(ev.effectType)} from ${esc(ev.card?.name)}`;
     case 'transformation_started':
       return `Transformed for ${ev.remainingTurns} turn(s)`;
     case 'transformation_ended':
@@ -608,6 +626,54 @@ export function describeEvent(ev, teamBName) {
         icon: ICON.analysis_charged,
         text: `${ev.card?.name} — analysed ×${ev.charges}`,
         color: EVENT_COLOR.analysis_charged,
+      };
+    case 'battlefield_started':
+      return {
+        icon: ICON.battlefield_started,
+        text: `${ev.source?.name} — ${ev.name ?? 'Battlefield'} (FIELD)`,
+        color: EVENT_COLOR.battlefield_started,
+      };
+    case 'battlefield_extended':
+      return {
+        icon: ICON.battlefield_extended,
+        text: `${ev.name ?? 'Battlefield'} — +${ev.extraTurns} turn(s)`,
+        color: EVENT_COLOR.battlefield_extended,
+      };
+    case 'battlefield_ended':
+      return {
+        icon: ICON.battlefield_ended,
+        text: `${ev.card?.name} — ${ev.name ?? 'Battlefield'} over`,
+        color: EVENT_COLOR.battlefield_ended,
+      };
+    case 'revived':
+      return {
+        icon: ICON.revived,
+        text: `${ev.card?.name} — revived by ${ev.source?.name}`,
+        color: EVENT_COLOR.revived,
+      };
+    case 'attack_empowered':
+      return {
+        icon: ICON.attack_empowered,
+        text: `${ev.name ?? 'Empowered'} — ${(ev.cards ?? []).length} card(s)`,
+        color: EVENT_COLOR.attack_empowered,
+      };
+    case 'damage_shared':
+      return {
+        icon: ICON.damage_shared,
+        text: `${ev.card?.name} — ${ev.name ?? 'Shared'} spreads the hit`,
+        color: EVENT_COLOR.damage_shared,
+      };
+    case 'energy_gained':
+      return {
+        icon: ICON.energy_gained,
+        text: `${ev.card?.name} — +${ev.amount} energy`,
+        color: EVENT_COLOR.energy_gained,
+      };
+    case 'effect_cleansed':
+      return {
+        icon: ICON.effect_cleansed,
+        text: `${ev.card?.name} — ${ev.effectType} cleansed`,
+        color: EVENT_COLOR.effect_cleansed,
       };
     case 'concealment_started':
       return {

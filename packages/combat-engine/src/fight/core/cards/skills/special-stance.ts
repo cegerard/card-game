@@ -6,6 +6,7 @@ import { SpecialResult } from '../@types/action-result/special-result';
 import { StanceActivation } from '../@types/stance/stance';
 import { Alteration } from '../@types/alteration/alteration';
 import { ShieldApplication } from '../@types/shield/shield-application';
+import { Battlefield } from '../@types/battlefield/battlefield';
 import {
   BuffResult,
   DebuffResult,
@@ -13,7 +14,7 @@ import {
 
 /**
  * A special that strikes nobody: its caster enters a stance, and may alter
- * stats, shield and conceal itself for its duration. Since it is no attack,
+ * stats, shield and conceal itself for its duration, and lay a battlefield. Since it is no attack,
  * it does not lift a concealment, which is how a power can hide its caster.
  */
 export class SpecialStance extends BaseSpecial {
@@ -24,6 +25,7 @@ export class SpecialStance extends BaseSpecial {
     private readonly alterations: Alteration[] = [],
     private readonly shieldApplication?: ShieldApplication,
     private readonly concealmentDuration?: number,
+    private readonly battlefield?: Battlefield,
   ) {
     super(name, energyNeeded);
     if (!stanceActivation) {
@@ -51,6 +53,7 @@ export class SpecialStance extends BaseSpecial {
       shieldResults,
       stanceStarted,
       concealmentStarted,
+      battlefield: this.battlefield?.deploy(source, context),
     };
   }
 

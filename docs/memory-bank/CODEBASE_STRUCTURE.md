@@ -70,13 +70,14 @@ cards/
 │   │   poisoned-enemy-agility.ts  # Card-bound passives, not Skill implementors
 │   ├── real-damage.ts, affliction.ts  # REAL_DAMAGE (real damage on targets), AFFLICTION (effect without attack)
 │   ├── analysis.ts, aftershock.ts, weak-point-legacy.ts  # ANALYSIS, AFTERSHOCK, WEAK_POINT_LEGACY
+│   ├── support.ts, energy-gain.ts  # SUPPORT, ENERGY_GAIN
 │   └── power-id-consistency.ts     # Composite power validation
 ├── behaviors/              # dodge-behaviors.ts, simple-dodge.ts, random-dodge.ts
 ├── damage/                 # damage-calculator.ts, elemental-matrix.ts (5x5)
 └── @types/
     ├── action-result/      # special-result, attack-result, named-attack-result, healing-result, buff-results, shield-result
     ├── attack/             # attack-effect + poison/burn/freeze/stunt/mark/bleed effects, stacked-poison effect, damage-type-bonus (base of bleed-stack-bonus, concealed-bonus), energy-refund, bleed-detonation, splash, weak-point/hypothermia effects, frozen-target-bonus, low-health-debuff, hit-alterations, execution, conditions/
-    ├── alteration/         # alteration-detail (Buff | Debuff), alteration-type, alteration-condition, buff-application, conditions/ (ally-presence, health-threshold, probability)
+    ├── alteration/         # alteration-detail (Buff | Debuff), alteration-type, alteration-condition, buff-application, live-rate, conditions/ (ally-presence, health-threshold, probability)
     ├── mark/               # elemental-mark, marked-target-bonus
     ├── weak-point/         # weak-point (WeakPoint, spec), weak-points (per card), weak-point-strike (penetration helper)
     ├── shield/             # shield, shield-application
@@ -84,6 +85,7 @@ cards/
     ├── concealment/        # concealment (name, optional remainingTurns)
     ├── skill-activation-conditions/  # health-threshold-condition
     ├── damage/             # damage-type, damage-composition, element
+    ├── battlefield/        # Battlefield, deployment, exposure
     └── state/              # card-state-frozen/stunted/bleeding/stacked-poison/hypothermia, status-category
 ```
 
@@ -96,7 +98,7 @@ fight-simulator/
 ├── action_stage.ts         # Attacks, specials, healing; reactive skills; damage-taken + ally-health events
 ├── card-death-subscriber.ts, death-skill-handler.ts  # Death notifications and death cascade
 ├── end-event-processor.ts  # Removes event-bound buffs/effects on end events
-├── skill-results-to-steps.ts, effect-results-to-steps.ts   # Pure fns → Step[]
+├── skill-results-to-steps.ts, effect-results-to-steps.ts, battlefield-steps.ts   # Pure fns → Step[]
 ├── reactive-skill-checker.ts   # triggerReactiveSkills()
 ├── reactive-kill-steps.ts      # reactiveKillSteps(): death cascade of the cards a reactive attack killed
 ├── survived-reactions.ts       # survivedReactions(), fightSurvivedReactor(): `survived` skills of a SURVIVE holder, shared by every attack path
@@ -117,7 +119,7 @@ most-wounded-ally.ts, fastest-ally.ts, protected-ally.ts, first-bleeding-enemy.t
 
 ### `trigger/`
 
-`trigger.ts`, `activatable-trigger.ts`, `turn-end`, `next-action`, `turn-start`, `fight-start`, `death-trigger` (ally/enemy death), `self-death`, `enemy-bleed-death`, `enemy-killed`, `survived`, `dynamic-trigger`, `bleed-stacks-applied`, `damage-taken`, `dodge`, `poisoned-enemy-death`, `enemy-attack`, `after-attack`, `transformed`, `enemies-analysed`, `ally-health-below-threshold-trigger`, `any-ally-health-below-threshold-trigger`.
+`trigger.ts`, `activatable-trigger.ts`, `turn-end`, `next-action`, `turn-start`, `fight-start`, `death-trigger` (ally/enemy death), `self-death`, `enemy-bleed-death`, `enemy-killed`, `survived`, `dynamic-trigger`, `bleed-stacks-applied`, `damage-taken`, `dodge`, `poisoned-enemy-death`, `enemy-attack`, `after-attack`, `transformed`, `enemies-analysed`, `any-ally-death`, `ally-skill-used`, `ally-health-below-threshold-trigger`, `any-ally-health-below-threshold-trigger`.
 
 ### `http-api/`
 
@@ -129,6 +131,7 @@ http-api/
 ├── attack-effect-factory.ts       # EffectDto → AttackEffect, triggered debuff
 ├── card-bound-skill-factory.ts    # Passives kept on the card (survive, reduction, dodge denial, bleed scaling/empowerment, low-health bonus)
 ├── other-skill-factory.ts         # createOtherSkill: one builder per SkillKind
+├── battlefield-factory.ts         # BattlefieldDto → Battlefield
 ├── skill-wiring-factory.ts        # Shared skill helpers: triggers, targeting, activation condition, stacking, alteration type, asBadRequest
 ├── card-selector-factory.ts       # CardSelectorStrategy → CardSelector
 ├── dto/fight-data.dto.ts          # Request validation

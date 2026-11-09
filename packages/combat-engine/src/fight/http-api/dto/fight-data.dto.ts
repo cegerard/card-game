@@ -92,6 +92,8 @@ export enum SkillKind {
   ANALYSIS = 'ANALYSIS',
   AFTERSHOCK = 'AFTERSHOCK',
   WEAK_POINT_LEGACY = 'WEAK_POINT_LEGACY',
+  SUPPORT = 'SUPPORT',
+  ENERGY_GAIN = 'ENERGY_GAIN',
 }
 
 export enum BuffType {
@@ -143,6 +145,8 @@ export enum TriggerEvent {
   AFTER_ATTACK = 'after-attack',
   TRANSFORMED = 'transformed',
   ENEMIES_ANALYSED = 'enemies-analysed',
+  ANY_ALLY_DEATH = 'any-ally-death',
+  ALLY_SKILL_USED = 'ally-skill-used',
 }
 
 export enum RateBasisDto {
@@ -165,6 +169,7 @@ export enum TargetingStrategy {
   FIRST_BLEEDING_ENEMY = 'first-bleeding-enemy',
   FASTEST_ALLY = 'fastest-ally',
   LAST_DODGED_ATTACKER = 'last-dodged-attacker',
+  LOWEST_HEALTH_ALLY = 'lowest-health-ally',
 }
 
 export enum CardSelectorStrategy {
@@ -396,6 +401,156 @@ class HitAlterationDto {
   @IsString()
   @IsNotEmpty()
   terminationEvent?: string;
+}
+
+// The share of a stat a living ally of the bearer is worth, up to maxRate
+class PerLivingAllyDto {
+  @IsNumber()
+  @IsPositive()
+  maxRate: number;
+}
+
+class BattlefieldAlterationDto {
+  @IsEnum(BuffType)
+  type: BuffType;
+
+  @IsNumber()
+  @IsPositive()
+  rate: number;
+
+  @IsIn(['buff', 'debuff'])
+  polarity: 'buff' | 'debuff';
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => PerLivingAllyDto)
+  perLivingAlly?: PerLivingAllyDto;
+}
+
+class DamageSharingDto {
+  @IsNumber()
+  @IsPositive()
+  @Max(1)
+  rate: number;
+
+  @IsNumber()
+  @IsPositive()
+  @Max(1)
+  maxShareRate: number;
+}
+
+class BattlefieldAlliesDto {
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(/* istanbul ignore next */ () => BattlefieldAlterationDto)
+  alterations?: BattlefieldAlterationDto[];
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  @Max(1)
+  healRate?: number;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => DamageSharingDto)
+  damageSharing?: DamageSharingDto;
+}
+
+class BattlefieldDamageDto {
+  @IsNumber()
+  @IsPositive()
+  rate: number;
+
+  @IsEnum(DamageType)
+  damageType: DamageType;
+}
+
+class BattlefieldEnemiesDto {
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(/* istanbul ignore next */ () => BattlefieldAlterationDto)
+  alterations?: BattlefieldAlterationDto[];
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => BattlefieldDamageDto)
+  damage?: BattlefieldDamageDto;
+}
+
+class RevivalDto {
+  @IsNumber()
+  @IsPositive()
+  @Max(1)
+  rate: number;
+
+  @IsInt()
+  @Min(1)
+  withinTurns: number;
+}
+
+class EmpowermentDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsNumber()
+  @IsPositive()
+  rate: number;
+}
+
+class BattlefieldLegacyDto {
+  @IsInt()
+  @Min(1)
+  duration: number;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => EmpowermentDto)
+  empowerment?: EmpowermentDto;
+}
+
+// A change of the battlefield: an aura on the caster side, a hazard on the other
+export class BattlefieldDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsInt()
+  @Min(1)
+  duration: number;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => BattlefieldAlliesDto)
+  allies?: BattlefieldAlliesDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => BattlefieldEnemiesDto)
+  enemies?: BattlefieldEnemiesDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => RevivalDto)
+  revival?: RevivalDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => BattlefieldLegacyDto)
+  legacy?: BattlefieldLegacyDto;
+}
+
+class SupportShieldDto {
+  @IsNumber()
+  @IsPositive()
+  rate: number;
+
+  @IsInt()
+  @Min(0)
+  duration: number;
 }
 
 class StatAlterationDto {
@@ -725,6 +880,12 @@ export class SpecialDto extends AttackBonusesDto {
   @IsOptional()
   @IsBoolean()
   undodgeable?: boolean;
+
+  // STANCE only: lays a battlefield for both sides
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => BattlefieldDto)
+  battlefield?: BattlefieldDto;
 }
 
 class DamageCompositionDto {
@@ -890,7 +1051,8 @@ export class OtherSkillDto {
       o.kind !== SkillKind.POISONED_ENEMY_AGILITY &&
       o.kind !== SkillKind.ANALYSIS &&
       o.kind !== SkillKind.AFTERSHOCK &&
-      o.kind !== SkillKind.WEAK_POINT_LEGACY,
+      o.kind !== SkillKind.WEAK_POINT_LEGACY &&
+      o.kind !== SkillKind.ENERGY_GAIN,
   )
   @IsDefined()
   @IsEnum(TargetingStrategy)
@@ -1036,6 +1198,59 @@ export class OtherSkillDto {
   @IsNumber()
   @IsPositive()
   criticalDamageRate?: number;
+
+  // TRANSFORMATION: a battlefield laid for both sides when it starts
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => BattlefieldDto)
+  battlefield?: BattlefieldDto;
+
+  // TRANSFORMATION: health ratio its any-ally-health-below activationEvent reads
+  @ValidateIf((o) => o.activationEvent === TriggerEvent.ANY_ALLY_HEALTH_BELOW)
+  @IsDefined()
+  @IsNumber()
+  @IsPositive()
+  @Max(1)
+  activationEventThreshold?: number;
+
+  // ALTERATION: the rate is earned per living ally of the bearer, up to maxRate
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => PerLivingAllyDto)
+  perLivingAlly?: PerLivingAllyDto;
+
+  // ALTERATION: the alteration only counts while its bearer health ratio is under it
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  @Max(1)
+  whileHealthBelow?: number;
+
+  // ENERGY_GAIN (required): special energy its owner gains when its event fires
+  @ValidateIf((o) => o.kind === SkillKind.ENERGY_GAIN)
+  @IsDefined()
+  @IsInt()
+  @Min(1)
+  amount?: number;
+
+  // SUPPORT: shield of rate x the caster max health on each target
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => SupportShieldDto)
+  shield?: SupportShieldDto;
+
+  // SUPPORT: statuses removed from each target, picked at random
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  cleanse?: number;
+
+  // SUPPORT: alterations left on each target
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(/* istanbul ignore next */ () => HitAlterationDto)
+  alterations?: HitAlterationDto[];
 
   // TRANSFORMATION: raises every stacked poison on the board and multiplies its damage
   @IsOptional()

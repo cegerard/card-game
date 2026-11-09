@@ -174,6 +174,7 @@ export class SpecialAttack extends BaseSpecial {
       survivedSkillName: finalResult.survivedSkillName,
       mitigated: finalResult.mitigated,
       mitigatedSkillName: finalResult.mitigatedSkillName,
+      damageShared: finalResult.damageShared,
     };
   }
 

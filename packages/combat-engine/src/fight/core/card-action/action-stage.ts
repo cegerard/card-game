@@ -45,6 +45,7 @@ import { BLEED_STACKS_APPLIED } from '../trigger/bleed-stacks-applied';
 import { TURN_START } from '../trigger/turn-start';
 import { ENEMY_ATTACK } from '../trigger/enemy-attack';
 import { AFTER_ATTACK } from '../trigger/after-attack';
+import { ALLY_SKILL_USED } from '../trigger/ally-skill-used';
 import { SpecialStanceActionReport } from '../fight-simulator/@types/special-stance-report';
 import { SpecialResult } from '../cards/@types/action-result/special-result';
 import {
@@ -55,6 +56,10 @@ import {
   stanceEndedReport,
   stanceStartedReport,
 } from '../fight-simulator/stance-steps';
+import {
+  battlefieldStartedSteps,
+  damageSharedSteps,
+} from '../fight-simulator/battlefield-steps';
 
 type SplittedSteps = {
   actionSteps: Step[];
@@ -105,22 +110,53 @@ export class ActionStage {
 
       const turnStartReports = this.launchTurnStartSkills(card);
       steps.actionSteps.push(...this.flatSteps(turnStartReports));
-      if (turnStartReports.length > 0 && !this.canAct(card)) return;
+      if (turnStartReports.length > 0 && !this.canAct(card)) {
+        steps.actionSteps.push(...this.dispatchAllySkillUsed(card));
+        return;
+      }
 
+      const action = this.launchAction(card);
       const { actionSteps, statusChangeSteps } = this.convertIntoSteps(
-        this.launchAction(card),
+        action.reports,
       );
       steps.actionSteps.push(...actionSteps);
+      if (turnStartReports.length > 0 || action.skillUsed) {
+        steps.actionSteps.push(...this.dispatchAllySkillUsed(card));
+      }
       steps.statusChangeSteps.push(...statusChangeSteps);
     });
 
     return [...steps.actionSteps, ...steps.statusChangeSteps];
   }
 
-  private launchAction(card: FightingCard): ActionReport[] {
-    if (card.isSpecialReady()) return [this.launchSpecial(card)];
+  /** The action of the card, and whether it used a skill rather than its plain attack. */
+  private launchAction(card: FightingCard): {
+    reports: ActionReport[];
+    skillUsed: boolean;
+  } {
+    if (card.isSpecialReady()) {
+      return { reports: [this.launchSpecial(card)], skillUsed: true };
+    }
 
-    return this.launchNextActionSkills(card) ?? [this.launchAttack(card)];
+    const skillReports = this.launchNextActionSkills(card);
+    return skillReports
+      ? { reports: skillReports, skillUsed: true }
+      : { reports: [this.launchAttack(card)], skillUsed: false };
+  }
+
+  /** Tells the teammates of the card it just used a skill. */
+  private dispatchAllySkillUsed(card: FightingCard): Step[] {
+    const team = this.player1.ownCard(card) ? this.player1 : this.player2;
+
+    return team.playableCards
+      .filter((teammate) => teammate !== card)
+      .flatMap((teammate) =>
+        this.launchOwnReactions(
+          teammate,
+          ALLY_SKILL_USED,
+          fightingContextOf(teammate, this.player1, this.player2),
+        ),
+      );
   }
 
   /** A strike at the start of the turn may have killed the card or its last opponent. */
@@ -166,8 +202,10 @@ export class ActionStage {
       (r): r is AttackSkillResults => r.skillKind === SkillKind.Attack,
     );
     if (!attackSkill) {
-      const dive = this.diveReport(card, skillResults);
-      return dive && [dive];
+      const action =
+        this.supportReport(card, skillResults) ??
+        this.diveReport(card, skillResults);
+      return action && [action];
     }
 
     const result: AttackReport = {
@@ -243,6 +281,23 @@ export class ActionStage {
         attackSkill.stanceEnded,
       );
     }
+  }
+
+  /**
+   * A support that helped somebody on `next-action` takes the action of the
+   * card, which still charges its special like an attack would.
+   */
+  private supportReport(
+    card: FightingCard,
+    skillResults: SkillResults[],
+  ): SkillStepsActionReport | null {
+    const support = skillResults.find(
+      (r) => r.skillKind === SkillKind.Support && r.results.length > 0,
+    );
+    if (!support) return null;
+
+    card.increaseSpecialEnergy();
+    return { kind: SKILL_STEPS, steps: skillResultsToSteps(card, [support]) };
   }
 
   /**
@@ -397,6 +452,9 @@ export class ActionStage {
         shieldAppliedReport,
         specialResults.concealmentStarted &&
           concealmentStartedReport(card, specialResults.concealmentStarted),
+        ...(specialResults.battlefield
+          ? battlefieldStartedSteps(card, specialResults.battlefield)
+          : []),
       ].filter((step) => step !== undefined),
     };
   }
@@ -546,6 +604,7 @@ export class ActionStage {
   ): void {
     if (attackResults.length > 0) {
       report.concealmentEndedReports.push(...revealAttacker(attackerCard));
+      attackerCard.consumeEmpowerment();
     }
     const reportedDeaths = new Set<FightingCard>();
     let stolenLife = 0;
@@ -583,6 +642,8 @@ export class ActionStage {
           card: defensiveCard.identityInfo,
         });
       }
+
+      report.statusChanges.push(...this.sharedDamageSteps(damageDealt));
 
       if (damageDealt.shieldBroken) {
         report.statusChanges.push({
@@ -657,6 +718,22 @@ export class ActionStage {
       ...this.dispatchAttackEvents(attackResults, attackerCard),
       ...this.dispatchBleedStacksApplied(attackerCard),
     );
+  }
+
+  /** The share a circle carried, then what the carriers felt of it. */
+  private sharedDamageSteps(hit: AttackResult): Step[] {
+    return [
+      ...damageSharedSteps(hit),
+      ...(hit.damageShared?.shares ?? []).flatMap(({ card }) =>
+        skillResultsToSteps(
+          card,
+          triggerReactiveSkills(
+            card,
+            fightingContextOf(card, this.player1, this.player2),
+          ),
+        ),
+      ),
+    ];
   }
 
   /**

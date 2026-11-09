@@ -56,7 +56,11 @@ export type SkillKind =
   /** Frappe les voisins de la carte visée par l'attaque du porteur (sans elle) ; pensé pour `after-attack`. */
   | 'AFTERSHOCK'
   /** Rend permanents les Points Faibles révélés par le porteur et amplifie de `rate` les coups qu'ils subissent ; pensé pour `self-death`. */
-  | 'WEAK_POINT_LEGACY';
+  | 'WEAK_POINT_LEGACY'
+  /** Action d'appui (sur `next-action`, avec `interval`) : bouclier en part de la santé max du lanceur, purge, altérations, sur chaque cible ; ne frappe personne. */
+  | 'SUPPORT'
+  /** Remplit la jauge du porteur de `amount` à chaque déclenchement. */
+  | 'ENERGY_GAIN';
 
 export type BuffType =
   | 'attack'
@@ -124,7 +128,11 @@ export type TriggerEvent =
   /** Sur la carte qui vient de se transformer. */
   | 'transformed'
   /** Sur la carte dont l'ANALYSIS a rempli tous les ennemis vivants. */
-  | 'enemies-analysed';
+  | 'enemies-analysed'
+  /** Sur les alliés survivants, quel que soit l'allié tombé. */
+  | 'any-ally-death'
+  /** Sur les alliés d'une carte dont l'action n'est pas l'attaque simple (spéciale, compétence d'action, frappe de début de tour). */
+  | 'ally-skill-used';
 
 export type TargetingStrategy =
   | 'position-based'
@@ -142,7 +150,9 @@ export type TargetingStrategy =
   /** Allié vivant le plus rapide (buffs compris), lanceur exclu ; se résout même lanceur mort. */
   | 'fastest-ally'
   /** Dernier attaquant esquivé par la carte `targetCardId` : la riposte à un coup manqué. */
-  | 'last-dodged-attacker';
+  | 'last-dodged-attacker'
+  /** Allié vivant au plus faible ratio de santé, lanceur exclu, quel que soit ce ratio. */
+  | 'lowest-health-ally';
 
 export type CardSelectorStrategy = 'player-by-player' | 'speed-weighted';
 
@@ -242,6 +252,36 @@ export interface Execution {
   threshold: number;
 }
 
+export interface BattlefieldAlteration {
+  type: BuffType;
+  rate: number;
+  polarity: 'buff' | 'debuff';
+  /** `rate` par allié vivant du porteur (lui exclu), plafonné à `maxRate`, relu en continu. */
+  perLivingAlly?: { maxRate: number };
+}
+
+/** Altération du champ de bataille : aura sur le camp du lanceur, péril sur l'autre, chaque carte la portant sur son propre compteur de tours. */
+export interface Battlefield {
+  name: string;
+  duration: number;
+  allies?: {
+    alterations?: BattlefieldAlteration[];
+    /** Part de sa santé max que chaque allié récupère en fin de tour. */
+    healRate?: number;
+    /** Chaque coup sur un membre perd `rate`, porté par les autres membres, `maxShareRate` du coup chacun au plus ; jamais mortel. */
+    damageSharing?: { rate: number; maxShareRate: number };
+  };
+  enemies?: {
+    alterations?: BattlefieldAlteration[];
+    /** `rate` de l'Attaque du lanceur en dégâts réels de ce type, en fin de tour de chaque ennemi. */
+    damage?: { rate: number; damageType: DamageType };
+  };
+  /** Les alliés tombés depuis moins de `withinTurns` tours de leur camp reviennent avec `rate` de leur santé max. */
+  revival?: { rate: number; withinTurns: number };
+  /** Si le lanceur tombe pendant qu'elle court : `duration` tours de plus, et ses alliés vivants frappent une fois plus fort. */
+  legacy?: { duration: number; empowerment?: { name: string; rate: number } };
+}
+
 export interface StatAlteration {
   type: BuffType;
   rate: number;
@@ -336,6 +376,8 @@ export interface SpecialSkill extends AttackBonuses {
   defensePenetration?: number;
   /** ATTACK uniquement : ni jet d'esquive ni évasion. */
   undodgeable?: boolean;
+  /** STANCE uniquement : altère le champ de bataille. */
+  battlefield?: Battlefield;
 }
 
 export interface SimpleAttackSkill extends AttackBonuses {
@@ -404,7 +446,7 @@ export interface OtherSkill {
   activationCondition?: BuffCondition;
   /** Requis pour CONDITIONAL_ATTACK. */
   damages?: DamageComposition[];
-  /** CONDITIONAL_ATTACK et CONCEALMENT : actions entre deux déclenchements (recharge). */
+  /** CONDITIONAL_ATTACK, CONCEALMENT et SUPPORT : actions entre deux déclenchements (recharge). */
   interval?: number;
   hits?: number;
   amplifier?: number;
@@ -470,6 +512,22 @@ export interface OtherSkill {
   criticalDamageRate?: number;
   /** TRANSFORMATION : porte chaque Poison à charges du terrain à `stacks` au moins et multiplie ses dégâts. */
   poisonSurge?: { stacks: number; damageMultiplier: number };
+  /** TRANSFORMATION : altère le champ de bataille à son déclenchement. */
+  battlefield?: Battlefield;
+  /** TRANSFORMATION avec `activationEvent: 'any-ally-health-below'` (requis) : seuil de santé de l'allié. */
+  activationEventThreshold?: number;
+  /** ALTERATION : `rate` par allié vivant du porteur (lui exclu), plafonné à `maxRate`, relu en continu. */
+  perLivingAlly?: { maxRate: number };
+  /** ALTERATION : l'altération ne compte que tant que la santé du porteur est sous ce ratio. */
+  whileHealthBelow?: number;
+  /** ENERGY_GAIN (requis) : énergie gagnée à chaque déclenchement. */
+  amount?: number;
+  /** SUPPORT : bouclier de `rate` × la santé max du lanceur, pour `duration` tours. */
+  shield?: { rate: number; duration: number };
+  /** SUPPORT : statuts retirés au hasard de chaque cible. */
+  cleanse?: number;
+  /** SUPPORT : altérations laissées sur chaque cible. */
+  alterations?: Omit<StatAlteration, 'targetingStrategy' | 'condition'>[];
   /** STANCE : chance d'ouverture, nulle avant `fromTurn`, +`increment` à chaque échec, 0 après ouverture ; jamais pendant la posture. */
   rampingChance?: { startChance: number; increment: number; fromTurn: number };
   /** Requis quand event vaut dormant ; TRANSFORMATION : événement qui la déclenche aussi, une fois par combat. */
