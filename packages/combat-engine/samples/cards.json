@@ -1473,5 +1473,359 @@
       ]
     },
     "behaviors": { "dodge": "simple-dodge" }
+  },
+  {
+    "id": "hyoki",
+    "name": "Hyōki",
+    "attack": 65,
+    "defense": 55,
+    "health": 520,
+    "speed": 65,
+    "agility": 60,
+    "accuracy": 80,
+    "criticalChance": 0.04,
+    "regeneration": 40,
+    "resistance": 50,
+    "element": "AIR",
+    "skills": {
+      "special": {
+        "kind": "STANCE",
+        "name": "Cercle de la Colonie",
+        "energy": 45,
+        "stanceActivation": {
+          "name": "Cercle de la Colonie",
+          "duration": 2
+        },
+        "battlefield": {
+          "name": "Cercle de la Colonie",
+          "duration": 2,
+          "allies": {
+            "alterations": [
+              {
+                "type": "defense",
+                "rate": 0.25,
+                "polarity": "buff"
+              },
+              {
+                "type": "attack",
+                "rate": 0.03,
+                "polarity": "buff",
+                "perLivingAlly": {
+                  "maxRate": 0.15
+                }
+              },
+              {
+                "type": "defense",
+                "rate": 0.03,
+                "polarity": "buff",
+                "perLivingAlly": {
+                  "maxRate": 0.15
+                }
+              },
+              {
+                "type": "agility",
+                "rate": 0.03,
+                "polarity": "buff",
+                "perLivingAlly": {
+                  "maxRate": 0.15
+                }
+              },
+              {
+                "type": "accuracy",
+                "rate": 0.03,
+                "polarity": "buff",
+                "perLivingAlly": {
+                  "maxRate": 0.15
+                }
+              },
+              {
+                "type": "speed",
+                "rate": 0.03,
+                "polarity": "buff",
+                "perLivingAlly": {
+                  "maxRate": 0.15
+                }
+              },
+              {
+                "type": "criticalChance",
+                "rate": 0.03,
+                "polarity": "buff",
+                "perLivingAlly": {
+                  "maxRate": 0.15
+                }
+              },
+              {
+                "type": "regeneration",
+                "rate": 0.03,
+                "polarity": "buff",
+                "perLivingAlly": {
+                  "maxRate": 0.15
+                }
+              },
+              {
+                "type": "resistance",
+                "rate": 0.03,
+                "polarity": "buff",
+                "perLivingAlly": {
+                  "maxRate": 0.15
+                }
+              }
+            ],
+            "damageSharing": {
+              "rate": 0.2,
+              "maxShareRate": 0.05
+            }
+          }
+        }
+      },
+      "simpleAttack": {
+        "name": "Rafale Polaire",
+        "damages": [
+          {
+            "type": "PHYSICAL",
+            "rate": 0.8
+          },
+          {
+            "type": "AIR",
+            "rate": 0.8
+          }
+        ],
+        "targetingStrategy": "position-based",
+        "frozenTargetBonus": {
+          "multiplier": 1.15
+        }
+      },
+      "others": [
+        {
+          "kind": "ALTERATION",
+          "name": "Rafale Polaire - Souffle Revigorant",
+          "event": "after-attack",
+          "targetingStrategy": "lowest-health-ally",
+          "polarity": "buff",
+          "buffType": "defense",
+          "rate": 0.15,
+          "duration": 1
+        },
+        {
+          "kind": "ENERGY_GAIN",
+          "name": "Souffle Encourageant",
+          "event": "ally-skill-used",
+          "amount": 3
+        },
+        {
+          "kind": "ALTERATION",
+          "name": "Souffle Encourageant - Esquive",
+          "event": "fight-start",
+          "targetingStrategy": "all-allies",
+          "polarity": "buff",
+          "buffType": "agility",
+          "rate": 0.15,
+          "duration": 0,
+          "whileHealthBelow": 0.3
+        },
+        {
+          "kind": "ALTERATION",
+          "name": "Esprit de Colonie",
+          "event": "fight-start",
+          "targetingStrategy": "self",
+          "polarity": "buff",
+          "buffType": "attack",
+          "rate": 0.05,
+          "duration": 0,
+          "perLivingAlly": {
+            "maxRate": 0.2
+          },
+          "powerId": "esprit-de-colonie"
+        },
+        {
+          "kind": "ALTERATION",
+          "name": "Esprit de Colonie",
+          "event": "fight-start",
+          "targetingStrategy": "self",
+          "polarity": "buff",
+          "buffType": "defense",
+          "rate": 0.05,
+          "duration": 0,
+          "perLivingAlly": {
+            "maxRate": 0.2
+          },
+          "powerId": "esprit-de-colonie"
+        },
+        {
+          "kind": "ALTERATION",
+          "name": "Esprit de Colonie",
+          "event": "fight-start",
+          "targetingStrategy": "self",
+          "polarity": "buff",
+          "buffType": "agility",
+          "rate": 0.05,
+          "duration": 0,
+          "perLivingAlly": {
+            "maxRate": 0.2
+          },
+          "powerId": "esprit-de-colonie"
+        },
+        {
+          "kind": "ALTERATION",
+          "name": "Esprit de Colonie",
+          "event": "fight-start",
+          "targetingStrategy": "self",
+          "polarity": "buff",
+          "buffType": "accuracy",
+          "rate": 0.05,
+          "duration": 0,
+          "perLivingAlly": {
+            "maxRate": 0.2
+          },
+          "powerId": "esprit-de-colonie"
+        },
+        {
+          "kind": "ALTERATION",
+          "name": "Esprit de Colonie",
+          "event": "fight-start",
+          "targetingStrategy": "self",
+          "polarity": "buff",
+          "buffType": "speed",
+          "rate": 0.05,
+          "duration": 0,
+          "perLivingAlly": {
+            "maxRate": 0.2
+          },
+          "powerId": "esprit-de-colonie"
+        },
+        {
+          "kind": "ALTERATION",
+          "name": "Esprit de Colonie",
+          "event": "fight-start",
+          "targetingStrategy": "self",
+          "polarity": "buff",
+          "buffType": "criticalChance",
+          "rate": 0.05,
+          "duration": 0,
+          "perLivingAlly": {
+            "maxRate": 0.2
+          },
+          "powerId": "esprit-de-colonie"
+        },
+        {
+          "kind": "ALTERATION",
+          "name": "Esprit de Colonie",
+          "event": "fight-start",
+          "targetingStrategy": "self",
+          "polarity": "buff",
+          "buffType": "regeneration",
+          "rate": 0.05,
+          "duration": 0,
+          "perLivingAlly": {
+            "maxRate": 0.2
+          },
+          "powerId": "esprit-de-colonie"
+        },
+        {
+          "kind": "ALTERATION",
+          "name": "Esprit de Colonie",
+          "event": "fight-start",
+          "targetingStrategy": "self",
+          "polarity": "buff",
+          "buffType": "resistance",
+          "rate": 0.05,
+          "duration": 0,
+          "perLivingAlly": {
+            "maxRate": 0.2
+          },
+          "powerId": "esprit-de-colonie"
+        },
+        {
+          "kind": "ALTERATION",
+          "name": "Esprit de Colonie - Deuil",
+          "event": "any-ally-death",
+          "targetingStrategy": "self",
+          "polarity": "buff",
+          "buffType": "attack",
+          "rate": 0.3,
+          "duration": 2,
+          "stackId": "deuil-de-la-colonie",
+          "maxStacks": 1
+        },
+        {
+          "kind": "SUPPORT",
+          "name": "Bourrasque Protectrice",
+          "event": "next-action",
+          "interval": 3,
+          "targetingStrategy": "lowest-health-ally",
+          "shield": {
+            "rate": 0.4,
+            "duration": 2
+          },
+          "cleanse": 1,
+          "alterations": [
+            {
+              "type": "speed",
+              "rate": 0.2,
+              "duration": 1,
+              "polarity": "buff"
+            }
+          ]
+        },
+        {
+          "kind": "TRANSFORMATION",
+          "name": "Tempête de l'Empereur",
+          "duration": 3,
+          "activationCondition": {
+            "type": "health-threshold",
+            "operator": "below",
+            "threshold": 0.4
+          },
+          "activationEvent": "any-ally-health-below",
+          "activationEventThreshold": 0.25,
+          "battlefield": {
+            "name": "Tempête de l'Empereur",
+            "duration": 3,
+            "allies": {
+              "alterations": [
+                {
+                  "type": "attack",
+                  "rate": 0.35,
+                  "polarity": "buff"
+                },
+                {
+                  "type": "speed",
+                  "rate": 0.25,
+                  "polarity": "buff"
+                }
+              ],
+              "healRate": 0.1
+            },
+            "enemies": {
+              "alterations": [
+                {
+                  "type": "accuracy",
+                  "rate": 0.2,
+                  "polarity": "debuff"
+                }
+              ],
+              "damage": {
+                "rate": 0.15,
+                "damageType": "AIR"
+              }
+            },
+            "revival": {
+              "rate": 0.3,
+              "withinTurns": 2
+            },
+            "legacy": {
+              "duration": 2,
+              "empowerment": {
+                "name": "Rage de la Colonie",
+                "rate": 0.5
+              }
+            }
+          }
+        }
+      ]
+    },
+    "behaviors": {
+      "dodge": "simple-dodge"
+    }
   }
 ]

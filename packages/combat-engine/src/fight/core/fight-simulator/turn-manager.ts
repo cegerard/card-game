@@ -100,6 +100,13 @@ export class TurnManager {
       steps.push(
         ...effectResultsToSteps(card, card.decreaseWeakPointDurations()),
       );
+      card.decreaseBattlefieldDurations().forEach((name) =>
+        steps.push({
+          kind: StepKind.BattlefieldEnded,
+          name,
+          card: card.identityInfo,
+        }),
+      );
       const expiredConcealment = card.decreaseConcealmentDuration();
       if (expiredConcealment) {
         steps.push(concealmentEndedReport(card, expiredConcealment, 'expired'));
@@ -108,9 +115,11 @@ export class TurnManager {
       // Regeneration runs before the status ticks: the card mends itself, then
       // the poison bites into what is left.
       this.processCardRegeneration(card, steps);
+      this.processBattlefields(card, steps);
       this.processCardEffectStates(card, steps);
     });
 
+    this.countTurnOfTheDead(cards);
     steps.push(...this.deathSkillHandler.drainSteps());
 
     return steps;
@@ -149,6 +158,69 @@ export class TurnManager {
       healed,
       remainingHealth: card.actualHealth,
     });
+  }
+
+  /** The heals and hazards of the battlefields the card stands in. */
+  private processBattlefields(card: FightingCard, steps: Step[]) {
+    const ticks = card.tickBattlefields();
+    ticks.forEach((tick) => {
+      if (tick.healed !== undefined) {
+        steps.push({
+          kind: StepKind.Healing,
+          name: tick.name,
+          source: tick.source.identityInfo,
+          heal: [
+            {
+              target: card.identityInfo,
+              healed: tick.healed,
+              remainingHealth: card.actualHealth,
+            },
+          ],
+          energy: tick.source.actualEnergy,
+        });
+        return;
+      }
+      steps.push({
+        kind: StepKind.Attack,
+        name: tick.name,
+        attacker: tick.source.identityInfo,
+        damages: [
+          {
+            defender: card.identityInfo,
+            damage: tick.damage,
+            isCritical: false,
+            dodge: false,
+            remainingHealth: card.actualHealth,
+            kind: [tick.damageType],
+          },
+        ],
+        energy: tick.source.actualEnergy,
+      });
+    });
+    if (ticks.length === 0 || !card.isDead()) return;
+
+    // A fallen caster still owns the hazard it left, but kills nobody.
+    const killer = ticks
+      .filter((tick) => tick.damage !== undefined)
+      .map((tick) => tick.source)
+      .find((source) => !source.isDead());
+    this.eventBroker.onCardDeath.forEach((subscriber) =>
+      subscriber.notifyDeath(card, killer),
+    );
+    steps.push({
+      kind: StepKind.StatusChange,
+      card: card.identityInfo,
+      status: 'dead',
+    });
+  }
+
+  /** Every side that played counts one more turn for its dead cards. */
+  private countTurnOfTheDead(cards: FightingCard[]) {
+    [this.player1, this.player2]
+      .filter((player) => cards.some((card) => player.ownCard(card)))
+      .forEach((player) =>
+        player.allCards.forEach((card) => card.countTurnDead()),
+      );
   }
 
   private processCardEffectStates(card: FightingCard, steps: Step[]) {

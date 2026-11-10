@@ -43,6 +43,15 @@ import { ConcealmentSkill } from '../core/cards/skills/concealment';
 import { AnalysisSkill } from '../core/cards/skills/analysis';
 import { AftershockSkill } from '../core/cards/skills/aftershock';
 import { WeakPointLegacySkill } from '../core/cards/skills/weak-point-legacy';
+import { SupportSkill } from '../core/cards/skills/support';
+import { EnergyGainSkill } from '../core/cards/skills/energy-gain';
+import { LiveRateFactory } from '../core/cards/skills/alteration-skill';
+import {
+  assertLivingAllyScaling,
+  HealthCeiling,
+  LivingAllyScaling,
+} from '../core/cards/@types/alteration/live-rate';
+import { buildBattlefield } from './battlefield-factory';
 import { buildTriggerStrategy } from './trigger-factory';
 import { buildEffect, buildEffects } from './attack-effect-factory';
 import { buildExecution } from './attack-skill-factory';
@@ -72,7 +81,7 @@ export function createOtherSkill(
     case SkillKind.TARGETING_OVERRIDE:
       return buildTargetingOverride(skillData, ownerId);
     case SkillKind.TRANSFORMATION:
-      return buildTransformation(skillData);
+      return buildTransformation(skillData, ownerId);
     case SkillKind.SHIELD:
       return buildShield(skillData);
     case SkillKind.PROTECTION:
@@ -147,6 +156,17 @@ export function createOtherSkill(
             skillData.rate,
             buildTriggerForSkill(skillData, ownerId),
             skillData.requiresStance,
+          ),
+      );
+    case SkillKind.SUPPORT:
+      return buildSupport(skillData, ownerId);
+    case SkillKind.ENERGY_GAIN:
+      return asBadRequest(
+        () =>
+          new EnergyGainSkill(
+            skillData.name,
+            skillData.amount,
+            buildTriggerForSkill(skillData, ownerId),
           ),
       );
     case SkillKind.SURVIVE:
@@ -231,7 +251,54 @@ function buildAlteration(
     terminationEvent: skillData.terminationEvent,
     powerId: skillData.powerId,
     requiredStance: skillData.requiresStance,
+    liveRate: buildLiveRate(skillData),
   });
+}
+
+/**
+ * The live rate an ALTERATION asks for: earned per living ally, or held only
+ * while its bearer is under a health ratio. Not both: they answer different
+ * questions and their product would read as neither.
+ */
+function buildLiveRate(skillData: OtherSkillDto): LiveRateFactory | undefined {
+  const { perLivingAlly, whileHealthBelow, rate } = skillData;
+  if (perLivingAlly && whileHealthBelow !== undefined) {
+    throw new BadRequestException(
+      'ALTERATION cannot combine perLivingAlly and whileHealthBelow',
+    );
+  }
+  if (perLivingAlly) {
+    asBadRequest(() => assertLivingAllyScaling(rate, perLivingAlly.maxRate));
+    return (team) => new LivingAllyScaling(rate, perLivingAlly.maxRate, team);
+  }
+  if (whileHealthBelow !== undefined) {
+    const ceiling = new HealthCeiling(rate, whileHealthBelow);
+    return () => ceiling;
+  }
+  return undefined;
+}
+
+function buildSupport(skillData: OtherSkillDto, ownerId: string): SupportSkill {
+  return asBadRequest(
+    () =>
+      new SupportSkill(
+        skillData.name,
+        buildTriggerForSkill(skillData, ownerId),
+        buildSkillTargeting(skillData),
+        buildCooldown(skillData.interval),
+        {
+          shield: skillData.shield,
+          cleanse: skillData.cleanse,
+          alterations: skillData.alterations?.map((a) => ({
+            type: mapAlterationType(a.type),
+            rate: a.rate,
+            duration: a.duration,
+            polarity: a.polarity,
+          })),
+        },
+        skillData.requiresStance,
+      ),
+  );
 }
 
 function buildConditionalAttack(
@@ -358,7 +425,10 @@ function buildTargetingOverride(
   );
 }
 
-function buildTransformation(skillData: OtherSkillDto): TransformationSkill {
+function buildTransformation(
+  skillData: OtherSkillDto,
+  ownerId: string,
+): TransformationSkill {
   const threshold = skillData.activationCondition?.threshold;
   if (threshold === undefined) {
     throw new Error(
@@ -378,11 +448,29 @@ function buildTransformation(skillData: OtherSkillDto): TransformationSkill {
     endCostRate: skillData.endCostRate,
     stanceActivations: skillData.stanceActivations,
     poisonSurge: skillData.poisonSurge,
-    activationTrigger:
-      skillData.activationEvent &&
-      asBadRequest(() => buildTriggerStrategy(skillData.activationEvent)),
+    activationTrigger: buildTransformationTrigger(skillData, ownerId),
     criticalDamageRate: skillData.criticalDamageRate,
+    battlefield: buildBattlefield(skillData.battlefield),
   });
+}
+
+/**
+ * The event setting a transformation off besides its own threshold. An ally
+ * falling low names its threshold apart, the skill one being its owner health.
+ */
+function buildTransformationTrigger(skillData: OtherSkillDto, ownerId: string) {
+  if (!skillData.activationEvent) return undefined;
+  if (skillData.activationEvent === TriggerEvent.ANY_ALLY_HEALTH_BELOW) {
+    return buildTriggerForSkill(
+      {
+        ...skillData,
+        event: skillData.activationEvent,
+        activationCondition: { threshold: skillData.activationEventThreshold },
+      } as OtherSkillDto,
+      ownerId,
+    );
+  }
+  return asBadRequest(() => buildTriggerStrategy(skillData.activationEvent));
 }
 
 function buildStatAlterations(skillData: OtherSkillDto): Alteration[] {

@@ -34,12 +34,13 @@ export interface Special {
   ): SpecialResult;
 
   /**
-   * Increases the current energy level.
+   * Increases the current energy level, never past what the special needs.
    *
    * @param actualEnergy - The current energy level.
+   * @param amount - The energy gained, a turn's worth by default.
    * @returns The new energy level after the increase.
    */
-  increaseEnergy(actualEnergy: number): number;
+  increaseEnergy(actualEnergy: number, amount?: number): number;
 
   /**
    * Get the kind of special skill.
@@ -63,8 +64,11 @@ export abstract class BaseSpecial implements Special {
     return actualEnergy >= this.energyNeeded;
   }
 
-  public increaseEnergy(actualEnergy: number): number {
-    return Math.min(actualEnergy + ENERGY_INCREASE_FACTOR, this.energyNeeded);
+  public increaseEnergy(
+    actualEnergy: number,
+    amount: number = ENERGY_INCREASE_FACTOR,
+  ): number {
+    return Math.min(actualEnergy + amount, this.energyNeeded);
   }
 
   public abstract launch(

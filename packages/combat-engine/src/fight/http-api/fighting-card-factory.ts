@@ -39,7 +39,25 @@ const KIND_ONLY_FIELDS: {
   },
   {
     kinds: [SkillKind.TRANSFORMATION],
-    fields: ['stanceActivations', 'poisonSurge', 'criticalDamageRate'],
+    fields: [
+      'stanceActivations',
+      'poisonSurge',
+      'criticalDamageRate',
+      'battlefield',
+      'activationEventThreshold',
+    ],
+  },
+  {
+    kinds: [SkillKind.ALTERATION],
+    fields: ['perLivingAlly', 'whileHealthBelow'],
+  },
+  {
+    kinds: [SkillKind.SUPPORT],
+    fields: ['shield', 'cleanse', 'alterations'],
+  },
+  {
+    kinds: [SkillKind.ENERGY_GAIN],
+    fields: ['amount'],
   },
   {
     kinds: [SkillKind.CONDITIONAL_ATTACK],
@@ -52,7 +70,15 @@ const KIND_ONLY_FIELDS: {
   },
   {
     kinds: [SkillKind.CONDITIONAL_ATTACK, SkillKind.CONCEALMENT],
-    fields: ['requiresUndamaged', 'interval'],
+    fields: ['requiresUndamaged'],
+  },
+  {
+    kinds: [
+      SkillKind.CONDITIONAL_ATTACK,
+      SkillKind.CONCEALMENT,
+      SkillKind.SUPPORT,
+    ],
+    fields: ['interval'],
   },
   {
     kinds: [SkillKind.STANCE],

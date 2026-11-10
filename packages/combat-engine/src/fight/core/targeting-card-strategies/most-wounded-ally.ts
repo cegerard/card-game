@@ -13,7 +13,7 @@ import { TargetingCardStrategy } from './targeting-card-strategy';
  * ally is below the threshold, so the skill stays silent on a healthy team.
  */
 export class MostWoundedAllyStrategy implements TargetingCardStrategy {
-  public readonly id = 'most-wounded-ally';
+  public readonly id: string = 'most-wounded-ally';
 
   constructor(private readonly threshold: number) {}
 
@@ -38,5 +38,14 @@ export class MostWoundedAllyStrategy implements TargetingCardStrategy {
         card.healthRatio < worst.healthRatio ? card : worst,
       ),
     ];
+  }
+}
+
+/** The ally in the worst shape, whatever its health: nobody only when the caster stands alone. */
+export class LowestHealthAllyStrategy extends MostWoundedAllyStrategy {
+  public readonly id = 'lowest-health-ally';
+
+  constructor() {
+    super(Infinity);
   }
 }

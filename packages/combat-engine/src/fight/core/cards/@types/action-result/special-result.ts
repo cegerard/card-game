@@ -5,6 +5,7 @@ import { ShieldResult } from './shield-result';
 import { Stance } from '../stance/stance';
 import { Concealment } from '../concealment/concealment';
 import { ExecutionResult } from './execution-result';
+import { BattlefieldResult } from '../battlefield/battlefield';
 
 export type SpecialResult = {
   name: string;
@@ -19,4 +20,6 @@ export type SpecialResult = {
   executions?: ExecutionResult[];
   /** Set when the special concealed its caster. */
   concealmentStarted?: Concealment;
+  /** Set when the special laid a battlefield. */
+  battlefield?: BattlefieldResult;
 };

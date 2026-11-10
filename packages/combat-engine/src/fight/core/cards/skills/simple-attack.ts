@@ -124,6 +124,7 @@ export class SimpleAttack implements AttackSkill {
           survivedSkillName: finalResult.survivedSkillName,
           mitigated: finalResult.mitigated,
           mitigatedSkillName: finalResult.mitigatedSkillName,
+          damageShared: finalResult.damageShared,
           consumedBleedStacks: detonation?.consumedStacks,
         };
       }),

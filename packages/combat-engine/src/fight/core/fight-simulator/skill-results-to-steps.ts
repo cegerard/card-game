@@ -5,6 +5,7 @@ import {
   DebuffSkillResults,
   SkillKind,
   SkillResults,
+  SupportSkillResults,
   TransformationSkillResults,
 } from '../cards/skills/skill';
 
@@ -21,6 +22,10 @@ import { concealmentStartedReport, revealAttacker } from './concealment-steps';
 import { stanceEndedReport, stanceStartedReport } from './stance-steps';
 import { executionSteps } from './execution-steps';
 import type { SurvivedReactor } from './survived-reactions';
+import {
+  battlefieldStartedSteps,
+  damageSharedSteps,
+} from './battlefield-steps';
 
 export function skillResultsToSteps(
   card: FightingCard,
@@ -107,6 +112,8 @@ export function skillResultsToSteps(
               card: r.defender.identityInfo,
             });
           }
+
+          perHit.push(...damageSharedSteps(r));
 
           if (r.shieldBroken) {
             perHit.push({
@@ -212,6 +219,23 @@ export function skillResultsToSteps(
             stacks: surged.poisonStacks(),
           }),
         );
+        if (skillResult.battlefield) {
+          steps.push(...battlefieldStartedSteps(card, skillResult.battlefield));
+        }
+        break;
+      case SkillKind.Support:
+        steps.push(...supportSteps(card, skillResult));
+        break;
+      case SkillKind.Energy:
+        if (skillResult.amount === 0) break;
+
+        steps.push({
+          kind: StepKind.EnergyGained,
+          name: skillResult.name,
+          card: card.identityInfo,
+          amount: skillResult.amount,
+          energy: skillResult.energy,
+        });
         break;
       case SkillKind.Shield:
         if (skillResult.results.length > 0) {
@@ -332,6 +356,44 @@ function pushAlterationStep(
     energy: card.actualEnergy,
     powerId: skillResult.powerId,
   });
+}
+
+/** The shields, then the cleansed statuses, then the alterations of a support. */
+function supportSteps(
+  card: FightingCard,
+  { name, powerId, results }: SupportSkillResults,
+): Step[] {
+  const steps: Step[] = [];
+  const shielded = results.filter((r) => r.shield);
+  if (shielded.length > 0) {
+    steps.push({
+      kind: StepKind.ShieldApplied,
+      name,
+      source: card.identityInfo,
+      targets: shielded.map((r) => ({
+        target: r.target.identityInfo,
+        points: r.shield.points,
+      })),
+    });
+  }
+  results.forEach(({ target, cleansed }) =>
+    cleansed.forEach((effectType) =>
+      steps.push({
+        kind: StepKind.EffectCleansed,
+        name,
+        source: card.identityInfo,
+        card: target.identityInfo,
+        effectType,
+      }),
+    ),
+  );
+  pushAlterationsByPolarity(steps, card, {
+    name,
+    powerId,
+    results: results.flatMap((r) => r.alterations),
+  });
+
+  return steps;
 }
 
 /** One `buff` step for the buffs, then one `debuff` step for the debuffs. */

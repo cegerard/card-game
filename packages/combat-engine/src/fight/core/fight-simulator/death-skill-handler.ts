@@ -14,6 +14,8 @@ import { FightingContext } from '../cards/@types/fighting-context';
 import { skillResultsToSteps } from './skill-results-to-steps';
 import { Player } from '../player';
 import { SurvivedReactor, survivedReactions } from './survived-reactions';
+import { ANY_ALLY_DEATH } from '../trigger/any-ally-death';
+import { legacySteps } from './battlefield-steps';
 
 /**
  * Handles the cascade of effects that must fire immediately after a card dies.
@@ -29,20 +31,23 @@ import { SurvivedReactor, survivedReactions } from './survived-reactions';
  *    A card a reactive attack kills in any phase goes through its own cascade
  *    right away, through `notifyKill` so every death subscriber hears of it,
  *    credited to the card that fired the attack.
- * 3. **Ally-death triggers** – skills on the dead card's own team that listen for
- *    `ally-death:<deadCard.id>` are fired next.
- * 4. **Enemy-death triggers** – skills on the opposing team that listen for
+ * 3. **Battlefield legacy** – a battlefield the card laid and still running
+ *    lasts longer and empowers its living allies, once.
+ * 4. **Ally-death triggers** – skills on the dead card's own team that listen for
+ *    `ally-death:<deadCard.id>`, then `any-ally-death`, are fired next.
+ * 5. **Enemy-death triggers** – skills on the opposing team that listen for
  *    `enemy-death:<deadCard.id>` are fired next.
- * 5. **Enemy-bleed-death triggers** – when the card bled out, skills on the
+ * 6. **Enemy-bleed-death triggers** – when the card bled out, skills on the
  *    opposing team that listen for `enemy-bleed-death` are fired next.
- * 6. **Poisoned-enemy-death triggers** – when the card carried a stacked
+ * 7. **Poisoned-enemy-death triggers** – when the card carried a stacked
  *    poison, the living enemy that laid it hears of the death, whoever killed.
- * 7. **Enemy-killed triggers** – when an enemy dealt the fatal blow and is
+ * 8. **Enemy-killed triggers** – when an enemy dealt the fatal blow and is
  *    still alive, its own skills listening for `enemy-killed` fire last, with
  *    the health ratio the victim had just before the blow. A card the reward
  *    kills goes through its own cascade right away, like a self-death kill.
  *
- * A card is processed once: a second notification of the same death is ignored.
+ * A death is processed once: a second notification of it is ignored, while a
+ * revived card that falls again dies anew.
  *
  * All resulting steps are accumulated internally. Callers must call `drainSteps()`
  * immediately after each `notifyDeath` invocation to collect them, because the
@@ -53,7 +58,8 @@ export class DeathSkillHandler implements CardDeathSubscriber {
   private player1: Player;
   private player2: Player;
   private endEventProcessor?: EndEventProcessor;
-  private readonly notifiedDeaths = new Set<FightingCard>();
+  /** Each card notified, with the revivals it had when it died. */
+  private readonly notifiedDeaths = new Map<FightingCard, number>();
   private readonly notifyKill: CardDeathSubscriber['notifyDeath'];
 
   /**
@@ -92,8 +98,8 @@ export class DeathSkillHandler implements CardDeathSubscriber {
   ): void {
     // A card killed inside a cascade can be reported again by the attack that
     // started it; its death runs once.
-    if (this.notifiedDeaths.has(deadCard)) return;
-    this.notifiedDeaths.add(deadCard);
+    if (this.notifiedDeaths.get(deadCard) === deadCard.revivals) return;
+    this.notifiedDeaths.set(deadCard, deadCard.revivals);
 
     const ownerPlayer = this.player1.ownCard(deadCard)
       ? this.player1
@@ -125,10 +131,19 @@ export class DeathSkillHandler implements CardDeathSubscriber {
       true,
     );
 
+    this.leaveLegacy(deadCard);
+
     const allyTriggerId = `ally-death:${deadCard.id}`;
     this.fireSkillsOnCards(
       ownerPlayer.playableCards,
       allyTriggerId,
+      ownerPlayer,
+      opponentPlayer,
+      killerCard,
+    );
+    this.fireSkillsOnCards(
+      ownerPlayer.playableCards,
+      ANY_ALLY_DEATH,
       ownerPlayer,
       opponentPlayer,
       killerCard,
@@ -188,6 +203,21 @@ export class DeathSkillHandler implements CardDeathSubscriber {
     const drained = this.steps;
     this.steps = [];
     return drained;
+  }
+
+  /** The battlefields the dead card laid outlive it, as their legacy says. */
+  private leaveLegacy(deadCard: FightingCard): void {
+    const players = [this.player1, this.player2];
+    const deployments = new Set(
+      players
+        .flatMap((player) => player.allCards)
+        .flatMap((card) => card.battlefieldDeployments)
+        .filter((deployment) => deployment.source === deadCard),
+    );
+    deployments.forEach((deployment) => {
+      const legacy = deployment.fallOfSource(players);
+      if (legacy) this.steps.push(...legacySteps(deadCard, legacy));
+    });
   }
 
   private fireSkillsOnCards(

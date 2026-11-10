@@ -2,6 +2,7 @@ import { FightingCard } from '../../fighting-card';
 import { EffectResult } from '../attack/attack-effect';
 import { BuffResult } from './alteration-result';
 import { DamageType } from '../damage/damage-type';
+import { SharedDamage } from '../../fighting-card';
 
 export type AttackResult = {
   damage: number;
@@ -20,6 +21,8 @@ export type AttackResult = {
   survivedSkillName?: string;
   mitigated?: boolean;
   mitigatedSkillName?: string;
+  /** The part of the hit a damage sharing circle carried. */
+  damageShared?: SharedDamage;
   /** Bleed stacks a detonation consumed on the defender. */
   consumedBleedStacks?: number;
 };

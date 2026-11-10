@@ -15,6 +15,9 @@ import { Stance } from '../@types/stance/stance';
 import { Concealment } from '../@types/concealment/concealment';
 import { Buff } from '../@types/alteration/alteration-detail';
 import { EffectResult } from '../@types/attack/attack-effect';
+import { BattlefieldResult } from '../@types/battlefield/battlefield';
+import { Shield } from '../@types/shield/shield';
+import { StateEffectType } from '../@types/state/state-effect-type';
 
 export enum SkillKind {
   Healing = 'healing',
@@ -30,6 +33,8 @@ export enum SkillKind {
   BuffTransfer = 'buff_transfer',
   Affliction = 'affliction',
   Analysis = 'analysis',
+  Support = 'support',
+  Energy = 'energy',
 }
 
 type BaseSkillResults = {
@@ -93,6 +98,26 @@ export type TransformationSkillResults = BaseSkillResults & {
   stancesStarted?: Stance[];
   /** Cards whose stacked poison the transformation surged. */
   poisonSurged?: FightingCard[];
+  /** The battlefield the transformation laid. */
+  battlefield?: BattlefieldResult;
+};
+
+export type SupportSkillResults = BaseSkillResults & {
+  skillKind: SkillKind.Support;
+  /** One entry per ally supported, empty when nobody was. */
+  results: {
+    target: FightingCard;
+    shield?: Shield;
+    cleansed: StateEffectType[];
+    alterations: (BuffResult | DebuffResult)[];
+  }[];
+};
+
+export type EnergySkillResults = BaseSkillResults & {
+  skillKind: SkillKind.Energy;
+  /** Energy actually gained: 0 on a full gauge. */
+  amount: number;
+  energy: number;
 };
 
 export type ProtectionSkillResults = BaseSkillResults & {
@@ -146,7 +171,9 @@ export type SkillResults =
   | BuffTransferSkillResults
   | AfflictionSkillResults
   | AnalysisSkillResults
-  | ConcealmentSkillResults;
+  | ConcealmentSkillResults
+  | SupportSkillResults
+  | EnergySkillResults;
 
 export interface Skill {
   id: string;

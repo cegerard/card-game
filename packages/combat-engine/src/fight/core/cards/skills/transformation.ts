@@ -12,6 +12,8 @@ import { SkillKind, TransformationSkillResults } from './skill';
 import { StanceActivation } from '../@types/stance/stance';
 import { Trigger } from '../../trigger/trigger';
 import { TRANSFORMED } from '../../trigger/transformed';
+import { Battlefield } from '../@types/battlefield/battlefield';
+import { isActivatableTrigger } from '../../trigger/activatable-trigger';
 
 export type TransformationConfig = {
   name: string;
@@ -29,6 +31,8 @@ export type TransformationConfig = {
   activationTrigger?: Trigger;
   /** Multiplies what a critical hit of the owner deals by `1 + rate`. */
   criticalDamageRate?: number;
+  /** A battlefield laid for both sides when it starts. */
+  battlefield?: Battlefield;
 };
 
 /**
@@ -87,6 +91,7 @@ export class TransformationSkill implements HealthReactiveSkill {
       (activation) => source.activateStance(activation),
     );
     const poisonSurged = this.surgePoisons(context);
+    const battlefield = this.config.battlefield?.deploy(source, context);
     const followUps = source.launchSkills(TRANSFORMED, context);
 
     return {
@@ -94,6 +99,7 @@ export class TransformationSkill implements HealthReactiveSkill {
       results,
       stancesStarted,
       poisonSurged,
+      battlefield,
       name: this.name,
       remainingTurns: this.config.duration,
       followUps: followUps.length > 0 ? followUps : undefined,
@@ -105,6 +111,14 @@ export class TransformationSkill implements HealthReactiveSkill {
       !this.consumed &&
       (this.config.activationTrigger?.isTriggered(triggerName) ?? false)
     );
+  }
+
+  /** Lets a stateful activation event, such as an ally falling low, follow the board. */
+  activate(triggerId: string, context: FightingContext): void {
+    const trigger = this.config.activationTrigger;
+    if (trigger && isActivatableTrigger(trigger)) {
+      trigger.activate(triggerId, context);
+    }
   }
 
   private surgePoisons(context: FightingContext): FightingCard[] {

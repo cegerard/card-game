@@ -52,12 +52,22 @@ import {
 } from './@types/weak-point/weak-point';
 import { WeakPoints } from './@types/weak-point/weak-points';
 import { EffectResult } from './@types/attack/attack-effect';
+import { LiveRate } from './@types/alteration/live-rate';
+import {
+  BattlefieldDeployment,
+  BattlefieldExposure,
+  DamageSharing,
+} from './@types/battlefield/battlefield';
+import { ElementalMatrix } from './damage/elemental-matrix';
 
 /**
  * Turns the resistance stat into a refusal chance. Chosen so the 20-80 design
  * range of the stat spans 10% to 40% of incoming statuses and debuffs refused.
  */
 const RESISTANCE_REFUSAL_DIVISOR = 200;
+
+/** What an alteration carries besides its rate and its lifetime. */
+export type AlterationOptions = { live?: LiveRate; origin?: string };
 
 export type FinalDamageResult = {
   damageToHealth: number;
@@ -66,6 +76,22 @@ export type FinalDamageResult = {
   survivedSkillName?: string;
   mitigated?: boolean;
   mitigatedSkillName?: string;
+  /** The part of the hit the other members of a damage sharing circle took. */
+  damageShared?: SharedDamage;
+};
+
+export type SharedDamage = {
+  name: string;
+  shares: { card: FightingCard; damage: number }[];
+};
+
+/** What one battlefield did to the card at its turn end. */
+export type BattlefieldTick = {
+  name: string;
+  source: FightingCard;
+  healed?: number;
+  damage?: number;
+  damageType?: DamageType;
 };
 
 type Transformation = {
@@ -175,6 +201,16 @@ export class FightingCard {
 
   // Concealment
   private concealment: Concealment | null = null;
+
+  // Battlefields the card stands in
+  private exposures: BattlefieldExposure[] = [];
+
+  // A one-shot bonus on the next attack
+  private empowerment: { name: string; rate: number } | null = null;
+
+  // Turns of its side since the card died, and how many times it came back
+  private turnsDead = 0;
+  private revivalCount = 0;
 
   private lastPreDamageHealthRatio = 1;
 
@@ -340,7 +376,9 @@ export class FightingCard {
       this.lowHealthTargetBonus?.multiplierAgainst(defender) ?? 1;
 
     return (
-      lowHealthBonus * (1 + defender.weakPoints.bonusOf(this, 'attackRate'))
+      lowHealthBonus *
+      (1 + defender.weakPoints.bonusOf(this, 'attackRate')) *
+      (1 + (this.empowerment?.rate ?? 0))
     );
   }
 
@@ -542,6 +580,30 @@ export class FightingCard {
     return true;
   }
 
+  /** Removes one status the card suffers, picked at random; returns its type. */
+  public cleanseRandomStatus(): StateEffectType | undefined {
+    const statuses = [
+      this.poisoned,
+      this.burned,
+      this.frozen,
+      this.stunted,
+      this.bleeding,
+      this.hypothermic,
+    ].filter((state) => state !== undefined);
+    if (statuses.length === 0) return undefined;
+
+    const { type } =
+      statuses[Math.floor(this.randomizer.random() * statuses.length)];
+    if (type === 'poison') this.poisoned = undefined;
+    if (type === 'burn') this.burned = undefined;
+    if (type === 'freeze') this.frozen = undefined;
+    if (type === 'stunt') this.stunted = undefined;
+    if (type === 'bleed') this.bleeding = undefined;
+    if (type === 'hypothermia') this.hypothermic = undefined;
+
+    return type;
+  }
+
   public unFreeze(): void {
     this.frozen = undefined;
   }
@@ -693,6 +755,16 @@ export class FightingCard {
     return this.specialEnergy;
   }
 
+  /** Energy granted by a skill, outside the turn gain; returns the new gauge. */
+  public gainEnergy(amount: number): number {
+    this.specialEnergy = this.special.increaseEnergy(
+      this.specialEnergy,
+      amount,
+    );
+
+    return this.specialEnergy;
+  }
+
   public spendEnergy(amount: number): void {
     this.specialEnergy -= amount;
   }
@@ -739,6 +811,12 @@ export class FightingCard {
       ? { mitigated: true, mitigatedSkillName: this.damageReduction.name }
       : {};
 
+    const damageShared = this.shareDamage(causedDamages);
+    if (damageShared) {
+      causedDamages -= causedDamages * this.sharing.rate;
+    }
+    const sharingReport = damageShared ? { damageShared } : {};
+
     const shieldAbsorbed = this.absorbWithShield(causedDamages);
     let damageToHealth = causedDamages - shieldAbsorbed;
     damageToHealth = Math.min(damageToHealth, this.actualHealth);
@@ -755,11 +833,181 @@ export class FightingCard {
         survived: true,
         survivedSkillName: this.surviveSkill.name,
         ...mitigationReport,
+        ...sharingReport,
       };
     }
 
     this.receivedDamages += damageToHealth;
-    return { damageToHealth, shieldAbsorbed, ...mitigationReport };
+    return {
+      damageToHealth,
+      shieldAbsorbed,
+      ...mitigationReport,
+      ...sharingReport,
+    };
+  }
+
+  private get sharing(): DamageSharing | undefined {
+    return this.exposures.find((exposure) => exposure.sharing)?.sharing;
+  }
+
+  /**
+   * Hands a share of the hit to the other living members of the circle, each
+   * taking at most `maxShareRate` of it. Without a partner to carry it, the
+   * card keeps the whole hit.
+   */
+  private shareDamage(damage: number): SharedDamage | undefined {
+    const sharing = this.sharing;
+    if (!sharing || damage <= 0) return undefined;
+
+    const partners = sharing.circle.filter(
+      (card) => card !== this && !card.isDead() && card.sharing === sharing,
+    );
+    if (partners.length === 0) return undefined;
+
+    const share = Math.min(
+      (damage * sharing.rate) / partners.length,
+      damage * sharing.maxShareRate,
+    );
+    return {
+      name: sharing.name,
+      shares: partners.map((card) => ({
+        card,
+        damage: card.takeSharedDamage(round2(share)),
+      })),
+    };
+  }
+
+  /** Damage carried for a circle partner: real, and never fatal. */
+  private takeSharedDamage(damage: number): number {
+    return this.addRealDamage(
+      Math.max(0, Math.min(damage, this.actualHealth - 1)),
+    );
+  }
+
+  /** Stands the card in a battlefield, or refreshes the one of that name. */
+  public expose(exposure: BattlefieldExposure): void {
+    this.exposures = [
+      ...this.exposures.filter(
+        (e) => e.deployment.name !== exposure.deployment.name,
+      ),
+      exposure,
+    ];
+  }
+
+  public isExposedTo(deployment: BattlefieldDeployment): boolean {
+    return this.exposures.some((e) => e.deployment === deployment);
+  }
+
+  /** What the battlefields the card stands in heal or deal at its turn end. */
+  public tickBattlefields(): BattlefieldTick[] {
+    if (this.isDead()) return [];
+
+    return this.exposures.flatMap((exposure): BattlefieldTick[] => {
+      const { name, source } = exposure.deployment;
+      if (exposure.healRate) {
+        const healed = this.healShareOfMaxHealth(exposure.healRate);
+        return healed > 0 ? [{ name, source, healed }] : [];
+      }
+      if (exposure.damage && !this.isDead()) {
+        const { amount, damageType } = exposure.damage;
+        const damage = this.addRealDamage(
+          round2(
+            amount * ElementalMatrix.getMultiplier(damageType, this.element),
+          ),
+        );
+        return [{ name, source, damage, damageType }];
+      }
+      return [];
+    });
+  }
+
+  /** Decrements every battlefield on the card and returns the ones that just ended. */
+  public decreaseBattlefieldDurations(): string[] {
+    this.exposures.forEach((exposure) => exposure.remainingTurns--);
+    const ended = this.exposures.filter((e) => e.remainingTurns < 0);
+    this.exposures = this.exposures.filter((e) => e.remainingTurns >= 0);
+
+    return ended.map((e) => e.deployment.name);
+  }
+
+  /** Makes a battlefield, and the alterations it laid, last `turns` more. */
+  public extendBattlefield(
+    deployment: BattlefieldDeployment,
+    turns: number,
+  ): void {
+    this.exposures
+      .filter((e) => e.deployment === deployment)
+      .forEach((e) => (e.remainingTurns += turns));
+    [...this.buffs, ...this.debuffs]
+      .filter((a) => a.origin === deployment.name)
+      .forEach((a) => (a.duration += turns));
+  }
+
+  /** A battlefield laid again refreshes its alterations rather than stacking them. */
+  public removeAlterationsFrom(origin: string): void {
+    this.buffs = this.buffs.filter((b) => b.origin !== origin);
+    this.debuffs = this.debuffs.filter((d) => d.origin !== origin);
+  }
+
+  /** Every battlefield deployment the card stands in. */
+  public get battlefieldDeployments(): BattlefieldDeployment[] {
+    return this.exposures.map((e) => e.deployment);
+  }
+
+  /** Multiplies the damage of the next attack by `1 + rate`, once. */
+  public empower(name: string, rate: number): void {
+    this.empowerment = { name, rate };
+  }
+
+  public get isEmpowered(): boolean {
+    return this.empowerment !== null;
+  }
+
+  public consumeEmpowerment(): void {
+    this.empowerment = null;
+  }
+
+  /** Turns its side played since the card died. */
+  public get turnsSinceDeath(): number {
+    return this.turnsDead;
+  }
+
+  public countTurnDead(): void {
+    if (this.isDead()) this.turnsDead++;
+  }
+
+  /** Times the card came back from death, which makes each death a new one. */
+  public get revivals(): number {
+    return this.revivalCount;
+  }
+
+  /**
+   * Brings a dead card back with `rate` of its max health, clear of what it
+   * carried when it fell.
+   */
+  public revive(rate: number): void {
+    this.receivedHeal = 0;
+    this.receivedDamages = this.maxHealth - Math.round(rate * this.maxHealth);
+    this.receivedDamagesAtActionStart = this.receivedDamages;
+    this.poisoned = undefined;
+    this.burned = undefined;
+    this.frozen = undefined;
+    this.stunted = undefined;
+    this.bleeding = undefined;
+    this.hypothermic = undefined;
+    this.buffs = [];
+    this.debuffs = [];
+    this.shield = null;
+    this.stances = [];
+    this.concealment = null;
+    this.protection = null;
+    this.transformation = null;
+    this.lifesteal = null;
+    this.statusImmunity = null;
+    this.exposures = [];
+    this.empowerment = null;
+    this.turnsDead = 0;
+    this.revivalCount++;
   }
 
   /**
@@ -1016,7 +1264,11 @@ export class FightingCard {
   }
 
   public applyShield(rate: number, duration: number): Shield {
-    const points = Math.round(rate * this.maxHealth);
+    return this.applyShieldPoints(Math.round(rate * this.maxHealth), duration);
+  }
+
+  /** A shield sized by somebody else than its bearer, such as its caster. */
+  public applyShieldPoints(points: number, duration: number): Shield {
     this.shield = { points, duration };
     return this.shield;
   }
@@ -1238,10 +1490,14 @@ export class FightingCard {
     terminationEvent?: string,
     powerId?: string,
     stacking?: AlterationStacking,
+    { live, origin }: AlterationOptions = {},
   ): Buff | undefined {
     if (isPileFull(this.buffs, stacking)) return undefined;
 
-    const value = this.computeAttributeModifierValue(buffType, buffRate);
+    const value = this.computeAttributeModifierValue(
+      buffType,
+      live?.rateFor(this) ?? buffRate,
+    );
     const buff: Buff = {
       polarity: 'buff',
       type: buffType,
@@ -1250,6 +1506,8 @@ export class FightingCard {
       terminationEvent,
       powerId,
       stackId: stacking?.id,
+      live,
+      origin,
     };
 
     if (terminationEvent && !stacking) {
@@ -1374,6 +1632,7 @@ export class FightingCard {
     terminationEvent?: string,
     powerId?: string,
     stacking?: AlterationStacking,
+    { live, origin }: AlterationOptions = {},
   ): Debuff | undefined {
     if (isPileFull(this.debuffs, stacking)) return undefined;
 
@@ -1382,11 +1641,16 @@ export class FightingCard {
     const debuff: Debuff = {
       polarity: 'debuff',
       type: debuffType,
-      value: this.computeAttributeModifierValue(debuffType, debuffRate),
+      value: this.computeAttributeModifierValue(
+        debuffType,
+        live?.rateFor(this) ?? debuffRate,
+      ),
       duration: duration,
       terminationEvent,
       powerId,
       stackId: stacking?.id,
+      live,
+      origin,
     };
 
     this.debuffs.push(debuff);
@@ -1446,12 +1710,29 @@ export class FightingCard {
   private computeActualStat(base: number, type: AlterationType): number {
     return Math.max(
       0,
-      base + sumOf(this.buffs, type) - sumOf(this.debuffs, type),
+      base + this.sumOf(this.buffs, type) - this.sumOf(this.debuffs, type),
     );
   }
 
   private get agilityWithoutBuffs(): number {
-    return Math.max(0, this.agility - sumOf(this.debuffs, 'agility'));
+    return Math.max(0, this.agility - this.sumOf(this.debuffs, 'agility'));
+  }
+
+  /** A live alteration is worth what its rate gives on the board right now. */
+  private sumOf(alterations: AlterationDetail[], type: AlterationType): number {
+    return alterations
+      .filter((alteration) => alteration.type === type)
+      .reduce(
+        (sum, alteration) =>
+          sum +
+          (alteration.live
+            ? this.computeAttributeModifierValue(
+                type,
+                alteration.live.rateFor(this),
+              )
+            : alteration.value),
+        0,
+      );
   }
 
   private computeAttributeModifierValue(
@@ -1491,10 +1772,4 @@ function isPileFull(
 
 function stacksIn(alterations: AlterationDetail[], stackId: string): number {
   return alterations.filter((a) => a.stackId === stackId).length;
-}
-
-function sumOf(alterations: AlterationDetail[], type: AlterationType): number {
-  return alterations
-    .filter((alteration) => alteration.type === type)
-    .reduce((sum, alteration) => sum + alteration.value, 0);
 }

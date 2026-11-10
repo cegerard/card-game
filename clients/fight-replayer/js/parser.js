@@ -409,6 +409,21 @@ function applyEvent(state, ev) {
       break;
     }
 
+    case 'revived': {
+      const c = get(ev.card?.id);
+      if (!c) break;
+      c.dead = false;
+      c.hp = ev.remainingHealth;
+      break;
+    }
+
+    case 'damage_shared':
+      ev.shares?.forEach(share => {
+        const c = get(share.card?.id);
+        if (c) c.hp = share.remainingHealth;
+      });
+      break;
+
     case 'stance_started': {
       const c = get(ev.card?.id);
       if (c) c.stance = { name: ev.name, turns: ev.remainingTurns };

@@ -1,4 +1,5 @@
 import { AlterationType } from './alteration-type';
+import { LiveRate } from './live-rate';
 
 type AlterationDetailBase = {
   type: AlterationType;
@@ -13,6 +14,10 @@ type AlterationDetailBase = {
    * budget, while unrelated alterations on the same stat keep their own.
    */
   stackId?: string;
+  /** Set, the value follows the board: it is read from this rate at every stat read. */
+  live?: LiveRate;
+  /** The battlefield that laid it, which prolongs it when its caster falls. */
+  origin?: string;
 };
 
 export type Buff = AlterationDetailBase & { polarity: 'buff' };
