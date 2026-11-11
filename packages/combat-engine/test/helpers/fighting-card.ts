@@ -39,6 +39,7 @@ import { LowHealthTargetBonusSkill } from '../../src/fight/core/cards/skills/low
 import { SurviveSkill } from '../../src/fight/core/cards/skills/survive';
 import { BleedEmpowermentSkill } from '../../src/fight/core/cards/skills/bleed-empowerment';
 import { PoisonedEnemyAgilitySkill } from '../../src/fight/core/cards/skills/poisoned-enemy-agility';
+import { AttackerInsightSkill } from '../../src/fight/core/cards/skills/attacker-insight';
 import { MathRandomizer } from '../../src/fight/tools/math-randomizer';
 
 type effect = {
@@ -70,6 +71,7 @@ type FightingCardParams = {
   bleedEmpowerment?: BleedEmpowermentSkill;
   lowHealthTargetBonus?: LowHealthTargetBonusSkill;
   poisonedEnemyAgility?: PoisonedEnemyAgilitySkill;
+  attackerInsight?: AttackerInsightSkill;
   survive?: SurviveSkill;
   extraSkills?: Skill[];
   skills?: {
@@ -541,6 +543,7 @@ export function createFightingCard(
       bleedEmpowerment: params.bleedEmpowerment,
       lowHealthTargetBonus: params.lowHealthTargetBonus,
       poisonedEnemyAgility: params.poisonedEnemyAgility,
+      attackerInsight: params.attackerInsight,
       survive: params.survive,
     },
     {

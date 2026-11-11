@@ -39,7 +39,9 @@ export class DamageCalculator {
         composition.type,
         defenderElement,
       );
-      const markAmplifier = defender.markAmplifier(composition.type);
+      const markAmplifier =
+        defender.markAmplifier(composition.type) *
+        defender.vulnerabilityAmplifier(composition.type);
       const afterMatrix = bruteDamage * multiplier * markAmplifier;
       const afterDefense = Math.max(0, afterMatrix - defense);
 

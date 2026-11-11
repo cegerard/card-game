@@ -39,6 +39,8 @@ export interface AlterationSkillOptions {
   requiredStance?: string;
   /** Set, the alteration value follows the board rather than `rate` alone. */
   liveRate?: LiveRateFactory;
+  /** Set, `terminationEvent` ends the alteration only on a hit costing more than this share of max health. */
+  terminationDamageRate?: number;
 }
 
 export class AlterationSkill implements Skill {
@@ -59,6 +61,7 @@ export class AlterationSkill implements Skill {
   private readonly stacking?: AlterationStacking;
   public readonly requiredStance?: string;
   private readonly liveRate?: LiveRateFactory;
+  private readonly terminationDamageRate?: number;
   private activationCount = 0;
 
   constructor({
@@ -77,6 +80,7 @@ export class AlterationSkill implements Skill {
     stacking,
     requiredStance,
     liveRate,
+    terminationDamageRate,
   }: AlterationSkillOptions) {
     if (polarity !== 'buff' && polarity !== 'debuff') {
       throw new Error(`Invalid polarity: ${polarity}`);
@@ -96,6 +100,7 @@ export class AlterationSkill implements Skill {
     this.stacking = stacking;
     this.requiredStance = requiredStance;
     this.liveRate = liveRate;
+    this.terminationDamageRate = terminationDamageRate;
   }
 
   launch(
@@ -124,9 +129,15 @@ export class AlterationSkill implements Skill {
     // A capped alteration refused at its stack limit returns undefined: drop it so
     // no step reports an alteration that was never applied.
     const results = targetedCards
+      .filter(
+        (targetedCard) =>
+          this.polarity === 'debuff' ||
+          !targetedCard.refusesSupportFrom(source),
+      )
       .map((targetedCard) => {
         const options = {
           live: this.liveRate?.(teamOf(targetedCard, context)),
+          terminationDamageRate: this.terminationDamageRate,
         };
         return {
           target: targetedCard.identityInfo,

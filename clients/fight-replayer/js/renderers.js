@@ -430,6 +430,20 @@ function buildGenericDetail(ev) {
         .join(', ');
     case 'energy_gained':
       return `+${ev.amount} energy → ${ev.energy}`;
+    case 'action_failed':
+      return `${esc(ev.card?.name)} is entangled and loses its action`;
+    case 'energy_drained':
+      return `${esc(ev.card?.name)} −${ev.amount} energy → ${ev.energy}`;
+    case 'vulnerability_applied':
+      return `${esc(ev.card?.name)} takes +${Math.round((ev.rate ?? 0) * 100)}% ${esc(ev.damageType)} damage for ${ev.remainingTurns} turn(s)`;
+    case 'vulnerability_ended':
+      return `${esc(ev.card?.name)} is no longer weak to ${esc(ev.damageType)}`;
+    case 'support_blocked':
+      return `${esc(ev.card?.name)} is cut off its allies support for ${ev.remainingTurns} turn(s)`;
+    case 'support_block_ended':
+      return `${esc(ev.card?.name)} receives support again`;
+    case 'decoy_struck':
+      return `A decoy of ${esc(ev.name)} takes the hit aimed at ${esc(ev.card?.name)} — ${ev.remainingDecoys} left`;
     case 'effect_cleansed':
       return `${esc(ev.source?.name)} cleanses ${esc(ev.effectType)} from ${esc(ev.card?.name)}`;
     case 'transformation_started':
@@ -668,6 +682,48 @@ export function describeEvent(ev, teamBName) {
         icon: ICON.energy_gained,
         text: `${ev.card?.name} — +${ev.amount} energy`,
         color: EVENT_COLOR.energy_gained,
+      };
+    case 'action_failed':
+      return {
+        icon: ICON.action_failed,
+        text: `${ev.card?.name} — action failed`,
+        color: EVENT_COLOR.action_failed,
+      };
+    case 'energy_drained':
+      return {
+        icon: ICON.energy_drained,
+        text: `${ev.card?.name} — −${ev.amount} energy`,
+        color: EVENT_COLOR.energy_drained,
+      };
+    case 'vulnerability_applied':
+      return {
+        icon: ICON.vulnerability_applied,
+        text: `${ev.card?.name} — weak to ${ev.damageType}`,
+        color: EVENT_COLOR.vulnerability_applied,
+      };
+    case 'vulnerability_ended':
+      return {
+        icon: ICON.vulnerability_ended,
+        text: `${ev.card?.name} — ${ev.damageType} weakness over`,
+        color: EVENT_COLOR.vulnerability_ended,
+      };
+    case 'support_blocked':
+      return {
+        icon: ICON.support_blocked,
+        text: `${ev.card?.name} — support blocked`,
+        color: EVENT_COLOR.support_blocked,
+      };
+    case 'support_block_ended':
+      return {
+        icon: ICON.support_block_ended,
+        text: `${ev.card?.name} — support restored`,
+        color: EVENT_COLOR.support_block_ended,
+      };
+    case 'decoy_struck':
+      return {
+        icon: ICON.decoy_struck,
+        text: `${ev.card?.name} — ${ev.name ?? 'Decoy'} decoy struck`,
+        color: EVENT_COLOR.decoy_struck,
       };
     case 'effect_cleansed':
       return {

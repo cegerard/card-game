@@ -1,2 +1,2 @@
 export type StateEffectType =
-  'burn' | 'poison' | 'freeze' | 'stunt' | 'bleed' | 'hypothermia';
+  'burn' | 'poison' | 'freeze' | 'stunt' | 'bleed' | 'hypothermia' | 'entangle';

@@ -71,7 +71,7 @@ export class SupportSkill implements Skill {
         target,
         shield: this.shieldOf(source, target),
         cleansed: this.cleanse(target),
-        alterations: this.alter(target),
+        alterations: this.alter(source, target),
       })),
     };
   }
@@ -102,14 +102,19 @@ export class SupportSkill implements Skill {
       .filter((type) => type !== undefined);
   }
 
-  private alter(target: FightingCard): (BuffResult | DebuffResult)[] {
+  private alter(
+    source: FightingCard,
+    target: FightingCard,
+  ): (BuffResult | DebuffResult)[] {
     return (this.config.alterations ?? [])
       .map(({ type, rate, duration, polarity }) => ({
         target: target.identityInfo,
         alteration:
           polarity === 'debuff'
             ? target.applyDebuff(type, rate, duration)
-            : target.applyBuff(type, rate, duration),
+            : target.refusesSupportFrom(source)
+              ? undefined
+              : target.applyBuff(type, rate, duration),
       }))
       .filter(
         (result): result is BuffResult | DebuffResult =>

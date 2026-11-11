@@ -26,6 +26,10 @@ import {
 } from '../@types/attack/damage-type-bonus';
 import { EnergyRefund } from '../@types/attack/energy-refund';
 import { Execution } from '../@types/attack/execution';
+import {
+  Battlefield,
+  BattlefieldResult,
+} from '../@types/battlefield/battlefield';
 
 const CRITICAL_RATE = 1.3;
 
@@ -48,6 +52,7 @@ export class SpecialAttack extends BaseSpecial {
     private readonly execution?: Execution,
     private readonly defensePenetration?: number,
     private readonly undodgeable = false,
+    private readonly adjacentTargetsBattlefield?: Battlefield,
   ) {
     super(name, energyNeeded);
     this.effects = [effects ?? []].flat();
@@ -97,7 +102,41 @@ export class SpecialAttack extends BaseSpecial {
         source,
         attackResults[0]?.defender,
       ),
+      battlefield: this.layBetweenAdjacentTargets(
+        source,
+        context,
+        attackResults,
+      ),
     };
+  }
+
+  /**
+   * Lays the battlefield on the living defenders that stand next to another
+   * defender of the special in their deck, dodged or not. Fewer than two such
+   * neighbours: nothing.
+   */
+  private layBetweenAdjacentTargets(
+    source: FightingCard,
+    context: FightingContext,
+    attackResults: AttackResult[],
+  ): BattlefieldResult | undefined {
+    if (!this.adjacentTargetsBattlefield) return undefined;
+
+    const opponent = context.opponentPlayer;
+    const defenders = [...new Set(attackResults.map((r) => r.defender))];
+    const adjacent = defenders.filter(
+      (card) =>
+        !card.isDead() &&
+        defenders.some(
+          (other) =>
+            Math.abs(
+              opponent.cardPosition(other) - opponent.cardPosition(card),
+            ) === 1,
+        ),
+    );
+    if (adjacent.length < 2) return undefined;
+
+    return this.adjacentTargetsBattlefield.deploy(source, context, adjacent);
   }
 
   public getSpecialKind(): string {
@@ -130,7 +169,7 @@ export class SpecialAttack extends BaseSpecial {
         interceptedFor,
         kind,
         remainingHealth: target.actualHealth,
-        effects: nonEmpty(target.strikeWeakPoints(context, false)),
+        effects: nonEmpty(target.dodgedEffects(context)),
       };
     }
 

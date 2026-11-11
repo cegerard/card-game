@@ -60,7 +60,11 @@ export type SkillKind =
   /** Action d'appui (sur `next-action`, avec `interval`) : bouclier en part de la santé max du lanceur, purge, altérations, sur chaque cible ; ne frappe personne. */
   | 'SUPPORT'
   /** Remplit la jauge du porteur de `amount` à chaque déclenchement. */
-  | 'ENERGY_GAIN';
+  | 'ENERGY_GAIN'
+  /** Passif : Précision +`accuracyRate` et Esquive +`agilityRate` (parts des stats de base) contre un ennemi qui a déjà attaqué pendant le combat. */
+  | 'ATTACKER_INSIGHT'
+  /** Relance la spéciale ATTACK du porteur, jauge intacte ; pensé pour `self-death` avec `requiresStance`. */
+  | 'SPECIAL_ECHO';
 
 export type BuffType =
   | 'attack'
@@ -82,7 +86,15 @@ export type EffectType =
   /** Révèle un Point Faible (`weakPoint`) : ni statut, ni immunité, ni résistance. */
   | 'WEAK_POINT'
   /** Dégâts sur la durée : `rate` de la santé max de la cible par tour pendant `duration` ; se pose et mord sur une carte gelée. */
-  | 'HYPOTHERMIA';
+  | 'HYPOTHERMIA'
+  /** Statut de contrôle : la prochaine action offensive de la cible échoue sur la chance `rate`. */
+  | 'ENTANGLE'
+  /** Retire `rate` points d'énergie spéciale à la cible (jamais sous 0). */
+  | 'ENERGY_DRAIN'
+  /** La cible subit `1 + rate` fois les dégâts de `damageType` pendant `duration` tours. */
+  | 'VULNERABILITY'
+  /** Les soins et buffs des alliés de la cible ne l'atteignent plus pendant `duration` tours. */
+  | 'SUPPORT_BLOCK';
 
 /**
  * Ce que fait un statut à sa cible, et donc ce contre quoi une immunité est
@@ -152,7 +164,9 @@ export type TargetingStrategy =
   /** Dernier attaquant esquivé par la carte `targetCardId` : la riposte à un coup manqué. */
   | 'last-dodged-attacker'
   /** Allié vivant au plus faible ratio de santé, lanceur exclu, quel que soit ce ratio. */
-  | 'lowest-health-ally';
+  | 'lowest-health-ally'
+  /** Spéciales uniquement : `targetCount` ennemis ciblables tirés au hasard à chaque lancer. */
+  | 'random-enemies';
 
 export type CardSelectorStrategy = 'player-by-player' | 'speed-weighted';
 
@@ -202,13 +216,13 @@ export interface EffectConfig {
    * pour BLEED, dégâts de chaque pile par tour.
    */
   rate: number;
-  /** Requis sauf pour MARK, BLEED, POISON à charges, WEAK_POINT et HYPOTHERMIA. */
+  /** Requis pour POISON, BURN, FREEZE et STUNT (hors POISON à charges). */
   level?: number;
-  /** BLEED (requis) : tours pendant lesquels chaque pile saigne ; POISON à charges (requis) : durée relancée à chaque pose ; HYPOTHERMIA (requis). */
+  /** BLEED (requis) : tours pendant lesquels chaque pile saigne ; POISON à charges (requis) : durée relancée à chaque pose ; HYPOTHERMIA, VULNERABILITY et SUPPORT_BLOCK (requis). */
   duration?: number;
   /** BLEED et POISON à charges : ce dont `rate` est une part (défaut `source-attack`). */
   basis?: RateBasis;
-  /** MARK uniquement : type de dégâts amplifié par la marque. */
+  /** MARK et VULNERABILITY (requis) : type de dégâts amplifié. */
   damageType?: DamageType;
   /** MARK et BLEED (requis) : nombre maximal de cumuls ; sur POISON, en fait un Poison à charges. */
   maxStacks?: number;
@@ -264,17 +278,23 @@ export interface BattlefieldAlteration {
 export interface Battlefield {
   name: string;
   duration: number;
+  /** Élément du terrain, lu par `terrainBonus`. */
+  element?: Element;
   allies?: {
     alterations?: BattlefieldAlteration[];
     /** Part de sa santé max que chaque allié récupère en fin de tour. */
     healRate?: number;
     /** Chaque coup sur un membre perd `rate`, porté par les autres membres, `maxShareRate` du coup chacun au plus ; jamais mortel. */
     damageSharing?: { rate: number; maxShareRate: number };
+    /** `count` leurres partagés par les alliés : chacun prend, sur `chance`, une attaque visant l'un d'eux, puis disparaît. */
+    decoys?: { count: number; chance: number };
   };
   enemies?: {
     alterations?: BattlefieldAlteration[];
     /** `rate` de l'Attaque du lanceur en dégâts réels de ce type, en fin de tour de chaque ennemi. */
     damage?: { rate: number; damageType: DamageType };
+    /** Énergie en plus que coûte chaque spéciale ennemie tant qu'elle s'y tient. */
+    energySurcharge?: number;
   };
   /** Les alliés tombés depuis moins de `withinTurns` tours de leur camp reviennent avec `rate` de leur santé max. */
   revival?: { rate: number; withinTurns: number };
@@ -336,6 +356,12 @@ export interface AttackBonuses {
   concealedBonus?: DamageTypeBonus;
   /** Bonus contre une cible déjà gelée, sur tous les types de dégâts sans `damageType`. */
   frozenTargetBonus?: { damageType?: DamageType; multiplier: number };
+  /** Bonus tant qu'un champ de bataille de cet élément court (l'attaquant ou la cible s'y tient), sur tous les types sans `damageType`. */
+  terrainBonus?: {
+    element: Element;
+    damageType?: DamageType;
+    multiplier: number;
+  };
 }
 
 export interface ShieldApplication {
@@ -378,6 +404,10 @@ export interface SpecialSkill extends AttackBonuses {
   undodgeable?: boolean;
   /** STANCE uniquement : altère le champ de bataille. */
   battlefield?: Battlefield;
+  /** Requis avec le ciblage `random-enemies` : nombre d'ennemis tirés. */
+  targetCount?: number;
+  /** ATTACK uniquement : champ de bataille posé sur les cibles voisines l'une de l'autre dans leur deck (deux au moins). */
+  adjacentTargetsBattlefield?: Battlefield;
 }
 
 export interface SimpleAttackSkill extends AttackBonuses {
@@ -385,6 +415,8 @@ export interface SimpleAttackSkill extends AttackBonuses {
   damages: DamageComposition[];
   targetingStrategy: Exclude<TargetingStrategy, 'targeted-card'>;
   effects?: EffectConfig[];
+  /** Altérations laissées sur le défenseur touché (coups esquivés exclus), sans ciblage propre. */
+  hitAlterations?: Omit<StatAlteration, 'targetingStrategy' | 'condition'>[];
 }
 
 export interface MultipleAttackSkill extends AttackBonuses {
@@ -520,6 +552,12 @@ export interface OtherSkill {
   perLivingAlly?: { maxRate: number };
   /** ALTERATION : l'altération ne compte que tant que la santé du porteur est sous ce ratio. */
   whileHealthBelow?: number;
+  /** ALTERATION : `terminationEvent` ne la retire que sur un coup coûtant strictement plus que cette part de la santé max. */
+  terminationDamageRate?: number;
+  /** ATTACKER_INSIGHT (requis) : part de la Précision de base gagnée contre un ennemi qui a déjà attaqué. */
+  accuracyRate?: number;
+  /** ATTACKER_INSIGHT (requis) : part de l'Esquive de base gagnée contre un ennemi qui a déjà attaqué. */
+  agilityRate?: number;
   /** ENERGY_GAIN (requis) : énergie gagnée à chaque déclenchement. */
   amount?: number;
   /** SUPPORT : bouclier de `rate` × la santé max du lanceur, pour `duration` tours. */

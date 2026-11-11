@@ -5,7 +5,9 @@ import {
   EnergyRefundDto,
   ExecutionDto,
   FightingCardDto,
+  TerrainBonusDto,
 } from './dto/fight-data.dto';
+import { TerrainBonus } from '../core/cards/@types/attack/terrain-bonus';
 import { SimpleAttack } from '../core/cards/skills/simple-attack';
 import { buildTargetingStrategy } from './targeting-strategy-factory';
 import { BleedStackBonus } from '../core/cards/@types/attack/bleed-stack-bonus';
@@ -18,7 +20,11 @@ import { MultipleAttack } from '../core/cards/skills/multiple-attack';
 import { AttackSkill } from '../core/cards/skills/attack-skill';
 import { Execution } from '../core/cards/@types/attack/execution';
 import { buildEffects } from './attack-effect-factory';
-import { asBadRequest } from './skill-wiring-factory';
+import {
+  asBadRequest,
+  buildHitAlterations,
+  mapElement,
+} from './skill-wiring-factory';
 
 export function buildAttackSkill(
   skills: FightingCardDto['skills'],
@@ -57,6 +63,10 @@ export function buildAttackSkill(
     buildTargetingStrategy(sa.targetingStrategy),
     saEffects,
     buildDamageBonuses(sa),
+    undefined,
+    undefined,
+    undefined,
+    buildHitAlterations(sa.hitAlterations),
   );
 }
 
@@ -76,8 +86,10 @@ export function buildDamageBonuses(attack: {
   bleedStackBonus?: BleedStackBonusDto;
   concealedBonus?: DamageTypeBonusDto;
   frozenTargetBonus?: FrozenTargetBonusDto;
+  terrainBonus?: TerrainBonusDto;
 }): DamageTypeBonus[] {
-  const { bleedStackBonus, concealedBonus, frozenTargetBonus } = attack;
+  const { bleedStackBonus, concealedBonus, frozenTargetBonus, terrainBonus } =
+    attack;
   const bonuses: DamageTypeBonus[] = [];
 
   if (bleedStackBonus) {
@@ -99,6 +111,15 @@ export function buildDamageBonuses(attack: {
       new FrozenTargetBonus(
         frozenTargetBonus.damageType,
         frozenTargetBonus.multiplier,
+      ),
+    );
+  }
+  if (terrainBonus) {
+    bonuses.push(
+      new TerrainBonus(
+        mapElement(terrainBonus.element),
+        terrainBonus.damageType,
+        terrainBonus.multiplier,
       ),
     );
   }

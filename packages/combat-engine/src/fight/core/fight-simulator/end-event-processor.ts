@@ -20,12 +20,14 @@ export class EndEventProcessor {
    * @param eventName - The end-event name to match against bound buffs, effects, and targeting overrides.
    * @param source - Identity of the card whose skill emitted the end event.
    * @param powerId - Optional composite-power identifier forwarded to each emitted step.
+   * @param hitRate - For a hit: the share of its max health it cost the card, read by the alterations bound to a heavy hit.
    * @returns Ordered list of steps produced by the three sweeps (may be empty).
    */
   public processEndEvent(
     eventName: string,
     source: CardInfo,
     powerId?: string,
+    hitRate?: number,
   ): Step[] {
     const steps: Step[] = [];
     const allCards = [
@@ -34,7 +36,7 @@ export class EndEventProcessor {
     ];
 
     const removedBuffs = allCards.flatMap((card) => {
-      const removedBuffs = card.removeEventBoundBuffs(eventName);
+      const removedBuffs = card.removeEventBoundBuffs(eventName, hitRate);
       return removedBuffs.map((b) => ({
         target: card.identityInfo,
         kind: b.type,
@@ -53,7 +55,7 @@ export class EndEventProcessor {
     }
 
     const removedDebuffs = allCards.flatMap((card) => {
-      const debuffs = card.removeEventBoundDebuffs(eventName);
+      const debuffs = card.removeEventBoundDebuffs(eventName, hitRate);
       return debuffs.map((d) => ({
         target: card.identityInfo,
         kind: d.type,

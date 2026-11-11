@@ -14,11 +14,11 @@ const roster: any[] = JSON.parse(
 
 // The roster outgrew a deck (5 cards at most). The mirror match keeps the five
 // cards these checks were written for: Selkhet's ultimate can wipe a team in
-// one blow, leaving Aegis no time to show his kit. Selkhet, Vespera, Svana and
-// Hyōki each fight in a deck of their own below.
+// one blow, leaving Aegis no time to show his kit. Selkhet, Vespera, Svana,
+// Hyōki and Umiko each fight in a deck of their own below.
 const without = (...ids: string[]) =>
   roster.filter((card) => !ids.includes(card.id));
-const sampleCards = without('selkhet', 'vespera', 'svana', 'hyoki');
+const sampleCards = without('selkhet', 'vespera', 'svana', 'hyoki', 'umiko');
 
 const fight = (app: INestApplication, player1: object[], player2: object[]) =>
   request(app.getHttpServer())
@@ -202,7 +202,7 @@ describe('samples/cards.json with Selkhet in a deck', () => {
 
     const response = await fight(
       app,
-      without('kaelion', 'vespera', 'svana', 'hyoki'),
+      without('kaelion', 'vespera', 'svana', 'hyoki', 'umiko'),
       sampleCards,
     );
     steps = Object.values(response.body);
@@ -241,7 +241,7 @@ describe('samples/cards.json with Vespera in a deck', () => {
 
     const response = await fight(
       app,
-      without('kaelion', 'selkhet', 'svana', 'hyoki'),
+      without('kaelion', 'selkhet', 'svana', 'hyoki', 'umiko'),
       sampleCards,
     );
     steps = Object.values(response.body);
@@ -279,7 +279,7 @@ describe('samples/cards.json with Svana in a deck', () => {
 
     const response = await fight(
       app,
-      without('kaelion', 'selkhet', 'vespera', 'hyoki'),
+      without('kaelion', 'selkhet', 'vespera', 'hyoki', 'umiko'),
       sampleCards,
     );
     steps = Object.values(response.body);
@@ -317,7 +317,7 @@ describe('samples/cards.json with Hyōki in a deck', () => {
 
     const response = await fight(
       app,
-      without('kaelion', 'selkhet', 'vespera', 'svana'),
+      without('kaelion', 'selkhet', 'vespera', 'svana', 'umiko'),
       sampleCards,
     );
     steps = Object.values(response.body);
@@ -337,5 +337,43 @@ describe('samples/cards.json with Hyōki in a deck', () => {
     );
 
     expect(spirit.length).toBeGreaterThan(0);
+  });
+});
+
+describe('samples/cards.json with Umiko in a deck', () => {
+  let app: INestApplication;
+  let steps: any[];
+
+  beforeEach(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    app.useLogger(false);
+    await app.init();
+
+    const response = await fight(
+      app,
+      without('kaelion', 'selkhet', 'vespera', 'svana', 'hyoki'),
+      sampleCards,
+    );
+    steps = Object.values(response.body);
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  it('is a deck the engine accepts and can fight with', () => {
+    expect(steps[steps.length - 1].kind).toBe('fight_end');
+  });
+
+  it('lets Umiko whip her targets with water', () => {
+    const whips = steps.filter(
+      (s) => s.kind === 'attack' && s.name === 'Fouet des Marées',
+    );
+
+    expect(whips.length).toBeGreaterThan(0);
   });
 });

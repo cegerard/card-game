@@ -93,7 +93,7 @@ export class MultipleAttack implements AttackSkill {
             interceptedFor,
             remainingHealth: defender.actualHealth,
             kind,
-            effects: nonEmpty(defender.strikeWeakPoints(context, false)),
+            effects: nonEmpty(defender.dodgedEffects(context)),
           });
           continue;
         }

@@ -134,6 +134,12 @@ export class ActionStage {
     reports: ActionReport[];
     skillUsed: boolean;
   } {
+    const offensive =
+      !card.isSpecialReady() || card.specialKind() === 'specialAttack';
+    if (offensive && card.failsOffensiveAction()) {
+      return { reports: [this.actionFailedReport(card)], skillUsed: false };
+    }
+
     if (card.isSpecialReady()) {
       return { reports: [this.launchSpecial(card)], skillUsed: true };
     }
@@ -142,6 +148,24 @@ export class ActionStage {
     return skillReports
       ? { reports: skillReports, skillUsed: true }
       : { reports: [this.launchAttack(card)], skillUsed: false };
+  }
+
+  /**
+   * An entanglement took the action away: nothing is launched and the gauge
+   * stays as it was. The regular action counts as offensive, whatever
+   * `next-action` skill would have replaced the plain attack.
+   */
+  private actionFailedReport(card: FightingCard): SkillStepsActionReport {
+    return {
+      kind: SKILL_STEPS,
+      steps: [
+        {
+          kind: StepKind.ActionFailed,
+          card: card.identityInfo,
+          cause: 'entangle',
+        },
+      ],
+    };
   }
 
   /** Tells the teammates of the card it just used a skill. */
@@ -191,6 +215,10 @@ export class ActionStage {
     };
 
     this.handleAttackResult(attackResults.results, report, card);
+    report.hitAlterationSteps = skillResultsToSteps(
+      card,
+      hitAlterationResults(attackResults),
+    );
 
     return report;
   }
@@ -419,6 +447,12 @@ export class ActionStage {
       specialResults.name,
       specialResults.executions ?? [],
     );
+    if (specialResults.battlefield) {
+      result.battlefieldSteps = battlefieldStartedSteps(
+        card,
+        specialResults.battlefield,
+      );
+    }
 
     Object.assign(result, this.specialSideReports(card, specialResults));
 
@@ -547,6 +581,7 @@ export class ActionStage {
           acc.actionSteps.push(...(report.executionSteps ?? []));
           acc.actionSteps.push(...report.concealmentEndedReports);
           acc.actionSteps.push(...(report.hitAlterationSteps ?? []));
+          acc.actionSteps.push(...(report.battlefieldSteps ?? []));
 
           if (report.buffReport) {
             acc.actionSteps.push(report.buffReport);
@@ -675,7 +710,11 @@ export class ActionStage {
         if (!damageDealt.dodge) {
           defensiveCard.lastAttacker = attackerCard;
           report.statusChanges.push(
-            ...this.dispatchDamageReactions(defensiveCard, attackerCard),
+            ...this.dispatchDamageReactions(
+              defensiveCard,
+              attackerCard,
+              damageDealt,
+            ),
           );
         } else {
           defensiveCard.lastDodgedAttacker = attackerCard;
@@ -799,18 +838,24 @@ export class ActionStage {
    * `damage-taken-<id>` on every hit, then `ally-health-<id>` for the
    * threshold-based reactions. Both reach the damaged card itself, so a card
    * reacts to its own wounds by monitoring its own id. The hit first ends
-   * whatever is bound to `damage-taken-<id>`.
+   * whatever is bound to `damage-taken-<id>`, telling it the share of max
+   * health the hit cost, the shield excluded.
    */
   private dispatchDamageReactions(
     damagedCard: FightingCard,
     attackerCard: FightingCard,
+    hit: AttackResult,
   ): Step[] {
     const damageTaken = `damage-taken-${damagedCard.id}`;
+    const hitRate =
+      (hit.damage - (hit.shieldAbsorbed ?? 0)) / damagedCard.maxHealth;
 
     return [
       ...(this.endEventProcessor?.processEndEvent(
         damageTaken,
         damagedCard.identityInfo,
+        undefined,
+        hitRate,
       ) ?? []),
       ...this.dispatchTeamReactions(damagedCard, attackerCard, [
         damageTaken,

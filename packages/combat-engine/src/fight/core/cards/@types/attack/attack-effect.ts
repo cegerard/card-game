@@ -7,6 +7,10 @@ import { StateEffectType } from '../state/state-effect-type';
 import { DamageType } from '../damage/damage-type';
 import { MARK_EFFECT_TYPE } from '../mark/elemental-mark';
 import {
+  VULNERABILITY_EFFECT_TYPE,
+  VULNERABILITY_ENDED_TYPE,
+} from '../vulnerability/vulnerability';
+import {
   WEAK_POINT_EFFECT_TYPE,
   WEAK_POINT_ENDED_TYPE,
   WeakPoint,
@@ -41,11 +45,65 @@ export type WeakPointEndedResult = {
   reason: WeakPointEndReason;
 };
 
+export const ENERGY_DRAINED_TYPE = 'energy_drained';
+
+export type EnergyDrainedResult = {
+  type: typeof ENERGY_DRAINED_TYPE;
+  card: FightingCard;
+  amount: number;
+  /** The gauge left. */
+  energy: number;
+};
+
+export type VulnerabilityEffectResult = {
+  type: typeof VULNERABILITY_EFFECT_TYPE;
+  card: FightingCard;
+  damageType: DamageType;
+  rate: number;
+  remainingTurns: number;
+};
+
+export type VulnerabilityEndedResult = {
+  type: typeof VULNERABILITY_ENDED_TYPE;
+  card: FightingCard;
+  damageType: DamageType;
+};
+
+export const SUPPORT_BLOCKED_TYPE = 'support_blocked';
+export const SUPPORT_BLOCK_ENDED_TYPE = 'support_block_ended';
+
+export type SupportBlockedResult = {
+  type: typeof SUPPORT_BLOCKED_TYPE;
+  card: FightingCard;
+  remainingTurns: number;
+};
+
+export type SupportBlockEndedResult = {
+  type: typeof SUPPORT_BLOCK_ENDED_TYPE;
+  card: FightingCard;
+};
+
+export const DECOY_STRUCK_TYPE = 'decoy_struck';
+
+/** A decoy took the attack aimed at the card, and is gone. */
+export type DecoyStruckResult = {
+  type: typeof DECOY_STRUCK_TYPE;
+  card: FightingCard;
+  name: string;
+  remainingDecoys: number;
+};
+
 export type EffectResult =
   | StateEffectResult
   | MarkEffectResult
   | WeakPointEffectResult
-  | WeakPointEndedResult;
+  | WeakPointEndedResult
+  | EnergyDrainedResult
+  | VulnerabilityEffectResult
+  | VulnerabilityEndedResult
+  | SupportBlockedResult
+  | SupportBlockEndedResult
+  | DecoyStruckResult;
 
 /** The effects a hit reports, none being reported as absent. */
 export function nonEmpty(effects: EffectResult[]): EffectResult[] | undefined {

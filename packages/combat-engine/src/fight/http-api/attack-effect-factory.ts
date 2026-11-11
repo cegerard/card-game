@@ -18,6 +18,10 @@ import { MathRandomizer } from '../tools/math-randomizer';
 import { StackedPoisonAttackEffect } from '../core/cards/@types/attack/attack-stacked-poison-effect';
 import { WeakPointAttackEffect } from '../core/cards/@types/attack/attack-weak-point-effect';
 import { HypothermiaAttackEffect } from '../core/cards/@types/attack/attack-hypothermia-effect';
+import { EntangleAttackEffect } from '../core/cards/@types/attack/attack-entangle-effect';
+import { EnergyDrainAttackEffect } from '../core/cards/@types/attack/attack-energy-drain-effect';
+import { VulnerabilityAttackEffect } from '../core/cards/@types/attack/attack-vulnerability-effect';
+import { SupportBlockAttackEffect } from '../core/cards/@types/attack/attack-support-block-effect';
 import {
   asBadRequest,
   buildAlterationStacking,
@@ -36,6 +40,12 @@ const STACKED_POISON_ONLY_FIELDS = [
   'ignoresImmunity',
 ] as const;
 const STACK_CAPPED_EFFECTS = [Effect.MARK, Effect.BLEED, Effect.POISON];
+const DEBUFFLESS_EFFECTS = [
+  Effect.ENTANGLE,
+  Effect.ENERGY_DRAIN,
+  Effect.VULNERABILITY,
+  Effect.SUPPORT_BLOCK,
+];
 
 /**
  * A field the effect would silently ignore is a malformed request: stack caps
@@ -63,6 +73,10 @@ function rejectMisplacedFields(effectDto: EffectDto): void {
     // A weak point carries its duration itself
     ...(effectDto.type === Effect.WEAK_POINT && effectDto.duration !== undefined
       ? ['duration']
+      : []),
+    ...(DEBUFFLESS_EFFECTS.includes(effectDto.type) &&
+    effectDto.triggeredDebuff !== undefined
+      ? ['triggeredDebuff']
       : []),
   ];
   if (misplaced.length > 0) {
@@ -150,6 +164,45 @@ export function buildEffect(effectDto: EffectDto): AttackEffect {
             new MathRandomizer(),
             effectDto.probability,
             effectDto.terminationEvent,
+          ),
+      );
+    case Effect.ENTANGLE:
+      return asBadRequest(
+        () =>
+          new EntangleAttackEffect(
+            effectDto.rate,
+            new MathRandomizer(),
+            effectDto.probability,
+            effectDto.terminationEvent,
+          ),
+      );
+    case Effect.ENERGY_DRAIN:
+      return asBadRequest(
+        () =>
+          new EnergyDrainAttackEffect(
+            effectDto.rate,
+            new MathRandomizer(),
+            effectDto.probability,
+          ),
+      );
+    case Effect.SUPPORT_BLOCK:
+      return asBadRequest(
+        () =>
+          new SupportBlockAttackEffect(
+            effectDto.duration,
+            new MathRandomizer(),
+            effectDto.probability,
+          ),
+      );
+    case Effect.VULNERABILITY:
+      return asBadRequest(
+        () =>
+          new VulnerabilityAttackEffect(
+            effectDto.damageType,
+            effectDto.rate,
+            effectDto.duration,
+            new MathRandomizer(),
+            effectDto.probability,
           ),
       );
   }

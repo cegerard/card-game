@@ -15,6 +15,8 @@ import {
 } from '../core/targeting-card-strategies/most-wounded-ally';
 import { ProtectedAllyStrategy } from '../core/targeting-card-strategies/protected-ally';
 import { FastestAllyStrategy } from '../core/targeting-card-strategies/fastest-ally';
+import { RandomEnemiesStrategy } from '../core/targeting-card-strategies/random-enemies';
+import { MathRandomizer } from '../tools/math-randomizer';
 import { TargetingStrategy } from './dto/fight-data.dto';
 import { TargetingCardStrategy } from '../core/targeting-card-strategies/targeting-card-strategy';
 
@@ -34,7 +36,13 @@ export function buildTargetingStrategy(
   strategyName: string,
   targetCardId?: string,
   threshold?: number,
+  targetCount?: number,
 ): TargetingCardStrategy {
+  if (strategyName === TargetingStrategy.RANDOM_ENEMIES) {
+    if (targetCount === undefined)
+      throw new Error(`${strategyName} strategy requires targetCount`);
+    return new RandomEnemiesStrategy(targetCount, new MathRandomizer());
+  }
   if (strategyName === TargetingStrategy.MOST_WOUNDED_ALLY) {
     if (threshold === undefined)
       throw new Error(

@@ -34,6 +34,8 @@ const STANCE_SPECIAL_FORBIDDEN_FIELDS = [
   'execution',
   'defensePenetration',
   'undodgeable',
+  'targetCount',
+  'adjacentTargetsBattlefield',
 ] as const;
 
 export function buildSpecial(dto: SpecialDto): Special {
@@ -55,6 +57,11 @@ export function buildSpecial(dto: SpecialDto): Special {
     return buildSpecialStance(dto);
   }
   if (dto.kind === SpecialKind.HEALING) {
+    if (dto.adjacentTargetsBattlefield) {
+      throw new BadRequestException(
+        'Only an ATTACK special can lay a battlefield between its targets',
+      );
+    }
     return new SpecialHealing(
       dto.name,
       dto.rate,
@@ -89,7 +96,12 @@ function buildSpecialAttack(dto: SpecialDto): SpecialAttack {
     dto.name,
     specialDamages,
     dto.energy,
-    buildTargetingStrategy(dto.targetingStrategy),
+    buildTargetingStrategy(
+      dto.targetingStrategy,
+      undefined,
+      undefined,
+      dto.targetCount,
+    ),
     [dto.effect, ...(dto.effects ?? [])]
       .filter((effect) => effect != null)
       .map(buildEffect),
@@ -103,6 +115,7 @@ function buildSpecialAttack(dto: SpecialDto): SpecialAttack {
     buildExecution(dto.execution),
     dto.defensePenetration,
     dto.undodgeable,
+    buildBattlefield(dto.adjacentTargetsBattlefield),
   );
 }
 

@@ -1827,5 +1827,214 @@
     "behaviors": {
       "dodge": "simple-dodge"
     }
+  },
+  {
+    "id": "umiko",
+    "name": "Umiko",
+    "attack": 75,
+    "defense": 50,
+    "health": 500,
+    "speed": 70,
+    "agility": 70,
+    "accuracy": 85,
+    "criticalChance": 0.07,
+    "regeneration": 45,
+    "resistance": 55,
+    "element": "WATER",
+    "skills": {
+      "special": {
+        "kind": "ATTACK",
+        "name": "Prison des Huit Courants",
+        "energy": 40,
+        "damages": [
+          {
+            "type": "WATER",
+            "rate": 0
+          }
+        ],
+        "targetingStrategy": "random-enemies",
+        "targetCount": 2,
+        "undodgeable": true,
+        "effects": [
+          {
+            "type": "ENTANGLE",
+            "rate": 0.7
+          },
+          {
+            "type": "ENERGY_DRAIN",
+            "rate": 15
+          },
+          {
+            "type": "VULNERABILITY",
+            "rate": 0.5,
+            "damageType": "WATER",
+            "duration": 2
+          }
+        ],
+        "adjacentTargetsBattlefield": {
+          "name": "Prison des Huit Courants - Zone d'eau",
+          "duration": 2,
+          "element": "WATER",
+          "enemies": {
+            "alterations": [
+              {
+                "type": "agility",
+                "rate": 0.3,
+                "polarity": "debuff"
+              }
+            ]
+          }
+        }
+      },
+      "simpleAttack": {
+        "name": "Fouet des Marées",
+        "damages": [
+          {
+            "type": "PHYSICAL",
+            "rate": 0.7
+          },
+          {
+            "type": "WATER",
+            "rate": 0.7
+          }
+        ],
+        "targetingStrategy": "position-based",
+        "hitAlterations": [
+          {
+            "type": "speed",
+            "rate": 0.15,
+            "duration": 1,
+            "polarity": "debuff"
+          }
+        ],
+        "terrainBonus": {
+          "element": "WATER",
+          "multiplier": 1.2
+        }
+      },
+      "others": [
+        {
+          "kind": "ALTERATION",
+          "name": "Flux Adaptatif - Vitesse",
+          "event": "turn-end",
+          "targetingStrategy": "self",
+          "polarity": "buff",
+          "buffType": "speed",
+          "rate": 0.05,
+          "duration": 0,
+          "stackId": "flux-adaptatif-vitesse",
+          "maxStacks": 5,
+          "terminationEvent": "damage-taken-umiko",
+          "terminationDamageRate": 0.3
+        },
+        {
+          "kind": "ALTERATION",
+          "name": "Flux Adaptatif - Esquive",
+          "event": "turn-end",
+          "targetingStrategy": "self",
+          "polarity": "buff",
+          "buffType": "agility",
+          "rate": 0.03,
+          "duration": 0,
+          "stackId": "flux-adaptatif-esquive",
+          "maxStacks": 5,
+          "terminationEvent": "damage-taken-umiko",
+          "terminationDamageRate": 0.3
+        },
+        {
+          "kind": "ATTACKER_INSIGHT",
+          "name": "Intelligence des Profondeurs",
+          "accuracyRate": 0.15,
+          "agilityRate": 0.1
+        },
+        {
+          "kind": "CONDITIONAL_ATTACK",
+          "name": "Tourbillon Entravant",
+          "event": "next-action",
+          "interval": 3,
+          "targetingStrategy": "position-based",
+          "damages": [
+            {
+              "type": "WATER",
+              "rate": 0.4
+            }
+          ],
+          "hitAlterations": [
+            {
+              "type": "defense",
+              "rate": 0.2,
+              "duration": 2,
+              "polarity": "debuff"
+            }
+          ],
+          "effect": {
+            "type": "SUPPORT_BLOCK",
+            "rate": 0,
+            "duration": 1
+          }
+        },
+        {
+          "kind": "TRANSFORMATION",
+          "name": "Marée des Possibilités",
+          "duration": 3,
+          "activationCondition": {
+            "type": "health-threshold",
+            "operator": "below",
+            "threshold": 0.5
+          },
+          "stanceActivations": [
+            {
+              "name": "Marée des Possibilités",
+              "duration": 3
+            }
+          ],
+          "battlefield": {
+            "name": "Marée des Possibilités",
+            "duration": 3,
+            "element": "WATER",
+            "allies": {
+              "alterations": [
+                {
+                  "type": "speed",
+                  "rate": 0.25,
+                  "polarity": "buff"
+                },
+                {
+                  "type": "accuracy",
+                  "rate": 0.2,
+                  "polarity": "buff"
+                }
+              ],
+              "decoys": {
+                "count": 3,
+                "chance": 0.4
+              }
+            },
+            "enemies": {
+              "alterations": [
+                {
+                  "type": "agility",
+                  "rate": 0.1,
+                  "polarity": "debuff"
+                }
+              ],
+              "energySurcharge": 5
+            },
+            "legacy": {
+              "duration": 2
+            }
+          }
+        },
+        {
+          "kind": "SPECIAL_ECHO",
+          "name": "Héritage de la Tisseuse",
+          "event": "self-death",
+          "requiresStance": "Marée des Possibilités"
+        }
+      ]
+    },
+    "behaviors": {
+      "dodge": "simple-dodge"
+    }
   }
 ]

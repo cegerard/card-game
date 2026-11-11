@@ -71,12 +71,13 @@ cards/
 │   ├── real-damage.ts, affliction.ts  # REAL_DAMAGE (real damage on targets), AFFLICTION (effect without attack)
 │   ├── analysis.ts, aftershock.ts, weak-point-legacy.ts  # ANALYSIS, AFTERSHOCK, WEAK_POINT_LEGACY
 │   ├── support.ts, energy-gain.ts  # SUPPORT, ENERGY_GAIN
+│   ├── attacker-insight.ts, special-echo.ts  # ATTACKER_INSIGHT (card-bound), SPECIAL_ECHO
 │   └── power-id-consistency.ts     # Composite power validation
 ├── behaviors/              # dodge-behaviors.ts, simple-dodge.ts, random-dodge.ts
 ├── damage/                 # damage-calculator.ts, elemental-matrix.ts (5x5)
 └── @types/
     ├── action-result/      # special-result, attack-result, named-attack-result, healing-result, buff-results, shield-result
-    ├── attack/             # attack-effect + poison/burn/freeze/stunt/mark/bleed effects, stacked-poison effect, damage-type-bonus (base of bleed-stack-bonus, concealed-bonus), energy-refund, bleed-detonation, splash, weak-point/hypothermia effects, frozen-target-bonus, low-health-debuff, hit-alterations, execution, conditions/
+    ├── attack/             # attack-effect + poison/burn/freeze/stunt/mark/bleed effects, stacked-poison effect, damage-type-bonus (base of bleed-stack-bonus, concealed-bonus, terrain-bonus), entangle/energy-drain/vulnerability/support-block effects, energy-refund, bleed-detonation, splash, weak-point/hypothermia effects, frozen-target-bonus, low-health-debuff, hit-alterations, execution, conditions/
     ├── alteration/         # alteration-detail (Buff | Debuff), alteration-type, alteration-condition, buff-application, live-rate, conditions/ (ally-presence, health-threshold, probability)
     ├── mark/               # elemental-mark, marked-target-bonus
     ├── weak-point/         # weak-point (WeakPoint, spec), weak-points (per card), weak-point-strike (penetration helper)
@@ -86,7 +87,8 @@ cards/
     ├── skill-activation-conditions/  # health-threshold-condition
     ├── damage/             # damage-type, damage-composition, element
     ├── battlefield/        # Battlefield, deployment, exposure
-    └── state/              # card-state-frozen/stunted/bleeding/stacked-poison/hypothermia, status-category
+    ├── vulnerability/      # vulnerability (timed weakness to one damage type)
+    └── state/              # card-state-frozen/stunted/bleeding/stacked-poison/hypothermia/entangled, status-category
 ```
 
 ### `fight-simulator/`
@@ -104,7 +106,7 @@ fight-simulator/
 ├── survived-reactions.ts       # survivedReactions(), fightSurvivedReactor(): `survived` skills of a SURVIVE holder, shared by every attack path
 ├── concealment-steps.ts, stance-steps.ts, execution-steps.ts  # Step helpers
 ├── card-selectors/         # card-selector.ts, player-by-player.ts, speed-weighted-card-pool.ts
-└── @types/                 # fight-result, fight-start-report, step (StepKind), winner-report, action/attack/healing/buff/debuff/state-effect/damage/status-change reports, and one report file per mechanic (shield, mark, weak-point, regeneration, protection, transformation, concealment, special-stance, survived, damage-mitigated, buff-transferred, executed, buff/effect-removed)
+└── @types/                 # fight-result, fight-start-report, step (StepKind), winner-report, action/attack/healing/buff/debuff/state-effect/damage/status-change reports, and one report file per mechanic (shield, mark, weak-point, regeneration, protection, transformation, concealment, special-stance, survived, damage-mitigated, buff-transferred, executed, buff/effect-removed, control)
 ```
 
 ### `targeting-card-strategies/`
@@ -114,7 +116,7 @@ targeting-card-strategy.ts (interface)
 targeted-from-position.ts, targeted-card.ts, targeted-all.ts, targeted-line-three.ts, target-and-neighbors.ts
 all-owner-cards.ts, all-allies.ts, launcher.ts (self)
 allied-card-by-id.ts, last-attacker-of-ally.ts   # [] if dead; last-attacker-of-ally.ts also holds LastDodgedAttackerStrategy
-most-wounded-ally.ts, fastest-ally.ts, protected-ally.ts, first-bleeding-enemy.ts
+most-wounded-ally.ts, fastest-ally.ts, protected-ally.ts, first-bleeding-enemy.ts, random-enemies.ts
 ```
 
 ### `trigger/`

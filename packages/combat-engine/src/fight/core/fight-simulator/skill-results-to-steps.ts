@@ -152,6 +152,10 @@ export function skillResultsToSteps(
           ...skillResultsToSteps(card, hitAlterationResults(skillResult)),
         );
 
+        if (skillResult.battlefield) {
+          steps.push(...battlefieldStartedSteps(card, skillResult.battlefield));
+        }
+
         if (skillResult.lowHealthDebuff) {
           steps.push(
             ...skillResultsToSteps(card, [
@@ -423,7 +427,7 @@ function pushAlterationsByPolarity(
 
 /** The buff and debuff an attack left on the defenders it hit, as skill results. */
 export function hitAlterationResults(
-  attack: AttackSkillResults,
+  attack: Pick<AttackSkillResults, 'hitAlterations' | 'powerId'>,
 ): SkillResults[] {
   if (!attack.hitAlterations) return [];
   const { name, buffs, debuffs } = attack.hitAlterations;

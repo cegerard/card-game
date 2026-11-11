@@ -3,7 +3,11 @@ import {
   Battlefield,
   BattlefieldAlteration,
 } from '../core/cards/@types/battlefield/battlefield';
-import { asBadRequest, mapAlterationType } from './skill-wiring-factory';
+import {
+  asBadRequest,
+  mapAlterationType,
+  mapElement,
+} from './skill-wiring-factory';
 
 export function buildBattlefield(
   dto?: BattlefieldDto,
@@ -15,12 +19,17 @@ export function buildBattlefield(
       new Battlefield({
         name: dto.name,
         duration: dto.duration,
+        element: dto.element && mapElement(dto.element),
         allies: dto.allies && {
           alterations: buildAlterations(dto.allies.alterations),
           healRate: dto.allies.healRate,
           damageSharing: dto.allies.damageSharing && {
             rate: dto.allies.damageSharing.rate,
             maxShareRate: dto.allies.damageSharing.maxShareRate,
+          },
+          decoys: dto.allies.decoys && {
+            count: dto.allies.decoys.count,
+            chance: dto.allies.decoys.chance,
           },
         },
         enemies: dto.enemies && {
@@ -29,6 +38,7 @@ export function buildBattlefield(
             rate: dto.enemies.damage.rate,
             damageType: dto.enemies.damage.damageType,
           },
+          energySurcharge: dto.enemies.energySurcharge,
         },
         revival: dto.revival && {
           rate: dto.revival.rate,

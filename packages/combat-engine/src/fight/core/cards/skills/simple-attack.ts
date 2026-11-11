@@ -16,6 +16,7 @@ import {
 } from '../@types/attack/damage-type-bonus';
 import { BleedDetonation } from '../@types/attack/bleed-detonation';
 import { penetrationAgainst } from '../@types/weak-point/weak-point-strike';
+import { HitAlterations } from '../@types/attack/hit-alterations';
 
 export class SimpleAttack implements AttackSkill {
   constructor(
@@ -27,6 +28,7 @@ export class SimpleAttack implements AttackSkill {
     private readonly defensePenetration?: number,
     private readonly bleedDetonation?: BleedDetonation,
     private readonly weakPointPenetration?: number,
+    private readonly hitAlterations?: HitAlterations,
   ) {}
 
   public get targetingId(): string {
@@ -42,7 +44,16 @@ export class SimpleAttack implements AttackSkill {
       targetingStrategy && this.targetingStrategy.id === 'from-position'
         ? targetingStrategy
         : this.targetingStrategy;
-    return this.executeAttack(card, context, targeting);
+    const attack = this.executeAttack(card, context, targeting);
+    if (!this.hitAlterations) return attack;
+
+    return {
+      ...attack,
+      hitAlterations: {
+        name: this.name,
+        ...this.hitAlterations.apply(attack.results),
+      },
+    };
   }
 
   private executeAttack(
@@ -80,7 +91,7 @@ export class SimpleAttack implements AttackSkill {
             interceptedFor,
             kind,
             remainingHealth: defender.actualHealth,
-            effects: nonEmpty(defender.strikeWeakPoints(context, false)),
+            effects: nonEmpty(defender.dodgedEffects(context)),
           };
         }
 

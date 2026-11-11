@@ -31,7 +31,10 @@ export class BuffTransferSkill implements Skill {
       context.sourcePlayer,
       context.opponentPlayer,
     );
-    const buffs = heir ? source.takeBuffs(this.buffType) : [];
+    const buffs =
+      heir && !heir.refusesSupportFrom(source)
+        ? source.takeBuffs(this.buffType)
+        : [];
     heir?.receiveBuffs(buffs);
 
     return {

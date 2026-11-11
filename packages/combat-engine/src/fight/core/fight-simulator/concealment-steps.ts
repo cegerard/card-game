@@ -33,10 +33,11 @@ export function concealmentEndedReport(
 }
 
 /**
- * Lifts the concealment of a card that just attacked somebody, and reports it
- * when there was one to lift.
+ * Records that the card just attacked somebody, lifts its concealment, and
+ * reports it when there was one to lift.
  */
 export function revealAttacker(card: FightingCard): ConcealmentEndedReport[] {
+  card.recordAttack();
   const broken = card.breakConcealment();
 
   return broken ? [concealmentEndedReport(card, broken, 'attacked')] : [];

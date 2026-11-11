@@ -26,6 +26,7 @@ export const ICON = {
   stunt:             '💫',
   bleed:             '🩸',
   hypothermia:       '🥶',
+  entangle:          '🐙',
   dead:              '💀',
   status_change:     '⚡',
   state_effect:      '💢',
@@ -66,6 +67,14 @@ export const ICON = {
   damage_shared:        '🤝',
   energy_gained:        '🔋',
   effect_cleansed:      '🧼',
+  /* Control */
+  action_failed:         '🪢',
+  energy_drained:        '🪫',
+  vulnerability_applied: '💧',
+  vulnerability_ended:   '🌤️',
+  support_blocked:       '🚫',
+  support_block_ended:   '✅',
+  decoy_struck:          '🫧',
   /* Transformation */
   transformation_started: '🌀',
   transformation_ended:   '💤',
@@ -89,6 +98,7 @@ export const STATUS_ICON = {
   stunt:  ICON.stunt,
   bleed:  ICON.bleed,
   hypothermia: ICON.hypothermia,
+  entangle: ICON.entangle,
 };
 
 /** Primary colour per event kind */
@@ -139,6 +149,13 @@ export const EVENT_COLOR = {
   damage_shared:        '#60a5fa',
   energy_gained:        '#facc15',
   effect_cleansed:      '#a7f3d0',
+  action_failed:         '#94a3b8',
+  energy_drained:        '#a855f7',
+  vulnerability_applied: '#38bdf8',
+  vulnerability_ended:   '#94a3b8',
+  support_blocked:       '#f87171',
+  support_block_ended:   '#94a3b8',
+  decoy_struck:          '#7dd3fc',
   transformation_started: '#a855f7',
   transformation_ended:   '#94a3b8',
   fight_end:         '#22c55e',

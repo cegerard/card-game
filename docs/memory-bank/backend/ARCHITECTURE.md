@@ -63,7 +63,7 @@ sequenceDiagram
 
 ## Damage and Stats
 
-- **Multi-damage**: `DamageCalculator` sums `DamageComposition` (type + rate); `ElementalMatrix` multiplies per attacker type vs defender element; the defender mark amplifier applies after the matrix and before defense.
+- **Multi-damage**: `DamageCalculator` sums `DamageComposition` (type + rate); `ElementalMatrix` multiplies per attacker type vs defender element; the defender mark and vulnerability amplifiers apply after the matrix and before defense.
 - **Defense penetration**: optional `defensePenetration` in `[0, 1]` (throws outside); defense subtracted = `actualDefense × (1 − p)`. Default 0. Exposed by `CONDITIONAL_ATTACK` and ATTACK specials.
 - **Damage type bonuses**: `DamageTypeBonus` (abstract, multiplier > 0) rewrites the composition rate of one damage type. Subclasses say when it is earned: `BleedStackBonus` (defender bleed stacks ≥ `minStacks`), `ConcealedBonus` (attacker concealed). `damageBonuses[]` on `SimpleAttack`/`MultipleAttack` (finisher included)/`SpecialAttack`, applied in order, so two bonuses on one type multiply. Read before the hit applies its own effects.
 - **Attack power**: every read of the striker attack goes through `FightingCard.attackPower(context, defender?)` = `actualAttack × multipliers`. Heals read `actualAttack`. Poison/burn/bleed effects and `BleedExplosionSkill` pass no defender.
@@ -80,7 +80,7 @@ sequenceDiagram
 - **Skill interface**: optional `tick()` and `lifecycleEndEvent()`; `launch()` takes an optional targeting override. Skills with `activationLimit` stop at the limit and emit their `endEvent`; `SkillResults.endEvent` makes the caller run `EndEventProcessor`, which removes matching buffs (`buff_removed`) and status effects (`effect_removed`) and reverts targeting overrides.
 - **Gating in `launchSkills()`**: `requiredStance` and `requiresUndamaged` filter skills there rather than in `isTriggered()` — triggers stay about events and a blocked skill emits no empty step. A blocked cooldown keeps its counter.
 - **Empty results report nothing**: `skillResultsToSteps()` skips empty heals/attacks/alterations/shields and attacks that struck nobody (legitimate when targeting is empty).
-- **Card-bound passives** are extracted from `others[]` in `fighting-card-factory.ts` (`CARD_BOUND_SKILL_KINDS`), stored on `FightingCard`, and have no event or targeting: SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL, BLEED_STACK_SCALING, BLEED_EMPOWERMENT, LOW_HEALTH_TARGET_BONUS, POISONED_ENEMY_AGILITY.
+- **Card-bound passives** are extracted from `others[]` in `fighting-card-factory.ts` (`CARD_BOUND_SKILL_KINDS`), stored on `FightingCard`, and have no event or targeting: SURVIVE, DAMAGE_REDUCTION, DODGE_BONUS_DENIAL, BLEED_STACK_SCALING, BLEED_EMPOWERMENT, LOW_HEALTH_TARGET_BONUS, POISONED_ENEMY_AGILITY, ATTACKER_INSIGHT.
 - **DTO guards** (`fighting-card-factory.ts`): `KIND_ONLY_FIELDS` lists which kinds may carry each reserved field; any other kind gets a 400. `STANCE_SPECIAL_FORBIDDEN_FIELDS` (`special-factory.ts`) does the same for STANCE specials.
 - **Event owning its `activationCondition`**: `any-ally-health-below` and `enemy-killed` read `activationCondition.threshold` as their own trigger threshold (`ownsActivationCondition()`), so the generic ALTERATION path must not also build a condition from it (it would gate the skill on the caster health).
 - **Reactive health skills**: `HealthReactiveSkill` (`isHealthReactive`, `onHealthChanged(card)`) is edge-triggered on `healthRatio` crossing a threshold, rearming on recovery. `triggerReactiveSkills()` runs after every HP change. Implemented by `ShieldSkill` and `TransformationSkill`.
@@ -114,6 +114,20 @@ sequenceDiagram
 
 Laid by a STANCE special or a TRANSFORMATION. `deploy()` first revives the allies dead for fewer than `withinTurns` turns of their side (`countTurnDead()` in `TurnManager`, `revive()` clears the card), then exposes every living card: allies get the aura (alterations tagged `origin`, `healRate`, damage sharing), enemies the hazard (debuffs, `rate × caster attack` through the elemental matrix). Each card carries its `BattlefieldExposure` on its own clock like a buff; heals and hits tick at its turn end, before the statuses (`healing` / `attack` steps); a recast refreshes. When its caster dies (cascade phase after `self-death`), a legacy prolongs exposures and `origin` alterations once and `empower()`s the living allies: their next action attack is multiplied, consumed in `handleAttackResult()`.
 - **Damage sharing**: inside `applyFinalDamage()` after the reduction, before the shield: with a living partner, the hit loses `rate`; each partner takes `min(rate / n, maxShareRate)` of it as real damage, never fatal (`damage_shared`, then their reactive skills).
+
+- **Terrain**: optional `element`; `TerrainBonus` (a `DamageTypeBonus`) holds while the attacker or the defender stands in a battlefield of that element.
+- **Restricted deploy**: `deploy(caster, context, enemies)` exposes only those enemies; `adjacentTargetsBattlefield` on an ATTACK special lays it on its living defenders standing next to another one in their deck (2 at least), reported after the attack.
+- **Decoys** (`allies.decoys`): one pool per cast shared by the allies; `dodge()` rolls it first, a taken hit is a dodge reported `decoy_struck` through `dodgedEffects()`. **Energy surcharge** (`enemies.energySurcharge`): added to the special cost and gauge cap of each exposed enemy.
+
+## Control
+
+- **Entangle**: control status (`CardStateEntangled`, no clock, immunity and resistance apply). `ActionStage` calls `failsOffensiveAction()` before an attack special or the regular action (plain attack or `next-action` skill, presumed offensive): it consumes the entanglement and rolls its chance; a failure reports `action_failed`, launches nothing and charges no energy.
+- **Energy drain**: `drainEnergy()`, never below 0, no roll. **Vulnerability**: one per damage type, replaced by a new one, resisted, timed like a weak point.
+- **Support block**: `refusesSupportFrom(source)` turns away heals (`applyHealing()`, battlefield heal) and buffs (alteration skills, special alterations, SUPPORT, battlefield aura, BUFF_TRANSFER) cast by another card. Shield and cleanse still land. Resisted, timed.
+- **Heavy-hit termination**: an alteration with `terminationDamageRate` ends on its `terminationEvent` only when `EndEventProcessor` gets a hit rate (`damage-taken-<id>`: health lost / max health) strictly above it.
+- **Insight** (ATTACKER_INSIGHT): accuracy and agility bonus against an enemy whose `hasAttacked` is set by `revealAttacker()` (any attack that targeted somebody).
+- **Random enemies**: `RandomEnemiesStrategy` draws `targetCount` targetable enemies per launch.
+- **Special echo** (SPECIAL_ECHO): `echoSpecial()` casts the ATTACK special again, gauge untouched, reported as a reactive attack (hits, effects, executions, battlefield). Paired with `self-death` + `requiresStance` of a transformation stance, a fallen caster casts it once more.
 
 ## Death Cascade (`DeathSkillHandler`)
 
@@ -149,7 +163,7 @@ Phases on each death, in order: end events of lifecycle-limited skills → `self
 
 Order after the main hit: hit effects → execution → hit alterations → low-health debuff → splash.
 
-- **Hit alterations**: `HitAlterations` buff/debuff each distinct defender that was hit, not dodged and still alive, once per defender (debuffs through `applyDebuff()`). Reported as `buff`/`debuff` steps after the attack step. Dedicated field because `statAlterations` requires targeting.
+- **Hit alterations** (also on `SimpleAttack`, reported by the plain attack): `HitAlterations` buff/debuff each distinct defender that was hit, not dodged and still alive, once per defender (debuffs through `applyDebuff()`). Reported as `buff`/`debuff` steps after the attack step. Dedicated field because `statAlterations` requires targeting.
 - **Execution** (`ConditionalAttack` and `SpecialAttack`; threshold in `]0, 1[`): each distinct defender hit, not dodged and strictly under the threshold, loses all remaining health through `execute()` → `addRealDamage()` (shield and reduction ignored) unless an unconsumed SURVIVE holds 1 HP. Runs inside `launch()`, so the defender is already dead when the result is read and the cascade follows with the attacker as killer. Reports `executed` (+ `survived`) via `executionSteps()`.
 - **Low-health debuff**: debuffs the main defender (not dodged, alive, `healthRatio < threshold` after the hit) before the splash; resistance applies; reported as a `debuff` step.
 - **Splash**: builds a `SimpleAttack` on `TargetAndNeighborsStrategy(center)` (primary target `interceptedFor ?? defender` and its deck neighbors, living only) when the main strike targeted somebody; dodge, protection and shield apply; reported as a second attack step.

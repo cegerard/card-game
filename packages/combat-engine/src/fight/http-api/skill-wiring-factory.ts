@@ -5,7 +5,11 @@ import {
   BuffType,
   TriggerEvent,
   TargetingStrategy,
+  ElementDto,
+  HitAlterationDto,
 } from './dto/fight-data.dto';
+import { Element } from '../core/cards/@types/damage/element';
+import { HitAlterations } from '../core/cards/@types/attack/hit-alterations';
 import { buildTargetingStrategy } from './targeting-strategy-factory';
 import { buildAlterationCondition } from './alteration-condition-factory';
 import { buildTriggerStrategy } from './trigger-factory';
@@ -214,4 +218,40 @@ export function mapAlterationType(
   const result = BUFF_TYPE_MAP[buffType];
   if (!result) throw new Error(`Unknown buff type: ${buffType}`);
   return result;
+}
+
+/**
+ * Maps the DTO element onto its domain counterpart. The two enums carry the
+ * same string values, but going through an explicit map keeps an unknown
+ * element loud instead of silently reaching the elemental matrix.
+ */
+export function mapElement(element: ElementDto): Element {
+  const ELEMENT_MAP: Record<ElementDto, Element> = {
+    [ElementDto.PHYSICAL]: Element.PHYSICAL,
+    [ElementDto.FIRE]: Element.FIRE,
+    [ElementDto.WATER]: Element.WATER,
+    [ElementDto.EARTH]: Element.EARTH,
+    [ElementDto.AIR]: Element.AIR,
+  };
+
+  const result = ELEMENT_MAP[element];
+  if (!result) throw new Error(`Unknown element: ${element}`);
+  return result;
+}
+
+/** The alterations an attack leaves on every defender it hit. */
+export function buildHitAlterations(
+  alterations?: HitAlterationDto[],
+): HitAlterations | undefined {
+  if (!alterations?.length) return undefined;
+
+  return new HitAlterations(
+    alterations.map((a) => ({
+      polarity: a.polarity,
+      type: mapAlterationType(a.type),
+      rate: a.rate,
+      duration: a.duration,
+      terminationEvent: a.terminationEvent,
+    })),
+  );
 }

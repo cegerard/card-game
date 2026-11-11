@@ -14,6 +14,7 @@ import { CardStateStackedPoison } from './@types/state/card-state-stacked-poison
 import { DodgeBonusDenialSkill } from './skills/dodge-bonus-denial';
 import { BleedStackScalingSkill } from './skills/bleed-stack-scaling';
 import { PoisonedEnemyAgilitySkill } from './skills/poisoned-enemy-agility';
+import { AttackerInsightSkill } from './skills/attacker-insight';
 import { LowHealthTargetBonusSkill } from './skills/low-health-target-bonus';
 import {
   BleedApplication,
@@ -51,7 +52,12 @@ import {
   WeakPointEndReason,
 } from './@types/weak-point/weak-point';
 import { WeakPoints } from './@types/weak-point/weak-points';
-import { EffectResult } from './@types/attack/attack-effect';
+import {
+  DECOY_STRUCK_TYPE,
+  DecoyStruckResult,
+  EffectResult,
+  SUPPORT_BLOCK_ENDED_TYPE,
+} from './@types/attack/attack-effect';
 import { LiveRate } from './@types/alteration/live-rate';
 import {
   BattlefieldDeployment,
@@ -59,6 +65,11 @@ import {
   DamageSharing,
 } from './@types/battlefield/battlefield';
 import { ElementalMatrix } from './damage/elemental-matrix';
+import { CardStateEntangled } from './@types/state/card-state-entangled';
+import {
+  VULNERABILITY_ENDED_TYPE,
+  Vulnerability,
+} from './@types/vulnerability/vulnerability';
 
 /**
  * Turns the resistance stat into a refusal chance. Chosen so the 20-80 design
@@ -67,7 +78,11 @@ import { ElementalMatrix } from './damage/elemental-matrix';
 const RESISTANCE_REFUSAL_DIVISOR = 200;
 
 /** What an alteration carries besides its rate and its lifetime. */
-export type AlterationOptions = { live?: LiveRate; origin?: string };
+export type AlterationOptions = {
+  live?: LiveRate;
+  origin?: string;
+  terminationDamageRate?: number;
+};
 
 export type FinalDamageResult = {
   damageToHealth: number;
@@ -195,6 +210,8 @@ export class FightingCard {
   private lowHealthTargetBonus: LowHealthTargetBonusSkill | null = null;
   private bleedEmpowerment: BleedEmpowermentSkill | null = null;
   private poisonedEnemyAgility: PoisonedEnemyAgilitySkill | null = null;
+  private attackerInsight: AttackerInsightSkill | null = null;
+  private attacked = false;
 
   // Stances
   private stances: Stance[] = [];
@@ -228,6 +245,10 @@ export class FightingCard {
   private stunted?: CardState;
   private bleeding?: CardStateBleeding;
   private hypothermic?: CardState;
+  private entangled?: CardStateEntangled;
+  private supportBlock: { remainingTurns: number } | null = null;
+  private struckDecoy?: DecoyStruckResult;
+  private vulnerabilities: Vulnerability[] = [];
   private readonly weakPoints = new WeakPoints();
   private laidBleedStacks = 0;
   private readonly poisonedCards = new Set<FightingCard>();
@@ -257,6 +278,7 @@ export class FightingCard {
       bleedEmpowerment?: BleedEmpowermentSkill;
       lowHealthTargetBonus?: LowHealthTargetBonusSkill;
       poisonedEnemyAgility?: PoisonedEnemyAgilitySkill;
+      attackerInsight?: AttackerInsightSkill;
     },
     behaviors: {
       dodge: DodgeBehavior;
@@ -288,6 +310,7 @@ export class FightingCard {
     this.bleedEmpowerment = skills.bleedEmpowerment ?? null;
     this.lowHealthTargetBonus = skills.lowHealthTargetBonus ?? null;
     this.poisonedEnemyAgility = skills.poisonedEnemyAgility ?? null;
+    this.attackerInsight = skills.attackerInsight ?? null;
   }
 
   public get lastAttacker(): FightingCard | undefined {
@@ -395,11 +418,22 @@ export class FightingCard {
     return base * (1 + (this.transformation?.criticalDamageRate ?? 0));
   }
 
-  /** The accuracy this card strikes that defender with, its weak points included. */
+  /** The accuracy this card strikes that defender with, its weak points and insight included. */
   public accuracyAgainst(defender: FightingCard): number {
-    const weakPointRate = defender.weakPoints.bonusOf(this, 'accuracyRate');
+    const rate =
+      defender.weakPoints.bonusOf(this, 'accuracyRate') +
+      (this.attackerInsight?.accuracyRateAgainst(defender) ?? 0);
 
-    return this.actualAccuracy + round2(this.accuracy * weakPointRate);
+    return this.actualAccuracy + round2(this.accuracy * rate);
+  }
+
+  /** Whether the card already attacked somebody during the fight. */
+  public get hasAttacked(): boolean {
+    return this.attacked;
+  }
+
+  public recordAttack(): void {
+    this.attacked = true;
   }
 
   public get actualDefense(): number {
@@ -572,6 +606,10 @@ export class FightingCard {
       this.hypothermic = newState;
     }
 
+    if (newState instanceof CardStateEntangled) {
+      this.entangled = newState;
+    }
+
     if (newState instanceof CardStateBleeding) {
       if (this.bleeding) this.bleeding.addStacks(newState);
       else this.bleeding = newState;
@@ -589,6 +627,7 @@ export class FightingCard {
       this.stunted,
       this.bleeding,
       this.hypothermic,
+      this.entangled,
     ].filter((state) => state !== undefined);
     if (statuses.length === 0) return undefined;
 
@@ -600,8 +639,25 @@ export class FightingCard {
     if (type === 'stunt') this.stunted = undefined;
     if (type === 'bleed') this.bleeding = undefined;
     if (type === 'hypothermia') this.hypothermic = undefined;
+    if (type === 'entangle') this.entangled = undefined;
 
     return type;
+  }
+
+  public get isEntangled(): boolean {
+    return this.entangled !== undefined;
+  }
+
+  /**
+   * Called when the card is about to act offensively: an entanglement goes
+   * with that action, which fails on its chance. Returns whether it failed.
+   */
+  public failsOffensiveAction(): boolean {
+    if (!this.entangled) return false;
+
+    const { failChance } = this.entangled;
+    this.entangled = undefined;
+    return this.randomizer.random() < failChance;
   }
 
   public unFreeze(): void {
@@ -667,6 +723,17 @@ export class FightingCard {
 
   public launchSpecial(context: FightingContext): SpecialResult {
     return this.special.launch(this, context, this.currentTargetingOverride);
+  }
+
+  /** Casts the attack special once more, the gauge untouched. */
+  public echoSpecial(context: FightingContext): SpecialResult {
+    if (this.specialKind() !== 'specialAttack') {
+      throw new Error(
+        `Only an attack special can be echoed, ${this.name} has ${this.specialKind()}`,
+      );
+    }
+
+    return this.special.launch(this, context);
   }
 
   public launchSkills(
@@ -746,11 +813,15 @@ export class FightingCard {
   }
 
   public isSpecialReady(): boolean {
-    return this.special.ready(this.specialEnergy);
+    return this.special.ready(this.specialEnergy, this.energySurcharge);
   }
 
   public increaseSpecialEnergy(): number {
-    this.specialEnergy = this.special.increaseEnergy(this.specialEnergy);
+    this.specialEnergy = this.special.increaseEnergy(
+      this.specialEnergy,
+      undefined,
+      this.energySurcharge,
+    );
 
     return this.specialEnergy;
   }
@@ -760,13 +831,30 @@ export class FightingCard {
     this.specialEnergy = this.special.increaseEnergy(
       this.specialEnergy,
       amount,
+      this.energySurcharge,
     );
 
     return this.specialEnergy;
   }
 
+  /** Extra energy its special costs, laid by the enemy battlefields it stands in. */
+  private get energySurcharge(): number {
+    return this.exposures.reduce(
+      (sum, exposure) => sum + (exposure.energySurcharge ?? 0),
+      0,
+    );
+  }
+
   public spendEnergy(amount: number): void {
     this.specialEnergy -= amount;
+  }
+
+  /** Energy an enemy takes away, never below 0; returns what was drained. */
+  public drainEnergy(amount: number): number {
+    const drained = Math.min(amount, this.specialEnergy);
+    this.specialEnergy -= drained;
+
+    return drained;
   }
 
   public resetSpecialEnergy(refund: number = 0): number {
@@ -905,6 +993,7 @@ export class FightingCard {
     return this.exposures.flatMap((exposure): BattlefieldTick[] => {
       const { name, source } = exposure.deployment;
       if (exposure.healRate) {
+        if (this.refusesSupportFrom(source)) return [];
         const healed = this.healShareOfMaxHealth(exposure.healRate);
         return healed > 0 ? [{ name, source, healed }] : [];
       }
@@ -947,6 +1036,11 @@ export class FightingCard {
   public removeAlterationsFrom(origin: string): void {
     this.buffs = this.buffs.filter((b) => b.origin !== origin);
     this.debuffs = this.debuffs.filter((d) => d.origin !== origin);
+  }
+
+  /** Whether the card stands in a battlefield of that element. */
+  public standsInTerrain(element: Element): boolean {
+    return this.exposures.some((e) => e.deployment.config.element === element);
   }
 
   /** Every battlefield deployment the card stands in. */
@@ -995,6 +1089,9 @@ export class FightingCard {
     this.stunted = undefined;
     this.bleeding = undefined;
     this.hypothermic = undefined;
+    this.entangled = undefined;
+    this.vulnerabilities = [];
+    this.supportBlock = null;
     this.buffs = [];
     this.debuffs = [];
     this.shield = null;
@@ -1319,6 +1416,76 @@ export class FightingCard {
     return 1 + entry.stacks * entry.mark.ratePerStack;
   }
 
+  /**
+   * Cuts the card off its allies support for a while: their heals and buffs
+   * no longer reach it. Like a debuff, a dead card takes none and resistance
+   * refuses it; a new one refreshes the running one.
+   */
+  public blockSupport(duration: number): boolean {
+    if (this.isDead() || this.resists()) return false;
+
+    this.supportBlock = { remainingTurns: duration };
+    return true;
+  }
+
+  /** Whether a heal or a buff cast by `source` is refused: its own still land. */
+  public refusesSupportFrom(source: FightingCard): boolean {
+    return this.supportBlock !== null && source !== this;
+  }
+
+  /** Same clock as a weak point; reports the block when it runs out. */
+  public decreaseSupportBlockDuration(): EffectResult[] {
+    if (!this.supportBlock) return [];
+
+    this.supportBlock.remainingTurns--;
+    if (this.supportBlock.remainingTurns >= 0) return [];
+
+    this.supportBlock = null;
+    return [{ type: SUPPORT_BLOCK_ENDED_TYPE, card: this }];
+  }
+
+  /**
+   * Makes the card weak to one damage type for a while, replacing the one of
+   * that type. Like a debuff, a dead card takes none and resistance refuses it.
+   */
+  public applyVulnerability(
+    damageType: DamageType,
+    rate: number,
+    duration: number,
+  ): Vulnerability | undefined {
+    if (this.isDead() || this.resists()) return undefined;
+
+    const vulnerability = { damageType, rate, remainingTurns: duration };
+    this.vulnerabilities = [
+      ...this.vulnerabilities.filter((v) => v.damageType !== damageType),
+      vulnerability,
+    ];
+    return vulnerability;
+  }
+
+  public vulnerabilityAmplifier(damageType: DamageType): number {
+    const vulnerability = this.vulnerabilities.find(
+      (v) => v.damageType === damageType,
+    );
+
+    return 1 + (vulnerability?.rate ?? 0);
+  }
+
+  /** Same clock as a weak point; reports the vulnerabilities that ran out. */
+  public decreaseVulnerabilityDurations(): EffectResult[] {
+    this.vulnerabilities.forEach((v) => v.remainingTurns--);
+    const ended = this.vulnerabilities.filter((v) => v.remainingTurns < 0);
+    this.vulnerabilities = this.vulnerabilities.filter(
+      (v) => v.remainingTurns >= 0,
+    );
+
+    return ended.map((v) => ({
+      type: VULNERABILITY_ENDED_TYPE,
+      card: this,
+      damageType: v.damageType,
+    }));
+  }
+
   /** Reveals a weak point on the card; a dead card reveals nothing. */
   public revealWeakPoint(weakPoint: WeakPoint): WeakPoint | undefined {
     if (this.isDead()) return undefined;
@@ -1447,13 +1614,44 @@ export class FightingCard {
     return healed;
   }
 
+  /**
+   * Whether the attack misses the card: a decoy of its side takes it, a
+   * stance evades it, or the dodge roll wins. A decoy is reported by the
+   * `dodgedEffects()` that follow.
+   */
   public dodge(attacker: FightingCard): boolean {
-    if (this.evades()) return true;
+    this.struckDecoy = this.decoyTakesAttack();
+    if (this.struckDecoy || this.evades()) return true;
 
     return this.dodgeBehavior.dodge(
       this.agilityAgainst(attacker),
       attacker.accuracyAgainst(this),
     );
+  }
+
+  /** What a missed attack leaves: the decoy it struck, the weak points it spent. */
+  public dodgedEffects(context: FightingContext): EffectResult[] {
+    const decoy = this.struckDecoy;
+    this.struckDecoy = undefined;
+
+    return [
+      ...(decoy ? [decoy] : []),
+      ...this.strikeWeakPoints(context, false),
+    ];
+  }
+
+  /** One roll against the first decoy pool of its side that has some left. */
+  private decoyTakesAttack(): DecoyStruckResult | undefined {
+    const pool = this.exposures.find((e) => e.decoys?.left > 0)?.decoys;
+    if (!pool || this.randomizer.random() >= pool.chance) return undefined;
+
+    pool.left--;
+    return {
+      type: DECOY_STRUCK_TYPE,
+      card: this,
+      name: pool.name,
+      remainingDecoys: pool.left,
+    };
   }
 
   /** One roll against the best evasion chance among the running stances. */
@@ -1467,11 +1665,14 @@ export class FightingCard {
     return this.randomizer.random() < chance;
   }
 
-  /** The agility this card dodges that attacker with. */
+  /** The agility this card dodges that attacker with, its insight included. */
   public agilityAgainst(attacker: FightingCard): number {
-    return attacker.deniesDodgeBonusOf(this)
+    const agility = attacker.deniesDodgeBonusOf(this)
       ? this.agilityWithoutBuffs
       : this.actualAgility;
+    const insightRate = this.attackerInsight?.agilityRateAgainst(attacker) ?? 0;
+
+    return agility + round2(this.agility * insightRate);
   }
 
   public deniesDodgeBonusOf(defender: FightingCard): boolean {
@@ -1490,7 +1691,7 @@ export class FightingCard {
     terminationEvent?: string,
     powerId?: string,
     stacking?: AlterationStacking,
-    { live, origin }: AlterationOptions = {},
+    { live, origin, terminationDamageRate }: AlterationOptions = {},
   ): Buff | undefined {
     if (isPileFull(this.buffs, stacking)) return undefined;
 
@@ -1508,6 +1709,7 @@ export class FightingCard {
       stackId: stacking?.id,
       live,
       origin,
+      terminationDamageRate,
     };
 
     if (terminationEvent && !stacking) {
@@ -1556,6 +1758,11 @@ export class FightingCard {
       this.hypothermic = undefined;
     }
 
+    if (this.entangled?.terminationEvent === eventName) {
+      removed.push({ type: this.entangled.type, card });
+      this.entangled = undefined;
+    }
+
     if (this.bleeding?.removeStacksBoundTo(eventName)) {
       removed.push({ type: this.bleeding.type, card });
       if (!this.bleeding.stackCount) this.bleeding = undefined;
@@ -1564,14 +1771,17 @@ export class FightingCard {
     return removed;
   }
 
+  /** `hitRate`: share of its max health the hit that fired the event cost the card. */
   public removeEventBoundBuffs(
     eventName: string,
+    hitRate?: number,
   ): { type: AlterationType; value: number }[] {
+    const ends = (b: Buff) => endsOn(b, eventName, hitRate);
     const removed = this.buffs
-      .filter((b) => b.terminationEvent === eventName)
+      .filter(ends)
       .map((b) => ({ type: b.type, value: b.value }));
 
-    this.buffs = this.buffs.filter((b) => b.terminationEvent !== eventName);
+    this.buffs = this.buffs.filter((b) => !ends(b));
 
     return removed;
   }
@@ -1632,7 +1842,7 @@ export class FightingCard {
     terminationEvent?: string,
     powerId?: string,
     stacking?: AlterationStacking,
-    { live, origin }: AlterationOptions = {},
+    { live, origin, terminationDamageRate }: AlterationOptions = {},
   ): Debuff | undefined {
     if (isPileFull(this.debuffs, stacking)) return undefined;
 
@@ -1651,6 +1861,7 @@ export class FightingCard {
       stackId: stacking?.id,
       live,
       origin,
+      terminationDamageRate,
     };
 
     this.debuffs.push(debuff);
@@ -1675,12 +1886,14 @@ export class FightingCard {
 
   public removeEventBoundDebuffs(
     eventName: string,
+    hitRate?: number,
   ): { type: AlterationType; value: number }[] {
+    const ends = (d: Debuff) => endsOn(d, eventName, hitRate);
     const removed = this.debuffs
-      .filter((d) => d.terminationEvent === eventName)
+      .filter(ends)
       .map((d) => ({ type: d.type, value: d.value }));
 
-    this.debuffs = this.debuffs.filter((d) => d.terminationEvent !== eventName);
+    this.debuffs = this.debuffs.filter((d) => !ends(d));
 
     return removed;
   }
@@ -1760,6 +1973,17 @@ export class FightingCard {
         throw new Error(`Unknown attribute type: ${type}`);
     }
   }
+}
+
+function endsOn(
+  alteration: AlterationDetail,
+  eventName: string,
+  hitRate?: number,
+): boolean {
+  if (alteration.terminationEvent !== eventName) return false;
+  if (alteration.terminationDamageRate === undefined) return true;
+
+  return (hitRate ?? 0) > alteration.terminationDamageRate;
 }
 
 function isPileFull(
