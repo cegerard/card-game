@@ -278,7 +278,7 @@ export interface BattlefieldAlteration {
 export interface Battlefield {
   name: string;
   duration: number;
-  /** Élément du terrain, lu par `terrainBonus`. */
+  /** Élément du champ de bataille, lu par `battlefieldBonus`. */
   element?: Element;
   allies?: {
     alterations?: BattlefieldAlteration[];
@@ -357,7 +357,7 @@ export interface AttackBonuses {
   /** Bonus contre une cible déjà gelée, sur tous les types de dégâts sans `damageType`. */
   frozenTargetBonus?: { damageType?: DamageType; multiplier: number };
   /** Bonus tant qu'un champ de bataille de cet élément court (l'attaquant ou la cible s'y tient), sur tous les types sans `damageType`. */
-  terrainBonus?: {
+  battlefieldBonus?: {
     element: Element;
     damageType?: DamageType;
     multiplier: number;

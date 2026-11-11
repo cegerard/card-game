@@ -1,4 +1,4 @@
-import { TerrainBonus } from '../terrain-bonus';
+import { BattlefieldBonus } from '../battlefield-bonus';
 import { DamageComposition } from '../../damage/damage-composition';
 import { DamageType } from '../../damage/damage-type';
 import { Element } from '../../damage/element';
@@ -12,8 +12,8 @@ const whipDamages = [
   new DamageComposition(DamageType.WATER, 0.7),
 ];
 
-describe('TerrainBonus', () => {
-  const bonus = new TerrainBonus(Element.WATER, undefined, 1.2);
+describe('BattlefieldBonus', () => {
+  const bonus = new BattlefieldBonus(Element.WATER, undefined, 1.2);
   let attacker: FightingCard;
   let defender: FightingCard;
   let players: Player[];
@@ -32,29 +32,29 @@ describe('TerrainBonus', () => {
     players = [new Player('p1', [attacker]), new Player('p2', [defender])];
   });
 
-  it('leaves the damages unchanged without terrain', () => {
+  it('leaves the damages unchanged without battlefield', () => {
     expect(rates()).toEqual([0.7, 0.7]);
   });
 
-  it('boosts every damage type when the attacker stands in that terrain', () => {
+  it('boosts every damage type when the attacker stands in that battlefield', () => {
     lay(Element.WATER, attacker);
 
     expect(rates()).toEqual([0.84, 0.84]);
   });
 
-  it('boosts the attack when the defender laid that terrain', () => {
+  it('boosts the attack when the defender laid that battlefield', () => {
     lay(Element.WATER, defender);
 
     expect(rates()).toEqual([0.84, 0.84]);
   });
 
-  it('ignores a terrain of another element', () => {
+  it('ignores a battlefield of another element', () => {
     lay(Element.FIRE, attacker);
 
     expect(rates()).toEqual([0.7, 0.7]);
   });
 
-  it('ignores a terrain that ran out', () => {
+  it('ignores a battlefield that ran out', () => {
     lay(Element.WATER, attacker);
     [1, 2, 3].forEach(() =>
       [attacker, defender].forEach((c) => c.decreaseBattlefieldDurations()),

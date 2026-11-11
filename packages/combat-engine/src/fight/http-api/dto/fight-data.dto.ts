@@ -558,7 +558,7 @@ export class BattlefieldDto {
   @Min(1)
   duration: number;
 
-  // The element of the terrain, read by `terrainBonus`
+  // The element of the battlefield, read by `battlefieldBonus`
   @IsOptional()
   @IsEnum(ElementDto)
   element?: ElementDto;
@@ -734,7 +734,7 @@ export class FrozenTargetBonusDto {
 }
 
 // Boosts every damage type, or only `damageType`, while a battlefield of that element runs
-export class TerrainBonusDto extends FrozenTargetBonusDto {
+export class BattlefieldBonusDto extends FrozenTargetBonusDto {
   @IsEnum(ElementDto)
   element: ElementDto;
 }
@@ -763,8 +763,8 @@ class AttackBonusesDto {
 
   @IsOptional()
   @ValidateNested()
-  @Type(/* istanbul ignore next */ () => TerrainBonusDto)
-  terrainBonus?: TerrainBonusDto;
+  @Type(/* istanbul ignore next */ () => BattlefieldBonusDto)
+  battlefieldBonus?: BattlefieldBonusDto;
 }
 
 export enum StatusCategoryDto {

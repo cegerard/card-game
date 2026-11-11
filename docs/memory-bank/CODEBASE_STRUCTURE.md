@@ -77,7 +77,7 @@ cards/
 ├── damage/                 # damage-calculator.ts, elemental-matrix.ts (5x5)
 └── @types/
     ├── action-result/      # special-result, attack-result, named-attack-result, healing-result, buff-results, shield-result
-    ├── attack/             # attack-effect + poison/burn/freeze/stunt/mark/bleed effects, stacked-poison effect, damage-type-bonus (base of bleed-stack-bonus, concealed-bonus, terrain-bonus), entangle/energy-drain/vulnerability/support-block effects, energy-refund, bleed-detonation, splash, weak-point/hypothermia effects, frozen-target-bonus, low-health-debuff, hit-alterations, execution, conditions/
+    ├── attack/             # attack-effect + poison/burn/freeze/stunt/mark/bleed effects, stacked-poison effect, damage-type-bonus (base of bleed-stack-bonus, concealed-bonus, battlefield-bonus), entangle/energy-drain/vulnerability/support-block effects, energy-refund, bleed-detonation, splash, weak-point/hypothermia effects, frozen-target-bonus, low-health-debuff, hit-alterations, execution, conditions/
     ├── alteration/         # alteration-detail (Buff | Debuff), alteration-type, alteration-condition, buff-application, live-rate, conditions/ (ally-presence, health-threshold, probability)
     ├── mark/               # elemental-mark, marked-target-bonus
     ├── weak-point/         # weak-point (WeakPoint, spec), weak-points (per card), weak-point-strike (penetration helper)

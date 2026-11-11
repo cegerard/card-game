@@ -23,7 +23,7 @@ export type BattlefieldConfig = {
   name: string;
   /** Turns it lasts on each card, counted on that card own clock like a buff. */
   duration: number;
-  /** The element of the terrain, read by the attacks boosted on it. */
+  /** The element of the battlefield, read by the attacks boosted on it. */
   element?: Element;
   allies?: {
     alterations?: BattlefieldAlteration[];

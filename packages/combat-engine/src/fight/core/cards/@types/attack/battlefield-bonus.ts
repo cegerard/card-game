@@ -6,9 +6,9 @@ import { DamageTypeBonus } from './damage-type-bonus';
 /**
  * Boosts an attack while a battlefield of that element runs where it is
  * fought: the attacker or the defender stands in it. A battlefield exposes
- * both sides, so a terrain laid by anybody counts.
+ * both sides, so a battlefield laid by anybody counts.
  */
-export class TerrainBonus extends DamageTypeBonus {
+export class BattlefieldBonus extends DamageTypeBonus {
   constructor(
     private readonly element: Element,
     damageType: DamageType | undefined,
@@ -19,8 +19,8 @@ export class TerrainBonus extends DamageTypeBonus {
 
   protected isEarned(attacker: FightingCard, defender: FightingCard): boolean {
     return (
-      attacker.standsInTerrain(this.element) ||
-      defender.standsInTerrain(this.element)
+      attacker.standsInBattlefield(this.element) ||
+      defender.standsInBattlefield(this.element)
     );
   }
 }

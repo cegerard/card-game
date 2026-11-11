@@ -59,7 +59,7 @@ describe('SpecialAttack laying a battlefield between adjacent targets', () => {
   it('lays it on two targets standing side by side', () => {
     castOn([0, 1]);
 
-    expect(enemies.map((e) => e.standsInTerrain(Element.WATER))).toEqual([
+    expect(enemies.map((e) => e.standsInBattlefield(Element.WATER))).toEqual([
       true,
       true,
       false,

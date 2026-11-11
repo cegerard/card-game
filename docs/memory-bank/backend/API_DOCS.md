@@ -137,7 +137,7 @@ Simulates a turn-based card battle between two players.
   bleedStackBonus?: ..., concealedBonus?: ...,  // Same as SpecialDto
   // Any attack (simple, multiple, special): x multiplier, every type unless damageType
   frozenTargetBonus?: { multiplier: number, damageType?: ... },  // against an already frozen defender
-  terrainBonus?: { element: Element, multiplier: number, damageType?: ... }  // while the attacker or the defender stands in a battlefield of that element
+  battlefieldBonus?: { element: Element, multiplier: number, damageType?: ... }  // while the attacker or the defender stands in a battlefield of that element
 }
 ```
 
@@ -281,7 +281,7 @@ Simulates a turn-based card battle between two players.
 ```typescript
 {
   name: string, duration: number,  // integer >= 1
-  element?: Element,               // terrain read by terrainBonus
+  element?: Element,               // read by battlefieldBonus
   allies?: { alterations?: BattlefieldAlterationDto[], healRate?: number, damageSharing?: { rate: number, maxShareRate: number }, decoys?: { count: number, chance: number } },
   enemies?: { alterations?: BattlefieldAlterationDto[], damage?: { rate: number, damageType: DamageType }, energySurcharge?: number },
   revival?: { rate: number, withinTurns: number },

@@ -1907,7 +1907,7 @@
             "polarity": "debuff"
           }
         ],
-        "terrainBonus": {
+        "battlefieldBonus": {
           "element": "WATER",
           "multiplier": 1.2
         }

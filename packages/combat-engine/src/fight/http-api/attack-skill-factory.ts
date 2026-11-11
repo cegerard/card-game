@@ -5,9 +5,9 @@ import {
   EnergyRefundDto,
   ExecutionDto,
   FightingCardDto,
-  TerrainBonusDto,
+  BattlefieldBonusDto,
 } from './dto/fight-data.dto';
-import { TerrainBonus } from '../core/cards/@types/attack/terrain-bonus';
+import { BattlefieldBonus } from '../core/cards/@types/attack/battlefield-bonus';
 import { SimpleAttack } from '../core/cards/skills/simple-attack';
 import { buildTargetingStrategy } from './targeting-strategy-factory';
 import { BleedStackBonus } from '../core/cards/@types/attack/bleed-stack-bonus';
@@ -86,10 +86,14 @@ export function buildDamageBonuses(attack: {
   bleedStackBonus?: BleedStackBonusDto;
   concealedBonus?: DamageTypeBonusDto;
   frozenTargetBonus?: FrozenTargetBonusDto;
-  terrainBonus?: TerrainBonusDto;
+  battlefieldBonus?: BattlefieldBonusDto;
 }): DamageTypeBonus[] {
-  const { bleedStackBonus, concealedBonus, frozenTargetBonus, terrainBonus } =
-    attack;
+  const {
+    bleedStackBonus,
+    concealedBonus,
+    frozenTargetBonus,
+    battlefieldBonus,
+  } = attack;
   const bonuses: DamageTypeBonus[] = [];
 
   if (bleedStackBonus) {
@@ -114,12 +118,12 @@ export function buildDamageBonuses(attack: {
       ),
     );
   }
-  if (terrainBonus) {
+  if (battlefieldBonus) {
     bonuses.push(
-      new TerrainBonus(
-        mapElement(terrainBonus.element),
-        terrainBonus.damageType,
-        terrainBonus.multiplier,
+      new BattlefieldBonus(
+        mapElement(battlefieldBonus.element),
+        battlefieldBonus.damageType,
+        battlefieldBonus.multiplier,
       ),
     );
   }
