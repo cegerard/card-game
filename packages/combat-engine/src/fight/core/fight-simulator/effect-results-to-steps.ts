@@ -1,5 +1,15 @@
 import { FightingCard } from '../cards/fighting-card';
-import { EffectResult } from '../cards/@types/attack/attack-effect';
+import {
+  DECOY_STRUCK_TYPE,
+  ENERGY_DRAINED_TYPE,
+  EffectResult,
+  SUPPORT_BLOCKED_TYPE,
+  SUPPORT_BLOCK_ENDED_TYPE,
+} from '../cards/@types/attack/attack-effect';
+import {
+  VULNERABILITY_EFFECT_TYPE,
+  VULNERABILITY_ENDED_TYPE,
+} from '../cards/@types/vulnerability/vulnerability';
 import { MARK_EFFECT_TYPE } from '../cards/@types/mark/elemental-mark';
 import {
   WEAK_POINT_EFFECT_TYPE,
@@ -42,6 +52,57 @@ export function effectResultsToSteps(
             name: effect.name,
             card: effect.card.identityInfo,
             reason: effect.reason,
+          },
+        ];
+      case ENERGY_DRAINED_TYPE:
+        return [
+          {
+            kind: StepKind.EnergyDrained,
+            card: effect.card.identityInfo,
+            amount: effect.amount,
+            energy: effect.energy,
+          },
+        ];
+      case VULNERABILITY_EFFECT_TYPE:
+        return [
+          {
+            kind: StepKind.VulnerabilityApplied,
+            card: effect.card.identityInfo,
+            damageType: effect.damageType,
+            rate: effect.rate,
+            remainingTurns: effect.remainingTurns,
+          },
+        ];
+      case VULNERABILITY_ENDED_TYPE:
+        return [
+          {
+            kind: StepKind.VulnerabilityEnded,
+            card: effect.card.identityInfo,
+            damageType: effect.damageType,
+          },
+        ];
+      case SUPPORT_BLOCKED_TYPE:
+        return [
+          {
+            kind: StepKind.SupportBlocked,
+            card: effect.card.identityInfo,
+            remainingTurns: effect.remainingTurns,
+          },
+        ];
+      case SUPPORT_BLOCK_ENDED_TYPE:
+        return [
+          {
+            kind: StepKind.SupportBlockEnded,
+            card: effect.card.identityInfo,
+          },
+        ];
+      case DECOY_STRUCK_TYPE:
+        return [
+          {
+            kind: StepKind.DecoyStruck,
+            name: effect.name,
+            card: effect.card.identityInfo,
+            remainingDecoys: effect.remainingDecoys,
           },
         ];
       case MARK_EFFECT_TYPE:

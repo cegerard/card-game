@@ -51,14 +51,16 @@ export class Alteration {
         .filter((result) => result.alteration !== undefined);
     }
 
-    return targets.map((target) => ({
-      target: target.identityInfo,
-      alteration: target.applyBuff(
-        this.type,
-        effectiveRate,
-        this.duration,
-        this.terminationEvent,
-      ),
-    }));
+    return targets
+      .filter((target) => !target.refusesSupportFrom(source))
+      .map((target) => ({
+        target: target.identityInfo,
+        alteration: target.applyBuff(
+          this.type,
+          effectiveRate,
+          this.duration,
+          this.terminationEvent,
+        ),
+      }));
   }
 }

@@ -87,6 +87,8 @@ export enum SkillKind {
   LOW_HEALTH_TARGET_BONUS = 'LOW_HEALTH_TARGET_BONUS',
   BUFF_TRANSFER = 'BUFF_TRANSFER',
   POISONED_ENEMY_AGILITY = 'POISONED_ENEMY_AGILITY',
+  ATTACKER_INSIGHT = 'ATTACKER_INSIGHT',
+  SPECIAL_ECHO = 'SPECIAL_ECHO',
   REAL_DAMAGE = 'REAL_DAMAGE',
   AFFLICTION = 'AFFLICTION',
   ANALYSIS = 'ANALYSIS',
@@ -116,6 +118,10 @@ export enum Effect {
   BLEED = 'BLEED',
   WEAK_POINT = 'WEAK_POINT',
   HYPOTHERMIA = 'HYPOTHERMIA',
+  ENTANGLE = 'ENTANGLE',
+  ENERGY_DRAIN = 'ENERGY_DRAIN',
+  VULNERABILITY = 'VULNERABILITY',
+  SUPPORT_BLOCK = 'SUPPORT_BLOCK',
 }
 
 export enum DodgeStrategy {
@@ -170,6 +176,7 @@ export enum TargetingStrategy {
   FASTEST_ALLY = 'fastest-ally',
   LAST_DODGED_ATTACKER = 'last-dodged-attacker',
   LOWEST_HEALTH_ALLY = 'lowest-health-ally',
+  RANDOM_ENEMIES = 'random-enemies',
 }
 
 export enum CardSelectorStrategy {
@@ -226,12 +233,21 @@ function isStackedPoison(o: EffectDto): boolean {
   return o.type === Effect.POISON && o.maxStacks !== undefined;
 }
 
+// Control effects: no level and no triggered debuff
+export const CONTROL_EFFECTS = [
+  Effect.ENTANGLE,
+  Effect.ENERGY_DRAIN,
+  Effect.VULNERABILITY,
+  Effect.SUPPORT_BLOCK,
+];
+
 // Effects counted without a level
 const LEVELLESS_EFFECTS = [
   Effect.MARK,
   Effect.BLEED,
   Effect.WEAK_POINT,
   Effect.HYPOTHERMIA,
+  ...CONTROL_EFFECTS,
 ];
 
 // Declared below: an alias keeps the decorator metadata from reading
@@ -305,11 +321,13 @@ export class EffectDto {
   @IsNumber()
   level?: number;
 
-  // Required for BLEED, stacked POISON and HYPOTHERMIA
+  // Required for BLEED, stacked POISON, HYPOTHERMIA, VULNERABILITY and SUPPORT_BLOCK
   @ValidateIf(
     (o) =>
       o.type === Effect.BLEED ||
       o.type === Effect.HYPOTHERMIA ||
+      o.type === Effect.VULNERABILITY ||
+      o.type === Effect.SUPPORT_BLOCK ||
       isStackedPoison(o),
   )
   @IsDefined()
@@ -322,7 +340,7 @@ export class EffectDto {
   @IsEnum(RateBasisDto)
   basis?: RateBasisDto;
 
-  @ValidateIf((o) => o.type === Effect.MARK)
+  @ValidateIf((o) => o.type === Effect.MARK || o.type === Effect.VULNERABILITY)
   @IsDefined()
   @IsEnum(DamageType)
   damageType?: DamageType;
@@ -384,7 +402,7 @@ export class ExecutionDto {
 }
 
 // An alteration an attack leaves on each defender it hit: no targeting of its own
-class HitAlterationDto {
+export class HitAlterationDto {
   @IsEnum(BuffType)
   type: BuffType;
 
@@ -439,6 +457,18 @@ class DamageSharingDto {
   maxShareRate: number;
 }
 
+// Decoys shared by the allies: each takes an attack aimed at one of them on `chance`
+class DecoysDto {
+  @IsInt()
+  @Min(1)
+  count: number;
+
+  @IsNumber()
+  @IsPositive()
+  @Max(1)
+  chance: number;
+}
+
 class BattlefieldAlliesDto {
   @IsOptional()
   @IsArray()
@@ -456,6 +486,11 @@ class BattlefieldAlliesDto {
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => DamageSharingDto)
   damageSharing?: DamageSharingDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => DecoysDto)
+  decoys?: DecoysDto;
 }
 
 class BattlefieldDamageDto {
@@ -478,6 +513,12 @@ class BattlefieldEnemiesDto {
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => BattlefieldDamageDto)
   damage?: BattlefieldDamageDto;
+
+  // Extra energy each enemy special costs while it stands in it
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  energySurcharge?: number;
 }
 
 class RevivalDto {
@@ -521,6 +562,11 @@ export class BattlefieldDto {
   @IsInt()
   @Min(1)
   duration: number;
+
+  // The element of the battlefield, read by `battlefieldBonus`
+  @IsOptional()
+  @IsEnum(ElementDto)
+  element?: ElementDto;
 
   @IsOptional()
   @ValidateNested()
@@ -692,6 +738,12 @@ export class FrozenTargetBonusDto {
   multiplier: number;
 }
 
+// Boosts every damage type, or only `damageType`, while a battlefield of that element runs
+export class BattlefieldBonusDto extends FrozenTargetBonusDto {
+  @IsEnum(ElementDto)
+  element: ElementDto;
+}
+
 export class BleedStackBonusDto extends DamageTypeBonusDto {
   @IsInt()
   @Min(1)
@@ -713,6 +765,11 @@ class AttackBonusesDto {
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => FrozenTargetBonusDto)
   frozenTargetBonus?: FrozenTargetBonusDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => BattlefieldBonusDto)
+  battlefieldBonus?: BattlefieldBonusDto;
 }
 
 export enum StatusCategoryDto {
@@ -816,6 +873,13 @@ export class SpecialDto extends AttackBonusesDto {
   })
   targetingStrategy?: TargetingStrategy;
 
+  // Required by the random-enemies targeting: how many enemies it draws
+  @ValidateIf((o) => o.targetingStrategy === TargetingStrategy.RANDOM_ENEMIES)
+  @IsDefined()
+  @IsInt()
+  @Min(1)
+  targetCount?: number;
+
   @IsOptional()
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => EffectDto)
@@ -886,6 +950,12 @@ export class SpecialDto extends AttackBonusesDto {
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => BattlefieldDto)
   battlefield?: BattlefieldDto;
+
+  // ATTACK only: battlefield laid on the defenders standing next to each other
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => BattlefieldDto)
+  adjacentTargetsBattlefield?: BattlefieldDto;
 }
 
 class DamageCompositionDto {
@@ -919,6 +989,12 @@ class SimpleAttackDto extends AttackBonusesDto {
   @ValidateNested({ each: true })
   @Type(/* istanbul ignore next */ () => EffectDto)
   effects?: EffectDto[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(/* istanbul ignore next */ () => HitAlterationDto)
+  hitAlterations?: HitAlterationDto[];
 }
 
 class MultipleAttackDto extends AttackBonusesDto {
@@ -1049,6 +1125,8 @@ export class OtherSkillDto {
       o.kind !== SkillKind.CONCEALMENT &&
       o.kind !== SkillKind.LOW_HEALTH_TARGET_BONUS &&
       o.kind !== SkillKind.POISONED_ENEMY_AGILITY &&
+      o.kind !== SkillKind.ATTACKER_INSIGHT &&
+      o.kind !== SkillKind.SPECIAL_ECHO &&
       o.kind !== SkillKind.ANALYSIS &&
       o.kind !== SkillKind.AFTERSHOCK &&
       o.kind !== SkillKind.WEAK_POINT_LEGACY &&
@@ -1096,7 +1174,8 @@ export class OtherSkillDto {
       o.kind !== SkillKind.BLEED_STACK_SCALING &&
       o.kind !== SkillKind.BLEED_EMPOWERMENT &&
       o.kind !== SkillKind.LOW_HEALTH_TARGET_BONUS &&
-      o.kind !== SkillKind.POISONED_ENEMY_AGILITY,
+      o.kind !== SkillKind.POISONED_ENEMY_AGILITY &&
+      o.kind !== SkillKind.ATTACKER_INSIGHT,
   )
   @IsDefined()
   @IsEnum(TriggerEvent)
@@ -1225,6 +1304,26 @@ export class OtherSkillDto {
   @IsPositive()
   @Max(1)
   whileHealthBelow?: number;
+
+  // ATTACKER_INSIGHT (required): shares of base accuracy and agility gained against an enemy that already attacked
+  @ValidateIf((o) => o.kind === SkillKind.ATTACKER_INSIGHT)
+  @IsDefined()
+  @IsNumber()
+  @Min(0)
+  accuracyRate?: number;
+
+  @ValidateIf((o) => o.kind === SkillKind.ATTACKER_INSIGHT)
+  @IsDefined()
+  @IsNumber()
+  @Min(0)
+  agilityRate?: number;
+
+  // ALTERATION: `terminationEvent` only ends it on a hit costing more than this share of max health
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  @Max(1)
+  terminationDamageRate?: number;
 
   // ENERGY_GAIN (required): special energy its owner gains when its event fires
   @ValidateIf((o) => o.kind === SkillKind.ENERGY_GAIN)

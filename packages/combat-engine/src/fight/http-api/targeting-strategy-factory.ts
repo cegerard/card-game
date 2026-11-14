@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import { TargetedAll } from '../core/targeting-card-strategies/targeted-all';
 import { TargetedFromPosition } from '../core/targeting-card-strategies/targeted-from-position';
 import { TargetedLineThree } from '../core/targeting-card-strategies/targeted-line-three';
@@ -15,6 +16,8 @@ import {
 } from '../core/targeting-card-strategies/most-wounded-ally';
 import { ProtectedAllyStrategy } from '../core/targeting-card-strategies/protected-ally';
 import { FastestAllyStrategy } from '../core/targeting-card-strategies/fastest-ally';
+import { RandomEnemiesStrategy } from '../core/targeting-card-strategies/random-enemies';
+import { MathRandomizer } from '../tools/math-randomizer';
 import { TargetingStrategy } from './dto/fight-data.dto';
 import { TargetingCardStrategy } from '../core/targeting-card-strategies/targeting-card-strategy';
 
@@ -34,7 +37,16 @@ export function buildTargetingStrategy(
   strategyName: string,
   targetCardId?: string,
   threshold?: number,
+  targetCount?: number,
 ): TargetingCardStrategy {
+  if (strategyName === TargetingStrategy.RANDOM_ENEMIES) {
+    // Only SpecialDto carries targetCount: anywhere else the request is malformed.
+    if (targetCount === undefined)
+      throw new BadRequestException(
+        `${strategyName} targeting is for specials only, with a targetCount`,
+      );
+    return new RandomEnemiesStrategy(targetCount, new MathRandomizer());
+  }
   if (strategyName === TargetingStrategy.MOST_WOUNDED_ALLY) {
     if (threshold === undefined)
       throw new Error(

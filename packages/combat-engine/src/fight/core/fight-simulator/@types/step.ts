@@ -61,6 +61,15 @@ import {
   EffectCleansedReport,
   EnergyGainedReport,
 } from './support-report';
+import {
+  ActionFailedReport,
+  EnergyDrainedReport,
+  VulnerabilityAppliedReport,
+  VulnerabilityEndedReport,
+  SupportBlockedReport,
+  SupportBlockEndedReport,
+  DecoyStruckReport,
+} from './control-report';
 
 export enum StepKind {
   FightStart = 'fight_start',
@@ -109,6 +118,13 @@ export enum StepKind {
   DamageShared = 'damage_shared',
   EnergyGained = 'energy_gained',
   EffectCleansed = 'effect_cleansed',
+  ActionFailed = 'action_failed',
+  EnergyDrained = 'energy_drained',
+  VulnerabilityApplied = 'vulnerability_applied',
+  VulnerabilityEnded = 'vulnerability_ended',
+  SupportBlocked = 'support_blocked',
+  SupportBlockEnded = 'support_block_ended',
+  DecoyStruck = 'decoy_struck',
 }
 
 export type Step =
@@ -157,4 +173,11 @@ export type Step =
   | AttackEmpoweredReport
   | DamageSharedReport
   | EnergyGainedReport
-  | EffectCleansedReport;
+  | EffectCleansedReport
+  | ActionFailedReport
+  | EnergyDrainedReport
+  | VulnerabilityAppliedReport
+  | VulnerabilityEndedReport
+  | SupportBlockedReport
+  | SupportBlockEndedReport
+  | DecoyStruckReport;

@@ -99,6 +99,8 @@ export class TurnManager {
       });
       steps.push(
         ...effectResultsToSteps(card, card.decreaseWeakPointDurations()),
+        ...effectResultsToSteps(card, card.decreaseVulnerabilityDurations()),
+        ...effectResultsToSteps(card, card.decreaseSupportBlockDuration()),
       );
       card.decreaseBattlefieldDurations().forEach((name) =>
         steps.push({

@@ -15,9 +15,10 @@ export interface Special {
    * Determines if the special skill is ready to be used based on the current energy level.
    *
    * @param actualEnergy - The current energy level.
+   * @param surcharge - Extra energy the special costs right now (an enemy battlefield), 0 by default.
    * @returns A boolean indicating whether the special skill is ready.
    */
-  ready(actualEnergy: number): boolean;
+  ready(actualEnergy: number, surcharge?: number): boolean;
 
   /**
    * Launches the special skill.
@@ -37,10 +38,15 @@ export interface Special {
    * Increases the current energy level, never past what the special needs.
    *
    * @param actualEnergy - The current energy level.
+   * @param surcharge - Extra energy the special costs right now (an enemy battlefield), 0 by default.
    * @param amount - The energy gained, a turn's worth by default.
    * @returns The new energy level after the increase.
    */
-  increaseEnergy(actualEnergy: number, amount?: number): number;
+  increaseEnergy(
+    actualEnergy: number,
+    amount?: number,
+    surcharge?: number,
+  ): number;
 
   /**
    * Get the kind of special skill.
@@ -60,15 +66,16 @@ export abstract class BaseSpecial implements Special {
     protected readonly energyNeeded: number,
   ) {}
 
-  public ready(actualEnergy: number): boolean {
-    return actualEnergy >= this.energyNeeded;
+  public ready(actualEnergy: number, surcharge = 0): boolean {
+    return actualEnergy >= this.energyNeeded + surcharge;
   }
 
   public increaseEnergy(
     actualEnergy: number,
     amount: number = ENERGY_INCREASE_FACTOR,
+    surcharge = 0,
   ): number {
-    return Math.min(actualEnergy + amount, this.energyNeeded);
+    return Math.min(actualEnergy + amount, this.energyNeeded + surcharge);
   }
 
   public abstract launch(

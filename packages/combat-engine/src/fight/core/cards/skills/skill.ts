@@ -79,6 +79,8 @@ export type AttackSkillResults = BaseSkillResults & {
   stanceStarted?: Stance;
   /** The stance the attack closed on its owner when it fired. */
   stanceEnded?: string;
+  /** A battlefield the attack laid. */
+  battlefield?: BattlefieldResult;
 };
 
 export type TargetingOverrideSkillResults = BaseSkillResults & {

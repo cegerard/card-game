@@ -1,5 +1,6 @@
 import { EffectTriggeredDebuff } from '../effect-triggered-debuff';
 import { RandomizerFake } from '../../../../../../../test/helpers/randomizer-fake';
+import { Randomizer } from '../../../../randomizer';
 import { createFightingCard } from '../../../../../../../test/helpers/fighting-card';
 
 describe('EffectTriggeredDebuff constructor validation', () => {
@@ -112,14 +113,28 @@ describe('EffectTriggeredDebuff', () => {
     });
   });
 
+  it('always applies a guaranteed debuff, even on the highest roll', () => {
+    const highestRoll: Randomizer = {
+      random: () => 0.999,
+      random_int_between: (_min, max) => max,
+    };
+    const target = createFightingCard({ defense: 200, resistance: 0 });
+
+    expect(
+      new EffectTriggeredDebuff(1, 'defense', 0.1, 2, highestRoll).tryApply(
+        target,
+      ),
+    ).toBeDefined();
+  });
+
   describe('when the random roll fails', () => {
     let result: ReturnType<EffectTriggeredDebuff['tryApply']>;
 
     beforeEach(() => {
-      randomizer.setNextRandomValue(100);
+      randomizer.setNextRandomValue(0.5);
       const target = createFightingCard({ defense: 200 });
       const triggered = new EffectTriggeredDebuff(
-        1.0,
+        0.5,
         'defense',
         0.1,
         2,

@@ -6,6 +6,11 @@ type AlterationDetailBase = {
   value: number;
   duration: number;
   terminationEvent?: string;
+  /**
+   * Set, `terminationEvent` ends the alteration only when it is a hit that
+   * cost the bearer strictly more than this share of its max health.
+   */
+  terminationDamageRate?: number;
   powerId?: string;
   /**
    * Name of the stack this alteration belongs to. Alterations of the same

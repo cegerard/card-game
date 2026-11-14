@@ -4,6 +4,7 @@ import { AlterationType } from '../alteration/alteration-type';
 import { LivingAllyScaling } from '../alteration/live-rate';
 import { BuffResult, DebuffResult } from '../action-result/alteration-result';
 import { DamageType } from '../damage/damage-type';
+import { Element } from '../damage/element';
 import { Player } from '../../../player';
 import { round2 } from '../../../../tools/round';
 
@@ -22,16 +23,22 @@ export type BattlefieldConfig = {
   name: string;
   /** Turns it lasts on each card, counted on that card own clock like a buff. */
   duration: number;
+  /** The element of the battlefield, read by the attacks boosted on it. */
+  element?: Element;
   allies?: {
     alterations?: BattlefieldAlteration[];
     /** Share of its max health each ally heals at its turn end. */
     healRate?: number;
     damageSharing?: DamageSharingConfig;
+    /** `count` decoys shared by the allies: each takes an attack aimed at one of them on `chance`, and is gone. */
+    decoys?: { count: number; chance: number };
   };
   enemies?: {
     alterations?: BattlefieldAlteration[];
     /** Share of the caster attack each enemy takes at its turn end, of that type. */
     damage?: { rate: number; damageType: DamageType };
+    /** Extra energy each enemy special costs while it stands in it. */
+    energySurcharge?: number;
   };
   /** Allies dead for less than `withinTurns` turns of their side come back with `rate` of their max health. */
   revival?: { rate: number; withinTurns: number };
@@ -67,7 +74,12 @@ export type BattlefieldExposure = {
   healRate?: number;
   damage?: { amount: number; damageType: DamageType };
   sharing?: DamageSharing;
+  decoys?: DecoyPool;
+  energySurcharge?: number;
 };
+
+/** Decoys one cast leaves its side, shared by every ally standing in it. */
+export type DecoyPool = { name: string; chance: number; left: number };
 
 /**
  * A change of the battlefield laid by a card for both sides: the caster allies
@@ -84,13 +96,21 @@ export class Battlefield {
     assertRate('revival rate', config.revival?.rate);
     assertRate('heal rate', config.allies?.healRate);
     assertRate('damage sharing rate', config.allies?.damageSharing?.rate);
+    assertRate('decoy chance', config.allies?.decoys?.chance);
+    assertPositiveInteger('decoy count', config.allies?.decoys?.count);
+    assertPositiveInteger('energy surcharge', config.enemies?.energySurcharge);
   }
 
+  /** Laid on every living enemy, or on `enemies` alone when given. */
   public deploy(
     caster: FightingCard,
     context: FightingContext,
+    enemies?: FightingCard[],
   ): BattlefieldResult {
-    return new BattlefieldDeployment(this.config, caster).deploy(context);
+    return new BattlefieldDeployment(this.config, caster).deploy(
+      context,
+      enemies,
+    );
   }
 }
 
@@ -107,7 +127,10 @@ export class BattlefieldDeployment {
     return this.config.name;
   }
 
-  public deploy(context: FightingContext): BattlefieldResult {
+  public deploy(
+    context: FightingContext,
+    enemyCards: FightingCard[] = context.opponentPlayer.playableCards,
+  ): BattlefieldResult {
     const { allies, enemies, duration } = this.config;
     const revived = this.revive(context.sourcePlayer);
     const sharing: DamageSharing | undefined = allies?.damageSharing && {
@@ -120,16 +143,28 @@ export class BattlefieldDeployment {
       damageType: enemies.damage.damageType,
     };
 
+    const decoys: DecoyPool | undefined = allies?.decoys && {
+      name: this.name,
+      chance: allies.decoys.chance,
+      left: allies.decoys.count,
+    };
+
     context.sourcePlayer.playableCards.forEach((card) =>
       card.expose({
         deployment: this,
         remainingTurns: duration,
         healRate: allies?.healRate,
         sharing,
+        decoys,
       }),
     );
-    context.opponentPlayer.playableCards.forEach((card) =>
-      card.expose({ deployment: this, remainingTurns: duration, damage }),
+    enemyCards.forEach((card) =>
+      card.expose({
+        deployment: this,
+        remainingTurns: duration,
+        damage,
+        energySurcharge: enemies?.energySurcharge,
+      }),
     );
 
     return {
@@ -137,8 +172,12 @@ export class BattlefieldDeployment {
       remainingTurns: duration,
       revived,
       alterations: [
-        ...this.alter(context.sourcePlayer, allies?.alterations),
-        ...this.alter(context.opponentPlayer, enemies?.alterations),
+        ...this.alter(
+          context.sourcePlayer,
+          context.sourcePlayer.playableCards,
+          allies?.alterations,
+        ),
+        ...this.alter(context.opponentPlayer, enemyCards, enemies?.alterations),
       ],
     };
   }
@@ -193,9 +232,10 @@ export class BattlefieldDeployment {
 
   private alter(
     team: Player,
+    cards: FightingCard[],
     alterations: BattlefieldAlteration[] = [],
   ): (BuffResult | DebuffResult)[] {
-    return team.playableCards.flatMap((card) => {
+    return cards.flatMap((card) => {
       card.removeAlterationsFrom(this.name);
       return alterations
         .map((alteration) => ({
@@ -221,6 +261,9 @@ export class BattlefieldDeployment {
         new LivingAllyScaling(rate, perLivingAlly.maxRate, team),
     };
     const { duration } = this.config;
+    if (polarity === 'buff' && card.refusesSupportFrom(this.source)) {
+      return undefined;
+    }
 
     return polarity === 'debuff'
       ? card.applyDebuff(
@@ -247,5 +290,13 @@ export class BattlefieldDeployment {
 function assertRate(label: string, rate?: number): void {
   if (rate !== undefined && (rate <= 0 || rate > 1)) {
     throw new Error(`Battlefield ${label} must be in ]0, 1], got ${rate}`);
+  }
+}
+
+function assertPositiveInteger(label: string, value?: number): void {
+  if (value !== undefined && (!Number.isInteger(value) || value < 1)) {
+    throw new Error(
+      `Battlefield ${label} must be an integer >= 1, got ${value}`,
+    );
   }
 }

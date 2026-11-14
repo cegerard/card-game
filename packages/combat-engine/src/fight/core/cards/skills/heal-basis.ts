@@ -3,7 +3,8 @@ import { RateBasis } from '../@types/rate-basis';
 
 /**
  * Heals one target and returns the health points actually restored, capped at
- * the target's maximum by `FightingCard.heal()`.
+ * the target's maximum by `FightingCard.heal()`. A target cut off its allies
+ * support is left out by the heal skills before this is called.
  */
 export function applyHealing(
   source: FightingCard,

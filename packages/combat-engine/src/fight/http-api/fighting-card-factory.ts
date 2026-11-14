@@ -3,8 +3,9 @@ import {
   FightingCardDto,
   OtherSkillDto,
   SkillKind,
-  ElementDto,
+  SpecialKind,
 } from './dto/fight-data.dto';
+import { mapElement } from './skill-wiring-factory';
 import { FightingCard } from '../core/cards/fighting-card';
 import { buildDodgeStrategy } from './dodge-strategy-factory';
 import { Element } from '../core/cards/@types/damage/element';
@@ -21,6 +22,7 @@ import {
   buildDodgeBonusDenialSkill,
   buildLowHealthTargetBonus,
   buildPoisonedEnemyAgility,
+  buildAttackerInsight,
   buildSurviveSkill,
 } from './card-bound-skill-factory';
 
@@ -49,11 +51,15 @@ const KIND_ONLY_FIELDS: {
   },
   {
     kinds: [SkillKind.ALTERATION],
-    fields: ['perLivingAlly', 'whileHealthBelow'],
+    fields: ['perLivingAlly', 'whileHealthBelow', 'terminationDamageRate'],
   },
   {
     kinds: [SkillKind.SUPPORT],
     fields: ['shield', 'cleanse', 'alterations'],
+  },
+  {
+    kinds: [SkillKind.ATTACKER_INSIGHT],
+    fields: ['accuracyRate', 'agilityRate'],
   },
   {
     kinds: [SkillKind.ENERGY_GAIN],
@@ -94,9 +100,18 @@ const CARD_BOUND_SKILL_KINDS = [
   SkillKind.BLEED_EMPOWERMENT,
   SkillKind.LOW_HEALTH_TARGET_BONUS,
   SkillKind.POISONED_ENEMY_AGILITY,
+  SkillKind.ATTACKER_INSIGHT,
 ];
 
 export function buildFightingCard(cardData: FightingCardDto): FightingCard {
+  if (
+    cardData.skills.others.some((s) => s.kind === SkillKind.SPECIAL_ECHO) &&
+    cardData.skills.special.kind !== SpecialKind.ATTACK
+  ) {
+    throw new BadRequestException(
+      'SPECIAL_ECHO can only echo an ATTACK special',
+    );
+  }
   const special = buildSpecial(cardData.skills.special);
   const attackSkill = buildAttackSkill(cardData.skills);
 
@@ -109,6 +124,7 @@ export function buildFightingCard(cardData: FightingCardDto): FightingCard {
   const bleedEmpowerment = buildBleedEmpowerment(others);
   const lowHealthTargetBonus = buildLowHealthTargetBonus(others);
   const poisonedEnemyAgility = buildPoisonedEnemyAgility(others);
+  const attackerInsight = buildAttackerInsight(others);
 
   // The CARD_BOUND_SKILL_KINDS carry no trigger and no
   // targeting: they live on the card itself and are consulted when a hit is
@@ -150,12 +166,15 @@ export function buildFightingCard(cardData: FightingCardDto): FightingCard {
       bleedEmpowerment,
       lowHealthTargetBonus,
       poisonedEnemyAgility,
+      attackerInsight,
     },
     {
       dodge: buildDodgeStrategy(cardData.behaviors.dodge),
     },
     new MathRandomizer(),
-    mapElement(cardData.element),
+    cardData.element === undefined
+      ? Element.PHYSICAL
+      : mapElement(cardData.element),
   );
 }
 
@@ -172,25 +191,4 @@ function rejectMisplacedKindOnlyFields(others: OtherSkillDto[]): void {
       );
     }
   }
-}
-
-/**
- * Maps the DTO element onto its domain counterpart. The two enums carry the
- * same string values, but going through an explicit map keeps an unknown
- * element loud instead of silently reaching the elemental matrix.
- */
-function mapElement(element?: ElementDto): Element {
-  if (element === undefined) return Element.PHYSICAL;
-
-  const ELEMENT_MAP: Record<ElementDto, Element> = {
-    [ElementDto.PHYSICAL]: Element.PHYSICAL,
-    [ElementDto.FIRE]: Element.FIRE,
-    [ElementDto.WATER]: Element.WATER,
-    [ElementDto.EARTH]: Element.EARTH,
-    [ElementDto.AIR]: Element.AIR,
-  };
-
-  const result = ELEMENT_MAP[element];
-  if (!result) throw new Error(`Unknown element: ${element}`);
-  return result;
 }

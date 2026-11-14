@@ -9,6 +9,7 @@ export type StatusCategory = 'control' | 'damage-over-time';
 const CATEGORY_BY_TYPE: Record<StateEffectType, StatusCategory> = {
   freeze: 'control',
   stunt: 'control',
+  entangle: 'control',
   poison: 'damage-over-time',
   burn: 'damage-over-time',
   bleed: 'damage-over-time',

@@ -9,6 +9,8 @@ import { LowHealthTargetBonusSkill } from '../core/cards/skills/low-health-targe
 import { BleedEmpowermentSkill } from '../core/cards/skills/bleed-empowerment';
 import { PoisonedEnemyAgilitySkill } from '../core/cards/skills/poisoned-enemy-agility';
 import { buildTriggeredDebuff } from './attack-effect-factory';
+import { AttackerInsightSkill } from '../core/cards/skills/attacker-insight';
+import { asBadRequest } from './skill-wiring-factory';
 
 function findSkill(
   others: OtherSkillDto[],
@@ -114,4 +116,15 @@ export function buildPoisonedEnemyAgility(
   } catch (e) {
     throw new BadRequestException((e as Error).message);
   }
+}
+
+export function buildAttackerInsight(
+  others: OtherSkillDto[],
+): AttackerInsightSkill | undefined {
+  const dto = findSkill(others, SkillKind.ATTACKER_INSIGHT);
+  if (!dto) return undefined;
+
+  return asBadRequest(
+    () => new AttackerInsightSkill(dto.name, dto.accuracyRate, dto.agilityRate),
+  );
 }

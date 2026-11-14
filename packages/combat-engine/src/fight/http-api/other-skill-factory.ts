@@ -38,13 +38,13 @@ import { AlliedCardByIdStrategy } from '../core/targeting-card-strategies/allied
 import { MultipleAttack } from '../core/cards/skills/multiple-attack';
 import { AttackSkill } from '../core/cards/skills/attack-skill';
 import { TargetedCard } from '../core/targeting-card-strategies/targeted-card';
-import { HitAlterations } from '../core/cards/@types/attack/hit-alterations';
 import { ConcealmentSkill } from '../core/cards/skills/concealment';
 import { AnalysisSkill } from '../core/cards/skills/analysis';
 import { AftershockSkill } from '../core/cards/skills/aftershock';
 import { WeakPointLegacySkill } from '../core/cards/skills/weak-point-legacy';
 import { SupportSkill } from '../core/cards/skills/support';
 import { EnergyGainSkill } from '../core/cards/skills/energy-gain';
+import { SpecialEchoSkill } from '../core/cards/skills/special-echo';
 import { LiveRateFactory } from '../core/cards/skills/alteration-skill';
 import {
   assertLivingAllyScaling,
@@ -58,6 +58,7 @@ import { buildExecution } from './attack-skill-factory';
 import {
   asBadRequest,
   buildAlterationStacking,
+  buildHitAlterations,
   buildSkillActivationCondition,
   buildSkillTargeting,
   buildTriggerForSkill,
@@ -169,6 +170,12 @@ export function createOtherSkill(
             buildTriggerForSkill(skillData, ownerId),
           ),
       );
+    case SkillKind.SPECIAL_ECHO:
+      return new SpecialEchoSkill(
+        skillData.name,
+        buildTriggerForSkill(skillData, ownerId),
+        skillData.requiresStance,
+      );
     case SkillKind.SURVIVE:
       throw new Error('SURVIVE skill must not appear in others skill list');
     case SkillKind.DAMAGE_REDUCTION:
@@ -177,6 +184,7 @@ export function createOtherSkill(
     case SkillKind.BLEED_EMPOWERMENT:
     case SkillKind.LOW_HEALTH_TARGET_BONUS:
     case SkillKind.POISONED_ENEMY_AGILITY:
+    case SkillKind.ATTACKER_INSIGHT:
       throw new Error(
         `${skillData.kind} skill must not appear in others skill list`,
       );
@@ -252,6 +260,7 @@ function buildAlteration(
     powerId: skillData.powerId,
     requiredStance: skillData.requiresStance,
     liveRate: buildLiveRate(skillData),
+    terminationDamageRate: skillData.terminationDamageRate,
   });
 }
 
@@ -339,7 +348,7 @@ function buildConditionalAttack(
             : undefined,
           stanceActivation: skillData.stanceActivation,
           requiresUndamaged: skillData.requiresUndamaged,
-          hitAlterations: buildHitAlterations(skillData),
+          hitAlterations: buildHitAlterations(skillData.hitAlterations),
           endsStance: skillData.endsStance,
           execution: buildExecution(skillData.execution),
           activationLimit: skillData.activationLimit,
@@ -587,18 +596,4 @@ function buildCooldown(interval?: number): AttackCondition {
   return interval
     ? new EveryNTurnsCondition(interval)
     : new AlwaysTrueAttackCondition();
-}
-
-function buildHitAlterations(dto: OtherSkillDto): HitAlterations | undefined {
-  if (!dto.hitAlterations?.length) return undefined;
-
-  return new HitAlterations(
-    dto.hitAlterations.map((a) => ({
-      polarity: a.polarity,
-      type: mapAlterationType(a.type),
-      rate: a.rate,
-      duration: a.duration,
-      terminationEvent: a.terminationEvent,
-    })),
-  );
 }
