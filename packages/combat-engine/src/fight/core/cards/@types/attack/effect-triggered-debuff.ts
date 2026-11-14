@@ -37,8 +37,7 @@ export class EffectTriggeredDebuff {
   }
 
   public tryApply(target: FightingCard): Debuff | undefined {
-    if (this.randomizer.random_int_between(0, 100) >= this.probability * 100)
-      return undefined;
+    if (this.randomizer.random() >= this.probability) return undefined;
 
     return target.applyDebuff(
       this.debuffType,
