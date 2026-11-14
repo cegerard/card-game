@@ -1,5 +1,5 @@
 import { FightingCard } from '../../fighting-card';
-import { AttackEffect, StateEffectResult } from './attack-effect';
+import { AttackEffect, StateEffectResult, failsChance } from './attack-effect';
 import { FightingContext } from '../fighting-context';
 import {
   CardStateEntangled,
@@ -28,11 +28,7 @@ export class EntangleAttackEffect implements AttackEffect {
     _card: FightingCard,
     _context: FightingContext,
   ): StateEffectResult {
-    if (
-      this.probability !== undefined &&
-      this.randomizer.random() >= this.probability
-    )
-      return;
+    if (failsChance(this.randomizer, this.probability)) return;
 
     const entangled = new CardStateEntangled(this.rate, this.terminationEvent);
     if (!defender.setState(entangled)) return;

@@ -82,7 +82,8 @@ export class SimpleAttack implements AttackSkill {
         const isCritical = criticalRoll < card.criticalChanceAgainst(defender);
         const damageMultiplier = isCritical ? card.criticalMultiplier(2) : 1;
 
-        if (defender.dodge(card)) {
+        const missed = defender.missedBy(card, context);
+        if (missed) {
           return {
             damage: 0,
             isCritical,
@@ -91,7 +92,7 @@ export class SimpleAttack implements AttackSkill {
             interceptedFor,
             kind,
             remainingHealth: defender.actualHealth,
-            effects: nonEmpty(defender.dodgedEffects(context)),
+            effects: nonEmpty(missed),
           };
         }
 

@@ -83,7 +83,8 @@ export class MultipleAttack implements AttackSkill {
         const isCritical = Math.random() < card.criticalChanceAgainst(defender);
         const damageMultiplier = isCritical ? card.criticalMultiplier(2) : 1;
 
-        if (defender.dodge(card)) {
+        const missed = defender.missedBy(card, context);
+        if (missed) {
           dodgedTargets.add(defender);
           results.results.push({
             damage: 0,
@@ -93,7 +94,7 @@ export class MultipleAttack implements AttackSkill {
             interceptedFor,
             remainingHealth: defender.actualHealth,
             kind,
-            effects: nonEmpty(defender.dodgedEffects(context)),
+            effects: nonEmpty(missed),
           });
           continue;
         }

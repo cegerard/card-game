@@ -20,7 +20,7 @@ describe('Battlefield decoys and energy surcharge', () => {
 
   const aimAt = (target: FightingCard, roll: number) => {
     randomizer.setNextRandomValue(roll);
-    return target.dodge(enemy) && target.dodgedEffects(context);
+    return target.missedBy(enemy, context);
   };
 
   beforeEach(() => {
@@ -52,7 +52,7 @@ describe('Battlefield decoys and energy surcharge', () => {
   it('spends the decoys of the whole side', () => {
     aimAt(ally, 0.1);
 
-    expect(aimAt(caster, 0.1)).toBe(false);
+    expect(aimAt(caster, 0.1)).toBeUndefined();
   });
 
   it('makes the enemy special cost more', () => {

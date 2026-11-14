@@ -45,11 +45,9 @@ export class Healing implements Skill {
     context: FightingContext,
     _targetingOverride?: TargetingCardStrategy,
   ): HealingSkillResults {
-    const targetedCards = this.targetingStrategy.targetedCards(
-      source,
-      context.sourcePlayer,
-      context.opponentPlayer,
-    );
+    const targetedCards = this.targetingStrategy
+      .targetedCards(source, context.sourcePlayer, context.opponentPlayer)
+      .filter((target) => !target.refusesSupportFrom(source));
 
     this.activationCount++;
     const isExhausted =

@@ -3,6 +3,7 @@ import {
   AttackEffect,
   SUPPORT_BLOCKED_TYPE,
   SupportBlockedResult,
+  failsChance,
 } from './attack-effect';
 import { FightingContext } from '../fighting-context';
 import { Randomizer } from '../../../randomizer';
@@ -29,11 +30,7 @@ export class SupportBlockAttackEffect implements AttackEffect {
     _card: FightingCard,
     _context: FightingContext,
   ): SupportBlockedResult {
-    if (
-      this.probability !== undefined &&
-      this.randomizer.random() >= this.probability
-    )
-      return;
+    if (failsChance(this.randomizer, this.probability)) return;
     if (!defender.blockSupport(this.duration)) return;
 
     return {

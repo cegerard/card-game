@@ -117,7 +117,7 @@ Laid by a STANCE special or a TRANSFORMATION. `deploy()` first revives the allie
 
 - **Battlefield bonus**: optional `element`; `BattlefieldBonus` (a `DamageTypeBonus`) holds while the attacker or the defender stands in a battlefield of that element.
 - **Restricted deploy**: `deploy(caster, context, enemies)` exposes only those enemies; `adjacentTargetsBattlefield` on an ATTACK special lays it on its living defenders standing next to another one in their deck (2 at least), reported after the attack.
-- **Decoys** (`allies.decoys`): one pool per cast shared by the allies; `dodge()` rolls it first, a taken hit is a dodge reported `decoy_struck` through `dodgedEffects()`. **Energy surcharge** (`enemies.energySurcharge`): added to the special cost and gauge cap of each exposed enemy.
+- **Decoys** (`allies.decoys`): one pool per cast shared by the allies; `missedBy()` (every strike path) rolls it before `dodge()`, a taken hit is a dodge reported `decoy_struck`. **Energy surcharge** (`enemies.energySurcharge`): added to the special cost and gauge cap of each exposed enemy.
 
 ## Control
 
@@ -127,7 +127,7 @@ Laid by a STANCE special or a TRANSFORMATION. `deploy()` first revives the allie
 - **Heavy-hit termination**: an alteration with `terminationDamageRate` ends on its `terminationEvent` only when `EndEventProcessor` gets a hit rate (`damage-taken-<id>`: health lost / max health) strictly above it.
 - **Insight** (ATTACKER_INSIGHT): accuracy and agility bonus against an enemy whose `hasAttacked` is set by `revealAttacker()` (any attack that targeted somebody).
 - **Random enemies**: `RandomEnemiesStrategy` draws `targetCount` targetable enemies per launch.
-- **Special echo** (SPECIAL_ECHO): `echoSpecial()` casts the ATTACK special again, gauge untouched, reported as a reactive attack (hits, effects, executions, battlefield). Paired with `self-death` + `requiresStance` of a transformation stance, a fallen caster casts it once more.
+- **Special echo** (SPECIAL_ECHO): `echoSpecial()` casts the ATTACK special again, gauge untouched (no refund to apply), reported as a reactive attack with all it did (hits, effects, executions, battlefield, stance; alterations and shield as follow-ups). Paired with `self-death` + `requiresStance` of a transformation stance, a fallen caster casts it once more.
 
 ## Death Cascade (`DeathSkillHandler`)
 

@@ -1,15 +1,21 @@
 import { FightingCard } from '../fighting-card';
 import { FightingContext } from '../@types/fighting-context';
 import { AttackResult } from '../@types/action-result/attack-result';
+import { SpecialResult } from '../@types/action-result/special-result';
+import {
+  BuffResult,
+  DebuffResult,
+} from '../@types/action-result/alteration-result';
 import { Trigger } from '../../trigger/trigger';
-import { AttackSkillResults, Skill, SkillKind } from './skill';
+import { AttackSkillResults, Skill, SkillKind, SkillResults } from './skill';
 
 /**
- * Casts its owner attack special once more when its event fires, without
- * touching the gauge: meant for `self-death` under a stance, an echo of the
- * caster lingering after it fell. Its hits, effects, executions and
- * battlefield are reported like a reactive attack; the special own
- * alterations, shield and stance are not.
+ * Casts its owner attack special once more when its event fires: meant for
+ * `self-death` under a stance, an echo of the caster lingering after it fell.
+ * Everything the special does is reported like a reactive attack: hits,
+ * effects, executions, battlefield, stance, and its alterations and shield as
+ * follow-ups. The gauge is never touched, so an energy refund has nothing to
+ * refund.
  */
 export class SpecialEchoSkill implements Skill {
   public readonly id = 'special-echo';
@@ -33,10 +39,37 @@ export class SpecialEchoSkill implements Skill {
           ? { name: special.name, results: executions }
           : undefined,
       battlefield: special.battlefield,
+      stanceStarted: special.stanceStarted,
+      followUps: sideResults(special),
     };
   }
 
   isTriggered(triggerName: string): boolean {
     return this.trigger.isTriggered(triggerName);
   }
+}
+
+/** The alterations and shield of the special, reported after its hits. */
+function sideResults({
+  name,
+  alterationResults,
+  shieldResults,
+}: SpecialResult): SkillResults[] {
+  return [
+    {
+      skillKind: SkillKind.Buff,
+      name,
+      results: alterationResults.filter(
+        (r): r is BuffResult => r.alteration.polarity === 'buff',
+      ),
+    },
+    {
+      skillKind: SkillKind.Debuff,
+      name,
+      results: alterationResults.filter(
+        (r): r is DebuffResult => r.alteration.polarity === 'debuff',
+      ),
+    },
+    { skillKind: SkillKind.Shield, name, results: shieldResults },
+  ];
 }

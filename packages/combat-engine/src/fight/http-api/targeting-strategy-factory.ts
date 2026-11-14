@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import { TargetedAll } from '../core/targeting-card-strategies/targeted-all';
 import { TargetedFromPosition } from '../core/targeting-card-strategies/targeted-from-position';
 import { TargetedLineThree } from '../core/targeting-card-strategies/targeted-line-three';
@@ -39,8 +40,11 @@ export function buildTargetingStrategy(
   targetCount?: number,
 ): TargetingCardStrategy {
   if (strategyName === TargetingStrategy.RANDOM_ENEMIES) {
+    // Only SpecialDto carries targetCount: anywhere else the request is malformed.
     if (targetCount === undefined)
-      throw new Error(`${strategyName} strategy requires targetCount`);
+      throw new BadRequestException(
+        `${strategyName} targeting is for specials only, with a targetCount`,
+      );
     return new RandomEnemiesStrategy(targetCount, new MathRandomizer());
   }
   if (strategyName === TargetingStrategy.MOST_WOUNDED_ALLY) {

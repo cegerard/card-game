@@ -5,6 +5,7 @@ import { Debuff } from '../alteration/alteration-detail';
 import { EffectTriggeredDebuff } from './effect-triggered-debuff';
 import { StateEffectType } from '../state/state-effect-type';
 import { DamageType } from '../damage/damage-type';
+import { Randomizer } from '../../../randomizer';
 import { MARK_EFFECT_TYPE } from '../mark/elemental-mark';
 import {
   VULNERABILITY_EFFECT_TYPE,
@@ -104,6 +105,14 @@ export type EffectResult =
   | SupportBlockedResult
   | SupportBlockEndedResult
   | DecoyStruckResult;
+
+/** Whether an effect with that optional chance fails its roll (none: never). */
+export function failsChance(
+  randomizer: Randomizer,
+  probability?: number,
+): boolean {
+  return probability !== undefined && randomizer.random() >= probability;
+}
 
 /** The effects a hit reports, none being reported as absent. */
 export function nonEmpty(effects: EffectResult[]): EffectResult[] | undefined {

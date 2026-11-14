@@ -160,7 +160,10 @@ export class SpecialAttack extends BaseSpecial {
       ? source.criticalMultiplier(CRITICAL_RATE)
       : 1;
 
-    if (!this.undodgeable && target.dodge(source)) {
+    const missed = this.undodgeable
+      ? undefined
+      : target.missedBy(source, context);
+    if (missed) {
       return {
         damage: 0,
         isCritical,
@@ -169,7 +172,7 @@ export class SpecialAttack extends BaseSpecial {
         interceptedFor,
         kind,
         remainingHealth: target.actualHealth,
-        effects: nonEmpty(target.dodgedEffects(context)),
+        effects: nonEmpty(missed),
       };
     }
 

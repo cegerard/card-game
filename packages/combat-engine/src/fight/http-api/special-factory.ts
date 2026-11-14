@@ -1,5 +1,9 @@
 import { BadRequestException } from '@nestjs/common';
-import { SpecialDto, SpecialKind } from './dto/fight-data.dto';
+import {
+  SpecialDto,
+  SpecialKind,
+  TargetingStrategy,
+} from './dto/fight-data.dto';
 import { SpecialAttack } from '../core/cards/skills/special-attack';
 import { buildTargetingStrategy } from './targeting-strategy-factory';
 import { buildAlterationCondition } from './alteration-condition-factory';
@@ -47,6 +51,15 @@ export function buildSpecial(dto: SpecialDto): Special {
   if (dto.battlefield && dto.kind !== SpecialKind.STANCE) {
     throw new BadRequestException(
       'Only a STANCE special can lay a battlefield',
+    );
+  }
+
+  if (
+    dto.targetCount !== undefined &&
+    dto.targetingStrategy !== TargetingStrategy.RANDOM_ENEMIES
+  ) {
+    throw new BadRequestException(
+      'targetCount only goes with the random-enemies targeting',
     );
   }
 

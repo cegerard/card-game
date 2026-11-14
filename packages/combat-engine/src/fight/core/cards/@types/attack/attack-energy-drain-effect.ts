@@ -3,6 +3,7 @@ import {
   AttackEffect,
   ENERGY_DRAINED_TYPE,
   EnergyDrainedResult,
+  failsChance,
 } from './attack-effect';
 import { FightingContext } from '../fighting-context';
 import { Randomizer } from '../../../randomizer';
@@ -31,11 +32,7 @@ export class EnergyDrainAttackEffect implements AttackEffect {
     _card: FightingCard,
     _context: FightingContext,
   ): EnergyDrainedResult {
-    if (
-      this.probability !== undefined &&
-      this.randomizer.random() >= this.probability
-    )
-      return;
+    if (failsChance(this.randomizer, this.probability)) return;
     if (defender.isDead()) return;
 
     const amount = defender.drainEnergy(this.rate);

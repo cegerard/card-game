@@ -233,16 +233,21 @@ function isStackedPoison(o: EffectDto): boolean {
   return o.type === Effect.POISON && o.maxStacks !== undefined;
 }
 
+// Control effects: no level and no triggered debuff
+export const CONTROL_EFFECTS = [
+  Effect.ENTANGLE,
+  Effect.ENERGY_DRAIN,
+  Effect.VULNERABILITY,
+  Effect.SUPPORT_BLOCK,
+];
+
 // Effects counted without a level
 const LEVELLESS_EFFECTS = [
   Effect.MARK,
   Effect.BLEED,
   Effect.WEAK_POINT,
   Effect.HYPOTHERMIA,
-  Effect.ENTANGLE,
-  Effect.ENERGY_DRAIN,
-  Effect.VULNERABILITY,
-  Effect.SUPPORT_BLOCK,
+  ...CONTROL_EFFECTS,
 ];
 
 // Declared below: an alias keeps the decorator metadata from reading

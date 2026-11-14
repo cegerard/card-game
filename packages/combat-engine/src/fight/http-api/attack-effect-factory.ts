@@ -1,5 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 import {
+  CONTROL_EFFECTS,
   Effect,
   EffectDto,
   EffectTriggeredDebuffDto,
@@ -40,12 +41,6 @@ const STACKED_POISON_ONLY_FIELDS = [
   'ignoresImmunity',
 ] as const;
 const STACK_CAPPED_EFFECTS = [Effect.MARK, Effect.BLEED, Effect.POISON];
-const DEBUFFLESS_EFFECTS = [
-  Effect.ENTANGLE,
-  Effect.ENERGY_DRAIN,
-  Effect.VULNERABILITY,
-  Effect.SUPPORT_BLOCK,
-];
 
 /**
  * A field the effect would silently ignore is a malformed request: stack caps
@@ -74,7 +69,7 @@ function rejectMisplacedFields(effectDto: EffectDto): void {
     ...(effectDto.type === Effect.WEAK_POINT && effectDto.duration !== undefined
       ? ['duration']
       : []),
-    ...(DEBUFFLESS_EFFECTS.includes(effectDto.type) &&
+    ...(CONTROL_EFFECTS.includes(effectDto.type) &&
     effectDto.triggeredDebuff !== undefined
       ? ['triggeredDebuff']
       : []),

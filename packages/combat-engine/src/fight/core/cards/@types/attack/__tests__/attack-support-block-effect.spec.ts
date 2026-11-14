@@ -3,6 +3,9 @@ import { createFightingCard } from '../../../../../../../test/helpers/fighting-c
 import { RandomizerFake } from '../../../../../../../test/helpers/randomizer-fake';
 import { FightingCard } from '../../../fighting-card';
 import { Player } from '../../../../player';
+import { SpecialHealing } from '../../../skills/special-healing';
+import { AllAllies } from '../../../../targeting-card-strategies/all-allies';
+import { HealingResult } from '../../action-result/healing-result';
 import { applyHealing } from '../../../skills/heal-basis';
 
 describe('SupportBlockAttackEffect', () => {
@@ -35,10 +38,17 @@ describe('SupportBlockAttackEffect', () => {
     });
   });
 
-  it('turns away the heal of an ally', () => {
+  it('leaves a blocked card out of an ally special heal', () => {
     block();
+    const healed = new SpecialHealing('Soin', 1, 40, new AllAllies()).launch(
+      ally,
+      {
+        sourcePlayer: new Player('p2', [defender, ally]),
+        opponentPlayer: new Player('p1', [attacker]),
+      },
+    ).actionResults as HealingResult[];
 
-    expect(applyHealing(ally, defender, 1)).toBe(0);
+    expect(healed).toEqual([]);
   });
 
   it('lets the card heal itself', () => {

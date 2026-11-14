@@ -247,7 +247,6 @@ export class FightingCard {
   private hypothermic?: CardState;
   private entangled?: CardStateEntangled;
   private supportBlock: { remainingTurns: number } | null = null;
-  private struckDecoy?: DecoyStruckResult;
   private vulnerabilities: Vulnerability[] = [];
   private readonly weakPoints = new WeakPoints();
   private laidBleedStacks = 0;
@@ -1615,29 +1614,31 @@ export class FightingCard {
   }
 
   /**
-   * Whether the attack misses the card: a decoy of its side takes it, a
-   * stance evades it, or the dodge roll wins. A decoy is reported by the
-   * `dodgedEffects()` that follow.
+   * Resolves whether an attack aimed at the card misses it: a decoy of its
+   * side takes it, else it is dodged. Returns what the missed attack leaves
+   * (the decoy struck, the weak points spent), or undefined when it lands.
    */
-  public dodge(attacker: FightingCard): boolean {
-    this.struckDecoy = this.decoyTakesAttack();
-    if (this.struckDecoy || this.evades()) return true;
-
-    return this.dodgeBehavior.dodge(
-      this.agilityAgainst(attacker),
-      attacker.accuracyAgainst(this),
-    );
-  }
-
-  /** What a missed attack leaves: the decoy it struck, the weak points it spent. */
-  public dodgedEffects(context: FightingContext): EffectResult[] {
-    const decoy = this.struckDecoy;
-    this.struckDecoy = undefined;
+  public missedBy(
+    attacker: FightingCard,
+    context: FightingContext,
+  ): EffectResult[] | undefined {
+    const decoy = this.decoyTakesAttack();
+    if (!decoy && !this.dodge(attacker)) return undefined;
 
     return [
       ...(decoy ? [decoy] : []),
       ...this.strikeWeakPoints(context, false),
     ];
+  }
+
+  /** The stance evasion, then the dodge roll; decoys are `missedBy()` own. */
+  public dodge(attacker: FightingCard): boolean {
+    if (this.evades()) return true;
+
+    return this.dodgeBehavior.dodge(
+      this.agilityAgainst(attacker),
+      attacker.accuracyAgainst(this),
+    );
   }
 
   /** One roll against the first decoy pool of its side that has some left. */

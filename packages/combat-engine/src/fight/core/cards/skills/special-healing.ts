@@ -20,11 +20,9 @@ export class SpecialHealing extends BaseSpecial {
     context: FightingContext,
     _targetingStrategy?: TargetingCardStrategy,
   ): SpecialResult {
-    const targetedCards = this.targetingStrategy.targetedCards(
-      source,
-      context.sourcePlayer,
-      context.opponentPlayer,
-    );
+    const targetedCards = this.targetingStrategy
+      .targetedCards(source, context.sourcePlayer, context.opponentPlayer)
+      .filter((target) => !target.refusesSupportFrom(source));
 
     const actionResults = targetedCards.map((target) => {
       const healed = applyHealing(source, target, this.rate);

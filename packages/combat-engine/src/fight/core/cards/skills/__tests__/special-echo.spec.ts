@@ -2,6 +2,8 @@ import { SpecialEchoSkill } from '../special-echo';
 import { SelfDeathTrigger } from '../../../trigger/self-death';
 import { Player } from '../../../player';
 import { FightingCard } from '../../fighting-card';
+import { skillResultsToSteps } from '../../../fight-simulator/skill-results-to-steps';
+import { StepKind } from '../../../fight-simulator/@types/step';
 import { createFightingCard } from '../../../../../../test/helpers/fighting-card';
 
 describe('SpecialEchoSkill', () => {
@@ -41,6 +43,35 @@ describe('SpecialEchoSkill', () => {
     echo();
 
     expect(owner.actualEnergy).toBe(20);
+  });
+
+  it('reports what the special left besides its hits', () => {
+    owner = createFightingCard({
+      id: 'umiko',
+      skills: {
+        special: {
+          kind: 'specialAttack',
+          energy: 40,
+          buffs: [
+            {
+              buffType: 'speed',
+              buffRate: 0.2,
+              buffDuration: 2,
+              buffTargetingStrategy: 'self',
+            },
+          ],
+          shieldApplication: {
+            rate: 0.1,
+            duration: 2,
+            targetingStrategy: 'self',
+          },
+        },
+      },
+    });
+
+    expect(skillResultsToSteps(owner, [echo()]).map((s) => s.kind)).toEqual(
+      expect.arrayContaining([StepKind.Buff, StepKind.ShieldApplied]),
+    );
   });
 
   it('refuses to echo a special that does not attack', () => {
