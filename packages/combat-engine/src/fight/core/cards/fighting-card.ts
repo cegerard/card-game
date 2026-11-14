@@ -1039,7 +1039,7 @@ export class FightingCard {
   }
 
   /** Whether the card stands in a battlefield of that element. */
-  public standsInBattlefield(element: Element): boolean {
+  public standsInBattlefieldOf(element: Element): boolean {
     return this.exposures.some((e) => e.deployment.config.element === element);
   }
 

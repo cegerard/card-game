@@ -19,8 +19,8 @@ export class BattlefieldBonus extends DamageTypeBonus {
 
   protected isEarned(attacker: FightingCard, defender: FightingCard): boolean {
     return (
-      attacker.standsInBattlefield(this.element) ||
-      defender.standsInBattlefield(this.element)
+      attacker.standsInBattlefieldOf(this.element) ||
+      defender.standsInBattlefieldOf(this.element)
     );
   }
 }
