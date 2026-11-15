@@ -27,8 +27,9 @@ const during = (steps: any[], from: string, to: string) =>
   );
 
 /**
- * Hurts with its special alone: 405 damage at its fifth action, enough to
- * drop Kaito under 25%; its plain attack only poisons.
+ * Hurts with its special alone: 405 damage at its sixth action, enough to
+ * drop Kaito under 25% despite his regeneration; its plain attack only
+ * poisons, for 1 a tick.
  */
 const brute = () =>
   dummy('foe', {
@@ -258,7 +259,8 @@ describe('Kaito full kit', () => {
       const steps = await fight([kaito], [brute()]);
       const risen = steps.findIndex((s) => s.kind === 'transformation_started');
 
-      // 520 max health: 516 after the poisons, 110 after the blow
+      // 520 max health: regeneration offsets each poison tick but the last,
+      // 519 before the blow, 114 after it
       expect(
         steps
           .slice(0, risen)

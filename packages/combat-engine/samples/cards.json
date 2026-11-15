@@ -351,6 +351,8 @@
     "agility": 70,
     "accuracy": 85,
     "criticalChance": 0.12,
+    "regeneration": 35,
+    "resistance": 40,
     "element": "WATER",
     "skills": {
       "simpleAttack": {
