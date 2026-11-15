@@ -216,8 +216,13 @@ describe('samples/cards.json with Selkhet in a deck', () => {
     expect(steps[steps.length - 1].kind).toBe('fight_end');
   });
 
+  // Every fight-start skill reports before the first action, in deck order
   it('lets Selkhet open the fight concealed', () => {
-    expect(steps[1]).toEqual(
+    const firstAction = steps.findIndex((s) =>
+      ['attack', 'special_attack'].includes(s.kind),
+    );
+
+    expect(steps.slice(1, firstAction)).toContainEqual(
       expect.objectContaining({
         kind: 'concealment_started',
         name: 'Marche Fantôme',
