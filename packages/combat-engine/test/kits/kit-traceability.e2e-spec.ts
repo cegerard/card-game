@@ -15,7 +15,6 @@ const PENDING_KITS = [
   'arionis',
   'kaelion',
   'kaito',
-  'aegis',
   'scythra',
   'selkhet',
   'vespera',
@@ -35,19 +34,28 @@ const matches = (text: string, pattern: RegExp) =>
 const missingFrom = (expected: string[], actual: string[]) =>
   expected.filter((item) => !actual.includes(item));
 
-function kitStats(kit: string) {
-  const block = kit.match(/```json kit-stats\n([\s\S]*?)\n```/);
+function jsonBlock(kit: string, name: string) {
+  const block = kit.match(
+    new RegExp(`\`\`\`json ${name}\\n([\\s\\S]*?)\\n\`\`\``),
+  );
   return block ? JSON.parse(block[1]) : undefined;
 }
+
+// Notion stats the engine does not follow yet, with the engine values
+const statGaps = (kit: string) => jsonBlock(kit, 'kit-stat-gaps') ?? {};
 
 function cardStats(card: any) {
   const { attack, defense, health, speed, agility, accuracy } = card;
   const { criticalChance, regeneration, resistance, element } = card;
-  return {
+  const stats = {
     ...{ attack, defense, health, speed, agility, accuracy },
     ...{ criticalChance, regeneration, resistance, element },
     specialEnergy: card.skills.special.energy,
   };
+  // A stat the card leaves out reads null, as JSON can write it
+  return Object.fromEntries(
+    Object.entries(stats).map(([stat, value]) => [stat, value ?? null]),
+  );
 }
 
 function skillNames(card: any): string[] {
@@ -91,8 +99,20 @@ describe('Kit traceability', () => {
       expect(exists(specPath(card.id))).toBe(true);
     });
 
-    it('carries the stats of its kit', () => {
-      expect(cardStats(card)).toEqual(kitStats(kit));
+    it('carries the stats of its kit, documented gaps aside', () => {
+      expect(cardStats(card)).toEqual({
+        ...jsonBlock(kit, 'kit-stats'),
+        ...statGaps(kit),
+      });
+    });
+
+    it('documents as gaps only stats that differ from its kit', () => {
+      const notion = jsonBlock(kit, 'kit-stats') ?? {};
+      const gaps = statGaps(kit);
+
+      expect(
+        Object.keys(gaps).filter((stat) => gaps[stat] === notion[stat]),
+      ).toEqual([]);
     });
 
     it('gives each effect of its kit its own id', () => {
