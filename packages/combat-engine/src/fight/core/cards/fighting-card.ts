@@ -651,6 +651,11 @@ export class FightingCard {
    * Called when the card is about to act offensively: an entanglement goes
    * with that action, which fails on its chance. Returns whether it failed.
    */
+  /** One roll in [0, 1), compared to the critical chance against each defender. */
+  public criticalRoll(): number {
+    return this.randomizer.random();
+  }
+
   public failsOffensiveAction(): boolean {
     if (!this.entangled) return false;
 

@@ -8,17 +8,20 @@ import { ProbabilityCondition } from '../../core/cards/@types/alteration/conditi
 import { RandomizerFake } from '../../../../test/helpers/randomizer-fake';
 import { buildAlterationCondition } from '../alteration-condition-factory';
 
+// Only the PROBABILITY condition rolls: a fake randomizer does for the others
+const build = (
+  type: AlterationConditionType,
+  params: Parameters<typeof buildAlterationCondition>[1],
+) => buildAlterationCondition(type, params, new RandomizerFake());
+
 describe('buildAlterationCondition', () => {
   describe('ALLY_PRESENCE', () => {
     let condition: AlterationCondition;
 
     beforeEach(() => {
-      condition = buildAlterationCondition(
-        AlterationConditionType.ALLY_PRESENCE,
-        {
-          allyName: 'Hero',
-        },
-      );
+      condition = build(AlterationConditionType.ALLY_PRESENCE, {
+        allyName: 'Hero',
+      });
     });
 
     it('returns AllyPresenceCondition when allyName is provided', () => {
@@ -26,9 +29,9 @@ describe('buildAlterationCondition', () => {
     });
 
     it('throws when allyName is missing', () => {
-      expect(() =>
-        buildAlterationCondition(AlterationConditionType.ALLY_PRESENCE, {}),
-      ).toThrow('AllyPresenceCondition requires allyName');
+      expect(() => build(AlterationConditionType.ALLY_PRESENCE, {})).toThrow(
+        'AllyPresenceCondition requires allyName',
+      );
     });
   });
 
@@ -37,10 +40,7 @@ describe('buildAlterationCondition', () => {
       let condition: AlterationCondition;
 
       beforeEach(() => {
-        condition = buildAlterationCondition(
-          AlterationConditionType.HEALTH_THRESHOLD,
-          {},
-        );
+        condition = build(AlterationConditionType.HEALTH_THRESHOLD, {});
       });
 
       it('returns HealthThresholdCondition', () => {
@@ -52,13 +52,10 @@ describe('buildAlterationCondition', () => {
       let condition: AlterationCondition;
 
       beforeEach(() => {
-        condition = buildAlterationCondition(
-          AlterationConditionType.HEALTH_THRESHOLD,
-          {
-            threshold: 0.3,
-            operator: 'above',
-          },
-        );
+        condition = build(AlterationConditionType.HEALTH_THRESHOLD, {
+          threshold: 0.3,
+          operator: 'above',
+        });
       });
 
       it('returns HealthThresholdCondition', () => {
@@ -70,13 +67,10 @@ describe('buildAlterationCondition', () => {
       let condition: AlterationCondition;
 
       beforeEach(() => {
-        condition = buildAlterationCondition(
-          AlterationConditionType.HEALTH_THRESHOLD,
-          {
-            threshold: 0.5,
-            operator: 'below',
-          },
-        );
+        condition = build(AlterationConditionType.HEALTH_THRESHOLD, {
+          threshold: 0.5,
+          operator: 'below',
+        });
       });
 
       it('returns HealthThresholdCondition', () => {
@@ -86,7 +80,7 @@ describe('buildAlterationCondition', () => {
 
     it('throws for an invalid operator', () => {
       expect(() =>
-        buildAlterationCondition(AlterationConditionType.HEALTH_THRESHOLD, {
+        build(AlterationConditionType.HEALTH_THRESHOLD, {
           operator: 'greater',
         }),
       ).toThrow('Invalid operator: greater');
@@ -94,7 +88,7 @@ describe('buildAlterationCondition', () => {
 
     it('throws for an empty string operator', () => {
       expect(() =>
-        buildAlterationCondition(AlterationConditionType.HEALTH_THRESHOLD, {
+        build(AlterationConditionType.HEALTH_THRESHOLD, {
           operator: '',
         }),
       ).toThrow('Invalid operator: ');
@@ -104,32 +98,30 @@ describe('buildAlterationCondition', () => {
   describe('unknown type', () => {
     it('throws for an unknown AlterationConditionType', () => {
       expect(() =>
-        buildAlterationCondition('UNKNOWN_TYPE' as AlterationConditionType, {}),
+        build('UNKNOWN_TYPE' as AlterationConditionType, {}),
       ).toThrow('Unknown AlterationConditionType: UNKNOWN_TYPE');
     });
   });
 
   describe('PROBABILITY', () => {
     it('returns ProbabilityCondition when probability is provided', () => {
-      const condition = buildAlterationCondition(
-        AlterationConditionType.PROBABILITY,
-        { probability: 0.3 },
-      );
+      const condition = build(AlterationConditionType.PROBABILITY, {
+        probability: 0.3,
+      });
 
       expect(condition).toBeInstanceOf(ProbabilityCondition);
     });
 
     it('throws when probability is missing', () => {
-      expect(() =>
-        buildAlterationCondition(AlterationConditionType.PROBABILITY, {}),
-      ).toThrow('ProbabilityCondition requires probability');
+      expect(() => build(AlterationConditionType.PROBABILITY, {})).toThrow(
+        'ProbabilityCondition requires probability',
+      );
     });
 
     it('accepts a probability of 0', () => {
-      const condition = buildAlterationCondition(
-        AlterationConditionType.PROBABILITY,
-        { probability: 0 },
-      );
+      const condition = build(AlterationConditionType.PROBABILITY, {
+        probability: 0,
+      });
 
       expect(condition).toBeInstanceOf(ProbabilityCondition);
     });
@@ -147,7 +139,7 @@ describe('buildAlterationCondition', () => {
 
     it('rejects a probability outside the allowed range', () => {
       expect(() =>
-        buildAlterationCondition(AlterationConditionType.PROBABILITY, {
+        build(AlterationConditionType.PROBABILITY, {
           probability: 2,
         }),
       ).toThrow('probability must be in [0, 1], got: 2');

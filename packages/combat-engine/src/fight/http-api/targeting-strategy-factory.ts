@@ -17,7 +17,7 @@ import {
 import { ProtectedAllyStrategy } from '../core/targeting-card-strategies/protected-ally';
 import { FastestAllyStrategy } from '../core/targeting-card-strategies/fastest-ally';
 import { RandomEnemiesStrategy } from '../core/targeting-card-strategies/random-enemies';
-import { MathRandomizer } from '../tools/math-randomizer';
+import { Randomizer } from '../core/randomizer';
 import { TargetingStrategy } from './dto/fight-data.dto';
 import { TargetingCardStrategy } from '../core/targeting-card-strategies/targeting-card-strategy';
 
@@ -38,6 +38,7 @@ export function buildTargetingStrategy(
   targetCardId?: string,
   threshold?: number,
   targetCount?: number,
+  randomizer?: Randomizer,
 ): TargetingCardStrategy {
   if (strategyName === TargetingStrategy.RANDOM_ENEMIES) {
     // Only SpecialDto carries targetCount: anywhere else the request is malformed.
@@ -45,7 +46,9 @@ export function buildTargetingStrategy(
       throw new BadRequestException(
         `${strategyName} targeting is for specials only, with a targetCount`,
       );
-    return new RandomEnemiesStrategy(targetCount, new MathRandomizer());
+    if (!randomizer)
+      throw new Error(`${strategyName} targeting needs the fight randomizer`);
+    return new RandomEnemiesStrategy(targetCount, randomizer);
   }
   if (strategyName === TargetingStrategy.MOST_WOUNDED_ALLY) {
     if (threshold === undefined)

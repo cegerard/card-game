@@ -27,7 +27,7 @@ import { AllyHealthBelowThresholdTrigger } from '../core/trigger/ally-health-bel
 import { BuffTransferSkill } from '../core/cards/skills/buff-transfer';
 import { StanceSkill } from '../core/cards/skills/stance';
 import { RampingChance } from '../core/cards/@types/stance/ramping-chance';
-import { MathRandomizer } from '../tools/math-randomizer';
+import { Randomizer } from '../core/randomizer';
 import { BleedExplosionSkill } from '../core/cards/skills/bleed-explosion';
 import { RealDamageSkill } from '../core/cards/skills/real-damage';
 import { AfflictionSkill } from '../core/cards/skills/affliction';
@@ -71,14 +71,15 @@ import {
 export function createOtherSkill(
   skillData: OtherSkillDto,
   ownerId: string,
+  randomizer: Randomizer,
 ): Skill {
   switch (skillData.kind) {
     case SkillKind.HEALING:
       return buildHealing(skillData, ownerId);
     case SkillKind.ALTERATION:
-      return buildAlteration(skillData, ownerId);
+      return buildAlteration(skillData, ownerId, randomizer);
     case SkillKind.CONDITIONAL_ATTACK:
-      return buildConditionalAttack(skillData, ownerId);
+      return buildConditionalAttack(skillData, ownerId, randomizer);
     case SkillKind.TARGETING_OVERRIDE:
       return buildTargetingOverride(skillData, ownerId);
     case SkillKind.TRANSFORMATION:
@@ -88,7 +89,7 @@ export function createOtherSkill(
     case SkillKind.PROTECTION:
       return buildProtection(skillData, ownerId);
     case SkillKind.STANCE:
-      return buildStance(skillData, ownerId);
+      return buildStance(skillData, ownerId, randomizer);
     case SkillKind.CONCEALMENT:
       return buildConcealment(skillData, ownerId);
     case SkillKind.BUFF_TRANSFER:
@@ -122,7 +123,7 @@ export function createOtherSkill(
     case SkillKind.AFFLICTION:
       return new AfflictionSkill(
         skillData.name,
-        buildEffect(skillData.effect),
+        buildEffect(skillData.effect, randomizer),
         buildTriggerForSkill(skillData, ownerId),
         buildSkillTargeting(skillData),
         skillData.requiresStance,
@@ -133,7 +134,7 @@ export function createOtherSkill(
           new AnalysisSkill(
             skillData.name,
             skillData.maxStacks,
-            buildEffect(skillData.effect),
+            buildEffect(skillData.effect, randomizer),
             buildTriggerForSkill(skillData, ownerId),
           ),
       );
@@ -143,7 +144,9 @@ export function createOtherSkill(
         new Splash(
           skillData.name,
           buildDamages(skillData),
-          skillData.effect ? [buildEffect(skillData.effect)] : undefined,
+          skillData.effect
+            ? [buildEffect(skillData.effect, randomizer)]
+            : undefined,
           false,
         ),
         buildTriggerForSkill(skillData, ownerId),
@@ -209,6 +212,7 @@ function buildHealing(skillData: OtherSkillDto, ownerId: string): Healing {
 function buildAlteration(
   skillData: OtherSkillDto,
   ownerId: string,
+  randomizer: Randomizer,
 ): AlterationSkill {
   if (!skillData.buffType) {
     throw new Error('Alteration skill requires buffType');
@@ -234,7 +238,7 @@ function buildAlteration(
   }
   const alterationCondition = ownsActivationCondition(skillData)
     ? undefined
-    : buildSkillActivationCondition(skillData);
+    : buildSkillActivationCondition(skillData, randomizer);
   // duration: 0 means infinite — either permanent (no terminationEvent)
   // or event-bound (removed when terminationEvent fires via EndEventProcessor).
   // The domain uses Infinity to bypass the turn-decrement filter.
@@ -313,8 +317,9 @@ function buildSupport(skillData: OtherSkillDto, ownerId: string): SupportSkill {
 function buildConditionalAttack(
   skillData: OtherSkillDto,
   ownerId: string,
+  randomizer: Randomizer,
 ): ConditionalAttack {
-  const attackSkill = buildConditionalAttackSkill(skillData);
+  const attackSkill = buildConditionalAttackSkill(skillData, randomizer);
   return asBadRequest(
     () =>
       new ConditionalAttack(
@@ -332,7 +337,7 @@ function buildConditionalAttack(
                 skillData.splash.damages.map(
                   (d) => new DamageComposition(d.type, d.rate),
                 ),
-                buildEffects(skillData.splash.effects),
+                buildEffects(skillData.splash.effects, randomizer),
               )
             : undefined,
           lowHealthDebuff: skillData.onLowHealthAfterHit
@@ -358,7 +363,10 @@ function buildConditionalAttack(
   );
 }
 
-function buildConditionalAttackSkill(skillData: OtherSkillDto): AttackSkill {
+function buildConditionalAttackSkill(
+  skillData: OtherSkillDto,
+  randomizer: Randomizer,
+): AttackSkill {
   if (skillData.bleedDetonation && skillData.hits) {
     throw new BadRequestException(
       'CONDITIONAL_ATTACK bleedDetonation cannot be combined with hits',
@@ -366,7 +374,7 @@ function buildConditionalAttackSkill(skillData: OtherSkillDto): AttackSkill {
   }
   const caDamages = buildDamages(skillData);
   const caEffects = skillData.effect
-    ? [buildEffect(skillData.effect)]
+    ? [buildEffect(skillData.effect, randomizer)]
     : undefined;
   const caComboFinisher = skillData.comboFinisher
     ? skillData.comboFinisher.map((d) => new DamageComposition(d.type, d.rate))
@@ -380,7 +388,7 @@ function buildConditionalAttackSkill(skillData: OtherSkillDto): AttackSkill {
         skillData.amplifier ?? 0,
         caEffects,
         caComboFinisher,
-        buildEffects(skillData.comboFinisherEffects),
+        buildEffects(skillData.comboFinisherEffects, randomizer),
         undefined,
         skillData.defensePenetration,
         skillData.weakPointPenetration,
@@ -498,7 +506,11 @@ function buildStatAlterations(skillData: OtherSkillDto): Alteration[] {
   );
 }
 
-function buildStance(skillData: OtherSkillDto, ownerId: string): StanceSkill {
+function buildStance(
+  skillData: OtherSkillDto,
+  ownerId: string,
+  randomizer: Randomizer,
+): StanceSkill {
   const ramping = skillData.rampingChance;
 
   return asBadRequest(
@@ -515,7 +527,7 @@ function buildStance(skillData: OtherSkillDto, ownerId: string): StanceSkill {
                 ramping.startChance,
                 ramping.increment,
                 ramping.fromTurn,
-                new MathRandomizer(),
+                randomizer,
               )
             : undefined,
         },

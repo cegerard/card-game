@@ -1,4 +1,3 @@
-import { random } from '../../random-source';
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 import { FightingContext } from '../@types/fighting-context';
 import { SpecialResult } from '../@types/action-result/special-result';
@@ -76,7 +75,7 @@ export class SpecialAttack extends BaseSpecial {
     const attackResults: AttackResult[] = [];
 
     for (let hit = 0; hit < this.hits; hit++) {
-      const criticalRoll = random();
+      const criticalRoll = source.criticalRoll();
       const targetedCards = targeting
         .targetedCards(source, context.sourcePlayer, context.opponentPlayer)
         .filter((card) => !card.isDead());

@@ -30,7 +30,7 @@ src/
     ├── fight.module.ts
     ├── core/          # Domain logic
     ├── http-api/      # REST layer
-    └── tools/         # math-randomizer.ts (reads random-source), seeded-random.ts (seed → generator)
+    └── tools/         # math-randomizer.ts (Math.random()), seeded-randomizer.ts (request seed)
 ```
 
 ### `fight/core/`
@@ -38,7 +38,7 @@ src/
 ```
 core/
 ├── player.ts               # Player entity managing card decks (protectorOf, threeCardsFromCenter…)
-├── randomizer.ts, random-source.ts  # Randomization abstraction; per-fight source of every roll
+├── randomizer.ts           # Randomization abstraction
 ├── cards/                  # Fighting card entities and types
 ├── card-action/            # Action resolution logic
 ├── fight-simulator/        # Fight orchestration

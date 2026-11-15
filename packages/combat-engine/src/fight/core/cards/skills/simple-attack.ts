@@ -1,4 +1,3 @@
-import { random } from '../../random-source';
 import { DamageComposition } from '../@types/damage/damage-composition';
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 import {
@@ -62,7 +61,7 @@ export class SimpleAttack implements AttackSkill {
     context: FightingContext,
     targeting: TargetingCardStrategy,
   ): NamedAttackResult {
-    const criticalRoll = random();
+    const criticalRoll = card.criticalRoll();
     const defensiveCards = targeting.targetedCards(
       card,
       context.sourcePlayer,
