@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -8,12 +8,6 @@ const read = (path: string) =>
   exists(path) ? readFileSync(join(root, path), 'utf-8') : '';
 
 const roster: any[] = JSON.parse(read('samples/cards.json'));
-
-// Roster cards whose Notion kit is not exported yet. Exporting a kit takes
-// its card off this list: a card outside it must come with its kit.
-const PENDING_KITS = [
-  'hyoki',
-];
 
 const kitPath = (id: string) => `samples/kits/${id}.md`;
 const specPath = (id: string) => `test/fight/${id}-kit.e2e-spec.ts`;
@@ -60,26 +54,22 @@ function skillNames(card: any): string[] {
   ];
 }
 
-const traced = roster.filter((card) => !PENDING_KITS.includes(card.id));
-const pending = roster.filter((card) => PENDING_KITS.includes(card.id));
-
 describe('Kit traceability', () => {
-  it('lists only roster cards as pending', () => {
+  // A kit exported ahead of its card would otherwise sit there untested
+  it('exports kits for roster cards only', () => {
+    const kits = readdirSync(join(root, 'samples/kits')).map((file) =>
+      file.replace(/\.md$/, ''),
+    );
+
     expect(
       missingFrom(
-        PENDING_KITS,
+        kits,
         roster.map((card) => card.id),
       ),
     ).toEqual([]);
   });
 
-  describe.each(pending)('$id, kit pending', ({ id }) => {
-    it('has no exported kit yet, or leaves PENDING_KITS', () => {
-      expect(exists(kitPath(id))).toBe(false);
-    });
-  });
-
-  describe.each(traced)('$id', (card) => {
+  describe.each(roster)('$id', (card) => {
     const kit = read(kitPath(card.id));
     const spec = read(specPath(card.id));
     const kitIds = matches(kit, EFFECT_ID);

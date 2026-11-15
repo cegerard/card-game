@@ -51,6 +51,28 @@ const bleeder = (effect: object, targetingStrategy = 'position-based') =>
     },
   });
 
+// 100 agility, +50% from the start of the fight
+const hasty = () =>
+  dummy('foe', {
+    attack: 10,
+    agility: 100,
+    skills: {
+      ...dummy('foe').skills,
+      others: [
+        {
+          kind: 'ALTERATION',
+          name: 'Haste',
+          event: 'fight-start',
+          targetingStrategy: 'self',
+          polarity: 'buff',
+          buffType: 'agility',
+          rate: 0.5,
+          duration: 0,
+        },
+      ],
+    },
+  });
+
 describe('Scythra full kit', () => {
   const fight = useFight();
 
@@ -170,20 +192,7 @@ describe('Scythra full kit', () => {
     // 100 agility + 50% from a fight-start buff = 150: she misses until the
     // foe bleeds, then it dodges with its 100 base agility
     it('[SCY-AER-2] strips a bleeding enemy of its dodge buffs', async () => {
-      const foe = dummy('foe', { attack: 10, agility: 100 });
-      foe.skills.others = [
-        {
-          kind: 'ALTERATION',
-          name: 'Haste',
-          event: 'fight-start',
-          targetingStrategy: 'self',
-          polarity: 'buff',
-          buffType: 'agility',
-          rate: 0.5,
-          duration: 0,
-        },
-      ];
-      const steps = await fight([scythra, bleeder({ rate: 0.01 })], [foe]);
+      const steps = await fight([scythra, bleeder({ rate: 0.01 })], [hasty()]);
 
       expect(
         named(steps, 'attack', LACERATION)
