@@ -1,62 +1,43 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import request from 'supertest';
-import { AppModule } from '../../src/app.module';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import {
+  actionsOf,
+  dummy,
+  named,
+  ofKind,
+  rosterCard,
+  useFight,
+} from '../helpers/kit';
 
-const __dirname = join(fileURLToPath(import.meta.url), '..');
-
-const selkhet = JSON.parse(
-  readFileSync(join(__dirname, '../../samples/cards.json'), 'utf-8'),
-).find((card) => card.id === 'selkhet');
-
+const LACERATION = 'Lacération Silencieuse';
+const FUSION = 'Fusion Tectonique';
+const GHOST_WALK = 'Marche Fantôme';
+const CLAWS = 'Griffures';
+const INSTINCT = 'Instinct de Chasseresse';
+const INSTINCT_SPEED = 'Instinct de Chasseresse - Vitesse';
+const AMBUSH = 'Embuscade Tectonique';
 const SURPRISE_ATTACK = 'Embuscade Tectonique - Attaque surprise';
 const JUDGEMENT = 'Jugement de l’Obsidienne';
-const LEGACY = 'heritage-de-la-panthere';
+const PANTHER_LEGACY = 'Héritage de la Panthère';
 
-const card = (id: string, overrides: Record<string, unknown> = {}) => ({
-  id,
-  name: id,
-  attack: 0,
-  defense: 0,
-  health: 1000,
-  speed: 50,
-  agility: 0,
-  accuracy: 9999,
-  criticalChance: 0,
-  element: 'WATER',
-  skills: {
-    special: {
-      kind: 'ATTACK',
-      name: 'Special',
-      damages: [{ type: 'PHYSICAL', rate: 1 }],
-      energy: 9999,
-      targetingStrategy: 'position-based',
-    },
-    simpleAttack: {
-      name: 'Attack',
-      damages: [{ type: 'PHYSICAL', rate: 1 }],
-      targetingStrategy: 'position-based',
-    },
-    others: [],
-  },
-  behaviors: { dodge: 'simple-dodge' },
-  ...overrides,
-});
+// Nothing in her kit rolls: without criticals her fights replay exactly
+const selkhet = rosterCard('selkhet');
 
-// Without criticals every hit lands the same from one run to the next: dodges
-// are deterministic, and her opponents carry no resistance to roll.
-const hunter = { ...selkhet, criticalChance: 0 };
+const deathOf = (steps: any[], id: string) =>
+  steps.findIndex(
+    (s) =>
+      s.kind === 'status_change' && s.status === 'dead' && s.card.id === id,
+  );
+const after = (steps: any[], match: (s: any) => boolean) =>
+  steps.slice(steps.findIndex(match) + 1);
+const dives = (steps: any[]) =>
+  steps.filter((s) => s.kind === 'stance_started' && s.name === 'sous-terre');
 
-// Strikes the whole board, so Selkhet takes a hit as soon as she is revealed.
-const brute = card('brute', {
+/** Strikes the whole board, so Selkhet takes a hit as soon as she shows. */
+const brute = dummy('brute', {
   attack: 135,
-  health: 100000,
+  agility: 20,
   speed: 10,
   skills: {
-    ...card('brute').skills,
+    ...dummy('brute').skills,
     simpleAttack: {
       name: 'Smash',
       damages: [{ type: 'PHYSICAL', rate: 1 }],
@@ -66,198 +47,342 @@ const brute = card('brute', {
 });
 
 describe('Selkhet full kit', () => {
-  let app: INestApplication;
+  const fight = useFight();
 
-  const fight = async (player1: object[], player2: object[]) => {
-    const response = await request(app.getHttpServer())
-      .post('/fight')
-      .send({
-        cardSelectorStrategy: 'player-by-player',
-        player1: { name: 'P1', deck: player1 },
-        player2: { name: 'P2', deck: player2 },
-      })
-      .expect(200);
-    return Object.values(response.body) as any[];
-  };
+  // A harmless prey: she dives and strikes at will, and it falls under 40%
+  const hunting = () =>
+    fight([selkhet], [dummy('prey', { health: 5000, regeneration: 10 })]);
 
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-    app = moduleFixture.createNestApplication();
-    app.useLogger(false);
-    await app.init();
-  });
+  // The weakling dies at her second blow; the brute takes her under 40%;
+  // the straggler is left at 22% by the ultimate
+  const cornered = () =>
+    fight(
+      [
+        selkhet,
+        dummy('slow-ally', { speed: 20 }),
+        dummy('fast-ally', { speed: 200 }),
+      ],
+      [
+        dummy('weakling', { health: 160, speed: 10 }),
+        brute,
+        dummy('straggler', { health: 330, speed: 10, agility: 20 }),
+      ],
+    );
 
-  afterEach(async () => {
-    await app.close();
-  });
+  describe(LACERATION, () => {
+    // In the open: 60 physical + 36 earth
+    it('[SEL-ATK-1] strikes for 75% physical and 45% earth', async () => {
+      const steps = await hunting();
 
-  describe('on the hunt', () => {
-    let steps: any[];
-
-    const named = (name: string) => steps.filter((s) => s.name === name);
-    const lacerations = () =>
-      named('Lacération Silencieuse').map((s) => s.damages[0].damage);
-
-    beforeEach(async () => {
-      steps = await fight([hunter], [card('prey', { health: 5000 })]);
+      expect(named(steps, 'attack', LACERATION)[1].damages[0]).toMatchObject({
+        damage: 96,
+        kind: ['PHYSICAL', 'EARTH'],
+      });
     });
 
-    it('opens the fight concealed with Marche Fantôme', () => {
-      expect(steps[1]).toEqual(
-        expect.objectContaining({
-          kind: 'concealment_started',
-          name: 'Marche Fantôme',
-        }),
-      );
-    });
+    it('[SEL-ATK-2] bleeds 2% of the target max health a turn, for 3 turns', async () => {
+      const steps = await hunting();
 
-    it('strikes harder from concealment', () => {
-      const [fromConcealment, inTheOpen] = lacerations();
-
-      expect(fromConcealment).toBeGreaterThan(inTheOpen);
-    });
-
-    it('makes its prey bleed with Lacération Silencieuse', () => {
       expect(
-        steps.some((s) => s.kind === 'status_change' && s.status === 'bleed'),
-      ).toBe(true);
+        steps.find((s) => s.kind === 'state_effect' && s.type === 'bleed'),
+      ).toMatchObject({ damage: 100, remainingStacks: 1, remainingTurns: 2 });
     });
 
-    it('hits a prey under 40% a quarter harder (Instinct de Chasseresse)', () => {
-      const [, base] = lacerations();
+    // 60 x 1.5 = 90 physical + 36 earth
+    it('[SEL-ATK-3] strikes 50% harder in physical from concealment', async () => {
+      const steps = await hunting();
 
-      expect(lacerations().map((d) => Math.round((d / base) * 100))).toContain(
-        125,
-      );
-    });
-
-    it('dives underground with Embuscade Tectonique', () => {
-      expect(named('sous-terre').map((s) => s.kind)).toContain(
-        'stance_started',
-      );
-    });
-
-    it('stuns with the surprise attack', () => {
-      const strike = steps.findIndex((s) => s.name === SURPRISE_ATTACK);
-      const stun = steps.findIndex(
-        (s, i) => i > strike && s.kind === 'status_change',
-      );
-
-      expect(steps[stun].status).toBe('stunt');
-    });
-
-    it('fractures the defense of its target', () => {
-      const [fracture] = named(SURPRISE_ATTACK).filter(
-        (s) => s.kind === 'debuff',
-      );
-
-      expect(fracture.alterations[0].kind).toBe('defense');
-    });
-
-    it('casts Fusion Tectonique', () => {
-      expect(named('Fusion Tectonique').map((s) => s.kind)).toEqual([
-        'special_stance',
-        'buff',
-        'concealment_started',
-      ]);
-    });
-
-    it('sharpens its accuracy with Sens Sismique', () => {
-      const [sense] = named('Fusion Tectonique').filter(
-        (s) => s.kind === 'buff',
-      );
-
-      expect(sense.alterations[0].kind).toBe('accuracy');
-    });
-
-    it('cuts the regeneration of its prey with Griffures', () => {
-      const griffures = steps.filter(
-        (s) => s.kind === 'debuff' && s.alterations[0].kind === 'regeneration',
-      );
-
-      expect(griffures.length).toBeGreaterThan(0);
+      expect(named(steps, 'attack', LACERATION)[0].damages[0].damage).toBe(126);
     });
   });
 
-  describe('when cornered', () => {
-    let steps: any[];
+  describe(FUSION, () => {
+    it('[SEL-SPE-1] is cast once 80 energy are charged', async () => {
+      const steps = await hunting();
+      const fusion = steps.findIndex((s) => s.name === FUSION);
 
-    const named = (name: string) => steps.filter((s) => s.name === name);
-    const deathOf = (id: string) =>
-      steps.findIndex(
-        (s) =>
-          s.kind === 'status_change' && s.status === 'dead' && s.card.id === id,
-      );
-
-    beforeEach(async () => {
-      steps = await fight(
-        [
-          hunter,
-          card('slow-ally', { speed: 20, health: 100000 }),
-          card('fast-ally', { speed: 200, health: 100000 }),
-        ],
-        [
-          card('weakling', { health: 160, speed: 10 }),
-          brute,
-          card('straggler', { health: 350, speed: 10 }),
-        ],
-      );
+      expect(
+        steps
+          .slice(0, fusion)
+          .filter((s) => s.kind === 'attack' && s.attacker.id === 'selkhet')
+          .slice(-1)[0].energy,
+      ).toBe(80);
     });
 
-    it('conceals itself again after a kill (Marche Fantôme)', () => {
-      expect(steps[deathOf('weakling') + 1]).toEqual(
+    it('[SEL-SPE-1] hides her from her enemies for 2 turns', async () => {
+      const steps = await hunting();
+
+      expect(
+        named(steps, 'concealment_started', FUSION)[0].remainingTurns,
+      ).toBe(2);
+    });
+
+    it('[SEL-SPE-2] sharpens her accuracy by 30% for 2 turns', async () => {
+      const steps = await hunting();
+
+      expect(named(steps, 'buff', FUSION)[0].alterations).toEqual([
         expect.objectContaining({
-          kind: 'concealment_started',
-          name: 'Marche Fantôme',
+          kind: 'accuracy',
+          value: 25.5,
+          remainingTurns: 2,
         }),
-      );
-    });
-
-    // The weakling falls from 10% and the executed straggler from 13%.
-    it('speeds up for each target it kills under 30%', () => {
-      expect(named('Instinct de Chasseresse - Vitesse')).toHaveLength(2);
-    });
-
-    it('strikes every enemy with Jugement de l’Obsidienne', () => {
-      const [judgement] = named(JUDGEMENT);
-
-      expect(judgement.damages.map((d) => d.defender.id)).toEqual([
-        'brute',
-        'straggler',
       ]);
     });
 
-    it('executes the enemy left under 25%', () => {
-      const [execution] = named(JUDGEMENT).filter((s) => s.kind === 'executed');
+    it('[SEL-SPE-2] lets her see through concealment while it lasts', async () => {
+      const stance = selkhet.skills.special.stanceActivation;
 
-      expect(execution.card.id).toBe('straggler');
+      expect(stance).toMatchObject({
+        name: 'fusion-tectonique',
+        revealsConcealed: true,
+      });
     });
 
-    it('lowers the dodge of the survivors (Terrain d’Obsidienne)', () => {
-      const [field] = named(JUDGEMENT).filter((s) => s.kind === 'debuff');
+    it('[SEL-SPE-3] makes her bleeds cut the regeneration by 50% for 4 turns', async () => {
+      const steps = await hunting();
 
-      expect(field.alterations[0].kind).toBe('agility');
-    });
-
-    it('fires its ultimate only once', () => {
-      expect(named(JUDGEMENT).filter((s) => s.kind === 'attack')).toHaveLength(
-        1,
-      );
-    });
-
-    it('opens the window of Héritage de la Panthère', () => {
-      expect(named(LEGACY).map((s) => s.kind)).toContain('stance_started');
-    });
-
-    it('leaves its speed to the fastest ally when it falls', () => {
-      expect(steps[deathOf('selkhet') + 1]).toEqual(
+      expect(
+        ofKind(
+          after(steps, (s) => s.name === FUSION),
+          'debuff',
+        ).find((s) => s.alterations[0].kind === 'regeneration').alterations,
+      ).toEqual([
         expect.objectContaining({
-          kind: 'buff_transferred',
-          target: expect.objectContaining({ id: 'fast-ally' }),
+          kind: 'regeneration',
+          value: 5,
+          remainingTurns: 4,
         }),
+      ]);
+    });
+
+    it('[SEL-SPE-3] makes her bleeds deal 3% of the max health for 4 turns', async () => {
+      const claws = selkhet.skills.others.find((s) => s.name === CLAWS);
+
+      expect(claws).toMatchObject({ rate: 0.03, duration: 4 });
+    });
+  });
+
+  describe(GHOST_WALK, () => {
+    it('[SEL-MAR-1] opens the fight concealed', async () => {
+      const steps = await hunting();
+
+      expect(steps[1]).toMatchObject({
+        kind: 'concealment_started',
+        name: GHOST_WALK,
+      });
+    });
+
+    it('[SEL-MAR-1] shows herself at her first attack', async () => {
+      const steps = await hunting();
+
+      expect(steps[3]).toMatchObject({
+        kind: 'concealment_ended',
+        name: GHOST_WALK,
+        reason: 'attacked',
+      });
+    });
+
+    it('[SEL-MAR-2] hides again for a turn after a kill', async () => {
+      const steps = await cornered();
+
+      expect(steps[deathOf(steps, 'weakling') + 1]).toMatchObject({
+        kind: 'concealment_started',
+        name: GHOST_WALK,
+        remainingTurns: 1,
+      });
+    });
+  });
+
+  describe(INSTINCT, () => {
+    // The first Lacération on a prey already under 40% (2000) before the hit,
+    // stunned by the surprise attack (+20% taken): 96 x 1.25 x 1.2
+    it('[SEL-INS-1] hits a target under 40% health 25% harder', async () => {
+      const steps = await hunting();
+      const weakened = named(steps, 'attack', LACERATION).find(
+        (s) => s.damages[0].remainingHealth + s.damages[0].damage < 2000,
       );
+
+      expect(weakened.damages[0].damage).toBe(144);
+    });
+
+    it('[SEL-INS-2] quickens her by 15% for good when she kills under 30%', async () => {
+      const steps = await cornered();
+
+      expect(named(steps, 'buff', INSTINCT_SPEED)[0].alterations).toEqual([
+        expect.objectContaining({
+          kind: 'speed',
+          value: 13.8,
+          remainingTurns: null,
+        }),
+      ]);
+    });
+
+    // Four weaklings, each killed from 21%
+    it('[SEL-INS-2] quickens her three times at most', async () => {
+      const steps = await fight(
+        [selkhet],
+        ['w1', 'w2', 'w3', 'w4'].map((id) => dummy(id, { health: 160 })),
+      );
+
+      expect(named(steps, 'buff', INSTINCT_SPEED)).toHaveLength(3);
+    });
+  });
+
+  describe(AMBUSH, () => {
+    it('[SEL-EMB-1] sinks underground on her fourth action', async () => {
+      const steps = await hunting();
+      const sunk = steps.findIndex((s) => s.name === 'sous-terre');
+
+      expect(named(steps.slice(0, sunk), 'attack', LACERATION)).toHaveLength(3);
+    });
+
+    it('[SEL-EMB-1] cannot be struck while underground', async () => {
+      const steps = await hunting();
+
+      expect(named(steps, 'concealment_started', AMBUSH)).not.toEqual([]);
+    });
+
+    it('[SEL-EMB-1] surfaces to strike at her next turn start', async () => {
+      const steps = await hunting();
+      const sunk = steps.findIndex((s) => s.name === 'sous-terre');
+
+      expect(
+        steps
+          .slice(sunk)
+          .find((s) => s.kind === 'attack' && s.attacker.id === 'selkhet').name,
+      ).toBe(SURPRISE_ATTACK);
+    });
+
+    // 120 physical + 64 earth
+    it('[SEL-EMB-2] strikes for 150% physical and 80% earth', async () => {
+      const steps = await hunting();
+
+      expect(
+        named(steps, 'attack', SURPRISE_ATTACK)[0].damages[0],
+      ).toMatchObject({
+        damage: 184,
+        kind: ['PHYSICAL', 'EARTH'],
+      });
+    });
+
+    it('[SEL-EMB-3] stuns its target', async () => {
+      const steps = await hunting();
+
+      expect(
+        ofKind(
+          after(steps, (s) => s.name === SURPRISE_ATTACK),
+          'status_change',
+        )[0],
+      ).toMatchObject({
+        card: expect.objectContaining({ id: 'prey' }),
+        status: 'stunt',
+      });
+    });
+
+    it('[SEL-EMB-4] fractures the target defense by 30% for 2 turns', async () => {
+      const steps = await fight(
+        [selkhet],
+        [dummy('prey', { health: 5000, defense: 20 })],
+      );
+
+      expect(named(steps, 'debuff', SURPRISE_ATTACK)[0].alterations).toEqual([
+        expect.objectContaining({
+          kind: 'defense',
+          value: 6,
+          remainingTurns: 2,
+        }),
+      ]);
+    });
+
+    // 40 attack against 35 defense: a 5 point scratch every turn she shows
+    it('[SEL-EMB-5] stays above ground while she keeps taking hits', async () => {
+      const steps = await fight(
+        [selkhet],
+        [dummy('prey', { health: 5000, attack: 40 })],
+      );
+      const fusion = steps.findIndex((s) => s.name === FUSION);
+
+      expect(dives(steps.slice(0, fusion))).toEqual([]);
+    });
+
+    // Lacérations at her 5th (after the strike), 6th and 7th turns
+    it('[SEL-EMB-6] sinks again four turns later', async () => {
+      const steps = await hunting();
+      const [first, second] = dives(steps).map((s) => steps.indexOf(s));
+
+      expect(actionsOf(steps.slice(first, second), 'selkhet')).toEqual([
+        SURPRISE_ATTACK,
+        LACERATION,
+        LACERATION,
+        LACERATION,
+      ]);
+    });
+  });
+
+  describe(JUDGEMENT, () => {
+    // 160 physical + 96 earth on each
+    it('[SEL-JUG-1] strikes every enemy for 200% physical and 120% earth', async () => {
+      const steps = await cornered();
+
+      expect(named(steps, 'attack', JUDGEMENT)[0].damages).toEqual([
+        expect.objectContaining({
+          defender: expect.objectContaining({ id: 'brute' }),
+          damage: 256,
+        }),
+        expect.objectContaining({
+          defender: expect.objectContaining({ id: 'straggler' }),
+          damage: 256,
+        }),
+      ]);
+    });
+
+    it('[SEL-JUG-2] executes the enemy left under 25%', async () => {
+      const steps = await cornered();
+
+      expect(named(steps, 'executed', JUDGEMENT)[0].card.id).toBe('straggler');
+    });
+
+    it('[SEL-JUG-3] lowers the dodge of the survivors by 50% for 3 turns', async () => {
+      const steps = await cornered();
+
+      expect(named(steps, 'debuff', JUDGEMENT)[0].alterations).toEqual([
+        expect.objectContaining({
+          target: expect.objectContaining({ id: 'brute' }),
+          kind: 'agility',
+          value: 10,
+          remainingTurns: 3,
+        }),
+      ]);
+    });
+
+    it('[SEL-JUG-4] opens a 3 turn window for her legacy', async () => {
+      const steps = await cornered();
+
+      expect(
+        ofKind(steps, 'stance_started').find(
+          (s) => s.name === 'heritage-de-la-panthere',
+        ).remainingTurns,
+      ).toBe(3);
+    });
+
+    it('[SEL-JUG-4] hands her speed buffs to the fastest ally when she falls', async () => {
+      const steps = await cornered();
+
+      expect(steps[deathOf(steps, 'selkhet') + 1]).toMatchObject({
+        kind: 'buff_transferred',
+        name: PANTHER_LEGACY,
+        target: expect.objectContaining({ id: 'fast-ally' }),
+        alterations: [
+          expect.objectContaining({ kind: 'speed', value: 13.8 }),
+          expect.objectContaining({ kind: 'speed', value: 13.8 }),
+        ],
+      });
+    });
+
+    it('[SEL-JUG-5] fires once per fight', async () => {
+      const steps = await cornered();
+
+      expect(named(steps, 'attack', JUDGEMENT)).toHaveLength(1);
     });
   });
 });

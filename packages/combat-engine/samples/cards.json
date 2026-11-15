@@ -688,7 +688,7 @@
     "health": 300,
     "speed": 85,
     "agility": 65,
-    "accuracy": 109,
+    "accuracy": 95,
     "criticalChance": 0.13,
     "regeneration": 25,
     "resistance": 35,
@@ -749,6 +749,16 @@
         {
           "kind": "DODGE_BONUS_DENIAL",
           "name": "Aéro-traqueur"
+        },
+        {
+          "kind": "ALTERATION",
+          "name": "Aéro-traqueur - Précision",
+          "event": "fight-start",
+          "targetingStrategy": "self",
+          "polarity": "buff",
+          "buffType": "accuracy",
+          "rate": 0.15,
+          "duration": 0
         },
         {
           "kind": "BLEED_STACK_SCALING",

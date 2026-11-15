@@ -1,92 +1,46 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import request from 'supertest';
-import { AppModule } from '../../src/app.module';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-const __dirname = join(fileURLToPath(import.meta.url), '..');
-
-const svana = JSON.parse(
-  readFileSync(join(__dirname, '../../samples/cards.json'), 'utf-8'),
-).find((card) => card.id === 'svana');
+import { jest } from '@jest/globals';
+import {
+  actionsOf,
+  dummy,
+  named,
+  ofKind,
+  rosterCard,
+  useFight,
+} from '../helpers/kit';
 
 const BREATH = 'Souffle Cristallin';
 const EMBRACE = 'Étreinte du Cygne Glacé';
 const ANALYSIS = 'Analyse Aérienne';
+const GRACE = 'Grâce Trompeuse';
 const COUNTER = 'Grâce Trompeuse - Éclat de Givre';
 const STORM = 'Tempête Focalisée';
 const WALTZ = 'Valse du Cygne Noir';
+const MASS_FREEZE = 'Valse du Cygne Noir - Gel de Masse';
+const OMNISCIENCE = 'Valse du Cygne Noir - Omniscience Tactique';
 const CRYSTALS = 'Valse du Cygne Noir - Tempête de Cristaux';
+const SWAN_LEGACY = 'Valse du Cygne Noir - Héritage du Cygne';
 
-const card = (id: string, overrides: Record<string, unknown> = {}) => ({
-  id,
-  name: id,
-  attack: 0,
-  defense: 0,
-  health: 10000,
-  speed: 50,
-  agility: 0,
-  accuracy: 9999,
-  criticalChance: 0,
-  element: 'WATER',
+const swan = rosterCard('svana');
+const without = (card: any, dropped: (skill: any) => boolean) => ({
+  ...card,
   skills: {
-    special: {
-      kind: 'ATTACK',
-      name: 'Special',
-      damages: [{ type: 'PHYSICAL', rate: 1 }],
-      energy: 9999,
-      targetingStrategy: 'position-based',
-    },
-    simpleAttack: {
-      name: 'Attack',
-      damages: [{ type: 'PHYSICAL', rate: 1 }],
-      targetingStrategy: 'position-based',
-    },
-    others: [],
+    ...card.skills,
+    others: card.skills.others.filter((skill) => !dropped(skill)),
   },
-  behaviors: { dodge: 'simple-dodge' },
-  ...overrides,
 });
+const skillNamed = (name: string, kind?: string) =>
+  swan.skills.others.find((s) => s.name === name && (!kind || s.kind === kind));
 
-// Without criticals every hit lands the same from one run to the next.
-const swan = { ...svana, criticalChance: 0 };
+// Without her analysis, nothing sets the ultimate off early
+const focused = without(swan, (skill) => skill.kind === 'ANALYSIS');
+// Without Tempête Focalisée, no earlier freeze holds her special's target
+const embracing = without(focused, (skill) => skill.name === STORM);
 
-// Without her analysis, nothing sets the ultimate off early.
-const focused = {
-  ...swan,
-  skills: {
-    ...swan.skills,
-    others: swan.skills.others.filter((skill) => skill.kind !== 'ANALYSIS'),
-  },
-};
-
-// Without Tempête Focalisée, no earlier freeze holds the target the special aims at.
-const embracing = {
-  ...focused,
-  skills: {
-    ...focused.skills,
-    others: focused.skills.others.filter((skill) => skill.name !== STORM),
-  },
-};
-
-const named = (steps: any[], kind: string, name: string) =>
-  steps.filter((s) => s.kind === kind && s.name === name);
-
-// The step `offset` places after the first one carrying every field of `match`.
-const after = (steps: any[], match: object, offset = 1) =>
-  steps[
-    steps.findIndex((s) =>
-      Object.entries(match).every(([key, value]) => s[key] === value),
-    ) + offset
-  ];
-
-// A guard against control keeps the enemy attacking, and so analysed, under freezes.
+// A guard against control keeps an enemy attacking, so analysed, under freezes
 const unfreezable = (id: string) =>
-  card(id, {
+  dummy(id, {
     skills: {
-      ...card(id).skills,
+      ...dummy(id).skills,
       others: [
         {
           kind: 'STANCE',
@@ -102,52 +56,38 @@ const unfreezable = (id: string) =>
     },
   });
 
+// The step `offset` places after the first one carrying every field of `match`
+const after = (steps: any[], match: object, offset = 1) =>
+  steps[
+    steps.findIndex((s) =>
+      Object.entries(match).every(([key, value]) => s[key] === value),
+    ) + offset
+  ];
+
 describe('Svana full kit', () => {
-  let app: INestApplication;
+  const fight = useFight();
 
-  const fight = async (player1: object[], player2: object[]) => {
-    const response = await request(app.getHttpServer())
-      .post('/fight')
-      .send({
-        cardSelectorStrategy: 'player-by-player',
-        player1: { name: 'P1', deck: player1 },
-        player2: { name: 'P2', deck: player2 },
-      })
-      .expect(200);
-    return Object.values(response.body) as any[];
-  };
-
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-    app = moduleFixture.createNestApplication();
-    app.useLogger(false);
-    await app.init();
+  // Éclat de Givre is the only roll of her kit: high unless a test says otherwise
+  const rolling = (roll: number) =>
+    jest.spyOn(Math, 'random').mockReturnValue(roll);
+  beforeEach(() => {
+    rolling(0.99);
   });
 
-  afterEach(async () => {
-    await app.close();
-  });
+  describe(BREATH, () => {
+    // 52.5 -> 53 physical, 52.5 -> 53 air
+    it('[SVA-ATK-1] strikes for 70% physical and 70% air', async () => {
+      const steps = await fight([focused], [dummy('prey')]);
 
-  describe('opening the fight', () => {
-    it('raises her agility for the whole fight with Grâce Trompeuse', async () => {
-      const steps = await fight([focused], [card('prey')]);
-
-      expect(named(steps, 'buff', 'Grâce Trompeuse')[0].alterations).toEqual([
-        expect.objectContaining({ kind: 'agility', remainingTurns: null }),
-      ]);
-    });
-  });
-
-  describe('breathing Souffle Cristallin', () => {
-    let steps: any[];
-
-    beforeEach(async () => {
-      steps = await fight([focused], [card('prey')]);
+      expect(named(steps, 'attack', BREATH)[0].damages[0]).toMatchObject({
+        damage: 106,
+        kind: ['PHYSICAL', 'AIR'],
+      });
     });
 
-    it('lays a Marque Thermique for two turns', () => {
+    it('[SVA-ATK-2] lays a Marque Thermique for two turns', async () => {
+      const steps = await fight([focused], [dummy('prey')]);
+
       expect(after(steps, { kind: 'attack', name: BREATH })).toMatchObject({
         kind: 'weak_point_revealed',
         name: 'Marque Thermique',
@@ -155,139 +95,379 @@ describe('Svana full kit', () => {
       });
     });
 
-    it('casts Tempête Focalisée on its cooldown', () => {
-      expect(named(steps, 'attack', STORM).length).toBeGreaterThan(0);
+    // The ally has no critical chance of its own: the mark lends it 10%
+    it('[SVA-ATK-3] lends her allies 10% critical chance against a marked target', async () => {
+      rolling(0.05);
+      const steps = await fight(
+        [focused, dummy('ally', { attack: 100 })],
+        [dummy('prey')],
+      );
+
+      expect(
+        steps.find((s) => s.kind === 'attack' && s.attacker.id === 'ally')
+          .damages[0].isCritical,
+      ).toBe(true);
+    });
+
+    it('[SVA-ATK-3] lends no more than 10%', async () => {
+      rolling(0.11);
+      const steps = await fight(
+        [focused, dummy('ally', { attack: 100 })],
+        [dummy('prey')],
+      );
+
+      expect(
+        steps.find((s) => s.kind === 'attack' && s.attacker.id === 'ally')
+          .damages[0].isCritical,
+      ).toBe(false);
+    });
+
+    // Frozen by Tempête Focalisée: 52.5 x 1.2 = 63 a part, then x 1.2 taken
+    // by a frozen card: 151.2
+    it('[SVA-ATK-4] hits a frozen target 20% harder', async () => {
+      const steps = await fight([focused], [dummy('prey')]);
+
+      const frozen = steps.findIndex((s) => s.status === 'freeze');
+
+      expect(
+        named(steps.slice(frozen), 'attack', BREATH)[0].damages[0].damage,
+      ).toBe(151);
     });
   });
 
-  describe('casting Étreinte du Cygne Glacé', () => {
-    let steps: any[];
+  describe(EMBRACE, () => {
+    const embraced = () => fight([embracing], [dummy('prey', { attack: 100 })]);
 
-    beforeEach(async () => {
-      steps = await fight([embracing], [card('prey')]);
+    it('[SVA-SPE-1] is cast on her sixth action, once 45 energy are charged', async () => {
+      const steps = await embraced();
+
+      expect(actionsOf(steps, 'svana').indexOf(EMBRACE)).toBe(5);
     });
 
-    it('drains the attack, freezes and reveals a critical weak point', () => {
-      const cast = { kind: 'special_attack', name: EMBRACE };
-      const names = [1, 2, 3].map((i) => after(steps, cast, i));
+    it('[SVA-SPE-1] freezes its target', async () => {
+      const steps = await embraced();
 
-      expect(names.map((s) => s.name ?? s.status)).toEqual([
-        EMBRACE,
-        'freeze',
-        'Point Faible Critique',
+      expect(after(steps, { kind: 'debuff', name: EMBRACE })).toMatchObject({
+        kind: 'status_change',
+        status: 'freeze',
+      });
+    });
+
+    // 106 x 1.6 = 169.6
+    it('[SVA-SPE-2] makes the next hit on its target 60% harder', async () => {
+      const steps = await embraced();
+
+      expect(
+        named(
+          steps.slice(steps.findIndex((s) => s.name === EMBRACE)),
+          'attack',
+          BREATH,
+        )[0].damages[0].damage,
+      ).toBe(170);
+    });
+
+    it('[SVA-SPE-2] spends the weak point on that hit', async () => {
+      const steps = await embraced();
+
+      expect(ofKind(steps, 'weak_point_ended')[0]).toMatchObject({
+        name: 'Point Faible Critique',
+        reason: 'struck',
+      });
+    });
+
+    // A target agile enough to dodge that hit dodges the special itself
+    it('[SVA-SPE-2] loses the weak point to a dodge', async () => {
+      expect(swan.skills.special.effects[1].weakPoint.consumable).toBe(true);
+    });
+
+    it('[SVA-SPE-3] drains the target attack by 25% for 4 turns', async () => {
+      const steps = await embraced();
+
+      expect(named(steps, 'debuff', EMBRACE)[0].alterations).toEqual([
+        expect.objectContaining({
+          kind: 'attack',
+          value: 25,
+          remainingTurns: 4,
+        }),
       ]);
     });
 
-    it('lays a hypothermia when the next hit strikes the weak point', () => {
-      const struck = { kind: 'weak_point_ended', reason: 'struck' };
+    it('[SVA-SPE-4] lays a hypothermia when that hit strikes the weak point', async () => {
+      const steps = await embraced();
 
-      expect(after(steps, struck)).toMatchObject({
+      expect(
+        after(steps, { kind: 'weak_point_ended', reason: 'struck' }),
+      ).toMatchObject({
         kind: 'status_change',
         status: 'hypothermia',
       });
     });
 
-    it('bites 15% of the target max health each turn', () => {
-      const bites = steps.filter(
-        (s) => s.kind === 'state_effect' && s.type === 'hypothermia',
-      );
+    it('[SVA-SPE-4] bites 15% of the target max health a turn, for 3 turns', async () => {
+      const steps = await embraced();
 
-      expect(bites.slice(0, 3).map((s) => s.damage)).toEqual([
-        1500, 1500, 1500,
+      expect(
+        steps
+          .filter((s) => s.kind === 'state_effect' && s.type === 'hypothermia')
+          .slice(0, 3)
+          .map((s) => [s.damage, s.remainingTurns]),
+      ).toEqual([
+        [1500, 2],
+        [1500, 1],
+        [1500, 0],
       ]);
     });
   });
 
-  describe('analysing the enemies', () => {
-    let steps: any[];
+  describe(ANALYSIS, () => {
+    const analysing = () => fight([swan], [dummy('prey')]);
 
-    beforeEach(async () => {
-      steps = await fight([swan], [card('prey')]);
+    it('[SVA-ANA-1] lays one charge per enemy attack, up to three', async () => {
+      const steps = await analysing();
+
+      expect(
+        named(steps, 'analysis_charged', ANALYSIS).map((s) => s.charges),
+      ).toEqual([1, 2, 3]);
     });
 
-    it('lays one charge per enemy attack up to three', () => {
-      const charges = named(steps, 'analysis_charged', ANALYSIS).map(
-        (s) => s.charges,
-      );
+    it('[SVA-ANA-2] reveals a lasting weak point with the third charge', async () => {
+      const steps = await analysing();
 
-      expect(charges).toEqual([1, 2, 3]);
-    });
-
-    it('reveals a lasting weak point with the third charge', () => {
-      const third = { kind: 'analysis_charged', charges: 3 };
-
-      expect(after(steps, third)).toMatchObject({
+      expect(
+        after(steps, { kind: 'analysis_charged', charges: 3 }),
+      ).toMatchObject({
         kind: 'weak_point_revealed',
         name: 'Point Faible',
+        source: expect.objectContaining({ id: 'svana' }),
       });
     });
 
-    it('sets the ultimate off once every enemy is analysed', () => {
-      const third = { kind: 'analysis_charged', charges: 3 };
+    // Read by the revealer alone: the engine weak point tests cover the reads
+    it('[SVA-ANA-2] sharpens her accuracy by 40% and her attack by 30% against it', async () => {
+      expect(skillNamed(ANALYSIS).effect.weakPoint).toMatchObject({
+        revealerAccuracyRate: 0.4,
+        revealerAttackRate: 0.3,
+      });
+    });
+  });
 
-      expect(after(steps, third, 2)).toMatchObject({
+  describe(GRACE, () => {
+    it('[SVA-GRA-1] raises her agility by 15% for the whole fight', async () => {
+      const steps = await fight([focused], [dummy('prey')]);
+
+      expect(named(steps, 'buff', GRACE)[0].alterations).toEqual([
+        expect.objectContaining({
+          kind: 'agility',
+          value: 9.75,
+          remainingTurns: null,
+        }),
+      ]);
+    });
+
+    // 70% of 75 = 52.5
+    it('[SVA-GRA-2] answers a dodge with Éclat de Givre, 70% air', async () => {
+      const steps = await fight([focused], [dummy('clumsy', { accuracy: 0 })]);
+
+      expect(named(steps, 'attack', COUNTER)[0].damages[0]).toMatchObject({
+        defender: expect.objectContaining({ id: 'clumsy' }),
+        damage: 53,
+        kind: ['AIR'],
+      });
+    });
+
+    it('[SVA-GRA-2] freezes the attacker on a roll under 33%', async () => {
+      rolling(0.2);
+      const steps = await fight([focused], [dummy('clumsy', { accuracy: 0 })]);
+
+      expect(after(steps, { kind: 'attack', name: COUNTER })).toMatchObject({
+        kind: 'status_change',
+        status: 'freeze',
+      });
+    });
+
+    it('[SVA-GRA-2] spares it on a roll of 33% or more', async () => {
+      const steps = await fight([focused], [dummy('clumsy', { accuracy: 0 })]);
+
+      expect(after(steps, { kind: 'attack', name: COUNTER }).kind).not.toBe(
+        'status_change',
+      );
+    });
+  });
+
+  describe(STORM, () => {
+    it('[SVA-TEM-1] strikes for 120% air', async () => {
+      const steps = await fight([focused], [dummy('prey')]);
+
+      expect(named(steps, 'attack', STORM)[0].damages[0]).toMatchObject({
+        damage: 90,
+        kind: ['AIR'],
+      });
+    });
+
+    it('[SVA-TEM-2] freezes its target', async () => {
+      const steps = await fight([focused], [dummy('prey')]);
+
+      expect(after(steps, { kind: 'attack', name: STORM })).toMatchObject({
+        kind: 'status_change',
+        status: 'freeze',
+      });
+    });
+
+    // Every Souffle Cristallin marks the target first: 90 - 100 x 0.6
+    it('[SVA-TEM-3] ignores 40% of the defense of a target bearing a weak point', async () => {
+      const steps = await fight([focused], [dummy('prey', { defense: 100 })]);
+
+      expect(named(steps, 'attack', STORM)[0].damages[0].damage).toBe(30);
+    });
+
+    it('[SVA-TEM-4] comes back every fourth action', async () => {
+      const steps = await fight([focused], [dummy('prey')]);
+      const actions = actionsOf(steps, 'svana').slice(0, 8);
+
+      expect(actions.flatMap((name, i) => (name === STORM ? [i] : []))).toEqual(
+        [3, 7],
+      );
+    });
+  });
+
+  describe(WALTZ, () => {
+    const analysing = () => fight([swan], [dummy('prey', { defense: 100 })]);
+
+    it('[SVA-VAL-1] sets off once every enemy is analysed', async () => {
+      const steps = await analysing();
+
+      expect(
+        after(steps, { kind: 'analysis_charged', charges: 3 }, 2),
+      ).toMatchObject({
         kind: 'transformation_started',
         name: WALTZ,
-      });
-    });
-
-    it('freezes every enemy as the ultimate starts', () => {
-      const waltz = steps.findIndex((s) => s.kind === 'transformation_started');
-      const freeze = steps.findIndex(
-        (s, i) => i > waltz && s.status === 'freeze',
-      );
-
-      expect(steps[freeze].card.name).toBe('prey');
-    });
-
-    it('reveals every enemy weak point for the ultimate', () => {
-      expect(
-        named(steps, 'weak_point_revealed', 'Omniscience Tactique')[0],
-      ).toMatchObject({
         remainingTurns: 3,
       });
     });
-  });
 
-  describe('dodging an attack', () => {
-    it('answers with Éclat de Givre', async () => {
-      const steps = await fight([focused], [card('clumsy', { accuracy: 0 })]);
+    // 470 - 50 defense = 420 a hit: 90, under 20% of 510
+    it('[SVA-VAL-1] sets off under 20% health', async () => {
+      const steps = await fight([focused], [dummy('brute', { attack: 470 })]);
 
-      expect(named(steps, 'attack', COUNTER).length).toBeGreaterThan(0);
+      expect(
+        steps[steps.findIndex((s) => s.kind === 'transformation_started') - 1]
+          .damages[0].remainingHealth,
+      ).toBe(90);
     });
-  });
 
-  describe('attacking during the ultimate', () => {
-    it('shatters crystals on the neighbors of her target', async () => {
+    it('[SVA-VAL-1] rises once per fight', async () => {
+      const steps = await analysing();
+
+      expect(ofKind(steps, 'transformation_started')).toHaveLength(1);
+    });
+
+    it('[SVA-VAL-2] sharpens her accuracy by 50% and her speed by 35% for 3 turns', async () => {
+      const steps = await analysing();
+
+      expect(named(steps, 'buff', WALTZ)[0].alterations).toEqual([
+        expect.objectContaining({
+          kind: 'accuracy',
+          value: 40,
+          remainingTurns: 3,
+        }),
+        expect.objectContaining({
+          kind: 'speed',
+          value: 24.5,
+          remainingTurns: 3,
+        }),
+      ]);
+    });
+
+    it('[SVA-VAL-2] raises her critical damage by 30%', async () => {
+      expect(skillNamed(WALTZ).criticalDamageRate).toBe(0.3);
+    });
+
+    it('[SVA-VAL-3] freezes every enemy as it starts', async () => {
+      const steps = await analysing();
+
+      expect(
+        after(steps, { kind: 'stance_started', name: 'valse-du-cygne-noir' }),
+      ).toMatchObject({
+        kind: 'status_change',
+        status: 'freeze',
+        card: expect.objectContaining({ id: 'prey' }),
+      });
+    });
+
+    it('[SVA-VAL-3] weakens the defense of every enemy by 25% for 3 turns', async () => {
+      const steps = await analysing();
+
+      expect(named(steps, 'debuff', MASS_FREEZE)[0].alterations).toEqual([
+        expect.objectContaining({
+          kind: 'defense',
+          value: 25,
+          remainingTurns: 3,
+        }),
+      ]);
+    });
+
+    it('[SVA-VAL-4] reveals a weak point on every enemy for 3 turns', async () => {
+      const steps = await analysing();
+
+      expect(
+        named(steps, 'weak_point_revealed', 'Omniscience Tactique'),
+      ).toEqual([
+        expect.objectContaining({
+          card: expect.objectContaining({ id: 'prey' }),
+          remainingTurns: 3,
+        }),
+      ]);
+    });
+
+    it('[SVA-VAL-4] hits each of them 15% harder', async () => {
+      expect(skillNamed(OMNISCIENCE).effect.weakPoint.revealerDamageRate).toBe(
+        0.15,
+      );
+    });
+
+    it('[SVA-VAL-5] shatters crystals of air on the neighbors of her target', async () => {
       const steps = await fight(
         [swan],
         [unfreezable('left'), unfreezable('right')],
       );
-      const crystals = named(steps, 'attack', CRYSTALS)[0];
 
-      expect(crystals.damages.map((d) => d.defender.name)).toEqual(['right']);
-    });
-  });
-
-  describe('dying during the ultimate', () => {
-    let steps: any[];
-
-    beforeEach(async () => {
-      steps = await fight(
-        [focused],
-        [card('brute', { attack: 470, element: 'PHYSICAL' })],
-      );
+      expect(named(steps, 'attack', CRYSTALS)[0].damages).toEqual([
+        expect.objectContaining({
+          defender: expect.objectContaining({ id: 'right' }),
+          kind: ['AIR'],
+        }),
+      ]);
     });
 
-    it('leaves the weak points she revealed for good', () => {
-      const death = { kind: 'status_change', status: 'dead' };
+    it('[SVA-VAL-5] strikes the neighbors for 60% of her attack', async () => {
+      expect(skillNamed(CRYSTALS).damages).toEqual([
+        { type: 'AIR', rate: 0.6 },
+      ]);
+    });
 
-      expect(after(steps, death)).toEqual({
+    it('[SVA-VAL-6] leaves the weak points she revealed for good when she dies in it', async () => {
+      const steps = await fight([focused], [dummy('brute', { attack: 470 })]);
+
+      expect(
+        after(steps, { kind: 'status_change', status: 'dead' }),
+      ).toMatchObject({
         kind: 'weak_point_revealed',
         name: 'Omniscience Tactique',
-        source: expect.objectContaining({ name: 'Svana' }),
-        card: expect.objectContaining({ name: 'brute' }),
+        card: expect.objectContaining({ id: 'brute' }),
       });
+    });
+
+    it('[SVA-VAL-6] keeps them without a duration', async () => {
+      const steps = await fight([focused], [dummy('brute', { attack: 470 })]);
+
+      expect(
+        after(steps, { kind: 'status_change', status: 'dead' })
+          .remainingTurns ?? null,
+      ).toBeNull();
+    });
+
+    it('[SVA-VAL-6] makes them hit 25% harder', async () => {
+      expect(skillNamed(SWAN_LEGACY).rate).toBe(0.25);
     });
   });
 });

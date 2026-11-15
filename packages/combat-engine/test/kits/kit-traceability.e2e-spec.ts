@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -8,20 +8,6 @@ const read = (path: string) =>
   exists(path) ? readFileSync(join(root, path), 'utf-8') : '';
 
 const roster: any[] = JSON.parse(read('samples/cards.json'));
-
-// Roster cards whose Notion kit is not exported yet. Exporting a kit takes
-// its card off this list: a card outside it must come with its kit.
-const PENDING_KITS = [
-  'arionis',
-  'kaelion',
-  'kaito',
-  'aegis',
-  'scythra',
-  'selkhet',
-  'vespera',
-  'svana',
-  'hyoki',
-];
 
 const kitPath = (id: string) => `samples/kits/${id}.md`;
 const specPath = (id: string) => `test/fight/${id}-kit.e2e-spec.ts`;
@@ -35,19 +21,28 @@ const matches = (text: string, pattern: RegExp) =>
 const missingFrom = (expected: string[], actual: string[]) =>
   expected.filter((item) => !actual.includes(item));
 
-function kitStats(kit: string) {
-  const block = kit.match(/```json kit-stats\n([\s\S]*?)\n```/);
+function jsonBlock(kit: string, name: string) {
+  const block = kit.match(
+    new RegExp(`\`\`\`json ${name}\\n([\\s\\S]*?)\\n\`\`\``),
+  );
   return block ? JSON.parse(block[1]) : undefined;
 }
+
+// Notion stats the engine does not follow yet, with the engine values
+const statGaps = (kit: string) => jsonBlock(kit, 'kit-stat-gaps') ?? {};
 
 function cardStats(card: any) {
   const { attack, defense, health, speed, agility, accuracy } = card;
   const { criticalChance, regeneration, resistance, element } = card;
-  return {
+  const stats = {
     ...{ attack, defense, health, speed, agility, accuracy },
     ...{ criticalChance, regeneration, resistance, element },
     specialEnergy: card.skills.special.energy,
   };
+  // A stat the card leaves out reads null, as JSON can write it
+  return Object.fromEntries(
+    Object.entries(stats).map(([stat, value]) => [stat, value ?? null]),
+  );
 }
 
 function skillNames(card: any): string[] {
@@ -59,26 +54,22 @@ function skillNames(card: any): string[] {
   ];
 }
 
-const traced = roster.filter((card) => !PENDING_KITS.includes(card.id));
-const pending = roster.filter((card) => PENDING_KITS.includes(card.id));
-
 describe('Kit traceability', () => {
-  it('lists only roster cards as pending', () => {
+  // A kit exported ahead of its card would otherwise sit there untested
+  it('exports kits for roster cards only', () => {
+    const kits = readdirSync(join(root, 'samples/kits')).map((file) =>
+      file.replace(/\.md$/, ''),
+    );
+
     expect(
       missingFrom(
-        PENDING_KITS,
+        kits,
         roster.map((card) => card.id),
       ),
     ).toEqual([]);
   });
 
-  describe.each(pending)('$id, kit pending', ({ id }) => {
-    it('has no exported kit yet, or leaves PENDING_KITS', () => {
-      expect(exists(kitPath(id))).toBe(false);
-    });
-  });
-
-  describe.each(traced)('$id', (card) => {
+  describe.each(roster)('$id', (card) => {
     const kit = read(kitPath(card.id));
     const spec = read(specPath(card.id));
     const kitIds = matches(kit, EFFECT_ID);
@@ -91,8 +82,20 @@ describe('Kit traceability', () => {
       expect(exists(specPath(card.id))).toBe(true);
     });
 
-    it('carries the stats of its kit', () => {
-      expect(cardStats(card)).toEqual(kitStats(kit));
+    it('carries the stats of its kit, documented gaps aside', () => {
+      expect(cardStats(card)).toEqual({
+        ...jsonBlock(kit, 'kit-stats'),
+        ...statGaps(kit),
+      });
+    });
+
+    it('documents as gaps only stats that differ from its kit', () => {
+      const notion = jsonBlock(kit, 'kit-stats') ?? {};
+      const gaps = statGaps(kit);
+
+      expect(
+        Object.keys(gaps).filter((stat) => gaps[stat] === notion[stat]),
+      ).toEqual([]);
     });
 
     it('gives each effect of its kit its own id', () => {
