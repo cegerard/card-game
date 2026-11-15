@@ -27,24 +27,14 @@ et compare les caractéristiques ci-dessous à `samples/cards.json`.
 
 Le moteur ne suit pas encore ces points de la fiche ; ils ne portent pas d'identifiant et ne sont pas testés :
 
-- Poings de Braise : Notion pose une brûlure de niveau 1 (deux tours) ; le moteur pose une brûlure de niveau 2 (trois tours).
-- Rugissement solaire : Notion inflige des dégâts élémentaires de Feu ; le moteur inflige des dégâts physiques.
-- Rugissement solaire : Notion pose une brûlure grave de niveau 3 ; le moteur pose une brûlure de niveau 2.
-- Héritage du Lion : Notion rend 33 % des PV quand le responsable tombe ; le moteur soigne 33 % de l'Attaque.
-
-Valeurs actuelles du moteur pour les caractéristiques que `cards.json` ne suit pas encore :
-
-```json kit-stat-gaps
-{
-  "regeneration": null,
-  "resistance": null
-}
-```
+- Poings de Braise : Notion fait durer la brûlure de niveau 1 deux tours ; le moteur lie la durée au niveau, un seul tour au niveau 1.
+- Rugissement solaire : Notion fait durer la brûlure de niveau 3 deux tours ; le moteur lie la durée au niveau, cinq tours au niveau 3.
 
 ## Attaque : Poings de Braise
 
 - [ARI-ATK-1] Inflige 80 % d'Attaque en dégâts physiques et 40 % d'Attaque en dégâts élémentaires (Feu).
 - [ARI-ATK-2] Chaque coup laisse une brûlure qui inflige 10 % de l'Attaque par tour.
+- [ARI-ATK-3] La brûlure est légère (niveau 1).
 
 ## Compétence spéciale : Rugissement solaire
 
@@ -52,6 +42,8 @@ Valeurs actuelles du moteur pour les caractéristiques que `cards.json` ne suit 
 - [ARI-SPE-2] Pose une brûlure qui ajoute 30 % de l'Attaque par tour.
 - [ARI-SPE-3] Inspiration : +5 % d'Attaque et +5 % de Défense aux alliés jusqu'à la fin de leur prochain tour.
 - [ARI-SPE-4] Si son frère cadet (Kaelion) est présent, l'effet de soutien est multiplié par deux.
+- [ARI-SPE-5] Les dégâts sont élémentaires (Feu).
+- [ARI-SPE-6] La brûlure est grave (niveau 3).
 
 ## Chaleur étouffante (passif)
 
@@ -73,3 +65,4 @@ Valeurs actuelles du moteur pour les caractéristiques que `cards.json` ne suit 
 - [ARI-HER-2] Buff héroïque : +40 % d'Attaque jusqu'à la fin de l'héritage.
 - [ARI-HER-3] Vengeance : Arionis ne cible plus que le responsable de la mort de son frère.
 - [ARI-HER-4] Si le responsable est vaincu, l'héritage s'arrête : la brûlure et le bonus d'Attaque se dissipent, et Arionis reprend son ciblage.
+- [ARI-HER-5] Arionis récupère alors 33 % de ses PV.
