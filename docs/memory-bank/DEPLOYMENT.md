@@ -2,7 +2,7 @@
 
 ## CI/CD
 
-- **CI** (`.github/workflows/node.js.yml`, push and PR on `main`): memory-bank size check, install, `pnpm build:all`, `pnpm lint:all`, `pnpm test:all`, `pnpm test:e2e:engine`
+- **CI** (`.github/workflows/node.js.yml`, push and PR on `main`): job `build` runs memory-bank size check, install, `pnpm build:all`, `pnpm lint:all`, `pnpm test:all`, `pnpm test:e2e:engine`; job `gasha-e2e` installs Chromium and runs `pnpm test:e2e:gasha`
 - **Deploy** (`.github/workflows/heroku.yml`, push on `main`): `akhileshns/heroku-deploy` builds the root `Dockerfile`, pushes it to the Heroku Container Registry and releases it
 
 ## Container

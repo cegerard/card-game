@@ -17,12 +17,13 @@
     "test": "pnpm test:all",
     "test:engine": "pnpm --filter combat-engine test",
     "test:e2e:engine": "pnpm --filter combat-engine test:e2e",
+    "test:e2e:gasha": "pnpm --filter gasha test:e2e",
     "test:all": "pnpm -r test",
     "lint": "pnpm lint:all",
     "lint:engine": "pnpm --filter combat-engine lint",
     "lint:all": "pnpm -r lint",
     "check:memory-bank": "bash scripts/check-memory-bank-size.sh",
-    "verify": "pnpm check:memory-bank && pnpm check && pnpm build:all && pnpm lint:all && pnpm test:all && pnpm test:e2e:engine",
+    "verify": "pnpm check:memory-bank && pnpm check && pnpm build:all && pnpm lint:all && pnpm test:all && pnpm test:e2e:engine && pnpm test:e2e:gasha",
     "replayer": "npx serve clients/fight-replayer"
   },
   "devDependencies": {

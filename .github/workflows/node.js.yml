@@ -37,3 +37,32 @@ jobs:
       - run: pnpm lint:all
       - run: pnpm test:all
       - run: pnpm test:e2e:engine
+
+  gasha-e2e:
+    runs-on: ubuntu-latest
+
+    env:
+      # The dev server needs it to start; every /fight call is answered from
+      # clients/gasha/tests/fixtures, so no engine runs.
+      PUBLIC_COMBAT_ENGINE_URL: http://localhost:3000
+
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+      - name: Use Node.js 26.x
+        uses: actions/setup-node@v6
+        with:
+          node-version: 26.x
+          cache: 'pnpm'
+      - run: pnpm install
+      - name: Install Chromium for Playwright
+        run: pnpm --filter gasha exec playwright install --with-deps chromium
+      - run: pnpm test:e2e:gasha
+      - name: Upload the Playwright traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gasha-playwright-results
+          path: clients/gasha/test-results
+          retention-days: 7

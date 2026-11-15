@@ -5,7 +5,7 @@ Mechanics are described once, in [backend/ARCHITECTURE.md](backend/ARCHITECTURE.
 ## Root
 
 ```
-card-game/                  # pnpm 11 workspace
+card-game/                  # pnpm workspace
 ├── packages/
 │   ├── combat-engine/      # NestJS fight simulation backend
 │   └── shared-types/       # Shared TypeScript types (stub)
@@ -106,7 +106,7 @@ fight-simulator/
 ├── survived-reactions.ts       # survivedReactions(), fightSurvivedReactor(): `survived` skills of a SURVIVE holder, shared by every attack path
 ├── concealment-steps.ts, stance-steps.ts, execution-steps.ts  # Step helpers
 ├── card-selectors/         # card-selector.ts, player-by-player.ts, speed-weighted-card-pool.ts
-└── @types/                 # fight-result, fight-start-report, step (StepKind), winner-report, action/attack/healing/buff/debuff/state-effect/damage/status-change reports, and one report file per mechanic (shield, mark, weak-point, regeneration, protection, transformation, concealment, special-stance, survived, damage-mitigated, buff-transferred, executed, buff/effect-removed, control)
+└── @types/                 # step.ts (StepKind), fight-result, fight-start-report, winner-report, then one report file per step family or mechanic
 ```
 
 ### `targeting-card-strategies/`
@@ -147,28 +147,28 @@ Unit tests next to the source in `__tests__/`; e2e in `packages/combat-engine/te
 
 ### Configuration
 
-`packages/combat-engine/`: `package.json`, `tsconfig.json`, `tsconfig.build.json`, `nest-cli.json`, `eslint.config.js`, `.prettierrc`. Root: `Dockerfile`, `.github/workflows/`, `AGENTS.md` (single agent entry point, `CLAUDE.md` is a symlink to it), `.devcontainer/devcontainer.json`, `.vscode/settings.json`, `.claude/` (commands, templates).
+`packages/combat-engine/`: `package.json`, `tsconfig(.build).json`, `nest-cli.json`, `eslint.config.js`, `.prettierrc`. Root: `AGENTS.md` (single agent entry point, `CLAUDE.md` symlinks to it), `.devcontainer/`, `.vscode/settings.json`.
 
 ## Gasha Client (`clients/gasha/src/`)
 
-SvelteKit 2 + Phaser 3, Web and Phaser renderers.
+SvelteKit 2 + Phaser, Web and Phaser renderers.
 
 ```
-├── routes/
-│   ├── +page.svelte        # Home: links to Arcade Mode and Deck Builder
-│   ├── arcade/+page.svelte # Fetch fight (selectedDeckCards), mount renderer, handle outcome
-│   └── deck/+page.svelte   # Deck Builder: pick exactly 5 characters
+├── routes/                 # +page (menu), arcade/ (fetch fight, renderer, outcome, XP), deck/ (Deck Builder)
 └── lib/
-    ├── arcade/             # session.ts (store: phase, currentLevel, fightResult), levels.ts, types.ts
-    ├── deck/               # roster.ts (CHARACTER_ROSTER, 8 cards), deck-store.ts (selectedCardIds, selectedDeckCards, toggleCard, DECK_SIZE=5), RosterCard.svelte
-    ├── combat/             # engine-client.ts (fetchFight), outcome.ts, rendererMode.ts, combatStats.ts, CombatScene.ts, PhaserRenderer.svelte, CombatReportRenderer.svelte
-    ├── components/         # VictoryScreen, LevelIndicator, GameOverScreen
-    └── design-system/      # tokens.ts/.css, primitives/ (Button, Panel, Badge, StatBar, Overlay), composites/ (CardHeader, CharacterCard)
+    ├── arcade/             # session.ts (phase, currentLevel, fightResult), levels.ts (ARCADE_LEVELS, 5), types.ts
+    ├── deck/               # roster.ts (CHARACTER_ROSTER), deck-store.ts (selectedDeckCards: XP applied, then toCombatConfig), RosterCard.svelte
+    ├── combat/             # engine-client.ts (fetchFight), outcome.ts, rendererMode.ts, combatStats.ts, CombatScene.ts, PhaserRenderer, CombatReportRenderer
+    ├── experience/         # attribute-experience.ts (XP per fight), apply-experience.ts (XP → effective stats)
+    ├── progression/        # progression-store.ts + local-storage-repository.ts (XP and tier), fuse-card.ts, convertible-experience.ts
+    ├── score/              # combat-power.ts (team power, difficulty), global-score.ts
+    ├── components/         # VictoryScreen, GameOverScreen, LevelIndicator, XpGainList
+    └── design-system/      # tokens, primitives/, composites/
 ```
 
-- **Renderers**: `getRendererMode()` reads `?mode=`; default `web` → `CombatReportRenderer` (mobile-portrait report from `combatStats.ts`, needs `playerCardIds` to split teams); `?mode=phaser` → `PhaserRenderer` (Phaser lazy-imported; SSR falls back to `'phaser'`).
-- **Navigation**: `<a href role="button">` rather than `goto()` (no JS needed).
-- **Deck**: selection lives in module-scoped stores, kept across client-side navigation but not across a hard reload (no `localStorage`). `toggleCard()` enforces the 5-card cap; default deck = first 5 roster ids.
+- **Renderers**: `?mode=phaser` → `PhaserRenderer` (lazy-imported, 300 ms a step, ends by itself); default `web` → `CombatReportRenderer` (waits for Continue, needs `playerCardIds` to split teams).
+- **State**: the deck lives in module stores (lost on a hard reload, default = first 5 roster ids); the progression lives in `localStorage` (`card-game:progression:v1`).
+- **Tests**: Vitest in `src/**/__tests__`; Playwright in `tests/` (`pnpm test:e2e:gasha`, port 5179, Chromium needed: `pnpm --filter gasha exec playwright install chromium`). `tests/helpers/arcade.ts` answers `/fight` with `tests/fixtures/level-<n>-<victory|defeat>.json`, real reports recorded by `pnpm --filter gasha record:fights` against a running engine. `packages/combat-engine/test/fight/gasha-contract.e2e-spec.ts` fights every roster card and level through `toCombatConfig`.
 
 ## Fight Replayer (`clients/fight-replayer/`)
 

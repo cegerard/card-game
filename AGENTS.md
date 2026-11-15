@@ -59,7 +59,7 @@ pnpm TypeScript monorepo for a card game.
 
 ## Validation
 
-Before considering a task complete, run `pnpm verify` from the root (memory-bank size, check, build, lint, tests, engine e2e). If a part cannot be run, report exactly which command was skipped and why.
+Before considering a task complete, run `pnpm verify` from the root (memory-bank size, check, build, lint, tests, engine e2e, gasha Playwright). If a part cannot be run, report exactly which command was skipped and why.
 
 Useful commands (root): `pnpm dev`, `pnpm check`, `pnpm test`, `pnpm lint`, `pnpm build`, `pnpm verify`, `pnpm --filter combat-engine test` / `lint` (or `npm test` / `npm run lint` from `packages/combat-engine/`).
 
