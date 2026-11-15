@@ -1,300 +1,429 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import request from 'supertest';
-import { AppModule } from '../../src/app.module';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { jest } from '@jest/globals';
+import {
+  actionsOf,
+  dummy,
+  named,
+  ofKind,
+  rosterCard,
+  useFight,
+} from '../helpers/kit';
 
-const __dirname = join(fileURLToPath(import.meta.url), '..');
-
-const vespera = JSON.parse(
-  readFileSync(join(__dirname, '../../samples/cards.json'), 'utf-8'),
-).find((card) => card.id === 'vespera');
-
-const NUEE = 'Nuée de Cristaux';
+const STING = 'Dard du Crépuscule';
+const SWARM = 'Nuée de Cristaux';
+const CARAPACE = 'Carapace de Sable';
+const INSTINCT = 'Instinct de Guêpe';
 const DANCE = 'Danse du Désert';
 const COUNTER = 'Danse du Désert - Dard du Crépuscule';
 const QUEEN = 'Reine du Crépuscule';
 const ZONE = 'Reine du Crépuscule - Zone toxique';
 const EXPLOSION = 'Reine du Crépuscule - Explosion de venin';
 
-const card = (id: string, overrides: Record<string, unknown> = {}) => ({
-  id,
-  name: id,
-  attack: 0,
-  defense: 0,
-  health: 10000,
-  speed: 50,
-  agility: 0,
-  accuracy: 9999,
-  criticalChance: 0,
-  element: 'WATER',
-  skills: {
-    special: {
-      kind: 'ATTACK',
-      name: 'Special',
-      damages: [{ type: 'PHYSICAL', rate: 1 }],
-      energy: 9999,
-      targetingStrategy: 'position-based',
-    },
-    simpleAttack: {
-      name: 'Attack',
-      damages: [{ type: 'PHYSICAL', rate: 1 }],
-      targetingStrategy: 'position-based',
-    },
-    others: [],
-  },
-  behaviors: { dodge: 'simple-dodge' },
-  ...overrides,
-});
+const vespera = rosterCard('vespera');
 
-// Without criticals every hit lands the same from one run to the next, and
-// her opponents carry no resistance to roll.
-const wasp = { ...vespera, criticalChance: 0 };
-
-// The dance rolls a chance; the cornered queen must not dodge by luck.
-const queen = {
-  ...wasp,
-  skills: {
-    ...wasp.skills,
-    others: wasp.skills.others.filter((skill) => skill.name !== DANCE),
-  },
-};
+const poisonsOn = (steps: any[], id: string) =>
+  ofKind(steps, 'status_change').filter(
+    (s) => s.status === 'poison' && s.card.id === id,
+  );
+const poisonTicksOn = (steps: any[], id: string) =>
+  steps.filter(
+    (s) => s.kind === 'state_effect' && s.type === 'poison' && s.card.id === id,
+  );
+const from = (steps: any[], kind: string) =>
+  steps.slice(steps.findIndex((s) => s.kind === kind));
+const foeStrikes = (steps: any[], id: string) =>
+  steps.filter((s) => s.kind === 'attack' && s.attacker.id === id);
 
 describe('Vespera full kit', () => {
-  let app: INestApplication;
+  const fight = useFight();
 
-  const fight = async (player1: object[], player2: object[]) => {
-    const response = await request(app.getHttpServer())
-      .post('/fight')
-      .send({
-        cardSelectorStrategy: 'player-by-player',
-        player1: { name: 'P1', deck: player1 },
-        player2: { name: 'P2', deck: player2 },
-      })
-      .expect(200);
-    return Object.values(response.body) as any[];
-  };
-
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-    app = moduleFixture.createNestApplication();
-    app.useLogger(false);
-    await app.init();
+  // Her dance and its mirages roll: a test that needs them says so
+  const rolling = (roll: number) =>
+    jest.spyOn(Math, 'random').mockReturnValue(roll);
+  beforeEach(() => {
+    rolling(0.99);
   });
+  const alone = (overrides = {}) =>
+    fight([vespera], [dummy('foe', { attack: 10, ...overrides })]);
+  // 220 - 40 defense = 180 a hit: 300, then 150, under half of 480
+  const cornered = () =>
+    fight(
+      [vespera],
+      [dummy('brute', { attack: 220, speed: 10, agility: 50, accuracy: 100 })],
+    );
 
-  afterEach(async () => {
-    await app.close();
-  });
+  describe(STING, () => {
+    // 64 physical + 48 earth
+    it('[VES-ATK-1] strikes for 80% physical and 60% earth', async () => {
+      const steps = await alone();
 
-  describe('stinging with Dard du Crépuscule', () => {
-    let steps: any[];
-
-    beforeEach(async () => {
-      steps = await fight([wasp], [card('prey')]);
+      expect(named(steps, 'attack', STING)[0].damages[0]).toMatchObject({
+        damage: 112,
+        kind: ['PHYSICAL', 'EARTH'],
+      });
     });
 
-    it('adds one Venin Sableux stack per sting up to three', () => {
-      const stacks = steps
-        .filter((s) => s.kind === 'status_change' && s.status === 'poison')
-        .map((s) => s.stacks);
+    it('[VES-ATK-2] poisons for 3% of the target max health a turn, for 3 turns', async () => {
+      const steps = await alone();
 
-      expect(stacks.slice(0, 4)).toEqual([1, 2, 3, 3]);
+      expect(poisonTicksOn(steps, 'foe')[0]).toMatchObject({
+        damage: 300,
+        remainingTurns: 2,
+      });
     });
 
-    it('doubles the poison tick at each stack (3%, 6%, 12%)', () => {
-      const ticks = steps
-        .filter((s) => s.kind === 'state_effect' && s.type === 'poison')
-        .map((s) => s.damage);
+    it('[VES-ATK-3] adds one stack a sting, up to three', async () => {
+      const steps = await alone();
 
-      expect(ticks.slice(0, 3)).toEqual([300, 600, 1200]);
-    });
-  });
-
-  describe('casting Nuée de Cristaux on an evasive target', () => {
-    let steps: any[];
-
-    beforeEach(async () => {
-      steps = await fight([wasp], [card('ghost', { agility: 9999 })]);
+      expect(
+        poisonsOn(steps, 'foe')
+          .slice(0, 4)
+          .map((s) => s.stacks),
+      ).toEqual([1, 2, 3, 3]);
     });
 
-    it('cannot be dodged', () => {
-      const dodges = steps
-        .filter((s) => s.name === NUEE)
-        .flatMap((s) => s.damages.map((d) => d.dodge));
+    it('[VES-ATK-3] doubles the tick at each stack: 3%, 6%, 12%', async () => {
+      const steps = await alone();
 
-      expect(dodges).toEqual(expect.not.arrayContaining([true]));
-    });
-
-    it('lays two Venin Sableux stacks at once', () => {
-      const poison = steps.find(
-        (s) => s.kind === 'status_change' && s.status === 'poison',
-      );
-
-      expect(poison.stacks).toBe(2);
+      expect(
+        poisonTicksOn(steps, 'foe')
+          .slice(0, 3)
+          .map((s) => s.damage),
+      ).toEqual([300, 600, 1200]);
     });
   });
 
-  describe('dancing out of reach', () => {
-    let steps: any[];
+  describe(SWARM, () => {
+    // Second in her deck, she aims at b, between a and c
+    const swarming = () =>
+      fight(
+        [dummy('ally'), vespera],
+        ['a', 'b', 'c', 'd'].map((id) => dummy(id, { defense: 100 })),
+      );
 
-    const named = (name: string) => steps.filter((s) => s.name === name);
+    it('[VES-SPE-1] is cast on her fifth action, once 40 energy are charged', async () => {
+      const steps = await alone();
 
-    beforeEach(async () => {
-      steps = await fight(
-        [wasp],
-        [card('brute', { attack: 100, accuracy: 50, health: 100000 })],
+      expect(actionsOf(steps, 'vespera').indexOf(SWARM)).toBe(4);
+    });
+
+    it('[VES-SPE-1] strikes up to three adjacent enemies', async () => {
+      const steps = await swarming();
+
+      expect(
+        named(steps, 'special_attack', SWARM)[0].damages.map(
+          (d) => d.defender.id,
+        ),
+      ).toEqual(['a', 'b', 'c']);
+    });
+
+    it('[VES-SPE-2] strikes for 100% physical', async () => {
+      const steps = await alone();
+
+      expect(named(steps, 'special_attack', SWARM)[0].damages[0]).toMatchObject(
+        {
+          damage: 80,
+          kind: ['PHYSICAL'],
+        },
       );
     });
 
-    it('piles Carapace de Sable up to five stacks of defense and agility', () => {
-      expect(named('Carapace de Sable')).toHaveLength(10);
+    it('[VES-SPE-3] lays two stacks at once', async () => {
+      const steps = await alone({ agility: 9999 });
+
+      expect(poisonsOn(steps, 'foe')[0].stacks).toBe(2);
     });
 
-    it('opens Danse du Désert', () => {
-      expect(named('danse-du-desert').map((s) => s.kind)).toContain(
-        'stance_started',
+    // 80 - 100 x 0.7
+    it('[VES-SPE-4] ignores 30% of the enemy defense', async () => {
+      const steps = await swarming();
+
+      expect(named(steps, 'special_attack', SWARM)[0].damages[0].damage).toBe(
+        10,
       );
     });
 
-    it('dances with more agility', () => {
-      const [dance] = named(DANCE);
+    it('[VES-SPE-4] cannot be dodged', async () => {
+      const steps = await alone({ agility: 9999 });
 
-      expect(dance.alterations[0].kind).toBe('agility');
-    });
-
-    it('stings back the attacker it dodged while dancing', () => {
-      expect(named(COUNTER).length).toBeGreaterThan(0);
+      expect(
+        named(steps, 'special_attack', SWARM)[0].damages.map((d) => d.dodge),
+      ).toEqual([false]);
     });
   });
 
-  describe('when cornered', () => {
-    let steps: any[];
+  describe(CARAPACE, () => {
+    // An attacker her 75 agility outruns
+    const dodging = () =>
+      fight([vespera], [dummy('foe', { attack: 100, accuracy: 50 })]);
 
-    const named = (name: string) => steps.filter((s) => s.name === name);
-    const transformation = () =>
-      steps.findIndex((s) => s.kind === 'transformation_started');
+    it('[VES-CAR-1] hardens her defense by 8% and her dodge by 3% at each dodge', async () => {
+      const steps = await dodging();
 
-    beforeEach(async () => {
-      steps = await fight(
-        [queen],
-        [card('brute', { attack: 220, speed: 10, health: 100000 })],
+      expect(
+        named(steps, 'buff', CARAPACE)
+          .slice(0, 2)
+          .map((s) => s.alterations[0]),
+      ).toEqual([
+        expect.objectContaining({ kind: 'defense', value: 3.2 }),
+        expect.objectContaining({ kind: 'agility', value: 2.25 }),
+      ]);
+    });
+
+    it('[VES-CAR-1] piles five charges at most', async () => {
+      const steps = await dodging();
+
+      expect(named(steps, 'buff', CARAPACE)).toHaveLength(10);
+    });
+
+    it('[VES-CAR-2] drops every charge at the first hit she takes', async () => {
+      const steps = await cornered();
+
+      expect(ofKind(steps, 'buff_removed')[0].eventName).toBe(
+        'damage-taken-vespera',
       );
     });
+  });
 
-    it('turns into the Reine du Crépuscule under half health', () => {
-      expect(steps[transformation()].name).toBe(QUEEN);
+  describe(INSTINCT, () => {
+    // 76 accuracy outruns her 75 agility, not 75 + 2% once the foe is poisoned
+    it('[VES-INS-1] dodges better for each poisoned enemy', async () => {
+      const steps = await alone({ accuracy: 76 });
+
+      expect(foeStrikes(steps, 'foe')[0].damages[0].dodge).toBe(true);
     });
 
-    it('opens the queen and untouchable stances', () => {
-      const stances = steps
-        .filter((s) => s.kind === 'stance_started')
-        .map((s) => s.name);
-
-      expect(stances).toEqual(['reine-du-crepuscule', 'intouchable']);
-    });
-
-    it('carries every Venin Sableux to three stacks', () => {
-      const surge = steps.find(
-        (s, i) => i > transformation() && s.kind === 'status_change',
+    it('[VES-INS-1] needs the poison: without it the same foe hits her', async () => {
+      const unpoisoned = rosterCard('vespera', {
+        skills: {
+          ...vespera.skills,
+          simpleAttack: { ...vespera.skills.simpleAttack, effects: [] },
+        },
+      });
+      const steps = await fight(
+        [unpoisoned],
+        [dummy('foe', { attack: 10, accuracy: 76 })],
       );
 
-      expect(surge).toEqual(
-        expect.objectContaining({ status: 'poison', stacks: 3 }),
-      );
+      expect(foeStrikes(steps, 'foe')[0].damages[0].dodge).toBe(false);
     });
 
-    it('doubles the surged poison damage', () => {
-      const tick = steps.find(
-        (s, i) => i > transformation() && s.kind === 'state_effect',
-      );
-
-      expect(tick.damage).toBe(24000);
-    });
-
-    it('dodges the first attack once untouchable', () => {
-      const strike = steps.find(
-        (s, i) => i > transformation() && s.attacker?.id === 'brute',
+    // The weakling lasts two stings, while the prey hurts her 160 a hit
+    it('[VES-INS-2] heals her 15% of her max health when a poisoned enemy falls', async () => {
+      const steps = await fight(
+        [vespera],
+        [dummy('weakling', { health: 300 }), dummy('prey', { attack: 200 })],
       );
 
-      expect(strike.damages[0].dodge).toBe(true);
+      expect(named(steps, 'healing', INSTINCT)[0].heal[0].healed).toBe(72);
+    });
+  });
+
+  describe(DANCE, () => {
+    it('[VES-DAN-1] sharpens her dodge by 40% for 2 turns', async () => {
+      rolling(0.2);
+      const steps = await alone();
+
+      expect(named(steps, 'buff', DANCE)[0].alterations).toEqual([
+        expect.objectContaining({
+          kind: 'agility',
+          value: 30,
+          remainingTurns: 2,
+        }),
+      ]);
     });
 
-    it('cuts the agility of the enemies', () => {
-      const [cut] = named(QUEEN).filter((s) => s.kind === 'debuff');
+    it('[VES-DAN-2] stings back the attacker she dodged while dancing', async () => {
+      rolling(0.2);
+      const steps = await alone();
 
-      expect(cut.alterations[0].kind).toBe('agility');
+      expect(named(steps, 'attack', COUNTER)[0].damages[0]).toMatchObject({
+        defender: expect.objectContaining({ id: 'foe' }),
+        damage: 112,
+      });
     });
 
-    it('takes 5% of their max health each turn with Zone toxique', () => {
-      expect(named(ZONE)[0].damages[0].damage).toBe(5000);
+    it('[VES-DAN-3] makes an attack miss her on a roll under 50%', async () => {
+      rolling(0.3);
+      const steps = await alone();
+
+      expect(
+        foeStrikes(from(steps, 'stance_started'), 'foe')[0].damages[0].dodge,
+      ).toBe(true);
     });
 
-    it('drops Carapace de Sable at the first hit taken', () => {
-      const removed = steps.find((s) => s.kind === 'buff_removed');
+    // At 60%, the dance opens on her seventh turn, when its chance reaches 65%
+    it('[VES-DAN-3] lets an attack land on a roll of 50% or more', async () => {
+      rolling(0.6);
+      const steps = await alone();
 
-      expect(removed.eventName).toBe('damage-taken-vespera');
+      expect(
+        foeStrikes(from(steps, 'stance_started'), 'foe')[0].damages[0].dodge,
+      ).toBe(false);
     });
 
-    it('bursts five Venin Sableux stacks on her death', () => {
+    it('[VES-DAN-4] opens on her third turn at 25%', async () => {
+      rolling(0.2);
+      const steps = await alone();
+      const opened = steps.findIndex((s) => s.kind === 'stance_started');
+
+      expect(named(steps.slice(0, opened), 'attack', STING)).toHaveLength(3);
+    });
+
+    it('[VES-DAN-4] gains 10% at each turn it does not open', async () => {
+      rolling(0.3);
+      const steps = await alone();
+      const opened = steps.findIndex((s) => s.kind === 'stance_started');
+
+      expect(named(steps.slice(0, opened), 'attack', STING)).toHaveLength(4);
+    });
+
+    it('[VES-DAN-4] never opens before her third turn', async () => {
+      rolling(0);
+      const steps = await alone();
+      const opened = steps.findIndex((s) => s.kind === 'stance_started');
+
+      expect(named(steps.slice(0, opened), 'attack', STING)).toHaveLength(3);
+    });
+  });
+
+  describe(QUEEN, () => {
+    it('[VES-REI-1] rises once under half her health, for 4 turns', async () => {
+      const steps = await cornered();
+
+      expect(named(steps, 'transformation_started', QUEEN)).toEqual([
+        expect.objectContaining({ remainingTurns: 4 }),
+      ]);
+    });
+
+    it('[VES-REI-1] rises on the blow that drops her under half', async () => {
+      const steps = await cornered();
+      const risen = steps.findIndex((s) => s.kind === 'transformation_started');
+
+      expect(steps[risen - 1].damages[0].remainingHealth).toBe(150);
+    });
+
+    it('[VES-REI-2] makes her untouchable for her first turn', async () => {
+      const steps = await cornered();
+
+      expect(
+        foeStrikes(from(steps, 'transformation_started'), 'brute')[0].damages[0]
+          .dodge,
+      ).toBe(true);
+    });
+
+    it('[VES-REI-2] lasts one turn', async () => {
+      const steps = await cornered();
+
+      expect(
+        ofKind(steps, 'stance_started').find((s) => s.name === 'intouchable')
+          .remainingTurns,
+      ).toBe(1);
+    });
+
+    // She evades every attack meanwhile: no control could reach her to refuse
+    it('[VES-REI-2] grants her an immunity to control', async () => {
+      const queen = vespera.skills.others.find((s) => s.name === QUEEN);
+
+      expect(
+        queen.stanceActivations.find((s) => s.name === 'intouchable'),
+      ).toMatchObject({ immunities: ['control'], evasionChance: 1 });
+    });
+
+    it('[VES-REI-3] carries every poison on the board to three stacks', async () => {
+      const steps = await cornered();
+
+      expect(
+        poisonsOn(from(steps, 'transformation_started'), 'brute')[0].stacks,
+      ).toBe(3);
+    });
+
+    // 3 stacks: 3% x 4 = 12% of 10000, doubled
+    it('[VES-REI-3] doubles their damage', async () => {
+      const steps = await cornered();
+
+      expect(
+        poisonTicksOn(from(steps, 'transformation_started'), 'brute')[0].damage,
+      ).toBe(2400);
+    });
+
+    it('[VES-REI-4] takes 5% of every enemy max health a turn', async () => {
+      const steps = await cornered();
+
+      expect(named(steps, 'attack', ZONE)[0].damages[0].damage).toBe(500);
+    });
+
+    it('[VES-REI-4] lowers the dodge of the enemies by 20%', async () => {
+      const steps = await cornered();
+
+      expect(named(steps, 'debuff', QUEEN)[0].alterations).toEqual([
+        expect.objectContaining({
+          kind: 'agility',
+          value: 10,
+          remainingTurns: 4,
+        }),
+      ]);
+    });
+
+    it('[VES-REI-5] poisons every enemy with five stacks when she falls', async () => {
+      const steps = await cornered();
       const death = steps.findIndex(
         (s) => s.kind === 'status_change' && s.status === 'dead',
       );
 
-      expect(steps[death + 1]).toEqual(
-        expect.objectContaining({ status: 'poison', stacks: 5 }),
-      );
+      expect(steps[death + 1]).toMatchObject({ status: 'poison', stacks: 5 });
     });
 
-    it('blinds the enemies for the rest of the fight', () => {
-      const [blind] = named(EXPLOSION);
+    it('[VES-REI-5] goes through a poison immunity', async () => {
+      const explosion = vespera.skills.others.find(
+        (s) => s.name === EXPLOSION && s.kind === 'AFFLICTION',
+      );
 
-      expect(blind.alterations[0].kind).toBe('accuracy');
+      expect(explosion.effect.ignoresImmunity).toBe(true);
+    });
+
+    it('[VES-REI-5] blinds the enemies by 40% for the rest of the fight', async () => {
+      const steps = await cornered();
+
+      expect(named(steps, 'debuff', EXPLOSION)[0].alterations).toEqual([
+        expect.objectContaining({
+          kind: 'accuracy',
+          value: 40,
+          remainingTurns: null,
+        }),
+      ]);
     });
   });
 
   describe('rejecting a malformed kit', () => {
-    const post = (deck: object[]) =>
-      request(app.getHttpServer())
-        .post('/fight')
-        .send({
-          cardSelectorStrategy: 'player-by-player',
-          player1: { name: 'P1', deck },
-          player2: { name: 'P2', deck: [card('prey')] },
-        });
-    const withSkills = (others: object[]) => ({
-      ...wasp,
-      skills: { ...wasp.skills, others },
-    });
-
     it('refuses a stacked poison without its stack multiplier', async () => {
       const { stackMultiplier: _dropped, ...venom } =
-        wasp.skills.simpleAttack.effects[0];
-      const stinger = { ...wasp.skills.simpleAttack, effects: [venom] };
-      const skills = { ...wasp.skills, simpleAttack: stinger };
+        vespera.skills.simpleAttack.effects[0];
+      const stinger = { ...vespera.skills.simpleAttack, effects: [venom] };
 
-      await post([{ ...wasp, skills }]).expect(400);
+      await fight
+        .post(
+          [
+            {
+              ...vespera,
+              skills: { ...vespera.skills, simpleAttack: stinger },
+            },
+          ],
+          [dummy('prey')],
+        )
+        .expect(400);
     });
 
     it('refuses a ramping chance on another kind than STANCE', async () => {
-      const [carapace] = wasp.skills.others;
+      const [carapace] = vespera.skills.others;
       const rampingChance = { startChance: 0.25, increment: 0.1, fromTurn: 3 };
+      const others = [{ ...carapace, rampingChance }];
 
-      await post([withSkills([{ ...carapace, rampingChance }])]).expect(400);
-    });
-  });
-
-  describe('when a poisoned enemy falls', () => {
-    it('heals with Instinct de Guêpe', async () => {
-      const steps = await fight(
-        [wasp],
-        [card('weakling', { health: 150 }), card('prey', { attack: 50 })],
-      );
-
-      expect(steps.map((s) => s.name)).toContain('Instinct de Guêpe');
+      await fight
+        .post(
+          [{ ...vespera, skills: { ...vespera.skills, others } }],
+          [dummy('prey')],
+        )
+        .expect(400);
     });
   });
 });

@@ -99,15 +99,17 @@ export function useFight() {
     await app.close();
   });
 
-  return async (player1: Card[], player2: Card[]): Promise<any[]> => {
-    const response = await request(app.getHttpServer())
+  const post = (player1: Card[], player2: Card[]) =>
+    request(app.getHttpServer())
       .post('/fight')
       .send({
         cardSelectorStrategy: 'player-by-player',
         player1: { name: 'P1', deck: player1 },
         player2: { name: 'P2', deck: player2 },
-      })
-      .expect(200);
-    return Object.values(response.body);
-  };
+      });
+  const fight = async (player1: Card[], player2: Card[]): Promise<any[]> =>
+    Object.values((await post(player1, player2).expect(200)).body);
+
+  // `post` leaves the status to the caller, for the requests the engine refuses
+  return Object.assign(fight, { post });
 }

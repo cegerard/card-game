@@ -12,7 +12,6 @@ const roster: any[] = JSON.parse(read('samples/cards.json'));
 // Roster cards whose Notion kit is not exported yet. Exporting a kit takes
 // its card off this list: a card outside it must come with its kit.
 const PENDING_KITS = [
-  'vespera',
   'svana',
   'hyoki',
 ];
