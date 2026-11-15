@@ -14,7 +14,6 @@ const roster: any[] = JSON.parse(read('samples/cards.json'));
 const PENDING_KITS = [
   'arionis',
   'kaelion',
-  'kaito',
   'scythra',
   'selkhet',
   'vespera',
