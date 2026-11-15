@@ -126,3 +126,46 @@ describe('FreezeAttackEffect against a control-immune defender', () => {
     expect(result).toBeUndefined();
   });
 });
+
+describe('FreezeAttackEffect with an explicit duration', () => {
+  const frozenTurnsLeft = (level: 1 | 2, duration?: number) => {
+    const defender = createFightingCard({ agility: 0 });
+    new FreezeAttackEffect(
+      0.2,
+      level,
+      new MathRandomizer(),
+      undefined,
+      undefined,
+      undefined,
+      duration,
+    ).applyEffect(defender, createFightingCard({}), {} as any);
+    return defender.applyStateEffects()[0].remainingTurns;
+  };
+
+  it('outlasts the single turn of its level 1', () => {
+    expect(frozenTurnsLeft(1, 2)).toBe(1);
+  });
+
+  it('cuts short the three turns of its level 2', () => {
+    expect(frozenTurnsLeft(2, 2)).toBe(1);
+  });
+
+  it('keeps the level duration when absent', () => {
+    expect(frozenTurnsLeft(2)).toBe(2);
+  });
+
+  it.each([0, 1.5])('refuses a duration of %s', (duration) => {
+    expect(
+      () =>
+        new FreezeAttackEffect(
+          0.2,
+          1,
+          new MathRandomizer(),
+          undefined,
+          undefined,
+          undefined,
+          duration,
+        ),
+    ).toThrow(`FreezeAttackEffect duration must be an integer >= 1`);
+  });
+});

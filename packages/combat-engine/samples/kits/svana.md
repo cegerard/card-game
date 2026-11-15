@@ -23,13 +23,6 @@ et compare les caractéristiques ci-dessous à `samples/cards.json`.
 }
 ```
 
-## Écarts avec Notion
-
-Le moteur ne suit pas encore ces points de la fiche ; ils ne portent pas d'identifiant et ne sont pas testés :
-
-- Étreinte du Cygne Glacé : Notion gèle la cible pendant 2 tours ; le moteur pose un Gel de niveau 1, qui dure 1 tour.
-- Tempête Focalisée : Notion gèle la cible pendant 2 tours ; le moteur pose un Gel de niveau 2, qui dure 3 tours.
-
 ## Attaque : Souffle Cristallin
 
 - [SVA-ATK-1] Inflige 70 % d'Attaque en dégâts physiques et 70 % d'Attaque en dégâts élémentaires (Vent).
