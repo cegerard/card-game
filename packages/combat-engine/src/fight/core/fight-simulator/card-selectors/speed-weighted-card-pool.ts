@@ -1,3 +1,4 @@
+import { random } from '../../random-source';
 import { Player } from '../../player';
 import { FightingCard } from '../../cards/fighting-card';
 import { CardSelector } from './card-selector';
@@ -50,7 +51,7 @@ export class SpeedWeightedCardSelector implements CardSelector {
 
   private shufflePool(): void {
     for (let i = this.cardPool.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
+      const j = Math.floor(random() * (i + 1));
       [this.cardPool[i], this.cardPool[j]] = [
         this.cardPool[j],
         this.cardPool[i],

@@ -30,7 +30,7 @@ src/
     ├── fight.module.ts
     ├── core/          # Domain logic
     ├── http-api/      # REST layer
-    └── tools/         # math-randomizer.ts (Math.random() implementation)
+    └── tools/         # math-randomizer.ts (reads random-source), seeded-random.ts (seed → generator)
 ```
 
 ### `fight/core/`
@@ -38,7 +38,7 @@ src/
 ```
 core/
 ├── player.ts               # Player entity managing card decks (protectorOf, threeCardsFromCenter…)
-├── randomizer.ts           # Randomization abstraction
+├── randomizer.ts, random-source.ts  # Randomization abstraction; per-fight source of every roll
 ├── cards/                  # Fighting card entities and types
 ├── card-action/            # Action resolution logic
 ├── fight-simulator/        # Fight orchestration
@@ -143,7 +143,7 @@ http-api/
 
 ### Tests
 
-Unit tests next to the source in `__tests__/`; e2e in `packages/combat-engine/test/` (`jest-e2e.json`, `fight/`, `helpers/`).
+Unit tests next to the source in `__tests__/`; e2e in `packages/combat-engine/test/` (`jest-e2e.json`, `fight/`, `kits/`, `helpers/`); kit exports in `samples/kits/`.
 
 ### Configuration
 

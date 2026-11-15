@@ -14,6 +14,8 @@ import { buildCardSelector } from './card-selector-factory';
 import { CardSelector } from '../core/fight-simulator/card-selectors/card-selector';
 import { Player } from '../core/player';
 import { FightSimulator } from '../core/fight-simulator/@types/fight-simulator';
+import { withRandomSource } from '../core/random-source';
+import { seededRandom } from '../tools/seeded-random';
 
 @Controller()
 @UsePipes(
@@ -36,6 +38,13 @@ export class FightController {
   @Post('fight')
   @HttpCode(200)
   startFight(@Body() fightData: FightDataDto): FightResult {
+    if (fightData.seed === undefined) return this.simulate(fightData);
+    return withRandomSource(seededRandom(fightData.seed), () =>
+      this.simulate(fightData),
+    );
+  }
+
+  private simulate(fightData: FightDataDto): FightResult {
     const player1Deck = fightData.player1.deck.map(buildFightingCard);
     const player2Deck = fightData.player2.deck.map(buildFightingCard);
 
