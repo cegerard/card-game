@@ -55,6 +55,14 @@ describe('Arionis full kit', () => {
 
       expect(burnTicksOn(steps, 'foe')[0].damage).toBe(8.5);
     });
+
+    // A level 1 burn ticks once
+    it('[ARI-ATK-3] lays a light burn, level 1', async () => {
+      rolling(0.99);
+      const steps = await alone();
+
+      expect(burnTicksOn(steps, 'foe')[0].remainingTurns).toBe(0);
+    });
   });
 
   describe(ROAR, () => {
@@ -81,6 +89,23 @@ describe('Arionis full kit', () => {
       const steps = await fight([arionis], [dummy('a'), dummy('b')]);
 
       expect(burnTicksOn(steps, 'b')[0].damage).toBe(30.6);
+    });
+
+    it('[ARI-SPE-5] deals fire damage', async () => {
+      rolling(0.99);
+      const steps = await fight([arionis], [dummy('a'), dummy('b')]);
+
+      expect(named(steps, 'special_attack', ROAR)[0].damages[0].kind).toEqual([
+        'FIRE',
+      ]);
+    });
+
+    // A level 3 burn ticks five times
+    it('[ARI-SPE-6] lays a severe burn, level 3', async () => {
+      rolling(0.99);
+      const steps = await fight([arionis], [dummy('a'), dummy('b')]);
+
+      expect(burnTicksOn(steps, 'b')[0].remainingTurns).toBe(4);
     });
 
     it('[ARI-SPE-3] raises the attack and defense of his allies by 5% for a turn', async () => {
@@ -210,11 +235,11 @@ describe('Arionis full kit', () => {
 
   describe('Héritage du Lion', () => {
     // killer takes Kaelion down at once, then Arionis hunts it down
-    const avenging = () =>
+    const avenging = (otherAttack = 10) =>
       fight(
         [arionis, kaelion({ health: 100 })],
         [
-          dummy('other', { attack: 10 }),
+          dummy('other', { attack: otherAttack }),
           dummy('killer', { attack: 500, health: 400 }),
         ],
       );
@@ -316,6 +341,16 @@ describe('Arionis full kit', () => {
       );
 
       expect(steps[killed + 1].name).toBe(VENGEANCE_END);
+    });
+
+    // other hits for 200 so that he has health to win back: 33% of 550
+    it('[ARI-HER-5] heals him for 33% of his max health once the killer falls', async () => {
+      rolling(0.99);
+      const steps = await avenging(260);
+
+      expect(named(steps, 'healing', VENGEANCE_END)[0].heal[0].healed).toBe(
+        181.5,
+      );
     });
   });
 });

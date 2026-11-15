@@ -9,18 +9,20 @@
     "agility": 55,
     "accuracy": 80,
     "criticalChance": 0.05,
+    "regeneration": 45,
+    "resistance": 50,
     "element": "FIRE",
     "skills": {
       "special": {
         "kind": "ATTACK",
         "name": "Rugissement solaire",
-        "damages": [{ "type": "PHYSICAL", "rate": 1.5 }],
+        "damages": [{ "type": "FIRE", "rate": 1.5 }],
         "energy": 40,
         "targetingStrategy": "target-all",
         "effect": {
           "type": "BURN",
           "rate": 0.3,
-          "level": 2,
+          "level": 3,
           "triggeredDebuff": {
             "debuffType": "defense",
             "debuffRate": 0.08,
@@ -66,7 +68,7 @@
           {
             "type": "BURN",
             "rate": 0.1,
-            "level": 2,
+            "level": 1,
             "triggeredDebuff": {
               "debuffType": "defense",
               "debuffRate": 0.08,
@@ -146,6 +148,7 @@
           "kind": "HEALING",
           "name": "Fin de la vengeance",
           "rate": 0.33,
+          "healBasis": "target-max-health",
           "targetingStrategy": "self",
           "event": "dormant",
           "activationEvent": "ally-death",
