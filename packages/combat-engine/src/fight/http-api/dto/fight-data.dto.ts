@@ -1305,6 +1305,12 @@ export class OtherSkillDto {
   @Max(1)
   whileHealthBelow?: number;
 
+  // ALTERATION: the alteration only counts while its bearer holds the shield raised by the SHIELD skill of that name
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  whileShielded?: string;
+
   // ATTACKER_INSIGHT (required): shares of base accuracy and agility gained against an enemy that already attacked
   @ValidateIf((o) => o.kind === SkillKind.ATTACKER_INSIGHT)
   @IsDefined()

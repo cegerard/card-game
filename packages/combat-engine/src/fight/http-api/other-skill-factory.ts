@@ -50,6 +50,7 @@ import {
   assertLivingAllyScaling,
   HealthCeiling,
   LivingAllyScaling,
+  ShieldHold,
 } from '../core/cards/@types/alteration/live-rate';
 import { buildBattlefield } from './battlefield-factory';
 import { buildTriggerStrategy } from './trigger-factory';
@@ -269,16 +270,24 @@ function buildAlteration(
 }
 
 /**
- * The live rate an ALTERATION asks for: earned per living ally, or held only
- * while its bearer is under a health ratio. Not both: they answer different
- * questions and their product would read as neither.
+ * The live rate an ALTERATION asks for: earned per living ally, held only
+ * while its bearer is under a health ratio, or only while it holds a named
+ * shield. One at most: they answer different questions and their product
+ * would read as none of them.
  */
 function buildLiveRate(skillData: OtherSkillDto): LiveRateFactory | undefined {
-  const { perLivingAlly, whileHealthBelow, rate } = skillData;
-  if (perLivingAlly && whileHealthBelow !== undefined) {
+  const { perLivingAlly, whileHealthBelow, whileShielded, rate } = skillData;
+  const asked = [perLivingAlly, whileHealthBelow, whileShielded].filter(
+    (field) => field !== undefined,
+  );
+  if (asked.length > 1) {
     throw new BadRequestException(
-      'ALTERATION cannot combine perLivingAlly and whileHealthBelow',
+      'ALTERATION takes one of perLivingAlly, whileHealthBelow and whileShielded',
     );
+  }
+  if (whileShielded !== undefined) {
+    const hold = new ShieldHold(rate, whileShielded);
+    return () => hold;
   }
   if (perLivingAlly) {
     asBadRequest(() => assertLivingAllyScaling(rate, perLivingAlly.maxRate));

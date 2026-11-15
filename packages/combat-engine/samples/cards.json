@@ -168,6 +168,8 @@
     "agility": 60,
     "accuracy": 85,
     "criticalChance": 0.08,
+    "regeneration": 40,
+    "resistance": 45,
     "element": "FIRE",
     "skills": {
       "simpleAttack": {
@@ -182,7 +184,7 @@
           {
             "type": "BURN",
             "rate": 0.1,
-            "level": 2,
+            "level": 1,
             "probability": 0.5
           },
           {
@@ -222,11 +224,19 @@
           "kind": "CONDITIONAL_ATTACK",
           "name": "Elan de la salamandre",
           "targetingStrategy": "position-based",
-          "event": "next-action",
+          "event": "turn-start",
           "interval": 3,
           "damages": [
             { "type": "PHYSICAL", "rate": 0.6 },
             { "type": "FIRE", "rate": 0.6 }
+          ],
+          "hitAlterations": [
+            {
+              "type": "defense",
+              "rate": 0.15,
+              "duration": 2,
+              "polarity": "debuff"
+            }
           ]
         },
         {
@@ -239,6 +249,17 @@
             "operator": "below",
             "threshold": 0.3
           }
+        },
+        {
+          "kind": "ALTERATION",
+          "name": "Résilience Pyro-Minérale - ATTACK",
+          "event": "fight-start",
+          "buffType": "attack",
+          "rate": 0.15,
+          "duration": 0,
+          "targetingStrategy": "self",
+          "polarity": "buff",
+          "whileShielded": "Résilience Pyro-Minérale"
         },
         {
           "kind": "SURVIVE",

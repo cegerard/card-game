@@ -53,3 +53,15 @@ export class HealthCeiling implements LiveRate {
     return bearer.healthRatio < this.threshold ? this.rate : 0;
   }
 }
+
+/** `rate` while the bearer holds the shield its `shieldName` skill raised, nothing otherwise. */
+export class ShieldHold implements LiveRate {
+  constructor(
+    private readonly rate: number,
+    private readonly shieldName: string,
+  ) {}
+
+  rateFor(bearer: FightingCard): number {
+    return bearer.holdsShield(this.shieldName) ? this.rate : 0;
+  }
+}

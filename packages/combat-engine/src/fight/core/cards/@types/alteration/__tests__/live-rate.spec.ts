@@ -1,7 +1,7 @@
 import { createFightingCard } from '../../../../../../../test/helpers/fighting-card';
 import { FightingCard } from '../../../fighting-card';
 import { Player } from '../../../../player';
-import { HealthCeiling, LivingAllyScaling } from '../live-rate';
+import { HealthCeiling, LivingAllyScaling, ShieldHold } from '../live-rate';
 
 describe('live alteration rates', () => {
   let bearer: FightingCard;
@@ -72,6 +72,36 @@ describe('live alteration rates', () => {
       expect(() => new HealthCeiling(0.15, 1.5)).toThrow(
         'Health ceiling threshold must be in ]0, 1]',
       );
+    });
+  });
+
+  describe('ShieldHold', () => {
+    it('grants nothing without a shield', () => {
+      buffDefense(new ShieldHold(0.15, 'basalt'));
+
+      expect(bearer.actualDefense).toBe(100);
+    });
+
+    it('grants its rate while the named shield holds', () => {
+      buffDefense(new ShieldHold(0.15, 'basalt'));
+      bearer.applyShield(0.3, Infinity, 'basalt');
+
+      expect(bearer.actualDefense).toBe(115);
+    });
+
+    it('grants nothing under a shield of another name', () => {
+      buffDefense(new ShieldHold(0.15, 'basalt'));
+      bearer.applyShield(0.3, 1, 'molten rock');
+
+      expect(bearer.actualDefense).toBe(100);
+    });
+
+    it('grants nothing once the shield broke', () => {
+      buffDefense(new ShieldHold(0.15, 'basalt'));
+      bearer.applyShield(0.3, Infinity, 'basalt');
+      bearer.applyFinalDamage(400);
+
+      expect(bearer.actualDefense).toBe(100);
     });
   });
 });

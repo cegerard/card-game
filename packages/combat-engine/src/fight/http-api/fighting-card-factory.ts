@@ -51,7 +51,12 @@ const KIND_ONLY_FIELDS: {
   },
   {
     kinds: [SkillKind.ALTERATION],
-    fields: ['perLivingAlly', 'whileHealthBelow', 'terminationDamageRate'],
+    fields: [
+      'perLivingAlly',
+      'whileHealthBelow',
+      'whileShielded',
+      'terminationDamageRate',
+    ],
   },
   {
     kinds: [SkillKind.SUPPORT],
