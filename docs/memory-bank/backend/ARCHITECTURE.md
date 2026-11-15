@@ -60,6 +60,7 @@ sequenceDiagram
 - **Rich domain model**: `FightingCard` owns stats, behaviors, element and every state mutation (shield, stance, concealment, protection, marks, bleed…).
 - **Separation of concerns**: `Fight` orchestrates · `ActionStage` resolves attacks/heals, fires reactive skills and damage events · `TurnManager` handles turn end · `CardSelector` orders turns · `EndEventProcessor` removes event-bound buffs/effects · `skillResultsToSteps()` and `triggerReactiveSkills()` are shared pure functions.
 - **Fail fast**: invalid input throws (unknown kind, unknown basis, missing property); no silent fallback.
+- **Randomness**: the controller builds one `Randomizer` per fight (`SeededRandomizer` for a request `seed`, else `MathRandomizer`) and hands it to every factory, the card selector and the cards; no other `Math.random()`.
 
 ## Damage and Stats
 

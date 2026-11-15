@@ -4,7 +4,6 @@ import { AllyPresenceCondition } from '../core/cards/@types/alteration/condition
 import { HealthThresholdCondition } from '../core/cards/@types/alteration/conditions/health-threshold-condition';
 import { ProbabilityCondition } from '../core/cards/@types/alteration/conditions/probability-condition';
 import { Randomizer } from '../core/randomizer';
-import { MathRandomizer } from '../tools/math-randomizer';
 
 type ConditionOperator = 'above' | 'below';
 const VALID_OPERATORS: ConditionOperator[] = ['above', 'below'];
@@ -17,7 +16,7 @@ export function buildAlterationCondition(
     operator?: string;
     probability?: number;
   },
-  randomizer: Randomizer = new MathRandomizer(),
+  randomizer: Randomizer,
 ): AlterationCondition {
   switch (type) {
     case AlterationConditionType.ALLY_PRESENCE:

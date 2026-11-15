@@ -1,3 +1,4 @@
+import { Randomizer } from '../core/randomizer';
 import {
   BleedStackBonusDto,
   DamageTypeBonusDto,
@@ -28,13 +29,14 @@ import {
 
 export function buildAttackSkill(
   skills: FightingCardDto['skills'],
+  randomizer: Randomizer,
 ): AttackSkill {
   if (skills.multipleAttack) {
     const ma = skills.multipleAttack;
     const maDamages = ma.damages.map(
       (d) => new DamageComposition(d.type, d.rate),
     );
-    const maEffects = buildEffects(ma.effects);
+    const maEffects = buildEffects(ma.effects, randomizer);
     const maComboFinisher = ma.comboFinisher
       ? ma.comboFinisher.map((d) => new DamageComposition(d.type, d.rate))
       : undefined;
@@ -46,7 +48,7 @@ export function buildAttackSkill(
       ma.amplifier ?? 0,
       maEffects,
       maComboFinisher,
-      buildEffects(ma.comboFinisherEffects),
+      buildEffects(ma.comboFinisherEffects, randomizer),
       buildDamageBonuses(ma),
     );
   }
@@ -55,7 +57,7 @@ export function buildAttackSkill(
   if (!sa) {
     throw new Error('Either simpleAttack or multipleAttack must be provided');
   }
-  const saEffects = buildEffects(sa.effects);
+  const saEffects = buildEffects(sa.effects, randomizer);
   const damages = sa.damages.map((d) => new DamageComposition(d.type, d.rate));
   return new SimpleAttack(
     sa.name,

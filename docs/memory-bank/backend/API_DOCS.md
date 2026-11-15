@@ -44,7 +44,8 @@ Simulates a turn-based card battle between two players.
     name: string,
     deck: FightingCardDto[] // 1-5 cards
   },
-  cardSelectorStrategy: "player-by-player" | "speed-weighted"
+  cardSelectorStrategy: "player-by-player" | "speed-weighted",
+  seed?: number // Integer in [0, 2^32 - 1]: same seed and decks, same fight
 }
 ```
 

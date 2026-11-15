@@ -9,7 +9,7 @@ import { mapElement } from './skill-wiring-factory';
 import { FightingCard } from '../core/cards/fighting-card';
 import { buildDodgeStrategy } from './dodge-strategy-factory';
 import { Element } from '../core/cards/@types/damage/element';
-import { MathRandomizer } from '../tools/math-randomizer';
+import { Randomizer } from '../core/randomizer';
 import { Skill } from '../core/cards/skills/skill';
 import { validatePowerIdConsistency } from '../core/cards/skills/power-id-consistency';
 import { buildSpecial } from './special-factory';
@@ -103,7 +103,10 @@ const CARD_BOUND_SKILL_KINDS = [
   SkillKind.ATTACKER_INSIGHT,
 ];
 
-export function buildFightingCard(cardData: FightingCardDto): FightingCard {
+export function buildFightingCard(
+  cardData: FightingCardDto,
+  randomizer: Randomizer,
+): FightingCard {
   if (
     cardData.skills.others.some((s) => s.kind === SkillKind.SPECIAL_ECHO) &&
     cardData.skills.special.kind !== SpecialKind.ATTACK
@@ -112,16 +115,16 @@ export function buildFightingCard(cardData: FightingCardDto): FightingCard {
       'SPECIAL_ECHO can only echo an ATTACK special',
     );
   }
-  const special = buildSpecial(cardData.skills.special);
-  const attackSkill = buildAttackSkill(cardData.skills);
+  const special = buildSpecial(cardData.skills.special, randomizer);
+  const attackSkill = buildAttackSkill(cardData.skills, randomizer);
 
   const { others } = cardData.skills;
   const surviveSkill = buildSurviveSkill(others);
-  const damageReduction = buildDamageReduction(others);
+  const damageReduction = buildDamageReduction(others, randomizer);
   const dodgeBonusDenial = buildDodgeBonusDenialSkill(others);
   const bleedStackScaling = buildBleedStackScalingSkill(others);
   rejectMisplacedKindOnlyFields(others);
-  const bleedEmpowerment = buildBleedEmpowerment(others);
+  const bleedEmpowerment = buildBleedEmpowerment(others, randomizer);
   const lowHealthTargetBonus = buildLowHealthTargetBonus(others);
   const poisonedEnemyAgility = buildPoisonedEnemyAgility(others);
   const attackerInsight = buildAttackerInsight(others);
@@ -148,7 +151,7 @@ export function buildFightingCard(cardData: FightingCardDto): FightingCard {
   }
 
   const otherSkills: Skill[] = triggeredOthers.map((skill) =>
-    createOtherSkill(skill, cardData.id),
+    createOtherSkill(skill, cardData.id, randomizer),
   );
 
   return new FightingCard(
@@ -169,9 +172,9 @@ export function buildFightingCard(cardData: FightingCardDto): FightingCard {
       attackerInsight,
     },
     {
-      dodge: buildDodgeStrategy(cardData.behaviors.dodge),
+      dodge: buildDodgeStrategy(cardData.behaviors.dodge, randomizer),
     },
-    new MathRandomizer(),
+    randomizer,
     cardData.element === undefined
       ? Element.PHYSICAL
       : mapElement(cardData.element),

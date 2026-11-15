@@ -1,6 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 import { OtherSkillDto, SkillKind } from './dto/fight-data.dto';
-import { MathRandomizer } from '../tools/math-randomizer';
+import { Randomizer } from '../core/randomizer';
 import { SurviveSkill } from '../core/cards/skills/survive';
 import { DamageReductionSkill } from '../core/cards/skills/damage-reduction';
 import { DodgeBonusDenialSkill } from '../core/cards/skills/dodge-bonus-denial';
@@ -48,6 +48,7 @@ export function buildBleedStackScalingSkill(
  */
 export function buildDamageReduction(
   others: OtherSkillDto[],
+  randomizer: Randomizer,
 ): DamageReductionSkill | undefined {
   const dto = findSkill(others, SkillKind.DAMAGE_REDUCTION);
   if (!dto) return undefined;
@@ -56,7 +57,7 @@ export function buildDamageReduction(
     return new DamageReductionSkill(
       dto.name,
       dto.rate,
-      new MathRandomizer(),
+      randomizer,
       dto.probability,
     );
   } catch (e) {
@@ -66,11 +67,12 @@ export function buildDamageReduction(
 
 export function buildBleedEmpowerment(
   others: OtherSkillDto[],
+  randomizer: Randomizer,
 ): BleedEmpowermentSkill | undefined {
   const dto = findSkill(others, SkillKind.BLEED_EMPOWERMENT);
   if (!dto) return undefined;
 
-  const triggeredDebuff = buildTriggeredDebuff(dto.triggeredDebuff);
+  const triggeredDebuff = buildTriggeredDebuff(dto.triggeredDebuff, randomizer);
   try {
     return new BleedEmpowermentSkill(
       dto.name,

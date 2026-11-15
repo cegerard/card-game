@@ -1,5 +1,6 @@
 import { Player } from '../../../player';
 import { SpeedWeightedCardSelector } from '../speed-weighted-card-pool';
+import { MathRandomizer } from '../../../../tools/math-randomizer';
 import { createFightingCard } from '../../../../../../test/helpers/fighting-card';
 
 describe('SpeedWeightedCardSelector', () => {
@@ -25,7 +26,11 @@ describe('SpeedWeightedCardSelector', () => {
       createFightingCard({ name: '12', speed: 12 }),
       createFightingCard({ name: '20', speed: 20 }),
     ]);
-    const selector = new SpeedWeightedCardSelector(player1, player2);
+    const selector = new SpeedWeightedCardSelector(
+      player1,
+      player2,
+      new MathRandomizer(),
+    );
     const occurrences = countCardOccurrences(selector, 1000);
 
     expect(occurrences['20']).toBeGreaterThanOrEqual(occurrences['10']);
@@ -43,7 +48,11 @@ describe('SpeedWeightedCardSelector', () => {
       createFightingCard({ name: '5', speed: 5 }),
     ]);
 
-    const selector = new SpeedWeightedCardSelector(player1, player2);
+    const selector = new SpeedWeightedCardSelector(
+      player1,
+      player2,
+      new MathRandomizer(),
+    );
     const occurrences = countCardOccurrences(selector, 1000);
 
     expect(occurrences['5']).toBeLessThanOrEqual(occurrences['10']);
@@ -60,7 +69,11 @@ describe('SpeedWeightedCardSelector', () => {
       createFightingCard({ name: '3', speed: 10 }),
       createFightingCard({ name: '4', speed: 10 }),
     ]);
-    const selector = new SpeedWeightedCardSelector(player1, player2);
+    const selector = new SpeedWeightedCardSelector(
+      player1,
+      player2,
+      new MathRandomizer(),
+    );
     const occurrences = countCardOccurrences(selector, 1000);
 
     expect(occurrences['1']).toBe(occurrences['2']);

@@ -1,3 +1,4 @@
+import { Randomizer } from '../core/randomizer';
 import { BadRequestException } from '@nestjs/common';
 import {
   SpecialDto,
@@ -42,7 +43,7 @@ const STANCE_SPECIAL_FORBIDDEN_FIELDS = [
   'adjacentTargetsBattlefield',
 ] as const;
 
-export function buildSpecial(dto: SpecialDto): Special {
+export function buildSpecial(dto: SpecialDto, randomizer: Randomizer): Special {
   if (dto.concealment && dto.kind !== SpecialKind.STANCE) {
     throw new BadRequestException(
       'Only a STANCE special can conceal its caster: an attack would reveal it at once',
@@ -64,10 +65,10 @@ export function buildSpecial(dto: SpecialDto): Special {
   }
 
   if (dto.kind === SpecialKind.ATTACK) {
-    return buildSpecialAttack(dto);
+    return buildSpecialAttack(dto, randomizer);
   }
   if (dto.kind === SpecialKind.STANCE) {
-    return buildSpecialStance(dto);
+    return buildSpecialStance(dto, randomizer);
   }
   if (dto.kind === SpecialKind.HEALING) {
     if (dto.adjacentTargetsBattlefield) {
@@ -85,8 +86,11 @@ export function buildSpecial(dto: SpecialDto): Special {
   throw new Error(`Unknown SpecialKind: ${dto.kind}`);
 }
 
-function buildSpecialAttack(dto: SpecialDto): SpecialAttack {
-  const alterations = buildSpecialAlterations(dto);
+function buildSpecialAttack(
+  dto: SpecialDto,
+  randomizer: Randomizer,
+): SpecialAttack {
+  const alterations = buildSpecialAlterations(dto, randomizer);
 
   const rawDamages = dto.damages;
   if (!rawDamages || rawDamages.length === 0) {
@@ -114,10 +118,11 @@ function buildSpecialAttack(dto: SpecialDto): SpecialAttack {
       undefined,
       undefined,
       dto.targetCount,
+      randomizer,
     ),
     [dto.effect, ...(dto.effects ?? [])]
       .filter((effect) => effect != null)
-      .map(buildEffect),
+      .map((effect) => buildEffect(effect, randomizer)),
     alterations.length > 0 ? alterations : undefined,
     shieldApplication,
     markedTargetBonus,
@@ -132,7 +137,10 @@ function buildSpecialAttack(dto: SpecialDto): SpecialAttack {
   );
 }
 
-function buildSpecialStance(dto: SpecialDto): SpecialStance {
+function buildSpecialStance(
+  dto: SpecialDto,
+  randomizer: Randomizer,
+): SpecialStance {
   const strikingFields = STANCE_SPECIAL_FORBIDDEN_FIELDS.filter(
     (field) => dto[field] !== undefined,
   );
@@ -146,19 +154,26 @@ function buildSpecialStance(dto: SpecialDto): SpecialStance {
     dto.name,
     dto.energy,
     dto.stanceActivation,
-    buildSpecialAlterations(dto),
+    buildSpecialAlterations(dto, randomizer),
     buildShieldApplication(dto),
     dto.concealment?.duration,
     buildBattlefield(dto.battlefield),
   );
 }
 
-function buildSpecialAlterations(dto: SpecialDto): Alteration[] {
+function buildSpecialAlterations(
+  dto: SpecialDto,
+  randomizer: Randomizer,
+): Alteration[] {
   return (dto.statAlterations ?? []).map((a) => {
     const condition = a.condition
-      ? buildAlterationCondition(a.condition.type, {
-          allyName: a.condition.allyName,
-        })
+      ? buildAlterationCondition(
+          a.condition.type,
+          {
+            allyName: a.condition.allyName,
+          },
+          randomizer,
+        )
       : undefined;
     return new Alteration(
       mapAlterationType(a.type),

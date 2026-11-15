@@ -80,7 +80,8 @@ export class MultipleAttack implements AttackSkill {
         const interceptedFor = protector ? target : undefined;
 
         hitTargets.add(defender);
-        const isCritical = Math.random() < card.criticalChanceAgainst(defender);
+        const isCritical =
+          card.criticalRoll() < card.criticalChanceAgainst(defender);
         const damageMultiplier = isCritical ? card.criticalMultiplier(2) : 1;
 
         const missed = defender.missedBy(card, context);

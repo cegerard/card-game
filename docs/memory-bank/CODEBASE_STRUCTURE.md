@@ -30,7 +30,7 @@ src/
     ├── fight.module.ts
     ├── core/          # Domain logic
     ├── http-api/      # REST layer
-    └── tools/         # math-randomizer.ts (Math.random() implementation)
+    └── tools/         # math-randomizer.ts (Math.random()), seeded-randomizer.ts (request seed)
 ```
 
 ### `fight/core/`
@@ -143,7 +143,7 @@ http-api/
 
 ### Tests
 
-Unit tests next to the source in `__tests__/`; e2e in `packages/combat-engine/test/` (`jest-e2e.json`, `fight/`, `helpers/`).
+Unit tests next to the source in `__tests__/`; e2e in `packages/combat-engine/test/` (`jest-e2e.json`, `fight/`, `kits/`, `helpers/`); kit exports in `samples/kits/`.
 
 ### Configuration
 

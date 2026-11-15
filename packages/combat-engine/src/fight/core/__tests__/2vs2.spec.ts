@@ -6,6 +6,7 @@ import { DamageReport } from '../fight-simulator/@types/damage-report';
 import { FightResult } from '../fight-simulator/@types/fight-result';
 import { createFightingCard } from '../../../../test/helpers/fighting-card';
 import { SpeedWeightedCardSelector } from '../fight-simulator/card-selectors/speed-weighted-card-pool';
+import { MathRandomizer } from '../../tools/math-randomizer';
 
 describe('with only two cards each', () => {
   describe('when the player1 has the speediest cards in speed weighted card pool selection', () => {
@@ -70,7 +71,7 @@ describe('with only two cards each', () => {
       const fight = new Fight(
         player1,
         player2,
-        new SpeedWeightedCardSelector(player1, player2),
+        new SpeedWeightedCardSelector(player1, player2, new MathRandomizer()),
       );
 
       res = fight.start();
@@ -160,7 +161,7 @@ describe('with only two cards each', () => {
       const fight = new Fight(
         player1,
         player2,
-        new SpeedWeightedCardSelector(player1, player2),
+        new SpeedWeightedCardSelector(player1, player2, new MathRandomizer()),
       );
 
       res = fight.start();

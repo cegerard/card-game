@@ -61,7 +61,7 @@ export class SimpleAttack implements AttackSkill {
     context: FightingContext,
     targeting: TargetingCardStrategy,
   ): NamedAttackResult {
-    const criticalRoll = Math.random();
+    const criticalRoll = card.criticalRoll();
     const defensiveCards = targeting.targetedCards(
       card,
       context.sourcePlayer,

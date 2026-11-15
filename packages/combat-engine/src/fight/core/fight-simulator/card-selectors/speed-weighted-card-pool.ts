@@ -1,6 +1,7 @@
 import { Player } from '../../player';
 import { FightingCard } from '../../cards/fighting-card';
 import { CardSelector } from './card-selector';
+import { Randomizer } from '../../randomizer';
 
 export class SpeedWeightedCardSelector implements CardSelector {
   private player1: Player;
@@ -9,7 +10,11 @@ export class SpeedWeightedCardSelector implements CardSelector {
 
   public readonly id = 'speed-weighted';
 
-  constructor(player1: Player, player2: Player) {
+  constructor(
+    player1: Player,
+    player2: Player,
+    private readonly randomizer: Randomizer,
+  ) {
     this.player1 = player1;
     this.player2 = player2;
 
@@ -50,7 +55,7 @@ export class SpeedWeightedCardSelector implements CardSelector {
 
   private shufflePool(): void {
     for (let i = this.cardPool.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
+      const j = Math.floor(this.randomizer.random() * (i + 1));
       [this.cardPool[i], this.cardPool[j]] = [
         this.cardPool[j],
         this.cardPool[i],

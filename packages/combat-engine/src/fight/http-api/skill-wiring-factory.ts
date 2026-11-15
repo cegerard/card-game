@@ -21,6 +21,7 @@ import { BleedStacksAppliedTrigger } from '../core/trigger/bleed-stacks-applied'
 import { FirstBleedingEnemyStrategy } from '../core/targeting-card-strategies/first-bleeding-enemy';
 import { AlterationStacking } from '../core/cards/@types/alteration/alteration-detail';
 import { EnemyKilledTrigger } from '../core/trigger/enemy-killed';
+import { Randomizer } from '../core/randomizer';
 
 export function asBadRequest<T>(build: () => T): T {
   try {
@@ -82,15 +83,22 @@ export function ownsActivationCondition(skillData: OtherSkillDto): boolean {
   );
 }
 
-export function buildSkillActivationCondition(skillData: OtherSkillDto) {
+export function buildSkillActivationCondition(
+  skillData: OtherSkillDto,
+  randomizer: Randomizer,
+) {
   if (!skillData.activationCondition) return undefined;
 
-  return buildAlterationCondition(skillData.activationCondition.type, {
-    allyName: skillData.activationCondition.allyName,
-    threshold: skillData.activationCondition.threshold,
-    operator: skillData.activationCondition.operator,
-    probability: skillData.activationCondition.probability,
-  });
+  return buildAlterationCondition(
+    skillData.activationCondition.type,
+    {
+      allyName: skillData.activationCondition.allyName,
+      threshold: skillData.activationCondition.threshold,
+      operator: skillData.activationCondition.operator,
+      probability: skillData.activationCondition.probability,
+    },
+    randomizer,
+  );
 }
 
 /** The stack cap of a skill, `debuffMaxStacks` being the former name of `maxStacks`. */

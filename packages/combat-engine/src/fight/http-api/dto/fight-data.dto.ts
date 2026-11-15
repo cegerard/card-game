@@ -1648,4 +1648,11 @@ export class FightDataDto {
 
   @IsEnum(CardSelectorStrategy)
   cardSelectorStrategy: CardSelectorStrategy;
+
+  // Same seed and same decks, same fight: every roll draws from it
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(0xffffffff)
+  seed?: number;
 }

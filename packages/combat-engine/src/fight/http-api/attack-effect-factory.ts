@@ -15,7 +15,7 @@ import { MarkAttackEffect } from '../core/cards/@types/attack/attack-mark-effect
 import { BleedAttackEffect } from '../core/cards/@types/attack/attack-bleed-effect';
 import { ElementalMark } from '../core/cards/@types/mark/elemental-mark';
 import { EffectTriggeredDebuff } from '../core/cards/@types/attack/effect-triggered-debuff';
-import { MathRandomizer } from '../tools/math-randomizer';
+import { Randomizer } from '../core/randomizer';
 import { StackedPoisonAttackEffect } from '../core/cards/@types/attack/attack-stacked-poison-effect';
 import { WeakPointAttackEffect } from '../core/cards/@types/attack/attack-weak-point-effect';
 import { HypothermiaAttackEffect } from '../core/cards/@types/attack/attack-hypothermia-effect';
@@ -30,10 +30,11 @@ import {
 } from './skill-wiring-factory';
 
 export function buildEffects(
-  effectDtos?: EffectDto[],
+  effectDtos: EffectDto[] | undefined,
+  randomizer: Randomizer,
 ): AttackEffect[] | undefined {
   if (!effectDtos?.length) return undefined;
-  return effectDtos.map((dto) => buildEffect(dto));
+  return effectDtos.map((dto) => buildEffect(dto, randomizer));
 }
 
 const STACKED_POISON_ONLY_FIELDS = [
@@ -81,19 +82,25 @@ function rejectMisplacedFields(effectDto: EffectDto): void {
   }
 }
 
-export function buildEffect(effectDto: EffectDto): AttackEffect {
+export function buildEffect(
+  effectDto: EffectDto,
+  randomizer: Randomizer,
+): AttackEffect {
   rejectMisplacedFields(effectDto);
-  const triggeredDebuff = buildTriggeredDebuff(effectDto.triggeredDebuff);
+  const triggeredDebuff = buildTriggeredDebuff(
+    effectDto.triggeredDebuff,
+    randomizer,
+  );
 
   switch (effectDto.type) {
     case Effect.POISON:
       if (effectDto.maxStacks !== undefined) {
-        return buildStackedPoison(effectDto, triggeredDebuff);
+        return buildStackedPoison(effectDto, triggeredDebuff, randomizer);
       }
       return new PoisonAttackEffect(
         effectDto.rate,
         effectDto.level as EffectLevel,
-        new MathRandomizer(),
+        randomizer,
         triggeredDebuff,
         effectDto.terminationEvent,
         effectDto.probability,
@@ -102,7 +109,7 @@ export function buildEffect(effectDto: EffectDto): AttackEffect {
       return new BurnAttackEffect(
         effectDto.rate,
         effectDto.level as EffectLevel,
-        new MathRandomizer(),
+        randomizer,
         triggeredDebuff,
         effectDto.terminationEvent,
         effectDto.probability,
@@ -111,7 +118,7 @@ export function buildEffect(effectDto: EffectDto): AttackEffect {
       return new FreezeAttackEffect(
         effectDto.rate,
         effectDto.level as EffectLevel,
-        new MathRandomizer(),
+        randomizer,
         triggeredDebuff,
         effectDto.terminationEvent,
         effectDto.probability,
@@ -120,7 +127,7 @@ export function buildEffect(effectDto: EffectDto): AttackEffect {
       return new StuntAttackEffect(
         effectDto.rate,
         effectDto.level as EffectLevel,
-        new MathRandomizer(),
+        randomizer,
         effectDto.probability,
         effectDto.terminationEvent,
       );
@@ -131,7 +138,7 @@ export function buildEffect(effectDto: EffectDto): AttackEffect {
           effectDto.rate,
           effectDto.maxStacks,
         ),
-        new MathRandomizer(),
+        randomizer,
         effectDto.stacks,
         effectDto.probability,
         triggeredDebuff,
@@ -141,7 +148,7 @@ export function buildEffect(effectDto: EffectDto): AttackEffect {
         effectDto.rate,
         effectDto.duration,
         effectDto.maxStacks,
-        new MathRandomizer(),
+        randomizer,
         effectDto.stacks,
         effectDto.probability,
         triggeredDebuff,
@@ -149,14 +156,14 @@ export function buildEffect(effectDto: EffectDto): AttackEffect {
         effectDto.basis,
       );
     case Effect.WEAK_POINT:
-      return buildWeakPoint(effectDto);
+      return buildWeakPoint(effectDto, randomizer);
     case Effect.HYPOTHERMIA:
       return asBadRequest(
         () =>
           new HypothermiaAttackEffect(
             effectDto.rate,
             effectDto.duration,
-            new MathRandomizer(),
+            randomizer,
             effectDto.probability,
             effectDto.terminationEvent,
           ),
@@ -166,7 +173,7 @@ export function buildEffect(effectDto: EffectDto): AttackEffect {
         () =>
           new EntangleAttackEffect(
             effectDto.rate,
-            new MathRandomizer(),
+            randomizer,
             effectDto.probability,
             effectDto.terminationEvent,
           ),
@@ -176,7 +183,7 @@ export function buildEffect(effectDto: EffectDto): AttackEffect {
         () =>
           new EnergyDrainAttackEffect(
             effectDto.rate,
-            new MathRandomizer(),
+            randomizer,
             effectDto.probability,
           ),
       );
@@ -185,7 +192,7 @@ export function buildEffect(effectDto: EffectDto): AttackEffect {
         () =>
           new SupportBlockAttackEffect(
             effectDto.duration,
-            new MathRandomizer(),
+            randomizer,
             effectDto.probability,
           ),
       );
@@ -196,14 +203,17 @@ export function buildEffect(effectDto: EffectDto): AttackEffect {
             effectDto.damageType,
             effectDto.rate,
             effectDto.duration,
-            new MathRandomizer(),
+            randomizer,
             effectDto.probability,
           ),
       );
   }
 }
 
-function buildWeakPoint(effectDto: EffectDto): WeakPointAttackEffect {
+function buildWeakPoint(
+  effectDto: EffectDto,
+  randomizer: Randomizer,
+): WeakPointAttackEffect {
   const dto = effectDto.weakPoint;
 
   return asBadRequest(
@@ -220,9 +230,10 @@ function buildWeakPoint(effectDto: EffectDto): WeakPointAttackEffect {
             attackRate: dto.revealerAttackRate,
             damageRate: dto.revealerDamageRate,
           },
-          exploitEffect: dto.exploitEffect && buildEffect(dto.exploitEffect),
+          exploitEffect:
+            dto.exploitEffect && buildEffect(dto.exploitEffect, randomizer),
         },
-        new MathRandomizer(),
+        randomizer,
         effectDto.probability,
       ),
   );
@@ -231,6 +242,7 @@ function buildWeakPoint(effectDto: EffectDto): WeakPointAttackEffect {
 function buildStackedPoison(
   effectDto: EffectDto,
   triggeredDebuff: EffectTriggeredDebuff | undefined,
+  randomizer: Randomizer,
 ): StackedPoisonAttackEffect {
   return asBadRequest(
     () =>
@@ -239,7 +251,7 @@ function buildStackedPoison(
         effectDto.duration,
         effectDto.maxStacks,
         effectDto.stackMultiplier,
-        new MathRandomizer(),
+        randomizer,
         {
           stacks: effectDto.stacks,
           basis: effectDto.basis,
@@ -254,6 +266,7 @@ function buildStackedPoison(
 
 export function buildTriggeredDebuff(
   dto: EffectTriggeredDebuffDto | undefined,
+  randomizer: Randomizer,
 ): EffectTriggeredDebuff | undefined {
   if (!dto) return undefined;
 
@@ -262,7 +275,7 @@ export function buildTriggeredDebuff(
     mapAlterationType(dto.debuffType),
     dto.debuffRate,
     dto.duration,
-    new MathRandomizer(),
+    randomizer,
     dto.terminationEvent,
     dto.powerId,
     buildAlterationStacking(dto.stackId, dto.maxStacks, ` triggeredDebuff`),

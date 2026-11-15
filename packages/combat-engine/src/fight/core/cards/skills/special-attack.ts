@@ -75,7 +75,7 @@ export class SpecialAttack extends BaseSpecial {
     const attackResults: AttackResult[] = [];
 
     for (let hit = 0; hit < this.hits; hit++) {
-      const criticalRoll = Math.random();
+      const criticalRoll = source.criticalRoll();
       const targetedCards = targeting
         .targetedCards(source, context.sourcePlayer, context.opponentPlayer)
         .filter((card) => !card.isDead());

@@ -3,11 +3,13 @@ import { CardSelector } from '../core/fight-simulator/card-selectors/card-select
 import { PlayerByPlayerCardSelector } from '../core/fight-simulator/card-selectors/player-by-player';
 import { SpeedWeightedCardSelector } from '../core/fight-simulator/card-selectors/speed-weighted-card-pool';
 import { Player } from '../core/player';
+import { Randomizer } from '../core/randomizer';
 
 export function buildCardSelector(
   cardSelectorStrategy: CardSelectorStrategy,
   player1: Player,
   player2: Player,
+  randomizer: Randomizer,
 ): CardSelector {
   const STRATEGY_MAP = {
     [CardSelectorStrategy.PLAYER_BY_PLAYER]: new PlayerByPlayerCardSelector(
@@ -17,6 +19,7 @@ export function buildCardSelector(
     [CardSelectorStrategy.SPEED_WEIGHTED]: new SpeedWeightedCardSelector(
       player1,
       player2,
+      randomizer,
     ),
   };
 
