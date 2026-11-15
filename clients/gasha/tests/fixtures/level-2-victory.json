@@ -1,0 +1,152 @@
+{
+  "0": {
+    "kind": "fight_start",
+    "cards": [
+      {
+        "card": {
+          "id": "player-warrior",
+          "name": "Warrior",
+          "deckIdentity": "Player-0"
+        },
+        "maxHealth": 120
+      },
+      {
+        "card": {
+          "id": "player-mage",
+          "name": "Mage",
+          "deckIdentity": "Player-1"
+        },
+        "maxHealth": 80
+      },
+      {
+        "card": {
+          "id": "player-healer",
+          "name": "Healer",
+          "deckIdentity": "Player-2"
+        },
+        "maxHealth": 100
+      },
+      {
+        "card": {
+          "id": "player-rogue",
+          "name": "Rogue",
+          "deckIdentity": "Player-3"
+        },
+        "maxHealth": 85
+      },
+      {
+        "card": {
+          "id": "player-guardian",
+          "name": "Guardian",
+          "deckIdentity": "Player-4"
+        },
+        "maxHealth": 140
+      },
+      {
+        "card": {
+          "id": "enemy-2-1",
+          "name": "Brawler",
+          "deckIdentity": "Level 2 — Brawlers-0"
+        },
+        "maxHealth": 130
+      },
+      {
+        "card": {
+          "id": "enemy-2-2",
+          "name": "Scout",
+          "deckIdentity": "Level 2 — Brawlers-1"
+        },
+        "maxHealth": 130
+      }
+    ]
+  },
+  "1": {
+    "kind": "attack",
+    "name": "Flame Bolt",
+    "attacker": {
+      "id": "player-mage",
+      "name": "Mage",
+      "deckIdentity": "Player-1"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "enemy-2-2",
+          "name": "Scout",
+          "deckIdentity": "Level 2 — Brawlers-1"
+        },
+        "damage": 64,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 66,
+        "kind": [
+          "FIRE",
+          "PHYSICAL"
+        ]
+      }
+    ],
+    "energy": 4
+  },
+  "2": {
+    "kind": "special_attack",
+    "name": "Fireball",
+    "attacker": {
+      "id": "player-mage",
+      "name": "Mage",
+      "deckIdentity": "Player-1"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "enemy-2-1",
+          "name": "Brawler",
+          "deckIdentity": "Level 2 — Brawlers-0"
+        },
+        "damage": 130,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 0,
+        "kind": [
+          "FIRE"
+        ]
+      },
+      {
+        "defender": {
+          "id": "enemy-2-2",
+          "name": "Scout",
+          "deckIdentity": "Level 2 — Brawlers-1"
+        },
+        "damage": 66,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 0,
+        "kind": [
+          "FIRE"
+        ]
+      }
+    ],
+    "energy": 0
+  },
+  "3": {
+    "kind": "status_change",
+    "card": {
+      "id": "enemy-2-1",
+      "name": "Brawler",
+      "deckIdentity": "Level 2 — Brawlers-0"
+    },
+    "status": "dead"
+  },
+  "4": {
+    "kind": "status_change",
+    "card": {
+      "id": "enemy-2-2",
+      "name": "Scout",
+      "deckIdentity": "Level 2 — Brawlers-1"
+    },
+    "status": "dead"
+  },
+  "5": {
+    "kind": "fight_end",
+    "winner": "Player"
+  }
+}

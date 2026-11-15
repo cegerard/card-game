@@ -1,0 +1,1000 @@
+{
+  "0": {
+    "kind": "fight_start",
+    "cards": [
+      {
+        "card": {
+          "id": "player-warrior",
+          "name": "Warrior",
+          "deckIdentity": "Player-0"
+        },
+        "maxHealth": 120
+      },
+      {
+        "card": {
+          "id": "player-mage",
+          "name": "Mage",
+          "deckIdentity": "Player-1"
+        },
+        "maxHealth": 80
+      },
+      {
+        "card": {
+          "id": "player-healer",
+          "name": "Healer",
+          "deckIdentity": "Player-2"
+        },
+        "maxHealth": 100
+      },
+      {
+        "card": {
+          "id": "player-rogue",
+          "name": "Rogue",
+          "deckIdentity": "Player-3"
+        },
+        "maxHealth": 85
+      },
+      {
+        "card": {
+          "id": "player-guardian",
+          "name": "Guardian",
+          "deckIdentity": "Player-4"
+        },
+        "maxHealth": 140
+      },
+      {
+        "card": {
+          "id": "enemy-5-1",
+          "name": "Overlord",
+          "deckIdentity": "Level 5 — Overlords-0"
+        },
+        "maxHealth": 250
+      },
+      {
+        "card": {
+          "id": "enemy-5-2",
+          "name": "Tempest",
+          "deckIdentity": "Level 5 — Overlords-1"
+        },
+        "maxHealth": 250
+      },
+      {
+        "card": {
+          "id": "enemy-5-3",
+          "name": "Colossus",
+          "deckIdentity": "Level 5 — Overlords-2"
+        },
+        "maxHealth": 250
+      },
+      {
+        "card": {
+          "id": "enemy-5-4",
+          "name": "Inferno",
+          "deckIdentity": "Level 5 — Overlords-3"
+        },
+        "maxHealth": 250
+      },
+      {
+        "card": {
+          "id": "enemy-5-5",
+          "name": "Glacier",
+          "deckIdentity": "Level 5 — Overlords-4"
+        },
+        "maxHealth": 250
+      }
+    ]
+  },
+  "1": {
+    "kind": "attack",
+    "name": "Attack",
+    "attacker": {
+      "id": "enemy-5-5",
+      "name": "Glacier",
+      "deckIdentity": "Level 5 — Overlords-4"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "player-guardian",
+          "name": "Guardian",
+          "deckIdentity": "Player-4"
+        },
+        "damage": 0,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 140,
+        "kind": [
+          "WATER"
+        ]
+      }
+    ],
+    "energy": 3
+  },
+  "2": {
+    "kind": "special_attack",
+    "name": "Heavy Strike",
+    "attacker": {
+      "id": "enemy-5-5",
+      "name": "Glacier",
+      "deckIdentity": "Level 5 — Overlords-4"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "player-guardian",
+          "name": "Guardian",
+          "deckIdentity": "Player-4"
+        },
+        "damage": 45,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 95,
+        "kind": [
+          "WATER"
+        ]
+      }
+    ],
+    "energy": 0
+  },
+  "3": {
+    "kind": "attack",
+    "name": "Quick Cut",
+    "attacker": {
+      "id": "player-rogue",
+      "name": "Rogue",
+      "deckIdentity": "Player-3"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "enemy-5-4",
+          "name": "Inferno",
+          "deckIdentity": "Level 5 — Overlords-3"
+        },
+        "damage": 70,
+        "isCritical": true,
+        "dodge": false,
+        "remainingHealth": 180,
+        "kind": [
+          "PHYSICAL"
+        ]
+      }
+    ],
+    "energy": 3
+  },
+  "4": {
+    "kind": "attack",
+    "name": "Ground Slam",
+    "attacker": {
+      "id": "enemy-5-3",
+      "name": "Colossus",
+      "deckIdentity": "Level 5 — Overlords-2"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "player-healer",
+          "name": "Healer",
+          "deckIdentity": "Player-2"
+        },
+        "damage": 100,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 0,
+        "kind": [
+          "EARTH"
+        ]
+      }
+    ],
+    "energy": 4
+  },
+  "5": {
+    "kind": "status_change",
+    "card": {
+      "id": "player-healer",
+      "name": "Healer",
+      "deckIdentity": "Player-2"
+    },
+    "status": "dead"
+  },
+  "6": {
+    "kind": "buff",
+    "name": "Fortify",
+    "source": {
+      "id": "enemy-5-3",
+      "name": "Colossus",
+      "deckIdentity": "Level 5 — Overlords-2"
+    },
+    "alterations": [
+      {
+        "target": {
+          "id": "enemy-5-3",
+          "name": "Colossus",
+          "deckIdentity": "Level 5 — Overlords-2"
+        },
+        "kind": "defense",
+        "value": 30,
+        "remainingTurns": 2
+      }
+    ],
+    "energy": 4
+  },
+  "7": {
+    "kind": "attack",
+    "name": "Flame Bolt",
+    "attacker": {
+      "id": "player-mage",
+      "name": "Mage",
+      "deckIdentity": "Player-1"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "enemy-5-2",
+          "name": "Tempest",
+          "deckIdentity": "Level 5 — Overlords-1"
+        },
+        "damage": 131,
+        "isCritical": true,
+        "dodge": false,
+        "remainingHealth": 119,
+        "kind": [
+          "FIRE",
+          "PHYSICAL"
+        ]
+      }
+    ],
+    "energy": 4
+  },
+  "8": {
+    "kind": "special_attack",
+    "name": "Shadow Flurry",
+    "attacker": {
+      "id": "player-rogue",
+      "name": "Rogue",
+      "deckIdentity": "Player-3"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "enemy-5-4",
+          "name": "Inferno",
+          "deckIdentity": "Level 5 — Overlords-3"
+        },
+        "damage": 36,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 144,
+        "kind": [
+          "PHYSICAL",
+          "AIR"
+        ]
+      }
+    ],
+    "energy": 0
+  },
+  "9": {
+    "kind": "special_attack",
+    "name": "Fireball",
+    "attacker": {
+      "id": "player-mage",
+      "name": "Mage",
+      "deckIdentity": "Player-1"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "enemy-5-1",
+          "name": "Overlord",
+          "deckIdentity": "Level 5 — Overlords-0"
+        },
+        "damage": 250,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 0,
+        "kind": [
+          "FIRE"
+        ]
+      },
+      {
+        "defender": {
+          "id": "enemy-5-2",
+          "name": "Tempest",
+          "deckIdentity": "Level 5 — Overlords-1"
+        },
+        "damage": 119,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 0,
+        "kind": [
+          "FIRE"
+        ]
+      },
+      {
+        "defender": {
+          "id": "enemy-5-3",
+          "name": "Colossus",
+          "deckIdentity": "Level 5 — Overlords-2"
+        },
+        "damage": 245,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 5,
+        "kind": [
+          "FIRE"
+        ]
+      },
+      {
+        "defender": {
+          "id": "enemy-5-4",
+          "name": "Inferno",
+          "deckIdentity": "Level 5 — Overlords-3"
+        },
+        "damage": 144,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 0,
+        "kind": [
+          "FIRE"
+        ]
+      },
+      {
+        "defender": {
+          "id": "enemy-5-5",
+          "name": "Glacier",
+          "deckIdentity": "Level 5 — Overlords-4"
+        },
+        "damage": 0,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 250,
+        "kind": [
+          "FIRE"
+        ]
+      }
+    ],
+    "energy": 0
+  },
+  "10": {
+    "kind": "status_change",
+    "card": {
+      "id": "enemy-5-1",
+      "name": "Overlord",
+      "deckIdentity": "Level 5 — Overlords-0"
+    },
+    "status": "dead"
+  },
+  "11": {
+    "kind": "status_change",
+    "card": {
+      "id": "enemy-5-2",
+      "name": "Tempest",
+      "deckIdentity": "Level 5 — Overlords-1"
+    },
+    "status": "dead"
+  },
+  "12": {
+    "kind": "status_change",
+    "card": {
+      "id": "enemy-5-4",
+      "name": "Inferno",
+      "deckIdentity": "Level 5 — Overlords-3"
+    },
+    "status": "dead"
+  },
+  "13": {
+    "kind": "attack",
+    "name": "Quick Cut",
+    "attacker": {
+      "id": "player-rogue",
+      "name": "Rogue",
+      "deckIdentity": "Player-3"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "enemy-5-5",
+          "name": "Glacier",
+          "deckIdentity": "Level 5 — Overlords-4"
+        },
+        "damage": 70,
+        "isCritical": true,
+        "dodge": false,
+        "remainingHealth": 180,
+        "kind": [
+          "PHYSICAL"
+        ]
+      }
+    ],
+    "energy": 3
+  },
+  "14": {
+    "kind": "attack",
+    "name": "Attack",
+    "attacker": {
+      "id": "enemy-5-5",
+      "name": "Glacier",
+      "deckIdentity": "Level 5 — Overlords-4"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "player-guardian",
+          "name": "Guardian",
+          "deckIdentity": "Player-4"
+        },
+        "damage": 0,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 95,
+        "kind": [
+          "WATER"
+        ]
+      }
+    ],
+    "energy": 3
+  },
+  "15": {
+    "kind": "regenerated",
+    "card": {
+      "id": "enemy-5-5",
+      "name": "Glacier",
+      "deckIdentity": "Level 5 — Overlords-4"
+    },
+    "healed": 20,
+    "remainingHealth": 200
+  },
+  "16": {
+    "kind": "special_attack",
+    "name": "Heavy Strike",
+    "attacker": {
+      "id": "enemy-5-5",
+      "name": "Glacier",
+      "deckIdentity": "Level 5 — Overlords-4"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "player-guardian",
+          "name": "Guardian",
+          "deckIdentity": "Player-4"
+        },
+        "damage": 45,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 50,
+        "kind": [
+          "WATER"
+        ]
+      }
+    ],
+    "energy": 0
+  },
+  "17": {
+    "kind": "regenerated",
+    "card": {
+      "id": "enemy-5-5",
+      "name": "Glacier",
+      "deckIdentity": "Level 5 — Overlords-4"
+    },
+    "healed": 20,
+    "remainingHealth": 220
+  },
+  "18": {
+    "kind": "attack",
+    "name": "Flame Bolt",
+    "attacker": {
+      "id": "player-mage",
+      "name": "Mage",
+      "deckIdentity": "Player-1"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "enemy-5-3",
+          "name": "Colossus",
+          "deckIdentity": "Level 5 — Overlords-2"
+        },
+        "damage": 5,
+        "isCritical": true,
+        "dodge": false,
+        "remainingHealth": 0,
+        "kind": [
+          "FIRE",
+          "PHYSICAL"
+        ]
+      }
+    ],
+    "energy": 4
+  },
+  "19": {
+    "kind": "status_change",
+    "card": {
+      "id": "enemy-5-3",
+      "name": "Colossus",
+      "deckIdentity": "Level 5 — Overlords-2"
+    },
+    "status": "dead"
+  },
+  "20": {
+    "kind": "attack",
+    "name": "Attack",
+    "attacker": {
+      "id": "enemy-5-5",
+      "name": "Glacier",
+      "deckIdentity": "Level 5 — Overlords-4"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "player-guardian",
+          "name": "Guardian",
+          "deckIdentity": "Player-4"
+        },
+        "damage": 0,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 50,
+        "kind": [
+          "WATER"
+        ]
+      }
+    ],
+    "energy": 3
+  },
+  "21": {
+    "kind": "regenerated",
+    "card": {
+      "id": "enemy-5-5",
+      "name": "Glacier",
+      "deckIdentity": "Level 5 — Overlords-4"
+    },
+    "healed": 20,
+    "remainingHealth": 240
+  },
+  "22": {
+    "kind": "special_attack",
+    "name": "Heavy Strike",
+    "attacker": {
+      "id": "enemy-5-5",
+      "name": "Glacier",
+      "deckIdentity": "Level 5 — Overlords-4"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "player-guardian",
+          "name": "Guardian",
+          "deckIdentity": "Player-4"
+        },
+        "damage": 45,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 5,
+        "kind": [
+          "WATER"
+        ]
+      }
+    ],
+    "energy": 0
+  },
+  "23": {
+    "kind": "regenerated",
+    "card": {
+      "id": "enemy-5-5",
+      "name": "Glacier",
+      "deckIdentity": "Level 5 — Overlords-4"
+    },
+    "healed": 10,
+    "remainingHealth": 250
+  },
+  "24": {
+    "kind": "attack",
+    "name": "Strike",
+    "attacker": {
+      "id": "player-warrior",
+      "name": "Warrior",
+      "deckIdentity": "Player-0"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "enemy-5-5",
+          "name": "Glacier",
+          "deckIdentity": "Level 5 — Overlords-4"
+        },
+        "damage": 0,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 250,
+        "kind": [
+          "PHYSICAL"
+        ]
+      }
+    ],
+    "energy": 3
+  },
+  "25": {
+    "kind": "special_attack",
+    "name": "Power Slash",
+    "attacker": {
+      "id": "player-warrior",
+      "name": "Warrior",
+      "deckIdentity": "Player-0"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "enemy-5-5",
+          "name": "Glacier",
+          "deckIdentity": "Level 5 — Overlords-4"
+        },
+        "damage": 60,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 190,
+        "kind": [
+          "PHYSICAL"
+        ]
+      }
+    ],
+    "energy": 0
+  },
+  "26": {
+    "kind": "special_attack",
+    "name": "Shadow Flurry",
+    "attacker": {
+      "id": "player-rogue",
+      "name": "Rogue",
+      "deckIdentity": "Player-3"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "enemy-5-5",
+          "name": "Glacier",
+          "deckIdentity": "Level 5 — Overlords-4"
+        },
+        "damage": 36,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 154,
+        "kind": [
+          "PHYSICAL",
+          "AIR"
+        ]
+      }
+    ],
+    "energy": 0
+  },
+  "27": {
+    "kind": "special_attack",
+    "name": "Fireball",
+    "attacker": {
+      "id": "player-mage",
+      "name": "Mage",
+      "deckIdentity": "Player-1"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "enemy-5-5",
+          "name": "Glacier",
+          "deckIdentity": "Level 5 — Overlords-4"
+        },
+        "damage": 0,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 154,
+        "kind": [
+          "FIRE"
+        ]
+      }
+    ],
+    "energy": 0
+  },
+  "28": {
+    "kind": "attack",
+    "name": "Strike",
+    "attacker": {
+      "id": "player-warrior",
+      "name": "Warrior",
+      "deckIdentity": "Player-0"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "enemy-5-5",
+          "name": "Glacier",
+          "deckIdentity": "Level 5 — Overlords-4"
+        },
+        "damage": 0,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 154,
+        "kind": [
+          "PHYSICAL"
+        ]
+      }
+    ],
+    "energy": 3
+  },
+  "29": {
+    "kind": "special_attack",
+    "name": "Power Slash",
+    "attacker": {
+      "id": "player-warrior",
+      "name": "Warrior",
+      "deckIdentity": "Player-0"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "enemy-5-5",
+          "name": "Glacier",
+          "deckIdentity": "Level 5 — Overlords-4"
+        },
+        "damage": 60,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 94,
+        "kind": [
+          "PHYSICAL"
+        ]
+      }
+    ],
+    "energy": 0
+  },
+  "30": {
+    "kind": "attack",
+    "name": "Flame Bolt",
+    "attacker": {
+      "id": "player-mage",
+      "name": "Mage",
+      "deckIdentity": "Player-1"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "enemy-5-5",
+          "name": "Glacier",
+          "deckIdentity": "Level 5 — Overlords-4"
+        },
+        "damage": 0,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 94,
+        "kind": [
+          "FIRE",
+          "PHYSICAL"
+        ]
+      }
+    ],
+    "energy": 4
+  },
+  "31": {
+    "kind": "attack",
+    "name": "Quick Cut",
+    "attacker": {
+      "id": "player-rogue",
+      "name": "Rogue",
+      "deckIdentity": "Player-3"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "enemy-5-5",
+          "name": "Glacier",
+          "deckIdentity": "Level 5 — Overlords-4"
+        },
+        "damage": 0,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 94,
+        "kind": [
+          "PHYSICAL"
+        ]
+      }
+    ],
+    "energy": 3
+  },
+  "32": {
+    "kind": "attack",
+    "name": "Strike",
+    "attacker": {
+      "id": "player-warrior",
+      "name": "Warrior",
+      "deckIdentity": "Player-0"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "enemy-5-5",
+          "name": "Glacier",
+          "deckIdentity": "Level 5 — Overlords-4"
+        },
+        "damage": 0,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 94,
+        "kind": [
+          "PHYSICAL"
+        ]
+      }
+    ],
+    "energy": 3
+  },
+  "33": {
+    "kind": "special_attack",
+    "name": "Shadow Flurry",
+    "attacker": {
+      "id": "player-rogue",
+      "name": "Rogue",
+      "deckIdentity": "Player-3"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "enemy-5-5",
+          "name": "Glacier",
+          "deckIdentity": "Level 5 — Overlords-4"
+        },
+        "damage": 77,
+        "isCritical": true,
+        "dodge": false,
+        "remainingHealth": 17,
+        "kind": [
+          "PHYSICAL",
+          "AIR"
+        ]
+      }
+    ],
+    "energy": 0
+  },
+  "34": {
+    "kind": "special_attack",
+    "name": "Fireball",
+    "attacker": {
+      "id": "player-mage",
+      "name": "Mage",
+      "deckIdentity": "Player-1"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "enemy-5-5",
+          "name": "Glacier",
+          "deckIdentity": "Level 5 — Overlords-4"
+        },
+        "damage": 0,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 17,
+        "kind": [
+          "FIRE"
+        ]
+      }
+    ],
+    "energy": 0
+  },
+  "35": {
+    "kind": "attack",
+    "name": "Attack",
+    "attacker": {
+      "id": "enemy-5-5",
+      "name": "Glacier",
+      "deckIdentity": "Level 5 — Overlords-4"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "player-guardian",
+          "name": "Guardian",
+          "deckIdentity": "Player-4"
+        },
+        "damage": 0,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 5,
+        "kind": [
+          "WATER"
+        ]
+      }
+    ],
+    "energy": 3
+  },
+  "36": {
+    "kind": "regenerated",
+    "card": {
+      "id": "enemy-5-5",
+      "name": "Glacier",
+      "deckIdentity": "Level 5 — Overlords-4"
+    },
+    "healed": 20,
+    "remainingHealth": 37
+  },
+  "37": {
+    "kind": "special_attack",
+    "name": "Heavy Strike",
+    "attacker": {
+      "id": "enemy-5-5",
+      "name": "Glacier",
+      "deckIdentity": "Level 5 — Overlords-4"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "player-guardian",
+          "name": "Guardian",
+          "deckIdentity": "Player-4"
+        },
+        "damage": 5,
+        "isCritical": true,
+        "dodge": false,
+        "remainingHealth": 0,
+        "kind": [
+          "WATER"
+        ]
+      }
+    ],
+    "energy": 0
+  },
+  "38": {
+    "kind": "status_change",
+    "card": {
+      "id": "player-guardian",
+      "name": "Guardian",
+      "deckIdentity": "Player-4"
+    },
+    "status": "dead"
+  },
+  "39": {
+    "kind": "regenerated",
+    "card": {
+      "id": "enemy-5-5",
+      "name": "Glacier",
+      "deckIdentity": "Level 5 — Overlords-4"
+    },
+    "healed": 20,
+    "remainingHealth": 57
+  },
+  "40": {
+    "kind": "special_attack",
+    "name": "Power Slash",
+    "attacker": {
+      "id": "player-warrior",
+      "name": "Warrior",
+      "deckIdentity": "Player-0"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "enemy-5-5",
+          "name": "Glacier",
+          "deckIdentity": "Level 5 — Overlords-4"
+        },
+        "damage": 57,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 0,
+        "kind": [
+          "PHYSICAL"
+        ]
+      }
+    ],
+    "energy": 0
+  },
+  "41": {
+    "kind": "status_change",
+    "card": {
+      "id": "enemy-5-5",
+      "name": "Glacier",
+      "deckIdentity": "Level 5 — Overlords-4"
+    },
+    "status": "dead"
+  },
+  "42": {
+    "kind": "fight_end",
+    "winner": "Player"
+  }
+}

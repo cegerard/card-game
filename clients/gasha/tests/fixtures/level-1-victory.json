@@ -1,0 +1,94 @@
+{
+  "0": {
+    "kind": "fight_start",
+    "cards": [
+      {
+        "card": {
+          "id": "player-warrior",
+          "name": "Warrior",
+          "deckIdentity": "Player-0"
+        },
+        "maxHealth": 120
+      },
+      {
+        "card": {
+          "id": "player-mage",
+          "name": "Mage",
+          "deckIdentity": "Player-1"
+        },
+        "maxHealth": 80
+      },
+      {
+        "card": {
+          "id": "player-healer",
+          "name": "Healer",
+          "deckIdentity": "Player-2"
+        },
+        "maxHealth": 100
+      },
+      {
+        "card": {
+          "id": "player-rogue",
+          "name": "Rogue",
+          "deckIdentity": "Player-3"
+        },
+        "maxHealth": 85
+      },
+      {
+        "card": {
+          "id": "player-guardian",
+          "name": "Guardian",
+          "deckIdentity": "Player-4"
+        },
+        "maxHealth": 140
+      },
+      {
+        "card": {
+          "id": "enemy-1-1",
+          "name": "Grunt",
+          "deckIdentity": "Level 1 — Rookies-0"
+        },
+        "maxHealth": 100
+      }
+    ]
+  },
+  "1": {
+    "kind": "attack",
+    "name": "Quick Cut",
+    "attacker": {
+      "id": "player-rogue",
+      "name": "Rogue",
+      "deckIdentity": "Player-3"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "enemy-1-1",
+          "name": "Grunt",
+          "deckIdentity": "Level 1 — Rookies-0"
+        },
+        "damage": 100,
+        "isCritical": true,
+        "dodge": false,
+        "remainingHealth": 0,
+        "kind": [
+          "PHYSICAL"
+        ]
+      }
+    ],
+    "energy": 3
+  },
+  "2": {
+    "kind": "status_change",
+    "card": {
+      "id": "enemy-1-1",
+      "name": "Grunt",
+      "deckIdentity": "Level 1 — Rookies-0"
+    },
+    "status": "dead"
+  },
+  "3": {
+    "kind": "fight_end",
+    "winner": "Player"
+  }
+}

@@ -1,0 +1,183 @@
+{
+  "0": {
+    "kind": "fight_start",
+    "cards": [
+      {
+        "card": {
+          "id": "player-warrior",
+          "name": "Warrior",
+          "deckIdentity": "Player-0"
+        },
+        "maxHealth": 120
+      },
+      {
+        "card": {
+          "id": "player-mage",
+          "name": "Mage",
+          "deckIdentity": "Player-1"
+        },
+        "maxHealth": 80
+      },
+      {
+        "card": {
+          "id": "player-healer",
+          "name": "Healer",
+          "deckIdentity": "Player-2"
+        },
+        "maxHealth": 100
+      },
+      {
+        "card": {
+          "id": "player-rogue",
+          "name": "Rogue",
+          "deckIdentity": "Player-3"
+        },
+        "maxHealth": 85
+      },
+      {
+        "card": {
+          "id": "player-guardian",
+          "name": "Guardian",
+          "deckIdentity": "Player-4"
+        },
+        "maxHealth": 140
+      },
+      {
+        "card": {
+          "id": "enemy-3-1",
+          "name": "Brute",
+          "deckIdentity": "Level 3 — Brutes-0"
+        },
+        "maxHealth": 160
+      },
+      {
+        "card": {
+          "id": "enemy-3-2",
+          "name": "Guard",
+          "deckIdentity": "Level 3 — Brutes-1"
+        },
+        "maxHealth": 160
+      },
+      {
+        "card": {
+          "id": "enemy-3-3",
+          "name": "Ranger",
+          "deckIdentity": "Level 3 — Brutes-2"
+        },
+        "maxHealth": 160
+      }
+    ]
+  },
+  "1": {
+    "kind": "attack",
+    "name": "Flame Bolt",
+    "attacker": {
+      "id": "player-mage",
+      "name": "Mage",
+      "deckIdentity": "Player-1"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "enemy-3-2",
+          "name": "Guard",
+          "deckIdentity": "Level 3 — Brutes-1"
+        },
+        "damage": 6,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 154,
+        "kind": [
+          "FIRE",
+          "PHYSICAL"
+        ]
+      }
+    ],
+    "energy": 4
+  },
+  "2": {
+    "kind": "special_attack",
+    "name": "Fireball",
+    "attacker": {
+      "id": "player-mage",
+      "name": "Mage",
+      "deckIdentity": "Player-1"
+    },
+    "damages": [
+      {
+        "defender": {
+          "id": "enemy-3-1",
+          "name": "Brute",
+          "deckIdentity": "Level 3 — Brutes-0"
+        },
+        "damage": 160,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 0,
+        "kind": [
+          "FIRE"
+        ]
+      },
+      {
+        "defender": {
+          "id": "enemy-3-2",
+          "name": "Guard",
+          "deckIdentity": "Level 3 — Brutes-1"
+        },
+        "damage": 154,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 0,
+        "kind": [
+          "FIRE"
+        ]
+      },
+      {
+        "defender": {
+          "id": "enemy-3-3",
+          "name": "Ranger",
+          "deckIdentity": "Level 3 — Brutes-2"
+        },
+        "damage": 160,
+        "isCritical": false,
+        "dodge": false,
+        "remainingHealth": 0,
+        "kind": [
+          "FIRE"
+        ]
+      }
+    ],
+    "energy": 0
+  },
+  "3": {
+    "kind": "status_change",
+    "card": {
+      "id": "enemy-3-1",
+      "name": "Brute",
+      "deckIdentity": "Level 3 — Brutes-0"
+    },
+    "status": "dead"
+  },
+  "4": {
+    "kind": "status_change",
+    "card": {
+      "id": "enemy-3-2",
+      "name": "Guard",
+      "deckIdentity": "Level 3 — Brutes-1"
+    },
+    "status": "dead"
+  },
+  "5": {
+    "kind": "status_change",
+    "card": {
+      "id": "enemy-3-3",
+      "name": "Ranger",
+      "deckIdentity": "Level 3 — Brutes-2"
+    },
+    "status": "dead"
+  },
+  "6": {
+    "kind": "fight_end",
+    "winner": "Player"
+  }
+}
