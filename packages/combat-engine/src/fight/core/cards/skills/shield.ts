@@ -47,7 +47,7 @@ export class ShieldSkill implements HealthReactiveSkill {
     );
 
     const results = targets.map((target) => {
-      const shield = target.applyShield(this.rate, Infinity);
+      const shield = target.applyShield(this.rate, Infinity, this.name);
       return { target: target.identityInfo, shield };
     });
 

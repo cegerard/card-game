@@ -27,24 +27,12 @@ et compare les caractéristiques ci-dessous à `samples/cards.json`.
 
 Le moteur ne suit pas encore ces points de la fiche ; ils ne portent pas d'identifiant et ne sont pas testés :
 
-- Flamme Terreuse : Notion pose une brûlure légère de niveau 1 (deux tours) ; le moteur pose une brûlure de niveau 2 (trois tours).
-- Élan de la salamandre : Notion le déclenche automatiquement au début du tour ; le moteur le lance à la place de l'attaque normale.
-- Élan de la salamandre : Notion réduit la Défense de l'ennemi de 15 % ; le moteur n'applique pas cette réduction.
-- Résilience Pyro-Minérale : Notion donne +15 % d'Attaque sous le bouclier de basalte ; le moteur n'applique pas ce bonus.
-
-Valeurs actuelles du moteur pour les caractéristiques que `cards.json` ne suit pas encore :
-
-```json kit-stat-gaps
-{
-  "regeneration": null,
-  "resistance": null
-}
-```
+- Flamme Terreuse : Notion annonce une brûlure de niveau 1 pendant deux tours ; une brûlure de niveau 1 du moteur ne dure qu'un tour (2 × niveau − 1).
 
 ## Attaque : Flamme Terreuse
 
 - [KAE-ATK-1] Inflige 80 % d'Attaque en dégâts physiques, 20 % d'Attaque en dégâts de Feu et 10 % d'Attaque en dégâts de Terre.
-- [KAE-ATK-2] 50 % de chances de laisser une brûlure qui inflige 10 % de l'Attaque par tour.
+- [KAE-ATK-2] 50 % de chances de laisser une brûlure légère (niveau 1) qui inflige 10 % de l'Attaque par tour.
 - [KAE-ATK-3] 20 % de chances d'étourdir l'ennemi (niveau 1) pendant un tour.
 
 ## Compétence spéciale : Cœur de Basalte
@@ -56,11 +44,13 @@ Valeurs actuelles du moteur pour les caractéristiques que `cards.json` ne suit 
 ## Élan de la salamandre
 
 - [KAE-ELA-1] Inflige 120 % de dégâts d'Attaque (Feu : 60 %, physique : 60 %).
-- [KAE-ELA-2] Se déclenche tous les trois tours.
+- [KAE-ELA-2] Se déclenche automatiquement tous les trois tours, au début du tour ; Kaelion agit ensuite normalement.
+- [KAE-ELA-3] Réduit la Défense de l'ennemi touché de 15 % pendant 2 tours (Notion ne précise pas la durée).
 
 ## Résilience Pyro-Minérale (passif)
 
 - [KAE-RES-1] Lorsqu'il passe sous 30 % de PV, il génère un bouclier de basalte de 30 % de ses PV max.
+- [KAE-RES-2] Tant que le bouclier de basalte tient, son Attaque augmente de 15 %.
 
 ## Recharge naturelle
 

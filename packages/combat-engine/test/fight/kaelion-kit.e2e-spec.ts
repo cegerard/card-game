@@ -12,6 +12,7 @@ const FLAME = 'Flamme Terreuse';
 const BASALT_HEART = 'Coeur de basalte';
 const RUSH = 'Elan de la salamandre';
 const RESILIENCE = 'Résilience Pyro-Minérale';
+const RESILIENCE_ATTACK = 'Résilience Pyro-Minérale - ATTACK';
 const RECHARGE = 'Recharge naturelle';
 const RECHARGE_DEFENSE = 'Recharge naturelle - DEFENSE';
 const RECHARGE_ATTACK = 'Recharge naturelle - ATTACK';
@@ -24,14 +25,24 @@ const statusesOn = (steps: any[], id: string, status: string) =>
     (s) => s.card.id === id && s.status === status,
   );
 
+const after = (steps: any[], found: (step: any) => boolean) =>
+  steps.slice(steps.findIndex(found) + 1);
+
+const nextFlameAfter = (steps: any[], found: (step: any) => boolean) =>
+  named(after(steps, found), 'attack', FLAME).find(
+    (s) => s.attacker.id === 'kaelion',
+  );
+
 describe('Kaelion full kit', () => {
   const fight = useFight();
 
   const rolling = (roll: number) =>
     jest.spyOn(Math, 'random').mockReturnValue(roll);
   const alone = () => fight([kaelion], [dummy('foe', { attack: 10 })]);
-  // 300 - 50 defense = 250 a hit: 280, then 30
+  // 300 - 50 defense = 250 a hit: 280, then 70 after his 40 regeneration
   const pressed = () => fight([kaelion], [dummy('foe', { attack: 300 })]);
+  // 190 a hit: the shield rises at 40 health, the next hit breaks it, not him
+  const worn = () => fight([kaelion], [dummy('foe', { attack: 240 })]);
 
   describe(FLAME, () => {
     // 68 physical + 17 fire + 8.5 earth -> 9
@@ -53,6 +64,16 @@ describe('Kaelion full kit', () => {
         steps.find((s) => s.kind === 'state_effect' && s.type === 'burn')
           .damage,
       ).toBe(8.5);
+    });
+
+    it('[KAE-ATK-2] burns at level 1, a single turn', async () => {
+      rolling(0.1);
+      const steps = await alone();
+
+      expect(
+        steps.find((s) => s.kind === 'state_effect' && s.type === 'burn')
+          .remainingTurns,
+      ).toBe(0);
     });
 
     it('[KAE-ATK-2] does not burn on a roll of 50% or more', async () => {
@@ -78,11 +99,13 @@ describe('Kaelion full kit', () => {
   });
 
   describe(BASALT_HEART, () => {
+    // The turn-start rushes are not his action
     it('[KAE-SPE-1] is cast on his sixth action, once 50 energy are charged', async () => {
       rolling(0.99);
       const steps = await alone();
+      const ownActions = actionsOf(steps, 'kaelion').filter((n) => n !== RUSH);
 
-      expect(actionsOf(steps, 'kaelion').indexOf(BASALT_HEART)).toBe(5);
+      expect(ownActions.indexOf(BASALT_HEART)).toBe(5);
     });
 
     // 85 fire + 85 earth on each
@@ -156,14 +179,44 @@ describe('Kaelion full kit', () => {
       });
     });
 
-    // Due on his sixth action, it waits one more: his special takes that turn
-    it('[KAE-ELA-2] comes back every third action', async () => {
+    // His own actions before each rush: it opens his 3rd, 6th and 9th turns
+    it('[KAE-ELA-2] comes back every third turn', async () => {
       rolling(0.99);
       const steps = await alone();
-      const actions = actionsOf(steps, 'kaelion').slice(0, 9);
+      const actions = actionsOf(steps, 'kaelion');
+      const ownBefore = (i: number) =>
+        actions.slice(0, i).filter((name) => name !== RUSH).length;
 
-      expect(actions.flatMap((name, i) => (name === RUSH ? [i] : []))).toEqual([
-        2, 6,
+      expect(
+        actions
+          .flatMap((name, i) => (name === RUSH ? [ownBefore(i)] : []))
+          .slice(0, 3),
+      ).toEqual([2, 5, 8]);
+    });
+
+    it('[KAE-ELA-2] fires on its own at turn start, then he still acts', async () => {
+      rolling(0.99);
+      const steps = await alone();
+      const strikes = after(steps, (s) => s.name === RUSH).filter((s) =>
+        ['attack', 'special_attack'].includes(s.kind),
+      );
+
+      expect(strikes[0]).toMatchObject({
+        name: FLAME,
+        attacker: expect.objectContaining({ id: 'kaelion' }),
+      });
+    });
+
+    it('[KAE-ELA-3] lowers the defense of the enemy struck by 15% for 2 turns', async () => {
+      rolling(0.99);
+      const steps = await fight([kaelion], [dummy('foe', { defense: 100 })]);
+
+      expect(named(steps, 'debuff', RUSH)[0].alterations).toEqual([
+        expect.objectContaining({
+          kind: 'defense',
+          value: 15,
+          remainingTurns: 2,
+        }),
       ]);
     });
   });
@@ -184,6 +237,44 @@ describe('Kaelion full kit', () => {
       const shielded = steps.findIndex((s) => s.name === RESILIENCE);
 
       expect(steps[shielded - 1].damages[0].remainingHealth).toBeLessThan(159);
+    });
+
+    // A permanent buff laid at fight start, read live: worth nothing unshielded
+    it('[KAE-RES-2] holds his attack bonus from the fight start, worth 0 without the shield', async () => {
+      rolling(0.99);
+      const steps = await alone();
+
+      expect(
+        named(steps, 'buff', RESILIENCE_ATTACK)[0].alterations[0],
+      ).toMatchObject({ kind: 'attack', value: 0, remainingTurns: null });
+    });
+
+    // 97.75 attack: 78.2 physical + 19.55 fire + 9.775 earth
+    it('[KAE-RES-2] raises his attack by 15% while the basalt shield holds', async () => {
+      rolling(0.99);
+      const steps = await pressed();
+      const flame = nextFlameAfter(steps, (s) => s.name === RESILIENCE);
+
+      expect(flame.damages[0].damage).toBe(108);
+    });
+
+    it('[KAE-RES-2] loses the bonus once the basalt shield breaks', async () => {
+      rolling(0.99);
+      const steps = await worn();
+      const flame = nextFlameAfter(
+        steps,
+        (s) => s.kind === 'shield_broken' && s.card.id === 'kaelion',
+      );
+
+      expect(flame.damages[0].damage).toBe(94);
+    });
+
+    it('[KAE-RES-2] gets nothing from the molten rock shield of his special', async () => {
+      rolling(0.99);
+      const steps = await alone();
+      const flame = nextFlameAfter(steps, (s) => s.name === BASALT_HEART);
+
+      expect(flame.damages[0].damage).toBe(94);
     });
   });
 

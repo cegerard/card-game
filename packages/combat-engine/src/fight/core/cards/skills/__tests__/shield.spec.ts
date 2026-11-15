@@ -82,5 +82,11 @@ describe('ShieldSkill', () => {
 
       expect(result.results[0].shield.points).toBe(300); // 0.3 * 1000
     });
+
+    it('raises a shield named after the skill', () => {
+      skill.launch(card, context);
+
+      expect(card.holdsShield('Résilience Pyro-Minérale')).toBe(true);
+    });
   });
 });

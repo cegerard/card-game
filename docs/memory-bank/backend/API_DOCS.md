@@ -209,6 +209,7 @@ Simulates a turn-based card battle between two players.
   activationEventThreshold?: number,  // TRANSFORMATION, required with activationEvent any-ally-health-below: the ally health ratio
   perLivingAlly?: { maxRate },  // ALTERATION only: `rate` per living ally of the bearer (bearer excluded), capped, read live
   whileHealthBelow?: number,    // ALTERATION only (not with perLivingAlly): counts only while the bearer health ratio is under it
+  whileShielded?: string,       // ALTERATION only (not with the other live rates): counts only while the bearer holds the shield of the SHIELD skill of that name
   terminationDamageRate?: number,  // ALTERATION only, in ]0, 1]: `terminationEvent` ends it only on a hit costing more than that share of max health
   accuracyRate?: number, agilityRate?: number,  // ATTACKER_INSIGHT (required, >= 0)
   amount?: number,              // ENERGY_GAIN (required, integer >= 1)

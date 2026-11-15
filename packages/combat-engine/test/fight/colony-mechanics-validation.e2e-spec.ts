@@ -148,6 +148,19 @@ describe('Colony mechanics validation', () => {
 
     it('returns 400 for a health ceiling above 1', () =>
       post(payload([colonySpirit({ whileHealthBelow: 1.5 })])).expect(400));
+
+    it('accepts a rate held under a named shield', () =>
+      post(payload([colonySpirit({ whileShielded: 'Basalte' })])).expect(200));
+
+    it('returns 400 when a shield hold meets another live rate', () =>
+      post(
+        payload([
+          colonySpirit({ whileShielded: 'Basalte', whileHealthBelow: 0.3 }),
+        ]),
+      ).expect(400));
+
+    it('returns 400 when another kind carries a shield hold', () =>
+      post(payload([storm({ whileShielded: 'Basalte' })])).expect(400));
   });
 
   describe('battlefield', () => {

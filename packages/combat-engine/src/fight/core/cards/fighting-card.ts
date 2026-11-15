@@ -562,6 +562,10 @@ export class FightingCard {
     return this.shield !== null;
   }
 
+  public holdsShield(name: string): boolean {
+    return this.shield?.name === name;
+  }
+
   public setOwnerInfo(ownerName: string, cardPositionInDeck: number): void {
     this.cardDeckIdentity = `${ownerName}-${cardPositionInDeck}`;
   }
@@ -1364,13 +1368,22 @@ export class FightingCard {
     return ended.map((s) => s.name);
   }
 
-  public applyShield(rate: number, duration: number): Shield {
-    return this.applyShieldPoints(Math.round(rate * this.maxHealth), duration);
+  /** `name` lets a live alteration tell this shield from another one. */
+  public applyShield(rate: number, duration: number, name?: string): Shield {
+    return this.applyShieldPoints(
+      Math.round(rate * this.maxHealth),
+      duration,
+      name,
+    );
   }
 
   /** A shield sized by somebody else than its bearer, such as its caster. */
-  public applyShieldPoints(points: number, duration: number): Shield {
-    this.shield = { points, duration };
+  public applyShieldPoints(
+    points: number,
+    duration: number,
+    name?: string,
+  ): Shield {
+    this.shield = name ? { points, duration, name } : { points, duration };
     return this.shield;
   }
 
