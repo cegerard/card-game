@@ -93,3 +93,46 @@ describe('BurnAttackEffect with triggeredDebuff', () => {
     });
   });
 });
+
+describe('BurnAttackEffect with an explicit duration', () => {
+  const burnedTurnsLeft = (level: 1 | 3, duration?: number) => {
+    const defender = createFightingCard({});
+    new BurnAttackEffect(
+      0.1,
+      level,
+      new MathRandomizer(),
+      undefined,
+      undefined,
+      undefined,
+      duration,
+    ).applyEffect(defender, createFightingCard({}), {} as any);
+    return defender.applyStateEffects()[0].remainingTurns;
+  };
+
+  it('outlasts the single turn of its level 1', () => {
+    expect(burnedTurnsLeft(1, 2)).toBe(1);
+  });
+
+  it('cuts short the five turns of its level 3', () => {
+    expect(burnedTurnsLeft(3, 2)).toBe(1);
+  });
+
+  it('keeps the level duration when absent', () => {
+    expect(burnedTurnsLeft(3)).toBe(4);
+  });
+
+  it.each([0, 1.5])('refuses a duration of %s', (duration) => {
+    expect(
+      () =>
+        new BurnAttackEffect(
+          0.1,
+          1,
+          new MathRandomizer(),
+          undefined,
+          undefined,
+          undefined,
+          duration,
+        ),
+    ).toThrow(`BurnAttackEffect duration must be an integer >= 1`);
+  });
+});

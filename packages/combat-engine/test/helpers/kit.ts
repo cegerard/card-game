@@ -79,6 +79,25 @@ export const hitsOn = (steps: any[], id: string) =>
     .flatMap((s) => s.damages.filter((d) => d.defender.id === id));
 
 /**
+ * Remaining turns of the `status` ticks on `id` from step `from`, up to the
+ * one ending it: a status lasting two turns reads [1, 0].
+ */
+export const statusTicks = (
+  steps: any[],
+  status: string,
+  id: string,
+  from = 0,
+) => {
+  const ticks = steps
+    .slice(from)
+    .filter(
+      (s) => s.kind === 'state_effect' && s.type === status && s.card.id === id,
+    )
+    .map((s) => s.remainingTurns);
+  return ticks.slice(0, ticks.indexOf(0) + 1);
+};
+
+/**
  * Boots the app around each test of the calling `describe` and returns a
  * `fight()` that posts two decks and resolves to the report steps.
  */

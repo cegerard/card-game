@@ -1,6 +1,6 @@
 import { FightingCard } from '../../fighting-card';
 import { AttackEffect, StateEffectResult } from './attack-effect';
-import { EffectLevel } from './effect-level';
+import { assertLevelDuration, EffectLevel, levelTurns } from './effect-level';
 import { FightingContext } from '../fighting-context';
 import { CardStateBurned } from '../state/card-state-burned';
 import { EffectTriggeredDebuff } from './effect-triggered-debuff';
@@ -15,6 +15,8 @@ export class BurnAttackEffect implements AttackEffect {
   public readonly terminationEvent?: string;
   public readonly probability?: number;
   private readonly randomizer: Randomizer;
+  // Replaces the turns the level gives; the level keeps its other roles
+  private readonly duration?: number;
 
   constructor(
     rate: number,
@@ -23,7 +25,10 @@ export class BurnAttackEffect implements AttackEffect {
     triggeredDebuff?: EffectTriggeredDebuff,
     terminationEvent?: string,
     probability?: number,
+    duration?: number,
   ) {
+    assertLevelDuration('BurnAttackEffect', duration);
+    this.duration = duration;
     this.rate = rate;
     this.level = level;
     this.randomizer = randomizer;
@@ -76,6 +81,6 @@ export class BurnAttackEffect implements AttackEffect {
   }
 
   private computeBurnedTurns(effectLevel: EffectLevel) {
-    return 2 * effectLevel - 1;
+    return levelTurns(effectLevel, this.duration);
   }
 }

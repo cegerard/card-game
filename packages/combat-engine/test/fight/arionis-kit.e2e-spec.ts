@@ -5,6 +5,7 @@ import {
   named,
   ofKind,
   rosterCard,
+  statusTicks,
   useFight,
 } from '../helpers/kit';
 
@@ -56,12 +57,16 @@ describe('Arionis full kit', () => {
       expect(burnTicksOn(steps, 'foe')[0].damage).toBe(8.5);
     });
 
-    // A level 1 burn ticks once
-    it('[ARI-ATK-3] lays a light burn, level 1', async () => {
+    // Its duration replaces the turns of its level, which the report never shows
+    it('[ARI-ATK-3] lays a light burn, level 1', () => {
+      expect(arionis.skills.simpleAttack.effects[0].level).toBe(1);
+    });
+
+    it('[ARI-ATK-3] burns for two turns', async () => {
       rolling(0.99);
       const steps = await alone();
 
-      expect(burnTicksOn(steps, 'foe')[0].remainingTurns).toBe(0);
+      expect(statusTicks(steps, 'burn', 'foe')).toEqual([1, 0]);
     });
   });
 
@@ -100,12 +105,17 @@ describe('Arionis full kit', () => {
       ]);
     });
 
-    // A level 3 burn ticks five times
-    it('[ARI-SPE-6] lays a severe burn, level 3', async () => {
+    // Its duration replaces the turns of its level, which the report never shows
+    it('[ARI-SPE-6] lays a severe burn, level 3', () => {
+      expect(arionis.skills.special.effect.level).toBe(3);
+    });
+
+    // b, never struck by his fists, carries the burn of the special alone
+    it('[ARI-SPE-6] burns for two turns', async () => {
       rolling(0.99);
       const steps = await fight([arionis], [dummy('a'), dummy('b')]);
 
-      expect(burnTicksOn(steps, 'b')[0].remainingTurns).toBe(4);
+      expect(statusTicks(steps, 'burn', 'b')).toEqual([1, 0]);
     });
 
     it('[ARI-SPE-3] raises the attack and defense of his allies by 5% for a turn', async () => {
