@@ -23,7 +23,7 @@
     "lint:engine": "pnpm --filter combat-engine lint",
     "lint:all": "pnpm -r lint",
     "check:memory-bank": "bash scripts/check-memory-bank-size.sh",
-    "verify": "pnpm check:memory-bank && pnpm check && pnpm build:all && pnpm lint:all && pnpm test:all && pnpm test:e2e:engine && pnpm test:e2e:gasha",
+    "verify": "export PUBLIC_COMBAT_ENGINE_URL=${PUBLIC_COMBAT_ENGINE_URL:-http://localhost:3000} && pnpm check:memory-bank && pnpm check && pnpm build:all && pnpm lint:all && pnpm test:all && pnpm test:e2e:engine && pnpm test:e2e:gasha",
     "replayer": "npx serve clients/fight-replayer"
   },
   "devDependencies": {
