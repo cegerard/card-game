@@ -23,17 +23,6 @@ et compare les caractéristiques ci-dessous à `samples/cards.json`.
 }
 ```
 
-## Écarts avec Notion
-
-Valeurs actuelles du moteur pour les caractéristiques que `cards.json` ne suit pas encore :
-
-```json kit-stat-gaps
-{
-  "regeneration": null,
-  "resistance": null
-}
-```
-
 ## Attaque : Crocs de Marée
 
 - [KAI-ATK-1] Inflige 80 % d'Attaque en dégâts physiques et 40 % d'Attaque en dégâts élémentaires (Eau).
