@@ -1,18 +1,6 @@
 # Architecture
 
-## Language/Framework
-
-- **Stack**: Node.js, NestJS 11 → @packages/combat-engine/package.json
-- **API**: REST, a single `POST /fight` endpoint (@packages/combat-engine/src/fight/http-api/fight.controller.ts)
-- **Style**: DDD / hexagonal — domain (`src/fight/core/`) isolated from HTTP (`src/fight/http-api/`)
-- **State**: none. No database, no cache; a fight is simulated in memory per request
-- **DTOs**: `class-validator` decorators in `http-api/dto/fight-data.dto.ts`
-- **Tests**: Jest, unit tests in `__tests__` next to the source
-- **File tree**: see [CODEBASE_STRUCTURE.md](../CODEBASE_STRUCTURE.md) (single source for paths)
-
-### Naming Conventions
-
-Files kebab-case · classes/types PascalCase · functions/variables camelCase · constants UPPER_CASE · private methods camelCase with `private`.
+DDD / hexagonal NestJS service: the domain (`src/fight/core/`) is isolated from HTTP (`src/fight/http-api/`, DTOs in `dto/fight-data.dto.ts`). Stateless, one `POST /fight` ([API_DOCS.md](API_DOCS.md)). Versions in STACK.md, paths in [CODEBASE_STRUCTURE.md](../CODEBASE_STRUCTURE.md), naming in [CODING_ASSERTIONS.md](CODING_ASSERTIONS.md).
 
 ## Fight Simulation Flow
 
@@ -20,10 +8,10 @@ Files kebab-case · classes/types PascalCase · functions/variables camelCase ·
 sequenceDiagram
     participant Client
     participant Controller as FightController
-    participant Fight as Fight
-    participant ActionStage as ActionStage
-    participant TurnManager as TurnManager
-    participant CardSelector as CardSelector
+    participant Fight
+    participant ActionStage
+    participant TurnManager
+    participant CardSelector
     participant Card as FightingCard
     participant DeathHandler as DeathSkillHandler
 

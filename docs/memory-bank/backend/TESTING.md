@@ -20,7 +20,7 @@ Tools, configuration and commands: see [STACK.md](../STACK.md) and [CODING_ASSER
 
 ## Patterns
 
-- `beforeEach()` for isolation, `beforeAll()` for expensive setup
+- One `describe` per unit; `beforeEach()` for isolation, `beforeAll()` for expensive setup
 - Cover success and edge cases; verify exact step sequences with `toEqual()`
 - Cover status interactions (poison + burn, freeze blocking effects) and buff/debuff duration and stacking
 - One expectation per `it`, at most 10 lines
