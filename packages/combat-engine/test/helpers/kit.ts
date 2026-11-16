@@ -141,13 +141,14 @@ export const statusTicks = (
 };
 
 /**
- * Boots the app around each test of the calling `describe` and returns a
- * `fight()` that posts two decks and resolves to the report steps.
+ * Boots the app once for the calling `describe` (the engine keeps no state
+ * between requests) and returns a `fight()` that posts two decks and resolves
+ * to the report steps. Mocked rolls are restored after each test.
  */
 export function useFight() {
   let app: INestApplication;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -156,8 +157,11 @@ export function useFight() {
     await app.init();
   });
 
-  afterEach(async () => {
+  afterEach(() => {
     jest.restoreAllMocks();
+  });
+
+  afterAll(async () => {
     await app.close();
   });
 
