@@ -1,4 +1,4 @@
-import { faker } from '@faker-js/faker';
+import { faker } from '@faker-js/faker/locale/en';
 
 import { ActionStage } from '../action-stage';
 import { Player } from '../../player';

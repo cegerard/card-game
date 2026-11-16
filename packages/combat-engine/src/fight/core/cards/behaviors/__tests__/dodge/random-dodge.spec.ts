@@ -1,4 +1,4 @@
-import { faker } from '@faker-js/faker';
+import { faker } from '@faker-js/faker/locale/en';
 
 import { RandomizerFake } from '../../../../../../../test/helpers/randomizer-fake';
 import { RandomDodge } from '../../random-dodge';

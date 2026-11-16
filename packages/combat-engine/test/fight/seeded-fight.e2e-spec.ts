@@ -4,9 +4,6 @@ import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-const __dirname = join(fileURLToPath(import.meta.url), '..');
 
 // Dodges, criticals, effect probabilities and the speed-weighted order all
 // roll, so two unseeded fights of these decks almost never match.

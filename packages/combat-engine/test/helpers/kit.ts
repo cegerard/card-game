@@ -5,15 +5,11 @@ import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 type Card = Record<string, any>;
 
 const roster: Card[] = JSON.parse(
-  readFileSync(
-    join(fileURLToPath(import.meta.url), '../../../samples/cards.json'),
-    'utf-8',
-  ),
+  readFileSync(join(__dirname, '../../samples/cards.json'), 'utf-8'),
 );
 
 /** A roster card, criticals off unless overridden, so every hit lands the same. */
