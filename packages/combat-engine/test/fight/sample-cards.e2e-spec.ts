@@ -20,11 +20,16 @@ const without = (...ids: string[]) =>
   roster.filter((card) => !ids.includes(card.id));
 const sampleCards = without('selkhet', 'vespera', 'svana', 'hyoki', 'umiko');
 
+// The decks fight with real dodges, criticals and probabilities: a fixed seed
+// replays the same fights, so a check never depends on the draw
+const SEED = 1;
+
 const fight = (app: INestApplication, player1: object[], player2: object[]) =>
   request(app.getHttpServer())
     .post('/fight')
     .send({
       cardSelectorStrategy: 'player-by-player',
+      seed: SEED,
       player1: { name: 'P1', deck: player1 },
       player2: { name: 'P2', deck: player2 },
     })
