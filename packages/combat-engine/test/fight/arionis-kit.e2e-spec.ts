@@ -1,9 +1,13 @@
-import { jest } from '@jest/globals';
 import {
   actionsOf,
+  alteration,
+  alterationsOf,
+  deathOf,
   dummy,
   named,
   ofKind,
+  positionsOf,
+  rolling,
   rosterCard,
   statusTicks,
   useFight,
@@ -32,8 +36,6 @@ const burnTicksOn = (steps: any[], id: string) =>
 describe('Arionis full kit', () => {
   const fight = useFight();
 
-  const rolling = (roll: number) =>
-    jest.spyOn(Math, 'random').mockReturnValue(roll);
   const alone = () => fight([arionis], [dummy('foe', { attack: 10 })]);
   const inspiring = (ally: object) =>
     fight([arionis, ally], [dummy('foe', { attack: 10 })]);
@@ -120,21 +122,12 @@ describe('Arionis full kit', () => {
 
     it('[ARI-SPE-3] raises the attack and defense of his allies by 5% for a turn', async () => {
       rolling(0.99);
-      const steps = await inspiring(
-        dummy('ally', { attack: 100, defense: 100 }),
-      );
+      const ally = dummy('ally', { attack: 100, defense: 100 });
+      const steps = await inspiring(ally);
 
-      expect(named(steps, 'buff', ROAR)[0].alterations).toEqual([
-        expect.objectContaining({
-          kind: 'attack',
-          value: 5,
-          remainingTurns: 1,
-        }),
-        expect.objectContaining({
-          kind: 'defense',
-          value: 5,
-          remainingTurns: 1,
-        }),
+      expect(alterationsOf(steps, 'buff', ROAR)).toEqual([
+        alteration('attack', 5, 1),
+        alteration('defense', 5, 1),
       ]);
     });
 
@@ -156,11 +149,7 @@ describe('Arionis full kit', () => {
       const steps = await tough();
 
       expect(ofKind(steps, 'debuff')[0].alterations).toEqual([
-        expect.objectContaining({
-          kind: 'defense',
-          value: 4,
-          remainingTurns: 2,
-        }),
+        alteration('defense', 4, 2),
       ]);
     });
 
@@ -177,18 +166,10 @@ describe('Arionis full kit', () => {
       rolling(0.99);
       const steps = await alone();
 
-      expect(
-        named(steps, 'buff', PRIDE)
-          .slice(0, 3)
-          .map((s) => s.alterations[0]),
-      ).toEqual(
-        Array(3).fill(
-          expect.objectContaining({
-            kind: 'attack',
-            value: 4.25,
-            remainingTurns: null,
-          }),
-        ),
+      const prides = named(steps, 'buff', PRIDE).slice(0, 3);
+
+      expect(prides.map((s) => s.alterations[0])).toEqual(
+        Array(3).fill(alteration('attack', 4.25, null)),
       );
     });
 
@@ -197,10 +178,7 @@ describe('Arionis full kit', () => {
       rolling(0.99);
       const steps = await fight([arionis], [dummy('foe', { attack: 200 })]);
       const halved = steps.findIndex(
-        (s) =>
-          s.kind === 'attack' &&
-          s.damages[0].defender.id === 'arionis' &&
-          s.damages[0].remainingHealth < 275,
+        (s) => s.kind === 'attack' && s.damages[0].remainingHealth < 275,
       );
 
       expect(named(steps.slice(halved), 'buff', PRIDE)).toEqual([]);
@@ -237,9 +215,7 @@ describe('Arionis full kit', () => {
       const steps = await alone();
       const actions = actionsOf(steps, 'arionis').slice(0, 9);
 
-      expect(actions.flatMap((name, i) => (name === CLAWS ? [i] : []))).toEqual(
-        [2, 5, 8],
-      );
+      expect(positionsOf(actions, CLAWS)).toEqual([2, 5, 8]);
     });
   });
 
@@ -253,38 +229,29 @@ describe('Arionis full kit', () => {
           dummy('killer', { attack: 500, health: 400 }),
         ],
       );
-    const kaelionDeath = (steps: any[]) =>
-      steps.findIndex(
-        (s) =>
-          s.kind === 'status_change' &&
-          s.status === 'dead' &&
-          s.card.id === 'kaelion',
-      );
+    const kaelionDeath = (steps: any[]) => deathOf(steps, 'kaelion');
 
     // 85 + 4.25 attack: 89.25 -> 89
     it('[ARI-HER-1] blasts every enemy for 100% fire when Kaelion falls', async () => {
       rolling(0.99);
       const steps = await avenging();
+      const { name, damages } = steps[kaelionDeath(steps) + 1];
 
-      expect(steps[kaelionDeath(steps) + 1]).toMatchObject({
-        name: BLAST,
-        damages: [
-          expect.objectContaining({ damage: 89, kind: ['FIRE'] }),
-          expect.objectContaining({ damage: 89, kind: ['FIRE'] }),
-        ],
-      });
+      expect([name, ...damages.map((d) => [d.damage, d.kind])]).toEqual([
+        BLAST,
+        ...Array(2).fill([89, ['FIRE']]),
+      ]);
     });
 
+    // The two steps right after the blast
     it('[ARI-HER-1] burns every enemy', async () => {
       rolling(0.99);
       const steps = await avenging();
-      const blast = kaelionDeath(steps) + 1;
+      const burns = steps.slice(kaelionDeath(steps) + 2).slice(0, 2);
 
-      expect(
-        steps.slice(blast + 1, blast + 3).map((s) => [s.card.id, s.status]),
-      ).toEqual([
-        ['other', 'burn'],
-        ['killer', 'burn'],
+      expect(burns.map((s) => `${s.card.id} ${s.status}`)).toEqual([
+        'other burn',
+        'killer burn',
       ]);
     });
 
@@ -292,11 +259,8 @@ describe('Arionis full kit', () => {
       rolling(0.99);
       const steps = await avenging();
 
-      expect(named(steps, 'buff', HEROIC_BUFF)[0].alterations[0]).toMatchObject(
-        {
-          kind: 'attack',
-          value: 34,
-        },
+      expect(alterationsOf(steps, 'buff', HEROIC_BUFF)[0]).toEqual(
+        alteration('attack', 34),
       );
     });
 
@@ -304,13 +268,11 @@ describe('Arionis full kit', () => {
       rolling(0.99);
       const steps = await avenging();
       const vengeance = steps.findIndex((s) => s.name === VENGEANCE);
+      const next = steps
+        .slice(vengeance)
+        .find((s) => s.kind === 'attack' && s.attacker.id === 'arionis');
 
-      expect(
-        steps
-          .slice(vengeance)
-          .find((s) => s.kind === 'attack' && s.attacker.id === 'arionis')
-          .damages[0].defender.id,
-      ).toBe('killer');
+      expect(next.damages[0].defender.id).toBe('killer');
     });
 
     it('[ARI-HER-4] ends once the killer falls: the buff goes', async () => {
@@ -343,14 +305,7 @@ describe('Arionis full kit', () => {
     it('[ARI-HER-4] ends right after the killer falls', async () => {
       rolling(0.99);
       const steps = await avenging();
-      const killed = steps.findIndex(
-        (s) =>
-          s.kind === 'status_change' &&
-          s.status === 'dead' &&
-          s.card.id === 'killer',
-      );
-
-      expect(steps[killed + 1].name).toBe(VENGEANCE_END);
+      expect(steps[deathOf(steps, 'killer') + 1].name).toBe(VENGEANCE_END);
     });
 
     // other hits for 200 so that he has health to win back: 33% of 550

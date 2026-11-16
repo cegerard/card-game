@@ -1,10 +1,13 @@
-import { jest } from '@jest/globals';
 import {
   actionsOf,
+  alteration,
+  alterationsOf,
   dummy,
   hitsOn,
   named,
   ofKind,
+  positionsOf,
+  rolling,
   rosterCard,
   useFight,
 } from '../helpers/kit';
@@ -48,12 +51,32 @@ const between = (steps: any[], from: string, to: string) =>
     steps.findIndex((s) => s.kind === to),
   );
 
+// From the first fortress end up to the next fortress, if he casts it again
+const fallen = (steps: any[]) => {
+  const closed = steps.findIndex((s) => s.kind === 'stance_ended');
+  const reopened = steps.findIndex(
+    (s, i) => i > closed && s.kind === 'stance_started',
+  );
+  return steps.slice(closed, reopened === -1 ? undefined : reopened);
+};
+
+const stunsOn = (steps: any[], id: string) =>
+  steps.filter(
+    (s) =>
+      s.kind === 'status_change' && s.status === 'stunt' && s.card.id === id,
+  );
+
+// A foe whose plain attack always stuns
+const stunner = () => {
+  const foe = dummy('foe', { attack: 10 });
+  foe.skills.simpleAttack.effects = [{ type: 'STUNT', rate: 0, level: 1 }];
+  return foe;
+};
+
 describe('Aegis full kit', () => {
   const fight = useFight();
 
   // High rolls: no Enlisement, no mitigation, unless a test says otherwise
-  const rolling = (roll: number) =>
-    jest.spyOn(Math, 'random').mockReturnValue(roll);
   const alone = () => fight([aegis], [dummy('foe', { attack: 100 })]);
 
   describe(FIST, () => {
@@ -104,23 +127,19 @@ describe('Aegis full kit', () => {
       expect(actionsOf(steps, 'aegis').indexOf(FORTRESS)).toBe(4);
     });
 
+    // Half of 650 for him, half of 1000 for the ally
+    const SHIELDS = [
+      ['aegis', 325],
+      ['ally', 500],
+    ];
+
     it('[AEG-SPE-1] shields him and his allies for half their max health', async () => {
       rolling(0.99);
-      const steps = await fight(
-        [aegis, dummy('ally', { health: 1000 })],
-        [dummy('foe')],
-      );
+      const ally = dummy('ally', { health: 1000 });
+      const steps = await fight([aegis, ally], [dummy('foe')]);
+      const { targets } = named(steps, 'shield_applied', FORTRESS)[0];
 
-      expect(named(steps, 'shield_applied', FORTRESS)[0].targets).toEqual([
-        expect.objectContaining({
-          target: expect.objectContaining({ id: 'aegis' }),
-          points: 325,
-        }),
-        expect.objectContaining({
-          target: expect.objectContaining({ id: 'ally' }),
-          points: 500,
-        }),
-      ]);
+      expect(targets.map((t) => [t.target.id, t.points])).toEqual(SHIELDS);
     });
 
     it('[AEG-SPE-1] holds the stance for three turns', async () => {
@@ -156,36 +175,16 @@ describe('Aegis full kit', () => {
     it('[AEG-SPE-2] stops striking back once the fortress falls', async () => {
       rolling(0.99);
       const steps = await alone();
-      const closed = steps.findIndex((s) => s.kind === 'stance_ended');
-      const reopened = steps.findIndex(
-        (s, i) => i > closed && s.kind === 'stance_started',
-      );
 
-      expect(
-        named(
-          steps.slice(closed, reopened === -1 ? undefined : reopened),
-          'attack',
-          COUNTER,
-        ),
-      ).toEqual([]);
+      expect(named(fallen(steps), 'attack', COUNTER)).toEqual([]);
     });
 
     it('[AEG-SPE-3] shrugs off stuns while the fortress stands', async () => {
       rolling(0.99);
-      const stunner = dummy('foe', { attack: 10 });
-      stunner.skills.simpleAttack.effects = [
-        { type: 'STUNT', rate: 0, level: 1 },
-      ];
-      const steps = await fight([aegis], [stunner]);
+      const steps = await fight([aegis], [stunner()]);
+      const standing = between(steps, 'stance_started', 'stance_ended');
 
-      expect(
-        between(steps, 'stance_started', 'stance_ended').filter(
-          (s) =>
-            s.kind === 'status_change' &&
-            s.status === 'stunt' &&
-            s.card.id === 'aegis',
-        ),
-      ).toEqual([]);
+      expect(stunsOn(standing, 'aegis')).toEqual([]);
     });
   });
 
@@ -216,14 +215,9 @@ describe('Aegis full kit', () => {
       rolling(0.2);
       const steps = await alone();
 
-      expect(
-        named(steps, 'debuff', RESILIENCE_MIRE)[0].alterations[0],
-      ).toMatchObject({
-        target: expect.objectContaining({ id: 'foe' }),
-        kind: 'speed',
-        value: 5,
-        remainingTurns: 3,
-      });
+      expect(alterationsOf(steps, 'debuff', RESILIENCE_MIRE)[0]).toEqual(
+        alteration('speed', 5, 3, 'foe'),
+      );
     });
   });
 
@@ -242,11 +236,8 @@ describe('Aegis full kit', () => {
       rolling(0.99);
       const steps = await fight([aegis], [dummy('foe', { attack: 400 })]);
 
-      expect(named(steps, 'buff', SECOND_WIND)[0].alterations[0]).toMatchObject(
-        {
-          kind: 'regeneration',
-          value: 8.25,
-        },
+      expect(alterationsOf(steps, 'buff', SECOND_WIND)[0]).toEqual(
+        alteration('regeneration', 8.25),
       );
     });
 
@@ -305,25 +296,18 @@ describe('Aegis full kit', () => {
       const steps = await alone();
       const waves = steps.findIndex((s) => s.name === WAVES);
 
-      expect(
-        steps.slice(waves).find((s) => s.kind === 'status_change'),
-      ).toMatchObject({
-        card: expect.objectContaining({ id: 'foe' }),
-        status: 'stunt',
-      });
+      const hit = steps.slice(waves).find((s) => s.kind === 'status_change');
+
+      expect([hit.card.id, hit.status]).toEqual(['foe', 'stunt']);
     });
 
     // His special counts as an action, his reactive strikes back do not
     it('[AEG-VAG-4] replaces his attack every fourth action', async () => {
       rolling(0.99);
       const steps = await alone();
-      const actions = actionsOf(steps, 'aegis')
-        .filter((name) => name !== COUNTER)
-        .slice(0, 8);
+      const actions = actionsOf(steps, 'aegis').filter((n) => n !== COUNTER);
 
-      expect(actions.flatMap((name, i) => (name === WAVES ? [i] : []))).toEqual(
-        [3, 7],
-      );
+      expect(positionsOf(actions.slice(0, 8), WAVES)).toEqual([3, 7]);
     });
   });
 
@@ -366,38 +350,28 @@ describe('Aegis full kit', () => {
       rolling(0.99);
       const steps = await guarding();
 
-      expect(
-        named(steps, 'buff', ANCESTRAL_SHELL)[0].alterations[0],
-      ).toMatchObject({
-        kind: 'defense',
-        value: 42.5,
-        remainingTurns: 2,
-      });
+      expect(alterationsOf(steps, 'buff', ANCESTRAL_SHELL)[0]).toEqual(
+        alteration('defense', 42.5, 2),
+      );
     });
 
     it('[AEG-GAR-2] regenerates 30% more for two turns', async () => {
       rolling(0.99);
       const steps = await guarding();
 
-      expect(
-        named(steps, 'buff', TURTLE_BREATH)[0].alterations[0],
-      ).toMatchObject({
-        kind: 'regeneration',
-        value: 16.5,
-        remainingTurns: 2,
-      });
+      expect(alterationsOf(steps, 'buff', TURTLE_BREATH)[0]).toEqual(
+        alteration('regeneration', 16.5, 2),
+      );
     });
 
     it('[AEG-GAR-3] heals the ally 10% of its max health a turn', async () => {
       rolling(0.99);
       const steps = await guarding();
 
-      expect(
-        named(steps, 'healing', SHARED_REGENERATION)[0].heal[0],
-      ).toMatchObject({
-        target: expect.objectContaining({ id: 'ally' }),
-        healed: 100,
-      });
+      const { target, healed } = named(steps, 'healing', SHARED_REGENERATION)[0]
+        .heal[0];
+
+      expect([target.id, healed]).toEqual(['ally', 100]);
     });
 
     it('[AEG-GAR-3] stops healing once the protection ends', async () => {
@@ -435,13 +409,8 @@ describe('Aegis full kit', () => {
         rolling(0.99);
         const steps = await sacrificed();
 
-        expect(named(steps, 'buff', BROKEN_SHELL)[0].alterations).toEqual([
-          expect.objectContaining({
-            target: expect.objectContaining({ id: 'ally' }),
-            kind: 'defense',
-            value: 20,
-            remainingTurns: null,
-          }),
+        expect(alterationsOf(steps, 'buff', BROKEN_SHELL)).toEqual([
+          alteration('defense', 20, null, 'ally'),
         ]);
       });
     });

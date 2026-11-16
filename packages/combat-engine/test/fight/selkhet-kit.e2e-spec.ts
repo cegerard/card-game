@@ -1,5 +1,8 @@
 import {
   actionsOf,
+  alteration,
+  alterationsOf,
+  deathOf,
   dummy,
   named,
   ofKind,
@@ -21,11 +24,6 @@ const PANTHER_LEGACY = 'Héritage de la Panthère';
 // Nothing in her kit rolls: without criticals her fights replay exactly
 const selkhet = rosterCard('selkhet');
 
-const deathOf = (steps: any[], id: string) =>
-  steps.findIndex(
-    (s) =>
-      s.kind === 'status_change' && s.status === 'dead' && s.card.id === id,
-  );
 const after = (steps: any[], match: (s: any) => boolean) =>
   steps.slice(steps.findIndex(match) + 1);
 const dives = (steps: any[]) =>
@@ -100,13 +98,12 @@ describe('Selkhet full kit', () => {
     it('[SEL-SPE-1] is cast once 80 energy are charged', async () => {
       const steps = await hunting();
       const fusion = steps.findIndex((s) => s.name === FUSION);
+      const last = steps
+        .slice(0, fusion)
+        .filter((s) => s.kind === 'attack' && s.attacker.id === 'selkhet')
+        .slice(-1)[0];
 
-      expect(
-        steps
-          .slice(0, fusion)
-          .filter((s) => s.kind === 'attack' && s.attacker.id === 'selkhet')
-          .slice(-1)[0].energy,
-      ).toBe(80);
+      expect(last.energy).toBe(80);
     });
 
     it('[SEL-SPE-1] hides her from her enemies for 2 turns', async () => {
@@ -120,12 +117,8 @@ describe('Selkhet full kit', () => {
     it('[SEL-SPE-2] sharpens her accuracy by 30% for 2 turns', async () => {
       const steps = await hunting();
 
-      expect(named(steps, 'buff', FUSION)[0].alterations).toEqual([
-        expect.objectContaining({
-          kind: 'accuracy',
-          value: 25.5,
-          remainingTurns: 2,
-        }),
+      expect(alterationsOf(steps, 'buff', FUSION)).toEqual([
+        alteration('accuracy', 25.5, 2),
       ]);
     });
 
@@ -141,18 +134,12 @@ describe('Selkhet full kit', () => {
     it('[SEL-SPE-3] makes her bleeds cut the regeneration by 50% for 4 turns', async () => {
       const steps = await hunting();
 
-      expect(
-        ofKind(
-          after(steps, (s) => s.name === FUSION),
-          'debuff',
-        ).find((s) => s.alterations[0].kind === 'regeneration').alterations,
-      ).toEqual([
-        expect.objectContaining({
-          kind: 'regeneration',
-          value: 5,
-          remainingTurns: 4,
-        }),
-      ]);
+      const cut = ofKind(
+        after(steps, (s) => s.name === FUSION),
+        'debuff',
+      ).find((s) => s.alterations[0].kind === 'regeneration');
+
+      expect(cut.alterations).toEqual([alteration('regeneration', 5, 4)]);
     });
 
     it('[SEL-SPE-3] makes her bleeds deal 3% of the max health for 4 turns', async () => {
@@ -208,12 +195,8 @@ describe('Selkhet full kit', () => {
     it('[SEL-INS-2] quickens her by 15% for good when she kills under 30%', async () => {
       const steps = await cornered();
 
-      expect(named(steps, 'buff', INSTINCT_SPEED)[0].alterations).toEqual([
-        expect.objectContaining({
-          kind: 'speed',
-          value: 13.8,
-          remainingTurns: null,
-        }),
+      expect(alterationsOf(steps, 'buff', INSTINCT_SPEED)).toEqual([
+        alteration('speed', 13.8, null),
       ]);
     });
 
@@ -268,29 +251,18 @@ describe('Selkhet full kit', () => {
     it('[SEL-EMB-3] stuns its target', async () => {
       const steps = await hunting();
 
-      expect(
-        ofKind(
-          after(steps, (s) => s.name === SURPRISE_ATTACK),
-          'status_change',
-        )[0],
-      ).toMatchObject({
-        card: expect.objectContaining({ id: 'prey' }),
-        status: 'stunt',
-      });
+      const struck = after(steps, (s) => s.name === SURPRISE_ATTACK);
+      const status = ofKind(struck, 'status_change')[0];
+
+      expect([status.card.id, status.status]).toEqual(['prey', 'stunt']);
     });
 
     it('[SEL-EMB-4] fractures the target defense by 30% for 2 turns', async () => {
-      const steps = await fight(
-        [selkhet],
-        [dummy('prey', { health: 5000, defense: 20 })],
-      );
+      const prey = dummy('prey', { health: 5000, defense: 20 });
+      const steps = await fight([selkhet], [prey]);
 
-      expect(named(steps, 'debuff', SURPRISE_ATTACK)[0].alterations).toEqual([
-        expect.objectContaining({
-          kind: 'defense',
-          value: 6,
-          remainingTurns: 2,
-        }),
+      expect(alterationsOf(steps, 'debuff', SURPRISE_ATTACK)).toEqual([
+        alteration('defense', 6, 2),
       ]);
     });
 
@@ -309,12 +281,11 @@ describe('Selkhet full kit', () => {
     it('[SEL-EMB-6] sinks again four turns later', async () => {
       const steps = await hunting();
       const [first, second] = dives(steps).map((s) => steps.indexOf(s));
+      const underground = steps.slice(first, second);
 
-      expect(actionsOf(steps.slice(first, second), 'selkhet')).toEqual([
+      expect(actionsOf(underground, 'selkhet')).toEqual([
         SURPRISE_ATTACK,
-        LACERATION,
-        LACERATION,
-        LACERATION,
+        ...Array(3).fill(LACERATION),
       ]);
     });
   });
@@ -324,15 +295,11 @@ describe('Selkhet full kit', () => {
     it('[SEL-JUG-1] strikes every enemy for 200% physical and 120% earth', async () => {
       const steps = await cornered();
 
-      expect(named(steps, 'attack', JUDGEMENT)[0].damages).toEqual([
-        expect.objectContaining({
-          defender: expect.objectContaining({ id: 'brute' }),
-          damage: 256,
-        }),
-        expect.objectContaining({
-          defender: expect.objectContaining({ id: 'straggler' }),
-          damage: 256,
-        }),
+      const { damages } = named(steps, 'attack', JUDGEMENT)[0];
+
+      expect(damages.map((d) => [d.defender.id, d.damage])).toEqual([
+        ['brute', 256],
+        ['straggler', 256],
       ]);
     });
 
@@ -345,13 +312,8 @@ describe('Selkhet full kit', () => {
     it('[SEL-JUG-3] lowers the dodge of the survivors by 50% for 3 turns', async () => {
       const steps = await cornered();
 
-      expect(named(steps, 'debuff', JUDGEMENT)[0].alterations).toEqual([
-        expect.objectContaining({
-          target: expect.objectContaining({ id: 'brute' }),
-          kind: 'agility',
-          value: 10,
-          remainingTurns: 3,
-        }),
+      expect(alterationsOf(steps, 'debuff', JUDGEMENT)).toEqual([
+        alteration('agility', 10, 3, 'brute'),
       ]);
     });
 
@@ -365,18 +327,20 @@ describe('Selkhet full kit', () => {
       ).toBe(3);
     });
 
+    // Her two Instinct speed buffs, handed over as they were
+    const LEGACY = [
+      'buff_transferred',
+      PANTHER_LEGACY,
+      'fast-ally',
+      ...Array(2).fill(alteration('speed', 13.8)),
+    ];
+
     it('[SEL-JUG-4] hands her speed buffs to the fastest ally when she falls', async () => {
       const steps = await cornered();
+      const { kind, name, target, alterations } =
+        steps[deathOf(steps, 'selkhet') + 1];
 
-      expect(steps[deathOf(steps, 'selkhet') + 1]).toMatchObject({
-        kind: 'buff_transferred',
-        name: PANTHER_LEGACY,
-        target: expect.objectContaining({ id: 'fast-ally' }),
-        alterations: [
-          expect.objectContaining({ kind: 'speed', value: 13.8 }),
-          expect.objectContaining({ kind: 'speed', value: 13.8 }),
-        ],
-      });
+      expect([kind, name, target.id, ...alterations]).toEqual(LEGACY);
     });
 
     it('[SEL-JUG-5] fires once per fight', async () => {

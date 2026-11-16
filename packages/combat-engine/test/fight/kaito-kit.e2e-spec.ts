@@ -1,9 +1,11 @@
-import { jest } from '@jest/globals';
 import {
   actionsOf,
+  alteration,
+  alterationsOf,
   dummy,
   named,
   ofKind,
+  rolling,
   rosterCard,
   useFight,
 } from '../helpers/kit';
@@ -55,8 +57,6 @@ const brute = () =>
 describe('Kaito full kit', () => {
   const fight = useFight();
 
-  const rolling = (roll: number) =>
-    jest.spyOn(Math, 'random').mockReturnValue(roll);
   const alone = () => fight([kaito], [dummy('foe', { attack: 10 })]);
 
   describe(FANGS, () => {
@@ -135,12 +135,8 @@ describe('Kaito full kit', () => {
       rolling(0.99);
       const steps = await alone();
 
-      expect(named(steps, 'buff', ABYSS)[0].alterations).toEqual([
-        expect.objectContaining({
-          kind: 'agility',
-          value: 14,
-          remainingTurns: 1,
-        }),
+      expect(alterationsOf(steps, 'buff', ABYSS)).toEqual([
+        alteration('agility', 14, 1),
       ]);
     });
 
@@ -149,12 +145,9 @@ describe('Kaito full kit', () => {
       rolling(0.99);
       const steps = await fight([kaito], [dummy('a'), dummy('b')]);
 
-      expect(named(steps, 'special_attack', ABYSS)[0].damages[0]).toMatchObject(
-        {
-          defender: expect.objectContaining({ id: 'a' }),
-          damage: 182,
-        },
-      );
+      const hit = named(steps, 'special_attack', ABYSS)[0].damages[0];
+
+      expect([hit.defender.id, hit.damage]).toEqual(['a', 182]);
     });
   });
 
@@ -181,15 +174,12 @@ describe('Kaito full kit', () => {
     // 0.12 x 2.5 = 0.3: 42% in all
     it('[KAI-SAN-1] raises his critical chance to 42% under 40% health', async () => {
       rolling(0.99);
-      const steps = await fight(
-        [rosterCard('kaito', { criticalChance: 0.12 })],
-        [brute()],
-      );
+      const critical = rosterCard('kaito', { criticalChance: 0.12 });
+      const steps = await fight([critical], [brute()]);
 
-      expect(named(steps, 'buff', COLD_BLOOD)[0].alterations[0]).toMatchObject({
-        kind: 'criticalChance',
-        value: 0.3,
-      });
+      expect(alterationsOf(steps, 'buff', COLD_BLOOD)[0]).toEqual(
+        alteration('criticalChance', 0.3),
+      );
     });
 
     it('[KAI-SAN-1] waits for his health to fall under 40%', async () => {
@@ -254,36 +244,24 @@ describe('Kaito full kit', () => {
       ]);
     });
 
+    // 520 max health: regeneration offsets each poison tick but the last,
+    // 519 before the blow, 114 after it
     it('[KAI-FRE-1] rises on the blow that drops him under 25%', async () => {
       rolling(0.99);
       const steps = await fight([kaito], [brute()]);
       const risen = steps.findIndex((s) => s.kind === 'transformation_started');
+      const blow = ofKind(steps.slice(0, risen), 'special_attack').slice(-1)[0];
 
-      // 520 max health: regeneration offsets each poison tick but the last,
-      // 519 before the blow, 114 after it
-      expect(
-        steps
-          .slice(0, risen)
-          .filter((s) => s.kind === 'special_attack')
-          .slice(-1)[0].damages[0].remainingHealth,
-      ).toBeLessThan(130);
+      expect(blow.damages[0].remainingHealth).toBeLessThan(130);
     });
 
     it('[KAI-FRE-2] raises his attack by 35% and his speed by 20%', async () => {
       rolling(0.99);
       const steps = await fight([kaito], [brute()]);
 
-      expect(named(steps, 'buff', FRENZY)[0].alterations).toEqual([
-        expect.objectContaining({
-          kind: 'attack',
-          value: 29.75,
-          remainingTurns: 3,
-        }),
-        expect.objectContaining({
-          kind: 'speed',
-          value: 17,
-          remainingTurns: 3,
-        }),
+      expect(alterationsOf(steps, 'buff', FRENZY)).toEqual([
+        alteration('attack', 29.75, 3),
+        alteration('speed', 17, 3),
       ]);
     });
 

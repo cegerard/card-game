@@ -1,9 +1,11 @@
-import { jest } from '@jest/globals';
 import {
   actionsOf,
+  alteration,
+  alterationsOf,
   dummy,
   named,
   ofKind,
+  rolling,
   rosterCard,
   useFight,
 } from '../helpers/kit';
@@ -37,8 +39,6 @@ describe('Vespera full kit', () => {
   const fight = useFight();
 
   // Her dance and its mirages roll: a test that needs them says so
-  const rolling = (roll: number) =>
-    jest.spyOn(Math, 'random').mockReturnValue(roll);
   beforeEach(() => {
     rolling(0.99);
   });
@@ -159,13 +159,11 @@ describe('Vespera full kit', () => {
     it('[VES-CAR-1] hardens her defense by 8% and her dodge by 3% at each dodge', async () => {
       const steps = await dodging();
 
-      expect(
-        named(steps, 'buff', CARAPACE)
-          .slice(0, 2)
-          .map((s) => s.alterations[0]),
-      ).toEqual([
-        expect.objectContaining({ kind: 'defense', value: 3.2 }),
-        expect.objectContaining({ kind: 'agility', value: 2.25 }),
+      const firstCharge = named(steps, 'buff', CARAPACE).slice(0, 2);
+
+      expect(firstCharge.map((s) => s.alterations[0])).toEqual([
+        alteration('defense', 3.2),
+        alteration('agility', 2.25),
       ]);
     });
 
@@ -192,17 +190,18 @@ describe('Vespera full kit', () => {
       expect(foeStrikes(steps, 'foe')[0].damages[0].dodge).toBe(true);
     });
 
-    it('[VES-INS-1] needs the poison: without it the same foe hits her', async () => {
-      const unpoisoned = rosterCard('vespera', {
+    // Vespera with a sting that poisons nobody
+    const unpoisoned = () =>
+      rosterCard('vespera', {
         skills: {
           ...vespera.skills,
           simpleAttack: { ...vespera.skills.simpleAttack, effects: [] },
         },
       });
-      const steps = await fight(
-        [unpoisoned],
-        [dummy('foe', { attack: 10, accuracy: 76 })],
-      );
+
+    it('[VES-INS-1] needs the poison: without it the same foe hits her', async () => {
+      const foe = dummy('foe', { attack: 10, accuracy: 76 });
+      const steps = await fight([unpoisoned()], [foe]);
 
       expect(foeStrikes(steps, 'foe')[0].damages[0].dodge).toBe(false);
     });
@@ -223,12 +222,8 @@ describe('Vespera full kit', () => {
       rolling(0.2);
       const steps = await alone();
 
-      expect(named(steps, 'buff', DANCE)[0].alterations).toEqual([
-        expect.objectContaining({
-          kind: 'agility',
-          value: 30,
-          remainingTurns: 2,
-        }),
+      expect(alterationsOf(steps, 'buff', DANCE)).toEqual([
+        alteration('agility', 30, 2),
       ]);
     });
 
@@ -355,12 +350,8 @@ describe('Vespera full kit', () => {
     it('[VES-REI-4] lowers the dodge of the enemies by 20%', async () => {
       const steps = await cornered();
 
-      expect(named(steps, 'debuff', QUEEN)[0].alterations).toEqual([
-        expect.objectContaining({
-          kind: 'agility',
-          value: 10,
-          remainingTurns: 4,
-        }),
+      expect(alterationsOf(steps, 'debuff', QUEEN)).toEqual([
+        alteration('agility', 10, 4),
       ]);
     });
 
@@ -384,12 +375,8 @@ describe('Vespera full kit', () => {
     it('[VES-REI-5] blinds the enemies by 40% for the rest of the fight', async () => {
       const steps = await cornered();
 
-      expect(named(steps, 'debuff', EXPLOSION)[0].alterations).toEqual([
-        expect.objectContaining({
-          kind: 'accuracy',
-          value: 40,
-          remainingTurns: null,
-        }),
+      expect(alterationsOf(steps, 'debuff', EXPLOSION)).toEqual([
+        alteration('accuracy', 40, null),
       ]);
     });
   });
@@ -398,32 +385,19 @@ describe('Vespera full kit', () => {
     it('refuses a stacked poison without its stack multiplier', async () => {
       const { stackMultiplier: _dropped, ...venom } =
         vespera.skills.simpleAttack.effects[0];
-      const stinger = { ...vespera.skills.simpleAttack, effects: [venom] };
+      const simpleAttack = { ...vespera.skills.simpleAttack, effects: [venom] };
+      const card = { ...vespera, skills: { ...vespera.skills, simpleAttack } };
 
-      await fight
-        .post(
-          [
-            {
-              ...vespera,
-              skills: { ...vespera.skills, simpleAttack: stinger },
-            },
-          ],
-          [dummy('prey')],
-        )
-        .expect(400);
+      await fight.post([card], [dummy('prey')]).expect(400);
     });
 
     it('refuses a ramping chance on another kind than STANCE', async () => {
       const [carapace] = vespera.skills.others;
       const rampingChance = { startChance: 0.25, increment: 0.1, fromTurn: 3 };
       const others = [{ ...carapace, rampingChance }];
+      const card = { ...vespera, skills: { ...vespera.skills, others } };
 
-      await fight
-        .post(
-          [{ ...vespera, skills: { ...vespera.skills, others } }],
-          [dummy('prey')],
-        )
-        .expect(400);
+      await fight.post([card], [dummy('prey')]).expect(400);
     });
   });
 });

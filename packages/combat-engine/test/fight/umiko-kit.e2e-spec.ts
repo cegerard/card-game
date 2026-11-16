@@ -6,6 +6,7 @@ import { AppModule } from '../../src/app.module';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { alteration, alterationsOf, deathOf } from '../helpers/kit';
 
 const __dirname = join(fileURLToPath(import.meta.url), '..');
 
@@ -122,27 +123,20 @@ describe('Umiko full kit', () => {
     it('[UMI-ATK-2] slows its target by 15% for a turn', async () => {
       const steps = await fight([umiko], [card('foe')]);
 
-      expect(named(steps, 'debuff', WHIP)[0].alterations).toEqual([
-        expect.objectContaining({
-          kind: 'speed',
-          value: 7.5,
-          remainingTurns: 1,
-        }),
+      expect(alterationsOf(steps, 'debuff', WHIP)).toEqual([
+        alteration('speed', 7.5, 1),
       ]);
     });
 
     it('[UMI-ATK-3] hits 20% harder in a water battlefield', async () => {
       jest.spyOn(Math, 'random').mockReturnValue(0.99);
-      const steps = await fight(
-        [umiko, card('ally')],
-        [card('foe', { attack: 90 })],
-      );
+      const foe = card('foe', { attack: 90 });
+      const steps = await fight([umiko, card('ally')], [foe]);
       const flooded = steps.findIndex((s) => s.kind === 'battlefield_started');
+      const whip = named(steps.slice(flooded), 'attack', WHIP)[0];
 
       // 52.5 x 1.2 = 63 physical, 94.5 x 1.2 = 113.4 water -> 113
-      expect(
-        named(steps.slice(flooded), 'attack', WHIP)[0].damages[0].damage,
-      ).toBe(176);
+      expect(whip.damages[0].damage).toBe(176);
     });
   });
 
@@ -183,10 +177,8 @@ describe('Umiko full kit', () => {
   describe('Intelligence des Profondeurs', () => {
     // Accuracy 75: hits her base agility of 70, misses it raised by 10%.
     it('[UMI-INS-1] dodges an enemy once it has attacked her', async () => {
-      const steps = await fight(
-        [umiko],
-        [card('foe', { attack: 10, accuracy: 75 })],
-      );
+      const foe = card('foe', { attack: 10, accuracy: 75 });
+      const steps = await fight([umiko], [foe]);
       const dodges = steps
         .filter((s) => s.kind === 'attack' && s.attacker.id === 'foe')
         .map((s) => s.damages[0].dodge);
@@ -196,16 +188,11 @@ describe('Umiko full kit', () => {
 
     // Agility 90: dodges her base accuracy of 85, not 85 raised by 15%.
     it('[UMI-INS-2] hits an enemy once it has attacked her', async () => {
-      const steps = await fight(
-        [umiko],
-        [card('foe', { attack: 10, agility: 90 })],
-      );
+      const foe = card('foe', { attack: 10, agility: 90 });
+      const steps = await fight([umiko], [foe]);
+      const whips = named(steps, 'attack', WHIP).slice(0, 2);
 
-      expect(
-        named(steps, 'attack', WHIP)
-          .slice(0, 2)
-          .map((s) => s.damages[0].dodge),
-      ).toEqual([true, false]);
+      expect(whips.map((s) => s.damages[0].dodge)).toEqual([true, false]);
     });
   });
 
@@ -228,12 +215,8 @@ describe('Umiko full kit', () => {
     it('[UMI-TOU-2] weakens the defense of its target by 20% for two turns', async () => {
       const steps = await fight([umiko], [card('foe', { defense: 100 })]);
 
-      expect(named(steps, 'debuff', WHIRLPOOL)[0].alterations).toEqual([
-        expect.objectContaining({
-          kind: 'defense',
-          value: 20,
-          remainingTurns: 2,
-        }),
+      expect(alterationsOf(steps, 'debuff', WHIRLPOOL)).toEqual([
+        alteration('defense', 20, 2),
       ]);
     });
 
@@ -273,16 +256,12 @@ describe('Umiko full kit', () => {
 
     it('[UMI-SPE-2] entangles both of them', async () => {
       const steps = await imprison();
-      const seized = named(steps, 'special_attack', PRISON)[0].damages.map(
-        (d) => d.defender.id,
-      );
+      const { damages } = named(steps, 'special_attack', PRISON)[0];
+      const entangled = ofKind(steps, 'status_change')
+        .filter((s) => s.status === 'entangle')
+        .map((s) => s.card.id);
 
-      expect(
-        ofKind(steps, 'status_change')
-          .filter((s) => s.status === 'entangle')
-          .slice(0, 2)
-          .map((s) => s.card.id),
-      ).toEqual(seized);
+      expect(entangled.slice(0, 2)).toEqual(damages.map((d) => d.defender.id));
     });
 
     it('[UMI-SPE-2] makes an entangled enemy fail its action on a roll under 70%', async () => {
@@ -317,14 +296,12 @@ describe('Umiko full kit', () => {
     });
 
     it('[UMI-SPE-5] lowers by 30% the dodge of two adjacent targets', async () => {
-      const steps = await fight(
-        [umiko],
-        [card('a', { agility: 50 }), card('b', { agility: 50 })],
-      );
+      const foes = [card('a', { agility: 50 }), card('b', { agility: 50 })];
+      const steps = await fight([umiko], foes);
 
-      expect(named(steps, 'debuff', WATER_ZONE)[0].alterations).toEqual([
-        expect.objectContaining({ kind: 'agility', value: 15 }),
-        expect.objectContaining({ kind: 'agility', value: 15 }),
+      expect(alterationsOf(steps, 'debuff', WATER_ZONE)).toEqual([
+        alteration('agility', 15),
+        alteration('agility', 15),
       ]);
     });
   });
@@ -391,22 +368,11 @@ describe('Umiko full kit', () => {
 
     it('[UMI-ULT-3] quickens by 25% and sharpens by 20% her allies while it lasts', async () => {
       const steps = await pressed();
+      const tide = alterationsOf(steps, 'buff', TIDE);
 
-      expect(
-        named(steps, 'buff', TIDE)[0].alterations.filter(
-          (a) => a.target.id === 'ally',
-        ),
-      ).toEqual([
-        expect.objectContaining({
-          kind: 'speed',
-          value: 12.5,
-          remainingTurns: 3,
-        }),
-        expect.objectContaining({
-          kind: 'accuracy',
-          value: 20,
-          remainingTurns: 3,
-        }),
+      expect(tide.filter((a) => a.target.id === 'ally')).toEqual([
+        alteration('speed', 12.5, 3),
+        alteration('accuracy', 20, 3),
       ]);
     });
 
@@ -418,22 +384,21 @@ describe('Umiko full kit', () => {
       ]);
     });
 
-    it('[UMI-ULT-4] raises by 5 the energy the enemy specials cost', async () => {
+    // Its special costs 20 energy
+    const charger = () => {
       const foe = card('foe', { attack: 150 }) as any;
       const special = { ...foe.skills.special, energy: 20 };
-      const steps = await fight(
-        [umiko, card('ally')],
-        [{ ...foe, skills: { ...foe.skills, special } }],
-      );
+      return { ...foe, skills: { ...foe.skills, special } };
+    };
 
-      // The gauge stops at the cost: 20, then 25 in her battlefield
-      expect(
-        Math.max(
-          ...steps
-            .filter((s) => s.kind === 'attack' && s.attacker.id === 'foe')
-            .map((s) => s.energy),
-        ),
-      ).toBe(25);
+    // The gauge stops at the cost: 20, then 25 in her battlefield
+    it('[UMI-ULT-4] raises by 5 the energy the enemy specials cost', async () => {
+      const steps = await fight([umiko, card('ally')], [charger()]);
+      const gauges = steps
+        .filter((s) => s.kind === 'attack' && s.attacker.id === 'foe')
+        .map((s) => s.energy);
+
+      expect(Math.max(...gauges)).toBe(25);
     });
 
     describe('Héritage de la Tisseuse, when Umiko falls under it', () => {
@@ -450,18 +415,9 @@ describe('Umiko full kit', () => {
 
       it('[UMI-ULT-5] lets her clone cast the prison one last time', async () => {
         const steps = await killed();
-        const death = steps.findIndex(
-          (s) =>
-            s.kind === 'status_change' &&
-            s.status === 'dead' &&
-            s.card.id === 'umiko',
-        );
+        const afterDeath = steps.slice(deathOf(steps, 'umiko'));
 
-        expect(
-          steps
-            .slice(death)
-            .filter((s) => s.kind === 'attack' && s.name === PRISON),
-        ).toHaveLength(1);
+        expect(named(afterDeath, 'attack', PRISON)).toHaveLength(1);
       });
     });
   });

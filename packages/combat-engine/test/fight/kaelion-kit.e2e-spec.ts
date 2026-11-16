@@ -1,9 +1,12 @@
-import { jest } from '@jest/globals';
 import {
   actionsOf,
+  alteration,
+  alterationsOf,
   dummy,
   named,
   ofKind,
+  positionsOf,
+  rolling,
   rosterCard,
   statusTicks,
   useFight,
@@ -37,8 +40,6 @@ const nextFlameAfter = (steps: any[], found: (step: any) => boolean) =>
 describe('Kaelion full kit', () => {
   const fight = useFight();
 
-  const rolling = (roll: number) =>
-    jest.spyOn(Math, 'random').mockReturnValue(roll);
   const alone = () => fight([kaelion], [dummy('foe', { attack: 10 })]);
   // 300 - 50 defense = 250 a hit: 280, then 70 after his 40 regeneration
   const pressed = () => fight([kaelion], [dummy('foe', { attack: 300 })]);
@@ -124,22 +125,12 @@ describe('Kaelion full kit', () => {
 
     it('[KAE-SPE-2] lowers the dodge of the enemies struck by 20% for 3 turns', async () => {
       rolling(0.99);
-      const steps = await fight(
-        [kaelion],
-        [dummy('a', { agility: 50 }), dummy('b', { agility: 50 })],
-      );
+      const foes = [dummy('a', { agility: 50 }), dummy('b', { agility: 50 })];
+      const steps = await fight([kaelion], foes);
 
-      expect(named(steps, 'debuff', BASALT_HEART)[0].alterations).toEqual([
-        expect.objectContaining({
-          kind: 'agility',
-          value: 10,
-          remainingTurns: 3,
-        }),
-        expect.objectContaining({
-          kind: 'agility',
-          value: 10,
-          remainingTurns: 3,
-        }),
+      expect(alterationsOf(steps, 'debuff', BASALT_HEART)).toEqual([
+        alteration('agility', 10, 3, 'a'),
+        alteration('agility', 10, 3, 'b'),
       ]);
     });
 
@@ -147,11 +138,10 @@ describe('Kaelion full kit', () => {
       rolling(0.99);
       const steps = await alone();
 
-      expect(named(steps, 'shield_applied', BASALT_HEART)[0].targets).toEqual([
-        expect.objectContaining({
-          target: expect.objectContaining({ id: 'kaelion' }),
-          points: 159,
-        }),
+      const { targets } = named(steps, 'shield_applied', BASALT_HEART)[0];
+
+      expect(targets.map((t) => [t.target.id, t.points])).toEqual([
+        ['kaelion', 159],
       ]);
     });
 
@@ -159,14 +149,11 @@ describe('Kaelion full kit', () => {
       rolling(0.99);
       const steps = await alone();
       const shielded = steps.findIndex((s) => s.name === BASALT_HEART);
+      const expired = steps.findIndex(
+        (s) => s.kind === 'shield_expired' && s.card.id === 'kaelion',
+      );
 
-      expect(
-        steps
-          .slice(shielded)
-          .findIndex(
-            (s) => s.kind === 'shield_expired' && s.card.id === 'kaelion',
-          ),
-      ).toBeGreaterThan(0);
+      expect(expired).toBeGreaterThan(shielded);
     });
   });
 
@@ -187,39 +174,28 @@ describe('Kaelion full kit', () => {
       rolling(0.99);
       const steps = await alone();
       const actions = actionsOf(steps, 'kaelion');
-      const ownBefore = (i: number) =>
-        actions.slice(0, i).filter((name) => name !== RUSH).length;
+      const rushes = positionsOf(actions, RUSH).slice(0, 3);
 
-      expect(
-        actions
-          .flatMap((name, i) => (name === RUSH ? [ownBefore(i)] : []))
-          .slice(0, 3),
-      ).toEqual([2, 5, 8]);
+      // A rush at index i follows i minus the earlier rushes of his own actions
+      expect(rushes.map((at, n) => at - n)).toEqual([2, 5, 8]);
     });
 
     it('[KAE-ELA-2] fires on its own at turn start, then he still acts', async () => {
       rolling(0.99);
       const steps = await alone();
-      const strikes = after(steps, (s) => s.name === RUSH).filter((s) =>
+      const next = after(steps, (s) => s.name === RUSH).find((s) =>
         ['attack', 'special_attack'].includes(s.kind),
       );
 
-      expect(strikes[0]).toMatchObject({
-        name: FLAME,
-        attacker: expect.objectContaining({ id: 'kaelion' }),
-      });
+      expect(`${next.attacker.id} ${next.name}`).toBe(`kaelion ${FLAME}`);
     });
 
     it('[KAE-ELA-3] lowers the defense of the enemy struck by 15% for 2 turns', async () => {
       rolling(0.99);
       const steps = await fight([kaelion], [dummy('foe', { defense: 100 })]);
 
-      expect(named(steps, 'debuff', RUSH)[0].alterations).toEqual([
-        expect.objectContaining({
-          kind: 'defense',
-          value: 15,
-          remainingTurns: 2,
-        }),
+      expect(alterationsOf(steps, 'debuff', RUSH)).toEqual([
+        alteration('defense', 15, 2),
       ]);
     });
   });
@@ -301,26 +277,18 @@ describe('Kaelion full kit', () => {
       rolling(0.99);
       const steps = await pressed();
 
-      expect(
-        named(steps, 'buff', RECHARGE_DEFENSE)[0].alterations[0],
-      ).toMatchObject({
-        kind: 'defense',
-        value: 50,
-        remainingTurns: 1,
-      });
+      expect(alterationsOf(steps, 'buff', RECHARGE_DEFENSE)[0]).toEqual(
+        alteration('defense', 50, 1),
+      );
     });
 
     it('[KAE-REC-2] raises his attack by 150% until his next turn ends', async () => {
       rolling(0.99);
       const steps = await pressed();
 
-      expect(
-        named(steps, 'buff', RECHARGE_ATTACK)[0].alterations[0],
-      ).toMatchObject({
-        kind: 'attack',
-        value: 127.5,
-        remainingTurns: 1,
-      });
+      expect(alterationsOf(steps, 'buff', RECHARGE_ATTACK)[0]).toEqual(
+        alteration('attack', 127.5, 1),
+      );
     });
   });
 
@@ -345,12 +313,10 @@ describe('Kaelion full kit', () => {
       rolling(0.99);
       const steps = await avenging();
 
-      expect(named(steps, 'attack', TEARS)[0].damages).toEqual([
-        expect.objectContaining({
-          defender: expect.objectContaining({ id: 'hitter' }),
-          damage: 170,
-          kind: ['FIRE'],
-        }),
+      const { damages } = named(steps, 'attack', TEARS)[0];
+
+      expect(damages.map((d) => [d.defender.id, d.damage, d.kind])).toEqual([
+        ['hitter', 170, ['FIRE']],
       ]);
     });
 
@@ -370,16 +336,8 @@ describe('Kaelion full kit', () => {
       const steps = await avenging();
 
       expect(named(steps, 'buff', TEARS).map((s) => s.alterations[0])).toEqual([
-        expect.objectContaining({
-          target: expect.objectContaining({ id: 'arionis' }),
-          kind: 'attack',
-          value: 10,
-        }),
-        expect.objectContaining({
-          target: expect.objectContaining({ id: 'arionis' }),
-          kind: 'defense',
-          value: 20,
-        }),
+        alteration('attack', 10, undefined, 'arionis'),
+        alteration('defense', 20, undefined, 'arionis'),
       ]);
     });
   });

@@ -5,6 +5,7 @@ import { AppModule } from '../../src/app.module';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { alteration, alterationsOf } from '../helpers/kit';
 
 const __dirname = join(fileURLToPath(import.meta.url), '..');
 
@@ -161,33 +162,24 @@ describe('Hyōki full kit', () => {
     });
 
     it('[HYO-ATK-2] hardens that ally by 15% for a turn', async () => {
-      const steps = await fight(
-        [hyoki, card('a', { defense: 100 })],
-        [card('foe')],
-      );
+      const ally = card('a', { defense: 100 });
+      const steps = await fight([hyoki, ally], [card('foe')]);
 
-      expect(named(steps, 'buff', REVIVING_BREATH)[0].alterations).toEqual([
-        expect.objectContaining({
-          kind: 'defense',
-          value: 15,
-          remainingTurns: 1,
-        }),
+      expect(alterationsOf(steps, 'buff', REVIVING_BREATH)).toEqual([
+        alteration('defense', 15, 1),
       ]);
     });
 
+    // The foe stays frozen until its own turn ends, after the decoy's and
+    // Hyōki's: 54.6 x 1.15 = 62.79 -> 63 a part (a 0 rate freeze adds nothing)
     it('[HYO-ATK-3] hits a frozen target 15% harder', async () => {
-      // The foe stays frozen until its own turn ends, after the decoy's and
-      // Hyōki's: 54.6 x 1.15 = 62.79 -> 63 a part (a 0 rate freeze adds nothing)
-      const steps = await fight(
-        [freezer(), hyoki],
-        [card('decoy'), card('foe')],
-      );
+      const foes = [card('decoy'), card('foe')];
+      const steps = await fight([freezer(), hyoki], foes);
+      const gale = named(steps, 'attack', GALE)[0];
 
-      expect(
-        named(steps, 'attack', GALE)[0].damages.find(
-          (d) => d.defender.id === 'foe',
-        ).damage,
-      ).toBe(126);
+      expect(gale.damages.find((d) => d.defender.id === 'foe').damage).toBe(
+        126,
+      );
     });
 
     it('[HYO-ATK-1] strikes with physical and air damage', async () => {
@@ -254,12 +246,8 @@ describe('Hyōki full kit', () => {
     it('[HYO-BOU-3] quickens that ally', async () => {
       const steps = await fight([card('a'), hyoki], [card('foe')]);
 
-      expect(named(steps, 'buff', GUST)[0].alterations).toEqual([
-        expect.objectContaining({
-          kind: 'speed',
-          value: 10,
-          remainingTurns: 1,
-        }),
+      expect(alterationsOf(steps, 'buff', GUST)).toEqual([
+        alteration('speed', 10, 1),
       ]);
     });
 
@@ -293,38 +281,34 @@ describe('Hyōki full kit', () => {
       ).toEqual(['a', 'a', 'hyoki', 'hyoki']);
     });
 
+    // The 25% defense of the circle first, then 3% of each stat for his ally
+    const HYOKI_CIRCLE = [
+      ['defense', 13.75],
+      ['attack', 1.95],
+      ['defense', 1.65],
+      ['agility', 1.8],
+      ['accuracy', 2.4],
+      ['speed', 1.95],
+      ['criticalChance', 0],
+      ['regeneration', 1.2],
+      ['resistance', 1.5],
+    ];
+
     it('[HYO-SPE-3] raises every stat of each member by 3% a living ally', async () => {
       const steps = await fight([card('a'), hyoki], [card('foe')]);
+      const onHyoki = alterationsOf(steps, 'buff', CIRCLE).filter(
+        (a) => a.target.id === 'hyoki',
+      );
 
-      expect(
-        named(steps, 'buff', CIRCLE)[0]
-          .alterations.filter((a) => a.target.id === 'hyoki')
-          .map((a) => [a.kind, a.value]),
-      ).toEqual([
-        ['defense', 13.75],
-        ['attack', 1.95],
-        ['defense', 1.65],
-        ['agility', 1.8],
-        ['accuracy', 2.4],
-        ['speed', 1.95],
-        ['criticalChance', 0],
-        ['regeneration', 1.2],
-        ['resistance', 1.5],
-      ]);
+      expect(onHyoki.map((a) => [a.kind, a.value])).toEqual(HYOKI_CIRCLE);
     });
 
     it('[HYO-SPE-2] shares the hits of a member with the others', async () => {
-      const steps = await fight(
-        [card('a'), hyoki],
-        [card('foe', { attack: 100 })],
-      );
+      const foe = card('foe', { attack: 100 });
+      const steps = await fight([card('a'), hyoki], [foe]);
+      const { shares } = named(steps, 'damage_shared', CIRCLE)[0];
 
-      expect(named(steps, 'damage_shared', CIRCLE)[0].shares).toEqual([
-        expect.objectContaining({
-          card: expect.objectContaining({ id: 'hyoki' }),
-          damage: 5,
-        }),
-      ]);
+      expect(shares.map((s) => [s.card.id, s.damage])).toEqual([['hyoki', 5]]);
     });
   });
 
@@ -381,12 +365,8 @@ describe('Hyōki full kit', () => {
     it('[HYO-TEM-5] blinds the enemies', async () => {
       const steps = await allyInDanger();
 
-      expect(named(steps, 'debuff', STORM)[0].alterations).toEqual([
-        expect.objectContaining({
-          target: expect.objectContaining({ id: 'foe' }),
-          kind: 'accuracy',
-          value: 1999.8,
-        }),
+      expect(alterationsOf(steps, 'debuff', STORM)).toEqual([
+        alteration('accuracy', 1999.8, undefined, 'foe'),
       ]);
     });
 
@@ -400,16 +380,21 @@ describe('Hyōki full kit', () => {
       });
     });
 
-    it('[HYO-TEM-3] brings back an ally fallen in the last turns', async () => {
-      const steps = await fight(
+    // fragile falls at the first blow, b holds long enough for the storm
+    const reviving = () =>
+      fight(
         [card('fragile', { health: 100 }), card('b', { health: 500 }), hyoki],
         [card('foe', { attack: 400 })],
       );
 
-      expect(named(steps, 'revived', STORM)[0]).toMatchObject({
-        card: { id: 'fragile' },
-        remainingHealth: 30,
-      });
+    it('[HYO-TEM-3] brings back an ally fallen in the last turns', async () => {
+      const steps = await reviving();
+      const revived = named(steps, 'revived', STORM)[0];
+
+      expect([revived.card.id, revived.remainingHealth]).toEqual([
+        'fragile',
+        30,
+      ]);
     });
 
     describe('when Hyōki falls under it', () => {
