@@ -1,6 +1,8 @@
 import { jest } from '@jest/globals';
 import {
   actionsOf,
+  alteration,
+  alterationsOf,
   dummy,
   named,
   ofKind,
@@ -170,14 +172,13 @@ describe('Scythra full kit', () => {
   describe(AERO_TRACKER, () => {
     it('[SCY-AER-1] sharpens her accuracy by 15% from the start', async () => {
       const steps = await alone();
+      const { kind, name, alterations } = steps[1];
 
-      expect(steps[1]).toMatchObject({
-        kind: 'buff',
-        name: AERO_ACCURACY,
-        alterations: [
-          expect.objectContaining({ kind: 'accuracy', value: 14.25 }),
-        ],
-      });
+      expect([kind, name, ...alterations]).toEqual([
+        'buff',
+        AERO_ACCURACY,
+        alteration('accuracy', 14.25),
+      ]);
     });
 
     // 95 alone would miss 100 agility
@@ -273,12 +274,8 @@ describe('Scythra full kit', () => {
     it('[SCY-LAM-3] quickens her by 20% for 3 turns', async () => {
       const steps = await alone();
 
-      expect(named(steps, 'buff', RED_WIND)[0].alterations).toEqual([
-        expect.objectContaining({
-          kind: 'speed',
-          value: 17,
-          remainingTurns: 3,
-        }),
+      expect(alterationsOf(steps, 'buff', RED_WIND)).toEqual([
+        alteration('speed', 17, 3),
       ]);
     });
 
@@ -350,52 +347,40 @@ describe('Scythra full kit', () => {
     });
 
     // foe: 0 stack left, 0.6 x 85 = 51; b: the foe bleeds 3 again, 0.6 x 90.1
-    it('[SCY-EXS-4] strikes the target and its neighbors for 60% air', async () => {
-      const steps = await fight(
-        [scythra],
-        [dummy('foe', { attack: 10 }), dummy('b')],
-      );
+    const neighbors = () =>
+      fight([scythra], [dummy('foe', { attack: 10 }), dummy('b')]);
 
-      expect(named(steps, 'attack', SCARLET_WIND)[0].damages).toEqual([
-        expect.objectContaining({ damage: 51, kind: ['AIR'] }),
-        expect.objectContaining({ damage: 54, kind: ['AIR'] }),
+    it('[SCY-EXS-4] strikes the target and its neighbors for 60% air', async () => {
+      const steps = await neighbors();
+      const { damages } = named(steps, 'attack', SCARLET_WIND)[0];
+
+      expect(damages.map((d) => [d.damage, d.kind])).toEqual([
+        [51, ['AIR']],
+        [54, ['AIR']],
       ]);
     });
 
     it('[SCY-EXS-4] lays 3 stacks on each of them', async () => {
-      const steps = await fight(
-        [scythra],
-        [dummy('foe', { attack: 10 }), dummy('b')],
-      );
+      const steps = await neighbors();
 
       expect(bleedsOn(after(steps, SCARLET_WIND), 'b')[0].stacks).toBe(3);
     });
 
     // The 2000 defense prey, worn out by bleeding, falls under 30%
-    it('[SCY-EXS-5] shocks a target left under 30%: defense -40%, regeneration -80% for 4 turns', async () => {
-      const steps = await fight(
-        [scythra],
-        [
-          dummy('prey', {
-            attack: 10,
-            health: 200,
-            defense: 2000,
-            regeneration: 10,
-          }),
-        ],
-      );
+    const prey = () =>
+      dummy('prey', {
+        attack: 10,
+        health: 200,
+        defense: 2000,
+        regeneration: 10,
+      });
 
-      expect(named(steps, 'debuff', SHOCK)[0].alterations).toEqual([
-        expect.objectContaining({
-          kind: 'defense',
-          value: 800,
-          remainingTurns: 4,
-        }),
-        expect.objectContaining({
-          kind: 'regeneration',
-          value: 8,
-          remainingTurns: 4,
-        }),
+    it('[SCY-EXS-5] shocks a target left under 30%: defense -40%, regeneration -80% for 4 turns', async () => {
+      const steps = await fight([scythra], [prey()]);
+
+      expect(alterationsOf(steps, 'debuff', SHOCK)).toEqual([
+        alteration('defense', 800, 4),
+        alteration('regeneration', 8, 4),
       ]);
     });
 

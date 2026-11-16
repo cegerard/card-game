@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+import { expect, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
@@ -57,6 +57,34 @@ export const dummy = (id: string, overrides: Card = {}): Card => ({
   ...overrides,
 });
 
+/** Pins every roll of the fight to `roll`. */
+export const rolling = (roll: number) =>
+  jest.spyOn(Math, 'random').mockReturnValue(roll);
+
+/** Matches a card of a step by its id. */
+export const card = (id: string) => expect.objectContaining({ id });
+
+/**
+ * An alteration entry of a buff or debuff step: kind and value, then the
+ * remaining turns and the target when given.
+ */
+export const alteration = (
+  kind: string,
+  value: number,
+  remainingTurns?: number | null,
+  target?: string,
+) =>
+  expect.objectContaining({
+    kind,
+    value,
+    ...(remainingTurns === undefined ? {} : { remainingTurns }),
+    ...(target === undefined ? {} : { target: card(target) }),
+  });
+
+/** The alterations of the first `kind` step (buff, debuff…) named `name`. */
+export const alterationsOf = (steps: any[], kind: string, name: string) =>
+  named(steps, kind, name)[0].alterations;
+
 export const named = (steps: any[], kind: string, name: string) =>
   steps.filter((s) => s.kind === kind && s.name === name);
 
@@ -71,6 +99,21 @@ export const actionsOf = (steps: any[], id: string) =>
         ['attack', 'special_attack'].includes(s.kind) && s.attacker.id === id,
     )
     .map((s) => s.name);
+
+/** Index of the step reporting the death of `id`, -1 if it lives. */
+export const deathOf = (steps: any[], id: string) =>
+  steps.findIndex(
+    (s) =>
+      s.kind === 'status_change' && s.status === 'dead' && s.card.id === id,
+  );
+
+/** The values of `keys` in a step, a card reduced to its id, to compare at once. */
+export const pick = (step: any, ...keys: string[]) =>
+  keys.map((key) => step[key]?.id ?? step[key]);
+
+/** Where `name` stands in a list of action names. */
+export const positionsOf = (actions: string[], name: string) =>
+  actions.flatMap((action, i) => (action === name ? [i] : []));
 
 /** Each hit a card took: the damages entries aimed at it, in order. */
 export const hitsOn = (steps: any[], id: string) =>

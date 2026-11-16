@@ -1,9 +1,13 @@
-import { jest } from '@jest/globals';
 import {
   actionsOf,
+  alteration,
+  alterationsOf,
   dummy,
   named,
   ofKind,
+  pick,
+  positionsOf,
+  rolling,
   rosterCard,
   statusTicks,
   useFight,
@@ -20,6 +24,8 @@ const MASS_FREEZE = 'Valse du Cygne Noir - Gel de Masse';
 const OMNISCIENCE = 'Valse du Cygne Noir - Omniscience Tactique';
 const CRYSTALS = 'Valse du Cygne Noir - Tempête de Cristaux';
 const SWAN_LEGACY = 'Valse du Cygne Noir - Héritage du Cygne';
+const WALTZ_STANCE = 'valse-du-cygne-noir';
+const OMNISCIENCE_POINT = 'Omniscience Tactique';
 
 const swan = rosterCard('svana');
 const without = (card: any, dropped: (skill: any) => boolean) => ({
@@ -72,8 +78,6 @@ describe('Svana full kit', () => {
   const fight = useFight();
 
   // Éclat de Givre is the only roll of her kit: high unless a test says otherwise
-  const rolling = (roll: number) =>
-    jest.spyOn(Math, 'random').mockReturnValue(roll);
   beforeEach(() => {
     rolling(0.99);
   });
@@ -100,30 +104,25 @@ describe('Svana full kit', () => {
     });
 
     // The ally has no critical chance of its own: the mark lends it 10%
-    it('[SVA-ATK-3] lends her allies 10% critical chance against a marked target', async () => {
-      rolling(0.05);
+    const allyCritical = async () => {
       const steps = await fight(
         [focused, dummy('ally', { attack: 100 })],
         [dummy('prey')],
       );
+      return steps.find((s) => s.kind === 'attack' && s.attacker.id === 'ally')
+        .damages[0].isCritical;
+    };
 
-      expect(
-        steps.find((s) => s.kind === 'attack' && s.attacker.id === 'ally')
-          .damages[0].isCritical,
-      ).toBe(true);
+    it('[SVA-ATK-3] lends her allies 10% critical chance against a marked target', async () => {
+      rolling(0.05);
+
+      expect(await allyCritical()).toBe(true);
     });
 
     it('[SVA-ATK-3] lends no more than 10%', async () => {
       rolling(0.11);
-      const steps = await fight(
-        [focused, dummy('ally', { attack: 100 })],
-        [dummy('prey')],
-      );
 
-      expect(
-        steps.find((s) => s.kind === 'attack' && s.attacker.id === 'ally')
-          .damages[0].isCritical,
-      ).toBe(false);
+      expect(await allyCritical()).toBe(false);
     });
 
     // Frozen by Tempête Focalisée: 52.5 x 1.2 = 63 a part, then x 1.2 taken
@@ -172,14 +171,13 @@ describe('Svana full kit', () => {
     // target, x 1.6 = 201.6, then x 1.2 taken by a frozen card: 242
     it('[SVA-SPE-2] makes the next hit on its target 60% harder', async () => {
       const steps = await embraced();
+      const sinceEmbrace = steps.slice(
+        steps.findIndex((s) => s.name === EMBRACE),
+      );
 
-      expect(
-        named(
-          steps.slice(steps.findIndex((s) => s.name === EMBRACE)),
-          'attack',
-          BREATH,
-        )[0].damages[0].damage,
-      ).toBe(242);
+      expect(named(sinceEmbrace, 'attack', BREATH)[0].damages[0].damage).toBe(
+        242,
+      );
     });
 
     it('[SVA-SPE-2] spends the weak point on that hit', async () => {
@@ -199,12 +197,8 @@ describe('Svana full kit', () => {
     it('[SVA-SPE-3] drains the target attack by 25% for 4 turns', async () => {
       const steps = await embraced();
 
-      expect(named(steps, 'debuff', EMBRACE)[0].alterations).toEqual([
-        expect.objectContaining({
-          kind: 'attack',
-          value: 25,
-          remainingTurns: 4,
-        }),
+      expect(alterationsOf(steps, 'debuff', EMBRACE)).toEqual([
+        alteration('attack', 25, 4),
       ]);
     });
 
@@ -219,19 +213,18 @@ describe('Svana full kit', () => {
       });
     });
 
+    // Damage and remaining turns of its first three ticks
+    const HYPOTHERMIA_TICKS = ['1500 2', '1500 1', '1500 0'];
+
     it('[SVA-SPE-4] bites 15% of the target max health a turn, for 3 turns', async () => {
       const steps = await embraced();
+      const ticks = steps
+        .filter((s) => s.kind === 'state_effect' && s.type === 'hypothermia')
+        .slice(0, 3);
 
-      expect(
-        steps
-          .filter((s) => s.kind === 'state_effect' && s.type === 'hypothermia')
-          .slice(0, 3)
-          .map((s) => [s.damage, s.remainingTurns]),
-      ).toEqual([
-        [1500, 2],
-        [1500, 1],
-        [1500, 0],
-      ]);
+      expect(ticks.map((s) => `${s.damage} ${s.remainingTurns}`)).toEqual(
+        HYPOTHERMIA_TICKS,
+      );
     });
   });
 
@@ -246,16 +239,17 @@ describe('Svana full kit', () => {
       ).toEqual([1, 2, 3]);
     });
 
+    const REVEALED = ['weak_point_revealed', 'Point Faible', 'svana'];
+
     it('[SVA-ANA-2] reveals a lasting weak point with the third charge', async () => {
       const steps = await analysing();
 
-      expect(
-        after(steps, { kind: 'analysis_charged', charges: 3 }),
-      ).toMatchObject({
-        kind: 'weak_point_revealed',
-        name: 'Point Faible',
-        source: expect.objectContaining({ id: 'svana' }),
+      const { kind, name, source } = after(steps, {
+        kind: 'analysis_charged',
+        charges: 3,
       });
+
+      expect([kind, name, source.id]).toEqual(REVEALED);
     });
 
     // Read by the revealer alone: the engine weak point tests cover the reads
@@ -271,12 +265,8 @@ describe('Svana full kit', () => {
     it('[SVA-GRA-1] raises her agility by 15% for the whole fight', async () => {
       const steps = await fight([focused], [dummy('prey')]);
 
-      expect(named(steps, 'buff', GRACE)[0].alterations).toEqual([
-        expect.objectContaining({
-          kind: 'agility',
-          value: 9.75,
-          remainingTurns: null,
-        }),
+      expect(alterationsOf(steps, 'buff', GRACE)).toEqual([
+        alteration('agility', 9.75, null),
       ]);
     });
 
@@ -351,9 +341,7 @@ describe('Svana full kit', () => {
       const steps = await fight([focused], [dummy('prey')]);
       const actions = actionsOf(steps, 'svana').slice(0, 8);
 
-      expect(actions.flatMap((name, i) => (name === STORM ? [i] : []))).toEqual(
-        [3, 7],
-      );
+      expect(positionsOf(actions, STORM)).toEqual([3, 7]);
     });
   });
 
@@ -362,24 +350,22 @@ describe('Svana full kit', () => {
 
     it('[SVA-VAL-1] sets off once every enemy is analysed', async () => {
       const steps = await analysing();
+      const risen = after(steps, { kind: 'analysis_charged', charges: 3 }, 2);
 
-      expect(
-        after(steps, { kind: 'analysis_charged', charges: 3 }, 2),
-      ).toMatchObject({
-        kind: 'transformation_started',
-        name: WALTZ,
-        remainingTurns: 3,
-      });
+      expect(pick(risen, 'kind', 'name', 'remainingTurns')).toEqual([
+        'transformation_started',
+        WALTZ,
+        3,
+      ]);
     });
 
     // 470 - 50 defense = 420 a hit: 90, under 20% of 510
     it('[SVA-VAL-1] sets off under 20% health', async () => {
       const steps = await fight([focused], [dummy('brute', { attack: 470 })]);
 
-      expect(
-        steps[steps.findIndex((s) => s.kind === 'transformation_started') - 1]
-          .damages[0].remainingHealth,
-      ).toBe(90);
+      const risen = steps.findIndex((s) => s.kind === 'transformation_started');
+
+      expect(steps[risen - 1].damages[0].remainingHealth).toBe(90);
     });
 
     it('[SVA-VAL-1] rises once per fight', async () => {
@@ -391,17 +377,9 @@ describe('Svana full kit', () => {
     it('[SVA-VAL-2] sharpens her accuracy by 50% and her speed by 35% for 3 turns', async () => {
       const steps = await analysing();
 
-      expect(named(steps, 'buff', WALTZ)[0].alterations).toEqual([
-        expect.objectContaining({
-          kind: 'accuracy',
-          value: 40,
-          remainingTurns: 3,
-        }),
-        expect.objectContaining({
-          kind: 'speed',
-          value: 24.5,
-          remainingTurns: 3,
-        }),
+      expect(alterationsOf(steps, 'buff', WALTZ)).toEqual([
+        alteration('accuracy', 40, 3),
+        alteration('speed', 24.5, 3),
       ]);
     });
 
@@ -411,38 +389,30 @@ describe('Svana full kit', () => {
 
     it('[SVA-VAL-3] freezes every enemy as it starts', async () => {
       const steps = await analysing();
+      const next = after(steps, { kind: 'stance_started', name: WALTZ_STANCE });
 
-      expect(
-        after(steps, { kind: 'stance_started', name: 'valse-du-cygne-noir' }),
-      ).toMatchObject({
-        kind: 'status_change',
-        status: 'freeze',
-        card: expect.objectContaining({ id: 'prey' }),
-      });
+      expect(pick(next, 'kind', 'status', 'card')).toEqual([
+        'status_change',
+        'freeze',
+        'prey',
+      ]);
     });
 
     it('[SVA-VAL-3] weakens the defense of every enemy by 25% for 3 turns', async () => {
       const steps = await analysing();
 
-      expect(named(steps, 'debuff', MASS_FREEZE)[0].alterations).toEqual([
-        expect.objectContaining({
-          kind: 'defense',
-          value: 25,
-          remainingTurns: 3,
-        }),
+      expect(alterationsOf(steps, 'debuff', MASS_FREEZE)).toEqual([
+        alteration('defense', 25, 3),
       ]);
     });
 
     it('[SVA-VAL-4] reveals a weak point on every enemy for 3 turns', async () => {
       const steps = await analysing();
 
-      expect(
-        named(steps, 'weak_point_revealed', 'Omniscience Tactique'),
-      ).toEqual([
-        expect.objectContaining({
-          card: expect.objectContaining({ id: 'prey' }),
-          remainingTurns: 3,
-        }),
+      const revealed = named(steps, 'weak_point_revealed', OMNISCIENCE_POINT);
+
+      expect(revealed.map((s) => pick(s, 'card', 'remainingTurns'))).toEqual([
+        ['prey', 3],
       ]);
     });
 
@@ -453,16 +423,12 @@ describe('Svana full kit', () => {
     });
 
     it('[SVA-VAL-5] shatters crystals of air on the neighbors of her target', async () => {
-      const steps = await fight(
-        [swan],
-        [unfreezable('left'), unfreezable('right')],
-      );
+      const foes = [unfreezable('left'), unfreezable('right')];
+      const steps = await fight([swan], foes);
+      const { damages } = named(steps, 'attack', CRYSTALS)[0];
 
-      expect(named(steps, 'attack', CRYSTALS)[0].damages).toEqual([
-        expect.objectContaining({
-          defender: expect.objectContaining({ id: 'right' }),
-          kind: ['AIR'],
-        }),
+      expect(damages.map((d) => pick(d, 'defender', 'kind'))).toEqual([
+        ['right', ['AIR']],
       ]);
     });
 
@@ -474,14 +440,13 @@ describe('Svana full kit', () => {
 
     it('[SVA-VAL-6] leaves the weak points she revealed for good when she dies in it', async () => {
       const steps = await fight([focused], [dummy('brute', { attack: 470 })]);
+      const next = after(steps, { kind: 'status_change', status: 'dead' });
 
-      expect(
-        after(steps, { kind: 'status_change', status: 'dead' }),
-      ).toMatchObject({
-        kind: 'weak_point_revealed',
-        name: 'Omniscience Tactique',
-        card: expect.objectContaining({ id: 'brute' }),
-      });
+      expect(pick(next, 'kind', 'name', 'card')).toEqual([
+        'weak_point_revealed',
+        OMNISCIENCE_POINT,
+        'brute',
+      ]);
     });
 
     it('[SVA-VAL-6] keeps them without a duration', async () => {
