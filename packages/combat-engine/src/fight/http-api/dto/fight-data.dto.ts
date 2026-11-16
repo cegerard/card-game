@@ -321,7 +321,8 @@ export class EffectDto {
   @IsNumber()
   level?: number;
 
-  // Required for BLEED, stacked POISON, HYPOTHERMIA, VULNERABILITY and SUPPORT_BLOCK
+  // Required for BLEED, stacked POISON, HYPOTHERMIA, VULNERABILITY and SUPPORT_BLOCK;
+  // optional on FREEZE, where it replaces the level turns (checked by the effect)
   @ValidateIf(
     (o) =>
       o.type === Effect.BLEED ||

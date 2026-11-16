@@ -1356,7 +1356,7 @@
         "damages": [{ "type": "AIR", "rate": 0 }],
         "targetingStrategy": "position-based",
         "effects": [
-          { "type": "FREEZE", "rate": 0.2, "level": 1 },
+          { "type": "FREEZE", "rate": 0.2, "level": 1, "duration": 2 },
           {
             "type": "WEAK_POINT",
             "rate": 0,
@@ -1440,7 +1440,7 @@
           "interval": 4,
           "targetingStrategy": "position-based",
           "damages": [{ "type": "AIR", "rate": 1.2 }],
-          "effect": { "type": "FREEZE", "rate": 0.2, "level": 2 },
+          "effect": { "type": "FREEZE", "rate": 0.2, "level": 2, "duration": 2 },
           "weakPointPenetration": 0.4
         },
         {

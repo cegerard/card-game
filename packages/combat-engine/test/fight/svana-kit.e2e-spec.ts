@@ -56,6 +56,18 @@ const unfreezable = (id: string) =>
     },
   });
 
+// Remaining turns of the freeze ticks of `id` from `from`, up to the one ending it
+const freezeTicks = (steps: any[], from: number, id = 'prey') => {
+  const ticks = steps
+    .slice(from)
+    .filter(
+      (s) =>
+        s.kind === 'state_effect' && s.type === 'freeze' && s.card.id === id,
+    )
+    .map((s) => s.remainingTurns);
+  return ticks.slice(0, ticks.indexOf(0) + 1);
+};
+
 // The step `offset` places after the first one carrying every field of `match`
 const after = (steps: any[], match: object, offset = 1) =>
   steps[
@@ -153,7 +165,19 @@ describe('Svana full kit', () => {
       });
     });
 
-    // 106 x 1.6 = 169.6
+    it('[SVA-SPE-1] freezes its target for two turns', async () => {
+      const steps = await embraced();
+
+      expect(
+        freezeTicks(
+          steps,
+          steps.findIndex((s) => s.name === EMBRACE),
+        ),
+      ).toEqual([1, 0]);
+    });
+
+    // Her freeze still holds on that hit: 63 x 2 = 126 against a frozen
+    // target, x 1.6 = 201.6, then x 1.2 taken by a frozen card: 242
     it('[SVA-SPE-2] makes the next hit on its target 60% harder', async () => {
       const steps = await embraced();
 
@@ -163,7 +187,7 @@ describe('Svana full kit', () => {
           'attack',
           BREATH,
         )[0].damages[0].damage,
-      ).toBe(170);
+      ).toBe(242);
     });
 
     it('[SVA-SPE-2] spends the weak point on that hit', async () => {
@@ -311,6 +335,17 @@ describe('Svana full kit', () => {
         kind: 'status_change',
         status: 'freeze',
       });
+    });
+
+    it('[SVA-TEM-2] freezes its target for two turns', async () => {
+      const steps = await fight([focused], [dummy('prey')]);
+
+      expect(
+        freezeTicks(
+          steps,
+          steps.findIndex((s) => s.name === STORM),
+        ),
+      ).toEqual([1, 0]);
     });
 
     // Every Souffle Cristallin marks the target first: 90 - 100 x 0.6

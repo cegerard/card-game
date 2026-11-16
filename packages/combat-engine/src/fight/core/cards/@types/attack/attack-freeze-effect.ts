@@ -14,6 +14,8 @@ export class FreezeAttackEffect implements AttackEffect {
   public readonly terminationEvent?: string;
   public readonly probability?: number;
   private readonly randomizer: Randomizer;
+  // Replaces the turns the level gives; the level keeps its other roles
+  private readonly duration?: number;
 
   constructor(
     rate: number,
@@ -22,13 +24,23 @@ export class FreezeAttackEffect implements AttackEffect {
     triggeredDebuff?: EffectTriggeredDebuff,
     terminationEvent?: string,
     probability?: number,
+    duration?: number,
   ) {
+    if (
+      duration !== undefined &&
+      !(Number.isInteger(duration) && duration >= 1)
+    ) {
+      throw new Error(
+        `FreezeAttackEffect duration must be an integer >= 1, got ${duration}`,
+      );
+    }
     this.rate = rate;
     this.level = level;
     this.randomizer = randomizer;
     this.triggeredDebuff = triggeredDebuff;
     this.terminationEvent = terminationEvent;
     this.probability = probability;
+    this.duration = duration;
   }
 
   public applyEffect(
@@ -78,6 +90,6 @@ export class FreezeAttackEffect implements AttackEffect {
   }
 
   private computeFrozenTurns(effectLevel: EffectLevel): number {
-    return 2 * effectLevel - 1;
+    return this.duration ?? 2 * effectLevel - 1;
   }
 }

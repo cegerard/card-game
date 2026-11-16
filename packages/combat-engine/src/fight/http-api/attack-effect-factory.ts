@@ -115,13 +115,17 @@ export function buildEffect(
         effectDto.probability,
       );
     case Effect.FREEZE:
-      return new FreezeAttackEffect(
-        effectDto.rate,
-        effectDto.level as EffectLevel,
-        randomizer,
-        triggeredDebuff,
-        effectDto.terminationEvent,
-        effectDto.probability,
+      return asBadRequest(
+        () =>
+          new FreezeAttackEffect(
+            effectDto.rate,
+            effectDto.level as EffectLevel,
+            randomizer,
+            triggeredDebuff,
+            effectDto.terminationEvent,
+            effectDto.probability,
+            effectDto.duration,
+          ),
       );
     case Effect.STUNT:
       return new StuntAttackEffect(
