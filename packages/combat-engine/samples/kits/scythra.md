@@ -23,12 +23,6 @@ et compare les caractéristiques ci-dessous à `samples/cards.json`.
 }
 ```
 
-## Écarts avec Notion
-
-Le moteur ne suit pas encore ces points de la fiche ; ils ne portent pas d'identifiant et ne sont pas testés :
-
-- Exsanguination Totale : Notion fait lire à la Détonation Hémorragique l'Attaque bonifiée par Anatomie Prédatrice ; le moteur lit l'Attaque une fois les piles de la cible consommées, donc sans le bonus qu'elles donnaient.
-
 ## Attaque : Lacération du Zéphyr
 
 - [SCY-ATK-1] Inflige 60 % d'Attaque en dégâts physiques et 40 % d'Attaque en dégâts élémentaires (Vent).

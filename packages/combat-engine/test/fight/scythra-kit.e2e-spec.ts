@@ -320,24 +320,25 @@ describe('Scythra full kit', () => {
       expect(named(steps, 'attack', EXSANGUINATION)[0].energy).toBe(0);
     });
 
-    // 7 stacks, read after they are consumed: 0.4 x 85 x 7
-    it('[SCY-EXS-3] deals 40% of her attack a stack it consumes', async () => {
+    // Her attack is read before the 7 stacks are consumed, so Anatomie
+    // Prédatrice counts them: 85 x 1.14 = 96.9; 0.4 x 7 x 96.9 = 271.32 -> 271
+    it('[SCY-EXS-3] deals 40% of her attack, raised by the stacks it consumes, a stack', async () => {
       const steps = await alone();
 
       expect(
         named(steps, 'attack', EXSANGUINATION)[0].damages[0],
       ).toMatchObject({
-        damage: 238,
+        damage: 271,
         consumedBleedStacks: 7,
       });
     });
 
-    // 238 less half of 100 defense
+    // 271.32 less half of 100 defense = 221.32 -> 221
     it('[SCY-EXS-3] ignores half the target defense', async () => {
       const steps = await alone({ defense: 100 });
 
       expect(named(steps, 'attack', EXSANGUINATION)[0].damages[0].damage).toBe(
-        188,
+        221,
       );
     });
 
