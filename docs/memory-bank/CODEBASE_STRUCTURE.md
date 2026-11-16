@@ -5,20 +5,20 @@ Mechanics are described once, in [backend/ARCHITECTURE.md](backend/ARCHITECTURE.
 ## Root
 
 ```
-card-game/                  # pnpm workspace
+card-game/ # pnpm workspace
 ├── packages/
-│   ├── combat-engine/      # NestJS fight simulation backend
-│   └── shared-types/       # Shared TypeScript types (stub)
+│   ├── combat-engine/ # NestJS fight simulation backend
+│   └── shared-types/ # Shared TypeScript types (stub)
 ├── clients/
-│   ├── fight-replayer/     # Static HTML/JS fight replay viewer (Vitest on the parser)
-│   └── gasha/              # SvelteKit arcade client (Phaser + Web renderer)
-├── docs/                   # Documentation and memory bank
-├── scripts/                # check-memory-bank-size.sh
-├── .claude/                # Claude commands, configuration, templates
-├── .github/                # Workflows (Node.js CI, Heroku deploy)
-├── Dockerfile              # Multi-stage production build (Node 26 Alpine)
+│   ├── fight-replayer/ # Static HTML/JS fight replay viewer (Vitest on the parser)
+│   └── gasha/ # SvelteKit arcade client (Phaser + Web renderer)
+├── docs/ # Documentation and memory bank
+├── scripts/ # check-memory-bank-size.sh
+├── .claude/ # Claude commands, configuration, templates
+├── .github/ # Workflows (Node.js CI, Heroku deploy)
+├── Dockerfile # Multi-stage production build (Node 26 Alpine)
 ├── pnpm-workspace.yaml
-└── package.json            # Root workspace scripts
+└── package.json # Root workspace scripts
 ```
 
 ## Combat Engine (`packages/combat-engine/src/`)
@@ -28,22 +28,22 @@ src/
 ├── main.ts, app.module.ts, logger-middleware.ts
 └── fight/
     ├── fight.module.ts
-    ├── core/          # Domain logic
-    ├── http-api/      # REST layer
-    └── tools/         # math-randomizer.ts (Math.random()), seeded-randomizer.ts (request seed)
+    ├── core/ # Domain logic
+    ├── http-api/ # REST layer
+    └── tools/ # math-randomizer.ts (Math.random()), seeded-randomizer.ts (request seed)
 ```
 
 ### `fight/core/`
 
 ```
 core/
-├── player.ts               # Player entity managing card decks (protectorOf, threeCardsFromCenter…)
-├── randomizer.ts           # Randomization abstraction
-├── cards/                  # Fighting card entities and types
-├── card-action/            # Action resolution logic
-├── fight-simulator/        # Fight orchestration
+├── player.ts # Player entity managing card decks (protectorOf, threeCardsFromCenter…)
+├── randomizer.ts # Randomization abstraction
+├── cards/ # Fighting card entities and types
+├── card-action/ # Action resolution logic
+├── fight-simulator/ # Fight orchestration
 ├── targeting-card-strategies/
-├── trigger/                # Event triggers
+├── trigger/ # Event triggers
 └── __tests__/
 ```
 
@@ -51,62 +51,62 @@ core/
 
 ```
 cards/
-├── fighting-card.ts        # Card entity: stats, state, buffers (shield, stance, concealment, protection, marks, bleed)
+├── fighting-card.ts # Card entity: stats, state, buffers (shield, stance, concealment, protection, marks, bleed)
 ├── skills/
-│   ├── simple-attack.ts, multiple-attack.ts, attack-skill.ts  # Attacks (attack-skill = base)
+│   ├── simple-attack.ts, multiple-attack.ts, attack-skill.ts # Attacks (attack-skill = base)
 │   ├── alteration-skill.ts # Triggered stat alteration
-│   ├── special.ts          # Special base class
+│   ├── special.ts # Special base class
 │   ├── special-attack.ts, special-healing.ts
-│   ├── special-stance.ts   # Special that strikes nobody: stance + alterations + shield + concealment
-│   ├── skill.ts            # Skill interface + SkillKind enum
-│   ├── healing.ts, heal-basis.ts   # applyHealing(), RateBasis
-│   ├── conditional-attack.ts       # Event-triggered attack (splash, execution, hit alterations…)
+│   ├── special-stance.ts # Special that strikes nobody: stance + alterations + shield + concealment
+│   ├── skill.ts # Skill interface + SkillKind enum
+│   ├── healing.ts, heal-basis.ts # applyHealing(), RateBasis
+│   ├── conditional-attack.ts # Event-triggered attack (splash, execution, hit alterations…)
 │   ├── targeting-override.ts
-│   ├── shield.ts, transformation.ts, reactive-skill.ts  # HealthReactiveSkill implementors + interface
+│   ├── shield.ts, transformation.ts, reactive-skill.ts # HealthReactiveSkill implementors + interface
 │   ├── protection.ts, stance.ts, concealment.ts, concealment-duration.ts
 │   ├── buff-transfer.ts, bleed-explosion.ts (BLEED_DETONATION)
 │   ├── survive.ts, damage-reduction.ts, dodge-bonus-denial.ts,
 │   │   bleed-stack-scaling.ts, low-health-target-bonus.ts, bleed-empowerment.ts,
-│   │   poisoned-enemy-agility.ts  # Card-bound passives, not Skill implementors
-│   ├── real-damage.ts, affliction.ts  # REAL_DAMAGE (real damage on targets), AFFLICTION (effect without attack)
-│   ├── analysis.ts, aftershock.ts, weak-point-legacy.ts  # ANALYSIS, AFTERSHOCK, WEAK_POINT_LEGACY
-│   ├── support.ts, energy-gain.ts  # SUPPORT, ENERGY_GAIN
-│   ├── attacker-insight.ts, special-echo.ts  # ATTACKER_INSIGHT (card-bound), SPECIAL_ECHO
-│   └── power-id-consistency.ts     # Composite power validation
-├── behaviors/              # dodge-behaviors.ts, simple-dodge.ts, random-dodge.ts
-├── damage/                 # damage-calculator.ts, elemental-matrix.ts (5x5)
+│   │   poisoned-enemy-agility.ts # Card-bound passives, not Skill implementors
+│   ├── real-damage.ts, affliction.ts # REAL_DAMAGE (real damage on targets), AFFLICTION (effect without attack)
+│   ├── analysis.ts, aftershock.ts, weak-point-legacy.ts # ANALYSIS, AFTERSHOCK, WEAK_POINT_LEGACY
+│   ├── support.ts, energy-gain.ts # SUPPORT, ENERGY_GAIN
+│   ├── attacker-insight.ts, special-echo.ts # ATTACKER_INSIGHT (card-bound), SPECIAL_ECHO
+│   └── power-id-consistency.ts # Composite power validation
+├── behaviors/ # dodge-behaviors.ts, simple-dodge.ts, random-dodge.ts
+├── damage/ # damage-calculator.ts, elemental-matrix.ts (5x5)
 └── @types/
-    ├── action-result/      # special-result, attack-result, named-attack-result, healing-result, buff-results, shield-result
-    ├── attack/             # attack-effect + poison/burn/freeze/stunt/mark/bleed effects, stacked-poison effect, damage-type-bonus (base of bleed-stack-bonus, concealed-bonus, battlefield-bonus), entangle/energy-drain/vulnerability/support-block effects, energy-refund, bleed-detonation, splash, weak-point/hypothermia effects, frozen-target-bonus, low-health-debuff, hit-alterations, execution, conditions/
-    ├── alteration/         # alteration-detail (Buff | Debuff), alteration-type, alteration-condition, buff-application, live-rate, conditions/ (ally-presence, health-threshold, probability)
-    ├── mark/               # elemental-mark, marked-target-bonus
-    ├── weak-point/         # weak-point (WeakPoint, spec), weak-points (per card), weak-point-strike (penetration helper)
-    ├── shield/             # shield, shield-application
-    ├── stance/             # stance (name, remainingTurns, immunities), StanceActivation, ramping-chance (STANCE skill chance)
-    ├── concealment/        # concealment (name, optional remainingTurns)
-    ├── skill-activation-conditions/  # health-threshold-condition
-    ├── damage/             # damage-type, damage-composition, element
-    ├── battlefield/        # Battlefield, deployment, exposure
-    ├── vulnerability/      # vulnerability (timed weakness to one damage type)
-    └── state/              # card-state-frozen/stunted/bleeding/stacked-poison/hypothermia/entangled, status-category
+    ├── action-result/ # special-result, attack-result, named-attack-result, healing-result, buff-results, shield-result
+    ├── attack/ # attack-effect + poison/burn/freeze/stunt/mark/bleed effects, stacked-poison effect, damage-type-bonus (base of bleed-stack-bonus, concealed-bonus, battlefield-bonus), entangle/energy-drain/vulnerability/support-block effects, energy-refund, bleed-detonation, splash, weak-point/hypothermia effects, frozen-target-bonus, low-health-debuff, hit-alterations, execution, conditions/
+    ├── alteration/ # alteration-detail (Buff | Debuff), alteration-type, alteration-condition, buff-application, live-rate, conditions/ (ally-presence, health-threshold, probability)
+    ├── mark/ # elemental-mark, marked-target-bonus
+    ├── weak-point/ # weak-point (WeakPoint, spec), weak-points (per card), weak-point-strike (penetration helper)
+    ├── shield/ # shield, shield-application
+    ├── stance/ # stance (name, remainingTurns, immunities), StanceActivation, ramping-chance (STANCE skill chance)
+    ├── concealment/ # concealment (name, optional remainingTurns)
+    ├── skill-activation-conditions/ # health-threshold-condition
+    ├── damage/ # damage-type, damage-composition, element
+    ├── battlefield/ # Battlefield, deployment, exposure
+    ├── vulnerability/ # vulnerability (timed weakness to one damage type)
+    └── state/ # card-state-frozen/stunted/bleeding/stacked-poison/hypothermia/entangled, status-category
 ```
 
 ### `fight-simulator/`
 
 ```
 fight-simulator/
-├── fight.ts                # Orchestrator
-├── turn-manager.ts         # Turn end: durations, regeneration, status ticks, shield/stance/concealment/protection/transformation
-├── action_stage.ts         # Attacks, specials, healing; reactive skills; damage-taken + ally-health events
-├── card-death-subscriber.ts, death-skill-handler.ts  # Death notifications and death cascade
-├── end-event-processor.ts  # Removes event-bound buffs/effects on end events
-├── skill-results-to-steps.ts, effect-results-to-steps.ts, battlefield-steps.ts   # Pure fns → Step[]
-├── reactive-skill-checker.ts   # triggerReactiveSkills()
-├── reactive-kill-steps.ts      # reactiveKillSteps(): death cascade of the cards a reactive attack killed
-├── survived-reactions.ts       # survivedReactions(), fightSurvivedReactor(): `survived` skills of a SURVIVE holder, shared by every attack path
-├── concealment-steps.ts, stance-steps.ts, execution-steps.ts  # Step helpers
-├── card-selectors/         # card-selector.ts, player-by-player.ts, speed-weighted-card-pool.ts
-└── @types/                 # step.ts (StepKind), fight-result, fight-start-report, winner-report, then one report file per step family or mechanic
+├── fight.ts # Orchestrator
+├── turn-manager.ts # Turn end: durations, regeneration, status ticks, shield/stance/concealment/protection/transformation
+├── action_stage.ts # Attacks, specials, healing; reactive skills; damage-taken + ally-health events
+├── card-death-subscriber.ts, death-skill-handler.ts # Death notifications and death cascade
+├── end-event-processor.ts # Removes event-bound buffs/effects on end events
+├── skill-results-to-steps.ts, effect-results-to-steps.ts, battlefield-steps.ts # Pure fns → Step[]
+├── reactive-skill-checker.ts # triggerReactiveSkills()
+├── reactive-kill-steps.ts # reactiveKillSteps(): death cascade of the cards a reactive attack killed
+├── survived-reactions.ts # survivedReactions(), fightSurvivedReactor(): `survived` skills of a SURVIVE holder, shared by every attack path
+├── concealment-steps.ts, stance-steps.ts, execution-steps.ts # Step helpers
+├── card-selectors/ # card-selector.ts, player-by-player.ts, speed-weighted-card-pool.ts
+└── @types/ # step.ts (StepKind), fight-result, fight-start-report, winner-report, then one report file per step family or mechanic
 ```
 
 ### `targeting-card-strategies/`
@@ -115,7 +115,7 @@ fight-simulator/
 targeting-card-strategy.ts (interface)
 targeted-from-position.ts, targeted-card.ts, targeted-all.ts, targeted-line-three.ts, target-and-neighbors.ts
 all-owner-cards.ts, all-allies.ts, launcher.ts (self)
-allied-card-by-id.ts, last-attacker-of-ally.ts   # [] if dead; last-attacker-of-ally.ts also holds LastDodgedAttackerStrategy
+allied-card-by-id.ts, last-attacker-of-ally.ts # [] if dead; last-attacker-of-ally.ts also holds LastDodgedAttackerStrategy
 most-wounded-ally.ts, fastest-ally.ts, protected-ally.ts, first-bleeding-enemy.ts, random-enemies.ts
 ```
 
@@ -127,18 +127,18 @@ most-wounded-ally.ts, fastest-ally.ts, protected-ally.ts, first-bleeding-enemy.t
 
 ```
 http-api/
-├── fight.controller.ts            # POST /fight (startFight only)
-├── fighting-card-factory.ts       # FightingCardDto → FightingCard, KIND_ONLY_FIELDS guard, CARD_BOUND_SKILL_KINDS
-├── special-factory.ts, attack-skill-factory.ts   # Special / simple-multiple attack builders (+ damage bonuses, energy refund, execution)
-├── attack-effect-factory.ts       # EffectDto → AttackEffect, triggered debuff
-├── card-bound-skill-factory.ts    # Passives kept on the card (survive, reduction, dodge denial, bleed scaling/empowerment, low-health bonus)
-├── other-skill-factory.ts         # createOtherSkill: one builder per SkillKind
-├── battlefield-factory.ts         # BattlefieldDto → Battlefield
-├── skill-wiring-factory.ts        # Shared skill helpers: triggers, targeting, activation condition, stacking, alteration type, asBadRequest
-├── card-selector-factory.ts       # CardSelectorStrategy → CardSelector
-├── dto/fight-data.dto.ts          # Request validation
+├── fight.controller.ts # POST /fight (startFight only)
+├── fighting-card-factory.ts # FightingCardDto → FightingCard, KIND_ONLY_FIELDS guard, CARD_BOUND_SKILL_KINDS
+├── special-factory.ts, attack-skill-factory.ts # Special / simple-multiple attack builders (+ damage bonuses, energy refund, execution)
+├── attack-effect-factory.ts # EffectDto → AttackEffect, triggered debuff
+├── card-bound-skill-factory.ts # Passives kept on the card (survive, reduction, dodge denial, bleed scaling/empowerment, low-health bonus)
+├── other-skill-factory.ts # createOtherSkill: one builder per SkillKind
+├── battlefield-factory.ts # BattlefieldDto → Battlefield
+├── skill-wiring-factory.ts # Shared skill helpers: triggers, targeting, activation condition, stacking, alteration type, asBadRequest
+├── card-selector-factory.ts # CardSelectorStrategy → CardSelector
+├── dto/fight-data.dto.ts # Request validation
 ├── dodge-strategy-factory.ts, targeting-strategy-factory.ts, trigger-factory.ts
-└── buff-condition-factory.ts      # BuffConditionType → BuffCondition
+└── buff-condition-factory.ts # BuffConditionType → BuffCondition
 ```
 
 ### Tests
@@ -154,16 +154,16 @@ Unit tests next to the source in `__tests__/`; e2e in `packages/combat-engine/te
 SvelteKit 2 + Phaser, Web and Phaser renderers.
 
 ```
-├── routes/                 # +page (menu), arcade/ (fetch fight, renderer, outcome, XP), deck/ (Deck Builder)
+├── routes/ # +page (menu), arcade/ (fetch fight, renderer, outcome, XP), deck/ (Deck Builder)
 └── lib/
-    ├── arcade/             # session.ts (phase, currentLevel, fightResult), levels.ts (ARCADE_LEVELS, 5), types.ts
-    ├── deck/               # roster.ts (CHARACTER_ROSTER), deck-store.ts (selectedDeckCards: XP applied, then toCombatConfig), RosterCard.svelte
-    ├── combat/             # engine-client.ts (fetchFight), outcome.ts, rendererMode.ts, combatStats.ts, CombatScene.ts, PhaserRenderer, CombatReportRenderer
-    ├── experience/         # attribute-experience.ts (XP per fight), apply-experience.ts (XP → effective stats)
-    ├── progression/        # progression-store.ts + local-storage-repository.ts (XP and tier), fuse-card.ts, convertible-experience.ts
-    ├── score/              # combat-power.ts (team power, difficulty), global-score.ts
-    ├── components/         # VictoryScreen, GameOverScreen, LevelIndicator, XpGainList
-    └── design-system/      # tokens, primitives/, composites/
+    ├── arcade/ # session.ts (phase, currentLevel, fightResult), levels.ts (ARCADE_LEVELS, 5), types.ts
+    ├── deck/ # roster.ts (CHARACTER_ROSTER), deck-store.ts (selectedDeckCards: XP applied, then toCombatConfig), RosterCard.svelte
+    ├── combat/ # engine-client.ts (fetchFight), outcome.ts, rendererMode.ts, combatStats.ts, CombatScene.ts, PhaserRenderer, CombatReportRenderer
+    ├── experience/ # attribute-experience.ts (XP per fight), apply-experience.ts (XP → effective stats)
+    ├── progression/ # progression-store.ts + local-storage-repository.ts (XP and tier), fuse-card.ts, convertible-experience.ts
+    ├── score/ # combat-power.ts (team power, difficulty), global-score.ts
+    ├── components/ # VictoryScreen, GameOverScreen, LevelIndicator, XpGainList
+    └── design-system/ # tokens, primitives/, composites/
 ```
 
 - **Renderers**: `?mode=phaser` → `PhaserRenderer` (lazy-imported, 300 ms a step, ends by itself); default `web` → `CombatReportRenderer` (waits for Continue, needs `playerCardIds` to split teams).

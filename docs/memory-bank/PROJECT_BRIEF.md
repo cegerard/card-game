@@ -4,7 +4,7 @@
 
 ## Description
 
-Each player controls a deck of 1-5 fighting cards with stats (attack, defense, health, speed, agility, accuracy, critical chance, plus optional regeneration and resistance). The simulator runs turn by turn with a configurable card selector (player-by-player or speed-weighted), resolves attacks and specials, applies status effects and alterations, and names the winner from the remaining health. The fight stops at 100 iterations at most. Domain logic lives in `src/fight/core/`, the HTTP layer in `src/fight/http-api/`.
+Each player controls a deck of 1-5 fighting cards with stats (attack, defense, health, speed, agility, accuracy, critical chance, plus optional regeneration and resistance). The simulator runs turn by turn with a configurable card selector (player-by-player or speed-weighted), resolves attacks and specials, applies status effects and alterations, and names the winner from the remaining health. The fight stops at 100 iterations at most.
 
 ## Ubiquitous Language
 
