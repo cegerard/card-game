@@ -6,8 +6,6 @@ argument-hint: N/A
 
 # API Documentation
 
-This part provides a comprehensive reference for the API, including endpoints, request/response formats, validation, and error handling.
-
 ## Authentication & Authorization
 
 Not implemented - API is currently open without authentication.
@@ -256,8 +254,8 @@ Simulates a turn-based card battle between two players.
   type: Effect,                // See Enums
   weakPoint?: { name, duration?, damageMultiplier?, criticalChanceBonus?, consumable?, revealerAccuracyRate?, revealerAttackRate?, revealerDamageRate?, exploitEffect?: EffectDto },  // WEAK_POINT (required): see Effect
   rate: number,               // Meaning per type: see Effect
-  level: 1 | 2 | 3,           // POISON, BURN, FREEZE, STUNT only. STUNT = 2*level-1 turns; others = 1, 3, 5 ticks
-  duration?: number,          // Required (>= 1) for BLEED, stacked POISON, HYPOTHERMIA, VULNERABILITY, SUPPORT_BLOCK; FREEZE: optional integer >= 1 replacing its level turns
+  level: 1 | 2 | 3,           // POISON, BURN, FREEZE, STUNT only: 2*level-1 turns
+  duration?: number,          // Required (>= 1) for BLEED, stacked POISON, HYPOTHERMIA, VULNERABILITY, SUPPORT_BLOCK; BURN, FREEZE: optional, replaces the level turns
   basis?: "source-attack" | "target-max-health",  // BLEED and stacked POISON: what `rate` is a share of (default source-attack), see RateBasis
   damageType?: DamageType,    // MARK and VULNERABILITY (required): amplified damage type
   maxStacks?: number,         // MARK and BLEED (required): stack cap; on POISON, makes it a stacked poison
@@ -458,7 +456,7 @@ Used by `stanceActivation.immunities`: `control` (`FREEZE`, `STUNT`, `ENTANGLE`)
 Mechanics: see ARCHITECTURE (Status Effects, Control).
 
 - `POISON`, `BURN`: damage over time; `POISON` with `maxStacks` is a stacked poison
-- `FREEZE`, `STUNT`: skip the action, +20% damage taken; STUNT lasts `2 × level − 1` turns, no tick
+- `FREEZE`, `STUNT`: skip the action, +20% damage taken; STUNT has no tick
 - `BLEED`: stacked damage over time, each stack on its own `duration`; `rate` of `basis`
 - `WEAK_POINT`: reveals a weak point; `rate` unused; `duration` goes in `weakPoint` (400 outside)
 - `HYPOTHERMIA`: `rate` of the target max health per turn for `duration` turns

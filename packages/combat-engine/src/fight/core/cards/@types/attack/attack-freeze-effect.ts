@@ -2,7 +2,7 @@ import { FightingCard } from '../../fighting-card';
 import { FightingContext } from '../fighting-context';
 import { CardStateFrozen } from '../state/card-state-frozen';
 import { AttackEffect, StateEffectResult } from './attack-effect';
-import { EffectLevel } from './effect-level';
+import { assertLevelDuration, EffectLevel, levelTurns } from './effect-level';
 import { EffectTriggeredDebuff } from './effect-triggered-debuff';
 import { Randomizer } from '../../../randomizer';
 
@@ -26,14 +26,7 @@ export class FreezeAttackEffect implements AttackEffect {
     probability?: number,
     duration?: number,
   ) {
-    if (
-      duration !== undefined &&
-      !(Number.isInteger(duration) && duration >= 1)
-    ) {
-      throw new Error(
-        `FreezeAttackEffect duration must be an integer >= 1, got ${duration}`,
-      );
-    }
+    assertLevelDuration('FreezeAttackEffect', duration);
     this.rate = rate;
     this.level = level;
     this.randomizer = randomizer;
@@ -90,6 +83,6 @@ export class FreezeAttackEffect implements AttackEffect {
   }
 
   private computeFrozenTurns(effectLevel: EffectLevel): number {
-    return this.duration ?? 2 * effectLevel - 1;
+    return levelTurns(effectLevel, this.duration);
   }
 }

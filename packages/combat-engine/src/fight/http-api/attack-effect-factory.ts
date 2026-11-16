@@ -106,13 +106,17 @@ export function buildEffect(
         effectDto.probability,
       );
     case Effect.BURN:
-      return new BurnAttackEffect(
-        effectDto.rate,
-        effectDto.level as EffectLevel,
-        randomizer,
-        triggeredDebuff,
-        effectDto.terminationEvent,
-        effectDto.probability,
+      return asBadRequest(
+        () =>
+          new BurnAttackEffect(
+            effectDto.rate,
+            effectDto.level as EffectLevel,
+            randomizer,
+            triggeredDebuff,
+            effectDto.terminationEvent,
+            effectDto.probability,
+            effectDto.duration,
+          ),
       );
     case Effect.FREEZE:
       return asBadRequest(

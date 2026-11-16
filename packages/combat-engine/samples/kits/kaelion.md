@@ -23,16 +23,10 @@ et compare les caractéristiques ci-dessous à `samples/cards.json`.
 }
 ```
 
-## Écarts avec Notion
-
-Le moteur ne suit pas encore ces points de la fiche ; ils ne portent pas d'identifiant et ne sont pas testés :
-
-- Flamme Terreuse : Notion annonce une brûlure de niveau 1 pendant deux tours ; une brûlure de niveau 1 du moteur ne dure qu'un tour (2 × niveau − 1).
-
 ## Attaque : Flamme Terreuse
 
 - [KAE-ATK-1] Inflige 80 % d'Attaque en dégâts physiques, 20 % d'Attaque en dégâts de Feu et 10 % d'Attaque en dégâts de Terre.
-- [KAE-ATK-2] 50 % de chances de laisser une brûlure légère (niveau 1) qui inflige 10 % de l'Attaque par tour.
+- [KAE-ATK-2] 50 % de chances de laisser une brûlure légère (niveau 1) pendant deux tours, qui inflige 10 % de l'Attaque par tour.
 - [KAE-ATK-3] 20 % de chances d'étourdir l'ennemi (niveau 1) pendant un tour.
 
 ## Compétence spéciale : Cœur de Basalte

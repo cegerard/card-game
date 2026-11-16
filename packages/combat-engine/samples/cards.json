@@ -23,6 +23,7 @@
           "type": "BURN",
           "rate": 0.3,
           "level": 3,
+          "duration": 2,
           "triggeredDebuff": {
             "debuffType": "defense",
             "debuffRate": 0.08,
@@ -69,6 +70,7 @@
             "type": "BURN",
             "rate": 0.1,
             "level": 1,
+            "duration": 2,
             "triggeredDebuff": {
               "debuffType": "defense",
               "debuffRate": 0.08,
@@ -188,7 +190,8 @@
             "type": "BURN",
             "rate": 0.1,
             "level": 1,
-            "probability": 0.5
+            "probability": 0.5,
+            "duration": 2
           },
           {
             "type": "STUNT",

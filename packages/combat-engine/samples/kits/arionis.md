@@ -23,18 +23,11 @@ et compare les caractéristiques ci-dessous à `samples/cards.json`.
 }
 ```
 
-## Écarts avec Notion
-
-Le moteur ne suit pas encore ces points de la fiche ; ils ne portent pas d'identifiant et ne sont pas testés :
-
-- Poings de Braise : Notion fait durer la brûlure de niveau 1 deux tours ; le moteur lie la durée au niveau, un seul tour au niveau 1.
-- Rugissement solaire : Notion fait durer la brûlure de niveau 3 deux tours ; le moteur lie la durée au niveau, cinq tours au niveau 3.
-
 ## Attaque : Poings de Braise
 
 - [ARI-ATK-1] Inflige 80 % d'Attaque en dégâts physiques et 40 % d'Attaque en dégâts élémentaires (Feu).
 - [ARI-ATK-2] Chaque coup laisse une brûlure qui inflige 10 % de l'Attaque par tour.
-- [ARI-ATK-3] La brûlure est légère (niveau 1).
+- [ARI-ATK-3] La brûlure est légère (niveau 1) et dure 2 tours.
 
 ## Compétence spéciale : Rugissement solaire
 
@@ -43,7 +36,7 @@ Le moteur ne suit pas encore ces points de la fiche ; ils ne portent pas d'ident
 - [ARI-SPE-3] Inspiration : +5 % d'Attaque et +5 % de Défense aux alliés jusqu'à la fin de leur prochain tour.
 - [ARI-SPE-4] Si son frère cadet (Kaelion) est présent, l'effet de soutien est multiplié par deux.
 - [ARI-SPE-5] Les dégâts sont élémentaires (Feu).
-- [ARI-SPE-6] La brûlure est grave (niveau 3).
+- [ARI-SPE-6] La brûlure est grave (niveau 3) et dure 2 tours.
 
 ## Chaleur étouffante (passif)
 

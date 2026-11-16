@@ -5,6 +5,7 @@ import {
   named,
   ofKind,
   rosterCard,
+  statusTicks,
   useFight,
 } from '../helpers/kit';
 
@@ -66,14 +67,16 @@ describe('Kaelion full kit', () => {
       ).toBe(8.5);
     });
 
-    it('[KAE-ATK-2] burns at level 1, a single turn', async () => {
+    // Its duration replaces the turns of its level, which the report never shows
+    it('[KAE-ATK-2] lays a light burn, level 1', () => {
+      expect(kaelion.skills.simpleAttack.effects[0].level).toBe(1);
+    });
+
+    it('[KAE-ATK-2] burns for two turns', async () => {
       rolling(0.1);
       const steps = await alone();
 
-      expect(
-        steps.find((s) => s.kind === 'state_effect' && s.type === 'burn')
-          .remainingTurns,
-      ).toBe(0);
+      expect(statusTicks(steps, 'burn', 'foe')).toEqual([1, 0]);
     });
 
     it('[KAE-ATK-2] does not burn on a roll of 50% or more', async () => {

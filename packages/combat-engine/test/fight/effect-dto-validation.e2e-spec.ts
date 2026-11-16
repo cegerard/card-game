@@ -192,20 +192,19 @@ describe('EffectDto validation', () => {
       post(withEffect({ type: 'HYPOTHERMIA', rate: 0.15 })).expect(400));
   });
 
-  describe('FREEZE duration', () => {
-    const freeze = (duration: unknown) => ({
-      type: 'FREEZE',
+  describe.each(['FREEZE', 'BURN'])('%s duration', (type) => {
+    const timed = (duration: unknown) => ({
+      type,
       rate: 0.2,
       level: 1,
       duration,
     });
 
     it.each([0, 1.5, '2'])('refuses a duration of %p', (duration) =>
-      post(withEffect(freeze(duration))).expect(400),
+      post(withEffect(timed(duration))).expect(400),
     );
 
-    it('accepts a duration of 2', () =>
-      post(withEffect(freeze(2))).expect(200));
+    it('accepts a duration of 2', () => post(withEffect(timed(2))).expect(200));
   });
 
   describe('Svana skills', () => {

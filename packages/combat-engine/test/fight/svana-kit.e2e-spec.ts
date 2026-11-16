@@ -5,6 +5,7 @@ import {
   named,
   ofKind,
   rosterCard,
+  statusTicks,
   useFight,
 } from '../helpers/kit';
 
@@ -56,17 +57,8 @@ const unfreezable = (id: string) =>
     },
   });
 
-// Remaining turns of the freeze ticks of `id` from `from`, up to the one ending it
-const freezeTicks = (steps: any[], from: number, id = 'prey') => {
-  const ticks = steps
-    .slice(from)
-    .filter(
-      (s) =>
-        s.kind === 'state_effect' && s.type === 'freeze' && s.card.id === id,
-    )
-    .map((s) => s.remainingTurns);
-  return ticks.slice(0, ticks.indexOf(0) + 1);
-};
+const freezeTicks = (steps: any[], from: number) =>
+  statusTicks(steps, 'freeze', 'prey', from);
 
 // The step `offset` places after the first one carrying every field of `match`
 const after = (steps: any[], match: object, offset = 1) =>
