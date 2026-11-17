@@ -81,14 +81,10 @@ export class CombatScene extends Phaser.Scene {
         return `> ${step.kind.replace('_', ' ')}`;
       case 'healing':
         return `> healing`;
-      case 'status_change': {
-        const sc = step as { kind: string; card: { name: string }; status: string };
-        return `> ${sc.card?.name ?? '?'}: ${sc.status}`;
-      }
-      case 'fight_end': {
-        const fe = step as { kind: string; winner?: string };
-        return `--- Fight over: ${fe.winner ?? 'draw'} ---`;
-      }
+      case 'status_change':
+        return `> ${step.card.name}: ${step.status}`;
+      case 'fight_end':
+        return `--- Fight over: ${step.winner ?? 'draw'} ---`;
       default:
         return `  ${step.kind}`;
     }
