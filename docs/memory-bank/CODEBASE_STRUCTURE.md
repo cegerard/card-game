@@ -8,7 +8,7 @@ Mechanics are described once, in [backend/ARCHITECTURE.md](backend/ARCHITECTURE.
 card-game/ # pnpm workspace
 ├── packages/
 │   ├── combat-engine/ # NestJS fight simulation backend
-│   └── shared-types/ # Card contract shared with the clients (CardConfig, CardDefinition, toCombatConfig)
+│   └── shared-types/ # Fight contract shared with the clients: request (FightRequest, CardConfig…), report (fight-report.ts), CardDefinition, toCombatConfig
 ├── clients/
 │   ├── fight-replayer/ # Static HTML/JS fight replay viewer (Vitest on the parser)
 │   └── gasha/ # SvelteKit arcade client (Phaser + Web renderer)
@@ -106,7 +106,7 @@ fight-simulator/
 ├── survived-reactions.ts # survivedReactions(), fightSurvivedReactor(): `survived` skills of a SURVIVE holder, shared by every attack path
 ├── concealment-steps.ts, stance-steps.ts, execution-steps.ts # Step helpers
 ├── card-selectors/ # card-selector.ts, player-by-player.ts, speed-weighted-card-pool.ts
-└── @types/ # step.ts (StepKind), fight-result, fight-start-report, winner-report, then one report file per step family or mechanic
+└── @types/ # step.ts (StepKind enum), report files re-exporting the shared step types, shared-report-contract.ts, internal action/attack reports
 ```
 
 ### `targeting-card-strategies/`
@@ -136,7 +136,7 @@ http-api/
 ├── battlefield-factory.ts # BattlefieldDto → Battlefield
 ├── skill-wiring-factory.ts # Shared skill helpers: triggers, targeting, activation condition, stacking, alteration type, asBadRequest
 ├── card-selector-factory.ts # CardSelectorStrategy → CardSelector
-├── dto/fight-data.dto.ts # Request validation
+├── dto/fight-data.dto.ts, dto/shared-contract.ts # Request validation; compile-time checks against shared-types
 ├── dodge-strategy-factory.ts, targeting-strategy-factory.ts, trigger-factory.ts
 └── buff-condition-factory.ts # BuffConditionType → BuffCondition
 ```
