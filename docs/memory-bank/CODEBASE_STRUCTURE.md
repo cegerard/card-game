@@ -8,7 +8,7 @@ Mechanics are described once, in [backend/ARCHITECTURE.md](backend/ARCHITECTURE.
 card-game/ # pnpm workspace
 ├── packages/
 │   ├── combat-engine/ # NestJS fight simulation backend
-│   └── shared-types/ # Shared TypeScript types (stub)
+│   └── shared-types/ # Card contract shared with the clients (CardConfig, CardDefinition, toCombatConfig)
 ├── clients/
 │   ├── fight-replayer/ # Static HTML/JS fight replay viewer (Vitest on the parser)
 │   └── gasha/ # SvelteKit arcade client (Phaser + Web renderer)
