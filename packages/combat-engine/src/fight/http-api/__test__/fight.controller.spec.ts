@@ -6,16 +6,21 @@ import {
   DodgeStrategy,
   Effect,
   FightDataDto,
+  FightingCardDto,
   SkillKind,
+  SpecialDto,
   SpecialKind,
   TargetingStrategy,
   TriggerEvent,
 } from '../dto/fight-data.dto';
+
 import { FightController } from '../fight.controller';
 import { FightingCard } from '../../core/cards/fighting-card';
 import { FightSimulatorStub } from './fight-simulator-stub';
 import { Player } from '../../core/player';
 import { CardSelector } from '../../core/fight-simulator/card-selectors/card-selector';
+
+type SimpleAttackFixture = FightingCardDto['skills']['simpleAttack'];
 
 describe('FightController', () => {
   let fightSimulatorStub: FightSimulatorStub;
@@ -31,7 +36,7 @@ describe('FightController', () => {
 
   let fightData: FightDataDto;
   describe('when a player use a card with a special attack', () => {
-    const specialAttack = {
+    const specialAttack: SpecialDto = {
       kind: SpecialKind.ATTACK,
       name: 'Double Strike',
       damages: [{ type: DamageType.PHYSICAL, rate: 2.0 }],
@@ -376,7 +381,7 @@ describe('FightController', () => {
 
   describe('when a player use a card with a special healing', () => {
     beforeEach(() => {
-      const specialHealing = {
+      const specialHealing: SpecialDto = {
         name: 'heal me',
         kind: SpecialKind.HEALING,
         rate: 2.0,
@@ -441,7 +446,7 @@ describe('FightController', () => {
   });
 
   describe('when a player use a card with a only a simple attack', () => {
-    const simpleAttack = {
+    const simpleAttack: SimpleAttackFixture = {
       name: 'Strike',
       damages: [{ type: DamageType.PHYSICAL, rate: 2.0 }],
       targetingStrategy: TargetingStrategy.POSITION_BASED,
@@ -1120,7 +1125,7 @@ describe('FightController', () => {
   });
 
   describe('powerId validation', () => {
-    const baseCard = {
+    const baseCard: FightingCardDto = {
       id: 'card-1',
       name: 'Card',
       attack: 100,
@@ -1357,7 +1362,7 @@ describe('FightController', () => {
   });
 
   describe('when a player uses a skill with a dormant trigger', () => {
-    const dormantCard = {
+    const dormantCard: FightingCardDto = {
       id: 'axe-01',
       name: 'Axe',
       attack: 10,
@@ -1422,7 +1427,7 @@ describe('FightController', () => {
   });
 
   describe('error handling for unknown enum values', () => {
-    const baseCard = {
+    const baseCard: FightingCardDto = {
       id: 'card-1',
       name: 'Card',
       attack: 100,

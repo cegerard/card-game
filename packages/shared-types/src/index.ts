@@ -552,6 +552,8 @@ export interface OtherSkill {
   perLivingAlly?: { maxRate: number };
   /** ALTERATION : l'altération ne compte que tant que la santé du porteur est sous ce ratio. */
   whileHealthBelow?: number;
+  /** ALTERATION : l'altération ne compte que tant que le porteur garde le bouclier levé par le skill SHIELD de ce nom. */
+  whileShielded?: string;
   /** ALTERATION : `terminationEvent` ne la retire que sur un coup coûtant strictement plus que cette part de la santé max. */
   terminationDamageRate?: number;
   /** ATTACKER_INSIGHT (requis) : part de la Précision de base gagnée contre un ennemi qui a déjà attaqué. */
@@ -616,6 +618,21 @@ export interface CardConfig {
   behaviors: Behaviors;
   image?: string;
   cardDeckIdentity?: string;
+}
+
+export interface FightPlayer {
+  name: string;
+  /** 1 à 5 cartes. */
+  deck: CardConfig[];
+}
+
+/** Corps de POST /fight (FightDataDto). */
+export interface FightRequest {
+  player1: FightPlayer;
+  player2: FightPlayer;
+  cardSelectorStrategy: CardSelectorStrategy;
+  /** Entier dans [0, 2^32 − 1] : même graine et mêmes decks, même combat. */
+  seed?: number;
 }
 
 export interface FightResult {

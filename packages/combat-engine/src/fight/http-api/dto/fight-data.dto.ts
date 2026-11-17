@@ -1,3 +1,30 @@
+import type {
+  AttackBonuses,
+  Battlefield,
+  BattlefieldAlteration,
+  Behaviors,
+  BleedStackBonus,
+  BuffCondition,
+  CardConfig,
+  DamageComposition,
+  DamageTypeBonus,
+  EffectConfig,
+  EffectTriggeredDebuff,
+  EnergyRefund,
+  Execution,
+  FightPlayer,
+  FightRequest,
+  MarkedTargetBonus,
+  MultipleAttackSkill,
+  OtherSkill,
+  ShieldApplication,
+  SimpleAttackSkill,
+  SkillSet,
+  SpecialSkill,
+  StanceActivation,
+  StatAlteration,
+  WeakPoint,
+} from '@card-game/shared-types';
 import { Type } from 'class-transformer';
 import {
   ValidateNested,
@@ -30,7 +57,7 @@ export enum AlterationConditionType {
   PROBABILITY = 'probability',
 }
 
-class BuffConditionDto {
+class BuffConditionDto implements BuffCondition {
   @IsEnum(AlterationConditionType)
   type: AlterationConditionType;
 
@@ -50,7 +77,7 @@ class BuffConditionDto {
 
   @IsOptional()
   @IsIn(['below', 'above'])
-  operator?: string;
+  operator?: 'below' | 'above';
 
   // PROBABILITY condition only: activation chance of the skill
   @IsOptional()
@@ -179,6 +206,12 @@ export enum TargetingStrategy {
   RANDOM_ENEMIES = 'random-enemies',
 }
 
+/** What @IsNotIn([TARGETED_CARD]) lets through: targeted-card is reserved to TARGETING_OVERRIDE. */
+export type NonOverrideTargetingStrategy = Exclude<
+  TargetingStrategy,
+  TargetingStrategy.TARGETED_CARD
+>;
+
 export enum CardSelectorStrategy {
   PLAYER_BY_PLAYER = 'player-by-player',
   SPEED_WEIGHTED = 'speed-weighted',
@@ -192,7 +225,7 @@ export enum ElementDto {
   AIR = 'AIR',
 }
 
-export class EffectTriggeredDebuffDto {
+export class EffectTriggeredDebuffDto implements EffectTriggeredDebuff {
   // Stack budget: both fields together, or neither
   @IsOptional()
   @IsString()
@@ -255,7 +288,7 @@ const LEVELLESS_EFFECTS = [
 type ExploitEffectDto = EffectDto;
 
 // A weakness revealed on the defender, the attacker being its revealer
-export class WeakPointDto {
+export class WeakPointDto implements WeakPoint {
   @IsString()
   @IsNotEmpty()
   name: string;
@@ -309,7 +342,7 @@ export class WeakPointDto {
   exploitEffect?: ExploitEffectDto;
 }
 
-export class EffectDto {
+export class EffectDto implements EffectConfig {
   @IsEnum(Effect)
   type: Effect;
 
@@ -397,7 +430,7 @@ export class EffectDto {
 }
 
 // Finishes off every defender left strictly under `threshold` of its health
-export class ExecutionDto {
+export class ExecutionDto implements Execution {
   @IsNumber()
   threshold: number;
 }
@@ -429,7 +462,7 @@ class PerLivingAllyDto {
   maxRate: number;
 }
 
-class BattlefieldAlterationDto {
+class BattlefieldAlterationDto implements BattlefieldAlteration {
   @IsEnum(BuffType)
   type: BuffType;
 
@@ -555,7 +588,7 @@ class BattlefieldLegacyDto {
 }
 
 // A change of the battlefield: an aura on the caster side, a hazard on the other
-export class BattlefieldDto {
+export class BattlefieldDto implements Battlefield {
   @IsString()
   @IsNotEmpty()
   name: string;
@@ -600,7 +633,7 @@ class SupportShieldDto {
   duration: number;
 }
 
-class StatAlterationDto {
+class StatAlterationDto implements StatAlteration {
   @IsEnum(BuffType)
   type: BuffType;
 
@@ -615,7 +648,7 @@ class StatAlterationDto {
     message:
       'targeted-card strategy can only be used with targeting override skills',
   })
-  targetingStrategy: TargetingStrategy;
+  targetingStrategy: NonOverrideTargetingStrategy;
 
   @IsIn(['buff', 'debuff'])
   polarity: 'buff' | 'debuff';
@@ -631,7 +664,7 @@ class StatAlterationDto {
   terminationEvent?: string;
 }
 
-class ShieldApplicationDto {
+class ShieldApplicationDto implements ShieldApplication {
   @IsNumber()
   rate: number;
 
@@ -643,10 +676,10 @@ class ShieldApplicationDto {
     message:
       'targeted-card strategy can only be used with targeting override skills',
   })
-  targetingStrategy: TargetingStrategy;
+  targetingStrategy: NonOverrideTargetingStrategy;
 }
 
-class MarkedTargetBonusDto {
+class MarkedTargetBonusDto implements MarkedTargetBonus {
   @IsEnum(DamageType)
   damageType: DamageType;
 
@@ -655,7 +688,7 @@ class MarkedTargetBonusDto {
   multiplier: number;
 }
 
-export class EnergyRefundDto {
+export class EnergyRefundDto implements EnergyRefund {
   @IsInt()
   @Min(1)
   amount: number;
@@ -719,7 +752,7 @@ export class BleedDetonationDto {
   ratePerStack: number;
 }
 
-export class DamageTypeBonusDto {
+export class DamageTypeBonusDto implements DamageTypeBonus {
   @IsEnum(DamageType)
   damageType: DamageType;
 
@@ -745,13 +778,16 @@ export class BattlefieldBonusDto extends FrozenTargetBonusDto {
   element: ElementDto;
 }
 
-export class BleedStackBonusDto extends DamageTypeBonusDto {
+export class BleedStackBonusDto
+  extends DamageTypeBonusDto
+  implements BleedStackBonus
+{
   @IsInt()
   @Min(1)
   minStacks: number;
 }
 
-class AttackBonusesDto {
+class AttackBonusesDto implements AttackBonuses {
   @IsOptional()
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => BleedStackBonusDto)
@@ -778,7 +814,7 @@ export enum StatusCategoryDto {
   DAMAGE_OVER_TIME = 'damage-over-time',
 }
 
-class StanceActivationDto {
+class StanceActivationDto implements StanceActivation {
   @IsString()
   @IsNotEmpty()
   name: string;
@@ -840,7 +876,7 @@ class SpecialConcealmentDto {
   duration: number;
 }
 
-export class SpecialDto extends AttackBonusesDto {
+export class SpecialDto extends AttackBonusesDto implements SpecialSkill {
   @IsEnum(SpecialKind)
   kind: SpecialKind;
 
@@ -872,7 +908,7 @@ export class SpecialDto extends AttackBonusesDto {
     message:
       'targeted-card strategy can only be used with targeting override skills',
   })
-  targetingStrategy?: TargetingStrategy;
+  targetingStrategy?: NonOverrideTargetingStrategy;
 
   // Required by the random-enemies targeting: how many enemies it draws
   @ValidateIf((o) => o.targetingStrategy === TargetingStrategy.RANDOM_ENEMIES)
@@ -959,7 +995,7 @@ export class SpecialDto extends AttackBonusesDto {
   adjacentTargetsBattlefield?: BattlefieldDto;
 }
 
-class DamageCompositionDto {
+class DamageCompositionDto implements DamageComposition {
   @IsEnum(DamageType)
   type: DamageType;
 
@@ -968,7 +1004,7 @@ class DamageCompositionDto {
   rate: number;
 }
 
-class SimpleAttackDto extends AttackBonusesDto {
+class SimpleAttackDto extends AttackBonusesDto implements SimpleAttackSkill {
   @IsString()
   name: string;
 
@@ -983,7 +1019,7 @@ class SimpleAttackDto extends AttackBonusesDto {
     message:
       'targeted-card strategy can only be used with targeting override skills',
   })
-  targetingStrategy: TargetingStrategy;
+  targetingStrategy: NonOverrideTargetingStrategy;
 
   @IsOptional()
   @IsArray()
@@ -998,7 +1034,10 @@ class SimpleAttackDto extends AttackBonusesDto {
   hitAlterations?: HitAlterationDto[];
 }
 
-class MultipleAttackDto extends AttackBonusesDto {
+class MultipleAttackDto
+  extends AttackBonusesDto
+  implements MultipleAttackSkill
+{
   @IsString()
   name: string;
 
@@ -1016,7 +1055,7 @@ class MultipleAttackDto extends AttackBonusesDto {
     message:
       'targeted-card strategy can only be used with targeting override skills',
   })
-  targetingStrategy: TargetingStrategy;
+  targetingStrategy: NonOverrideTargetingStrategy;
 
   @IsOptional()
   @IsNumber()
@@ -1057,7 +1096,7 @@ class TargetedCardOnlyForOverrideConstraint implements ValidatorConstraintInterf
   }
 }
 
-export class OtherSkillDto {
+export class OtherSkillDto implements OtherSkill {
   @IsEnum(SkillKind)
   @Validate(TargetedCardOnlyForOverrideConstraint)
   kind: SkillKind;
@@ -1546,7 +1585,7 @@ export class OtherSkillDto {
   replacementEvent?: TriggerEvent;
 }
 
-class SkillsDto {
+class SkillsDto implements SkillSet {
   @IsNotEmpty()
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => SpecialDto)
@@ -1568,12 +1607,12 @@ class SkillsDto {
   others: OtherSkillDto[];
 }
 
-class BehaviorsDto {
+class BehaviorsDto implements Behaviors {
   @IsEnum(DodgeStrategy)
   dodge: DodgeStrategy;
 }
 
-export class FightingCardDto {
+export class FightingCardDto implements CardConfig {
   @IsString()
   id: string;
 
@@ -1632,7 +1671,7 @@ export class FightingCardDto {
   cardDeckIdentity?: string;
 }
 
-class PlayerDto {
+class PlayerDto implements FightPlayer {
   @IsArray()
   @ArrayMinSize(1)
   @ArrayMaxSize(5)
@@ -1644,7 +1683,7 @@ class PlayerDto {
   name: string;
 }
 
-export class FightDataDto {
+export class FightDataDto implements FightRequest {
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => PlayerDto)
   player1: PlayerDto;
