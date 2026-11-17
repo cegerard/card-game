@@ -1,6 +1,6 @@
 # API Documentation
 
-One unversioned, unauthenticated JSON endpoint on `http://localhost:3000` (`PORT`), in @packages/combat-engine/src/fight/http-api/fight.controller.ts. Global `ValidationPipe`: `transform`, `whitelist`, `forbidNonWhitelisted`.
+One unversioned, unauthenticated JSON endpoint on `http://localhost:3000` (`PORT`), in @packages/combat-engine/src/fight/http-api/fight.controller.ts. `ValidationPipe` on `FightController` (`transform`, `whitelist`, `forbidNonWhitelisted`), so the e2e tests, which build the app without `main.ts`, validate as production does.
 
 ## POST /fight
 
