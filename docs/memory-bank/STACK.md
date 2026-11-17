@@ -29,7 +29,7 @@ Exact versions live in the `package.json` files; this file names the tools and t
 
 - SvelteKit with `@sveltejs/adapter-static`, Svelte 5 runes (`$state`, `$derived`, `$props`), Vite
 - Phaser (lazy-loaded, only with the Phaser renderer); renderer chosen by `?mode=phaser`, default `web`
-- Vitest (`src/**/__tests__/*.spec.ts`) and Playwright (`tests/*.spec.ts`)
+- Vitest (`src/**/__tests__/*.spec.ts`) and Playwright (`tests/*.spec.ts`). Vitest runs two projects (`vite.config.ts`): `dom` (jsdom) for the component specs, named after their PascalCase component, and the localStorage one; `logic` (node) for every other spec
 - Prefer `<a href>` over `goto()` for navigation
 
 ## Container
