@@ -16,7 +16,7 @@ import { SpecialAttack } from '../special-attack';
 import { SimpleDodge } from '../../behaviors/simple-dodge';
 import { DeathSkillHandler } from '../../../fight-simulator/death-skill-handler';
 import { Element } from '../../@types/damage/element';
-import { faker } from '@faker-js/faker';
+import { faker } from '@faker-js/faker/locale/en';
 import { NextAction } from '../../../trigger/next-action';
 import { DeathTrigger } from '../../../trigger/death-trigger';
 import { TargetedCard } from '../../../targeting-card-strategies/targeted-card';

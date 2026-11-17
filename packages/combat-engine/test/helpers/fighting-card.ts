@@ -1,4 +1,4 @@
-import { faker } from '@faker-js/faker';
+import { faker } from '@faker-js/faker/locale/en';
 
 import { FightingCard } from '../../src/fight/core/cards/fighting-card';
 import { SimpleAttack } from '../../src/fight/core/cards/skills/simple-attack';

@@ -1,8 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
-const root = join(fileURLToPath(import.meta.url), '../../..');
+const root = join(__dirname, '../..');
 const exists = (path: string) => existsSync(join(root, path));
 const read = (path: string) =>
   exists(path) ? readFileSync(join(root, path), 'utf-8') : '';

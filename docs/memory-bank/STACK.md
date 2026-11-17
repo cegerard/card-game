@@ -16,7 +16,8 @@ Exact versions live in the `package.json` files; this file names the tools and t
 
 ### Testing
 
-- Jest 30 + `ts-jest`, `@nestjs/testing`, `supertest` (e2e), `@faker-js/faker`; jest config in `package.json`, e2e config `test/jest-e2e.json`
+- Jest 30 + `ts-jest`, `@nestjs/testing`, `supertest` (e2e), `@faker-js/faker` (import `@faker-js/faker/locale/en`: the full package loads every locale in each test file); configs `jest.config.js` and `test/jest-e2e.json`
+- Tests run as CommonJS, transpiled only (`tsconfig.spec.json`): `pnpm check` type-checks `src/` and its specs, not the e2e specs. NestJS and Faker ship ESM only, loaded natively (Node >= 24.9, hence `--experimental-vm-modules` in the scripts)
 - Unit `*.spec.ts` in `__tests__/`; e2e `*.e2e-spec.ts`; coverage excludes `*.module.ts`, `logger-middleware.ts`, `main.ts`
 
 ### Code quality

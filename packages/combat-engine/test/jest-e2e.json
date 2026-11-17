@@ -1,29 +1,12 @@
 {
-  "preset": "ts-jest/presets/default-esm",
   "testEnvironment": "node",
   "rootDir": ".",
   "moduleFileExtensions": ["js", "json", "ts"],
   "testRegex": ".e2e-spec.ts$",
-  "extensionsToTreatAsEsm": [".ts"],
   "moduleNameMapper": {
     "^(\\.{1,2}/.*)\\.js$": "$1"
   },
   "transform": {
-    "^.+\\.(t|j)sx?$": [
-      "ts-jest",
-      {
-        "useESM": true,
-        "tsconfig": {
-          "module": "esnext",
-          "target": "ES2020",
-          "allowJs": true,
-          "esModuleInterop": false,
-          "resolveJsonModule": true
-        }
-      }
-    ]
-  },
-  "transformIgnorePatterns": [
-    "node_modules/(?!.*(@nestjs|@types|reflect-metadata|rxjs|class-validator|class-transformer))"
-  ]
+    "^.+\\.ts$": ["ts-jest", { "tsconfig": "<rootDir>/../tsconfig.spec.json" }]
+  }
 }

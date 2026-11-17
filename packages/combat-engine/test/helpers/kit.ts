@@ -5,15 +5,11 @@ import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 type Card = Record<string, any>;
 
 const roster: Card[] = JSON.parse(
-  readFileSync(
-    join(fileURLToPath(import.meta.url), '../../../samples/cards.json'),
-    'utf-8',
-  ),
+  readFileSync(join(__dirname, '../../samples/cards.json'), 'utf-8'),
 );
 
 /** A roster card, criticals off unless overridden, so every hit lands the same. */
@@ -141,13 +137,14 @@ export const statusTicks = (
 };
 
 /**
- * Boots the app around each test of the calling `describe` and returns a
- * `fight()` that posts two decks and resolves to the report steps.
+ * Boots the app once for the calling `describe` (the engine keeps no state
+ * between requests) and returns a `fight()` that posts two decks and resolves
+ * to the report steps. Mocked rolls are restored after each test.
  */
 export function useFight() {
   let app: INestApplication;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -156,8 +153,11 @@ export function useFight() {
     await app.init();
   });
 
-  afterEach(async () => {
+  afterEach(() => {
     jest.restoreAllMocks();
+  });
+
+  afterAll(async () => {
     await app.close();
   });
 

@@ -4,10 +4,7 @@ import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { alteration, alterationsOf } from '../helpers/kit';
-
-const __dirname = join(fileURLToPath(import.meta.url), '..');
 
 const roster = JSON.parse(
   readFileSync(join(__dirname, '../../samples/cards.json'), 'utf-8'),
