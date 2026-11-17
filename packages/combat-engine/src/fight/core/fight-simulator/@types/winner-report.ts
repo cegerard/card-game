@@ -1,6 +1,1 @@
-import { StepKind } from './step';
-
-export type WinnerReport = {
-  kind: StepKind.FightEnd;
-  winner: string | null;
-};
+export type { WinnerReport } from '@card-game/shared-types';

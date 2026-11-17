@@ -1,5 +1,1 @@
-export type CardInfo = {
-  id: string;
-  name: string;
-  deckIdentity: string;
-};
+export type { CardInfo } from '@card-game/shared-types';

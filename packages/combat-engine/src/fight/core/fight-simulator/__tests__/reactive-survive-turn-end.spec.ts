@@ -47,7 +47,7 @@ const endTurn = (attacker: FightingCard, defender: FightingCard): Step[] => {
   return turnManager.endTurn([attacker]);
 };
 
-const kinds = (steps: Step[]): StepKind[] => steps.map((s) => s.kind);
+const kinds = (steps: Step[]): Step['kind'][] => steps.map((s) => s.kind);
 
 describe('TurnManager attack at turn end on a SURVIVE holder', () => {
   it('reports survived right after the attack step', () => {

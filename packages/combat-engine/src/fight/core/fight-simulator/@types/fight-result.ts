@@ -1,5 +1,1 @@
-import { Step } from './step';
-
-export type FightResult = {
-  [step: number]: Step;
-};
+export type { FightResult } from '@card-game/shared-types';

@@ -16,7 +16,7 @@ import {
   WEAK_POINT_ENDED_TYPE,
 } from '../cards/@types/weak-point/weak-point';
 import { Step, StepKind } from './@types/step';
-import { status } from './@types/status-change-report';
+import { StatusChangeStatus } from './@types/status-change-report';
 
 /**
  * Maps the effects landed by one hit to their report steps: the effect itself
@@ -119,7 +119,7 @@ export function effectResultsToSteps(
         return [
           {
             kind: StepKind.StatusChange,
-            status: effect.type as status,
+            status: effect.type as StatusChangeStatus,
             card: effect.card.identityInfo,
             ...(effect.stacks !== undefined && { stacks: effect.stacks }),
           },

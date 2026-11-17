@@ -635,9 +635,8 @@ export interface FightRequest {
   seed?: number;
 }
 
-export interface FightResult {
-  [step: number]: { kind: string; [key: string]: unknown };
-}
+// Rapport de combat (réponse de POST /fight) : voir fight-report.ts.
+export type * from './fight-report';
 
 // ---------------------------------------------------------------------------
 // Définition de carte — donnée de design, distincte de la configuration de

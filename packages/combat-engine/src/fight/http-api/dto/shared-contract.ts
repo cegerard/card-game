@@ -1,4 +1,5 @@
 import type * as Shared from '@card-game/shared-types';
+import type { Assert, Equal } from '../../tools/type-equality';
 import type {
   AlterationConditionType,
   BuffType,
@@ -22,11 +23,6 @@ import type {
  * client built on @card-game/shared-types never meets a 400 for it.
  */
 
-type Equal<A, B> =
-  (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2
-    ? true
-    : false;
-type Assert<T extends true> = T;
 type SameKeys<Dto, Contract> = Equal<keyof Dto, keyof Contract>;
 type SameValues<DtoEnum extends string, Contract> = Equal<
   `${DtoEnum}`,

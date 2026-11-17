@@ -1,8 +1,1 @@
-import { CardInfo } from '../../cards/@types/card-info';
-import { StepKind } from './step';
-
-export type SurvivedReport = {
-  kind: StepKind.Survived;
-  name: string;
-  card: CardInfo;
-};
+export type { SurvivedReport } from '@card-game/shared-types';
