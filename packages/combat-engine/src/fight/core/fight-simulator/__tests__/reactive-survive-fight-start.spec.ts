@@ -1,3 +1,4 @@
+import type { Step } from '@card-game/shared-types';
 import { Player } from '../../player';
 import { FightStart } from '../../trigger/fight-start';
 import { SurvivedTrigger } from '../../trigger/survived';
@@ -6,7 +7,7 @@ import { PlayerByPlayerCardSelector } from '../card-selectors/player-by-player';
 import { SurviveSkill } from '../../cards/skills/survive';
 import { AlterationSkill } from '../../cards/skills/alteration-skill';
 import { Launcher } from '../../targeting-card-strategies/launcher';
-import { Step, StepKind } from '../@types/step';
+import { StepKind } from '../@types/step';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 import { executioner } from '../../../../../test/helpers/reactive-kill';
 

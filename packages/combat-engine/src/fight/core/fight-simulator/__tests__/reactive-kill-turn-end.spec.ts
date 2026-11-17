@@ -1,10 +1,10 @@
+import type { Step } from '@card-game/shared-types';
 import { Player } from '../../player';
 import { TurnEnd } from '../../trigger/turn-end';
 import { TurnManager } from '../turn-manager';
 import { DeathSkillHandler } from '../death-skill-handler';
 import { EndEventProcessor } from '../end-event-processor';
 import { FightingCard } from '../../cards/fighting-card';
-import { Step } from '../@types/step';
 import {
   executioner,
   fragileWithLastBreath,

@@ -1,9 +1,8 @@
+import type { DamageReport, FightResult } from '@card-game/shared-types';
 import { Fight } from '../fight-simulator/fight';
 import { DamageComposition } from '../cards/@types/damage/damage-composition';
 import { DamageType } from '../cards/@types/damage/damage-type';
 import { Player } from '../player';
-import { DamageReport } from '../fight-simulator/@types/damage-report';
-import { FightResult } from '../fight-simulator/@types/fight-result';
 import { createFightingCard } from '../../../../test/helpers/fighting-card';
 import { SpeedWeightedCardSelector } from '../fight-simulator/card-selectors/speed-weighted-card-pool';
 import { MathRandomizer } from '../../tools/math-randomizer';

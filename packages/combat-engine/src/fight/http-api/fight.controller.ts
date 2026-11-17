@@ -7,7 +7,7 @@ import {
   ValidationPipe,
   Inject,
 } from '@nestjs/common';
-import { FightResult } from '../core/fight-simulator/@types/fight-result';
+import type { FightResult } from '@card-game/shared-types';
 import { FightDataDto } from './dto/fight-data.dto';
 import { buildFightingCard } from './fighting-card-factory';
 import { buildCardSelector } from './card-selector-factory';

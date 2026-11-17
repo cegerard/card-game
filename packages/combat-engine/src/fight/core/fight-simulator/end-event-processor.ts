@@ -1,6 +1,6 @@
+import type { CardInfo, Step } from '@card-game/shared-types';
 import { Player } from '../player';
-import { CardInfo } from '../cards/@types/card-info';
-import { Step, StepKind } from './@types/step';
+import { StepKind } from './@types/step';
 
 export class EndEventProcessor {
   constructor(

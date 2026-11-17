@@ -1,9 +1,14 @@
-import { DamageReport } from './damage-report';
-import { Step, StepKind } from './step';
-import { BuffReport, DebuffReport } from './alteration-report';
-import { ShieldAppliedReport } from './shield-report';
-import { StanceEndedReport, StanceStartedReport } from './stance-report';
-import { ConcealmentEndedReport } from './concealment-report';
+import type {
+  BuffReport,
+  ConcealmentEndedReport,
+  DamageReport,
+  DebuffReport,
+  ShieldAppliedReport,
+  StanceEndedReport,
+  StanceStartedReport,
+  Step,
+} from '@card-game/shared-types';
+import { StepKind } from './step';
 
 export type AttackReport = {
   kind: StepKind.Attack | StepKind.SpecialAttack;

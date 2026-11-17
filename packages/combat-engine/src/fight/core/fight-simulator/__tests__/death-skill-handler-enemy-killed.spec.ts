@@ -1,8 +1,9 @@
+import type { Step } from '@card-game/shared-types';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 import { FightingCard } from '../../cards/fighting-card';
 import { Player } from '../../player';
 import { DeathSkillHandler } from '../death-skill-handler';
-import { Step, StepKind } from '../@types/step';
+import { StepKind } from '../@types/step';
 
 const hunterSkill = {
   effectRate: 0.1,

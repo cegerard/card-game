@@ -1,3 +1,4 @@
+import type { Step } from '@card-game/shared-types';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 import { FightingCard } from '../../cards/fighting-card';
 import { BleedExplosionSkill } from '../../cards/skills/bleed-explosion';
@@ -5,7 +6,7 @@ import { CardStateBleeding } from '../../cards/@types/state/card-state-bleeding'
 import { SelfDeathTrigger } from '../../trigger/self-death';
 import { Player } from '../../player';
 import { DeathSkillHandler } from '../death-skill-handler';
-import { Step, StepKind } from '../@types/step';
+import { StepKind } from '../@types/step';
 
 describe('DeathSkillHandler bleed explosion on its owner death', () => {
   let scythra: FightingCard;

@@ -1,9 +1,9 @@
+import type { Step } from '@card-game/shared-types';
 import { FightingCard } from '../cards/fighting-card';
 import { SkillResults } from '../cards/skills/skill';
 import { CardDeathSubscriber } from './card-death-subscriber';
 import { DeathSkillHandler } from './death-skill-handler';
 import { defendersKilled } from './defenders-killed';
-import { Step } from './@types/step';
 
 /**
  * Runs the death cascade of every card the attacks among `skillResults` left

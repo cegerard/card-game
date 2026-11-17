@@ -1,3 +1,4 @@
+import type { Step } from '@card-game/shared-types';
 import { ActionStage } from '../action-stage';
 import { Player } from '../../player';
 import { FightingCard } from '../../cards/fighting-card';
@@ -11,7 +12,7 @@ import { Launcher } from '../../targeting-card-strategies/launcher';
 import { SimpleDodge } from '../../cards/behaviors/simple-dodge';
 import { MathRandomizer } from '../../../tools/math-randomizer';
 import { DeathSkillHandler } from '../../fight-simulator/death-skill-handler';
-import { Step, StepKind } from '../../fight-simulator/@types/step';
+import { StepKind } from '../../fight-simulator/@types/step';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 
 const STATS = {

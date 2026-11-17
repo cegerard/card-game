@@ -1,8 +1,9 @@
+import type { Step } from '@card-game/shared-types';
 import { ActionStage } from '../action-stage';
 import { Player } from '../../player';
 import { FightingCard } from '../../cards/fighting-card';
 import { DeathSkillHandler } from '../../fight-simulator/death-skill-handler';
-import { Step, StepKind } from '../../fight-simulator/@types/step';
+import { StepKind } from '../../fight-simulator/@types/step';
 import { CardStateEntangled } from '../../cards/@types/state/card-state-entangled';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 import { RandomizerFake } from '../../../../../test/helpers/randomizer-fake';

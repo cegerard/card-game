@@ -1,5 +1,3 @@
-export type { Step } from '@card-game/shared-types';
-
 /** Runtime kinds of the report steps; equal to the shared StepKind union (shared-report-contract.ts). */
 export enum StepKind {
   FightStart = 'fight_start',

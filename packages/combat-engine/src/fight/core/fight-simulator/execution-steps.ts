@@ -1,6 +1,7 @@
+import type { Step } from '@card-game/shared-types';
 import { FightingCard } from '../cards/fighting-card';
 import { ExecutionResult } from '../cards/@types/action-result/execution-result';
-import { Step, StepKind } from './@types/step';
+import { StepKind } from './@types/step';
 
 /** An `executed` step per defender, followed by `survived` when SURVIVE held. */
 export function executionSteps(

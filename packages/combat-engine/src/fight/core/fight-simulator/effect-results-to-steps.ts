@@ -1,3 +1,4 @@
+import type { StatusChangeStatus, Step } from '@card-game/shared-types';
 import { FightingCard } from '../cards/fighting-card';
 import {
   DECOY_STRUCK_TYPE,
@@ -15,8 +16,7 @@ import {
   WEAK_POINT_EFFECT_TYPE,
   WEAK_POINT_ENDED_TYPE,
 } from '../cards/@types/weak-point/weak-point';
-import { Step, StepKind } from './@types/step';
-import { StatusChangeStatus } from './@types/status-change-report';
+import { StepKind } from './@types/step';
 
 /**
  * Maps the effects landed by one hit to their report steps: the effect itself

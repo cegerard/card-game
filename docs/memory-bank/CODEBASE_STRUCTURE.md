@@ -106,7 +106,7 @@ fight-simulator/
 ├── survived-reactions.ts # survivedReactions(), fightSurvivedReactor(): `survived` skills of a SURVIVE holder, shared by every attack path
 ├── concealment-steps.ts, stance-steps.ts, execution-steps.ts # Step helpers
 ├── card-selectors/ # card-selector.ts, player-by-player.ts, speed-weighted-card-pool.ts
-└── @types/ # step.ts (StepKind enum), report files re-exporting the shared step types, shared-report-contract.ts, internal action/attack reports
+└── @types/ # step.ts (StepKind enum), shared-report-contract.ts, internal action/attack/special-stance reports; the step types come from shared-types
 ```
 
 ### `targeting-card-strategies/`

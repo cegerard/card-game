@@ -1,7 +1,5 @@
-import type { SpecialStanceReport } from '@card-game/shared-types';
-import { Step, StepKind } from './step';
-
-export type { SpecialStanceReport };
+import type { SpecialStanceReport, Step } from '@card-game/shared-types';
+import { StepKind } from './step';
 
 /** The special step, followed by everything the stance brought. */
 export type SpecialStanceActionReport = {

@@ -1,3 +1,4 @@
+import type { Step } from '@card-game/shared-types';
 import { ActionStage } from '../action-stage';
 import { Player } from '../../player';
 import { FightingCard } from '../../cards/fighting-card';
@@ -12,7 +13,7 @@ import { TargetedFromPosition } from '../../targeting-card-strategies/targeted-f
 import { DeathSkillHandler } from '../../fight-simulator/death-skill-handler';
 import { Splash } from '../../cards/@types/attack/splash';
 import { LowHealthDebuff } from '../../cards/@types/attack/low-health-debuff';
-import { Step, StepKind } from '../../fight-simulator/@types/step';
+import { StepKind } from '../../fight-simulator/@types/step';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 
 const UNDERGROUND = { name: 'Sous terre', duration: 1 };

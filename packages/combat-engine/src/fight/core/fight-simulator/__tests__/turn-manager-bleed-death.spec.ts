@@ -1,3 +1,4 @@
+import type { Step } from '@card-game/shared-types';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 import { FightingCard } from '../../cards/fighting-card';
 import { CardState } from '../../cards/@types/state/card-state';
@@ -7,7 +8,7 @@ import { Player } from '../../player';
 import { TurnManager } from '../turn-manager';
 import { DeathSkillHandler } from '../death-skill-handler';
 import { EndEventProcessor } from '../end-event-processor';
-import { Step, StepKind } from '../@types/step';
+import { StepKind } from '../@types/step';
 
 const bleeding = (damageValue: number) =>
   new CardStateBleeding([{ remainingTurns: 3, damageValue }]);

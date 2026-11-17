@@ -1,4 +1,4 @@
-import { CardInfo } from './@types/card-info';
+import type { CardInfo } from '@card-game/shared-types';
 import { FightingContext } from './@types/fighting-context';
 import { SpecialResult } from './@types/action-result/special-result';
 import { DodgeBehavior } from './behaviors/dodge-behaviors';

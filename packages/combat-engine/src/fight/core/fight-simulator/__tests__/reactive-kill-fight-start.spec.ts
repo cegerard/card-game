@@ -1,8 +1,8 @@
+import type { Step } from '@card-game/shared-types';
 import { Player } from '../../player';
 import { FightStart } from '../../trigger/fight-start';
 import { Fight } from '../fight';
 import { PlayerByPlayerCardSelector } from '../card-selectors/player-by-player';
-import { Step } from '../@types/step';
 import {
   attackers,
   executioner,

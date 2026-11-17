@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker/locale/en';
+import type { BuffReport, DebuffReport } from '@card-game/shared-types';
 
 import { ActionStage } from '../action-stage';
 import { Player } from '../../player';
@@ -22,10 +23,6 @@ import { RandomizerFake } from '../../../../../test/helpers/randomizer-fake';
 import { MathRandomizer } from '../../../tools/math-randomizer';
 import { StepKind } from '../../fight-simulator/@types/step';
 import { Alteration } from '../../cards/@types/alteration/alteration';
-import {
-  BuffReport,
-  DebuffReport,
-} from '../../fight-simulator/@types/alteration-report';
 import { AlterationSkill } from '../../cards/skills/alteration-skill';
 import { AllyHealthBelowThresholdTrigger } from '../../trigger/ally-health-below-threshold-trigger';
 import { DamageTakenTrigger } from '../../trigger/damage-taken';
@@ -212,7 +209,7 @@ describe('ActionStage', () => {
       );
       const steps = actionStage.computeNextAction([attacker]);
       const attackStep =
-        steps[0] as import('../../fight-simulator/@types/damage-report').DamageReport;
+        steps[0] as import('@card-game/shared-types').DamageReport;
 
       it('sets remainingHealth to the defender actual health after the hit', () => {
         expect(attackStep.damages[0].remainingHealth).toBe(
@@ -279,7 +276,7 @@ describe('ActionStage', () => {
     describe('remainingHealth snapshot in healing step', () => {
       let healer: FightingCard;
       let target: FightingCard;
-      let healStep: import('../../fight-simulator/@types/healing-report').HealingReport;
+      let healStep: import('@card-game/shared-types').HealingReport;
 
       beforeEach(() => {
         const specialHealing = new SpecialHealing('Heal', 1, 0, new Launcher());
@@ -303,7 +300,7 @@ describe('ActionStage', () => {
         const steps = actionStage.computeNextAction([healer]);
         healStep = steps.find(
           (s) => s.kind === StepKind.Healing,
-        ) as import('../../fight-simulator/@types/healing-report').HealingReport;
+        ) as import('@card-game/shared-types').HealingReport;
       });
 
       it('sets remainingHealth to the snapshot captured at heal time', () => {

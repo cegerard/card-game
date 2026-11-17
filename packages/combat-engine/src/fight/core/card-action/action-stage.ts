@@ -1,20 +1,25 @@
+import type {
+  DebuffReport,
+  HealingReport,
+  ShieldAppliedReport,
+  Step,
+  SurvivedReport,
+} from '@card-game/shared-types';
 import { fightingContextOf } from '../fight-simulator/fighting-context-of';
 import { reactiveKillSteps } from '../fight-simulator/reactive-kill-steps';
 import { AttackReport } from '../fight-simulator/@types/attack-report';
 import { FightingCard } from '../cards/fighting-card';
 import { Player } from '../player';
 import { CardDeathSubscriber } from '../fight-simulator/card-death-subscriber';
-import { Step, StepKind } from '../fight-simulator/@types/step';
+import { StepKind } from '../fight-simulator/@types/step';
 import {
   ActionReport,
   SKILL_STEPS,
   SkillStepsActionReport,
 } from '../fight-simulator/@types/action-report';
 import { AttackResult } from '../cards/@types/action-result/attack-result';
-import { HealingReport } from '../fight-simulator/@types/healing-report';
 import { HealingResult } from '../cards/@types/action-result/healing-result';
 import { FightingContext } from '../cards/@types/fighting-context';
-import { DebuffReport } from '../fight-simulator/@types/alteration-report';
 import {
   BuffResult,
   DebuffResult,
@@ -26,7 +31,6 @@ import {
 } from '../cards/skills/skill';
 import { DeathSkillHandler } from '../fight-simulator/death-skill-handler';
 import { ShieldResult } from '../cards/@types/action-result/shield-result';
-import { ShieldAppliedReport } from '../fight-simulator/@types/shield-report';
 import { triggerReactiveSkills } from '../fight-simulator/reactive-skill-checker';
 import {
   hitAlterationResults,
@@ -40,7 +44,6 @@ import {
   SurvivedReactor,
   fightSurvivedReactor,
 } from '../fight-simulator/survived-reactions';
-import { SurvivedReport } from '../fight-simulator/@types/survived-report';
 import { BLEED_STACKS_APPLIED } from '../trigger/bleed-stacks-applied';
 import { TURN_START } from '../trigger/turn-start';
 import { ENEMY_ATTACK } from '../trigger/enemy-attack';

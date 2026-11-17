@@ -1,3 +1,4 @@
+import type { Step } from '@card-game/shared-types';
 import { Player } from '../../player';
 import { TurnEnd } from '../../trigger/turn-end';
 import { SurvivedTrigger } from '../../trigger/survived';
@@ -12,7 +13,7 @@ import { AlwaysTrueAttackCondition } from '../../cards/@types/attack/conditions/
 import { DamageComposition } from '../../cards/@types/damage/damage-composition';
 import { DamageType } from '../../cards/@types/damage/damage-type';
 import { TargetedAll } from '../../targeting-card-strategies/targeted-all';
-import { Step, StepKind } from '../@types/step';
+import { StepKind } from '../@types/step';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 import { Healing } from '../../cards/skills/healing';
 import { Launcher } from '../../targeting-card-strategies/launcher';

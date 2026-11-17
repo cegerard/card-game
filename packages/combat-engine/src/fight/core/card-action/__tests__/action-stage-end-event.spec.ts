@@ -1,3 +1,4 @@
+import type { Step } from '@card-game/shared-types';
 import { ActionStage } from '../action-stage';
 import { Player } from '../../player';
 import { FightingCard } from '../../cards/fighting-card';
@@ -13,7 +14,7 @@ import { DamageTakenTrigger } from '../../trigger/damage-taken';
 import { TargetedFromPosition } from '../../targeting-card-strategies/targeted-from-position';
 import { DeathSkillHandler } from '../../fight-simulator/death-skill-handler';
 import { EndEventProcessor } from '../../fight-simulator/end-event-processor';
-import { Step, StepKind } from '../../fight-simulator/@types/step';
+import { StepKind } from '../../fight-simulator/@types/step';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 
 const END_EVENT = 'ultimate-over';

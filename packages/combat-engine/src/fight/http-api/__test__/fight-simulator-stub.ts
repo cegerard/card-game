@@ -1,6 +1,6 @@
+import type { FightResult } from '@card-game/shared-types';
 import { FightSimulator } from '../../core/fight-simulator/@types/fight-simulator';
 import { FightingCard } from '../../core/cards/fighting-card';
-import { FightResult } from '../../core/fight-simulator/@types/fight-result';
 import { Player } from '../../core/player';
 import { CardSelector } from '../../core/fight-simulator/card-selectors/card-selector';
 

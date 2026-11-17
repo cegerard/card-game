@@ -1,3 +1,4 @@
+import type { Step } from '@card-game/shared-types';
 import { FightingCard } from '../cards/fighting-card';
 import {
   AttackSkillResults,
@@ -11,7 +12,7 @@ import {
 
 type AlterationSkillResults =
   BuffSkillResults | DebuffSkillResults | TransformationSkillResults;
-import { Step, StepKind } from './@types/step';
+import { StepKind } from './@types/step';
 import {
   BuffResult,
   DebuffResult,

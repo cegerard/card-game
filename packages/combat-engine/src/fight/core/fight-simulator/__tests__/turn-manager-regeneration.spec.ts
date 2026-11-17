@@ -1,10 +1,11 @@
+import type { Step } from '@card-game/shared-types';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 import { FightingCard } from '../../cards/fighting-card';
 import { Player } from '../../player';
 import { TurnManager } from '../turn-manager';
 import { DeathSkillHandler } from '../death-skill-handler';
 import { EndEventProcessor } from '../end-event-processor';
-import { Step, StepKind } from '../@types/step';
+import { StepKind } from '../@types/step';
 
 function buildTurnManager(card: FightingCard): TurnManager {
   const player1 = new Player('p1', [card]);

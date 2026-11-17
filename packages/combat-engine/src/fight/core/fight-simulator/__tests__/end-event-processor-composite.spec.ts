@@ -1,10 +1,10 @@
+import type {
+  BuffRemovedReport,
+  DebuffRemovedReport,
+} from '@card-game/shared-types';
 import { EndEventProcessor } from '../end-event-processor';
 import { Player } from '../../player';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
-import {
-  BuffRemovedReport,
-  DebuffRemovedReport,
-} from '../@types/alteration-removed-report';
 import { StepKind } from '../@types/step';
 
 const source = { id: 'src', name: 'Source', deckIdentity: '' };
