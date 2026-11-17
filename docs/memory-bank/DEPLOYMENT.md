@@ -16,6 +16,6 @@ Multi-stage `Dockerfile` at the repo root:
 
 - `PORT`: application port, default 3000
 - GitHub secrets: `HEROKU_EMAIL`, `HEROKU_API_KEY`, `HEROKU_APP_NAME`
-- No environment file in the repository; runtime variables are set in the Heroku dashboard
-- `PUBLIC_COMBAT_ENGINE_URL`: required by the gasha build (`pnpm verify` and CI: http://localhost:3000)
+- Runtime variables are set in the Heroku dashboard; the only environment file in the repository is `clients/gasha/.env.test`, a placeholder Vite loads for Vitest alone (mode `test`)
+- `PUBLIC_COMBAT_ENGINE_URL`: inlined in the gasha bundle, so the build fails without it (`pnpm verify` and CI: http://localhost:3000); the unit tests read `.env.test`, Playwright defaults it
 - Production engine URL: set by the Heroku app name
