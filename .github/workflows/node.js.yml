@@ -41,10 +41,7 @@ jobs:
   gasha-e2e:
     runs-on: ubuntu-latest
 
-    env:
-      # The dev server needs it to start; every /fight call is answered from
-      # clients/gasha/tests/fixtures, so no engine runs.
-      PUBLIC_COMBAT_ENGINE_URL: http://localhost:3000
+    # PUBLIC_COMBAT_ENGINE_URL: playwright.config.ts gives the dev server its default
 
     steps:
       - uses: actions/checkout@v6
