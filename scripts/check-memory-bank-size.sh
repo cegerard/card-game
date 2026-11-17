@@ -11,7 +11,8 @@ if [ "$(readlink CLAUDE.md)" != "AGENTS.md" ]; then
 fi
 
 files=(CLAUDE.md $(grep -oE '@docs/[A-Za-z0-9_./-]+\.md' CLAUDE.md | sed 's/^@//' | sort -u))
-total=$(cat "${files[@]}" | wc -m)
+# Node counts characters (code points) whatever the locale; `wc -m` counts bytes outside UTF-8
+total=$(cat "${files[@]}" | node -e "process.stdout.write(String([...require('fs').readFileSync(0, 'utf8')].length))")
 
 echo "Instruction files: ${#files[@]}, ${total} chars (limit ${LIMIT})"
 if [ "$total" -gt "$LIMIT" ]; then
