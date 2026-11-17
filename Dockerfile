@@ -1,5 +1,5 @@
 FROM node:26-alpine AS base
-RUN npm install -g pnpm@11
+RUN npm install -g pnpm@12.15.0
 
 # --- deps stage ---
 FROM base AS deps
@@ -17,7 +17,7 @@ RUN pnpm --filter combat-engine build
 
 # --- prod stage ---
 FROM node:26-alpine AS prod
-RUN npm install -g pnpm@11
+RUN npm install -g pnpm@12.15.0
 WORKDIR /app
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 COPY packages/combat-engine/package.json ./packages/combat-engine/

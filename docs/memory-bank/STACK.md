@@ -34,4 +34,4 @@ Exact versions live in the `package.json` files; this file names the tools and t
 
 ## Container
 
-Root `Dockerfile`: multi-stage, `node:26-alpine`, production dependencies only in the final image, port 3000, installs pnpm 11 itself, entry `node packages/combat-engine/dist/main`.
+Root `Dockerfile`: multi-stage, `node:26-alpine`, production dependencies only in the final image, port 3000, installs the pnpm of `packageManager` itself, entry `node packages/combat-engine/dist/main`.
