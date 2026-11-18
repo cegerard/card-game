@@ -1,10 +1,10 @@
+import { DamageType } from '@card-game/shared-types';
 import { Fight } from '../fight-simulator/fight';
 import { Player } from '../player';
 import { PlayerByPlayerCardSelector } from '../fight-simulator/card-selectors/player-by-player';
 import { createFightingCard } from '../../../../test/helpers/fighting-card';
 import { FightingCard } from '../cards/fighting-card';
 import { DamageComposition } from '../cards/@types/damage/damage-composition';
-import { DamageType } from '../cards/@types/damage/damage-type';
 
 describe('Trigger an attack without effect', () => {
   const attackerAccuracy = 40;

@@ -4,6 +4,7 @@ import type {
   StateEffectType,
   WeakPointEndReason,
 } from '@card-game/shared-types';
+import { DamageType, Element, StatusCategory } from '@card-game/shared-types';
 import { FightingContext } from './@types/fighting-context';
 import { SpecialResult } from './@types/action-result/special-result';
 import { DodgeBehavior } from './behaviors/dodge-behaviors';
@@ -35,8 +36,6 @@ import { Skill, SkillResults } from './skills/skill';
 import { HealthReactiveSkill } from './skills/reactive-skill';
 import { SurviveSkill } from './skills/survive';
 import { DamageReductionSkill } from './skills/damage-reduction';
-import { Element } from './@types/damage/element';
-import { DamageType } from './@types/damage/damage-type';
 import { ElementalMark } from './@types/mark/elemental-mark';
 import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
 import { NamedAttackResult } from './@types/action-result/named-attack-result';
@@ -45,10 +44,7 @@ import { Randomizer } from '../randomizer';
 import { Shield } from './@types/shield/shield';
 import { Stance, StanceActivation } from './@types/stance/stance';
 import { Concealment } from './@types/concealment/concealment';
-import {
-  StatusCategory,
-  statusCategoryOf,
-} from './@types/state/status-category';
+import { statusCategoryOf } from './@types/state/status-category';
 import {
   WEAK_POINT_ENDED_TYPE,
   WeakPoint,

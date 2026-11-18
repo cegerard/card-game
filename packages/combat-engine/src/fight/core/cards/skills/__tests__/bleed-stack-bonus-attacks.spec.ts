@@ -1,10 +1,10 @@
+import { DamageType } from '@card-game/shared-types';
 import { SimpleAttack } from '../simple-attack';
 import { MultipleAttack } from '../multiple-attack';
 import { SpecialAttack } from '../special-attack';
 import { BleedStackBonus } from '../../@types/attack/bleed-stack-bonus';
 import { BleedAttackEffect } from '../../@types/attack/attack-bleed-effect';
 import { DamageComposition } from '../../@types/damage/damage-composition';
-import { DamageType } from '../../@types/damage/damage-type';
 import { TargetedFromPosition } from '../../../targeting-card-strategies/targeted-from-position';
 import { MathRandomizer } from '../../../../tools/math-randomizer';
 import { Player } from '../../../player';

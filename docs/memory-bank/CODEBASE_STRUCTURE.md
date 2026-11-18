@@ -8,7 +8,7 @@ Mechanics are described once, in [backend/ARCHITECTURE.md](backend/ARCHITECTURE.
 card-game/ # pnpm workspace
 ├── packages/
 │   ├── combat-engine/ # NestJS fight simulation backend
-│   └── shared-types/ # Fight contract shared with the clients: request (FightRequest, CardConfig…), report (fight-report.ts), CardDefinition, toCombatConfig
+│   └── shared-types/ # Fight contract shared with the clients: request (FightRequest, CardConfig…), report (fight-report.ts), enum values, CardDefinition, toCombatConfig; built to dist/ for Node
 ├── clients/
 │   ├── fight-replayer/ # Static HTML/JS fight replay viewer (Vitest on the parser)
 │   └── gasha/ # SvelteKit arcade client (Phaser + Web renderer)
@@ -85,7 +85,7 @@ cards/
     ├── stance/ # stance (name, remainingTurns, immunities), StanceActivation, ramping-chance (STANCE skill chance)
     ├── concealment/ # concealment (name, optional remainingTurns)
     ├── skill-activation-conditions/ # health-threshold-condition
-    ├── damage/ # damage-type, damage-composition, element
+    ├── damage/ # damage-composition
     ├── battlefield/ # Battlefield, deployment, exposure
     ├── vulnerability/ # vulnerability (timed weakness to one damage type)
     └── state/ # card-state-frozen/stunted/bleeding/stacked-poison/hypothermia/entangled, status-category
@@ -106,7 +106,7 @@ fight-simulator/
 ├── survived-reactions.ts # survivedReactions(), fightSurvivedReactor(): `survived` skills of a SURVIVE holder, shared by every attack path
 ├── concealment-steps.ts, stance-steps.ts, execution-steps.ts # Step helpers
 ├── card-selectors/ # card-selector.ts, player-by-player.ts, speed-weighted-card-pool.ts
-└── @types/ # step.ts (StepKind enum), shared-report-contract.ts, internal action/attack/special-stance reports; the step types come from shared-types
+└── @types/ # internal action/attack/special-stance reports; the step types and StepKind come from shared-types
 ```
 
 ### `targeting-card-strategies/`

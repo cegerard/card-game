@@ -1,12 +1,11 @@
 import type { Step } from '@card-game/shared-types';
+import { DamageType, StepKind } from '@card-game/shared-types';
 import { ActionStage } from '../action-stage';
 import { Player } from '../../player';
 import { FightingCard } from '../../cards/fighting-card';
 import { DeathSkillHandler } from '../../fight-simulator/death-skill-handler';
 import { EndEventProcessor } from '../../fight-simulator/end-event-processor';
-import { StepKind } from '../../fight-simulator/@types/step';
 import { DamageComposition } from '../../cards/@types/damage/damage-composition';
-import { DamageType } from '../../cards/@types/damage/damage-type';
 import { AlterationSkill } from '../../cards/skills/alteration-skill';
 import { ConditionalAttack } from '../../cards/skills/conditional-attack';
 import { SimpleAttack } from '../../cards/skills/simple-attack';

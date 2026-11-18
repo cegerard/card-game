@@ -50,12 +50,21 @@ import {
   ValidationArguments,
   Validate,
 } from 'class-validator';
-
-export enum AlterationConditionType {
-  ALLY_PRESENCE = 'ally-presence',
-  HEALTH_THRESHOLD = 'health-threshold',
-  PROBABILITY = 'probability',
-}
+import {
+  AlterationConditionType,
+  BuffType,
+  CardSelectorStrategy,
+  DamageType,
+  DodgeStrategy,
+  EffectType,
+  Element,
+  RateBasis,
+  SkillKind,
+  SpecialKind,
+  StatusCategory,
+  TargetingStrategy,
+  TriggerEvent,
+} from '@card-game/shared-types';
 
 class BuffConditionDto implements BuffCondition {
   @IsEnum(AlterationConditionType)
@@ -86,144 +95,13 @@ class BuffConditionDto implements BuffCondition {
   @Max(1)
   probability?: number;
 }
-import { DamageType } from '../../core/cards/@types/damage/damage-type';
 export { DamageType };
-
-export enum SpecialKind {
-  ATTACK = 'ATTACK',
-  HEALING = 'HEALING',
-  STANCE = 'STANCE',
-}
-
-export enum SkillKind {
-  HEALING = 'HEALING',
-  ALTERATION = 'ALTERATION',
-  CONDITIONAL_ATTACK = 'CONDITIONAL_ATTACK',
-  TARGETING_OVERRIDE = 'TARGETING_OVERRIDE',
-  SHIELD = 'SHIELD',
-  SURVIVE = 'SURVIVE',
-  DAMAGE_REDUCTION = 'DAMAGE_REDUCTION',
-  TRANSFORMATION = 'TRANSFORMATION',
-  PROTECTION = 'PROTECTION',
-  DODGE_BONUS_DENIAL = 'DODGE_BONUS_DENIAL',
-  BLEED_STACK_SCALING = 'BLEED_STACK_SCALING',
-  STANCE = 'STANCE',
-  BLEED_EMPOWERMENT = 'BLEED_EMPOWERMENT',
-  BLEED_DETONATION = 'BLEED_DETONATION',
-  CONCEALMENT = 'CONCEALMENT',
-  LOW_HEALTH_TARGET_BONUS = 'LOW_HEALTH_TARGET_BONUS',
-  BUFF_TRANSFER = 'BUFF_TRANSFER',
-  POISONED_ENEMY_AGILITY = 'POISONED_ENEMY_AGILITY',
-  ATTACKER_INSIGHT = 'ATTACKER_INSIGHT',
-  SPECIAL_ECHO = 'SPECIAL_ECHO',
-  REAL_DAMAGE = 'REAL_DAMAGE',
-  AFFLICTION = 'AFFLICTION',
-  ANALYSIS = 'ANALYSIS',
-  AFTERSHOCK = 'AFTERSHOCK',
-  WEAK_POINT_LEGACY = 'WEAK_POINT_LEGACY',
-  SUPPORT = 'SUPPORT',
-  ENERGY_GAIN = 'ENERGY_GAIN',
-}
-
-export enum BuffType {
-  ATTACK = 'attack',
-  DEFENSE = 'defense',
-  AGILITY = 'agility',
-  ACCURACY = 'accuracy',
-  SPEED = 'speed',
-  CRITICAL_CHANCE = 'criticalChance',
-  REGENERATION = 'regeneration',
-  RESISTANCE = 'resistance',
-}
-
-export enum Effect {
-  POISON = 'POISON',
-  BURN = 'BURN',
-  FREEZE = 'FREEZE',
-  STUNT = 'STUNT',
-  MARK = 'MARK',
-  BLEED = 'BLEED',
-  WEAK_POINT = 'WEAK_POINT',
-  HYPOTHERMIA = 'HYPOTHERMIA',
-  ENTANGLE = 'ENTANGLE',
-  ENERGY_DRAIN = 'ENERGY_DRAIN',
-  VULNERABILITY = 'VULNERABILITY',
-  SUPPORT_BLOCK = 'SUPPORT_BLOCK',
-}
-
-export enum DodgeStrategy {
-  SIMPLE_DODGE = 'simple-dodge',
-  RANDOM_DODGE = 'random-dodge',
-}
-
-export enum TriggerEvent {
-  TURN_END = 'turn-end',
-  NEXT_ACTION = 'next-action',
-  ALLY_DEATH = 'ally-death',
-  ENEMY_DEATH = 'enemy-death',
-  DORMANT = 'dormant',
-  SURVIVED = 'survived',
-  ALLY_HEALTH_BELOW = 'ally-health-below',
-  DAMAGE_TAKEN = 'damage-taken',
-  ANY_ALLY_HEALTH_BELOW = 'any-ally-health-below',
-  SELF_DEATH = 'self-death',
-  ENEMY_BLEED_DEATH = 'enemy-bleed-death',
-  TURN_START = 'turn-start',
-  BLEED_STACKS_APPLIED = 'bleed-stacks-applied',
-  FIGHT_START = 'fight-start',
-  ENEMY_KILLED = 'enemy-killed',
-  DODGE = 'dodge',
-  POISONED_ENEMY_DEATH = 'poisoned-enemy-death',
-  ENEMY_ATTACK = 'enemy-attack',
-  AFTER_ATTACK = 'after-attack',
-  TRANSFORMED = 'transformed',
-  ENEMIES_ANALYSED = 'enemies-analysed',
-  ANY_ALLY_DEATH = 'any-ally-death',
-  ALLY_SKILL_USED = 'ally-skill-used',
-}
-
-export enum RateBasisDto {
-  SOURCE_ATTACK = 'source-attack',
-  TARGET_MAX_HEALTH = 'target-max-health',
-}
-
-export enum TargetingStrategy {
-  POSITION_BASED = 'position-based',
-  TARGET_ALL = 'target-all',
-  LINE_THREE = 'line-three',
-  ALL_OWNER_CARD = 'all-owner-cards',
-  ALL_ALLIES = 'all-allies',
-  SELF = 'self',
-  TARGETED_CARD = 'targeted-card',
-  LAST_ATTACKER_OF_ALLY = 'last-attacker-of-ally',
-  LINKED_ALLY = 'linked-ally',
-  MOST_WOUNDED_ALLY = 'most-wounded-ally',
-  PROTECTED_ALLY = 'protected-ally',
-  FIRST_BLEEDING_ENEMY = 'first-bleeding-enemy',
-  FASTEST_ALLY = 'fastest-ally',
-  LAST_DODGED_ATTACKER = 'last-dodged-attacker',
-  LOWEST_HEALTH_ALLY = 'lowest-health-ally',
-  RANDOM_ENEMIES = 'random-enemies',
-}
 
 /** What @IsNotIn([TARGETED_CARD]) lets through: targeted-card is reserved to TARGETING_OVERRIDE. */
 export type NonOverrideTargetingStrategy = Exclude<
   TargetingStrategy,
-  TargetingStrategy.TARGETED_CARD
+  typeof TargetingStrategy.TARGETED_CARD
 >;
-
-export enum CardSelectorStrategy {
-  PLAYER_BY_PLAYER = 'player-by-player',
-  SPEED_WEIGHTED = 'speed-weighted',
-}
-
-export enum ElementDto {
-  PHYSICAL = 'PHYSICAL',
-  FIRE = 'FIRE',
-  WATER = 'WATER',
-  EARTH = 'EARTH',
-  AIR = 'AIR',
-}
 
 export class EffectTriggeredDebuffDto implements EffectTriggeredDebuff {
   // Stack budget: both fields together, or neither
@@ -263,23 +141,23 @@ export class EffectTriggeredDebuffDto implements EffectTriggeredDebuff {
 }
 
 function isStackedPoison(o: EffectDto): boolean {
-  return o.type === Effect.POISON && o.maxStacks !== undefined;
+  return o.type === EffectType.POISON && o.maxStacks !== undefined;
 }
 
 // Control effects: no level and no triggered debuff
-export const CONTROL_EFFECTS = [
-  Effect.ENTANGLE,
-  Effect.ENERGY_DRAIN,
-  Effect.VULNERABILITY,
-  Effect.SUPPORT_BLOCK,
+export const CONTROL_EFFECTS: readonly EffectType[] = [
+  EffectType.ENTANGLE,
+  EffectType.ENERGY_DRAIN,
+  EffectType.VULNERABILITY,
+  EffectType.SUPPORT_BLOCK,
 ];
 
 // Effects counted without a level
 const LEVELLESS_EFFECTS = [
-  Effect.MARK,
-  Effect.BLEED,
-  Effect.WEAK_POINT,
-  Effect.HYPOTHERMIA,
+  EffectType.MARK,
+  EffectType.BLEED,
+  EffectType.WEAK_POINT,
+  EffectType.HYPOTHERMIA,
   ...CONTROL_EFFECTS,
 ];
 
@@ -343,8 +221,8 @@ export class WeakPointDto implements WeakPoint {
 }
 
 export class EffectDto implements EffectConfig {
-  @IsEnum(Effect)
-  type: Effect;
+  @IsEnum(EffectType)
+  type: EffectType;
 
   @IsNumber()
   rate: number;
@@ -358,10 +236,10 @@ export class EffectDto implements EffectConfig {
   // optional on FREEZE and BURN, where it replaces the level turns (checked by the effect)
   @ValidateIf(
     (o) =>
-      o.type === Effect.BLEED ||
-      o.type === Effect.HYPOTHERMIA ||
-      o.type === Effect.VULNERABILITY ||
-      o.type === Effect.SUPPORT_BLOCK ||
+      o.type === EffectType.BLEED ||
+      o.type === EffectType.HYPOTHERMIA ||
+      o.type === EffectType.VULNERABILITY ||
+      o.type === EffectType.SUPPORT_BLOCK ||
       isStackedPoison(o),
   )
   @IsDefined()
@@ -371,10 +249,12 @@ export class EffectDto implements EffectConfig {
 
   // BLEED and stacked POISON: what the rate is a share of (default source-attack)
   @IsOptional()
-  @IsEnum(RateBasisDto)
-  basis?: RateBasisDto;
+  @IsEnum(RateBasis)
+  basis?: RateBasis;
 
-  @ValidateIf((o) => o.type === Effect.MARK || o.type === Effect.VULNERABILITY)
+  @ValidateIf(
+    (o) => o.type === EffectType.MARK || o.type === EffectType.VULNERABILITY,
+  )
   @IsDefined()
   @IsEnum(DamageType)
   damageType?: DamageType;
@@ -382,8 +262,8 @@ export class EffectDto implements EffectConfig {
   // POISON: given, the poison is counted in stacks instead of levels
   @ValidateIf(
     (o) =>
-      o.type === Effect.MARK ||
-      o.type === Effect.BLEED ||
+      o.type === EffectType.MARK ||
+      o.type === EffectType.BLEED ||
       o.maxStacks !== undefined,
   )
   @IsDefined()
@@ -422,7 +302,7 @@ export class EffectDto implements EffectConfig {
   @IsNumber()
   probability?: number;
 
-  @ValidateIf((o) => o.type === Effect.WEAK_POINT)
+  @ValidateIf((o) => o.type === EffectType.WEAK_POINT)
   @IsDefined()
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => WeakPointDto)
@@ -599,8 +479,8 @@ export class BattlefieldDto implements Battlefield {
 
   // The element of the battlefield, read by `battlefieldBonus`
   @IsOptional()
-  @IsEnum(ElementDto)
-  element?: ElementDto;
+  @IsEnum(Element)
+  element?: Element;
 
   @IsOptional()
   @ValidateNested()
@@ -774,8 +654,8 @@ export class FrozenTargetBonusDto {
 
 // Boosts every damage type, or only `damageType`, while a battlefield of that element runs
 export class BattlefieldBonusDto extends FrozenTargetBonusDto {
-  @IsEnum(ElementDto)
-  element: ElementDto;
+  @IsEnum(Element)
+  element: Element;
 }
 
 export class BleedStackBonusDto
@@ -809,11 +689,6 @@ class AttackBonusesDto implements AttackBonuses {
   battlefieldBonus?: BattlefieldBonusDto;
 }
 
-export enum StatusCategoryDto {
-  CONTROL = 'control',
-  DAMAGE_OVER_TIME = 'damage-over-time',
-}
-
 class StanceActivationDto implements StanceActivation {
   @IsString()
   @IsNotEmpty()
@@ -827,8 +702,8 @@ class StanceActivationDto implements StanceActivation {
   @IsOptional()
   @IsArray()
   @ArrayMinSize(1)
-  @IsEnum(StatusCategoryDto, { each: true })
-  immunities?: StatusCategoryDto[];
+  @IsEnum(StatusCategory, { each: true })
+  immunities?: StatusCategory[];
 
   // Lets the bearer target concealed enemies while the stance runs
   @IsOptional()
@@ -1132,8 +1007,8 @@ export class OtherSkillDto implements OtherSkill {
   // BLEED_EMPOWERMENT: replaces the basis of the bleeds laid during the stance;
   // REAL_DAMAGE: what the rate is a share of (default source-attack)
   @IsOptional()
-  @IsEnum(RateBasisDto)
-  basis?: RateBasisDto;
+  @IsEnum(RateBasis)
+  basis?: RateBasis;
 
   // BLEED_EMPOWERMENT: replaces the debuff rolled when a bleed lands during the stance
   @IsOptional()
@@ -1557,8 +1432,8 @@ export class OtherSkillDto implements OtherSkill {
 
   // HEALING only: what the rate is a share of. Defaults to source-attack.
   @IsOptional()
-  @IsEnum(RateBasisDto)
-  healBasis?: RateBasisDto;
+  @IsEnum(RateBasis)
+  healBasis?: RateBasis;
 
   @IsOptional()
   @IsString()
@@ -1651,8 +1526,8 @@ export class FightingCardDto implements CardConfig {
   resistance?: number;
 
   @IsOptional()
-  @IsEnum(ElementDto)
-  element?: ElementDto;
+  @IsEnum(Element)
+  element?: Element;
 
   @IsNotEmpty()
   @ValidateNested()

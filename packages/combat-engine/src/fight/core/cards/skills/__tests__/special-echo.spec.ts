@@ -1,9 +1,9 @@
+import { StepKind } from '@card-game/shared-types';
 import { SpecialEchoSkill } from '../special-echo';
 import { SelfDeathTrigger } from '../../../trigger/self-death';
 import { Player } from '../../../player';
 import { FightingCard } from '../../fighting-card';
 import { skillResultsToSteps } from '../../../fight-simulator/skill-results-to-steps';
-import { StepKind } from '../../../fight-simulator/@types/step';
 import { createFightingCard } from '../../../../../../test/helpers/fighting-card';
 
 describe('SpecialEchoSkill', () => {

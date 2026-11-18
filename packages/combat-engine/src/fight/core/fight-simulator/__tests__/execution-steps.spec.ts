@@ -1,6 +1,6 @@
+import { StepKind } from '@card-game/shared-types';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 import { executionSteps } from '../execution-steps';
-import { StepKind } from '../@types/step';
 
 describe('executionSteps', () => {
   const selkhet = createFightingCard({ id: 'selkhet' });

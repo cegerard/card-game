@@ -1,9 +1,9 @@
+import { DamageType } from '@card-game/shared-types';
 import { AftershockSkill } from '../aftershock';
 import { WeakPointLegacySkill } from '../weak-point-legacy';
 import { AfflictionSkillResults } from '../skill';
 import { Splash } from '../../@types/attack/splash';
 import { DamageComposition } from '../../@types/damage/damage-composition';
-import { DamageType } from '../../@types/damage/damage-type';
 import { AfterAttackTrigger } from '../../../trigger/after-attack';
 import { SelfDeathTrigger } from '../../../trigger/self-death';
 import { WeakPoint } from '../../@types/weak-point/weak-point';

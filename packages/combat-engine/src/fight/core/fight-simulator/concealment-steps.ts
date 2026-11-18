@@ -3,9 +3,9 @@ import type {
   ConcealmentEndedReport,
   ConcealmentStartedReport,
 } from '@card-game/shared-types';
+import { StepKind } from '@card-game/shared-types';
 import { Concealment } from '../cards/@types/concealment/concealment';
 import { FightingCard } from '../cards/fighting-card';
-import { StepKind } from './@types/step';
 
 export function concealmentStartedReport(
   card: FightingCard,

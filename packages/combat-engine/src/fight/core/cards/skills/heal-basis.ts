@@ -1,5 +1,5 @@
+import { RateBasis } from '@card-game/shared-types';
 import { FightingCard } from '../fighting-card';
-import { RateBasis } from '../@types/rate-basis';
 
 /**
  * Heals one target and returns the health points actually restored, capped at

@@ -1,9 +1,10 @@
 import 'reflect-metadata';
 
+import { AlterationConditionType } from '@card-game/shared-types';
+
 import { AlterationCondition } from '../../core/cards/@types/alteration/alteration-condition';
 import { AllyPresenceCondition } from '../../core/cards/@types/alteration/conditions/ally-presence-condition';
 import { HealthThresholdCondition } from '../../core/cards/@types/alteration/conditions/health-threshold-condition';
-import { AlterationConditionType } from '../dto/fight-data.dto';
 import { ProbabilityCondition } from '../../core/cards/@types/alteration/conditions/probability-condition';
 import { RandomizerFake } from '../../../../test/helpers/randomizer-fake';
 import { buildAlterationCondition } from '../alteration-condition-factory';

@@ -1,3 +1,4 @@
+import { TriggerEvent } from '@card-game/shared-types';
 import { TurnEnd } from '../core/trigger/turn-end';
 import { NextAction } from '../core/trigger/next-action';
 import { DeathTrigger } from '../core/trigger/death-trigger';
@@ -16,7 +17,6 @@ import { EnemiesAnalysedTrigger } from '../core/trigger/enemies-analysed';
 import { Trigger } from '../core/trigger/trigger';
 import { AnyAllyDeathTrigger } from '../core/trigger/any-ally-death';
 import { AllySkillUsedTrigger } from '../core/trigger/ally-skill-used';
-import { TriggerEvent } from './dto/fight-data.dto';
 
 const STRATEGY_MAP: Record<string, Trigger> = {
   [TriggerEvent.TURN_END]: new TurnEnd(),

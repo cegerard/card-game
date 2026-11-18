@@ -4,14 +4,17 @@ import {
   CardSelectorStrategy,
   DamageType,
   DodgeStrategy,
-  Effect,
-  FightDataDto,
-  FightingCardDto,
+  EffectType,
   SkillKind,
-  SpecialDto,
   SpecialKind,
   TargetingStrategy,
   TriggerEvent,
+} from '@card-game/shared-types';
+
+import {
+  FightDataDto,
+  FightingCardDto,
+  SpecialDto,
 } from '../dto/fight-data.dto';
 
 import { FightController } from '../fight.controller';
@@ -47,7 +50,7 @@ describe('FightController', () => {
     describe('and the special attack has a poisoned effect', () => {
       beforeEach(() => {
         const effect = {
-          type: Effect.POISON,
+          type: EffectType.POISON,
           rate: 0.5,
           level: 2,
         };
@@ -138,7 +141,7 @@ describe('FightController', () => {
     describe('and the special attack has a burned effect', () => {
       beforeEach(() => {
         const effect = {
-          type: Effect.BURN,
+          type: EffectType.BURN,
           rate: 0.2,
           level: 3,
         };
@@ -229,7 +232,7 @@ describe('FightController', () => {
     describe('and the special attack effect has a terminationEvent', () => {
       beforeEach(() => {
         const effect = {
-          type: Effect.BURN,
+          type: EffectType.BURN,
           rate: 0.3,
           level: 1,
           terminationEvent: 'fire-shield-end',
@@ -290,7 +293,7 @@ describe('FightController', () => {
     describe('and the special attack has a freeze effect', () => {
       beforeEach(() => {
         const effect = {
-          type: Effect.FREEZE,
+          type: EffectType.FREEZE,
           rate: 0.2,
           level: 2,
         };
@@ -455,7 +458,7 @@ describe('FightController', () => {
     describe('and the simple attack has a poisoned effect', () => {
       beforeEach(() => {
         const effect = {
-          type: Effect.POISON,
+          type: EffectType.POISON,
           rate: 0.5,
           level: 2,
         };
@@ -548,7 +551,7 @@ describe('FightController', () => {
     describe('and the simple attack has a burned effect', () => {
       beforeEach(() => {
         const effect = {
-          type: Effect.BURN,
+          type: EffectType.BURN,
           rate: 0.2,
           level: 3,
         };
@@ -641,7 +644,7 @@ describe('FightController', () => {
     describe('and the simple attack has a freeze effect', () => {
       beforeEach(() => {
         const effect = {
-          type: Effect.FREEZE,
+          type: EffectType.FREEZE,
           rate: 0.2,
           level: 2,
         };
@@ -734,7 +737,7 @@ describe('FightController', () => {
     describe('and the simple attack effect has a terminationEvent', () => {
       beforeEach(() => {
         const effect = {
-          type: Effect.BURN,
+          type: EffectType.BURN,
           rate: 0.3,
           level: 1,
           terminationEvent: 'fire-shield-end',
@@ -800,7 +803,7 @@ describe('FightController', () => {
     describe('and the simple attack has a mark effect', () => {
       beforeEach(() => {
         const effect = {
-          type: Effect.MARK,
+          type: EffectType.MARK,
           rate: 0.05,
           damageType: DamageType.WATER,
           maxStacks: 5,
@@ -1455,7 +1458,7 @@ describe('FightController', () => {
       behaviors: { dodge: DodgeStrategy.SIMPLE_DODGE },
     };
 
-    it('throws when mapAlterationType receives an unknown buff type', () => {
+    it('throws when requireBuffType receives an unknown buff type', () => {
       const data: FightDataDto = {
         cardSelectorStrategy: CardSelectorStrategy.PLAYER_BY_PLAYER,
         player1: {

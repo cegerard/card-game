@@ -1,5 +1,5 @@
+import { RateBasis } from '@card-game/shared-types';
 import { applyHealing } from '../heal-basis';
-import { RateBasis } from '../../@types/rate-basis';
 import { createFightingCard } from '../../../../../../test/helpers/fighting-card';
 import { FightingCard } from '../../fighting-card';
 

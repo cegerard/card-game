@@ -1,3 +1,4 @@
+import { StepKind } from '@card-game/shared-types';
 import { AnalysisSkill } from '../analysis';
 import { AnalysisSkillResults, SkillKind } from '../skill';
 import { TransformationSkill } from '../transformation';
@@ -10,7 +11,6 @@ import { Player } from '../../../player';
 import { createFightingCard } from '../../../../../../test/helpers/fighting-card';
 import { FightingCard } from '../../fighting-card';
 import { skillResultsToSteps } from '../../../fight-simulator/skill-results-to-steps';
-import { StepKind } from '../../../fight-simulator/@types/step';
 
 describe('AnalysisSkill', () => {
   let analyst: FightingCard;

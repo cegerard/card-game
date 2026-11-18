@@ -1,4 +1,5 @@
 import type { Step } from '@card-game/shared-types';
+import { DamageType, StepKind } from '@card-game/shared-types';
 import { ActionStage } from '../action-stage';
 import { Player } from '../../player';
 import { FightingCard } from '../../cards/fighting-card';
@@ -6,13 +7,11 @@ import { SpecialStance } from '../../cards/skills/special-stance';
 import { SimpleAttack } from '../../cards/skills/simple-attack';
 import { Alteration } from '../../cards/@types/alteration/alteration';
 import { DamageComposition } from '../../cards/@types/damage/damage-composition';
-import { DamageType } from '../../cards/@types/damage/damage-type';
 import { TargetedFromPosition } from '../../targeting-card-strategies/targeted-from-position';
 import { Launcher } from '../../targeting-card-strategies/launcher';
 import { SimpleDodge } from '../../cards/behaviors/simple-dodge';
 import { MathRandomizer } from '../../../tools/math-randomizer';
 import { DeathSkillHandler } from '../../fight-simulator/death-skill-handler';
-import { StepKind } from '../../fight-simulator/@types/step';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 
 const STATS = {

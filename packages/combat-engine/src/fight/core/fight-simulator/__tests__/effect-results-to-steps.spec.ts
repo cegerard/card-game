@@ -1,7 +1,6 @@
+import { DamageType, StepKind } from '@card-game/shared-types';
 import { effectResultsToSteps } from '../effect-results-to-steps';
-import { StepKind } from '../@types/step';
 import { MARK_EFFECT_TYPE } from '../../cards/@types/mark/elemental-mark';
-import { DamageType } from '../../cards/@types/damage/damage-type';
 import { Debuff } from '../../cards/@types/alteration/alteration-detail';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 

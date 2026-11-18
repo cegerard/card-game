@@ -1,7 +1,7 @@
+import { DamageType } from '@card-game/shared-types';
 import { BleedStackBonus } from '../bleed-stack-bonus';
 import { BleedAttackEffect } from '../attack-bleed-effect';
 import { DamageComposition } from '../../damage/damage-composition';
-import { DamageType } from '../../damage/damage-type';
 import { MathRandomizer } from '../../../../../tools/math-randomizer';
 import { createFightingCard } from '../../../../../../../test/helpers/fighting-card';
 import { FightingCard } from '../../../fighting-card';

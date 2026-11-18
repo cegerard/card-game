@@ -1,5 +1,5 @@
+import { DamageType } from '@card-game/shared-types';
 import { FightingCard } from '../../fighting-card';
-import { DamageType } from '../damage/damage-type';
 import { DamageTypeBonus } from './damage-type-bonus';
 
 /**

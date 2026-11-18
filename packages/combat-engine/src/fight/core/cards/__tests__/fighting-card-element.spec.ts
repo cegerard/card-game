@@ -1,5 +1,5 @@
+import { Element } from '@card-game/shared-types';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
-import { Element } from '../@types/damage/element';
 
 describe('FightingCard element property', () => {
   it('default to PHYSICAL element when not specified', () => {

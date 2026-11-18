@@ -1,8 +1,8 @@
 import type { StateEffectType, Step } from '@card-game/shared-types';
+import { StepKind } from '@card-game/shared-types';
 import { fightingContextOf } from './fighting-context-of';
 import { FightingCard } from '../cards/fighting-card';
 import { Player } from '../player';
-import { StepKind } from './@types/step';
 import { CardDeathSubscriber } from './card-death-subscriber';
 import { DeathSkillHandler } from './death-skill-handler';
 import { EndEventProcessor } from './end-event-processor';

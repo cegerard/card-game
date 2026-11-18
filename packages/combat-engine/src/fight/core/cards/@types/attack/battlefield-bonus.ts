@@ -1,6 +1,5 @@
+import { DamageType, Element } from '@card-game/shared-types';
 import { FightingCard } from '../../fighting-card';
-import { DamageType } from '../damage/damage-type';
-import { Element } from '../damage/element';
 import { DamageTypeBonus } from './damage-type-bonus';
 
 /**

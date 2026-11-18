@@ -1,4 +1,4 @@
-import { DamageType } from './damage-type';
+import { DamageType } from '@card-game/shared-types';
 
 export class DamageComposition {
   public readonly type: DamageType;

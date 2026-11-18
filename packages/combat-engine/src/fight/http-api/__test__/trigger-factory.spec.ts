@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 
-import { TriggerEvent } from '../dto/fight-data.dto';
+import { TriggerEvent } from '@card-game/shared-types';
+
 import { buildTriggerStrategy } from '../trigger-factory';
 import { TurnEnd } from '../../core/trigger/turn-end';
 import { NextAction } from '../../core/trigger/next-action';

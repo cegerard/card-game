@@ -1,7 +1,8 @@
+import { RateBasis } from '@card-game/shared-types';
 import { FightingCard } from '../fighting-card';
 import { FightingContext } from '../@types/fighting-context';
 import { AttackResult } from '../@types/action-result/attack-result';
-import { RATE_BASES, RateBasis } from '../@types/rate-basis';
+import { RATE_BASES } from '../@types/rate-basis';
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 import { Trigger } from '../../trigger/trigger';
 import { round2 } from '../../../tools/round';

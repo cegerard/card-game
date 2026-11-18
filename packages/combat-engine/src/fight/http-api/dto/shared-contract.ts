@@ -1,33 +1,17 @@
 import type * as Shared from '@card-game/shared-types';
 import type { Assert, Equal } from '../../tools/type-equality';
-import type {
-  AlterationConditionType,
-  BuffType,
-  CardSelectorStrategy,
-  DodgeStrategy,
-  Effect,
-  ElementDto,
-  FightDataDto,
-  RateBasisDto,
-  SkillKind,
-  SpecialKind,
-  StatusCategoryDto,
-  TargetingStrategy,
-  TriggerEvent,
-} from './fight-data.dto';
+import type { FightDataDto } from './fight-data.dto';
 
 /*
- * Compile-time only. The DTOs `implements` the shared contract, so whatever
- * the engine accepts fits the contract. These checks add the other way round:
- * a field or a value the contract allows is one the engine accepts, so a
- * client built on @card-game/shared-types never meets a 400 for it.
+ * Compile-time only. The DTO classes stay because their class-validator
+ * decorators validate the request at runtime, and the enums they validate
+ * against come from @card-game/shared-types. Each DTO `implements` its shared
+ * interface, so whatever the engine accepts fits the contract; these checks
+ * add the other way round: a field the contract allows is one the DTO
+ * whitelists, so a client built on the contract never meets a 400 for it.
  */
 
 type SameKeys<Dto, Contract> = Equal<keyof Dto, keyof Contract>;
-type SameValues<DtoEnum extends string, Contract> = Equal<
-  `${DtoEnum}`,
-  Contract
->;
 
 type Player = FightDataDto['player1'];
 type Card = Player['deck'][number];
@@ -51,16 +35,4 @@ export type SharedContractChecks = [
   Assert<SameKeys<Other, Shared.OtherSkill>>,
   Assert<SameKeys<Effects, Shared.EffectConfig>>,
   Assert<SameKeys<Battlefield, Shared.Battlefield>>,
-  Assert<SameValues<AlterationConditionType, Shared.AlterationConditionType>>,
-  Assert<SameValues<BuffType, Shared.BuffType>>,
-  Assert<SameValues<CardSelectorStrategy, Shared.CardSelectorStrategy>>,
-  Assert<SameValues<DodgeStrategy, Shared.DodgeStrategy>>,
-  Assert<SameValues<Effect, Shared.EffectType>>,
-  Assert<SameValues<ElementDto, Shared.Element>>,
-  Assert<SameValues<RateBasisDto, Shared.RateBasis>>,
-  Assert<SameValues<SkillKind, Shared.SkillKind>>,
-  Assert<SameValues<SpecialKind, Shared.SpecialKind>>,
-  Assert<SameValues<StatusCategoryDto, Shared.StatusCategory>>,
-  Assert<SameValues<TargetingStrategy, Shared.TargetingStrategy>>,
-  Assert<SameValues<TriggerEvent, Shared.TriggerEvent>>,
 ];

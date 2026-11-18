@@ -1,3 +1,4 @@
+import { StepKind } from '@card-game/shared-types';
 import { DeathSkillHandler } from '../death-skill-handler';
 import { Player } from '../../player';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
@@ -7,7 +8,6 @@ import { PoisonedEnemyDeathTrigger } from '../../trigger/poisoned-enemy-death';
 import { StackedPoisonAttackEffect } from '../../cards/@types/attack/attack-stacked-poison-effect';
 import { MathRandomizer } from '../../../tools/math-randomizer';
 import { FightingCard } from '../../cards/fighting-card';
-import { StepKind } from '../@types/step';
 
 const recovery = () =>
   new Healing(

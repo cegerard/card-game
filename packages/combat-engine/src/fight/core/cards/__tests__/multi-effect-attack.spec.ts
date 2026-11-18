@@ -1,8 +1,8 @@
+import { DamageType } from '@card-game/shared-types';
 import { Player } from '../../player';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 import { SimpleAttack } from '../skills/simple-attack';
 import { DamageComposition } from '../@types/damage/damage-composition';
-import { DamageType } from '../@types/damage/damage-type';
 import { TargetedFromPosition } from '../../targeting-card-strategies/targeted-from-position';
 import { BurnAttackEffect } from '../@types/attack/attack-burn-effect';
 import { StuntAttackEffect } from '../@types/attack/attack-stunt-effect';

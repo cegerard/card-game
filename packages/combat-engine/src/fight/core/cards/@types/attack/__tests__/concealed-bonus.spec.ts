@@ -1,6 +1,6 @@
+import { DamageType } from '@card-game/shared-types';
 import { ConcealedBonus } from '../concealed-bonus';
 import { DamageComposition } from '../../damage/damage-composition';
-import { DamageType } from '../../damage/damage-type';
 import { createFightingCard } from '../../../../../../../test/helpers/fighting-card';
 import { FightingCard } from '../../../fighting-card';
 

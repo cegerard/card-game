@@ -1,3 +1,4 @@
+import { StepKind } from '@card-game/shared-types';
 import { createFightingCard } from '../../../../../../test/helpers/fighting-card';
 import { FightingCard } from '../../fighting-card';
 import { Player } from '../../../player';
@@ -7,7 +8,6 @@ import { EveryNTurnsCondition } from '../../@types/attack/conditions/every-n-tur
 import { LowestHealthAllyStrategy } from '../../../targeting-card-strategies/most-wounded-ally';
 import { CardStatePoisoned } from '../../@types/state/card-state-poisoned';
 import { skillResultsToSteps } from '../../../fight-simulator/skill-results-to-steps';
-import { StepKind } from '../../../fight-simulator/@types/step';
 
 const GUST: SupportConfig = {
   shield: { rate: 0.4, duration: 2 },

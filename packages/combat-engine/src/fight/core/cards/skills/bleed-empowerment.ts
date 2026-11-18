@@ -1,5 +1,6 @@
+import { RateBasis } from '@card-game/shared-types';
 import { FightingCard } from '../fighting-card';
-import { RATE_BASES, RateBasis } from '../@types/rate-basis';
+import { RATE_BASES } from '../@types/rate-basis';
 import { EffectTriggeredDebuff } from '../@types/attack/effect-triggered-debuff';
 
 /** What a bleed carries when it is laid. */

@@ -5,13 +5,13 @@ import type {
   Step,
   SurvivedReport,
 } from '@card-game/shared-types';
+import { StepKind } from '@card-game/shared-types';
 import { fightingContextOf } from '../fight-simulator/fighting-context-of';
 import { reactiveKillSteps } from '../fight-simulator/reactive-kill-steps';
 import { AttackReport } from '../fight-simulator/@types/attack-report';
 import { FightingCard } from '../cards/fighting-card';
 import { Player } from '../player';
 import { CardDeathSubscriber } from '../fight-simulator/card-death-subscriber';
-import { StepKind } from '../fight-simulator/@types/step';
 import {
   ActionReport,
   SKILL_STEPS,

@@ -1,10 +1,10 @@
 import type { Step } from '@card-game/shared-types';
+import { StepKind } from '@card-game/shared-types';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 import { DeathTrigger } from '../../trigger/death-trigger';
 import { Player } from '../../player';
 import { DeathSkillHandler } from '../death-skill-handler';
 import { FightingCard } from '../../cards/fighting-card';
-import { StepKind } from '../@types/step';
 import {
   attackers,
   executioner,

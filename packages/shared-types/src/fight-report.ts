@@ -1,8 +1,7 @@
 /**
  * Rapport de combat renvoyé par POST /fight : une étape (`Step`) par
- * événement, numérotées à partir de 0 (`fight_start`). Types seulement :
- * le combat-engine les réexporte et garde ses propres enums, vérifiés
- * identiques à ces unions à la compilation.
+ * événement, numérotées à partir de 0 (`fight_start`). Le combat-engine les
+ * construit avec `StepKind`.
  */
 
 import type { BuffType, DamageType } from './index';
@@ -13,60 +12,62 @@ export interface CardInfo {
   deckIdentity: string;
 }
 
-export type StepKind =
-  | 'fight_start'
-  | 'fight_end'
-  | 'status_change'
-  | 'attack'
-  | 'special_attack'
-  | 'healing'
-  | 'state_effect'
-  | 'buff'
-  | 'debuff'
-  | 'buff_removed'
-  | 'debuff_removed'
-  | 'buff_expired'
-  | 'debuff_expired'
-  | 'targeting_override'
-  | 'targeting_reverted'
-  | 'effect_removed'
-  | 'shield_applied'
-  | 'shield_broken'
-  | 'shield_expired'
-  | 'survived'
-  | 'damage_mitigated'
-  | 'stance_started'
-  | 'stance_ended'
-  | 'mark_applied'
-  | 'regenerated'
-  | 'protection_started'
-  | 'protection_ended'
-  | 'attack_intercepted'
-  | 'transformation_started'
-  | 'transformation_ended'
-  | 'concealment_started'
-  | 'concealment_ended'
-  | 'special_stance'
-  | 'executed'
-  | 'buff_transferred'
-  | 'weak_point_revealed'
-  | 'weak_point_ended'
-  | 'analysis_charged'
-  | 'battlefield_started'
-  | 'battlefield_extended'
-  | 'battlefield_ended'
-  | 'revived'
-  | 'attack_empowered'
-  | 'damage_shared'
-  | 'energy_gained'
-  | 'effect_cleansed'
-  | 'action_failed'
-  | 'energy_drained'
-  | 'vulnerability_applied'
-  | 'vulnerability_ended'
-  | 'support_blocked'
-  | 'support_block_ended'
-  | 'decoy_struck';
+export const StepKind = {
+  FightStart: 'fight_start',
+  FightEnd: 'fight_end',
+  StatusChange: 'status_change',
+  Attack: 'attack',
+  SpecialAttack: 'special_attack',
+  Healing: 'healing',
+  StateEffect: 'state_effect',
+  Buff: 'buff',
+  Debuff: 'debuff',
+  BuffRemoved: 'buff_removed',
+  DebuffRemoved: 'debuff_removed',
+  BuffExpired: 'buff_expired',
+  DebuffExpired: 'debuff_expired',
+  TargetingOverride: 'targeting_override',
+  TargetingReverted: 'targeting_reverted',
+  EffectRemoved: 'effect_removed',
+  ShieldApplied: 'shield_applied',
+  ShieldBroken: 'shield_broken',
+  ShieldExpired: 'shield_expired',
+  Survived: 'survived',
+  DamageMitigated: 'damage_mitigated',
+  StanceStarted: 'stance_started',
+  StanceEnded: 'stance_ended',
+  MarkApplied: 'mark_applied',
+  Regenerated: 'regenerated',
+  ProtectionStarted: 'protection_started',
+  ProtectionEnded: 'protection_ended',
+  AttackIntercepted: 'attack_intercepted',
+  TransformationStarted: 'transformation_started',
+  TransformationEnded: 'transformation_ended',
+  ConcealmentStarted: 'concealment_started',
+  ConcealmentEnded: 'concealment_ended',
+  SpecialStance: 'special_stance',
+  Executed: 'executed',
+  BuffTransferred: 'buff_transferred',
+  WeakPointRevealed: 'weak_point_revealed',
+  WeakPointEnded: 'weak_point_ended',
+  AnalysisCharged: 'analysis_charged',
+  BattlefieldStarted: 'battlefield_started',
+  BattlefieldExtended: 'battlefield_extended',
+  BattlefieldEnded: 'battlefield_ended',
+  Revived: 'revived',
+  AttackEmpowered: 'attack_empowered',
+  DamageShared: 'damage_shared',
+  EnergyGained: 'energy_gained',
+  EffectCleansed: 'effect_cleansed',
+  ActionFailed: 'action_failed',
+  EnergyDrained: 'energy_drained',
+  VulnerabilityApplied: 'vulnerability_applied',
+  VulnerabilityEnded: 'vulnerability_ended',
+  SupportBlocked: 'support_blocked',
+  SupportBlockEnded: 'support_block_ended',
+  DecoyStruck: 'decoy_struck',
+} as const;
+export type StepKind = (typeof StepKind)[keyof typeof StepKind];
 
 export type StateEffectType =
   'burn' | 'poison' | 'freeze' | 'stunt' | 'bleed' | 'hypothermia' | 'entangle';

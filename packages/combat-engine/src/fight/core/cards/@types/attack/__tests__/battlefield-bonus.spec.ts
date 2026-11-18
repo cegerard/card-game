@@ -1,7 +1,6 @@
+import { DamageType, Element } from '@card-game/shared-types';
 import { BattlefieldBonus } from '../battlefield-bonus';
 import { DamageComposition } from '../../damage/damage-composition';
-import { DamageType } from '../../damage/damage-type';
-import { Element } from '../../damage/element';
 import { createFightingCard } from '../../../../../../../test/helpers/fighting-card';
 import { FightingCard } from '../../../fighting-card';
 import { Player } from '../../../../player';

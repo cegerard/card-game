@@ -1,5 +1,5 @@
+import { DamageType } from '@card-game/shared-types';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
-import { DamageType } from '../@types/damage/damage-type';
 import { ElementalMark } from '../@types/mark/elemental-mark';
 import { FightingCard } from '../fighting-card';
 

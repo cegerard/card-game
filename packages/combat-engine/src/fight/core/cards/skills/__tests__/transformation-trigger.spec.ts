@@ -1,3 +1,4 @@
+import { StepKind } from '@card-game/shared-types';
 import { TransformationSkill } from '../transformation';
 import { AfflictionSkill } from '../affliction';
 import { SkillKind, TransformationSkillResults } from '../skill';
@@ -12,7 +13,6 @@ import { createFightingCard } from '../../../../../../test/helpers/fighting-card
 import { FightingCard } from '../../fighting-card';
 import { FightingContext } from '../../@types/fighting-context';
 import { skillResultsToSteps } from '../../../fight-simulator/skill-results-to-steps';
-import { StepKind } from '../../../fight-simulator/@types/step';
 
 describe('TransformationSkill set off by an event', () => {
   let owner: FightingCard;

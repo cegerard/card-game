@@ -5,6 +5,8 @@ export default {
   testRegex: '.*\\.spec\\.ts$',
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
+    // The shared contract from its source: tests need no shared-types build
+    '^@card-game/shared-types$': '<rootDir>/../../shared-types/src/index.ts',
   },
   // Transpile only: `pnpm check` (tsc --noEmit) type-checks the sources and their specs
   transform: {

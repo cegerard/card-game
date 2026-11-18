@@ -1,9 +1,9 @@
+import { StepKind } from '@card-game/shared-types';
 import { skillResultsToSteps } from '../skill-results-to-steps';
 import {
   SkillKind,
   TargetingOverrideSkillResults,
 } from '../../cards/skills/skill';
-import { StepKind } from '../@types/step';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 
 describe('skillResultsToSteps: TargetingOverride', () => {

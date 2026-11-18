@@ -24,7 +24,7 @@ import { buildEffects } from './attack-effect-factory';
 import {
   asBadRequest,
   buildHitAlterations,
-  mapElement,
+  requireElement,
 } from './skill-wiring-factory';
 
 export function buildAttackSkill(
@@ -123,7 +123,7 @@ export function buildDamageBonuses(attack: {
   if (battlefieldBonus) {
     bonuses.push(
       new BattlefieldBonus(
-        mapElement(battlefieldBonus.element),
+        requireElement(battlefieldBonus.element),
         battlefieldBonus.damageType,
         battlefieldBonus.multiplier,
       ),

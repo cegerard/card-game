@@ -1,7 +1,7 @@
+import { DamageType } from '@card-game/shared-types';
 import { SimpleAttack } from '../simple-attack';
 import { MultipleAttack } from '../multiple-attack';
 import { DamageComposition } from '../../@types/damage/damage-composition';
-import { DamageType } from '../../@types/damage/damage-type';
 import { TargetedFromPosition } from '../../../targeting-card-strategies/targeted-from-position';
 import { Player } from '../../../player';
 import { createFightingCard } from '../../../../../../test/helpers/fighting-card';

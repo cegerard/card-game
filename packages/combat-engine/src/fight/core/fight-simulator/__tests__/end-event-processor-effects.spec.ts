@@ -1,7 +1,7 @@
+import { StepKind } from '@card-game/shared-types';
 import { EndEventProcessor } from '../end-event-processor';
 import { Player } from '../../player';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
-import { StepKind } from '../@types/step';
 import { CardStateBurned } from '../../cards/@types/state/card-state-burned';
 import { CardStatePoisoned } from '../../cards/@types/state/card-state-poisoned';
 

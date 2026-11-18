@@ -1,6 +1,6 @@
+import { DamageType } from '@card-game/shared-types';
 import { FightingCard } from '../../fighting-card';
 import { DamageComposition } from '../damage/damage-composition';
-import { DamageType } from '../damage/damage-type';
 
 export type Detonation = {
   damages: DamageComposition[];

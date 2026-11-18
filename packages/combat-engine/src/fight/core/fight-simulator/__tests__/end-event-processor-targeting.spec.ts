@@ -1,8 +1,8 @@
 import type { TargetingRevertedReport } from '@card-game/shared-types';
+import { StepKind } from '@card-game/shared-types';
 import { EndEventProcessor } from '../end-event-processor';
 import { Player } from '../../player';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
-import { StepKind } from '../@types/step';
 import { TargetedAll } from '../../targeting-card-strategies/targeted-all';
 
 describe('EndEventProcessor targeting revert', () => {

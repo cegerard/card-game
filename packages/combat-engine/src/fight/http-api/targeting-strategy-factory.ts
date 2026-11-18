@@ -1,4 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
+import { TargetingStrategy } from '@card-game/shared-types';
 import { TargetedAll } from '../core/targeting-card-strategies/targeted-all';
 import { TargetedFromPosition } from '../core/targeting-card-strategies/targeted-from-position';
 import { TargetedLineThree } from '../core/targeting-card-strategies/targeted-line-three';
@@ -18,7 +19,6 @@ import { ProtectedAllyStrategy } from '../core/targeting-card-strategies/protect
 import { FastestAllyStrategy } from '../core/targeting-card-strategies/fastest-ally';
 import { RandomEnemiesStrategy } from '../core/targeting-card-strategies/random-enemies';
 import { Randomizer } from '../core/randomizer';
-import { TargetingStrategy } from './dto/fight-data.dto';
 import { TargetingCardStrategy } from '../core/targeting-card-strategies/targeting-card-strategy';
 
 const STATIC_STRATEGY_MAP: Record<string, TargetingCardStrategy> = {

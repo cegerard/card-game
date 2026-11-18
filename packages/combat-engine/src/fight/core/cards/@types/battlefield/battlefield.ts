@@ -1,10 +1,9 @@
 import type { BuffType } from '@card-game/shared-types';
+import { DamageType, Element } from '@card-game/shared-types';
 import { FightingCard } from '../../fighting-card';
 import { FightingContext } from '../fighting-context';
 import { LivingAllyScaling } from '../alteration/live-rate';
 import { BuffResult, DebuffResult } from '../action-result/alteration-result';
-import { DamageType } from '../damage/damage-type';
-import { Element } from '../damage/element';
 import { Player } from '../../../player';
 import { round2 } from '../../../../tools/round';
 

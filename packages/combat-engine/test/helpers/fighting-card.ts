@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker/locale/en';
 import type { BuffType } from '@card-game/shared-types';
+import { DamageType, Element } from '@card-game/shared-types';
 
 import { FightingCard } from '../../src/fight/core/cards/fighting-card';
 import { SimpleAttack } from '../../src/fight/core/cards/skills/simple-attack';
@@ -28,9 +29,7 @@ import { Skill } from '../../src/fight/core/cards/skills/skill';
 import { TargetingOverrideSkill } from '../../src/fight/core/cards/skills/targeting-override';
 import { Alteration } from '../../src/fight/core/cards/@types/alteration/alteration';
 import { AlterationCondition } from '../../src/fight/core/cards/@types/alteration/alteration-condition';
-import { Element } from '../../src/fight/core/cards/@types/damage/element';
 import { DamageComposition } from '../../src/fight/core/cards/@types/damage/damage-composition';
-import { DamageType } from '../../src/fight/core/cards/@types/damage/damage-type';
 import { ShieldApplication } from '../../src/fight/core/cards/@types/shield/shield-application';
 import { Randomizer } from '../../src/fight/core/randomizer';
 import { DodgeBonusDenialSkill } from '../../src/fight/core/cards/skills/dodge-bonus-denial';

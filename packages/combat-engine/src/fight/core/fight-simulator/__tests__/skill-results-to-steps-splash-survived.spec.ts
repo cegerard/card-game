@@ -1,4 +1,5 @@
 import type { Step } from '@card-game/shared-types';
+import { StepKind } from '@card-game/shared-types';
 import { Player } from '../../player';
 import { SurvivedTrigger } from '../../trigger/survived';
 import { SurviveSkill } from '../../cards/skills/survive';
@@ -8,7 +9,6 @@ import { Launcher } from '../../targeting-card-strategies/launcher';
 import { skillResultsToSteps } from '../skill-results-to-steps';
 import { fightingContextOf } from '../fighting-context-of';
 import { survivedReactions } from '../survived-reactions';
-import { StepKind } from '../@types/step';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 
 describe('skillResultsToSteps: splash striking a SURVIVE holder', () => {

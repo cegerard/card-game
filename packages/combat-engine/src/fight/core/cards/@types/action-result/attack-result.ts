@@ -1,7 +1,7 @@
+import { DamageType } from '@card-game/shared-types';
 import { FightingCard } from '../../fighting-card';
 import { EffectResult } from '../attack/attack-effect';
 import { BuffResult } from './alteration-result';
-import { DamageType } from '../damage/damage-type';
 import { SharedDamage } from '../../fighting-card';
 
 export type AttackResult = {

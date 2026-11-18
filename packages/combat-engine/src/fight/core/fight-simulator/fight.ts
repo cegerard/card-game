@@ -1,10 +1,10 @@
 import type { FightResult, Step } from '@card-game/shared-types';
+import { StepKind } from '@card-game/shared-types';
 import { fightingContextOf } from './fighting-context-of';
 import { ActionStage } from '../card-action/action-stage';
 import { Player } from '../player';
 import { CardSelector } from './card-selectors/card-selector';
 import { CardDeathSubscriber } from './card-death-subscriber';
-import { StepKind } from './@types/step';
 import { TurnManager } from './turn-manager';
 import { FightSimulator } from './@types/fight-simulator';
 import { DeathSkillHandler } from './death-skill-handler';

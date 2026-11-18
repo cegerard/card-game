@@ -1,3 +1,4 @@
+import { StepKind } from '@card-game/shared-types';
 import { DeathSkillHandler } from '../death-skill-handler';
 import { Player } from '../../player';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
@@ -5,7 +6,6 @@ import { AlterationSkill } from '../../cards/skills/alteration-skill';
 import { AnyAllyDeathTrigger } from '../../trigger/any-ally-death';
 import { Launcher } from '../../targeting-card-strategies/launcher';
 import { FightingCard } from '../../cards/fighting-card';
-import { StepKind } from '../@types/step';
 
 describe('DeathSkillHandler with any-ally-death', () => {
   let handler: DeathSkillHandler;

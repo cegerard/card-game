@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker/locale/en';
 import type { BuffReport, DebuffReport } from '@card-game/shared-types';
+import { DamageType, Element, StepKind } from '@card-game/shared-types';
 
 import { ActionStage } from '../action-stage';
 import { Player } from '../../player';
@@ -11,9 +12,7 @@ import { SimpleAttack } from '../../cards/skills/simple-attack';
 import { SimpleDodge } from '../../cards/behaviors/simple-dodge';
 import { TargetedFromPosition } from '../../targeting-card-strategies/targeted-from-position';
 import { Launcher } from '../../targeting-card-strategies/launcher';
-import { Element } from '../../cards/@types/damage/element';
 import { DamageComposition } from '../../cards/@types/damage/damage-composition';
-import { DamageType } from '../../cards/@types/damage/damage-type';
 import { FightingContext } from '../../cards/@types/fighting-context';
 import { SpecialResult } from '../../cards/@types/action-result/special-result';
 import { DeathSkillHandler } from '../../fight-simulator/death-skill-handler';
@@ -21,7 +20,6 @@ import { BurnAttackEffect } from '../../cards/@types/attack/attack-burn-effect';
 import { EffectTriggeredDebuff } from '../../cards/@types/attack/effect-triggered-debuff';
 import { RandomizerFake } from '../../../../../test/helpers/randomizer-fake';
 import { MathRandomizer } from '../../../tools/math-randomizer';
-import { StepKind } from '../../fight-simulator/@types/step';
 import { Alteration } from '../../cards/@types/alteration/alteration';
 import { AlterationSkill } from '../../cards/skills/alteration-skill';
 import { AllyHealthBelowThresholdTrigger } from '../../trigger/ally-health-below-threshold-trigger';

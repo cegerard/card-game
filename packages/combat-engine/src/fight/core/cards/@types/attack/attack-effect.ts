@@ -2,12 +2,12 @@ import type {
   StateEffectType,
   WeakPointEndReason,
 } from '@card-game/shared-types';
+import { DamageType } from '@card-game/shared-types';
 import { FightingCard } from '../../fighting-card';
 import { EffectLevel } from './effect-level';
 import { FightingContext } from '../fighting-context';
 import { Debuff } from '../alteration/alteration-detail';
 import { EffectTriggeredDebuff } from './effect-triggered-debuff';
-import { DamageType } from '../damage/damage-type';
 import { Randomizer } from '../../../randomizer';
 import { MARK_EFFECT_TYPE } from '../mark/elemental-mark';
 import {

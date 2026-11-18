@@ -8,10 +8,10 @@ import type {
   StanceStartedReport,
   Step,
 } from '@card-game/shared-types';
-import { StepKind } from './step';
+import { StepKind } from '@card-game/shared-types';
 
 export type AttackReport = {
-  kind: StepKind.Attack | StepKind.SpecialAttack;
+  kind: typeof StepKind.Attack | typeof StepKind.SpecialAttack;
   attack: DamageReport;
   /** Reported before the attack: what fired next to it and took no strike. */
   precedingSteps?: Step[];

@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker/locale/en';
+import { DamageType } from '@card-game/shared-types';
 
 import { PoisonAttackEffect } from '../../src/fight/core/cards/@types/attack/attack-poison-effect';
 import { BurnAttackEffect } from '../../src/fight/core/cards/@types/attack/attack-burn-effect';
@@ -9,7 +10,6 @@ import { StuntAttackEffect } from '../../src/fight/core/cards/@types/attack/atta
 import { MathRandomizer } from '../../src/fight/tools/math-randomizer';
 import { MarkAttackEffect } from '../../src/fight/core/cards/@types/attack/attack-mark-effect';
 import { ElementalMark } from '../../src/fight/core/cards/@types/mark/elemental-mark';
-import { DamageType } from '../../src/fight/core/cards/@types/damage/damage-type';
 
 export function createEffect(params: {
   rate?: number;

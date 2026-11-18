@@ -1,8 +1,8 @@
+import { DamageType } from '@card-game/shared-types';
 import { ConditionalAttack } from '../conditional-attack';
 import { SimpleAttack } from '../simple-attack';
 import { Splash } from '../../@types/attack/splash';
 import { DamageComposition } from '../../@types/damage/damage-composition';
-import { DamageType } from '../../@types/damage/damage-type';
 import { AlwaysTrueAttackCondition } from '../../@types/attack/conditions/always-true-attack-condition';
 import { TurnStart } from '../../../trigger/turn-start';
 import { TargetingCardStrategy } from '../../../targeting-card-strategies/targeting-card-strategy';

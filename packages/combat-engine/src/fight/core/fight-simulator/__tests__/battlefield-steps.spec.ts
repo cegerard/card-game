@@ -1,10 +1,10 @@
+import { StepKind } from '@card-game/shared-types';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 import {
   battlefieldStartedSteps,
   damageSharedSteps,
   legacySteps,
 } from '../battlefield-steps';
-import { StepKind } from '../@types/step';
 
 describe('battlefield steps', () => {
   const caster = createFightingCard({ attack: 100 });
