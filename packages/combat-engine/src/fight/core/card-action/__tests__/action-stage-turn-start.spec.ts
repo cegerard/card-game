@@ -1,17 +1,17 @@
+import type { Step } from '@card-game/shared-types';
+import { DamageType, StepKind } from '@card-game/shared-types';
 import { ActionStage } from '../action-stage';
 import { Player } from '../../player';
 import { FightingCard } from '../../cards/fighting-card';
 import { ConditionalAttack } from '../../cards/skills/conditional-attack';
 import { SimpleAttack } from '../../cards/skills/simple-attack';
 import { DamageComposition } from '../../cards/@types/damage/damage-composition';
-import { DamageType } from '../../cards/@types/damage/damage-type';
 import { AlwaysTrueAttackCondition } from '../../cards/@types/attack/conditions/always-true-attack-condition';
 import { CardStateFrozen } from '../../cards/@types/state/card-state-frozen';
 import { TurnStart } from '../../trigger/turn-start';
 import { Splash } from '../../cards/@types/attack/splash';
 import { TargetedFromPosition } from '../../targeting-card-strategies/targeted-from-position';
 import { DeathSkillHandler } from '../../fight-simulator/death-skill-handler';
-import { Step, StepKind } from '../../fight-simulator/@types/step';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 
 const ULTIMATE = 'Exsanguination Totale';

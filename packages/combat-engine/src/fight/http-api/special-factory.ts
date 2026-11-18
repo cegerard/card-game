@@ -1,10 +1,7 @@
 import { Randomizer } from '../core/randomizer';
 import { BadRequestException } from '@nestjs/common';
-import {
-  SpecialDto,
-  SpecialKind,
-  TargetingStrategy,
-} from './dto/fight-data.dto';
+import { SpecialKind, TargetingStrategy } from '@card-game/shared-types';
+import { SpecialDto } from './dto/fight-data.dto';
 import { SpecialAttack } from '../core/cards/skills/special-attack';
 import { buildTargetingStrategy } from './targeting-strategy-factory';
 import { buildAlterationCondition } from './alteration-condition-factory';
@@ -21,7 +18,7 @@ import {
   buildEnergyRefund,
   buildExecution,
 } from './attack-skill-factory';
-import { mapAlterationType } from './skill-wiring-factory';
+import { requireBuffType } from './skill-wiring-factory';
 import { buildBattlefield } from './battlefield-factory';
 
 // What only a special that strikes can carry
@@ -176,7 +173,7 @@ function buildSpecialAlterations(
         )
       : undefined;
     return new Alteration(
-      mapAlterationType(a.type),
+      requireBuffType(a.type),
       a.rate,
       a.duration,
       buildTargetingStrategy(a.targetingStrategy),

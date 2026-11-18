@@ -1,9 +1,8 @@
+import { DamageType, Element } from '@card-game/shared-types';
 import { createFightingCard } from '../../../../../../../test/helpers/fighting-card';
 import { FightingCard } from '../../../fighting-card';
 import { Player } from '../../../../player';
 import { Battlefield, BattlefieldConfig } from '../battlefield';
-import { DamageType } from '../../damage/damage-type';
-import { Element } from '../../damage/element';
 
 const STORM: BattlefieldConfig = {
   name: 'Tempête',

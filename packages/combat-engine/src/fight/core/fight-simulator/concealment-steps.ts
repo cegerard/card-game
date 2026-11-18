@@ -1,11 +1,11 @@
-import { Concealment } from '../cards/@types/concealment/concealment';
-import { FightingCard } from '../cards/fighting-card';
-import {
+import type {
   ConcealmentEndReason,
   ConcealmentEndedReport,
   ConcealmentStartedReport,
-} from './@types/concealment-report';
-import { StepKind } from './@types/step';
+} from '@card-game/shared-types';
+import { StepKind } from '@card-game/shared-types';
+import { Concealment } from '../cards/@types/concealment/concealment';
+import { FightingCard } from '../cards/fighting-card';
 
 export function concealmentStartedReport(
   card: FightingCard,

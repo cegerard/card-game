@@ -1,7 +1,7 @@
+import type { Step } from '@card-game/shared-types';
 import { FightingCard } from '../cards/fighting-card';
 import { FightingContext } from '../cards/@types/fighting-context';
 import { SkillResults } from '../cards/skills/skill';
-import { Step } from './@types/step';
 import { CardDeathSubscriber } from './card-death-subscriber';
 import { DeathSkillHandler } from './death-skill-handler';
 import { EndEventProcessor } from './end-event-processor';

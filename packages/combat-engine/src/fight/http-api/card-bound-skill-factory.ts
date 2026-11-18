@@ -1,5 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
-import { OtherSkillDto, SkillKind } from './dto/fight-data.dto';
+import { SkillKind } from '@card-game/shared-types';
+import { OtherSkillDto } from './dto/fight-data.dto';
 import { Randomizer } from '../core/randomizer';
 import { SurviveSkill } from '../core/cards/skills/survive';
 import { DamageReductionSkill } from '../core/cards/skills/damage-reduction';

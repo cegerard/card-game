@@ -1,7 +1,6 @@
+import { DamageType, Element } from '@card-game/shared-types';
 import { SpecialAttack } from '../special-attack';
 import { DamageComposition } from '../../@types/damage/damage-composition';
-import { DamageType } from '../../@types/damage/damage-type';
-import { Element } from '../../@types/damage/element';
 import { Battlefield } from '../../@types/battlefield/battlefield';
 import { TargetingCardStrategy } from '../../../targeting-card-strategies/targeting-card-strategy';
 import { Player } from '../../../player';

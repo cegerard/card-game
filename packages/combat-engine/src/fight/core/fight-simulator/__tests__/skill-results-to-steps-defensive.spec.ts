@@ -1,10 +1,9 @@
+import { DamageType, StepKind } from '@card-game/shared-types';
 import { skillResultsToSteps } from '../skill-results-to-steps';
 import { SkillKind, AttackSkillResults } from '../../cards/skills/skill';
-import { StepKind } from '../@types/step';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 import { FightingCard } from '../../cards/fighting-card';
 import { MARK_EFFECT_TYPE } from '../../cards/@types/mark/elemental-mark';
-import { DamageType } from '../../cards/@types/damage/damage-type';
 
 function attackOn(
   defender: FightingCard,

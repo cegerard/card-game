@@ -1,4 +1,4 @@
-import { DamageType } from '../damage/damage-type';
+import { DamageType } from '@card-game/shared-types';
 
 export const MARK_EFFECT_TYPE = 'mark';
 

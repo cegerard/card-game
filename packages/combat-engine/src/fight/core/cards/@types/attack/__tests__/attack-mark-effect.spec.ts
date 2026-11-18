@@ -1,6 +1,6 @@
+import { DamageType } from '@card-game/shared-types';
 import { MarkAttackEffect } from '../attack-mark-effect';
 import { ElementalMark } from '../../mark/elemental-mark';
-import { DamageType } from '../../damage/damage-type';
 import { MathRandomizer } from '../../../../../tools/math-randomizer';
 import { RandomizerFake } from '../../../../../../../test/helpers/randomizer-fake';
 import { createFightingCard } from '../../../../../../../test/helpers/fighting-card';

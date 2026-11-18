@@ -1,3 +1,4 @@
+import { DamageType, Element } from '@card-game/shared-types';
 import { MathRandomizer } from '../../../tools/math-randomizer';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 import { SurviveSkill } from '../skills/survive';
@@ -7,8 +8,6 @@ import { SpecialAttack } from '../skills/special-attack';
 import { TargetedFromPosition } from '../../targeting-card-strategies/targeted-from-position';
 import { SimpleDodge } from '../behaviors/simple-dodge';
 import { DamageComposition } from '../@types/damage/damage-composition';
-import { DamageType } from '../@types/damage/damage-type';
-import { Element } from '../@types/damage/element';
 
 function createCardWithSurvive(health: number): FightingCard {
   const survive = new SurviveSkill('Last Stand');

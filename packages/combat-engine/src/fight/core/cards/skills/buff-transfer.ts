@@ -1,6 +1,6 @@
+import type { BuffType } from '@card-game/shared-types';
 import { FightingCard } from '../fighting-card';
 import { FightingContext } from '../@types/fighting-context';
-import { AlterationType } from '../@types/alteration/alteration-type';
 import { Trigger } from '../../trigger/trigger';
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 import { BuffTransferSkillResults, Skill, SkillKind } from './skill';
@@ -15,7 +15,7 @@ export class BuffTransferSkill implements Skill {
 
   constructor(
     public readonly name: string,
-    private readonly buffType: AlterationType,
+    private readonly buffType: BuffType,
     private readonly trigger: Trigger,
     private readonly targetingStrategy: TargetingCardStrategy,
     public readonly requiredStance?: string,

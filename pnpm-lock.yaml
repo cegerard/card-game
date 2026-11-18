@@ -276,6 +276,9 @@ importers:
 
   packages/combat-engine:
     dependencies:
+      '@card-game/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
       '@nestjs/common':
         specifier: ^12.5.0
         version: 12.5.0(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1)
@@ -298,9 +301,6 @@ importers:
         specifier: ^7.8.2
         version: 7.8.2
     devDependencies:
-      '@card-game/shared-types':
-        specifier: workspace:*
-        version: link:../shared-types
       '@eslint/eslintrc':
         specifier: ^3.3.7
         version: 3.3.7(supports-color@8.1.1)

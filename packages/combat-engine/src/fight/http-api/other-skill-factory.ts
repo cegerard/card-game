@@ -1,12 +1,12 @@
 import { BadRequestException } from '@nestjs/common';
 import {
   AlterationConditionType,
-  OtherSkillDto,
+  RateBasis,
   SkillKind,
-  RateBasisDto,
-  TriggerEvent,
   TargetingStrategy,
-} from './dto/fight-data.dto';
+  TriggerEvent,
+} from '@card-game/shared-types';
+import { OtherSkillDto } from './dto/fight-data.dto';
 import { SimpleAttack } from '../core/cards/skills/simple-attack';
 import { buildTargetingStrategy } from './targeting-strategy-factory';
 import { Healing } from '../core/cards/skills/healing';
@@ -63,7 +63,7 @@ import {
   buildSkillActivationCondition,
   buildSkillTargeting,
   buildTriggerForSkill,
-  mapAlterationType,
+  requireBuffType,
   ownsActivationCondition,
   requireAllyHealthBelowFields,
   resolveMaxStacks,
@@ -96,7 +96,7 @@ export function createOtherSkill(
     case SkillKind.BUFF_TRANSFER:
       return new BuffTransferSkill(
         skillData.name,
-        mapAlterationType(skillData.buffType),
+        requireBuffType(skillData.buffType),
         buildTriggerForSkill(skillData, ownerId),
         buildSkillTargeting(skillData),
         skillData.requiresStance,
@@ -115,7 +115,7 @@ export function createOtherSkill(
           new RealDamageSkill(
             skillData.name,
             skillData.rate,
-            skillData.basis ?? RateBasisDto.SOURCE_ATTACK,
+            skillData.basis ?? RateBasis.SOURCE_ATTACK,
             buildTriggerForSkill(skillData, ownerId),
             buildSkillTargeting(skillData),
             skillData.requiresStance,
@@ -226,7 +226,7 @@ function buildAlteration(
     return new AlterationSkill({
       name: skillData.name,
       polarity: skillData.polarity,
-      attributeType: mapAlterationType(skillData.buffType),
+      attributeType: requireBuffType(skillData.buffType),
       rate: skillData.rate,
       duration: skillData.duration === 0 ? Infinity : (skillData.duration ?? 0),
       trigger: new AllyHealthBelowThresholdTrigger(
@@ -248,7 +248,7 @@ function buildAlteration(
   return new AlterationSkill({
     name: skillData.name,
     polarity: skillData.polarity,
-    attributeType: mapAlterationType(skillData.buffType),
+    attributeType: requireBuffType(skillData.buffType),
     rate: skillData.rate,
     duration: alterationDuration,
     trigger: buildTriggerForSkill(skillData, ownerId),
@@ -312,7 +312,7 @@ function buildSupport(skillData: OtherSkillDto, ownerId: string): SupportSkill {
           shield: skillData.shield,
           cleanse: skillData.cleanse,
           alterations: skillData.alterations?.map((a) => ({
-            type: mapAlterationType(a.type),
+            type: requireBuffType(a.type),
             rate: a.rate,
             duration: a.duration,
             polarity: a.polarity,
@@ -354,7 +354,7 @@ function buildConditionalAttack(
                 skillData.onLowHealthAfterHit.name,
                 skillData.onLowHealthAfterHit.threshold,
                 skillData.onLowHealthAfterHit.debuffs.map((debuff) => ({
-                  type: mapAlterationType(debuff.type),
+                  type: requireBuffType(debuff.type),
                   rate: debuff.rate,
                   duration: debuff.duration,
                 })),
@@ -503,7 +503,7 @@ function buildStatAlterations(skillData: OtherSkillDto): Alteration[] {
   return (skillData.statAlterations ?? []).map(
     (a) =>
       new Alteration(
-        mapAlterationType(a.type),
+        requireBuffType(a.type),
         a.rate,
         a.duration,
         buildTargetingStrategy(a.targetingStrategy),

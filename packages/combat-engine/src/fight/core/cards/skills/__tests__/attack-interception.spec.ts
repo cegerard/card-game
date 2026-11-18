@@ -1,10 +1,10 @@
+import { DamageType } from '@card-game/shared-types';
 import { SimpleAttack } from '../simple-attack';
 import { createFightingCard } from '../../../../../../test/helpers/fighting-card';
 import { FightingCard } from '../../fighting-card';
 import { Player } from '../../../player';
 import { FightingContext } from '../../@types/fighting-context';
 import { DamageComposition } from '../../@types/damage/damage-composition';
-import { DamageType } from '../../@types/damage/damage-type';
 import { TargetedAll } from '../../../targeting-card-strategies/targeted-all';
 
 const ATTACK = 100;

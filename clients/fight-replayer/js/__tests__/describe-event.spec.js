@@ -6,16 +6,16 @@ import { ICON } from '../icons.js';
 
 const STEP_TYPES = fileURLToPath(
   new URL(
-    '../../../../packages/combat-engine/src/fight/core/fight-simulator/@types/step.ts',
+    '../../../../packages/shared-types/src/fight-report.ts',
     import.meta.url,
   ),
 );
 
-/** Every value of the engine `StepKind` enum, read from its source. */
+/** Every value of the shared `StepKind`, read from its source. */
 function engineStepKinds() {
   const source = readFileSync(STEP_TYPES, 'utf-8');
-  const body = source.match(/export enum StepKind \{([^}]*)\}/)[1];
-  return [...body.matchAll(/=\s*'([a-z_]+)'/g)].map((match) => match[1]);
+  const body = source.match(/export const StepKind = \{([^}]*)\}/)[1];
+  return [...body.matchAll(/:\s*'([a-z_]+)'/g)].map((match) => match[1]);
 }
 
 // fight_start is read as the initial state, never shown as an event.

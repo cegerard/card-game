@@ -1,7 +1,6 @@
+import type { HealingReport, Step } from '@card-game/shared-types';
 import { AttackReport } from './attack-report';
-import { HealingReport } from './healing-report';
 import { SpecialStanceActionReport } from './special-stance-report';
-import { Step } from './step';
 
 export const SKILL_STEPS = 'skill_steps';
 

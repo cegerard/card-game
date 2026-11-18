@@ -1,7 +1,6 @@
+import { DamageType, Element } from '@card-game/shared-types';
 import { createFightingCard } from '../../../../../../test/helpers/fighting-card';
 import { DamageComposition } from '../../@types/damage/damage-composition';
-import { DamageType } from '../../@types/damage/damage-type';
-import { Element } from '../../@types/damage/element';
 import { DamageCalculator } from '../damage-calculator';
 
 describe('DamageCalculator', () => {

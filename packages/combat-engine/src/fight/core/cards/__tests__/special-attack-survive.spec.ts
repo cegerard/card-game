@@ -1,3 +1,4 @@
+import { DamageType, Element } from '@card-game/shared-types';
 import { MathRandomizer } from '../../../tools/math-randomizer';
 import { SpecialAttack } from '../skills/special-attack';
 import { SurviveSkill } from '../skills/survive';
@@ -5,8 +6,6 @@ import { SimpleAttack } from '../skills/simple-attack';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 import { Player } from '../../player';
 import { DamageComposition } from '../@types/damage/damage-composition';
-import { DamageType } from '../@types/damage/damage-type';
-import { Element } from '../@types/damage/element';
 import { TargetedAll } from '../../targeting-card-strategies/targeted-all';
 import { TargetedFromPosition } from '../../targeting-card-strategies/targeted-from-position';
 import { SimpleDodge } from '../behaviors/simple-dodge';

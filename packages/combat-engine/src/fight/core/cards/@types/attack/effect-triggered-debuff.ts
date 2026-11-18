@@ -1,11 +1,11 @@
+import type { BuffType } from '@card-game/shared-types';
 import { FightingCard } from '../../fighting-card';
 import { Debuff, AlterationStacking } from '../alteration/alteration-detail';
-import { AlterationType } from '../alteration/alteration-type';
 import { Randomizer } from '../../../randomizer';
 
 export class EffectTriggeredDebuff {
   public readonly probability: number;
-  public readonly debuffType: AlterationType;
+  public readonly debuffType: BuffType;
   public readonly debuffRate: number;
   public readonly duration: number;
   public readonly terminationEvent?: string;
@@ -15,7 +15,7 @@ export class EffectTriggeredDebuff {
 
   constructor(
     probability: number,
-    debuffType: AlterationType,
+    debuffType: BuffType,
     debuffRate: number,
     duration: number,
     randomizer: Randomizer,

@@ -1,15 +1,12 @@
+import type { Step } from '@card-game/shared-types';
+import { DamageType, StepKind } from '@card-game/shared-types';
 import { createFightingCard } from './fighting-card';
 import { ConditionalAttack } from '../../src/fight/core/cards/skills/conditional-attack';
 import { SimpleAttack } from '../../src/fight/core/cards/skills/simple-attack';
 import { AlwaysTrueAttackCondition } from '../../src/fight/core/cards/@types/attack/conditions/always-true-attack-condition';
 import { DamageComposition } from '../../src/fight/core/cards/@types/damage/damage-composition';
-import { DamageType } from '../../src/fight/core/cards/@types/damage/damage-type';
 import { TargetedAll } from '../../src/fight/core/targeting-card-strategies/targeted-all';
 import { Trigger } from '../../src/fight/core/trigger/trigger';
-import {
-  Step,
-  StepKind,
-} from '../../src/fight/core/fight-simulator/@types/step';
 
 /** A one-shot killer of every enemy, fired by `trigger`. */
 export const executioner = (

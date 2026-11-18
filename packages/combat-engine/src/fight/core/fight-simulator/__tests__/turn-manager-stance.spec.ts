@@ -1,9 +1,9 @@
+import { StepKind } from '@card-game/shared-types';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 import { Player } from '../../player';
 import { TurnManager } from '../turn-manager';
 import { DeathSkillHandler } from '../death-skill-handler';
 import { EndEventProcessor } from '../end-event-processor';
-import { StepKind } from '../@types/step';
 
 const STANCE = 'forteresse-des-ages';
 

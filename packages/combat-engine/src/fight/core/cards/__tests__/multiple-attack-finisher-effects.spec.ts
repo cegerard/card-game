@@ -1,10 +1,9 @@
+import { DamageType, Element } from '@card-game/shared-types';
 import { MultipleAttack } from '../skills/multiple-attack';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 import { createEffect } from '../../../../../test/helpers/effect';
 import { Player } from '../../player';
 import { DamageComposition } from '../@types/damage/damage-composition';
-import { DamageType } from '../@types/damage/damage-type';
-import { Element } from '../@types/damage/element';
 import { TargetedAll } from '../../targeting-card-strategies/targeted-all';
 import { FightingCard } from '../fighting-card';
 import { FightingContext } from '../@types/fighting-context';

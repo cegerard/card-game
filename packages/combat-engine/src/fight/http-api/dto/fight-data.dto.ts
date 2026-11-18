@@ -1,3 +1,30 @@
+import type {
+  AttackBonuses,
+  Battlefield,
+  BattlefieldAlteration,
+  Behaviors,
+  BleedStackBonus,
+  BuffCondition,
+  CardConfig,
+  DamageComposition,
+  DamageTypeBonus,
+  EffectConfig,
+  EffectTriggeredDebuff,
+  EnergyRefund,
+  Execution,
+  FightPlayer,
+  FightRequest,
+  MarkedTargetBonus,
+  MultipleAttackSkill,
+  OtherSkill,
+  ShieldApplication,
+  SimpleAttackSkill,
+  SkillSet,
+  SpecialSkill,
+  StanceActivation,
+  StatAlteration,
+  WeakPoint,
+} from '@card-game/shared-types';
 import { Type } from 'class-transformer';
 import {
   ValidateNested,
@@ -23,14 +50,23 @@ import {
   ValidationArguments,
   Validate,
 } from 'class-validator';
+import {
+  AlterationConditionType,
+  BuffType,
+  CardSelectorStrategy,
+  DamageType,
+  DodgeStrategy,
+  EffectType,
+  Element,
+  RateBasis,
+  SkillKind,
+  SpecialKind,
+  StatusCategory,
+  TargetingStrategy,
+  TriggerEvent,
+} from '@card-game/shared-types';
 
-export enum AlterationConditionType {
-  ALLY_PRESENCE = 'ally-presence',
-  HEALTH_THRESHOLD = 'health-threshold',
-  PROBABILITY = 'probability',
-}
-
-class BuffConditionDto {
+class BuffConditionDto implements BuffCondition {
   @IsEnum(AlterationConditionType)
   type: AlterationConditionType;
 
@@ -50,7 +86,7 @@ class BuffConditionDto {
 
   @IsOptional()
   @IsIn(['below', 'above'])
-  operator?: string;
+  operator?: 'below' | 'above';
 
   // PROBABILITY condition only: activation chance of the skill
   @IsOptional()
@@ -59,140 +95,15 @@ class BuffConditionDto {
   @Max(1)
   probability?: number;
 }
-import { DamageType } from '../../core/cards/@types/damage/damage-type';
 export { DamageType };
 
-export enum SpecialKind {
-  ATTACK = 'ATTACK',
-  HEALING = 'HEALING',
-  STANCE = 'STANCE',
-}
+/** What @IsNotIn([TARGETED_CARD]) lets through: targeted-card is reserved to TARGETING_OVERRIDE. */
+export type NonOverrideTargetingStrategy = Exclude<
+  TargetingStrategy,
+  typeof TargetingStrategy.TARGETED_CARD
+>;
 
-export enum SkillKind {
-  HEALING = 'HEALING',
-  ALTERATION = 'ALTERATION',
-  CONDITIONAL_ATTACK = 'CONDITIONAL_ATTACK',
-  TARGETING_OVERRIDE = 'TARGETING_OVERRIDE',
-  SHIELD = 'SHIELD',
-  SURVIVE = 'SURVIVE',
-  DAMAGE_REDUCTION = 'DAMAGE_REDUCTION',
-  TRANSFORMATION = 'TRANSFORMATION',
-  PROTECTION = 'PROTECTION',
-  DODGE_BONUS_DENIAL = 'DODGE_BONUS_DENIAL',
-  BLEED_STACK_SCALING = 'BLEED_STACK_SCALING',
-  STANCE = 'STANCE',
-  BLEED_EMPOWERMENT = 'BLEED_EMPOWERMENT',
-  BLEED_DETONATION = 'BLEED_DETONATION',
-  CONCEALMENT = 'CONCEALMENT',
-  LOW_HEALTH_TARGET_BONUS = 'LOW_HEALTH_TARGET_BONUS',
-  BUFF_TRANSFER = 'BUFF_TRANSFER',
-  POISONED_ENEMY_AGILITY = 'POISONED_ENEMY_AGILITY',
-  ATTACKER_INSIGHT = 'ATTACKER_INSIGHT',
-  SPECIAL_ECHO = 'SPECIAL_ECHO',
-  REAL_DAMAGE = 'REAL_DAMAGE',
-  AFFLICTION = 'AFFLICTION',
-  ANALYSIS = 'ANALYSIS',
-  AFTERSHOCK = 'AFTERSHOCK',
-  WEAK_POINT_LEGACY = 'WEAK_POINT_LEGACY',
-  SUPPORT = 'SUPPORT',
-  ENERGY_GAIN = 'ENERGY_GAIN',
-}
-
-export enum BuffType {
-  ATTACK = 'attack',
-  DEFENSE = 'defense',
-  AGILITY = 'agility',
-  ACCURACY = 'accuracy',
-  SPEED = 'speed',
-  CRITICAL_CHANCE = 'criticalChance',
-  REGENERATION = 'regeneration',
-  RESISTANCE = 'resistance',
-}
-
-export enum Effect {
-  POISON = 'POISON',
-  BURN = 'BURN',
-  FREEZE = 'FREEZE',
-  STUNT = 'STUNT',
-  MARK = 'MARK',
-  BLEED = 'BLEED',
-  WEAK_POINT = 'WEAK_POINT',
-  HYPOTHERMIA = 'HYPOTHERMIA',
-  ENTANGLE = 'ENTANGLE',
-  ENERGY_DRAIN = 'ENERGY_DRAIN',
-  VULNERABILITY = 'VULNERABILITY',
-  SUPPORT_BLOCK = 'SUPPORT_BLOCK',
-}
-
-export enum DodgeStrategy {
-  SIMPLE_DODGE = 'simple-dodge',
-  RANDOM_DODGE = 'random-dodge',
-}
-
-export enum TriggerEvent {
-  TURN_END = 'turn-end',
-  NEXT_ACTION = 'next-action',
-  ALLY_DEATH = 'ally-death',
-  ENEMY_DEATH = 'enemy-death',
-  DORMANT = 'dormant',
-  SURVIVED = 'survived',
-  ALLY_HEALTH_BELOW = 'ally-health-below',
-  DAMAGE_TAKEN = 'damage-taken',
-  ANY_ALLY_HEALTH_BELOW = 'any-ally-health-below',
-  SELF_DEATH = 'self-death',
-  ENEMY_BLEED_DEATH = 'enemy-bleed-death',
-  TURN_START = 'turn-start',
-  BLEED_STACKS_APPLIED = 'bleed-stacks-applied',
-  FIGHT_START = 'fight-start',
-  ENEMY_KILLED = 'enemy-killed',
-  DODGE = 'dodge',
-  POISONED_ENEMY_DEATH = 'poisoned-enemy-death',
-  ENEMY_ATTACK = 'enemy-attack',
-  AFTER_ATTACK = 'after-attack',
-  TRANSFORMED = 'transformed',
-  ENEMIES_ANALYSED = 'enemies-analysed',
-  ANY_ALLY_DEATH = 'any-ally-death',
-  ALLY_SKILL_USED = 'ally-skill-used',
-}
-
-export enum RateBasisDto {
-  SOURCE_ATTACK = 'source-attack',
-  TARGET_MAX_HEALTH = 'target-max-health',
-}
-
-export enum TargetingStrategy {
-  POSITION_BASED = 'position-based',
-  TARGET_ALL = 'target-all',
-  LINE_THREE = 'line-three',
-  ALL_OWNER_CARD = 'all-owner-cards',
-  ALL_ALLIES = 'all-allies',
-  SELF = 'self',
-  TARGETED_CARD = 'targeted-card',
-  LAST_ATTACKER_OF_ALLY = 'last-attacker-of-ally',
-  LINKED_ALLY = 'linked-ally',
-  MOST_WOUNDED_ALLY = 'most-wounded-ally',
-  PROTECTED_ALLY = 'protected-ally',
-  FIRST_BLEEDING_ENEMY = 'first-bleeding-enemy',
-  FASTEST_ALLY = 'fastest-ally',
-  LAST_DODGED_ATTACKER = 'last-dodged-attacker',
-  LOWEST_HEALTH_ALLY = 'lowest-health-ally',
-  RANDOM_ENEMIES = 'random-enemies',
-}
-
-export enum CardSelectorStrategy {
-  PLAYER_BY_PLAYER = 'player-by-player',
-  SPEED_WEIGHTED = 'speed-weighted',
-}
-
-export enum ElementDto {
-  PHYSICAL = 'PHYSICAL',
-  FIRE = 'FIRE',
-  WATER = 'WATER',
-  EARTH = 'EARTH',
-  AIR = 'AIR',
-}
-
-export class EffectTriggeredDebuffDto {
+export class EffectTriggeredDebuffDto implements EffectTriggeredDebuff {
   // Stack budget: both fields together, or neither
   @IsOptional()
   @IsString()
@@ -230,23 +141,23 @@ export class EffectTriggeredDebuffDto {
 }
 
 function isStackedPoison(o: EffectDto): boolean {
-  return o.type === Effect.POISON && o.maxStacks !== undefined;
+  return o.type === EffectType.POISON && o.maxStacks !== undefined;
 }
 
 // Control effects: no level and no triggered debuff
-export const CONTROL_EFFECTS = [
-  Effect.ENTANGLE,
-  Effect.ENERGY_DRAIN,
-  Effect.VULNERABILITY,
-  Effect.SUPPORT_BLOCK,
+export const CONTROL_EFFECTS: readonly EffectType[] = [
+  EffectType.ENTANGLE,
+  EffectType.ENERGY_DRAIN,
+  EffectType.VULNERABILITY,
+  EffectType.SUPPORT_BLOCK,
 ];
 
 // Effects counted without a level
 const LEVELLESS_EFFECTS = [
-  Effect.MARK,
-  Effect.BLEED,
-  Effect.WEAK_POINT,
-  Effect.HYPOTHERMIA,
+  EffectType.MARK,
+  EffectType.BLEED,
+  EffectType.WEAK_POINT,
+  EffectType.HYPOTHERMIA,
   ...CONTROL_EFFECTS,
 ];
 
@@ -255,7 +166,7 @@ const LEVELLESS_EFFECTS = [
 type ExploitEffectDto = EffectDto;
 
 // A weakness revealed on the defender, the attacker being its revealer
-export class WeakPointDto {
+export class WeakPointDto implements WeakPoint {
   @IsString()
   @IsNotEmpty()
   name: string;
@@ -309,9 +220,9 @@ export class WeakPointDto {
   exploitEffect?: ExploitEffectDto;
 }
 
-export class EffectDto {
-  @IsEnum(Effect)
-  type: Effect;
+export class EffectDto implements EffectConfig {
+  @IsEnum(EffectType)
+  type: EffectType;
 
   @IsNumber()
   rate: number;
@@ -325,10 +236,10 @@ export class EffectDto {
   // optional on FREEZE and BURN, where it replaces the level turns (checked by the effect)
   @ValidateIf(
     (o) =>
-      o.type === Effect.BLEED ||
-      o.type === Effect.HYPOTHERMIA ||
-      o.type === Effect.VULNERABILITY ||
-      o.type === Effect.SUPPORT_BLOCK ||
+      o.type === EffectType.BLEED ||
+      o.type === EffectType.HYPOTHERMIA ||
+      o.type === EffectType.VULNERABILITY ||
+      o.type === EffectType.SUPPORT_BLOCK ||
       isStackedPoison(o),
   )
   @IsDefined()
@@ -338,10 +249,12 @@ export class EffectDto {
 
   // BLEED and stacked POISON: what the rate is a share of (default source-attack)
   @IsOptional()
-  @IsEnum(RateBasisDto)
-  basis?: RateBasisDto;
+  @IsEnum(RateBasis)
+  basis?: RateBasis;
 
-  @ValidateIf((o) => o.type === Effect.MARK || o.type === Effect.VULNERABILITY)
+  @ValidateIf(
+    (o) => o.type === EffectType.MARK || o.type === EffectType.VULNERABILITY,
+  )
   @IsDefined()
   @IsEnum(DamageType)
   damageType?: DamageType;
@@ -349,8 +262,8 @@ export class EffectDto {
   // POISON: given, the poison is counted in stacks instead of levels
   @ValidateIf(
     (o) =>
-      o.type === Effect.MARK ||
-      o.type === Effect.BLEED ||
+      o.type === EffectType.MARK ||
+      o.type === EffectType.BLEED ||
       o.maxStacks !== undefined,
   )
   @IsDefined()
@@ -389,7 +302,7 @@ export class EffectDto {
   @IsNumber()
   probability?: number;
 
-  @ValidateIf((o) => o.type === Effect.WEAK_POINT)
+  @ValidateIf((o) => o.type === EffectType.WEAK_POINT)
   @IsDefined()
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => WeakPointDto)
@@ -397,7 +310,7 @@ export class EffectDto {
 }
 
 // Finishes off every defender left strictly under `threshold` of its health
-export class ExecutionDto {
+export class ExecutionDto implements Execution {
   @IsNumber()
   threshold: number;
 }
@@ -429,7 +342,7 @@ class PerLivingAllyDto {
   maxRate: number;
 }
 
-class BattlefieldAlterationDto {
+class BattlefieldAlterationDto implements BattlefieldAlteration {
   @IsEnum(BuffType)
   type: BuffType;
 
@@ -555,7 +468,7 @@ class BattlefieldLegacyDto {
 }
 
 // A change of the battlefield: an aura on the caster side, a hazard on the other
-export class BattlefieldDto {
+export class BattlefieldDto implements Battlefield {
   @IsString()
   @IsNotEmpty()
   name: string;
@@ -566,8 +479,8 @@ export class BattlefieldDto {
 
   // The element of the battlefield, read by `battlefieldBonus`
   @IsOptional()
-  @IsEnum(ElementDto)
-  element?: ElementDto;
+  @IsEnum(Element)
+  element?: Element;
 
   @IsOptional()
   @ValidateNested()
@@ -600,7 +513,7 @@ class SupportShieldDto {
   duration: number;
 }
 
-class StatAlterationDto {
+class StatAlterationDto implements StatAlteration {
   @IsEnum(BuffType)
   type: BuffType;
 
@@ -615,7 +528,7 @@ class StatAlterationDto {
     message:
       'targeted-card strategy can only be used with targeting override skills',
   })
-  targetingStrategy: TargetingStrategy;
+  targetingStrategy: NonOverrideTargetingStrategy;
 
   @IsIn(['buff', 'debuff'])
   polarity: 'buff' | 'debuff';
@@ -631,7 +544,7 @@ class StatAlterationDto {
   terminationEvent?: string;
 }
 
-class ShieldApplicationDto {
+class ShieldApplicationDto implements ShieldApplication {
   @IsNumber()
   rate: number;
 
@@ -643,10 +556,10 @@ class ShieldApplicationDto {
     message:
       'targeted-card strategy can only be used with targeting override skills',
   })
-  targetingStrategy: TargetingStrategy;
+  targetingStrategy: NonOverrideTargetingStrategy;
 }
 
-class MarkedTargetBonusDto {
+class MarkedTargetBonusDto implements MarkedTargetBonus {
   @IsEnum(DamageType)
   damageType: DamageType;
 
@@ -655,7 +568,7 @@ class MarkedTargetBonusDto {
   multiplier: number;
 }
 
-export class EnergyRefundDto {
+export class EnergyRefundDto implements EnergyRefund {
   @IsInt()
   @Min(1)
   amount: number;
@@ -719,7 +632,7 @@ export class BleedDetonationDto {
   ratePerStack: number;
 }
 
-export class DamageTypeBonusDto {
+export class DamageTypeBonusDto implements DamageTypeBonus {
   @IsEnum(DamageType)
   damageType: DamageType;
 
@@ -741,17 +654,20 @@ export class FrozenTargetBonusDto {
 
 // Boosts every damage type, or only `damageType`, while a battlefield of that element runs
 export class BattlefieldBonusDto extends FrozenTargetBonusDto {
-  @IsEnum(ElementDto)
-  element: ElementDto;
+  @IsEnum(Element)
+  element: Element;
 }
 
-export class BleedStackBonusDto extends DamageTypeBonusDto {
+export class BleedStackBonusDto
+  extends DamageTypeBonusDto
+  implements BleedStackBonus
+{
   @IsInt()
   @Min(1)
   minStacks: number;
 }
 
-class AttackBonusesDto {
+class AttackBonusesDto implements AttackBonuses {
   @IsOptional()
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => BleedStackBonusDto)
@@ -773,12 +689,7 @@ class AttackBonusesDto {
   battlefieldBonus?: BattlefieldBonusDto;
 }
 
-export enum StatusCategoryDto {
-  CONTROL = 'control',
-  DAMAGE_OVER_TIME = 'damage-over-time',
-}
-
-class StanceActivationDto {
+class StanceActivationDto implements StanceActivation {
   @IsString()
   @IsNotEmpty()
   name: string;
@@ -791,8 +702,8 @@ class StanceActivationDto {
   @IsOptional()
   @IsArray()
   @ArrayMinSize(1)
-  @IsEnum(StatusCategoryDto, { each: true })
-  immunities?: StatusCategoryDto[];
+  @IsEnum(StatusCategory, { each: true })
+  immunities?: StatusCategory[];
 
   // Lets the bearer target concealed enemies while the stance runs
   @IsOptional()
@@ -840,7 +751,7 @@ class SpecialConcealmentDto {
   duration: number;
 }
 
-export class SpecialDto extends AttackBonusesDto {
+export class SpecialDto extends AttackBonusesDto implements SpecialSkill {
   @IsEnum(SpecialKind)
   kind: SpecialKind;
 
@@ -872,7 +783,7 @@ export class SpecialDto extends AttackBonusesDto {
     message:
       'targeted-card strategy can only be used with targeting override skills',
   })
-  targetingStrategy?: TargetingStrategy;
+  targetingStrategy?: NonOverrideTargetingStrategy;
 
   // Required by the random-enemies targeting: how many enemies it draws
   @ValidateIf((o) => o.targetingStrategy === TargetingStrategy.RANDOM_ENEMIES)
@@ -959,7 +870,7 @@ export class SpecialDto extends AttackBonusesDto {
   adjacentTargetsBattlefield?: BattlefieldDto;
 }
 
-class DamageCompositionDto {
+class DamageCompositionDto implements DamageComposition {
   @IsEnum(DamageType)
   type: DamageType;
 
@@ -968,7 +879,7 @@ class DamageCompositionDto {
   rate: number;
 }
 
-class SimpleAttackDto extends AttackBonusesDto {
+class SimpleAttackDto extends AttackBonusesDto implements SimpleAttackSkill {
   @IsString()
   name: string;
 
@@ -983,7 +894,7 @@ class SimpleAttackDto extends AttackBonusesDto {
     message:
       'targeted-card strategy can only be used with targeting override skills',
   })
-  targetingStrategy: TargetingStrategy;
+  targetingStrategy: NonOverrideTargetingStrategy;
 
   @IsOptional()
   @IsArray()
@@ -998,7 +909,10 @@ class SimpleAttackDto extends AttackBonusesDto {
   hitAlterations?: HitAlterationDto[];
 }
 
-class MultipleAttackDto extends AttackBonusesDto {
+class MultipleAttackDto
+  extends AttackBonusesDto
+  implements MultipleAttackSkill
+{
   @IsString()
   name: string;
 
@@ -1016,7 +930,7 @@ class MultipleAttackDto extends AttackBonusesDto {
     message:
       'targeted-card strategy can only be used with targeting override skills',
   })
-  targetingStrategy: TargetingStrategy;
+  targetingStrategy: NonOverrideTargetingStrategy;
 
   @IsOptional()
   @IsNumber()
@@ -1057,7 +971,7 @@ class TargetedCardOnlyForOverrideConstraint implements ValidatorConstraintInterf
   }
 }
 
-export class OtherSkillDto {
+export class OtherSkillDto implements OtherSkill {
   @IsEnum(SkillKind)
   @Validate(TargetedCardOnlyForOverrideConstraint)
   kind: SkillKind;
@@ -1093,8 +1007,8 @@ export class OtherSkillDto {
   // BLEED_EMPOWERMENT: replaces the basis of the bleeds laid during the stance;
   // REAL_DAMAGE: what the rate is a share of (default source-attack)
   @IsOptional()
-  @IsEnum(RateBasisDto)
-  basis?: RateBasisDto;
+  @IsEnum(RateBasis)
+  basis?: RateBasis;
 
   // BLEED_EMPOWERMENT: replaces the debuff rolled when a bleed lands during the stance
   @IsOptional()
@@ -1518,8 +1432,8 @@ export class OtherSkillDto {
 
   // HEALING only: what the rate is a share of. Defaults to source-attack.
   @IsOptional()
-  @IsEnum(RateBasisDto)
-  healBasis?: RateBasisDto;
+  @IsEnum(RateBasis)
+  healBasis?: RateBasis;
 
   @IsOptional()
   @IsString()
@@ -1546,7 +1460,7 @@ export class OtherSkillDto {
   replacementEvent?: TriggerEvent;
 }
 
-class SkillsDto {
+class SkillsDto implements SkillSet {
   @IsNotEmpty()
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => SpecialDto)
@@ -1568,12 +1482,12 @@ class SkillsDto {
   others: OtherSkillDto[];
 }
 
-class BehaviorsDto {
+class BehaviorsDto implements Behaviors {
   @IsEnum(DodgeStrategy)
   dodge: DodgeStrategy;
 }
 
-export class FightingCardDto {
+export class FightingCardDto implements CardConfig {
   @IsString()
   id: string;
 
@@ -1612,8 +1526,8 @@ export class FightingCardDto {
   resistance?: number;
 
   @IsOptional()
-  @IsEnum(ElementDto)
-  element?: ElementDto;
+  @IsEnum(Element)
+  element?: Element;
 
   @IsNotEmpty()
   @ValidateNested()
@@ -1632,7 +1546,7 @@ export class FightingCardDto {
   cardDeckIdentity?: string;
 }
 
-class PlayerDto {
+class PlayerDto implements FightPlayer {
   @IsArray()
   @ArrayMinSize(1)
   @ArrayMaxSize(5)
@@ -1644,7 +1558,7 @@ class PlayerDto {
   name: string;
 }
 
-export class FightDataDto {
+export class FightDataDto implements FightRequest {
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => PlayerDto)
   player1: PlayerDto;

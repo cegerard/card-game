@@ -1,7 +1,10 @@
+import type {
+  StanceEndedReport,
+  StanceStartedReport,
+} from '@card-game/shared-types';
+import { StepKind } from '@card-game/shared-types';
 import { Stance } from '../cards/@types/stance/stance';
 import { FightingCard } from '../cards/fighting-card';
-import { StanceEndedReport, StanceStartedReport } from './@types/stance-report';
-import { StepKind } from './@types/step';
 
 export function stanceStartedReport(
   card: FightingCard,

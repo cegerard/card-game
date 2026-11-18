@@ -1,3 +1,4 @@
+import { RateBasis } from '@card-game/shared-types';
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 import { FightingCard } from '../fighting-card';
 import { HealingSkillResults, Skill, SkillKind } from './skill';
@@ -5,7 +6,6 @@ import { Trigger } from '../../trigger/trigger';
 import { ActivatableTrigger } from '../../trigger/activatable-trigger';
 import { FightingContext } from '../@types/fighting-context';
 import { applyHealing } from './heal-basis';
-import { RateBasis } from '../@types/rate-basis';
 
 export class Healing implements Skill {
   public id = 'healing-skill';

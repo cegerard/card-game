@@ -13,7 +13,7 @@ RUN pnpm install --frozen-lockfile --filter combat-engine...
 FROM deps AS build
 COPY packages/combat-engine ./packages/combat-engine
 COPY packages/shared-types ./packages/shared-types
-RUN pnpm --filter combat-engine build
+RUN pnpm --filter combat-engine... build
 
 # --- prod stage ---
 FROM node:26-alpine AS prod
@@ -23,6 +23,7 @@ COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 COPY packages/combat-engine/package.json ./packages/combat-engine/
 COPY packages/shared-types/package.json ./packages/shared-types/
 RUN pnpm install --frozen-lockfile --filter combat-engine... --prod
+COPY --from=build /app/packages/shared-types/dist ./packages/shared-types/dist
 COPY --from=build /app/packages/combat-engine/dist ./packages/combat-engine/dist
 EXPOSE 3000
 CMD ["node", "packages/combat-engine/dist/main"]

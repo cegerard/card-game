@@ -1,10 +1,6 @@
-import { StateEffectType } from './state-effect-type';
+import type { StateEffectType, StatusCategory } from '@card-game/shared-types';
 
-/**
- * What a status effect does to its bearer, which is what an immunity is
- * granted against: control takes the turn away, damage-over-time only bites.
- */
-export type StatusCategory = 'control' | 'damage-over-time';
+/** What a status effect does to its bearer: what an immunity is granted against. */
 
 const CATEGORY_BY_TYPE: Record<StateEffectType, StatusCategory> = {
   freeze: 'control',

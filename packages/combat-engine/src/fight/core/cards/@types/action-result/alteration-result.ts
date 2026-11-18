@@ -1,4 +1,4 @@
-import { CardInfo } from '../card-info';
+import type { CardInfo } from '@card-game/shared-types';
 import { Buff, Debuff } from '../alteration/alteration-detail';
 
 export type BuffResult = { target: CardInfo; alteration: Buff };

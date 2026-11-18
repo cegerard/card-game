@@ -1,10 +1,11 @@
+import type { Step } from '@card-game/shared-types';
+import { StepKind } from '@card-game/shared-types';
 import { FightingCard } from '../cards/fighting-card';
 import {
   BattlefieldResult,
   LegacyResult,
 } from '../cards/@types/battlefield/battlefield';
 import { AttackResult } from '../cards/@types/action-result/attack-result';
-import { Step, StepKind } from './@types/step';
 
 /** The steps of a battlefield laid by `source`: start, revivals, then its alterations. */
 export function battlefieldStartedSteps(

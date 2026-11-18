@@ -9,8 +9,8 @@
 
 Multi-stage `Dockerfile` at the repo root:
 
-1. Build stage (`node:26-alpine`): install the combat-engine workspace dependencies, build TypeScript → `packages/combat-engine/dist`
-2. Production stage (`node:26-alpine`): production dependencies and compiled `dist/` only, `EXPOSE 3000`, `node packages/combat-engine/dist/main`
+1. Build stage (`node:26-alpine`): install the combat-engine workspace dependencies, build `shared-types` then the engine → `packages/*/dist`
+2. Production stage (`node:26-alpine`): production dependencies and the compiled `dist/` of both packages only, `EXPOSE 3000`, `node packages/combat-engine/dist/main`
 
 ## Configuration
 

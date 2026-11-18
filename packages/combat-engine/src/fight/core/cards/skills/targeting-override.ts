@@ -1,11 +1,11 @@
+import type { TargetingOverrideReport } from '@card-game/shared-types';
+import { StepKind } from '@card-game/shared-types';
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 import { FightingCard } from '../fighting-card';
 import { Trigger } from '../../trigger/trigger';
 import { ActivatableTrigger } from '../../trigger/activatable-trigger';
 import { FightingContext } from '../@types/fighting-context';
 import { Skill, SkillKind, TargetingOverrideSkillResults } from './skill';
-import { TargetingOverrideReport } from '../../fight-simulator/@types/targeting-override-report';
-import { StepKind } from '../../fight-simulator/@types/step';
 
 export class TargetingOverrideSkill implements Skill {
   public id = 'targeting-override';

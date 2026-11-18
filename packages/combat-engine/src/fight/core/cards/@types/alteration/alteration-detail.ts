@@ -1,8 +1,8 @@
-import { AlterationType } from './alteration-type';
+import type { BuffType } from '@card-game/shared-types';
 import { LiveRate } from './live-rate';
 
 type AlterationDetailBase = {
-  type: AlterationType;
+  type: BuffType;
   value: number;
   duration: number;
   terminationEvent?: string;

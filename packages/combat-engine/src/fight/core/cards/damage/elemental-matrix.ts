@@ -1,5 +1,4 @@
-import { DamageType } from '../@types/damage/damage-type';
-import { Element } from '../@types/damage/element';
+import { DamageType, Element } from '@card-game/shared-types';
 
 export class ElementalMatrix {
   private static readonly matrix: Record<DamageType, Record<Element, number>> =

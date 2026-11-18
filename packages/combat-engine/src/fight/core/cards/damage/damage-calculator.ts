@@ -1,5 +1,5 @@
+import { DamageType } from '@card-game/shared-types';
 import { DamageComposition } from '../@types/damage/damage-composition';
-import { DamageType } from '../@types/damage/damage-type';
 import { FightingCard } from '../fighting-card';
 import { ElementalMatrix } from './elemental-matrix';
 

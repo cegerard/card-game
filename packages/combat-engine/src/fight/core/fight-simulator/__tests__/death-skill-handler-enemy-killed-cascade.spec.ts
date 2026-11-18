@@ -1,14 +1,13 @@
+import { DamageType, StepKind } from '@card-game/shared-types';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 import { ConditionalAttack } from '../../cards/skills/conditional-attack';
 import { SimpleAttack } from '../../cards/skills/simple-attack';
 import { AlwaysTrueAttackCondition } from '../../cards/@types/attack/conditions/always-true-attack-condition';
 import { DamageComposition } from '../../cards/@types/damage/damage-composition';
-import { DamageType } from '../../cards/@types/damage/damage-type';
 import { TargetedAll } from '../../targeting-card-strategies/targeted-all';
 import { EnemyKilledTrigger } from '../../trigger/enemy-killed';
 import { Player } from '../../player';
 import { DeathSkillHandler } from '../death-skill-handler';
-import { StepKind } from '../@types/step';
 
 describe('DeathSkillHandler enemy killed phase cascade', () => {
   it('runs the death cascade of a card killed by the reward', () => {

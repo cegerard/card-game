@@ -1,11 +1,11 @@
+import type { BuffType } from '@card-game/shared-types';
 import { FightingCard } from '../../fighting-card';
 import { AttackResult } from '../action-result/attack-result';
 import { BuffResult, DebuffResult } from '../action-result/alteration-result';
-import { AlterationType } from '../alteration/alteration-type';
 
 export type HitAlterationSpec = {
   polarity: 'buff' | 'debuff';
-  type: AlterationType;
+  type: BuffType;
   rate: number;
   duration: number;
   terminationEvent?: string;

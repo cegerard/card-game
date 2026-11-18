@@ -1,14 +1,12 @@
 import { BadRequestException } from '@nestjs/common';
 import {
   AlterationConditionType,
-  OtherSkillDto,
   BuffType,
-  TriggerEvent,
+  Element,
   TargetingStrategy,
-  ElementDto,
-  HitAlterationDto,
-} from './dto/fight-data.dto';
-import { Element } from '../core/cards/@types/damage/element';
+  TriggerEvent,
+} from '@card-game/shared-types';
+import { OtherSkillDto, HitAlterationDto } from './dto/fight-data.dto';
 import { HitAlterations } from '../core/cards/@types/attack/hit-alterations';
 import { buildTargetingStrategy } from './targeting-strategy-factory';
 import { buildAlterationCondition } from './alteration-condition-factory';
@@ -209,42 +207,24 @@ export function requireAllyHealthBelowFields(skillData: OtherSkillDto): void {
   }
 }
 
-export function mapAlterationType(
-  buffType: BuffType,
-): import('../core/cards/@types/alteration/alteration-type').AlterationType {
-  const BUFF_TYPE_MAP = {
-    [BuffType.ATTACK]: 'attack' as const,
-    [BuffType.DEFENSE]: 'defense' as const,
-    [BuffType.AGILITY]: 'agility' as const,
-    [BuffType.ACCURACY]: 'accuracy' as const,
-    [BuffType.SPEED]: 'speed' as const,
-    [BuffType.CRITICAL_CHANCE]: 'criticalChance' as const,
-    [BuffType.REGENERATION]: 'regeneration' as const,
-    [BuffType.RESISTANCE]: 'resistance' as const,
-  };
-
-  const result = BUFF_TYPE_MAP[buffType];
-  if (!result) throw new Error(`Unknown buff type: ${buffType}`);
-  return result;
+/** A value a DTO names, refused early when missing or outside its shared set. */
+function requireKnown<T extends string>(
+  values: Record<string, T>,
+  value: T,
+  what: string,
+): T {
+  if (!Object.values(values).includes(value)) {
+    throw new Error(`Unknown ${what}: ${value}`);
+  }
+  return value;
 }
 
-/**
- * Maps the DTO element onto its domain counterpart. The two enums carry the
- * same string values, but going through an explicit map keeps an unknown
- * element loud instead of silently reaching the elemental matrix.
- */
-export function mapElement(element: ElementDto): Element {
-  const ELEMENT_MAP: Record<ElementDto, Element> = {
-    [ElementDto.PHYSICAL]: Element.PHYSICAL,
-    [ElementDto.FIRE]: Element.FIRE,
-    [ElementDto.WATER]: Element.WATER,
-    [ElementDto.EARTH]: Element.EARTH,
-    [ElementDto.AIR]: Element.AIR,
-  };
+export function requireBuffType(buffType: BuffType): BuffType {
+  return requireKnown(BuffType, buffType, 'buff type');
+}
 
-  const result = ELEMENT_MAP[element];
-  if (!result) throw new Error(`Unknown element: ${element}`);
-  return result;
+export function requireElement(element: Element): Element {
+  return requireKnown(Element, element, 'element');
 }
 
 /** The alterations an attack leaves on every defender it hit. */
@@ -256,7 +236,7 @@ export function buildHitAlterations(
   return new HitAlterations(
     alterations.map((a) => ({
       polarity: a.polarity,
-      type: mapAlterationType(a.type),
+      type: requireBuffType(a.type),
       rate: a.rate,
       duration: a.duration,
       terminationEvent: a.terminationEvent,

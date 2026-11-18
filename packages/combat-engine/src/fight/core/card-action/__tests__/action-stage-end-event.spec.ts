@@ -1,10 +1,11 @@
+import type { Step } from '@card-game/shared-types';
+import { DamageType, StepKind } from '@card-game/shared-types';
 import { ActionStage } from '../action-stage';
 import { Player } from '../../player';
 import { FightingCard } from '../../cards/fighting-card';
 import { ConditionalAttack } from '../../cards/skills/conditional-attack';
 import { SimpleAttack } from '../../cards/skills/simple-attack';
 import { DamageComposition } from '../../cards/@types/damage/damage-composition';
-import { DamageType } from '../../cards/@types/damage/damage-type';
 import { AlwaysTrueAttackCondition } from '../../cards/@types/attack/conditions/always-true-attack-condition';
 import { Trigger } from '../../trigger/trigger';
 import { TurnStart } from '../../trigger/turn-start';
@@ -13,7 +14,6 @@ import { DamageTakenTrigger } from '../../trigger/damage-taken';
 import { TargetedFromPosition } from '../../targeting-card-strategies/targeted-from-position';
 import { DeathSkillHandler } from '../../fight-simulator/death-skill-handler';
 import { EndEventProcessor } from '../../fight-simulator/end-event-processor';
-import { Step, StepKind } from '../../fight-simulator/@types/step';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 
 const END_EVENT = 'ultimate-over';

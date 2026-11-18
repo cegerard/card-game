@@ -1,12 +1,11 @@
+import type { FightResult } from '@card-game/shared-types';
+import { DamageType, Element } from '@card-game/shared-types';
 import { Fight } from '../fight-simulator/fight';
 import { DamageComposition } from '../cards/@types/damage/damage-composition';
-import { DamageType } from '../cards/@types/damage/damage-type';
-import { Element } from '../cards/@types/damage/element';
 import { Player } from '../player';
 import { PlayerByPlayerCardSelector } from '../fight-simulator/card-selectors/player-by-player';
 import { createFightingCard } from '../../../../test/helpers/fighting-card';
 import { FightingCard } from '../cards/fighting-card';
-import { FightResult } from '../fight-simulator/@types/fight-result';
 
 describe('Elemental mark amplifies the marked damage type', () => {
   let card1: FightingCard;

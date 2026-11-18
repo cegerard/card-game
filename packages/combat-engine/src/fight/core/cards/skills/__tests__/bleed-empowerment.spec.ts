@@ -1,4 +1,4 @@
-import { RateBasis } from '../../@types/rate-basis';
+import { RateBasis } from '@card-game/shared-types';
 import { BleedEmpowermentSkill } from '../bleed-empowerment';
 
 describe('BleedEmpowermentSkill', () => {

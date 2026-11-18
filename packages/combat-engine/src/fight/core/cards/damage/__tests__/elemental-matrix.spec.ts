@@ -1,5 +1,4 @@
-import { DamageType } from '../../@types/damage/damage-type';
-import { Element } from '../../@types/damage/element';
+import { DamageType, Element } from '@card-game/shared-types';
 import { ElementalMatrix } from '../elemental-matrix';
 
 describe('ElementalMatrix', () => {

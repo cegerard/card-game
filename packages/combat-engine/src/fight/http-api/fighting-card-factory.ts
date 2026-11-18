@@ -1,14 +1,9 @@
 import { BadRequestException } from '@nestjs/common';
-import {
-  FightingCardDto,
-  OtherSkillDto,
-  SkillKind,
-  SpecialKind,
-} from './dto/fight-data.dto';
-import { mapElement } from './skill-wiring-factory';
+import { Element, SkillKind, SpecialKind } from '@card-game/shared-types';
+import { FightingCardDto, OtherSkillDto } from './dto/fight-data.dto';
+import { requireElement } from './skill-wiring-factory';
 import { FightingCard } from '../core/cards/fighting-card';
 import { buildDodgeStrategy } from './dodge-strategy-factory';
-import { Element } from '../core/cards/@types/damage/element';
 import { Randomizer } from '../core/randomizer';
 import { Skill } from '../core/cards/skills/skill';
 import { validatePowerIdConsistency } from '../core/cards/skills/power-id-consistency';
@@ -97,7 +92,7 @@ const KIND_ONLY_FIELDS: {
   },
 ];
 
-const CARD_BOUND_SKILL_KINDS = [
+const CARD_BOUND_SKILL_KINDS: readonly SkillKind[] = [
   SkillKind.SURVIVE,
   SkillKind.DAMAGE_REDUCTION,
   SkillKind.DODGE_BONUS_DENIAL,
@@ -182,7 +177,7 @@ export function buildFightingCard(
     randomizer,
     cardData.element === undefined
       ? Element.PHYSICAL
-      : mapElement(cardData.element),
+      : requireElement(cardData.element),
   );
 }
 

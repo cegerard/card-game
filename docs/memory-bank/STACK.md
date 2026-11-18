@@ -6,6 +6,7 @@ Exact versions live in the `package.json` files; this file names the tools and t
 
 - pnpm 12 workspace (`pnpm-workspace.yaml`), Node.js 26
 - Packages: `packages/combat-engine`, `packages/shared-types`; clients: `clients/fight-replayer`, `clients/gasha`
+- `shared-types` is a runtime dependency of the engine: `exports` sends Node `require` to `dist/` (`pnpm --filter @card-game/shared-types build`, run by `build:all`, `build:engine`, `dev:engine` and the Dockerfile), TypeScript and Vite to the source; the engine Jest configs map it to the source too
 - Root scripts (`package.json`): `pnpm verify` (memory-bank size, check, build, lint, tests, engine e2e, gasha Playwright: Chromium installed once), `pnpm check:memory-bank`, `pnpm test:engine`, `pnpm dev:engine`, `pnpm dev:gasha`, `pnpm replayer`; per package: `pnpm --filter combat-engine <script>`
 
 ## Backend (`@packages/combat-engine/package.json`)

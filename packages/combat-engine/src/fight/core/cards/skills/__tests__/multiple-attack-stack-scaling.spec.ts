@@ -1,8 +1,8 @@
+import { DamageType } from '@card-game/shared-types';
 import { MultipleAttack } from '../multiple-attack';
 import { BleedStackScalingSkill } from '../bleed-stack-scaling';
 import { BleedAttackEffect } from '../../@types/attack/attack-bleed-effect';
 import { DamageComposition } from '../../@types/damage/damage-composition';
-import { DamageType } from '../../@types/damage/damage-type';
 import { TargetedAll } from '../../../targeting-card-strategies/targeted-all';
 import { MathRandomizer } from '../../../../tools/math-randomizer';
 import { Player } from '../../../player';

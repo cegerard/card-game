@@ -1,7 +1,7 @@
+import { DamageType } from '@card-game/shared-types';
 import { ConditionalAttack } from '../conditional-attack';
 import { SimpleAttack } from '../simple-attack';
 import { DamageComposition } from '../../@types/damage/damage-composition';
-import { DamageType } from '../../@types/damage/damage-type';
 import { AlwaysTrueAttackCondition } from '../../@types/attack/conditions/always-true-attack-condition';
 import { TurnStart } from '../../../trigger/turn-start';
 import { TargetedFromPosition } from '../../../targeting-card-strategies/targeted-from-position';

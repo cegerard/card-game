@@ -5,8 +5,8 @@ import {
 } from '../core/cards/@types/battlefield/battlefield';
 import {
   asBadRequest,
-  mapAlterationType,
-  mapElement,
+  requireBuffType,
+  requireElement,
 } from './skill-wiring-factory';
 
 export function buildBattlefield(
@@ -19,7 +19,8 @@ export function buildBattlefield(
       new Battlefield({
         name: dto.name,
         duration: dto.duration,
-        element: dto.element && mapElement(dto.element),
+        element:
+          dto.element === undefined ? undefined : requireElement(dto.element),
         allies: dto.allies && {
           alterations: buildAlterations(dto.allies.alterations),
           healRate: dto.allies.healRate,
@@ -59,7 +60,7 @@ function buildAlterations(
   alterations: BattlefieldDto['allies']['alterations'] = [],
 ): BattlefieldAlteration[] {
   return alterations.map((a) => ({
-    type: mapAlterationType(a.type),
+    type: requireBuffType(a.type),
     rate: a.rate,
     polarity: a.polarity,
     perLivingAlly: a.perLivingAlly && { maxRate: a.perLivingAlly.maxRate },

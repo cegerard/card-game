@@ -1,9 +1,8 @@
+import { DamageType, Element } from '@card-game/shared-types';
 import { SpecialAttack } from '../skills/special-attack';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 import { Player } from '../../player';
 import { DamageComposition } from '../@types/damage/damage-composition';
-import { DamageType } from '../@types/damage/damage-type';
-import { Element } from '../@types/damage/element';
 import { ElementalMark } from '../@types/mark/elemental-mark';
 import { MarkedTargetBonus } from '../@types/mark/marked-target-bonus';
 import { TargetedAll } from '../../targeting-card-strategies/targeted-all';

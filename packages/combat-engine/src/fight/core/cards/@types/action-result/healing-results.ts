@@ -1,4 +1,4 @@
-import { CardInfo } from '../card-info';
+import type { CardInfo } from '@card-game/shared-types';
 
 export type HealingResults = {
   target: CardInfo;

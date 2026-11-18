@@ -1,3 +1,4 @@
+import { RateBasis } from '@card-game/shared-types';
 import { BleedAttackEffect } from '../attack-bleed-effect';
 import { CardStateFrozen } from '../../state/card-state-frozen';
 import { MathRandomizer } from '../../../../../tools/math-randomizer';
@@ -6,7 +7,6 @@ import { createFightingCard } from '../../../../../../../test/helpers/fighting-c
 import { FightingCard } from '../../../fighting-card';
 import { StateEffectResult } from '../attack-effect';
 import { EffectTriggeredDebuff } from '../effect-triggered-debuff';
-import { RateBasis } from '../../rate-basis';
 
 function bleed(
   params: { stacks?: number; maxStacks?: number; probability?: number } = {},

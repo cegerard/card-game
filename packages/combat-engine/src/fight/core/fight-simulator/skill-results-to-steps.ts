@@ -1,3 +1,5 @@
+import type { Step } from '@card-game/shared-types';
+import { StepKind } from '@card-game/shared-types';
 import { FightingCard } from '../cards/fighting-card';
 import {
   AttackSkillResults,
@@ -11,7 +13,6 @@ import {
 
 type AlterationSkillResults =
   BuffSkillResults | DebuffSkillResults | TransformationSkillResults;
-import { Step, StepKind } from './@types/step';
 import {
   BuffResult,
   DebuffResult,
@@ -342,7 +343,7 @@ export function skillResultsToSteps(
 function pushAlterationStep(
   steps: Step[],
   card: FightingCard,
-  kind: StepKind.Buff | StepKind.Debuff,
+  kind: typeof StepKind.Buff | typeof StepKind.Debuff,
   skillResult: AlterationSkillResults,
 ): void {
   if (skillResult.results.length === 0) return;

@@ -279,7 +279,7 @@ Simulates a turn-based card battle between two players.
 }
 ```
 
-**Response** (`FightResult`): an object `{ [stepNumber]: Step }`. Step `0` is always `fight_start`; the others are numbered from 1. Types: @packages/combat-engine/src/fight/core/fight-simulator/@types/ (`step.ts` holds the `StepKind` enum).
+**Response** (`FightResult`): an object `{ [stepNumber]: Step }`. Step `0` is always `fight_start`; the others are numbered from 1. Types: @packages/shared-types/src/fight-report.ts (`StepKind` values included).
 
 `CardInfo` identifies a card. `name?` carries the generating skill name on `attack`, `special_attack`, `healing`, `buff`, `debuff`, `targeting_override`, `shield_applied`. `powerId?` appears on `buff`, `debuff`, `healing`, `buff_removed`, `debuff_removed`, `targeting_override`, `targeting_reverted` when the skill belongs to a composite power.
 

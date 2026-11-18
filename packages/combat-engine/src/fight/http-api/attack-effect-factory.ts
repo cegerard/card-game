@@ -1,7 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
+import { EffectType } from '@card-game/shared-types';
 import {
   CONTROL_EFFECTS,
-  Effect,
   EffectDto,
   EffectTriggeredDebuffDto,
 } from './dto/fight-data.dto';
@@ -26,7 +26,7 @@ import { SupportBlockAttackEffect } from '../core/cards/@types/attack/attack-sup
 import {
   asBadRequest,
   buildAlterationStacking,
-  mapAlterationType,
+  requireBuffType,
 } from './skill-wiring-factory';
 
 export function buildEffects(
@@ -41,7 +41,11 @@ const STACKED_POISON_ONLY_FIELDS = [
   'stackMultiplier',
   'ignoresImmunity',
 ] as const;
-const STACK_CAPPED_EFFECTS = [Effect.MARK, Effect.BLEED, Effect.POISON];
+const STACK_CAPPED_EFFECTS: readonly EffectType[] = [
+  EffectType.MARK,
+  EffectType.BLEED,
+  EffectType.POISON,
+];
 
 /**
  * A field the effect would silently ignore is a malformed request: stack caps
@@ -50,7 +54,7 @@ const STACK_CAPPED_EFFECTS = [Effect.MARK, Effect.BLEED, Effect.POISON];
  */
 function rejectMisplacedFields(effectDto: EffectDto): void {
   const stackedPoison =
-    effectDto.type === Effect.POISON && effectDto.maxStacks !== undefined;
+    effectDto.type === EffectType.POISON && effectDto.maxStacks !== undefined;
   const misplaced: string[] = [
     ...(stackedPoison
       ? []
@@ -62,12 +66,13 @@ function rejectMisplacedFields(effectDto: EffectDto): void {
       ? ['maxStacks']
       : []),
     ...(stackedPoison && effectDto.level !== undefined ? ['level'] : []),
-    ...(effectDto.type !== Effect.WEAK_POINT &&
+    ...(effectDto.type !== EffectType.WEAK_POINT &&
     effectDto.weakPoint !== undefined
       ? ['weakPoint']
       : []),
     // A weak point carries its duration itself
-    ...(effectDto.type === Effect.WEAK_POINT && effectDto.duration !== undefined
+    ...(effectDto.type === EffectType.WEAK_POINT &&
+    effectDto.duration !== undefined
       ? ['duration']
       : []),
     ...(CONTROL_EFFECTS.includes(effectDto.type) &&
@@ -93,7 +98,7 @@ export function buildEffect(
   );
 
   switch (effectDto.type) {
-    case Effect.POISON:
+    case EffectType.POISON:
       if (effectDto.maxStacks !== undefined) {
         return buildStackedPoison(effectDto, triggeredDebuff, randomizer);
       }
@@ -105,7 +110,7 @@ export function buildEffect(
         effectDto.terminationEvent,
         effectDto.probability,
       );
-    case Effect.BURN:
+    case EffectType.BURN:
       return asBadRequest(
         () =>
           new BurnAttackEffect(
@@ -118,7 +123,7 @@ export function buildEffect(
             effectDto.duration,
           ),
       );
-    case Effect.FREEZE:
+    case EffectType.FREEZE:
       return asBadRequest(
         () =>
           new FreezeAttackEffect(
@@ -131,7 +136,7 @@ export function buildEffect(
             effectDto.duration,
           ),
       );
-    case Effect.STUNT:
+    case EffectType.STUNT:
       return new StuntAttackEffect(
         effectDto.rate,
         effectDto.level as EffectLevel,
@@ -139,7 +144,7 @@ export function buildEffect(
         effectDto.probability,
         effectDto.terminationEvent,
       );
-    case Effect.MARK:
+    case EffectType.MARK:
       return new MarkAttackEffect(
         new ElementalMark(
           effectDto.damageType,
@@ -151,7 +156,7 @@ export function buildEffect(
         effectDto.probability,
         triggeredDebuff,
       );
-    case Effect.BLEED:
+    case EffectType.BLEED:
       return new BleedAttackEffect(
         effectDto.rate,
         effectDto.duration,
@@ -163,9 +168,9 @@ export function buildEffect(
         effectDto.terminationEvent,
         effectDto.basis,
       );
-    case Effect.WEAK_POINT:
+    case EffectType.WEAK_POINT:
       return buildWeakPoint(effectDto, randomizer);
-    case Effect.HYPOTHERMIA:
+    case EffectType.HYPOTHERMIA:
       return asBadRequest(
         () =>
           new HypothermiaAttackEffect(
@@ -176,7 +181,7 @@ export function buildEffect(
             effectDto.terminationEvent,
           ),
       );
-    case Effect.ENTANGLE:
+    case EffectType.ENTANGLE:
       return asBadRequest(
         () =>
           new EntangleAttackEffect(
@@ -186,7 +191,7 @@ export function buildEffect(
             effectDto.terminationEvent,
           ),
       );
-    case Effect.ENERGY_DRAIN:
+    case EffectType.ENERGY_DRAIN:
       return asBadRequest(
         () =>
           new EnergyDrainAttackEffect(
@@ -195,7 +200,7 @@ export function buildEffect(
             effectDto.probability,
           ),
       );
-    case Effect.SUPPORT_BLOCK:
+    case EffectType.SUPPORT_BLOCK:
       return asBadRequest(
         () =>
           new SupportBlockAttackEffect(
@@ -204,7 +209,7 @@ export function buildEffect(
             effectDto.probability,
           ),
       );
-    case Effect.VULNERABILITY:
+    case EffectType.VULNERABILITY:
       return asBadRequest(
         () =>
           new VulnerabilityAttackEffect(
@@ -280,7 +285,7 @@ export function buildTriggeredDebuff(
 
   return new EffectTriggeredDebuff(
     dto.probability,
-    mapAlterationType(dto.debuffType),
+    requireBuffType(dto.debuffType),
     dto.debuffRate,
     dto.duration,
     randomizer,

@@ -1,4 +1,4 @@
-import type { CardDefinition } from '@card-game/shared-types';
+import type { CardDefinition, FightResult } from '@card-game/shared-types';
 
 // Le contrat de carte (CardConfig et ses composants) vit désormais dans
 // @card-game/shared-types, contrat unique partagé avec le combat-engine.
@@ -10,6 +10,9 @@ export type {
   EffectConfig,
   SimpleAttackSkill as SimpleAttackConfig,
   OtherSkill as OtherSkillConfig,
+  FightRequest,
+  FightResult,
+  Step,
 } from '@card-game/shared-types';
 
 export type ArcadePhase =
@@ -25,16 +28,4 @@ export interface ArcadeLevel {
   index: number;
   name: string;
   enemyTeam: CardDefinition[];
-}
-
-export type Step =
-  | { kind: 'attack'; [key: string]: unknown }
-  | { kind: 'special_attack'; [key: string]: unknown }
-  | { kind: 'healing'; [key: string]: unknown }
-  | { kind: 'status_change'; card: { name: string }; status: string }
-  | { kind: 'fight_end'; winner?: string }
-  | { kind: string; [key: string]: unknown };
-
-export interface FightResult {
-  [step: number]: Step;
 }

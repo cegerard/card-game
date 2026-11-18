@@ -1,7 +1,7 @@
+import { DamageType } from '@card-game/shared-types';
 import { ConditionalAttack } from '../conditional-attack';
 import { SimpleAttack } from '../simple-attack';
 import { DamageComposition } from '../../@types/damage/damage-composition';
-import { DamageType } from '../../@types/damage/damage-type';
 import { AlwaysTrueAttackCondition } from '../../@types/attack/conditions/always-true-attack-condition';
 import { AllyHealthBelowThresholdTrigger } from '../../../trigger/ally-health-below-threshold-trigger';
 import { TargetedAll } from '../../../targeting-card-strategies/targeted-all';

@@ -1,3 +1,4 @@
+import { StepKind } from '@card-game/shared-types';
 import { TransformationSkill } from '../transformation';
 import { HealthThresholdCondition } from '../../@types/skill-activation-conditions/health-threshold-condition';
 import { Player } from '../../../player';
@@ -7,7 +8,6 @@ import { TransformationSkillResults } from '../skill';
 import { StackedPoisonAttackEffect } from '../../@types/attack/attack-stacked-poison-effect';
 import { MathRandomizer } from '../../../../tools/math-randomizer';
 import { skillResultsToSteps } from '../../../fight-simulator/skill-results-to-steps';
-import { StepKind } from '../../../fight-simulator/@types/step';
 
 const venom = new StackedPoisonAttackEffect(
   0.03,

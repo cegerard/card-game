@@ -8,7 +8,7 @@ Mechanics are described once, in [backend/ARCHITECTURE.md](backend/ARCHITECTURE.
 card-game/ # pnpm workspace
 ├── packages/
 │   ├── combat-engine/ # NestJS fight simulation backend
-│   └── shared-types/ # Card contract shared with the clients (CardConfig, CardDefinition, toCombatConfig)
+│   └── shared-types/ # Fight contract shared with the clients: request (FightRequest, CardConfig…), report (fight-report.ts), enum values, CardDefinition, toCombatConfig; built to dist/ for Node
 ├── clients/
 │   ├── fight-replayer/ # Static HTML/JS fight replay viewer (Vitest on the parser)
 │   └── gasha/ # SvelteKit arcade client (Phaser + Web renderer)
@@ -78,14 +78,14 @@ cards/
 └── @types/
     ├── action-result/ # special-result, attack-result, named-attack-result, healing-result, buff-results, shield-result
     ├── attack/ # attack-effect + poison/burn/freeze/stunt/mark/bleed effects, stacked-poison effect, damage-type-bonus (base of bleed-stack-bonus, concealed-bonus, battlefield-bonus), entangle/energy-drain/vulnerability/support-block effects, energy-refund, bleed-detonation, splash, weak-point/hypothermia effects, frozen-target-bonus, low-health-debuff, hit-alterations, execution, conditions/
-    ├── alteration/ # alteration-detail (Buff | Debuff), alteration-type, alteration-condition, buff-application, live-rate, conditions/ (ally-presence, health-threshold, probability)
+    ├── alteration/ # alteration-detail (Buff | Debuff), alteration-condition, buff-application, live-rate, conditions/ (ally-presence, health-threshold, probability)
     ├── mark/ # elemental-mark, marked-target-bonus
     ├── weak-point/ # weak-point (WeakPoint, spec), weak-points (per card), weak-point-strike (penetration helper)
     ├── shield/ # shield, shield-application
     ├── stance/ # stance (name, remainingTurns, immunities), StanceActivation, ramping-chance (STANCE skill chance)
     ├── concealment/ # concealment (name, optional remainingTurns)
     ├── skill-activation-conditions/ # health-threshold-condition
-    ├── damage/ # damage-type, damage-composition, element
+    ├── damage/ # damage-composition
     ├── battlefield/ # Battlefield, deployment, exposure
     ├── vulnerability/ # vulnerability (timed weakness to one damage type)
     └── state/ # card-state-frozen/stunted/bleeding/stacked-poison/hypothermia/entangled, status-category
@@ -106,7 +106,7 @@ fight-simulator/
 ├── survived-reactions.ts # survivedReactions(), fightSurvivedReactor(): `survived` skills of a SURVIVE holder, shared by every attack path
 ├── concealment-steps.ts, stance-steps.ts, execution-steps.ts # Step helpers
 ├── card-selectors/ # card-selector.ts, player-by-player.ts, speed-weighted-card-pool.ts
-└── @types/ # step.ts (StepKind), fight-result, fight-start-report, winner-report, then one report file per step family or mechanic
+└── @types/ # internal action/attack/special-stance reports; the step types and StepKind come from shared-types
 ```
 
 ### `targeting-card-strategies/`
@@ -136,7 +136,7 @@ http-api/
 ├── battlefield-factory.ts # BattlefieldDto → Battlefield
 ├── skill-wiring-factory.ts # Shared skill helpers: triggers, targeting, activation condition, stacking, alteration type, asBadRequest
 ├── card-selector-factory.ts # CardSelectorStrategy → CardSelector
-├── dto/fight-data.dto.ts # Request validation
+├── dto/fight-data.dto.ts, dto/shared-contract.ts # Request validation; compile-time checks against shared-types
 ├── dodge-strategy-factory.ts, targeting-strategy-factory.ts, trigger-factory.ts
 └── buff-condition-factory.ts # BuffConditionType → BuffCondition
 ```

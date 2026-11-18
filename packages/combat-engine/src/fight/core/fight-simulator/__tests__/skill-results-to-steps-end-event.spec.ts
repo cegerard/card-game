@@ -1,9 +1,9 @@
+import { StepKind } from '@card-game/shared-types';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 import { Player } from '../../player';
 import { TurnManager } from '../turn-manager';
 import { DeathSkillHandler } from '../death-skill-handler';
 import { EndEventProcessor } from '../end-event-processor';
-import { StepKind } from '../@types/step';
 import { AlterationSkill } from '../../cards/skills/alteration-skill';
 import { TurnEnd } from '../../trigger/turn-end';
 import { Launcher } from '../../targeting-card-strategies/launcher';

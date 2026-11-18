@@ -1,3 +1,4 @@
+import { RateBasis } from '@card-game/shared-types';
 import { FightingCard } from '../../fighting-card';
 import { AttackEffect, StateEffectResult } from './attack-effect';
 import { FightingContext } from '../fighting-context';
@@ -5,7 +6,7 @@ import { EffectTriggeredDebuff } from './effect-triggered-debuff';
 import { CardStateBleeding } from '../state/card-state-bleeding';
 import { round2 } from '../../../../tools/round';
 import { Randomizer } from '../../../randomizer';
-import { RATE_BASES, RateBasis } from '../rate-basis';
+import { RATE_BASES } from '../rate-basis';
 
 export class BleedAttackEffect implements AttackEffect {
   public readonly type = 'bleed' as const;

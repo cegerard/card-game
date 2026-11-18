@@ -1,7 +1,7 @@
+import { DodgeStrategy } from '@card-game/shared-types';
 import { RandomDodge } from '../core/cards/behaviors/random-dodge';
 import { SimpleDodge } from '../core/cards/behaviors/simple-dodge';
 import { Randomizer } from '../core/randomizer';
-import { DodgeStrategy } from './dto/fight-data.dto';
 
 export function buildDodgeStrategy(
   dodgeStrategy: DodgeStrategy,

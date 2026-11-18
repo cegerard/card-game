@@ -1,4 +1,4 @@
-import { StatusCategory } from '../state/status-category';
+import { StatusCategory } from '@card-game/shared-types';
 
 /**
  * A named combat posture a card holds for a number of turns. Skills can

@@ -1,14 +1,13 @@
+import { DamageType, StepKind } from '@card-game/shared-types';
 import { DeathSkillHandler } from '../death-skill-handler';
 import { EndEventProcessor } from '../end-event-processor';
 import { Player } from '../../player';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 import { DamageComposition } from '../../cards/@types/damage/damage-composition';
-import { DamageType } from '../../cards/@types/damage/damage-type';
 import { AlterationSkill } from '../../cards/skills/alteration-skill';
 import { TurnEnd } from '../../trigger/turn-end';
 import { DeathTrigger } from '../../trigger/death-trigger';
 import { Launcher } from '../../targeting-card-strategies/launcher';
-import { StepKind } from '../@types/step';
 
 describe('DeathSkillHandler', () => {
   describe('when an ally with a death-triggered healing skill survives', () => {

@@ -4,13 +4,13 @@ import {
   CardSelectorStrategy,
   DamageType,
   DodgeStrategy,
-  ElementDto,
-  FightDataDto,
+  Element,
   SpecialKind,
   TargetingStrategy,
-} from '../dto/fight-data.dto';
+} from '@card-game/shared-types';
+
+import { FightDataDto } from '../dto/fight-data.dto';
 import { FightController } from '../fight.controller';
-import { Element } from '../../core/cards/@types/damage/element';
 import { FightSimulatorStub } from './fight-simulator-stub';
 import { Player } from '../../core/player';
 import { CardSelector } from '../../core/fight-simulator/card-selectors/card-selector';
@@ -23,7 +23,7 @@ describe('FightController card element', () => {
     return fightSimulatorStub;
   };
 
-  function startFightWith(element?: ElementDto): void {
+  function startFightWith(element?: Element): void {
     const fightData: FightDataDto = {
       cardSelectorStrategy: CardSelectorStrategy.PLAYER_BY_PLAYER,
       player1: {
@@ -70,11 +70,11 @@ describe('FightController card element', () => {
   });
 
   it.each([
-    [ElementDto.PHYSICAL, Element.PHYSICAL],
-    [ElementDto.FIRE, Element.FIRE],
-    [ElementDto.WATER, Element.WATER],
-    [ElementDto.EARTH, Element.EARTH],
-    [ElementDto.AIR, Element.AIR],
+    [Element.PHYSICAL, Element.PHYSICAL],
+    [Element.FIRE, Element.FIRE],
+    [Element.WATER, Element.WATER],
+    [Element.EARTH, Element.EARTH],
+    [Element.AIR, Element.AIR],
   ])('carries the %s element onto the card', (dto, expected) => {
     startFightWith(dto);
 
@@ -92,7 +92,7 @@ describe('FightController card element', () => {
   });
 
   it('refuses an element outside the known set', () => {
-    expect(() => startFightWith('LIGHTNING' as ElementDto)).toThrow(
+    expect(() => startFightWith('LIGHTNING' as Element)).toThrow(
       'Unknown element: LIGHTNING',
     );
   });

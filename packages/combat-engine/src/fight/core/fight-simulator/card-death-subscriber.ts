@@ -1,5 +1,5 @@
+import type { StateEffectType } from '@card-game/shared-types';
 import { FightingCard } from '../cards/fighting-card';
-import { StateEffectType } from '../cards/@types/state/state-effect-type';
 
 export interface CardDeathSubscriber {
   notifyDeath: (

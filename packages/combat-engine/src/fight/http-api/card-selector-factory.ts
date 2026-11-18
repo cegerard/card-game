@@ -1,4 +1,4 @@
-import { CardSelectorStrategy } from './dto/fight-data.dto';
+import { CardSelectorStrategy } from '@card-game/shared-types';
 import { CardSelector } from '../core/fight-simulator/card-selectors/card-selector';
 import { PlayerByPlayerCardSelector } from '../core/fight-simulator/card-selectors/player-by-player';
 import { SpeedWeightedCardSelector } from '../core/fight-simulator/card-selectors/speed-weighted-card-pool';

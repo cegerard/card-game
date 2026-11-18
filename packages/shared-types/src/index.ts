@@ -1,18 +1,25 @@
 /**
- * Contrat de carte partagé entre le combat-engine et les clients.
+ * Contrat partagé entre le combat-engine et les clients : la requête de
+ * POST /fight, le rapport de combat (fight-report.ts) et les valeurs des enums
+ * (objets `as const`, avec le type du même nom). Le moteur valide la requête
+ * contre ces valeurs et ses DTO implémentent ces interfaces.
  *
- * Source de vérité : les DTO du combat-engine
- * (packages/combat-engine/src/fight/http-api/dto/fight-data.dto.ts).
- * Ce fichier reprend la même forme en TypeScript pur (sans les décorateurs
- * class-validator, propres au serveur), afin que le client construise des
- * cartes conformes à ce que l'API accepte réellement.
+ * Node lit la version compilée (dist/, `pnpm --filter @card-game/shared-types
+ * build`) ; TypeScript et Vite lisent la source.
  */
 
 // ---------------------------------------------------------------------------
 // Enums / unions
 // ---------------------------------------------------------------------------
 
-export type DamageType = 'PHYSICAL' | 'FIRE' | 'WATER' | 'EARTH' | 'AIR';
+export const DamageType = {
+  PHYSICAL: 'PHYSICAL',
+  FIRE: 'FIRE',
+  WATER: 'WATER',
+  EARTH: 'EARTH',
+  AIR: 'AIR',
+} as const;
+export type DamageType = (typeof DamageType)[keyof typeof DamageType];
 
 /**
  * Élément d'une carte. Techniquement identique à DamageType : le moteur ne
@@ -21,86 +28,102 @@ export type DamageType = 'PHYSICAL' | 'FIRE' | 'WATER' | 'EARTH' | 'AIR';
  * le roster de test. Non imposé par le système de types pour ne pas
  * contraindre ces fixtures, vouées à disparaître.
  */
+export const Element = DamageType;
 export type Element = DamageType;
 
 /** STANCE : spéciale qui ne frappe ni ne soigne, elle ouvre une posture sur le lanceur. */
-export type SpecialKind = 'ATTACK' | 'HEALING' | 'STANCE';
+export const SpecialKind = {
+  ATTACK: 'ATTACK',
+  HEALING: 'HEALING',
+  STANCE: 'STANCE',
+} as const;
+export type SpecialKind = (typeof SpecialKind)[keyof typeof SpecialKind];
 
-export type SkillKind =
-  | 'HEALING'
-  | 'ALTERATION'
-  | 'CONDITIONAL_ATTACK'
-  | 'TARGETING_OVERRIDE'
-  | 'SHIELD'
-  | 'SURVIVE'
-  | 'TRANSFORMATION'
-  | 'DAMAGE_REDUCTION'
-  | 'PROTECTION'
-  | 'DODGE_BONUS_DENIAL'
-  | 'BLEED_STACK_SCALING'
-  | 'LOW_HEALTH_TARGET_BONUS'
-  | 'STANCE'
-  | 'BLEED_EMPOWERMENT'
-  | 'BLEED_DETONATION'
-  | 'CONCEALMENT'
+export const SkillKind = {
+  HEALING: 'HEALING',
+  ALTERATION: 'ALTERATION',
+  CONDITIONAL_ATTACK: 'CONDITIONAL_ATTACK',
+  TARGETING_OVERRIDE: 'TARGETING_OVERRIDE',
+  SHIELD: 'SHIELD',
+  SURVIVE: 'SURVIVE',
+  TRANSFORMATION: 'TRANSFORMATION',
+  DAMAGE_REDUCTION: 'DAMAGE_REDUCTION',
+  PROTECTION: 'PROTECTION',
+  DODGE_BONUS_DENIAL: 'DODGE_BONUS_DENIAL',
+  BLEED_STACK_SCALING: 'BLEED_STACK_SCALING',
+  LOW_HEALTH_TARGET_BONUS: 'LOW_HEALTH_TARGET_BONUS',
+  STANCE: 'STANCE',
+  BLEED_EMPOWERMENT: 'BLEED_EMPOWERMENT',
+  BLEED_DETONATION: 'BLEED_DETONATION',
+  CONCEALMENT: 'CONCEALMENT',
   /** Transmet à la première cible tous les buffs d'un type que porte son propriétaire. */
-  | 'BUFF_TRANSFER'
+  BUFF_TRANSFER: 'BUFF_TRANSFER',
   /** Passif : Esquive +`rate` (part de l'Esquive de base) par carte vivante portant un Poison à charges du propriétaire, plafonné à `maxRate`. */
-  | 'POISONED_ENEMY_AGILITY'
+  POISONED_ENEMY_AGILITY: 'POISONED_ENEMY_AGILITY',
   /** Dégâts réels (ni esquive, ni défense, ni bouclier) : `rate` de `basis` à chaque cible. */
-  | 'REAL_DAMAGE'
+  REAL_DAMAGE: 'REAL_DAMAGE',
   /** Pose `effect` sur chaque cible, sans attaque. */
-  | 'AFFLICTION'
+  AFFLICTION: 'AFFLICTION',
   /** Pose une charge sur l'ennemi qui vient d'attaquer (`maxStacks` par ennemi) ; la charge qui le remplit pose `effect`. */
-  | 'ANALYSIS'
+  ANALYSIS: 'ANALYSIS',
   /** Frappe les voisins de la carte visée par l'attaque du porteur (sans elle) ; pensé pour `after-attack`. */
-  | 'AFTERSHOCK'
+  AFTERSHOCK: 'AFTERSHOCK',
   /** Rend permanents les Points Faibles révélés par le porteur et amplifie de `rate` les coups qu'ils subissent ; pensé pour `self-death`. */
-  | 'WEAK_POINT_LEGACY'
+  WEAK_POINT_LEGACY: 'WEAK_POINT_LEGACY',
   /** Action d'appui (sur `next-action`, avec `interval`) : bouclier en part de la santé max du lanceur, purge, altérations, sur chaque cible ; ne frappe personne. */
-  | 'SUPPORT'
+  SUPPORT: 'SUPPORT',
   /** Remplit la jauge du porteur de `amount` à chaque déclenchement. */
-  | 'ENERGY_GAIN'
+  ENERGY_GAIN: 'ENERGY_GAIN',
   /** Passif : Précision +`accuracyRate` et Esquive +`agilityRate` (parts des stats de base) contre un ennemi qui a déjà attaqué pendant le combat. */
-  | 'ATTACKER_INSIGHT'
+  ATTACKER_INSIGHT: 'ATTACKER_INSIGHT',
   /** Relance la spéciale ATTACK du porteur, jauge intacte ; pensé pour `self-death` avec `requiresStance`. */
-  | 'SPECIAL_ECHO';
+  SPECIAL_ECHO: 'SPECIAL_ECHO',
+} as const;
+export type SkillKind = (typeof SkillKind)[keyof typeof SkillKind];
 
-export type BuffType =
-  | 'attack'
-  | 'defense'
-  | 'agility'
-  | 'accuracy'
-  | 'speed'
-  | 'criticalChance'
-  | 'regeneration'
-  | 'resistance';
+export const BuffType = {
+  ATTACK: 'attack',
+  DEFENSE: 'defense',
+  AGILITY: 'agility',
+  ACCURACY: 'accuracy',
+  SPEED: 'speed',
+  CRITICAL_CHANCE: 'criticalChance',
+  REGENERATION: 'regeneration',
+  RESISTANCE: 'resistance',
+} as const;
+export type BuffType = (typeof BuffType)[keyof typeof BuffType];
 
-export type EffectType =
-  | 'POISON'
-  | 'BURN'
-  | 'FREEZE'
-  | 'STUNT'
-  | 'MARK'
-  | 'BLEED'
+export const EffectType = {
+  POISON: 'POISON',
+  BURN: 'BURN',
+  FREEZE: 'FREEZE',
+  STUNT: 'STUNT',
+  MARK: 'MARK',
+  BLEED: 'BLEED',
   /** Révèle un Point Faible (`weakPoint`) : ni statut, ni immunité, ni résistance. */
-  | 'WEAK_POINT'
+  WEAK_POINT: 'WEAK_POINT',
   /** Dégâts sur la durée : `rate` de la santé max de la cible par tour pendant `duration` ; se pose et mord sur une carte gelée. */
-  | 'HYPOTHERMIA'
+  HYPOTHERMIA: 'HYPOTHERMIA',
   /** Statut de contrôle : la prochaine action offensive de la cible échoue sur la chance `rate`. */
-  | 'ENTANGLE'
+  ENTANGLE: 'ENTANGLE',
   /** Retire `rate` points d'énergie spéciale à la cible (jamais sous 0). */
-  | 'ENERGY_DRAIN'
+  ENERGY_DRAIN: 'ENERGY_DRAIN',
   /** La cible subit `1 + rate` fois les dégâts de `damageType` pendant `duration` tours. */
-  | 'VULNERABILITY'
+  VULNERABILITY: 'VULNERABILITY',
   /** Les soins et buffs des alliés de la cible ne l'atteignent plus pendant `duration` tours. */
-  | 'SUPPORT_BLOCK';
+  SUPPORT_BLOCK: 'SUPPORT_BLOCK',
+} as const;
+export type EffectType = (typeof EffectType)[keyof typeof EffectType];
 
 /**
  * Ce que fait un statut à sa cible, et donc ce contre quoi une immunité est
  * accordée : `control` prive du tour, `damage-over-time` ne fait que mordre.
  */
-export type StatusCategory = 'control' | 'damage-over-time';
+export const StatusCategory = {
+  CONTROL: 'control',
+  DAMAGE_OVER_TIME: 'damage-over-time',
+} as const;
+export type StatusCategory = (typeof StatusCategory)[keyof typeof StatusCategory];
 
 /**
  * Ce dont le taux d'un soin ou d'un saignement est une part. `source-attack`
@@ -108,72 +131,90 @@ export type StatusCategory = 'control' | 'damage-over-time';
  * reçoit — ce que veut dire un kit formulé « l'allié récupère 10 % de ses PV
  * par tour » ou « saigne de 2 % de ses PV max par tour ».
  */
-export type RateBasis = 'source-attack' | 'target-max-health';
+export const RateBasis = {
+  SOURCE_ATTACK: 'source-attack',
+  TARGET_MAX_HEALTH: 'target-max-health',
+} as const;
+export type RateBasis = (typeof RateBasis)[keyof typeof RateBasis];
 
-export type DodgeStrategy = 'simple-dodge' | 'random-dodge';
+export const DodgeStrategy = {
+  SIMPLE_DODGE: 'simple-dodge',
+  RANDOM_DODGE: 'random-dodge',
+} as const;
+export type DodgeStrategy = (typeof DodgeStrategy)[keyof typeof DodgeStrategy];
 
-export type TriggerEvent =
-  | 'turn-end'
-  | 'next-action'
-  | 'ally-death'
-  | 'enemy-death'
-  | 'dormant'
-  | 'survived'
-  | 'ally-health-below'
-  | 'any-ally-health-below'
-  | 'self-death'
-  | 'enemy-bleed-death'
-  | 'turn-start'
-  | 'bleed-stacks-applied'
-  | 'damage-taken'
-  | 'fight-start'
+export const TriggerEvent = {
+  TURN_END: 'turn-end',
+  NEXT_ACTION: 'next-action',
+  ALLY_DEATH: 'ally-death',
+  ENEMY_DEATH: 'enemy-death',
+  DORMANT: 'dormant',
+  SURVIVED: 'survived',
+  ALLY_HEALTH_BELOW: 'ally-health-below',
+  ANY_ALLY_HEALTH_BELOW: 'any-ally-health-below',
+  SELF_DEATH: 'self-death',
+  ENEMY_BLEED_DEATH: 'enemy-bleed-death',
+  TURN_START: 'turn-start',
+  BLEED_STACKS_APPLIED: 'bleed-stacks-applied',
+  DAMAGE_TAKEN: 'damage-taken',
+  FIGHT_START: 'fight-start',
   /** Sur la carte qui a porté le coup fatal ; `activationCondition.threshold` : santé de la victime avant le coup. */
-  | 'enemy-killed'
+  ENEMY_KILLED: 'enemy-killed',
   /** Chaque attaque esquivée par la carte surveillée (`targetCardId`), évasion comprise. */
-  | 'dodge'
+  DODGE: 'dodge',
   /** Sur la carte qui a posé le Poison à charges que portait l'ennemi mort, quel que soit le tueur. */
-  | 'poisoned-enemy-death'
+  POISONED_ENEMY_DEATH: 'poisoned-enemy-death',
   /** Sur toute l'équipe attaquée, une fois par attaque ennemie (touchée ou esquivée), `lastAttacker` = l'attaquant. */
-  | 'enemy-attack'
+  ENEMY_ATTACK: 'enemy-attack',
   /** Sur l'attaquant après chacune de ses attaques ayant ciblé quelqu'un, avec la carte visée. */
-  | 'after-attack'
+  AFTER_ATTACK: 'after-attack',
   /** Sur la carte qui vient de se transformer. */
-  | 'transformed'
+  TRANSFORMED: 'transformed',
   /** Sur la carte dont l'ANALYSIS a rempli tous les ennemis vivants. */
-  | 'enemies-analysed'
+  ENEMIES_ANALYSED: 'enemies-analysed',
   /** Sur les alliés survivants, quel que soit l'allié tombé. */
-  | 'any-ally-death'
+  ANY_ALLY_DEATH: 'any-ally-death',
   /** Sur les alliés d'une carte dont l'action n'est pas l'attaque simple (spéciale, compétence d'action, frappe de début de tour). */
-  | 'ally-skill-used';
+  ALLY_SKILL_USED: 'ally-skill-used',
+} as const;
+export type TriggerEvent = (typeof TriggerEvent)[keyof typeof TriggerEvent];
 
-export type TargetingStrategy =
-  | 'position-based'
-  | 'target-all'
-  | 'line-three'
-  | 'all-owner-cards'
-  | 'all-allies'
-  | 'self'
-  | 'targeted-card'
-  | 'last-attacker-of-ally'
-  | 'linked-ally'
-  | 'most-wounded-ally'
-  | 'protected-ally'
-  | 'first-bleeding-enemy'
+export const TargetingStrategy = {
+  POSITION_BASED: 'position-based',
+  TARGET_ALL: 'target-all',
+  LINE_THREE: 'line-three',
+  ALL_OWNER_CARD: 'all-owner-cards',
+  ALL_ALLIES: 'all-allies',
+  SELF: 'self',
+  TARGETED_CARD: 'targeted-card',
+  LAST_ATTACKER_OF_ALLY: 'last-attacker-of-ally',
+  LINKED_ALLY: 'linked-ally',
+  MOST_WOUNDED_ALLY: 'most-wounded-ally',
+  PROTECTED_ALLY: 'protected-ally',
+  FIRST_BLEEDING_ENEMY: 'first-bleeding-enemy',
   /** Allié vivant le plus rapide (buffs compris), lanceur exclu ; se résout même lanceur mort. */
-  | 'fastest-ally'
+  FASTEST_ALLY: 'fastest-ally',
   /** Dernier attaquant esquivé par la carte `targetCardId` : la riposte à un coup manqué. */
-  | 'last-dodged-attacker'
+  LAST_DODGED_ATTACKER: 'last-dodged-attacker',
   /** Allié vivant au plus faible ratio de santé, lanceur exclu, quel que soit ce ratio. */
-  | 'lowest-health-ally'
+  LOWEST_HEALTH_ALLY: 'lowest-health-ally',
   /** Spéciales uniquement : `targetCount` ennemis ciblables tirés au hasard à chaque lancer. */
-  | 'random-enemies';
+  RANDOM_ENEMIES: 'random-enemies',
+} as const;
+export type TargetingStrategy = (typeof TargetingStrategy)[keyof typeof TargetingStrategy];
 
-export type CardSelectorStrategy = 'player-by-player' | 'speed-weighted';
+export const CardSelectorStrategy = {
+  PLAYER_BY_PLAYER: 'player-by-player',
+  SPEED_WEIGHTED: 'speed-weighted',
+} as const;
+export type CardSelectorStrategy = (typeof CardSelectorStrategy)[keyof typeof CardSelectorStrategy];
 
-export type AlterationConditionType =
-  | 'ally-presence'
-  | 'health-threshold'
-  | 'probability';
+export const AlterationConditionType = {
+  ALLY_PRESENCE: 'ally-presence',
+  HEALTH_THRESHOLD: 'health-threshold',
+  PROBABILITY: 'probability',
+} as const;
+export type AlterationConditionType = (typeof AlterationConditionType)[keyof typeof AlterationConditionType];
 
 // ---------------------------------------------------------------------------
 // Skill building blocks
@@ -552,6 +593,8 @@ export interface OtherSkill {
   perLivingAlly?: { maxRate: number };
   /** ALTERATION : l'altération ne compte que tant que la santé du porteur est sous ce ratio. */
   whileHealthBelow?: number;
+  /** ALTERATION : l'altération ne compte que tant que le porteur garde le bouclier levé par le skill SHIELD de ce nom. */
+  whileShielded?: string;
   /** ALTERATION : `terminationEvent` ne la retire que sur un coup coûtant strictement plus que cette part de la santé max. */
   terminationDamageRate?: number;
   /** ATTACKER_INSIGHT (requis) : part de la Précision de base gagnée contre un ennemi qui a déjà attaqué. */
@@ -618,9 +661,23 @@ export interface CardConfig {
   cardDeckIdentity?: string;
 }
 
-export interface FightResult {
-  [step: number]: { kind: string; [key: string]: unknown };
+export interface FightPlayer {
+  name: string;
+  /** 1 à 5 cartes. */
+  deck: CardConfig[];
 }
+
+/** Corps de POST /fight (FightDataDto). */
+export interface FightRequest {
+  player1: FightPlayer;
+  player2: FightPlayer;
+  cardSelectorStrategy: CardSelectorStrategy;
+  /** Entier dans [0, 2^32 − 1] : même graine et mêmes decks, même combat. */
+  seed?: number;
+}
+
+// Rapport de combat (réponse de POST /fight) : voir fight-report.ts.
+export * from './fight-report.js';
 
 // ---------------------------------------------------------------------------
 // Définition de carte — donnée de design, distincte de la configuration de

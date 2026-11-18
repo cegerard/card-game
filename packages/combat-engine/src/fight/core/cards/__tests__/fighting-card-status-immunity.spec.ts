@@ -1,7 +1,7 @@
+import { DamageType } from '@card-game/shared-types';
 import { createFightingCard } from '../../../../../test/helpers/fighting-card';
 import { createEffect } from '../../../../../test/helpers/effect';
 import { CardStatePoisoned } from '../@types/state/card-state-poisoned';
-import { DamageType } from '../@types/damage/damage-type';
 import { FightingCard } from '../fighting-card';
 
 describe('FightingCard status immunity', () => {
