@@ -1,4 +1,7 @@
-import type { TargetingOverrideReport } from '@card-game/shared-types';
+import type {
+  StateEffectType,
+  TargetingOverrideReport,
+} from '@card-game/shared-types';
 import { ExecutionResult } from '../@types/action-result/execution-result';
 import { FightingCard } from '../fighting-card';
 import { HealingResults } from '../@types/action-result/healing-results';
@@ -17,7 +20,6 @@ import { Buff } from '../@types/alteration/alteration-detail';
 import { EffectResult } from '../@types/attack/attack-effect';
 import { BattlefieldResult } from '../@types/battlefield/battlefield';
 import { Shield } from '../@types/shield/shield';
-import { StateEffectType } from '../@types/state/state-effect-type';
 
 export enum SkillKind {
   Healing = 'healing',

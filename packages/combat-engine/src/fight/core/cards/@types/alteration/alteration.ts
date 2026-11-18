@@ -1,13 +1,13 @@
+import type { BuffType } from '@card-game/shared-types';
 import { FightingCard } from '../../fighting-card';
 import { FightingContext } from '../fighting-context';
 import { TargetingCardStrategy } from '../../../targeting-card-strategies/targeting-card-strategy';
-import { AlterationType } from './alteration-type';
 import { AlterationCondition } from './alteration-condition';
 import { BuffResult, DebuffResult } from '../action-result/alteration-result';
 
 export class Alteration {
   constructor(
-    public readonly type: AlterationType,
+    public readonly type: BuffType,
     public readonly rate: number,
     public readonly duration: number,
     public readonly targetingStrategy: TargetingCardStrategy,

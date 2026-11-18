@@ -1,9 +1,9 @@
+import type { BuffType } from '@card-game/shared-types';
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 import { FightingCard } from '../fighting-card';
 import { Trigger } from '../../trigger/trigger';
 import { isActivatableTrigger } from '../../trigger/activatable-trigger';
 import { FightingContext } from '../@types/fighting-context';
-import { AlterationType } from '../@types/alteration/alteration-type';
 import {
   BuffSkillResults,
   DebuffSkillResults,
@@ -22,7 +22,7 @@ export type LiveRateFactory = (team: Player) => LiveRate;
 export interface AlterationSkillOptions {
   name: string;
   polarity: 'buff' | 'debuff';
-  attributeType: AlterationType;
+  attributeType: BuffType;
   rate: number;
   /** Number of turns the alteration lasts. Use 0 for permanent or event-bound alterations (combined with an optional terminationEvent). */
   duration: number;
@@ -48,7 +48,7 @@ export class AlterationSkill implements Skill {
 
   public readonly name: string;
   private readonly polarity: 'buff' | 'debuff';
-  private readonly attributeType: AlterationType;
+  private readonly attributeType: BuffType;
   private readonly rate: number;
   private readonly duration: number;
   private readonly trigger: Trigger;

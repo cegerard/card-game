@@ -30,8 +30,6 @@ export type WeakPointSpec = {
   exploitEffect?: AttackEffect;
 };
 
-export type WeakPointEndReason = 'struck' | 'dodged' | 'expired';
-
 /** Throws on a spec no weak point could be built from. */
 export function validateWeakPointSpec(spec: WeakPointSpec): void {
   if ((spec.damageMultiplier ?? 1) <= 0) {

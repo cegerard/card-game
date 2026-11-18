@@ -1,10 +1,9 @@
+import type { BuffType, StateEffectType } from '@card-game/shared-types';
 import { FightingCard } from '../fighting-card';
 import { FightingContext } from '../@types/fighting-context';
 import { TargetingCardStrategy } from '../../targeting-card-strategies/targeting-card-strategy';
 import { Trigger } from '../../trigger/trigger';
 import { AttackCondition } from '../@types/attack/attack-condition';
-import { AlterationType } from '../@types/alteration/alteration-type';
-import { StateEffectType } from '../@types/state/state-effect-type';
 import {
   BuffResult,
   DebuffResult,
@@ -17,7 +16,7 @@ export type SupportConfig = {
   /** Statuses removed from each target, picked at random. */
   cleanse?: number;
   alterations?: {
-    type: AlterationType;
+    type: BuffType;
     rate: number;
     duration: number;
     polarity: 'buff' | 'debuff';

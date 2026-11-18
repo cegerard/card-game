@@ -1,4 +1,4 @@
-import { StateEffectType } from './state-effect-type';
+import type { StateEffectType } from '@card-game/shared-types';
 
 /**
  * What a status effect does to its bearer, which is what an immunity is

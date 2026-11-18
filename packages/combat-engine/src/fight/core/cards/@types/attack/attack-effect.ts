@@ -1,9 +1,12 @@
+import type {
+  StateEffectType,
+  WeakPointEndReason,
+} from '@card-game/shared-types';
 import { FightingCard } from '../../fighting-card';
 import { EffectLevel } from './effect-level';
 import { FightingContext } from '../fighting-context';
 import { Debuff } from '../alteration/alteration-detail';
 import { EffectTriggeredDebuff } from './effect-triggered-debuff';
-import { StateEffectType } from '../state/state-effect-type';
 import { DamageType } from '../damage/damage-type';
 import { Randomizer } from '../../../randomizer';
 import { MARK_EFFECT_TYPE } from '../mark/elemental-mark';
@@ -15,7 +18,6 @@ import {
   WEAK_POINT_EFFECT_TYPE,
   WEAK_POINT_ENDED_TYPE,
   WeakPoint,
-  WeakPointEndReason,
 } from '../weak-point/weak-point';
 
 export type StateEffectResult = {

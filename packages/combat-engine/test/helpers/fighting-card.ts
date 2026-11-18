@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker/locale/en';
+import type { BuffType } from '@card-game/shared-types';
 
 import { FightingCard } from '../../src/fight/core/cards/fighting-card';
 import { SimpleAttack } from '../../src/fight/core/cards/skills/simple-attack';
@@ -23,7 +24,6 @@ import { EnemyKilledTrigger } from '../../src/fight/core/trigger/enemy-killed';
 import { DynamicTrigger } from '../../src/fight/core/trigger/dynamic-trigger';
 import { Trigger } from '../../src/fight/core/trigger/trigger';
 import { createEffect } from './effect';
-import { AlterationType } from '../../src/fight/core/cards/@types/alteration/alteration-type';
 import { Skill } from '../../src/fight/core/cards/skills/skill';
 import { TargetingOverrideSkill } from '../../src/fight/core/cards/skills/targeting-override';
 import { Alteration } from '../../src/fight/core/cards/@types/alteration/alteration';
@@ -90,13 +90,13 @@ type FightingCardParams = {
       kind?: string;
       effect?: effect;
       buffs?: {
-        buffType: AlterationType;
+        buffType: BuffType;
         buffRate: number;
         buffDuration: number;
         buffTargetingStrategy: string;
       }[];
       debuffs?: {
-        debuffType: AlterationType;
+        debuffType: BuffType;
         debuffRate: number;
         debuffDuration: number;
         debuffTargetingStrategy: string;
@@ -119,7 +119,7 @@ type FightingCardParams = {
           powerId?: string;
         }
       | {
-          buffType: AlterationType;
+          buffType: BuffType;
           buffRate: number;
           duration: number;
           trigger: string;
@@ -135,7 +135,7 @@ type FightingCardParams = {
           powerId?: string;
         }
       | {
-          debuffType: AlterationType;
+          debuffType: BuffType;
           debuffRate: number;
           duration: number;
           trigger: string;
@@ -275,13 +275,13 @@ function createSpecialAttack(params: {
   targetingStrategy?: string;
   effect?: effect;
   buffs?: {
-    buffType: AlterationType;
+    buffType: BuffType;
     buffRate: number;
     buffDuration: number;
     buffTargetingStrategy: string;
   }[];
   debuffs?: {
-    debuffType: AlterationType;
+    debuffType: BuffType;
     debuffRate: number;
     debuffDuration: number;
     debuffTargetingStrategy: string;
@@ -397,7 +397,7 @@ function createsSkills(
         powerId?: string;
       }
     | {
-        buffType: AlterationType;
+        buffType: BuffType;
         buffRate: number;
         duration: number;
         trigger: string;
@@ -413,7 +413,7 @@ function createsSkills(
         powerId?: string;
       }
     | {
-        debuffType: AlterationType;
+        debuffType: BuffType;
         debuffRate: number;
         duration: number;
         trigger: string;

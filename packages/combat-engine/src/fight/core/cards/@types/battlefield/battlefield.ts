@@ -1,6 +1,6 @@
+import type { BuffType } from '@card-game/shared-types';
 import { FightingCard } from '../../fighting-card';
 import { FightingContext } from '../fighting-context';
-import { AlterationType } from '../alteration/alteration-type';
 import { LivingAllyScaling } from '../alteration/live-rate';
 import { BuffResult, DebuffResult } from '../action-result/alteration-result';
 import { DamageType } from '../damage/damage-type';
@@ -9,7 +9,7 @@ import { Player } from '../../../player';
 import { round2 } from '../../../../tools/round';
 
 export type BattlefieldAlteration = {
-  type: AlterationType;
+  type: BuffType;
   rate: number;
   polarity: 'buff' | 'debuff';
   /** Set, `rate` is earned per living ally of the bearer, up to `maxRate`. */

@@ -211,7 +211,7 @@ export function requireAllyHealthBelowFields(skillData: OtherSkillDto): void {
 
 export function mapAlterationType(
   buffType: BuffType,
-): import('../core/cards/@types/alteration/alteration-type').AlterationType {
+): import('@card-game/shared-types').BuffType {
   const BUFF_TYPE_MAP = {
     [BuffType.ATTACK]: 'attack' as const,
     [BuffType.DEFENSE]: 'defense' as const,

@@ -1,11 +1,15 @@
-import type { CardInfo } from '@card-game/shared-types';
+import type {
+  BuffType,
+  CardInfo,
+  StateEffectType,
+  WeakPointEndReason,
+} from '@card-game/shared-types';
 import { FightingContext } from './@types/fighting-context';
 import { SpecialResult } from './@types/action-result/special-result';
 import { DodgeBehavior } from './behaviors/dodge-behaviors';
 import { AttackSkill } from './skills/attack-skill';
 import { Special } from './skills/special';
 import { CardState } from './@types/state/card-state';
-import { StateEffectType } from './@types/state/state-effect-type';
 import { StateResult } from './@types/action-result/state-result';
 import { CardStateFrozen } from './@types/state/card-state-frozen';
 import { CardStateStunted } from './@types/state/card-state-stunted';
@@ -31,7 +35,6 @@ import { Skill, SkillResults } from './skills/skill';
 import { HealthReactiveSkill } from './skills/reactive-skill';
 import { SurviveSkill } from './skills/survive';
 import { DamageReductionSkill } from './skills/damage-reduction';
-import { AlterationType } from './@types/alteration/alteration-type';
 import { Element } from './@types/damage/element';
 import { DamageType } from './@types/damage/damage-type';
 import { ElementalMark } from './@types/mark/elemental-mark';
@@ -49,7 +52,6 @@ import {
 import {
   WEAK_POINT_ENDED_TYPE,
   WeakPoint,
-  WeakPointEndReason,
 } from './@types/weak-point/weak-point';
 import { WeakPoints } from './@types/weak-point/weak-points';
 import {
@@ -1704,7 +1706,7 @@ export class FightingCard {
    * application changes nothing and is reported by nobody.
    */
   public applyBuff(
-    buffType: AlterationType,
+    buffType: BuffType,
     buffRate: number,
     duration: number,
     terminationEvent?: string,
@@ -1794,7 +1796,7 @@ export class FightingCard {
   public removeEventBoundBuffs(
     eventName: string,
     hitRate?: number,
-  ): { type: AlterationType; value: number }[] {
+  ): { type: BuffType; value: number }[] {
     const ends = (b: Buff) => endsOn(b, eventName, hitRate);
     const removed = this.buffs
       .filter(ends)
@@ -1833,7 +1835,7 @@ export class FightingCard {
   }
 
   /** Removes and returns every buff of that type, to hand it to another card. */
-  public takeBuffs(type: AlterationType): Buff[] {
+  public takeBuffs(type: BuffType): Buff[] {
     const taken = this.buffs.filter((b) => b.type === type);
     this.buffs = this.buffs.filter((b) => b.type !== type);
     return taken;
@@ -1855,7 +1857,7 @@ export class FightingCard {
    * reported by nobody.
    */
   public applyDebuff(
-    debuffType: AlterationType,
+    debuffType: BuffType,
     debuffRate: number,
     duration: number,
     terminationEvent?: string,
@@ -1906,7 +1908,7 @@ export class FightingCard {
   public removeEventBoundDebuffs(
     eventName: string,
     hitRate?: number,
-  ): { type: AlterationType; value: number }[] {
+  ): { type: BuffType; value: number }[] {
     const ends = (d: Debuff) => endsOn(d, eventName, hitRate);
     const removed = this.debuffs
       .filter(ends)
@@ -1939,7 +1941,7 @@ export class FightingCard {
     return this.heal(this.actualRegeneration);
   }
 
-  private computeActualStat(base: number, type: AlterationType): number {
+  private computeActualStat(base: number, type: BuffType): number {
     return Math.max(
       0,
       base + this.sumOf(this.buffs, type) - this.sumOf(this.debuffs, type),
@@ -1951,7 +1953,7 @@ export class FightingCard {
   }
 
   /** A live alteration is worth what its rate gives on the board right now. */
-  private sumOf(alterations: AlterationDetail[], type: AlterationType): number {
+  private sumOf(alterations: AlterationDetail[], type: BuffType): number {
     return alterations
       .filter((alteration) => alteration.type === type)
       .reduce(
@@ -1967,10 +1969,7 @@ export class FightingCard {
       );
   }
 
-  private computeAttributeModifierValue(
-    type: AlterationType,
-    rate: number,
-  ): number {
+  private computeAttributeModifierValue(type: BuffType, rate: number): number {
     switch (type) {
       case 'attack':
         return round2(rate * this.attack);

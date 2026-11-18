@@ -1,9 +1,9 @@
+import type { BuffType } from '@card-game/shared-types';
 import { FightingCard } from '../../fighting-card';
-import { AlterationType } from '../alteration/alteration-type';
 import { DebuffResult } from '../action-result/alteration-result';
 
 export type DebuffSpec = {
-  type: AlterationType;
+  type: BuffType;
   rate: number;
   duration: number;
 };

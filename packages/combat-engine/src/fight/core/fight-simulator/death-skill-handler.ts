@@ -1,10 +1,9 @@
-import type { Step } from '@card-game/shared-types';
+import type { StateEffectType, Step } from '@card-game/shared-types';
 import { fightingContextOf } from './fighting-context-of';
 import { SELF_DEATH_PREFIX } from '../trigger/self-death';
 import { ENEMY_BLEED_DEATH } from '../trigger/enemy-bleed-death';
 import { ENEMY_KILLED } from '../trigger/enemy-killed';
 import { POISONED_ENEMY_DEATH } from '../trigger/poisoned-enemy-death';
-import { StateEffectType } from '../cards/@types/state/state-effect-type';
 import { FightingCard } from '../cards/fighting-card';
 import { CardDeathSubscriber } from './card-death-subscriber';
 import { SkillResults } from '../cards/skills/skill';
