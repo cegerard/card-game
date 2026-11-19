@@ -17,6 +17,7 @@ Tools, configuration and commands: see [STACK.md](../STACK.md) and [CODING_ASSER
 - `createEffect()` (`effect.ts`): poison, burn, freeze effects
 - `randomizer-fake.ts`: deterministic randomizer
 - `kit.ts`: `useFight()`, `rosterCard()` (criticals off), neutral `dummy()`, step filters, for the kit specs
+- `status-duel.ts`: one-on-one status fights (`striker()`, `target()` already under a state, `duel()`) and step builders (`hit()`, `tick()`, `statusChange()`, `knockOut()`), for the status effect specs
 
 ## Patterns
 
