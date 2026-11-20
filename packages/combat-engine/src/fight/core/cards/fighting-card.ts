@@ -30,6 +30,10 @@ import { NamedAttackResult } from './@types/action-result/named-attack-result';
 import { round2 } from '../../tools/round';
 import { Randomizer } from '../randomizer';
 import { Shield } from './@types/shield/shield';
+import { ShieldSlot } from './@types/shield/shield-slot';
+import { countDown } from './@types/count-down';
+import { ElementalMarks } from './@types/mark/elemental-marks';
+import { Stances } from './@types/stance/stances';
 import { Stance, StanceActivation } from './@types/stance/stance';
 import { Concealment } from './@types/concealment/concealment';
 import { statusCategoryOf } from './@types/state/status-category';
@@ -114,11 +118,6 @@ type Protection = {
   remainingTurns: number;
 };
 
-type MarkEntry = {
-  mark: ElementalMark;
-  stacks: number;
-};
-
 export type TargetingOverrideEntry = {
   strategy: TargetingCardStrategy;
   terminationEvent: string;
@@ -163,11 +162,9 @@ export class FightingCard {
   // Behaviors
   private dodgeBehavior: DodgeBehavior;
 
-  // Shield
-  private shield: Shield | null = null;
+  private readonly shield = new ShieldSlot();
 
-  // Elemental marks
-  private marks: MarkEntry[] = [];
+  private readonly marks = new ElementalMarks();
 
   // Lifesteal
   private lifesteal: Lifesteal | null = null;
@@ -184,8 +181,7 @@ export class FightingCard {
   private readonly passives: CardBoundPassives;
   private attacked = false;
 
-  // Stances
-  private stances: Stance[] = [];
+  private readonly stances = new Stances();
 
   // Concealment
   private concealment: Concealment | null = null;
@@ -512,11 +508,11 @@ export class FightingCard {
   }
 
   public get shielded(): boolean {
-    return this.shield !== null;
+    return this.shield.isUp;
   }
 
   public holdsShield(name: string): boolean {
-    return this.shield?.name === name;
+    return this.shield.holds(name);
   }
 
   public setOwnerInfo(ownerName: string, cardPositionInDeck: number): void {
@@ -764,7 +760,7 @@ export class FightingCard {
     }
     const sharingReport = damageShared ? { damageShared } : {};
 
-    const shieldAbsorbed = this.absorbWithShield(causedDamages);
+    const shieldAbsorbed = this.shield.absorb(causedDamages);
     let damageToHealth = causedDamages - shieldAbsorbed;
     damageToHealth = Math.min(damageToHealth, this.actualHealth);
 
@@ -943,8 +939,8 @@ export class FightingCard {
     this.vulnerabilities = [];
     this.supportBlock = null;
     this.alterations.clear();
-    this.shield = null;
-    this.stances = [];
+    this.shield.clear();
+    this.stances.clear();
     this.concealment = null;
     this.protection = null;
     this.transformation = null;
@@ -976,10 +972,7 @@ export class FightingCard {
    * it for that category only.
    */
   public isImmuneTo(category: StatusCategory): boolean {
-    return (
-      this.isStatusImmune ||
-      this.stances.some((stance) => stance.immunities?.includes(category))
-    );
+    return this.isStatusImmune || this.stances.grantImmunityTo(category);
   }
 
   public get isStatusImmune(): boolean {
@@ -987,10 +980,7 @@ export class FightingCard {
   }
 
   public decreaseStatusImmunityDuration(): void {
-    if (!this.statusImmunity) return;
-
-    const remainingTurns = this.statusImmunity.remainingTurns - 1;
-    this.statusImmunity = remainingTurns < 0 ? null : { remainingTurns };
+    this.statusImmunity = countDown(this.statusImmunity).left;
   }
 
   /**
@@ -1023,17 +1013,14 @@ export class FightingCard {
    * point.
    */
   public decreaseTransformationDuration(): TransformationEnd | null {
-    if (!this.transformation) return null;
+    const { left, ended } = countDown(this.transformation);
+    this.transformation = left;
+    if (!ended) return null;
 
-    const remainingTurns = this.transformation.remainingTurns - 1;
-    if (remainingTurns < 0) {
-      const { name, endCostRate } = this.transformation;
-      this.transformation = null;
-      return { name, healthCost: this.payTransformationCost(endCostRate) };
-    }
-
-    this.transformation = { ...this.transformation, remainingTurns };
-    return null;
+    return {
+      name: ended.name,
+      healthCost: this.payTransformationCost(ended.endCostRate),
+    };
   }
 
   private payTransformationCost(rate?: number): number {
@@ -1069,17 +1056,9 @@ export class FightingCard {
 
   /** Decrements the protection and returns the ally it just freed, if any. */
   public decreaseProtectionDuration(): FightingCard | null {
-    if (!this.protection) return null;
-
-    const remainingTurns = this.protection.remainingTurns - 1;
-    if (remainingTurns < 0) {
-      const { ally } = this.protection;
-      this.protection = null;
-      return ally;
-    }
-
-    this.protection = { ...this.protection, remainingTurns };
-    return null;
+    const { left, ended } = countDown(this.protection);
+    this.protection = left;
+    return ended?.ally ?? null;
   }
 
   public applyLifesteal(name: string, rate: number, duration: number): void {
@@ -1101,48 +1080,17 @@ export class FightingCard {
   }
 
   public decreaseLifestealDuration(): void {
-    if (!this.lifesteal) return;
-
-    const remainingTurns = this.lifesteal.remainingTurns - 1;
-    this.lifesteal =
-      remainingTurns < 0 ? null : { ...this.lifesteal, remainingTurns };
+    this.lifesteal = countDown(this.lifesteal).left;
   }
 
-  /**
-   * Opens a stance on the card, or refreshes the duration of one already
-   * running: re-casting the power that grants it must not double its length,
-   * and what the stance grants is kept unless the refresh states it again.
-   */
-  public activateStance({
-    name,
-    duration,
-    immunities,
-    revealsConcealed,
-    evasionChance,
-  }: StanceActivation): Stance {
-    const running = this.stances.find((s) => s.name === name);
-    if (running) {
-      running.remainingTurns = duration;
-      running.immunities = immunities ?? running.immunities;
-      running.revealsConcealed = revealsConcealed ?? running.revealsConcealed;
-      running.evasionChance = evasionChance ?? running.evasionChance;
-      return running;
-    }
-
-    const stance: Stance = {
-      name,
-      remainingTurns: duration,
-      immunities,
-      revealsConcealed,
-      evasionChance,
-    };
-    this.stances.push(stance);
-    return stance;
+  /** Opens a stance on the card, or refreshes the one of that name. */
+  public activateStance(activation: StanceActivation): Stance {
+    return this.stances.activate(activation);
   }
 
   /** Whether a running stance lets the card see concealed enemies. */
   public seesConcealed(): boolean {
-    return this.stances.some((stance) => stance.revealsConcealed);
+    return this.stances.revealConcealed;
   }
 
   /**
@@ -1187,26 +1135,17 @@ export class FightingCard {
   }
 
   public hasStance(name: string): boolean {
-    return this.stances.some((s) => s.name === name);
+    return this.stances.has(name);
   }
 
   /** Closes a running stance before its time; returns whether it was held. */
   public endStance(name: string): boolean {
-    const held = this.hasStance(name);
-    this.stances = this.stances.filter((s) => s.name !== name);
-    return held;
+    return this.stances.end(name);
   }
 
   /** Decrements every running stance and returns the ones that just ended. */
   public decreaseStanceDurations(): string[] {
-    const decremented = this.stances.map((s) => ({
-      ...s,
-      remainingTurns: s.remainingTurns - 1,
-    }));
-    const ended = decremented.filter((s) => s.remainingTurns < 0);
-    this.stances = decremented.filter((s) => s.remainingTurns >= 0);
-
-    return ended.map((s) => s.name);
+    return this.stances.decreaseDurations();
   }
 
   /** `name` lets a live alteration tell this shield from another one. */
@@ -1224,54 +1163,23 @@ export class FightingCard {
     duration: number,
     name?: string,
   ): Shield {
-    this.shield = name ? { points, duration, name } : { points, duration };
-    return this.shield;
+    return this.shield.raise(points, duration, name);
   }
 
   public decreaseShieldDuration(): Shield | null {
-    if (!this.shield) return null;
-
-    this.shield = { ...this.shield, duration: this.shield.duration - 1 };
-    if (this.shield.duration < 0) {
-      const expired = this.shield;
-      this.shield = null;
-      return expired;
-    }
-    return null;
-  }
-
-  private absorbWithShield(damage: number): number {
-    if (!this.shield) return 0;
-
-    const absorbed = Math.min(this.shield.points, damage);
-    this.shield = { ...this.shield, points: this.shield.points - absorbed };
-    if (this.shield.points <= 0) {
-      this.shield = null;
-    }
-    return absorbed;
+    return this.shield.decreaseDuration();
   }
 
   public applyMark(mark: ElementalMark, stacks: number = 1): number {
-    const entry = this.findMark(mark.damageType);
-    if (!entry) {
-      const appliedStacks = Math.min(stacks, mark.maxStacks);
-      this.marks.push({ mark, stacks: appliedStacks });
-      return appliedStacks;
-    }
-
-    entry.stacks = Math.min(entry.stacks + stacks, entry.mark.maxStacks);
-    return entry.stacks;
+    return this.marks.apply(mark, stacks);
   }
 
   public markStacks(damageType: DamageType): number {
-    return this.findMark(damageType)?.stacks ?? 0;
+    return this.marks.stacks(damageType);
   }
 
   public markAmplifier(damageType: DamageType): number {
-    const entry = this.findMark(damageType);
-    if (!entry) return 1;
-
-    return 1 + entry.stacks * entry.mark.ratePerStack;
+    return this.marks.amplifier(damageType);
   }
 
   /**
@@ -1417,10 +1325,6 @@ export class FightingCard {
     };
   }
 
-  private findMark(damageType: DamageType): MarkEntry | undefined {
-    return this.marks.find((entry) => entry.mark.damageType === damageType);
-  }
-
   // Frozen at the fatal blow: later hits on the corpse must not rewrite it.
   private recordHealthRatioBeforeDamage() {
     if (!this.isDead()) {
@@ -1516,10 +1420,7 @@ export class FightingCard {
 
   /** One roll against the best evasion chance among the running stances. */
   private evades(): boolean {
-    const chance = Math.max(
-      0,
-      ...this.stances.map((s) => s.evasionChance ?? 0),
-    );
+    const chance = this.stances.evasionChance;
     if (chance <= 0) return false;
 
     return this.randomizer.random() < chance;
