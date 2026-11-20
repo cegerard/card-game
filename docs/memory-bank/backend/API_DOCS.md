@@ -440,5 +440,5 @@ ENTANGLE, ENERGY_DRAIN, VULNERABILITY and SUPPORT_BLOCK refuse a `triggeredDebuf
 
 ## Errors
 
-- **400**: `class-validator` failures (detailed messages), plus the domain checks the controller converts explicitly — composite power consistency (`validatePowerIdConsistency`), the DAMAGE_REDUCTION rate range, an alteration stack budget given by halves (`stackId` without its cap, or the reverse), and a field reserved to some skill kinds carried by another (`KIND_ONLY_FIELDS` in `fighting-card-factory.ts` is the list; effects have their own guards)
+- **400**: `class-validator` failures (detailed messages), plus the domain checks the controller converts explicitly — composite power consistency (`validatePowerIdConsistency`), the DAMAGE_REDUCTION rate range, an alteration stack budget given by halves (`stackId` without its cap, or the reverse), and a field reserved to some skill kinds carried by another (`RESERVED_FIELDS` in `skill-kind-fields.ts` is the list; effects have their own guards)
 - **500**: runtime errors (unknown skill kind, missing buff property…); NestJS defaults, no custom middleware

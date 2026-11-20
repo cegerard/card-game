@@ -20,6 +20,9 @@ import { FirstBleedingEnemyStrategy } from '../core/targeting-card-strategies/fi
 import { AlterationStacking } from '../core/cards/@types/alteration/alteration-detail';
 import { EnemyKilledTrigger } from '../core/trigger/enemy-killed';
 import { Randomizer } from '../core/randomizer';
+import { AttackCondition } from '../core/cards/@types/attack/attack-condition';
+import { EveryNTurnsCondition } from '../core/cards/@types/attack/conditions/every-n-turns-condition';
+import { AlwaysTrueAttackCondition } from '../core/cards/@types/attack/conditions/always-true-attack-condition';
 
 export function asBadRequest<T>(build: () => T): T {
   try {
@@ -242,4 +245,11 @@ export function buildHitAlterations(
       terminationEvent: a.terminationEvent,
     })),
   );
+}
+
+/** Every `interval` turns, or every time without one. */
+export function buildCooldown(interval?: number): AttackCondition {
+  return interval
+    ? new EveryNTurnsCondition(interval)
+    : new AlwaysTrueAttackCondition();
 }
