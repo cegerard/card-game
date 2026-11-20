@@ -81,6 +81,11 @@ export type FinalDamageResult = {
   damageShared?: SharedDamage;
 };
 
+/** What is left of a hit after one defensive layer, and what the layer did. */
+type LayerPass = { damage: number; report?: Partial<FinalDamageResult> };
+
+type DamageLayer = (damage: number) => LayerPass;
+
 export type SharedDamage = {
   name: string;
   shares: { card: FightingCard; damage: number }[];
@@ -729,64 +734,85 @@ export class FightingCard {
   }
 
   /**
-   * Resolves the damage of one hit against the card defensive layers, in
-   * order: state amplifiers (freeze, stunt), damage reduction, shield buffer,
-   * then the health pool. Reducing before the shield absorbs makes the shield
-   * last longer, which is the point of stacking both.
+   * Resolves the damage of one hit: it goes through `damageLayers` in order,
+   * then what is left comes off the health pool, where SURVIVE holds a fatal
+   * blow at 1 HP.
    *
-   * Status effect ticks go through `addRealDamage()` and bypass all of this,
-   * exactly as they bypass the shield.
+   * Status effect ticks go through `addRealDamage()` and bypass all of this.
    */
   public applyFinalDamage(damage: number): FinalDamageResult {
     this.recordHealthRatioBeforeDamage();
-    let causedDamages = this.statuses.amplify(damage);
-
-    const mitigatedDamages =
-      this.passives.damageReduction?.tryMitigate(causedDamages);
-    const mitigated = mitigatedDamages !== undefined;
-    if (mitigated) {
-      causedDamages = mitigatedDamages;
+    let left = damage;
+    let report: Partial<FinalDamageResult> = {};
+    for (const layer of this.damageLayers) {
+      const pass = layer(left);
+      left = pass.damage;
+      report = { ...report, ...pass.report };
     }
-    const mitigationReport = mitigated
-      ? {
-          mitigated: true,
-          mitigatedSkillName: this.passives.damageReduction.name,
-        }
-      : {};
 
-    const damageShared = this.shareDamage(causedDamages);
-    if (damageShared) {
-      causedDamages -= causedDamages * this.sharing.rate;
-    }
-    const sharingReport = damageShared ? { damageShared } : {};
+    return { shieldAbsorbed: 0, ...report, ...this.loseHealth(left) };
+  }
 
-    const shieldAbsorbed = this.shield.absorb(causedDamages);
-    let damageToHealth = causedDamages - shieldAbsorbed;
-    damageToHealth = Math.min(damageToHealth, this.actualHealth);
+  /**
+   * The defensive layers of a hit, in order: freeze and stun amplify it, the
+   * damage reduction removes a share, the damage sharing circle carries a
+   * share, the shield absorbs what it can. Reducing before the shield absorbs
+   * makes the shield last longer, which is the point of stacking both.
+   */
+  private readonly damageLayers: DamageLayer[] = [
+    (damage) => ({ damage: this.statuses.amplify(damage) }),
+    (damage) => this.mitigateHit(damage),
+    (damage) => this.shareHit(damage),
+    (damage) => this.absorbHit(damage),
+  ];
 
-    if (
-      this.actualHealth - damageToHealth <= 0 &&
-      this.passives.survive?.tryConsume()
-    ) {
-      damageToHealth = this.actualHealth - 1;
-      this.receivedDamages += damageToHealth;
+  private mitigateHit(damage: number): LayerPass {
+    const reduction = this.passives.damageReduction;
+    const mitigated = reduction?.tryMitigate(damage);
+    if (mitigated === undefined) return { damage };
+
+    return {
+      damage: mitigated,
+      report: { mitigated: true, mitigatedSkillName: reduction.name },
+    };
+  }
+
+  private shareHit(damage: number): LayerPass {
+    const damageShared = this.shareDamage(damage);
+    if (!damageShared) return { damage };
+
+    return {
+      damage: damage - damage * this.sharing.rate,
+      report: { damageShared },
+    };
+  }
+
+  private absorbHit(damage: number): LayerPass {
+    const shieldAbsorbed = this.shield.absorb(damage);
+
+    return { damage: damage - shieldAbsorbed, report: { shieldAbsorbed } };
+  }
+
+  private loseHealth(
+    damage: number,
+  ): Pick<
+    FinalDamageResult,
+    'damageToHealth' | 'survived' | 'survivedSkillName'
+  > {
+    const damageToHealth = Math.min(damage, this.actualHealth);
+    const survive = this.passives.survive;
+    if (this.actualHealth - damageToHealth <= 0 && survive?.tryConsume()) {
+      const survivedDamage = this.actualHealth - 1;
+      this.receivedDamages += survivedDamage;
       return {
-        damageToHealth,
-        shieldAbsorbed,
+        damageToHealth: survivedDamage,
         survived: true,
-        survivedSkillName: this.passives.survive.name,
-        ...mitigationReport,
-        ...sharingReport,
+        survivedSkillName: survive.name,
       };
     }
 
     this.receivedDamages += damageToHealth;
-    return {
-      damageToHealth,
-      shieldAbsorbed,
-      ...mitigationReport,
-      ...sharingReport,
-    };
+    return { damageToHealth };
   }
 
   private get sharing(): DamageSharing | undefined {
