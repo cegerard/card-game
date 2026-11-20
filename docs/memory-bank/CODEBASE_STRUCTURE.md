@@ -154,9 +154,9 @@ Unit tests next to the source in `__tests__/`; e2e in `packages/combat-engine/te
 SvelteKit 2 + Phaser, Web and Phaser renderers.
 
 ```
-├── routes/ # +page (menu), arcade/ (fetch fight, renderer, outcome, XP), deck/ (Deck Builder)
+├── routes/ # +page (menu), arcade/ (renderer and end screens, flow through arcade-run), deck/ (Deck Builder)
 └── lib/
-    ├── arcade/ # session.ts (phase, currentLevel, fightResult), levels.ts (ARCADE_LEVELS, 5), types.ts
+    ├── arcade/ # session.ts (phase, currentLevel, fightResult), levels.ts (ARCADE_LEVELS, 5), types.ts, arcade-run.ts (fightLevel; settleFight: difficulty, XP, next phase)
     ├── deck/ # roster.ts (CHARACTER_ROSTER), deck-store.ts (selectedDeckCards: XP applied, then toCombatConfig), RosterCard.svelte
     ├── combat/ # engine-client.ts (fetchFight), outcome.ts, rendererMode.ts, combatStats.ts, CombatScene.ts, PhaserRenderer, CombatReportRenderer
     ├── experience/ # attribute-experience.ts (XP per fight), apply-experience.ts (XP → effective stats)

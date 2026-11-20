@@ -1,23 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { get } from 'svelte/store';
 import { createProgressionStore } from '../progression-store.js';
-import type { CardProgression, ProgressionRepository } from '../types.js';
-
-function createInMemoryRepository(
-  seed: CardProgression[] = [],
-): ProgressionRepository {
-  const store = new Map(seed.map((p) => [p.cardId, p]));
-  return {
-    get: (cardId) => store.get(cardId),
-    getAll: () => [...store.values()],
-    set: (progression) => {
-      store.set(progression.cardId, progression);
-    },
-    reset: () => {
-      store.clear();
-    },
-  };
-}
+import { createInMemoryRepository } from './in-memory-repository.js';
 
 describe('createProgressionStore', () => {
   it('returns a default progression for a card with no history', () => {
