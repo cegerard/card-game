@@ -16,15 +16,8 @@ import { CardStateFrozen } from './@types/state/card-state-frozen';
 import { CardStateStunted } from './@types/state/card-state-stunted';
 import { CardStateBleeding } from './@types/state/card-state-bleeding';
 import { CardStateStackedPoison } from './@types/state/card-state-stacked-poison';
-import { DodgeBonusDenialSkill } from './skills/dodge-bonus-denial';
-import { BleedStackScalingSkill } from './skills/bleed-stack-scaling';
-import { PoisonedEnemyAgilitySkill } from './skills/poisoned-enemy-agility';
-import { AttackerInsightSkill } from './skills/attacker-insight';
-import { LowHealthTargetBonusSkill } from './skills/low-health-target-bonus';
-import {
-  BleedApplication,
-  BleedEmpowermentSkill,
-} from './skills/bleed-empowerment';
+import { BleedApplication } from './skills/bleed-empowerment';
+import { CardBoundPassives } from './skills/card-bound-passives';
 import { EffectLevel } from './@types/attack/effect-level';
 import {
   AlterationDetail,
@@ -34,8 +27,6 @@ import {
 } from './@types/alteration/alteration-detail';
 import { Skill, SkillResults } from './skills/skill';
 import { HealthReactiveSkill } from './skills/reactive-skill';
-import { SurviveSkill } from './skills/survive';
-import { DamageReductionSkill } from './skills/damage-reduction';
 import { ElementalMark } from './@types/mark/elemental-mark';
 import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
 import { NamedAttackResult } from './@types/action-result/named-attack-result';
@@ -198,17 +189,7 @@ export class FightingCard {
   // Transformation
   private transformation: Transformation | null = null;
 
-  // Survive
-  private surviveSkill: SurviveSkill | null = null;
-
-  // Damage reduction
-  private damageReduction: DamageReductionSkill | null = null;
-  private dodgeBonusDenial: DodgeBonusDenialSkill | null = null;
-  private bleedStackScaling: BleedStackScalingSkill | null = null;
-  private lowHealthTargetBonus: LowHealthTargetBonusSkill | null = null;
-  private bleedEmpowerment: BleedEmpowermentSkill | null = null;
-  private poisonedEnemyAgility: PoisonedEnemyAgilitySkill | null = null;
-  private attackerInsight: AttackerInsightSkill | null = null;
+  private readonly passives: CardBoundPassives;
   private attacked = false;
 
   // Stances
@@ -268,15 +249,7 @@ export class FightingCard {
       simpleAttack: AttackSkill;
       special: Special;
       others: Skill[];
-      survive?: SurviveSkill;
-      damageReduction?: DamageReductionSkill;
-      dodgeBonusDenial?: DodgeBonusDenialSkill;
-      bleedStackScaling?: BleedStackScalingSkill;
-      bleedEmpowerment?: BleedEmpowermentSkill;
-      lowHealthTargetBonus?: LowHealthTargetBonusSkill;
-      poisonedEnemyAgility?: PoisonedEnemyAgilitySkill;
-      attackerInsight?: AttackerInsightSkill;
-    },
+    } & CardBoundPassives,
     behaviors: {
       dodge: DodgeBehavior;
     },
@@ -296,18 +269,12 @@ export class FightingCard {
     this.resistance = stats.resistance ?? 0;
     this.element = element;
     this.randomizer = randomizer;
-    this.simpleAttack = skills.simpleAttack;
-    this.special = skills.special;
+    const { simpleAttack, special, others, ...passives } = skills;
+    this.simpleAttack = simpleAttack;
+    this.special = special;
+    this.skills = others;
+    this.passives = passives;
     this.dodgeBehavior = behaviors.dodge;
-    this.skills = skills.others;
-    this.surviveSkill = skills.survive ?? null;
-    this.damageReduction = skills.damageReduction ?? null;
-    this.dodgeBonusDenial = skills.dodgeBonusDenial ?? null;
-    this.bleedStackScaling = skills.bleedStackScaling ?? null;
-    this.bleedEmpowerment = skills.bleedEmpowerment ?? null;
-    this.lowHealthTargetBonus = skills.lowHealthTargetBonus ?? null;
-    this.poisonedEnemyAgility = skills.poisonedEnemyAgility ?? null;
-    this.attackerInsight = skills.attackerInsight ?? null;
   }
 
   public get lastAttacker(): FightingCard | undefined {
@@ -381,7 +348,8 @@ export class FightingCard {
     context?: FightingContext,
     defender?: FightingCard,
   ): number {
-    const stackBonus = this.bleedStackScaling?.multiplierFor(context) ?? 1;
+    const stackBonus =
+      this.passives.bleedStackScaling?.multiplierFor(context) ?? 1;
 
     return this.actualAttack * stackBonus * this.targetBonusAgainst(defender);
   }
@@ -393,7 +361,7 @@ export class FightingCard {
   public targetBonusAgainst(defender?: FightingCard): number {
     if (!defender) return 1;
     const lowHealthBonus =
-      this.lowHealthTargetBonus?.multiplierAgainst(defender) ?? 1;
+      this.passives.lowHealthTargetBonus?.multiplierAgainst(defender) ?? 1;
 
     return (
       lowHealthBonus *
@@ -419,7 +387,7 @@ export class FightingCard {
   public accuracyAgainst(defender: FightingCard): number {
     const rate =
       defender.weakPoints.bonusOf(this, 'accuracyRate') +
-      (this.attackerInsight?.accuracyRateAgainst(defender) ?? 0);
+      (this.passives.attackerInsight?.accuracyRateAgainst(defender) ?? 0);
 
     return this.actualAccuracy + round2(this.accuracy * rate);
   }
@@ -445,7 +413,8 @@ export class FightingCard {
   public get actualAgility(): number {
     const poisonBonus = round2(
       this.agility *
-        (this.poisonedEnemyAgility?.rateFor(this.poisonedCardCount) ?? 0),
+        (this.passives.poisonedEnemyAgility?.rateFor(this.poisonedCardCount) ??
+          0),
     );
 
     return this.computeActualStat(this.agility, 'agility') + poisonBonus;
@@ -553,7 +522,9 @@ export class FightingCard {
 
   /** The stacks and rate a bleed this card applies actually carries. */
   public empowerBleed(application: BleedApplication): BleedApplication {
-    return this.bleedEmpowerment?.empower(this, application) ?? application;
+    return (
+      this.passives.bleedEmpowerment?.empower(this, application) ?? application
+    );
   }
 
   public get shielded(): boolean {
@@ -896,13 +867,17 @@ export class FightingCard {
       );
     }
 
-    const mitigatedDamages = this.damageReduction?.tryMitigate(causedDamages);
+    const mitigatedDamages =
+      this.passives.damageReduction?.tryMitigate(causedDamages);
     const mitigated = mitigatedDamages !== undefined;
     if (mitigated) {
       causedDamages = mitigatedDamages;
     }
     const mitigationReport = mitigated
-      ? { mitigated: true, mitigatedSkillName: this.damageReduction.name }
+      ? {
+          mitigated: true,
+          mitigatedSkillName: this.passives.damageReduction.name,
+        }
       : {};
 
     const damageShared = this.shareDamage(causedDamages);
@@ -917,7 +892,7 @@ export class FightingCard {
 
     if (
       this.actualHealth - damageToHealth <= 0 &&
-      this.surviveSkill?.tryConsume()
+      this.passives.survive?.tryConsume()
     ) {
       damageToHealth = this.actualHealth - 1;
       this.receivedDamages += damageToHealth;
@@ -925,7 +900,7 @@ export class FightingCard {
         damageToHealth,
         shieldAbsorbed,
         survived: true,
-        survivedSkillName: this.surviveSkill.name,
+        survivedSkillName: this.passives.survive.name,
         ...mitigationReport,
         ...sharingReport,
       };
@@ -1591,9 +1566,9 @@ export class FightingCard {
    * leaves the card at 1 HP instead.
    */
   public execute(): { survived?: boolean; survivedSkillName?: string } {
-    if (this.surviveSkill?.tryConsume()) {
+    if (this.passives.survive?.tryConsume()) {
       this.addRealDamage(this.actualHealth - 1);
-      return { survived: true, survivedSkillName: this.surviveSkill.name };
+      return { survived: true, survivedSkillName: this.passives.survive.name };
     }
 
     this.addRealDamage(this.actualHealth);
@@ -1687,13 +1662,14 @@ export class FightingCard {
     const agility = attacker.deniesDodgeBonusOf(this)
       ? this.agilityWithoutBuffs
       : this.actualAgility;
-    const insightRate = this.attackerInsight?.agilityRateAgainst(attacker) ?? 0;
+    const insightRate =
+      this.passives.attackerInsight?.agilityRateAgainst(attacker) ?? 0;
 
     return agility + round2(this.agility * insightRate);
   }
 
   public deniesDodgeBonusOf(defender: FightingCard): boolean {
-    return this.dodgeBonusDenial?.appliesTo(defender) ?? false;
+    return this.passives.dodgeBonusDenial?.appliesTo(defender) ?? false;
   }
 
   /**
