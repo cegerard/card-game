@@ -9,110 +9,54 @@
     isDeckComplete,
   } from '$lib/deck/deck-store.js';
   import { ARCADE_LEVELS } from '$lib/arcade/levels.js';
-  import { findRosterCard } from '$lib/deck/roster.js';
-  import { fetchFight } from '$lib/combat/engine-client.js';
-  import { aggregateCombatStats } from '$lib/combat/combatStats.js';
-  import { attributeExperience } from '$lib/experience/attribute-experience.js';
-  import { progressionStore } from '$lib/progression/progression-store.js';
-  import { defaultProgression } from '$lib/progression/types.js';
   import {
-    computeTeamPower,
-    computeDifficulty,
-  } from '$lib/score/combat-power.js';
+    fightLevel,
+    settleFight,
+    type NamedXpGain,
+  } from '$lib/arcade/arcade-run.js';
+  import { PLAYER_NAME } from '$lib/combat/engine-client.js';
+  import { progressionStore } from '$lib/progression/progression-store.js';
   import { getRendererMode } from '$lib/combat/rendererMode.js';
   import PhaserRenderer from '$lib/combat/PhaserRenderer.svelte';
   import CombatReportRenderer from '$lib/combat/CombatReportRenderer.svelte';
   import VictoryScreen from '$lib/components/VictoryScreen.svelte';
   import GameOverScreen from '$lib/components/GameOverScreen.svelte';
   import LevelIndicator from '$lib/components/LevelIndicator.svelte';
-  import type { FightResult } from '$lib/arcade/types.js';
+  import type { ArcadeLevel, FightResult } from '$lib/arcade/types.js';
   import type { RendererMode } from '$lib/combat/rendererMode.js';
-  import type { CardDefinition } from '@card-game/shared-types';
-  import { toCombatConfig } from '@card-game/shared-types';
 
   let fightResult: FightResult | null = $state(null);
   let rendererMode: RendererMode = $state('phaser');
-  let currentEnemyTeam: CardDefinition[] = $state([]);
-  let lastXpGains: { cardId: string; name: string; gain: number }[] = $state(
-    [],
-  );
+  let lastXpGains: NamedXpGain[] = $state([]);
+  let currentLevel: ArcadeLevel;
 
   async function launchCombat(levelIndex: number) {
     const level = ARCADE_LEVELS[levelIndex - 1];
     if (!level) {
-      resetSession();
-      goto('/');
+      handleBackToMenu();
       return;
     }
 
     fightResult = null;
-    currentEnemyTeam = level.enemyTeam;
+    currentLevel = level;
 
     try {
-      fightResult = await fetchFight(
-        get(selectedDeckCards),
-        level.enemyTeam.map(toCombatConfig),
-        level.name,
-      );
+      fightResult = await fightLevel(level, get(selectedDeckCards));
     } catch {
-      resetSession();
-      goto('/');
+      handleBackToMenu();
     }
   }
 
-  function handleCombatComplete({ playerWon }: { playerWon: boolean }) {
-    const current = get(session);
+  function handleCombatComplete() {
     const result = fightResult!;
-
-    const playerCardIds = get(selectedDeckCards).map((card) => card.id);
-    const combatStats = aggregateCombatStats(result, playerCardIds);
-
-    // Puissance calculée avant l'attribution : la progression de ce
-    // combat ne doit pas influencer sa propre difficulté.
-    const playerPower = computeTeamPower(
-      get(selectedCardDefinitions).map((definition) => ({
-        definition,
-        progression: progressionStore.getProgression(definition.id),
-      })),
-    );
-    const opponentPower = computeTeamPower(
-      currentEnemyTeam.map((definition) => ({
-        definition,
-        progression: defaultProgression(definition.id),
-      })),
-    );
-    const difficulty = computeDifficulty(opponentPower, playerPower);
-
-    const gains = attributeExperience(
-      playerCardIds,
-      combatStats,
-      'Player',
+    const { phase, xpGains } = settleFight(
+      currentLevel,
+      result,
+      get(selectedCardDefinitions),
       progressionStore,
-      difficulty,
     );
-    lastXpGains = gains.map((g) => ({
-      cardId: g.cardId,
-      name: findRosterCard(g.cardId)?.name ?? g.cardId,
-      gain: g.gain,
-    }));
-
-    if (!playerWon) {
-      session.update((s) => ({
-        ...s,
-        phase: 'game-over',
-        fightResult: result,
-      }));
-      return;
-    }
-    if (current.currentLevel >= ARCADE_LEVELS.length) {
-      session.update((s) => ({
-        ...s,
-        phase: 'final-victory',
-        fightResult: result,
-      }));
-    } else {
-      session.update((s) => ({ ...s, phase: 'victory', fightResult: result }));
-    }
+    lastXpGains = xpGains;
+    session.update((s) => ({ ...s, phase, fightResult: result }));
   }
 
   function handleNextLevel() {
@@ -148,14 +92,14 @@
   {#if rendererMode === 'web'}
     <CombatReportRenderer
       {fightResult}
-      playerName="Player"
+      playerName={PLAYER_NAME}
       playerCardIds={$selectedDeckCards.map((c) => c.id)}
       oncomplete={handleCombatComplete}
     />
   {:else}
     <PhaserRenderer
       {fightResult}
-      playerName="Player"
+      playerName={PLAYER_NAME}
       oncomplete={handleCombatComplete}
     />
   {/if}

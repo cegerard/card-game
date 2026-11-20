@@ -11,7 +11,7 @@ const PARTICIPATION_NOT_ENGAGED = 0;
 /**
  * Valeur utilisée quand aucune difficulté n'est fournie à
  * attributeExperience (tests, appels ne calculant pas encore le ratio).
- * En production, +page.svelte calcule le ratio réel via
+ * En production, settleFight (arcade-run.ts) calcule le ratio réel via
  * computeDifficulty (étape 6 du plan) et le transmet explicitement.
  */
 const DEFAULT_DIFFICULTY = 1;

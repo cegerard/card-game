@@ -5,13 +5,16 @@ import type {
   FightResult,
 } from '$lib/arcade/types.js';
 
+/** Nom du joueur dans la requête de combat, donc dans le rapport (vainqueur). */
+export const PLAYER_NAME = 'Player';
+
 export async function fetchFight(
   player1Deck: CardConfig[],
   player2Deck: CardConfig[],
   enemyName: string,
 ): Promise<FightResult> {
   const request: FightRequest = {
-    player1: { name: 'Player', deck: player1Deck },
+    player1: { name: PLAYER_NAME, deck: player1Deck },
     player2: { name: enemyName, deck: player2Deck },
     cardSelectorStrategy: 'speed-weighted',
   };

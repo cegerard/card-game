@@ -6,27 +6,8 @@ import {
   attributeExperience,
 } from '../attribute-experience.js';
 import { createProgressionStore } from '$lib/progression/progression-store.js';
-import type {
-  CardProgression,
-  ProgressionRepository,
-} from '$lib/progression/types.js';
+import { createInMemoryRepository } from '$lib/progression/__tests__/in-memory-repository.js';
 import type { CombatStats } from '$lib/combat/combatStats.js';
-
-function createInMemoryRepository(
-  seed: CardProgression[] = [],
-): ProgressionRepository {
-  const store = new Map(seed.map((p) => [p.cardId, p]));
-  return {
-    get: (cardId) => store.get(cardId),
-    getAll: () => [...store.values()],
-    set: (progression) => {
-      store.set(progression.cardId, progression);
-    },
-    reset: () => {
-      store.clear();
-    },
-  };
-}
 
 describe('computeCombatResult', () => {
   it('returns the victory factor when the winner is the player', () => {
