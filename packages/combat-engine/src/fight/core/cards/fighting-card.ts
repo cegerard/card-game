@@ -18,7 +18,6 @@ import { BleedApplication } from './skills/bleed-empowerment';
 import { CardBoundPassives } from './skills/card-bound-passives';
 import { EffectLevel } from './@types/attack/effect-level';
 import {
-  AlterationDetail,
   Buff,
   Debuff,
   AlterationStacking,
@@ -45,7 +44,11 @@ import {
   EffectResult,
   SUPPORT_BLOCK_ENDED_TYPE,
 } from './@types/attack/attack-effect';
-import { LiveRate } from './@types/alteration/live-rate';
+import {
+  AlterationOptions,
+  CardAlterations,
+  RemovedAlteration,
+} from './@types/alteration/card-alterations';
 import {
   BattlefieldDeployment,
   BattlefieldExposure,
@@ -62,13 +65,6 @@ import {
  * range of the stat spans 10% to 40% of incoming statuses and debuffs refused.
  */
 const RESISTANCE_REFUSAL_DIVISOR = 200;
-
-/** What an alteration carries besides its rate and its lifetime. */
-export type AlterationOptions = {
-  live?: LiveRate;
-  origin?: string;
-  terminationDamageRate?: number;
-};
 
 export type FinalDamageResult = {
   damageToHealth: number;
@@ -154,11 +150,10 @@ export class FightingCard {
   private receivedHeal: number = 0;
   private _lastAttacker?: FightingCard;
 
-  // Buffs
-  private buffs: Buff[] = [];
-
-  // Debuffs
-  private debuffs: Debuff[] = [];
+  private readonly alterations = new CardAlterations(
+    (type, rate) => this.computeAttributeModifierValue(type, rate),
+    (live) => live.rateFor(this),
+  );
 
   // Skills
   private simpleAttack: AttackSkill;
@@ -891,15 +886,12 @@ export class FightingCard {
     this.exposures
       .filter((e) => e.deployment === deployment)
       .forEach((e) => (e.remainingTurns += turns));
-    [...this.buffs, ...this.debuffs]
-      .filter((a) => a.origin === deployment.name)
-      .forEach((a) => (a.duration += turns));
+    this.alterations.extend(deployment.name, turns);
   }
 
   /** A battlefield laid again refreshes its alterations rather than stacking them. */
   public removeAlterationsFrom(origin: string): void {
-    this.buffs = this.buffs.filter((b) => b.origin !== origin);
-    this.debuffs = this.debuffs.filter((d) => d.origin !== origin);
+    this.alterations.removeFrom(origin);
   }
 
   /** Whether the card stands in a battlefield of that element. */
@@ -950,8 +942,7 @@ export class FightingCard {
     this.statuses.clear();
     this.vulnerabilities = [];
     this.supportBlock = null;
-    this.buffs = [];
-    this.debuffs = [];
+    this.alterations.clear();
     this.shield = null;
     this.stances = [];
     this.concealment = null;
@@ -1561,40 +1552,19 @@ export class FightingCard {
     terminationEvent?: string,
     powerId?: string,
     stacking?: AlterationStacking,
-    { live, origin, terminationDamageRate }: AlterationOptions = {},
+    options: AlterationOptions = {},
   ): Buff | undefined {
-    if (isPileFull(this.buffs, stacking)) return undefined;
+    if (this.alterations.isPileFull('buff', stacking)) return undefined;
 
-    const value = this.computeAttributeModifierValue(
-      buffType,
-      live?.rateFor(this) ?? buffRate,
-    );
-    const buff: Buff = {
-      polarity: 'buff',
+    return this.alterations.addBuff({
       type: buffType,
-      value,
+      rate: buffRate,
       duration,
       terminationEvent,
       powerId,
-      stackId: stacking?.id,
-      live,
-      origin,
-      terminationDamageRate,
-    };
-
-    if (terminationEvent && !stacking) {
-      const existingIndex = this.buffs.findIndex(
-        (b) => b.type === buffType && b.terminationEvent === terminationEvent,
-      );
-      if (existingIndex >= 0) {
-        this.buffs[existingIndex] = buff;
-        return buff;
-      }
-    }
-
-    this.buffs.push(buff);
-
-    return buff;
+      stacking,
+      ...options,
+    });
   }
 
   public removeEventBoundEffects(
@@ -1607,15 +1577,8 @@ export class FightingCard {
   public removeEventBoundBuffs(
     eventName: string,
     hitRate?: number,
-  ): { type: BuffType; value: number }[] {
-    const ends = (b: Buff) => endsOn(b, eventName, hitRate);
-    const removed = this.buffs
-      .filter(ends)
-      .map((b) => ({ type: b.type, value: b.value }));
-
-    this.buffs = this.buffs.filter((b) => !ends(b));
-
-    return removed;
+  ): RemovedAlteration[] {
+    return this.alterations.removeBoundTo('buff', eventName, hitRate);
   }
 
   public lifecycleEndEvents(): string[] {
@@ -1628,37 +1591,21 @@ export class FightingCard {
     expiredBuffs: Buff[];
     expiredDebuffs: Debuff[];
   } {
-    const decremented = this.buffs.map((b) => ({
-      ...b,
-      duration: b.duration - 1,
-    }));
-    const expiredBuffs = decremented.filter((b) => b.duration < 0);
-    this.buffs = decremented.filter((b) => b.duration >= 0);
-
-    const decrementedDebuffs = this.debuffs.map((d) => ({
-      ...d,
-      duration: d.duration - 1,
-    }));
-    const expiredDebuffs = decrementedDebuffs.filter((d) => d.duration < 0);
-    this.debuffs = decrementedDebuffs.filter((d) => d.duration >= 0);
-
-    return { expiredBuffs, expiredDebuffs };
+    return this.alterations.decreaseDurations();
   }
 
   /** Removes and returns every buff of that type, to hand it to another card. */
   public takeBuffs(type: BuffType): Buff[] {
-    const taken = this.buffs.filter((b) => b.type === type);
-    this.buffs = this.buffs.filter((b) => b.type !== type);
-    return taken;
+    return this.alterations.takeBuffs(type);
   }
 
   /** Takes buffs as they are: value, remaining duration and stack pile. */
   public receiveBuffs(buffs: Buff[]): void {
-    this.buffs.push(...buffs.map((buff) => ({ ...buff })));
+    this.alterations.receiveBuffs(buffs);
   }
 
   public buffStacks(stackId: string): number {
-    return stacksIn(this.buffs, stackId);
+    return this.alterations.stacks('buff', stackId);
   }
 
   /**
@@ -1674,31 +1621,20 @@ export class FightingCard {
     terminationEvent?: string,
     powerId?: string,
     stacking?: AlterationStacking,
-    { live, origin, terminationDamageRate }: AlterationOptions = {},
+    options: AlterationOptions = {},
   ): Debuff | undefined {
-    if (isPileFull(this.debuffs, stacking)) return undefined;
-
+    if (this.alterations.isPileFull('debuff', stacking)) return undefined;
     if (this.resists()) return undefined;
 
-    const debuff: Debuff = {
-      polarity: 'debuff',
+    return this.alterations.addDebuff({
       type: debuffType,
-      value: this.computeAttributeModifierValue(
-        debuffType,
-        live?.rateFor(this) ?? debuffRate,
-      ),
-      duration: duration,
+      rate: debuffRate,
+      duration,
       terminationEvent,
       powerId,
-      stackId: stacking?.id,
-      live,
-      origin,
-      terminationDamageRate,
-    };
-
-    this.debuffs.push(debuff);
-
-    return debuff;
+      stacking,
+      ...options,
+    });
   }
 
   /** Whether the pile of that polarity already holds `maxStacks` alterations. */
@@ -1706,28 +1642,18 @@ export class FightingCard {
     polarity: 'buff' | 'debuff',
     stacking?: AlterationStacking,
   ): boolean {
-    return isPileFull(
-      polarity === 'buff' ? this.buffs : this.debuffs,
-      stacking,
-    );
+    return this.alterations.isPileFull(polarity, stacking);
   }
 
   public debuffStacks(stackId: string): number {
-    return stacksIn(this.debuffs, stackId);
+    return this.alterations.stacks('debuff', stackId);
   }
 
   public removeEventBoundDebuffs(
     eventName: string,
     hitRate?: number,
-  ): { type: BuffType; value: number }[] {
-    const ends = (d: Debuff) => endsOn(d, eventName, hitRate);
-    const removed = this.debuffs
-      .filter(ends)
-      .map((d) => ({ type: d.type, value: d.value }));
-
-    this.debuffs = this.debuffs.filter((d) => !ends(d));
-
-    return removed;
+  ): RemovedAlteration[] {
+    return this.alterations.removeBoundTo('debuff', eventName, hitRate);
   }
 
   /**
@@ -1755,29 +1681,17 @@ export class FightingCard {
   private computeActualStat(base: number, type: BuffType): number {
     return Math.max(
       0,
-      base + this.sumOf(this.buffs, type) - this.sumOf(this.debuffs, type),
+      base +
+        this.alterations.total('buff', type) -
+        this.alterations.total('debuff', type),
     );
   }
 
   private get agilityWithoutBuffs(): number {
-    return Math.max(0, this.agility - this.sumOf(this.debuffs, 'agility'));
-  }
-
-  /** A live alteration is worth what its rate gives on the board right now. */
-  private sumOf(alterations: AlterationDetail[], type: BuffType): number {
-    return alterations
-      .filter((alteration) => alteration.type === type)
-      .reduce(
-        (sum, alteration) =>
-          sum +
-          (alteration.live
-            ? this.computeAttributeModifierValue(
-                type,
-                alteration.live.rateFor(this),
-              )
-            : alteration.value),
-        0,
-      );
+    return Math.max(
+      0,
+      this.agility - this.alterations.total('debuff', 'agility'),
+    );
   }
 
   private computeAttributeModifierValue(type: BuffType, rate: number): number {
@@ -1802,27 +1716,4 @@ export class FightingCard {
         throw new Error(`Unknown attribute type: ${type}`);
     }
   }
-}
-
-function endsOn(
-  alteration: AlterationDetail,
-  eventName: string,
-  hitRate?: number,
-): boolean {
-  if (alteration.terminationEvent !== eventName) return false;
-  if (alteration.terminationDamageRate === undefined) return true;
-
-  return (hitRate ?? 0) > alteration.terminationDamageRate;
-}
-
-function isPileFull(
-  alterations: AlterationDetail[],
-  stacking?: AlterationStacking,
-): boolean {
-  if (!stacking) return false;
-  return stacksIn(alterations, stacking.id) >= stacking.maxStacks;
-}
-
-function stacksIn(alterations: AlterationDetail[], stackId: string): number {
-  return alterations.filter((a) => a.stackId === stackId).length;
 }
