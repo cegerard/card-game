@@ -72,23 +72,25 @@ cards/
 │   ├── analysis.ts, aftershock.ts, weak-point-legacy.ts # ANALYSIS, AFTERSHOCK, WEAK_POINT_LEGACY
 │   ├── support.ts, energy-gain.ts # SUPPORT, ENERGY_GAIN
 │   ├── attacker-insight.ts, special-echo.ts # ATTACKER_INSIGHT (card-bound), SPECIAL_ECHO
+│   ├── card-bound-passives.ts # CardBoundPassives: the passives a card holds
 │   └── power-id-consistency.ts # Composite power validation
 ├── behaviors/ # dodge-behaviors.ts, simple-dodge.ts, random-dodge.ts
 ├── damage/ # damage-calculator.ts, elemental-matrix.ts (5x5)
 └── @types/
+    ├── count-down.ts # countDown(): one turn off a timed buffer
     ├── action-result/ # special-result, attack-result, named-attack-result, healing-result, buff-results, shield-result
     ├── attack/ # attack-effect + poison/burn/freeze/stunt/mark/bleed effects, stacked-poison effect, damage-type-bonus (base of bleed-stack-bonus, concealed-bonus, battlefield-bonus), entangle/energy-drain/vulnerability/support-block effects, energy-refund, bleed-detonation, splash, weak-point/hypothermia effects, frozen-target-bonus, low-health-debuff, hit-alterations, execution, conditions/
-    ├── alteration/ # alteration-detail (Buff | Debuff), alteration-condition, buff-application, live-rate, conditions/ (ally-presence, health-threshold, probability)
-    ├── mark/ # elemental-mark, marked-target-bonus
+    ├── alteration/ # alteration-detail (Buff | Debuff), card-alterations (a card buffs and debuffs), alteration-condition, buff-application, live-rate, conditions/ (ally-presence, health-threshold, probability)
+    ├── mark/ # elemental-mark, elemental-marks (per card), marked-target-bonus
     ├── weak-point/ # weak-point (WeakPoint, spec), weak-points (per card), weak-point-strike (penetration helper)
-    ├── shield/ # shield, shield-application
-    ├── stance/ # stance (name, remainingTurns, immunities), StanceActivation, ramping-chance (STANCE skill chance)
+    ├── shield/ # shield, shield-slot, shield-application
+    ├── stance/ # stance (name, remainingTurns, immunities), StanceActivation, stances (per card), ramping-chance (STANCE skill chance)
     ├── concealment/ # concealment (name, optional remainingTurns)
     ├── skill-activation-conditions/ # health-threshold-condition
     ├── damage/ # damage-composition
     ├── battlefield/ # Battlefield, deployment, exposure
     ├── vulnerability/ # vulnerability (timed weakness to one damage type)
-    └── state/ # card-state-frozen/stunted/bleeding/stacked-poison/hypothermia/entangled, status-category
+    └── state/ # card-statuses (a card statuses), card-state-frozen/stunted/bleeding/stacked-poison/hypothermia/entangled, status-category
 ```
 
 ### `fight-simulator/`
