@@ -3,7 +3,6 @@ import type {
   HealingReport,
   ShieldAppliedReport,
   Step,
-  SurvivedReport,
 } from '@card-game/shared-types';
 import { StepKind } from '@card-game/shared-types';
 import { fightingContextOf } from '../fight-simulator/fighting-context-of';
@@ -38,8 +37,6 @@ import {
 } from '../fight-simulator/skill-results-to-steps';
 import { effectResultsToSteps } from '../fight-simulator/effect-results-to-steps';
 import { EndEventProcessor } from '../fight-simulator/end-event-processor';
-import { executionSteps } from '../fight-simulator/execution-steps';
-import { ExecutionResult } from '../cards/@types/action-result/execution-result';
 import {
   SurvivedReactor,
   fightSurvivedReactor,
@@ -59,10 +56,14 @@ import {
   stanceEndedReport,
   stanceStartedReport,
 } from '../fight-simulator/stance-steps';
+import { battlefieldStartedSteps } from '../fight-simulator/battlefield-steps';
 import {
-  battlefieldStartedSteps,
-  damageSharedSteps,
-} from '../fight-simulator/battlefield-steps';
+  deathStep,
+  defenseSteps,
+  executionReactionSteps,
+  hitDamage,
+  survivedSteps,
+} from '../fight-simulator/hit-steps';
 
 type SplittedSteps = {
   actionSteps: Step[];
@@ -257,10 +258,11 @@ export class ActionStage {
       card,
       skillResults.filter((r) => r.skillKind === SkillKind.Concealment),
     );
-    result.executionSteps = this.executionReport(
+    result.executionSteps = executionReactionSteps(
       card,
       attackSkill.name,
       attackSkill.executions?.results ?? [],
+      this.survivedReactor,
     );
     result.hitAlterationSteps = skillResultsToSteps(
       card,
@@ -366,10 +368,11 @@ export class ActionStage {
         const reports = [attackSkill, attackSkill.splash]
           .filter((strike) => strike?.results.length > 0)
           .map((strike) => this.reportStrike(card, strike));
-        reports[0].executionSteps = this.executionReport(
+        reports[0].executionSteps = executionReactionSteps(
           card,
           attackSkill.name,
           attackSkill.executions?.results ?? [],
+          this.survivedReactor,
         );
         reports[0].hitAlterationSteps = skillResultsToSteps(
           card,
@@ -445,10 +448,11 @@ export class ActionStage {
     const actionResults = specialResults.actionResults as AttackResult[];
 
     this.handleAttackResult(actionResults, result, card);
-    result.executionSteps = this.executionReport(
+    result.executionSteps = executionReactionSteps(
       card,
       specialResults.name,
       specialResults.executions ?? [],
+      this.survivedReactor,
     );
     if (specialResults.battlefield) {
       result.battlefieldSteps = battlefieldStartedSteps(
@@ -654,16 +658,7 @@ export class ActionStage {
 
       const defensiveCard = damageDealt.defender;
 
-      report.attack.damages.push({
-        defender: defensiveCard.identityInfo,
-        damage: damageDealt.damage,
-        isCritical: damageDealt.isCritical,
-        dodge: damageDealt.dodge,
-        remainingHealth: damageDealt.remainingHealth,
-        kind: damageDealt.kind,
-        shieldAbsorbed: damageDealt.shieldAbsorbed,
-        consumedBleedStacks: damageDealt.consumedBleedStacks,
-      });
+      report.attack.damages.push(hitDamage(damageDealt));
 
       if (damageDealt.interceptedFor) {
         report.statusChanges.push({
@@ -673,42 +668,20 @@ export class ActionStage {
         });
       }
 
-      if (damageDealt.mitigated) {
-        report.statusChanges.push({
-          kind: StepKind.DamageMitigated,
-          name: damageDealt.mitigatedSkillName,
-          card: defensiveCard.identityInfo,
-        });
-      }
-
-      report.statusChanges.push(...this.sharedDamageSteps(damageDealt));
-
-      if (damageDealt.shieldBroken) {
-        report.statusChanges.push({
-          kind: StepKind.ShieldBroken,
-          card: defensiveCard.identityInfo,
-        });
-      }
-
-      if (damageDealt.survived) {
-        const survivedReport: SurvivedReport = {
-          kind: StepKind.Survived,
-          name: damageDealt.survivedSkillName,
-          card: defensiveCard.identityInfo,
-        };
-        report.survivedSteps.push(survivedReport);
-        report.survivedSteps.push(...this.survivedReactor(defensiveCard));
-      }
+      report.statusChanges.push(
+        ...defenseSteps(damageDealt, (hit) => this.carriersReactions(hit)),
+      );
+      report.survivedSteps.push(
+        ...survivedSteps(damageDealt, this.survivedReactor),
+      );
 
       if (defensiveCard.isDead() && !reportedDeaths.has(defensiveCard)) {
         reportedDeaths.add(defensiveCard);
         this.notifyDeath(defensiveCard, attackerCard);
-        report.statusChanges.push({
-          kind: StepKind.StatusChange,
-          card: defensiveCard.identityInfo,
-          status: 'dead',
-        });
-        report.statusChanges.push(...this.deathSkillHandler.drainSteps());
+        report.statusChanges.push(
+          deathStep(defensiveCard),
+          ...this.deathSkillHandler.drainSteps(),
+        );
       } else if (!defensiveCard.isDead()) {
         if (!damageDealt.dodge) {
           defensiveCard.lastAttacker = attackerCard;
@@ -762,20 +735,17 @@ export class ActionStage {
     );
   }
 
-  /** The share a circle carried, then what the carriers felt of it. */
-  private sharedDamageSteps(hit: AttackResult): Step[] {
-    return [
-      ...damageSharedSteps(hit),
-      ...(hit.damageShared?.shares ?? []).flatMap(({ card }) =>
-        skillResultsToSteps(
+  /** What the cards that carried a share of the hit did on feeling it. */
+  private carriersReactions(hit: AttackResult): Step[] {
+    return (hit.damageShared?.shares ?? []).flatMap(({ card }) =>
+      skillResultsToSteps(
+        card,
+        triggerReactiveSkills(
           card,
-          triggerReactiveSkills(
-            card,
-            fightingContextOf(card, this.player1, this.player2),
-          ),
+          fightingContextOf(card, this.player1, this.player2),
         ),
       ),
-    ];
+    );
   }
 
   /**
@@ -899,18 +869,6 @@ export class ActionStage {
         ),
       ];
     });
-  }
-
-  /** The executions of an attack, each followed by the reactions it caused. */
-  private executionReport(
-    attacker: FightingCard,
-    name: string,
-    executions: ExecutionResult[],
-  ): Step[] {
-    return executions.flatMap((execution) => [
-      ...executionSteps(attacker, name, [execution]),
-      ...(execution.survived ? this.survivedReactor(execution.card) : []),
-    ]);
   }
 
   private notifyDeath(card: FightingCard, killerCard?: FightingCard): void {
