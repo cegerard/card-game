@@ -131,11 +131,13 @@ most-wounded-ally.ts, fastest-ally.ts, protected-ally.ts, first-bleeding-enemy.t
 ```
 http-api/
 ├── fight.controller.ts # POST /fight (startFight only)
-├── fighting-card-factory.ts # FightingCardDto → FightingCard, KIND_ONLY_FIELDS guard, CARD_BOUND_SKILL_KINDS
+├── fighting-card-factory.ts # FightingCardDto → FightingCard, CARD_BOUND_SKILL_KINDS
+├── skill-kind-fields.ts # RESERVED_FIELDS (kind → fields), OtherSkillOf<K>, rejectMisplacedFields()
 ├── special-factory.ts, attack-skill-factory.ts # Special / simple-multiple attack builders (+ damage bonuses, energy refund, execution)
 ├── attack-effect-factory.ts # EffectDto → AttackEffect, triggered debuff
 ├── card-bound-skill-factory.ts # Passives kept on the card (survive, reduction, dodge denial, bleed scaling/empowerment, low-health bonus)
-├── other-skill-factory.ts # createOtherSkill: one builder per SkillKind
+├── other-skill-factory.ts # createOtherSkill: BUILDERS table, one builder per SkillKind
+├── offensive-skill-factory.ts, supportive-skill-factory.ts, posture-skill-factory.ts # The builders by family: attacks and afflictions; heals, alterations, support; shield, protection, stance, concealment, transformation, targeting override
 ├── battlefield-factory.ts # BattlefieldDto → Battlefield
 ├── skill-wiring-factory.ts # Shared skill helpers: triggers, targeting, activation condition, stacking, alteration type, asBadRequest
 ├── card-selector-factory.ts # CardSelectorStrategy → CardSelector

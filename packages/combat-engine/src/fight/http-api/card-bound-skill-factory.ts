@@ -12,12 +12,14 @@ import { PoisonedEnemyAgilitySkill } from '../core/cards/skills/poisoned-enemy-a
 import { buildTriggeredDebuff } from './attack-effect-factory';
 import { AttackerInsightSkill } from '../core/cards/skills/attacker-insight';
 import { asBadRequest } from './skill-wiring-factory';
+import { OtherSkillOf } from './skill-kind-fields';
 
-function findSkill(
+/** The passive of that kind, seen with the fields of its kind only. */
+function findSkill<K extends SkillKind>(
   others: OtherSkillDto[],
-  kind: SkillKind,
-): OtherSkillDto | undefined {
-  return others.find((s) => s.kind === kind);
+  kind: K,
+): OtherSkillOf<K> | undefined {
+  return others.find((s): s is OtherSkillDto & { kind: K } => s.kind === kind);
 }
 
 export function buildSurviveSkill(
