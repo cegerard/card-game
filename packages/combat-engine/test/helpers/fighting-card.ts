@@ -36,6 +36,7 @@ import { DodgeBonusDenialSkill } from '../../src/fight/core/cards/skills/dodge-b
 import { BleedStackScalingSkill } from '../../src/fight/core/cards/skills/bleed-stack-scaling';
 import { LowHealthTargetBonusSkill } from '../../src/fight/core/cards/skills/low-health-target-bonus';
 import { SurviveSkill } from '../../src/fight/core/cards/skills/survive';
+import { DamageReductionSkill } from '../../src/fight/core/cards/skills/damage-reduction';
 import { BleedEmpowermentSkill } from '../../src/fight/core/cards/skills/bleed-empowerment';
 import { PoisonedEnemyAgilitySkill } from '../../src/fight/core/cards/skills/poisoned-enemy-agility';
 import { AttackerInsightSkill } from '../../src/fight/core/cards/skills/attacker-insight';
@@ -72,6 +73,7 @@ type FightingCardParams = {
   poisonedEnemyAgility?: PoisonedEnemyAgilitySkill;
   attackerInsight?: AttackerInsightSkill;
   survive?: SurviveSkill;
+  damageReduction?: DamageReductionSkill;
   extraSkills?: Skill[];
   skills?: {
     simpleAttack?: {
@@ -544,6 +546,7 @@ export function createFightingCard(
       poisonedEnemyAgility: params.poisonedEnemyAgility,
       attackerInsight: params.attackerInsight,
       survive: params.survive,
+      damageReduction: params.damageReduction,
     },
     {
       dodge: new SimpleDodge(),

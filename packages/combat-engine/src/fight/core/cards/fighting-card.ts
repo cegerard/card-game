@@ -12,36 +12,28 @@ import { AttackSkill } from './skills/attack-skill';
 import { Special } from './skills/special';
 import { CardState } from './@types/state/card-state';
 import { StateResult } from './@types/action-result/state-result';
-import { CardStateFrozen } from './@types/state/card-state-frozen';
-import { CardStateStunted } from './@types/state/card-state-stunted';
-import { CardStateBleeding } from './@types/state/card-state-bleeding';
 import { CardStateStackedPoison } from './@types/state/card-state-stacked-poison';
-import { DodgeBonusDenialSkill } from './skills/dodge-bonus-denial';
-import { BleedStackScalingSkill } from './skills/bleed-stack-scaling';
-import { PoisonedEnemyAgilitySkill } from './skills/poisoned-enemy-agility';
-import { AttackerInsightSkill } from './skills/attacker-insight';
-import { LowHealthTargetBonusSkill } from './skills/low-health-target-bonus';
-import {
-  BleedApplication,
-  BleedEmpowermentSkill,
-} from './skills/bleed-empowerment';
+import { CardStatuses } from './@types/state/card-statuses';
+import { BleedApplication } from './skills/bleed-empowerment';
+import { CardBoundPassives } from './skills/card-bound-passives';
 import { EffectLevel } from './@types/attack/effect-level';
 import {
-  AlterationDetail,
   Buff,
   Debuff,
   AlterationStacking,
 } from './@types/alteration/alteration-detail';
 import { Skill, SkillResults } from './skills/skill';
 import { HealthReactiveSkill } from './skills/reactive-skill';
-import { SurviveSkill } from './skills/survive';
-import { DamageReductionSkill } from './skills/damage-reduction';
 import { ElementalMark } from './@types/mark/elemental-mark';
 import { TargetingCardStrategy } from '../targeting-card-strategies/targeting-card-strategy';
 import { NamedAttackResult } from './@types/action-result/named-attack-result';
 import { round2 } from '../../tools/round';
 import { Randomizer } from '../randomizer';
 import { Shield } from './@types/shield/shield';
+import { ShieldSlot } from './@types/shield/shield-slot';
+import { countDown } from './@types/count-down';
+import { ElementalMarks } from './@types/mark/elemental-marks';
+import { Stances } from './@types/stance/stances';
 import { Stance, StanceActivation } from './@types/stance/stance';
 import { Concealment } from './@types/concealment/concealment';
 import { statusCategoryOf } from './@types/state/status-category';
@@ -56,14 +48,17 @@ import {
   EffectResult,
   SUPPORT_BLOCK_ENDED_TYPE,
 } from './@types/attack/attack-effect';
-import { LiveRate } from './@types/alteration/live-rate';
+import {
+  AlterationOptions,
+  CardAlterations,
+  RemovedAlteration,
+} from './@types/alteration/card-alterations';
 import {
   BattlefieldDeployment,
   BattlefieldExposure,
   DamageSharing,
 } from './@types/battlefield/battlefield';
 import { ElementalMatrix } from './damage/elemental-matrix';
-import { CardStateEntangled } from './@types/state/card-state-entangled';
 import {
   VULNERABILITY_ENDED_TYPE,
   Vulnerability,
@@ -75,13 +70,6 @@ import {
  */
 const RESISTANCE_REFUSAL_DIVISOR = 200;
 
-/** What an alteration carries besides its rate and its lifetime. */
-export type AlterationOptions = {
-  live?: LiveRate;
-  origin?: string;
-  terminationDamageRate?: number;
-};
-
 export type FinalDamageResult = {
   damageToHealth: number;
   shieldAbsorbed: number;
@@ -92,6 +80,11 @@ export type FinalDamageResult = {
   /** The part of the hit the other members of a damage sharing circle took. */
   damageShared?: SharedDamage;
 };
+
+/** What is left of a hit after one defensive layer, and what the layer did. */
+type LayerPass = { damage: number; report?: Partial<FinalDamageResult> };
+
+type DamageLayer = (damage: number) => LayerPass;
 
 export type SharedDamage = {
   name: string;
@@ -130,11 +123,6 @@ type Protection = {
   remainingTurns: number;
 };
 
-type MarkEntry = {
-  mark: ElementalMark;
-  stacks: number;
-};
-
 export type TargetingOverrideEntry = {
   strategy: TargetingCardStrategy;
   terminationEvent: string;
@@ -166,11 +154,10 @@ export class FightingCard {
   private receivedHeal: number = 0;
   private _lastAttacker?: FightingCard;
 
-  // Buffs
-  private buffs: Buff[] = [];
-
-  // Debuffs
-  private debuffs: Debuff[] = [];
+  private readonly alterations = new CardAlterations(
+    (type, rate) => this.computeAttributeModifierValue(type, rate),
+    (live) => live.rateFor(this),
+  );
 
   // Skills
   private simpleAttack: AttackSkill;
@@ -180,11 +167,9 @@ export class FightingCard {
   // Behaviors
   private dodgeBehavior: DodgeBehavior;
 
-  // Shield
-  private shield: Shield | null = null;
+  private readonly shield = new ShieldSlot();
 
-  // Elemental marks
-  private marks: MarkEntry[] = [];
+  private readonly marks = new ElementalMarks();
 
   // Lifesteal
   private lifesteal: Lifesteal | null = null;
@@ -198,21 +183,10 @@ export class FightingCard {
   // Transformation
   private transformation: Transformation | null = null;
 
-  // Survive
-  private surviveSkill: SurviveSkill | null = null;
-
-  // Damage reduction
-  private damageReduction: DamageReductionSkill | null = null;
-  private dodgeBonusDenial: DodgeBonusDenialSkill | null = null;
-  private bleedStackScaling: BleedStackScalingSkill | null = null;
-  private lowHealthTargetBonus: LowHealthTargetBonusSkill | null = null;
-  private bleedEmpowerment: BleedEmpowermentSkill | null = null;
-  private poisonedEnemyAgility: PoisonedEnemyAgilitySkill | null = null;
-  private attackerInsight: AttackerInsightSkill | null = null;
+  private readonly passives: CardBoundPassives;
   private attacked = false;
 
-  // Stances
-  private stances: Stance[] = [];
+  private readonly stances = new Stances();
 
   // Concealment
   private concealment: Concealment | null = null;
@@ -237,13 +211,7 @@ export class FightingCard {
   private targetingOverrides: TargetingOverrideEntry[] = [];
 
   // Status
-  private poisoned?: CardState;
-  private burned?: CardState;
-  private frozen?: CardState;
-  private stunted?: CardState;
-  private bleeding?: CardStateBleeding;
-  private hypothermic?: CardState;
-  private entangled?: CardStateEntangled;
+  private readonly statuses = new CardStatuses();
   private supportBlock: { remainingTurns: number } | null = null;
   private vulnerabilities: Vulnerability[] = [];
   private readonly weakPoints = new WeakPoints();
@@ -268,15 +236,7 @@ export class FightingCard {
       simpleAttack: AttackSkill;
       special: Special;
       others: Skill[];
-      survive?: SurviveSkill;
-      damageReduction?: DamageReductionSkill;
-      dodgeBonusDenial?: DodgeBonusDenialSkill;
-      bleedStackScaling?: BleedStackScalingSkill;
-      bleedEmpowerment?: BleedEmpowermentSkill;
-      lowHealthTargetBonus?: LowHealthTargetBonusSkill;
-      poisonedEnemyAgility?: PoisonedEnemyAgilitySkill;
-      attackerInsight?: AttackerInsightSkill;
-    },
+    } & CardBoundPassives,
     behaviors: {
       dodge: DodgeBehavior;
     },
@@ -296,18 +256,12 @@ export class FightingCard {
     this.resistance = stats.resistance ?? 0;
     this.element = element;
     this.randomizer = randomizer;
-    this.simpleAttack = skills.simpleAttack;
-    this.special = skills.special;
+    const { simpleAttack, special, others, ...passives } = skills;
+    this.simpleAttack = simpleAttack;
+    this.special = special;
+    this.skills = others;
+    this.passives = passives;
     this.dodgeBehavior = behaviors.dodge;
-    this.skills = skills.others;
-    this.surviveSkill = skills.survive ?? null;
-    this.damageReduction = skills.damageReduction ?? null;
-    this.dodgeBonusDenial = skills.dodgeBonusDenial ?? null;
-    this.bleedStackScaling = skills.bleedStackScaling ?? null;
-    this.bleedEmpowerment = skills.bleedEmpowerment ?? null;
-    this.lowHealthTargetBonus = skills.lowHealthTargetBonus ?? null;
-    this.poisonedEnemyAgility = skills.poisonedEnemyAgility ?? null;
-    this.attackerInsight = skills.attackerInsight ?? null;
   }
 
   public get lastAttacker(): FightingCard | undefined {
@@ -381,7 +335,8 @@ export class FightingCard {
     context?: FightingContext,
     defender?: FightingCard,
   ): number {
-    const stackBonus = this.bleedStackScaling?.multiplierFor(context) ?? 1;
+    const stackBonus =
+      this.passives.bleedStackScaling?.multiplierFor(context) ?? 1;
 
     return this.actualAttack * stackBonus * this.targetBonusAgainst(defender);
   }
@@ -393,7 +348,7 @@ export class FightingCard {
   public targetBonusAgainst(defender?: FightingCard): number {
     if (!defender) return 1;
     const lowHealthBonus =
-      this.lowHealthTargetBonus?.multiplierAgainst(defender) ?? 1;
+      this.passives.lowHealthTargetBonus?.multiplierAgainst(defender) ?? 1;
 
     return (
       lowHealthBonus *
@@ -419,7 +374,7 @@ export class FightingCard {
   public accuracyAgainst(defender: FightingCard): number {
     const rate =
       defender.weakPoints.bonusOf(this, 'accuracyRate') +
-      (this.attackerInsight?.accuracyRateAgainst(defender) ?? 0);
+      (this.passives.attackerInsight?.accuracyRateAgainst(defender) ?? 0);
 
     return this.actualAccuracy + round2(this.accuracy * rate);
   }
@@ -445,7 +400,8 @@ export class FightingCard {
   public get actualAgility(): number {
     const poisonBonus = round2(
       this.agility *
-        (this.poisonedEnemyAgility?.rateFor(this.poisonedCardCount) ?? 0),
+        (this.passives.poisonedEnemyAgility?.rateFor(this.poisonedCardCount) ??
+          0),
     );
 
     return this.computeActualStat(this.agility, 'agility') + poisonBonus;
@@ -477,7 +433,7 @@ export class FightingCard {
   }
 
   public get poisonLevel(): EffectLevel {
-    return this.poisoned?.level ?? 0;
+    return this.statuses.level('poison');
   }
 
   public poisonStacks(): number {
@@ -509,35 +465,33 @@ export class FightingCard {
   }
 
   private get stackedPoison(): CardStateStackedPoison | undefined {
-    return this.poisoned instanceof CardStateStackedPoison
-      ? this.poisoned
-      : undefined;
+    return this.statuses.stackedPoison;
   }
 
   public get frozenLevel(): EffectLevel {
-    return this.frozen?.level ?? 0;
+    return this.statuses.level('freeze');
   }
 
   public get isFrozen(): boolean {
-    return !!this.frozen;
+    return this.statuses.has('freeze');
   }
 
   public get isStunted(): boolean {
-    return !!this.stunted;
+    return this.statuses.has('stunt');
   }
 
   public get burnLevel(): EffectLevel {
-    return this.burned?.level ?? 0;
+    return this.statuses.level('burn');
   }
 
   public bleedStacks(): number {
-    return this.bleeding?.stackCount ?? 0;
+    return this.statuses.bleeding?.stackCount ?? 0;
   }
 
   /** Removes every bleed stack and tells how many there were. */
   public consumeBleedStacks(): number {
     const stacks = this.bleedStacks();
-    this.bleeding = undefined;
+    this.statuses.remove('bleed');
 
     return stacks;
   }
@@ -553,15 +507,17 @@ export class FightingCard {
 
   /** The stacks and rate a bleed this card applies actually carries. */
   public empowerBleed(application: BleedApplication): BleedApplication {
-    return this.bleedEmpowerment?.empower(this, application) ?? application;
+    return (
+      this.passives.bleedEmpowerment?.empower(this, application) ?? application
+    );
   }
 
   public get shielded(): boolean {
-    return this.shield !== null;
+    return this.shield.isUp;
   }
 
   public holdsShield(name: string): boolean {
-    return this.shield?.name === name;
+    return this.shield.holds(name);
   }
 
   public setOwnerInfo(ownerName: string, cardPositionInDeck: number): void {
@@ -583,95 +539,41 @@ export class FightingCard {
 
     if (this.resists()) return false;
 
-    if (newState instanceof CardStateStackedPoison) {
-      newState.carryOver(this.poisoned);
-    }
-
-    if (newState.type === 'poison') {
-      this.poisoned = newState;
-    }
-
-    if (newState.type === 'burn') {
-      this.burned = newState;
-    }
-
-    if (newState.type === 'freeze') {
-      this.frozen = newState;
-    }
-
-    if (newState.type === 'stunt') {
-      this.stunted = newState;
-    }
-
-    if (newState.type === 'hypothermia') {
-      this.hypothermic = newState;
-    }
-
-    if (newState instanceof CardStateEntangled) {
-      this.entangled = newState;
-    }
-
-    if (newState instanceof CardStateBleeding) {
-      if (this.bleeding) this.bleeding.addStacks(newState);
-      else this.bleeding = newState;
-    }
-
+    this.statuses.lay(newState);
     return true;
   }
 
   /** Removes one status the card suffers, picked at random; returns its type. */
   public cleanseRandomStatus(): StateEffectType | undefined {
-    const statuses = [
-      this.poisoned,
-      this.burned,
-      this.frozen,
-      this.stunted,
-      this.bleeding,
-      this.hypothermic,
-      this.entangled,
-    ].filter((state) => state !== undefined);
-    if (statuses.length === 0) return undefined;
-
-    const { type } =
-      statuses[Math.floor(this.randomizer.random() * statuses.length)];
-    if (type === 'poison') this.poisoned = undefined;
-    if (type === 'burn') this.burned = undefined;
-    if (type === 'freeze') this.frozen = undefined;
-    if (type === 'stunt') this.stunted = undefined;
-    if (type === 'bleed') this.bleeding = undefined;
-    if (type === 'hypothermia') this.hypothermic = undefined;
-    if (type === 'entangle') this.entangled = undefined;
-
-    return type;
+    return this.statuses.cleanseRandom(this.randomizer);
   }
 
   public get isEntangled(): boolean {
-    return this.entangled !== undefined;
+    return this.statuses.has('entangle');
+  }
+
+  /** One roll in [0, 1), compared to the critical chance against each defender. */
+  public criticalRoll(): number {
+    return this.randomizer.random();
   }
 
   /**
    * Called when the card is about to act offensively: an entanglement goes
    * with that action, which fails on its chance. Returns whether it failed.
    */
-  /** One roll in [0, 1), compared to the critical chance against each defender. */
-  public criticalRoll(): number {
-    return this.randomizer.random();
-  }
-
   public failsOffensiveAction(): boolean {
-    if (!this.entangled) return false;
+    const entangled = this.statuses.consumeEntanglement();
+    if (!entangled) return false;
 
-    const { failChance } = this.entangled;
-    this.entangled = undefined;
-    return this.randomizer.random() < failChance;
+    return this.randomizer.random() < entangled.failChance;
   }
 
   public unFreeze(): void {
-    this.frozen = undefined;
+    this.statuses.remove('freeze');
   }
 
   public unBurn(): void {
-    this.burned = undefined;
+    this.statuses.remove('burn');
   }
 
   public tickSkills(): void {
@@ -763,51 +665,9 @@ export class FightingCard {
   }
 
   public applyStateEffects(): StateResult[] {
-    if (this.isDead()) {
-      return [];
-    }
+    if (this.isDead()) return [];
 
-    const stateResults: StateResult[] = [];
-
-    if (this.frozen) {
-      stateResults.push(this.frozen.applyState(this));
-    }
-
-    if (this.poisoned) {
-      stateResults.push(this.poisoned.applyState(this));
-    }
-
-    if (this.burned) {
-      stateResults.push(this.burned.applyState(this));
-    }
-
-    if (this.stunted && !this.frozen) {
-      stateResults.push(this.stunted.applyState(this));
-    }
-
-    if (this.bleeding) {
-      stateResults.push(this.bleeding.applyState(this));
-    }
-
-    if (this.hypothermic) {
-      stateResults.push(this.hypothermic.applyState(this));
-    }
-
-    this.frozen = this.frozen?.remainingTurns ? this.frozen : undefined;
-    // A dead card keeps its poison whatever its remaining turns: the death
-    // cascade reads who laid it, and that must not depend on who killed it.
-    this.poisoned =
-      this.poisoned?.remainingTurns || this.isDead()
-        ? this.poisoned
-        : undefined;
-    this.burned = this.burned?.remainingTurns ? this.burned : undefined;
-    this.stunted = this.stunted?.remainingTurns ? this.stunted : undefined;
-    this.bleeding = this.bleeding?.stackCount ? this.bleeding : undefined;
-    this.hypothermic = this.hypothermic?.remainingTurns
-      ? this.hypothermic
-      : undefined;
-
-    return stateResults.filter((result) => result !== undefined);
+    return this.statuses.tick(this);
   }
 
   public fasterThan(defender: FightingCard | null): boolean {
@@ -874,70 +734,85 @@ export class FightingCard {
   }
 
   /**
-   * Resolves the damage of one hit against the card defensive layers, in
-   * order: state amplifiers (freeze, stunt), damage reduction, shield buffer,
-   * then the health pool. Reducing before the shield absorbs makes the shield
-   * last longer, which is the point of stacking both.
+   * Resolves the damage of one hit: it goes through `damageLayers` in order,
+   * then what is left comes off the health pool, where SURVIVE holds a fatal
+   * blow at 1 HP.
    *
-   * Status effect ticks go through `addRealDamage()` and bypass all of this,
-   * exactly as they bypass the shield.
+   * Status effect ticks go through `addRealDamage()` and bypass all of this.
    */
   public applyFinalDamage(damage: number): FinalDamageResult {
     this.recordHealthRatioBeforeDamage();
-    let causedDamages = damage;
-    if (this.frozen) {
-      causedDamages = (this.frozen as CardStateFrozen).applyDamageRate(
-        causedDamages,
-      );
-    }
-    if (this.stunted) {
-      causedDamages = (this.stunted as CardStateStunted).applyDamageRate(
-        causedDamages,
-      );
+    let left = damage;
+    let report: Partial<FinalDamageResult> = {};
+    for (const layer of this.damageLayers) {
+      const pass = layer(left);
+      left = pass.damage;
+      report = { ...report, ...pass.report };
     }
 
-    const mitigatedDamages = this.damageReduction?.tryMitigate(causedDamages);
-    const mitigated = mitigatedDamages !== undefined;
-    if (mitigated) {
-      causedDamages = mitigatedDamages;
-    }
-    const mitigationReport = mitigated
-      ? { mitigated: true, mitigatedSkillName: this.damageReduction.name }
-      : {};
+    return { shieldAbsorbed: 0, ...report, ...this.loseHealth(left) };
+  }
 
-    const damageShared = this.shareDamage(causedDamages);
-    if (damageShared) {
-      causedDamages -= causedDamages * this.sharing.rate;
-    }
-    const sharingReport = damageShared ? { damageShared } : {};
+  /**
+   * The defensive layers of a hit, in order: freeze and stun amplify it, the
+   * damage reduction removes a share, the damage sharing circle carries a
+   * share, the shield absorbs what it can. Reducing before the shield absorbs
+   * makes the shield last longer, which is the point of stacking both.
+   */
+  private readonly damageLayers: DamageLayer[] = [
+    (damage) => ({ damage: this.statuses.amplify(damage) }),
+    (damage) => this.mitigateHit(damage),
+    (damage) => this.shareHit(damage),
+    (damage) => this.absorbHit(damage),
+  ];
 
-    const shieldAbsorbed = this.absorbWithShield(causedDamages);
-    let damageToHealth = causedDamages - shieldAbsorbed;
-    damageToHealth = Math.min(damageToHealth, this.actualHealth);
+  private mitigateHit(damage: number): LayerPass {
+    const reduction = this.passives.damageReduction;
+    const mitigated = reduction?.tryMitigate(damage);
+    if (mitigated === undefined) return { damage };
 
-    if (
-      this.actualHealth - damageToHealth <= 0 &&
-      this.surviveSkill?.tryConsume()
-    ) {
-      damageToHealth = this.actualHealth - 1;
-      this.receivedDamages += damageToHealth;
+    return {
+      damage: mitigated,
+      report: { mitigated: true, mitigatedSkillName: reduction.name },
+    };
+  }
+
+  private shareHit(damage: number): LayerPass {
+    const damageShared = this.shareDamage(damage);
+    if (!damageShared) return { damage };
+
+    return {
+      damage: damage - damage * this.sharing.rate,
+      report: { damageShared },
+    };
+  }
+
+  private absorbHit(damage: number): LayerPass {
+    const shieldAbsorbed = this.shield.absorb(damage);
+
+    return { damage: damage - shieldAbsorbed, report: { shieldAbsorbed } };
+  }
+
+  private loseHealth(
+    damage: number,
+  ): Pick<
+    FinalDamageResult,
+    'damageToHealth' | 'survived' | 'survivedSkillName'
+  > {
+    const damageToHealth = Math.min(damage, this.actualHealth);
+    const survive = this.passives.survive;
+    if (this.actualHealth - damageToHealth <= 0 && survive?.tryConsume()) {
+      const survivedDamage = this.actualHealth - 1;
+      this.receivedDamages += survivedDamage;
       return {
-        damageToHealth,
-        shieldAbsorbed,
+        damageToHealth: survivedDamage,
         survived: true,
-        survivedSkillName: this.surviveSkill.name,
-        ...mitigationReport,
-        ...sharingReport,
+        survivedSkillName: survive.name,
       };
     }
 
     this.receivedDamages += damageToHealth;
-    return {
-      damageToHealth,
-      shieldAbsorbed,
-      ...mitigationReport,
-      ...sharingReport,
-    };
+    return { damageToHealth };
   }
 
   private get sharing(): DamageSharing | undefined {
@@ -1033,15 +908,12 @@ export class FightingCard {
     this.exposures
       .filter((e) => e.deployment === deployment)
       .forEach((e) => (e.remainingTurns += turns));
-    [...this.buffs, ...this.debuffs]
-      .filter((a) => a.origin === deployment.name)
-      .forEach((a) => (a.duration += turns));
+    this.alterations.extend(deployment.name, turns);
   }
 
   /** A battlefield laid again refreshes its alterations rather than stacking them. */
   public removeAlterationsFrom(origin: string): void {
-    this.buffs = this.buffs.filter((b) => b.origin !== origin);
-    this.debuffs = this.debuffs.filter((d) => d.origin !== origin);
+    this.alterations.removeFrom(origin);
   }
 
   /** Whether the card stands in a battlefield of that element. */
@@ -1089,19 +961,12 @@ export class FightingCard {
     this.receivedHeal = 0;
     this.receivedDamages = this.maxHealth - Math.round(rate * this.maxHealth);
     this.receivedDamagesAtActionStart = this.receivedDamages;
-    this.poisoned = undefined;
-    this.burned = undefined;
-    this.frozen = undefined;
-    this.stunted = undefined;
-    this.bleeding = undefined;
-    this.hypothermic = undefined;
-    this.entangled = undefined;
+    this.statuses.clear();
     this.vulnerabilities = [];
     this.supportBlock = null;
-    this.buffs = [];
-    this.debuffs = [];
-    this.shield = null;
-    this.stances = [];
+    this.alterations.clear();
+    this.shield.clear();
+    this.stances.clear();
     this.concealment = null;
     this.protection = null;
     this.transformation = null;
@@ -1133,10 +998,7 @@ export class FightingCard {
    * it for that category only.
    */
   public isImmuneTo(category: StatusCategory): boolean {
-    return (
-      this.isStatusImmune ||
-      this.stances.some((stance) => stance.immunities?.includes(category))
-    );
+    return this.isStatusImmune || this.stances.grantImmunityTo(category);
   }
 
   public get isStatusImmune(): boolean {
@@ -1144,10 +1006,7 @@ export class FightingCard {
   }
 
   public decreaseStatusImmunityDuration(): void {
-    if (!this.statusImmunity) return;
-
-    const remainingTurns = this.statusImmunity.remainingTurns - 1;
-    this.statusImmunity = remainingTurns < 0 ? null : { remainingTurns };
+    this.statusImmunity = countDown(this.statusImmunity).left;
   }
 
   /**
@@ -1180,17 +1039,14 @@ export class FightingCard {
    * point.
    */
   public decreaseTransformationDuration(): TransformationEnd | null {
-    if (!this.transformation) return null;
+    const { left, ended } = countDown(this.transformation);
+    this.transformation = left;
+    if (!ended) return null;
 
-    const remainingTurns = this.transformation.remainingTurns - 1;
-    if (remainingTurns < 0) {
-      const { name, endCostRate } = this.transformation;
-      this.transformation = null;
-      return { name, healthCost: this.payTransformationCost(endCostRate) };
-    }
-
-    this.transformation = { ...this.transformation, remainingTurns };
-    return null;
+    return {
+      name: ended.name,
+      healthCost: this.payTransformationCost(ended.endCostRate),
+    };
   }
 
   private payTransformationCost(rate?: number): number {
@@ -1226,17 +1082,9 @@ export class FightingCard {
 
   /** Decrements the protection and returns the ally it just freed, if any. */
   public decreaseProtectionDuration(): FightingCard | null {
-    if (!this.protection) return null;
-
-    const remainingTurns = this.protection.remainingTurns - 1;
-    if (remainingTurns < 0) {
-      const { ally } = this.protection;
-      this.protection = null;
-      return ally;
-    }
-
-    this.protection = { ...this.protection, remainingTurns };
-    return null;
+    const { left, ended } = countDown(this.protection);
+    this.protection = left;
+    return ended?.ally ?? null;
   }
 
   public applyLifesteal(name: string, rate: number, duration: number): void {
@@ -1258,48 +1106,17 @@ export class FightingCard {
   }
 
   public decreaseLifestealDuration(): void {
-    if (!this.lifesteal) return;
-
-    const remainingTurns = this.lifesteal.remainingTurns - 1;
-    this.lifesteal =
-      remainingTurns < 0 ? null : { ...this.lifesteal, remainingTurns };
+    this.lifesteal = countDown(this.lifesteal).left;
   }
 
-  /**
-   * Opens a stance on the card, or refreshes the duration of one already
-   * running: re-casting the power that grants it must not double its length,
-   * and what the stance grants is kept unless the refresh states it again.
-   */
-  public activateStance({
-    name,
-    duration,
-    immunities,
-    revealsConcealed,
-    evasionChance,
-  }: StanceActivation): Stance {
-    const running = this.stances.find((s) => s.name === name);
-    if (running) {
-      running.remainingTurns = duration;
-      running.immunities = immunities ?? running.immunities;
-      running.revealsConcealed = revealsConcealed ?? running.revealsConcealed;
-      running.evasionChance = evasionChance ?? running.evasionChance;
-      return running;
-    }
-
-    const stance: Stance = {
-      name,
-      remainingTurns: duration,
-      immunities,
-      revealsConcealed,
-      evasionChance,
-    };
-    this.stances.push(stance);
-    return stance;
+  /** Opens a stance on the card, or refreshes the one of that name. */
+  public activateStance(activation: StanceActivation): Stance {
+    return this.stances.activate(activation);
   }
 
   /** Whether a running stance lets the card see concealed enemies. */
   public seesConcealed(): boolean {
-    return this.stances.some((stance) => stance.revealsConcealed);
+    return this.stances.revealConcealed;
   }
 
   /**
@@ -1344,26 +1161,17 @@ export class FightingCard {
   }
 
   public hasStance(name: string): boolean {
-    return this.stances.some((s) => s.name === name);
+    return this.stances.has(name);
   }
 
   /** Closes a running stance before its time; returns whether it was held. */
   public endStance(name: string): boolean {
-    const held = this.hasStance(name);
-    this.stances = this.stances.filter((s) => s.name !== name);
-    return held;
+    return this.stances.end(name);
   }
 
   /** Decrements every running stance and returns the ones that just ended. */
   public decreaseStanceDurations(): string[] {
-    const decremented = this.stances.map((s) => ({
-      ...s,
-      remainingTurns: s.remainingTurns - 1,
-    }));
-    const ended = decremented.filter((s) => s.remainingTurns < 0);
-    this.stances = decremented.filter((s) => s.remainingTurns >= 0);
-
-    return ended.map((s) => s.name);
+    return this.stances.decreaseDurations();
   }
 
   /** `name` lets a live alteration tell this shield from another one. */
@@ -1381,54 +1189,23 @@ export class FightingCard {
     duration: number,
     name?: string,
   ): Shield {
-    this.shield = name ? { points, duration, name } : { points, duration };
-    return this.shield;
+    return this.shield.raise(points, duration, name);
   }
 
   public decreaseShieldDuration(): Shield | null {
-    if (!this.shield) return null;
-
-    this.shield = { ...this.shield, duration: this.shield.duration - 1 };
-    if (this.shield.duration < 0) {
-      const expired = this.shield;
-      this.shield = null;
-      return expired;
-    }
-    return null;
-  }
-
-  private absorbWithShield(damage: number): number {
-    if (!this.shield) return 0;
-
-    const absorbed = Math.min(this.shield.points, damage);
-    this.shield = { ...this.shield, points: this.shield.points - absorbed };
-    if (this.shield.points <= 0) {
-      this.shield = null;
-    }
-    return absorbed;
+    return this.shield.decreaseDuration();
   }
 
   public applyMark(mark: ElementalMark, stacks: number = 1): number {
-    const entry = this.findMark(mark.damageType);
-    if (!entry) {
-      const appliedStacks = Math.min(stacks, mark.maxStacks);
-      this.marks.push({ mark, stacks: appliedStacks });
-      return appliedStacks;
-    }
-
-    entry.stacks = Math.min(entry.stacks + stacks, entry.mark.maxStacks);
-    return entry.stacks;
+    return this.marks.apply(mark, stacks);
   }
 
   public markStacks(damageType: DamageType): number {
-    return this.findMark(damageType)?.stacks ?? 0;
+    return this.marks.stacks(damageType);
   }
 
   public markAmplifier(damageType: DamageType): number {
-    const entry = this.findMark(damageType);
-    if (!entry) return 1;
-
-    return 1 + entry.stacks * entry.mark.ratePerStack;
+    return this.marks.amplifier(damageType);
   }
 
   /**
@@ -1574,10 +1351,6 @@ export class FightingCard {
     };
   }
 
-  private findMark(damageType: DamageType): MarkEntry | undefined {
-    return this.marks.find((entry) => entry.mark.damageType === damageType);
-  }
-
   // Frozen at the fatal blow: later hits on the corpse must not rewrite it.
   private recordHealthRatioBeforeDamage() {
     if (!this.isDead()) {
@@ -1591,9 +1364,9 @@ export class FightingCard {
    * leaves the card at 1 HP instead.
    */
   public execute(): { survived?: boolean; survivedSkillName?: string } {
-    if (this.surviveSkill?.tryConsume()) {
+    if (this.passives.survive?.tryConsume()) {
       this.addRealDamage(this.actualHealth - 1);
-      return { survived: true, survivedSkillName: this.surviveSkill.name };
+      return { survived: true, survivedSkillName: this.passives.survive.name };
     }
 
     this.addRealDamage(this.actualHealth);
@@ -1673,10 +1446,7 @@ export class FightingCard {
 
   /** One roll against the best evasion chance among the running stances. */
   private evades(): boolean {
-    const chance = Math.max(
-      0,
-      ...this.stances.map((s) => s.evasionChance ?? 0),
-    );
+    const chance = this.stances.evasionChance;
     if (chance <= 0) return false;
 
     return this.randomizer.random() < chance;
@@ -1687,13 +1457,14 @@ export class FightingCard {
     const agility = attacker.deniesDodgeBonusOf(this)
       ? this.agilityWithoutBuffs
       : this.actualAgility;
-    const insightRate = this.attackerInsight?.agilityRateAgainst(attacker) ?? 0;
+    const insightRate =
+      this.passives.attackerInsight?.agilityRateAgainst(attacker) ?? 0;
 
     return agility + round2(this.agility * insightRate);
   }
 
   public deniesDodgeBonusOf(defender: FightingCard): boolean {
-    return this.dodgeBonusDenial?.appliesTo(defender) ?? false;
+    return this.passives.dodgeBonusDenial?.appliesTo(defender) ?? false;
   }
 
   /**
@@ -1708,99 +1479,33 @@ export class FightingCard {
     terminationEvent?: string,
     powerId?: string,
     stacking?: AlterationStacking,
-    { live, origin, terminationDamageRate }: AlterationOptions = {},
+    options: AlterationOptions = {},
   ): Buff | undefined {
-    if (isPileFull(this.buffs, stacking)) return undefined;
+    if (this.alterations.isPileFull('buff', stacking)) return undefined;
 
-    const value = this.computeAttributeModifierValue(
-      buffType,
-      live?.rateFor(this) ?? buffRate,
-    );
-    const buff: Buff = {
-      polarity: 'buff',
+    return this.alterations.addBuff({
       type: buffType,
-      value,
+      rate: buffRate,
       duration,
       terminationEvent,
       powerId,
-      stackId: stacking?.id,
-      live,
-      origin,
-      terminationDamageRate,
-    };
-
-    if (terminationEvent && !stacking) {
-      const existingIndex = this.buffs.findIndex(
-        (b) => b.type === buffType && b.terminationEvent === terminationEvent,
-      );
-      if (existingIndex >= 0) {
-        this.buffs[existingIndex] = buff;
-        return buff;
-      }
-    }
-
-    this.buffs.push(buff);
-
-    return buff;
+      stacking,
+      ...options,
+    });
   }
 
   public removeEventBoundEffects(
     eventName: string,
   ): { type: StateEffectType; card: CardInfo }[] {
-    const removed: { type: StateEffectType; card: CardInfo }[] = [];
-    const card = this.identityInfo;
-
-    if (this.poisoned?.terminationEvent === eventName) {
-      removed.push({ type: this.poisoned.type, card });
-      this.poisoned = undefined;
-    }
-
-    if (this.burned?.terminationEvent === eventName) {
-      removed.push({ type: this.burned.type, card });
-      this.burned = undefined;
-    }
-
-    if (this.frozen?.terminationEvent === eventName) {
-      removed.push({ type: this.frozen.type, card });
-      this.frozen = undefined;
-    }
-
-    if (this.stunted?.terminationEvent === eventName) {
-      removed.push({ type: this.stunted.type, card });
-      this.stunted = undefined;
-    }
-
-    if (this.hypothermic?.terminationEvent === eventName) {
-      removed.push({ type: this.hypothermic.type, card });
-      this.hypothermic = undefined;
-    }
-
-    if (this.entangled?.terminationEvent === eventName) {
-      removed.push({ type: this.entangled.type, card });
-      this.entangled = undefined;
-    }
-
-    if (this.bleeding?.removeStacksBoundTo(eventName)) {
-      removed.push({ type: this.bleeding.type, card });
-      if (!this.bleeding.stackCount) this.bleeding = undefined;
-    }
-
-    return removed;
+    return this.statuses.removeBoundTo(eventName, this.identityInfo);
   }
 
   /** `hitRate`: share of its max health the hit that fired the event cost the card. */
   public removeEventBoundBuffs(
     eventName: string,
     hitRate?: number,
-  ): { type: BuffType; value: number }[] {
-    const ends = (b: Buff) => endsOn(b, eventName, hitRate);
-    const removed = this.buffs
-      .filter(ends)
-      .map((b) => ({ type: b.type, value: b.value }));
-
-    this.buffs = this.buffs.filter((b) => !ends(b));
-
-    return removed;
+  ): RemovedAlteration[] {
+    return this.alterations.removeBoundTo('buff', eventName, hitRate);
   }
 
   public lifecycleEndEvents(): string[] {
@@ -1813,37 +1518,21 @@ export class FightingCard {
     expiredBuffs: Buff[];
     expiredDebuffs: Debuff[];
   } {
-    const decremented = this.buffs.map((b) => ({
-      ...b,
-      duration: b.duration - 1,
-    }));
-    const expiredBuffs = decremented.filter((b) => b.duration < 0);
-    this.buffs = decremented.filter((b) => b.duration >= 0);
-
-    const decrementedDebuffs = this.debuffs.map((d) => ({
-      ...d,
-      duration: d.duration - 1,
-    }));
-    const expiredDebuffs = decrementedDebuffs.filter((d) => d.duration < 0);
-    this.debuffs = decrementedDebuffs.filter((d) => d.duration >= 0);
-
-    return { expiredBuffs, expiredDebuffs };
+    return this.alterations.decreaseDurations();
   }
 
   /** Removes and returns every buff of that type, to hand it to another card. */
   public takeBuffs(type: BuffType): Buff[] {
-    const taken = this.buffs.filter((b) => b.type === type);
-    this.buffs = this.buffs.filter((b) => b.type !== type);
-    return taken;
+    return this.alterations.takeBuffs(type);
   }
 
   /** Takes buffs as they are: value, remaining duration and stack pile. */
   public receiveBuffs(buffs: Buff[]): void {
-    this.buffs.push(...buffs.map((buff) => ({ ...buff })));
+    this.alterations.receiveBuffs(buffs);
   }
 
   public buffStacks(stackId: string): number {
-    return stacksIn(this.buffs, stackId);
+    return this.alterations.stacks('buff', stackId);
   }
 
   /**
@@ -1859,31 +1548,20 @@ export class FightingCard {
     terminationEvent?: string,
     powerId?: string,
     stacking?: AlterationStacking,
-    { live, origin, terminationDamageRate }: AlterationOptions = {},
+    options: AlterationOptions = {},
   ): Debuff | undefined {
-    if (isPileFull(this.debuffs, stacking)) return undefined;
-
+    if (this.alterations.isPileFull('debuff', stacking)) return undefined;
     if (this.resists()) return undefined;
 
-    const debuff: Debuff = {
-      polarity: 'debuff',
+    return this.alterations.addDebuff({
       type: debuffType,
-      value: this.computeAttributeModifierValue(
-        debuffType,
-        live?.rateFor(this) ?? debuffRate,
-      ),
-      duration: duration,
+      rate: debuffRate,
+      duration,
       terminationEvent,
       powerId,
-      stackId: stacking?.id,
-      live,
-      origin,
-      terminationDamageRate,
-    };
-
-    this.debuffs.push(debuff);
-
-    return debuff;
+      stacking,
+      ...options,
+    });
   }
 
   /** Whether the pile of that polarity already holds `maxStacks` alterations. */
@@ -1891,28 +1569,18 @@ export class FightingCard {
     polarity: 'buff' | 'debuff',
     stacking?: AlterationStacking,
   ): boolean {
-    return isPileFull(
-      polarity === 'buff' ? this.buffs : this.debuffs,
-      stacking,
-    );
+    return this.alterations.isPileFull(polarity, stacking);
   }
 
   public debuffStacks(stackId: string): number {
-    return stacksIn(this.debuffs, stackId);
+    return this.alterations.stacks('debuff', stackId);
   }
 
   public removeEventBoundDebuffs(
     eventName: string,
     hitRate?: number,
-  ): { type: BuffType; value: number }[] {
-    const ends = (d: Debuff) => endsOn(d, eventName, hitRate);
-    const removed = this.debuffs
-      .filter(ends)
-      .map((d) => ({ type: d.type, value: d.value }));
-
-    this.debuffs = this.debuffs.filter((d) => !ends(d));
-
-    return removed;
+  ): RemovedAlteration[] {
+    return this.alterations.removeBoundTo('debuff', eventName, hitRate);
   }
 
   /**
@@ -1940,29 +1608,17 @@ export class FightingCard {
   private computeActualStat(base: number, type: BuffType): number {
     return Math.max(
       0,
-      base + this.sumOf(this.buffs, type) - this.sumOf(this.debuffs, type),
+      base +
+        this.alterations.total('buff', type) -
+        this.alterations.total('debuff', type),
     );
   }
 
   private get agilityWithoutBuffs(): number {
-    return Math.max(0, this.agility - this.sumOf(this.debuffs, 'agility'));
-  }
-
-  /** A live alteration is worth what its rate gives on the board right now. */
-  private sumOf(alterations: AlterationDetail[], type: BuffType): number {
-    return alterations
-      .filter((alteration) => alteration.type === type)
-      .reduce(
-        (sum, alteration) =>
-          sum +
-          (alteration.live
-            ? this.computeAttributeModifierValue(
-                type,
-                alteration.live.rateFor(this),
-              )
-            : alteration.value),
-        0,
-      );
+    return Math.max(
+      0,
+      this.agility - this.alterations.total('debuff', 'agility'),
+    );
   }
 
   private computeAttributeModifierValue(type: BuffType, rate: number): number {
@@ -1987,27 +1643,4 @@ export class FightingCard {
         throw new Error(`Unknown attribute type: ${type}`);
     }
   }
-}
-
-function endsOn(
-  alteration: AlterationDetail,
-  eventName: string,
-  hitRate?: number,
-): boolean {
-  if (alteration.terminationEvent !== eventName) return false;
-  if (alteration.terminationDamageRate === undefined) return true;
-
-  return (hitRate ?? 0) > alteration.terminationDamageRate;
-}
-
-function isPileFull(
-  alterations: AlterationDetail[],
-  stacking?: AlterationStacking,
-): boolean {
-  if (!stacking) return false;
-  return stacksIn(alterations, stacking.id) >= stacking.maxStacks;
-}
-
-function stacksIn(alterations: AlterationDetail[], stackId: string): number {
-  return alterations.filter((a) => a.stackId === stackId).length;
 }
