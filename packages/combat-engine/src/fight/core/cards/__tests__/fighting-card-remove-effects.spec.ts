@@ -116,14 +116,14 @@ describe('FightingCard.removeEventBoundEffects()', () => {
       expect(card.poisonLevel).toBe(0);
     });
 
-    it('returns info for all removed effects', () => {
+    it('reports them poison first, whatever the order they were laid in', () => {
       const card = createFightingCard({});
-      card.setState(new CardStatePoisoned(1, 3, 50, 'purge'));
       card.setState(new CardStateBurned(2, 3, 80, 'purge'));
+      card.setState(new CardStatePoisoned(1, 3, 50, 'purge'));
 
       const removed = card.removeEventBoundEffects('purge');
 
-      expect(removed).toHaveLength(2);
+      expect(removed.map(({ type }) => type)).toEqual(['poison', 'burn']);
     });
   });
 });

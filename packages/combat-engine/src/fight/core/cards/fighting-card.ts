@@ -12,10 +12,8 @@ import { AttackSkill } from './skills/attack-skill';
 import { Special } from './skills/special';
 import { CardState } from './@types/state/card-state';
 import { StateResult } from './@types/action-result/state-result';
-import { CardStateFrozen } from './@types/state/card-state-frozen';
-import { CardStateStunted } from './@types/state/card-state-stunted';
-import { CardStateBleeding } from './@types/state/card-state-bleeding';
 import { CardStateStackedPoison } from './@types/state/card-state-stacked-poison';
+import { CardStatuses } from './@types/state/card-statuses';
 import { BleedApplication } from './skills/bleed-empowerment';
 import { CardBoundPassives } from './skills/card-bound-passives';
 import { EffectLevel } from './@types/attack/effect-level';
@@ -54,7 +52,6 @@ import {
   DamageSharing,
 } from './@types/battlefield/battlefield';
 import { ElementalMatrix } from './damage/elemental-matrix';
-import { CardStateEntangled } from './@types/state/card-state-entangled';
 import {
   VULNERABILITY_ENDED_TYPE,
   Vulnerability,
@@ -218,13 +215,7 @@ export class FightingCard {
   private targetingOverrides: TargetingOverrideEntry[] = [];
 
   // Status
-  private poisoned?: CardState;
-  private burned?: CardState;
-  private frozen?: CardState;
-  private stunted?: CardState;
-  private bleeding?: CardStateBleeding;
-  private hypothermic?: CardState;
-  private entangled?: CardStateEntangled;
+  private readonly statuses = new CardStatuses();
   private supportBlock: { remainingTurns: number } | null = null;
   private vulnerabilities: Vulnerability[] = [];
   private readonly weakPoints = new WeakPoints();
@@ -446,7 +437,7 @@ export class FightingCard {
   }
 
   public get poisonLevel(): EffectLevel {
-    return this.poisoned?.level ?? 0;
+    return this.statuses.level('poison');
   }
 
   public poisonStacks(): number {
@@ -478,35 +469,33 @@ export class FightingCard {
   }
 
   private get stackedPoison(): CardStateStackedPoison | undefined {
-    return this.poisoned instanceof CardStateStackedPoison
-      ? this.poisoned
-      : undefined;
+    return this.statuses.stackedPoison;
   }
 
   public get frozenLevel(): EffectLevel {
-    return this.frozen?.level ?? 0;
+    return this.statuses.level('freeze');
   }
 
   public get isFrozen(): boolean {
-    return !!this.frozen;
+    return this.statuses.has('freeze');
   }
 
   public get isStunted(): boolean {
-    return !!this.stunted;
+    return this.statuses.has('stunt');
   }
 
   public get burnLevel(): EffectLevel {
-    return this.burned?.level ?? 0;
+    return this.statuses.level('burn');
   }
 
   public bleedStacks(): number {
-    return this.bleeding?.stackCount ?? 0;
+    return this.statuses.bleeding?.stackCount ?? 0;
   }
 
   /** Removes every bleed stack and tells how many there were. */
   public consumeBleedStacks(): number {
     const stacks = this.bleedStacks();
-    this.bleeding = undefined;
+    this.statuses.remove('bleed');
 
     return stacks;
   }
@@ -554,95 +543,41 @@ export class FightingCard {
 
     if (this.resists()) return false;
 
-    if (newState instanceof CardStateStackedPoison) {
-      newState.carryOver(this.poisoned);
-    }
-
-    if (newState.type === 'poison') {
-      this.poisoned = newState;
-    }
-
-    if (newState.type === 'burn') {
-      this.burned = newState;
-    }
-
-    if (newState.type === 'freeze') {
-      this.frozen = newState;
-    }
-
-    if (newState.type === 'stunt') {
-      this.stunted = newState;
-    }
-
-    if (newState.type === 'hypothermia') {
-      this.hypothermic = newState;
-    }
-
-    if (newState instanceof CardStateEntangled) {
-      this.entangled = newState;
-    }
-
-    if (newState instanceof CardStateBleeding) {
-      if (this.bleeding) this.bleeding.addStacks(newState);
-      else this.bleeding = newState;
-    }
-
+    this.statuses.lay(newState);
     return true;
   }
 
   /** Removes one status the card suffers, picked at random; returns its type. */
   public cleanseRandomStatus(): StateEffectType | undefined {
-    const statuses = [
-      this.poisoned,
-      this.burned,
-      this.frozen,
-      this.stunted,
-      this.bleeding,
-      this.hypothermic,
-      this.entangled,
-    ].filter((state) => state !== undefined);
-    if (statuses.length === 0) return undefined;
-
-    const { type } =
-      statuses[Math.floor(this.randomizer.random() * statuses.length)];
-    if (type === 'poison') this.poisoned = undefined;
-    if (type === 'burn') this.burned = undefined;
-    if (type === 'freeze') this.frozen = undefined;
-    if (type === 'stunt') this.stunted = undefined;
-    if (type === 'bleed') this.bleeding = undefined;
-    if (type === 'hypothermia') this.hypothermic = undefined;
-    if (type === 'entangle') this.entangled = undefined;
-
-    return type;
+    return this.statuses.cleanseRandom(this.randomizer);
   }
 
   public get isEntangled(): boolean {
-    return this.entangled !== undefined;
+    return this.statuses.has('entangle');
+  }
+
+  /** One roll in [0, 1), compared to the critical chance against each defender. */
+  public criticalRoll(): number {
+    return this.randomizer.random();
   }
 
   /**
    * Called when the card is about to act offensively: an entanglement goes
    * with that action, which fails on its chance. Returns whether it failed.
    */
-  /** One roll in [0, 1), compared to the critical chance against each defender. */
-  public criticalRoll(): number {
-    return this.randomizer.random();
-  }
-
   public failsOffensiveAction(): boolean {
-    if (!this.entangled) return false;
+    const entangled = this.statuses.consumeEntanglement();
+    if (!entangled) return false;
 
-    const { failChance } = this.entangled;
-    this.entangled = undefined;
-    return this.randomizer.random() < failChance;
+    return this.randomizer.random() < entangled.failChance;
   }
 
   public unFreeze(): void {
-    this.frozen = undefined;
+    this.statuses.remove('freeze');
   }
 
   public unBurn(): void {
-    this.burned = undefined;
+    this.statuses.remove('burn');
   }
 
   public tickSkills(): void {
@@ -734,51 +669,9 @@ export class FightingCard {
   }
 
   public applyStateEffects(): StateResult[] {
-    if (this.isDead()) {
-      return [];
-    }
+    if (this.isDead()) return [];
 
-    const stateResults: StateResult[] = [];
-
-    if (this.frozen) {
-      stateResults.push(this.frozen.applyState(this));
-    }
-
-    if (this.poisoned) {
-      stateResults.push(this.poisoned.applyState(this));
-    }
-
-    if (this.burned) {
-      stateResults.push(this.burned.applyState(this));
-    }
-
-    if (this.stunted && !this.frozen) {
-      stateResults.push(this.stunted.applyState(this));
-    }
-
-    if (this.bleeding) {
-      stateResults.push(this.bleeding.applyState(this));
-    }
-
-    if (this.hypothermic) {
-      stateResults.push(this.hypothermic.applyState(this));
-    }
-
-    this.frozen = this.frozen?.remainingTurns ? this.frozen : undefined;
-    // A dead card keeps its poison whatever its remaining turns: the death
-    // cascade reads who laid it, and that must not depend on who killed it.
-    this.poisoned =
-      this.poisoned?.remainingTurns || this.isDead()
-        ? this.poisoned
-        : undefined;
-    this.burned = this.burned?.remainingTurns ? this.burned : undefined;
-    this.stunted = this.stunted?.remainingTurns ? this.stunted : undefined;
-    this.bleeding = this.bleeding?.stackCount ? this.bleeding : undefined;
-    this.hypothermic = this.hypothermic?.remainingTurns
-      ? this.hypothermic
-      : undefined;
-
-    return stateResults.filter((result) => result !== undefined);
+    return this.statuses.tick(this);
   }
 
   public fasterThan(defender: FightingCard | null): boolean {
@@ -855,17 +748,7 @@ export class FightingCard {
    */
   public applyFinalDamage(damage: number): FinalDamageResult {
     this.recordHealthRatioBeforeDamage();
-    let causedDamages = damage;
-    if (this.frozen) {
-      causedDamages = (this.frozen as CardStateFrozen).applyDamageRate(
-        causedDamages,
-      );
-    }
-    if (this.stunted) {
-      causedDamages = (this.stunted as CardStateStunted).applyDamageRate(
-        causedDamages,
-      );
-    }
+    let causedDamages = this.statuses.amplify(damage);
 
     const mitigatedDamages =
       this.passives.damageReduction?.tryMitigate(causedDamages);
@@ -1064,13 +947,7 @@ export class FightingCard {
     this.receivedHeal = 0;
     this.receivedDamages = this.maxHealth - Math.round(rate * this.maxHealth);
     this.receivedDamagesAtActionStart = this.receivedDamages;
-    this.poisoned = undefined;
-    this.burned = undefined;
-    this.frozen = undefined;
-    this.stunted = undefined;
-    this.bleeding = undefined;
-    this.hypothermic = undefined;
-    this.entangled = undefined;
+    this.statuses.clear();
     this.vulnerabilities = [];
     this.supportBlock = null;
     this.buffs = [];
@@ -1723,45 +1600,7 @@ export class FightingCard {
   public removeEventBoundEffects(
     eventName: string,
   ): { type: StateEffectType; card: CardInfo }[] {
-    const removed: { type: StateEffectType; card: CardInfo }[] = [];
-    const card = this.identityInfo;
-
-    if (this.poisoned?.terminationEvent === eventName) {
-      removed.push({ type: this.poisoned.type, card });
-      this.poisoned = undefined;
-    }
-
-    if (this.burned?.terminationEvent === eventName) {
-      removed.push({ type: this.burned.type, card });
-      this.burned = undefined;
-    }
-
-    if (this.frozen?.terminationEvent === eventName) {
-      removed.push({ type: this.frozen.type, card });
-      this.frozen = undefined;
-    }
-
-    if (this.stunted?.terminationEvent === eventName) {
-      removed.push({ type: this.stunted.type, card });
-      this.stunted = undefined;
-    }
-
-    if (this.hypothermic?.terminationEvent === eventName) {
-      removed.push({ type: this.hypothermic.type, card });
-      this.hypothermic = undefined;
-    }
-
-    if (this.entangled?.terminationEvent === eventName) {
-      removed.push({ type: this.entangled.type, card });
-      this.entangled = undefined;
-    }
-
-    if (this.bleeding?.removeStacksBoundTo(eventName)) {
-      removed.push({ type: this.bleeding.type, card });
-      if (!this.bleeding.stackCount) this.bleeding = undefined;
-    }
-
-    return removed;
+    return this.statuses.removeBoundTo(eventName, this.identityInfo);
   }
 
   /** `hitRate`: share of its max health the hit that fired the event cost the card. */
