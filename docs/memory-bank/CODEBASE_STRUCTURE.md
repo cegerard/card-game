@@ -106,6 +106,7 @@ fight-simulator/
 ├── reactive-skill-checker.ts # triggerReactiveSkills()
 ├── reactive-kill-steps.ts # reactiveKillSteps(): death cascade of the cards a reactive attack killed
 ├── survived-reactions.ts # survivedReactions(), fightSurvivedReactor(): `survived` skills of a SURVIVE holder, shared by every attack path
+├── hit-steps.ts # The steps of one hit, shared by ActionStage and skillResultsToSteps: damage line, defense layers, SURVIVE, executions
 ├── concealment-steps.ts, stance-steps.ts, execution-steps.ts # Step helpers
 ├── card-selectors/ # card-selector.ts, player-by-player.ts, speed-weighted-card-pool.ts
 └── @types/ # internal action/attack/special-stance reports; the step types and StepKind come from shared-types

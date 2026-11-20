@@ -21,12 +21,15 @@ import { effectResultsToSteps } from './effect-results-to-steps';
 import { EndEventProcessor } from './end-event-processor';
 import { concealmentStartedReport, revealAttacker } from './concealment-steps';
 import { stanceEndedReport, stanceStartedReport } from './stance-steps';
-import { executionSteps } from './execution-steps';
-import type { SurvivedReactor } from './survived-reactions';
 import {
-  battlefieldStartedSteps,
-  damageSharedSteps,
-} from './battlefield-steps';
+  deathStep,
+  defenseSteps,
+  executionReactionSteps,
+  hitDamage,
+  survivedSteps,
+} from './hit-steps';
+import type { SurvivedReactor } from './survived-reactions';
+import { battlefieldStartedSteps } from './battlefield-steps';
 
 export function skillResultsToSteps(
   card: FightingCard,
@@ -78,76 +81,32 @@ export function skillResultsToSteps(
           kind: StepKind.Attack,
           name: skillResult.name,
           attacker: card.identityInfo,
-          damages: skillResult.results.map((r) => ({
-            defender: r.defender.identityInfo,
-            damage: r.damage,
-            isCritical: r.isCritical,
-            dodge: r.dodge,
-            remainingHealth: r.remainingHealth,
-            kind: r.kind,
-            shieldAbsorbed: r.shieldAbsorbed,
-            consumedBleedStacks: r.consumedBleedStacks,
-          })),
+          damages: skillResult.results.map(hitDamage),
           energy: card.actualEnergy,
           powerId: skillResult.powerId,
         });
-        skillResult.executions?.results.forEach((execution) => {
+        if (skillResult.executions) {
           steps.push(
-            ...executionSteps(card, skillResult.executions.name, [execution]),
-            ...(execution.survived
-              ? (survivedReactor?.(execution.card) ?? [])
-              : []),
+            ...executionReactionSteps(
+              card,
+              skillResult.executions.name,
+              skillResult.executions.results,
+              survivedReactor,
+            ),
           );
-        });
+        }
         steps.push(...revealAttacker(card));
 
-        // Same per-hit order as ActionStage.handleAttackResult: what happened
-        // on the way to the health pool first, then the outcome.
-        const hitSteps: Step[] = skillResult.results.flatMap((r): Step[] => {
-          const perHit: Step[] = [];
-
-          if (r.mitigated) {
-            perHit.push({
-              kind: StepKind.DamageMitigated,
-              name: r.mitigatedSkillName,
-              card: r.defender.identityInfo,
-            });
-          }
-
-          perHit.push(...damageSharedSteps(r));
-
-          if (r.shieldBroken) {
-            perHit.push({
-              kind: StepKind.ShieldBroken,
-              card: r.defender.identityInfo,
-            });
-          }
-
-          if (r.survived) {
-            perHit.push(
-              {
-                kind: StepKind.Survived,
-                name: r.survivedSkillName,
-                card: r.defender.identityInfo,
-              },
-              ...(survivedReactor?.(r.defender) ?? []),
-            );
-          }
-
-          if (r.defender.isDead()) {
-            perHit.push({
-              kind: StepKind.StatusChange,
-              card: r.defender.identityInfo,
-              status: 'dead',
-            });
-            return perHit;
-          }
-
-          perHit.push(...effectResultsToSteps(card, r.effects));
-
-          return perHit;
-        });
-        steps.push(...hitSteps);
+        // What happened on the way to the health pool first, then the outcome.
+        skillResult.results.forEach((hit) =>
+          steps.push(
+            ...defenseSteps(hit),
+            ...survivedSteps(hit, survivedReactor),
+            ...(hit.defender.isDead()
+              ? [deathStep(hit.defender)]
+              : effectResultsToSteps(card, hit.effects)),
+          ),
+        );
 
         steps.push(
           ...skillResultsToSteps(card, hitAlterationResults(skillResult)),
