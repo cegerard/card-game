@@ -25,8 +25,8 @@ pnpm TypeScript monorepo for a card game.
 
 - Svelte owns application UI, HUD, menus, navigation and presentation state.
 - Phaser owns game rendering, animation, camera, effects and visual interaction.
-- Domain/gameplay rules belong in the domain/backend package, never in Svelte components or Phaser scenes.
-- The combat engine is authoritative for simulation and calculation results.
+- The combat engine only simulates fights: it is authoritative for the fight result and holds no other game logic, so any client can use it through its API.
+- Game-mode rules (characters, their progression, the player progression, scores) belong to each client, in its domain layer (`clients/gasha/src/lib/`), never in Svelte components or Phaser scenes.
 - Shared DTOs, enums and contracts belong in `packages/shared-types`.
 - Do not introduce a duplicate domain model when a shared type or domain abstraction already exists.
 
