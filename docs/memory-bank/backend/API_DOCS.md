@@ -65,7 +65,8 @@ Simulates a turn-based card battle between two players.
   effects?: EffectDto[], // ATTACK only: more effects, tried after `effect` on every landed hit
   concealment?: { duration: number }, // STANCE only (400 otherwise): conceals the caster for `duration` turns (integer >= 0), see CONCEALMENT
   buffApplication?: BuffApplicationDto, // Optional buff application (for special attacks)
-  shieldApplication?: ShieldApplicationDto, // Optional shield application (independent targeting)
+  shieldApplication?: ShieldApplicationDto, // Optional shield application (own targeting; HEALING: the healed targets without one)
+  healBasis?: RateBasis, // HEALING only (400 otherwise)
   markedTargetBonus?: { damageType, multiplier }, // x multiplier (> 0) against a target already marked of that type
   stanceActivation?: { // Optional: opens a named stance on the caster
     name: string, // Stance name that skills reference with requiresStance
@@ -96,7 +97,7 @@ Simulates a turn-based card battle between two players.
 {
   rate: number, // Shield points = rate * maxHealth of target
   duration: number, // Number of turns shield lasts
-  targetingStrategy: TargetingStrategy // Cannot be targeted-card
+  targetingStrategy?: TargetingStrategy // Cannot be targeted-card; required except on a HEALING special
 }
 ```
 
@@ -370,7 +371,7 @@ Mechanics and ordering: see [ARCHITECTURE.md](ARCHITECTURE.md) (Skills and Event
 ### SpecialKind
 
 - `ATTACK`: deals damage
-- `HEALING`: heals
+- `HEALING`: heals, then shields; the attack and stance fields are refused (400)
 - `STANCE`: strikes nobody. `stanceActivation` required; optional `statAlterations`, `shieldApplication`, `concealment`. Being no attack, it does not lift a concealment. `damages`, `rate`, `hits`, `targetingStrategy`, `effect`, `energyRefund`, `markedTargetBonus`, `bleedStackBonus`, `concealedBonus` and `execution` are refused (400). Reported as `special_stance`; the gauge empties as for any special
 
 ### SkillKind

@@ -552,28 +552,35 @@ export class ActionStage {
     };
   }
 
-  private computeSpecialHealingResult(card: FightingCard): ActionReport {
+  /** The heal step, then the shield laid on the healed targets or its own. */
+  private computeSpecialHealingResult(
+    card: FightingCard,
+  ): SkillStepsActionReport {
     const specialResults = card.launchSpecial(
       fightingContextOf(card, this.player1, this.player2),
     );
-    const result: HealingReport = {
+    const healing: HealingReport = {
       kind: StepKind.Healing,
       name: specialResults.name,
       source: card.identityInfo,
       energy: card.resetSpecialEnergy(),
-      heal: [],
+      heal: (specialResults.actionResults as HealingResult[]).map(
+        ({ target, healed, remainingHealth }) => ({
+          target: target.identityInfo,
+          healed,
+          remainingHealth,
+        }),
+      ),
     };
-    const healingResults = specialResults.actionResults as HealingResult[];
+    const { shieldAppliedReport } = this.specialSideReports(
+      card,
+      specialResults,
+    );
 
-    healingResults.forEach((healingResult) => {
-      result.heal.push({
-        target: healingResult.target.identityInfo,
-        healed: healingResult.healed,
-        remainingHealth: healingResult.remainingHealth,
-      });
-    });
-
-    return result;
+    return {
+      kind: SKILL_STEPS,
+      steps: shieldAppliedReport ? [healing, shieldAppliedReport] : [healing],
+    };
   }
 
   private convertIntoSteps(attacksReports: ActionReport[]): SplittedSteps {
@@ -619,10 +626,6 @@ export class ActionStage {
           report.statusChanges.forEach((statusChange) => {
             acc.statusChangeSteps.push(statusChange);
           });
-        }
-
-        if (report.kind === 'healing') {
-          acc.actionSteps.push(report);
         }
 
         if (report.kind === StepKind.SpecialStance) {

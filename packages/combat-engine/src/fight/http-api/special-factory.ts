@@ -40,6 +40,26 @@ const STANCE_SPECIAL_FORBIDDEN_FIELDS = [
   'adjacentTargetsBattlefield',
 ] as const;
 
+// What a HEALING special would silently drop: it heals, then shields.
+const HEALING_SPECIAL_FORBIDDEN_FIELDS = [
+  'damages',
+  'hits',
+  'effect',
+  'effects',
+  'statAlterations',
+  'markedTargetBonus',
+  'stanceActivation',
+  'energyRefund',
+  'execution',
+  'defensePenetration',
+  'undodgeable',
+  'bleedStackBonus',
+  'concealedBonus',
+  'frozenTargetBonus',
+  'battlefieldBonus',
+  'adjacentTargetsBattlefield',
+] as const;
+
 export function buildSpecial(dto: SpecialDto, randomizer: Randomizer): Special {
   if (dto.concealment && dto.kind !== SpecialKind.STANCE) {
     throw new BadRequestException(
@@ -61,6 +81,19 @@ export function buildSpecial(dto: SpecialDto, randomizer: Randomizer): Special {
     );
   }
 
+  if (dto.healBasis && dto.kind !== SpecialKind.HEALING) {
+    throw new BadRequestException('Only a HEALING special takes a healBasis');
+  }
+  if (
+    dto.shieldApplication &&
+    !dto.shieldApplication.targetingStrategy &&
+    dto.kind !== SpecialKind.HEALING
+  ) {
+    throw new BadRequestException(
+      'Only a HEALING special shields the targets of its action: give the shield a targetingStrategy',
+    );
+  }
+
   if (dto.kind === SpecialKind.ATTACK) {
     return buildSpecialAttack(dto, randomizer);
   }
@@ -68,16 +101,18 @@ export function buildSpecial(dto: SpecialDto, randomizer: Randomizer): Special {
     return buildSpecialStance(dto, randomizer);
   }
   if (dto.kind === SpecialKind.HEALING) {
-    if (dto.adjacentTargetsBattlefield) {
-      throw new BadRequestException(
-        'Only an ATTACK special can lay a battlefield between its targets',
-      );
-    }
+    rejectFields(
+      dto,
+      HEALING_SPECIAL_FORBIDDEN_FIELDS,
+      'HEALING special only heals and shields, it cannot carry',
+    );
     return new SpecialHealing(
       dto.name,
       dto.rate,
       dto.energy,
       buildTargetingStrategy(dto.targetingStrategy),
+      dto.healBasis,
+      buildShieldApplication(dto),
     );
   }
   throw new Error(`Unknown SpecialKind: ${dto.kind}`);
@@ -138,14 +173,11 @@ function buildSpecialStance(
   dto: SpecialDto,
   randomizer: Randomizer,
 ): SpecialStance {
-  const strikingFields = STANCE_SPECIAL_FORBIDDEN_FIELDS.filter(
-    (field) => dto[field] !== undefined,
+  rejectFields(
+    dto,
+    STANCE_SPECIAL_FORBIDDEN_FIELDS,
+    'STANCE special strikes nobody and cannot carry',
   );
-  if (strikingFields.length > 0) {
-    throw new BadRequestException(
-      `STANCE special strikes nobody and cannot carry: ${strikingFields.join(', ')}`,
-    );
-  }
 
   return new SpecialStance(
     dto.name,
@@ -194,6 +226,19 @@ function buildShieldApplication(
   return new ShieldApplication(
     shieldDto.rate,
     shieldDto.duration,
-    buildTargetingStrategy(shieldDto.targetingStrategy),
+    shieldDto.targetingStrategy &&
+      buildTargetingStrategy(shieldDto.targetingStrategy),
   );
+}
+
+/** A 400 naming the fields of `fields` the special carries, if any. */
+function rejectFields(
+  dto: SpecialDto,
+  fields: readonly (keyof SpecialDto)[],
+  reason: string,
+): void {
+  const carried = fields.filter((field) => dto[field] !== undefined);
+  if (carried.length > 0) {
+    throw new BadRequestException(`${reason}: ${carried.join(', ')}`);
+  }
 }

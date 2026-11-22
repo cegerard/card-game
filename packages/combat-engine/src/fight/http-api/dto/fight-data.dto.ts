@@ -557,12 +557,14 @@ class ShieldApplicationDto implements ShieldApplication {
   @IsNumber()
   duration: number;
 
+  // Required except on a HEALING special, whose shield then goes to the healed targets
+  @IsOptional()
   @IsEnum(TargetingStrategy)
   @IsNotIn([TargetingStrategy.TARGETED_CARD], {
     message:
       'targeted-card strategy can only be used with targeting override skills',
   })
-  targetingStrategy: NonOverrideTargetingStrategy;
+  targetingStrategy?: NonOverrideTargetingStrategy;
 }
 
 class MarkedTargetBonusDto implements MarkedTargetBonus {
@@ -826,6 +828,11 @@ export class SpecialDto extends AttackBonusesDto implements SpecialSkill {
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => ShieldApplicationDto)
   shieldApplication?: ShieldApplicationDto;
+
+  // HEALING only: what the rate is a share of. Defaults to source-attack.
+  @IsOptional()
+  @IsEnum(RateBasis)
+  healBasis?: RateBasis;
 
   @IsOptional()
   @ValidateNested()

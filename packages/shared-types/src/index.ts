@@ -414,7 +414,8 @@ export interface AttackBonuses {
 export interface ShieldApplication {
   rate: number;
   duration: number;
-  targetingStrategy: Exclude<TargetingStrategy, 'targeted-card'>;
+  /** Requis sauf sur un spécial HEALING : sans ciblage, le bouclier va aux cibles soignées. */
+  targetingStrategy?: Exclude<TargetingStrategy, 'targeted-card'>;
 }
 
 export interface SpecialSkill extends AttackBonuses {
@@ -434,6 +435,8 @@ export interface SpecialSkill extends AttackBonuses {
   concealment?: { duration: number };
   statAlterations?: StatAlteration[];
   shieldApplication?: ShieldApplication;
+  /** HEALING uniquement : ce dont `rate` est une part (défaut `source-attack`). */
+  healBasis?: RateBasis;
   /** Bonus de dégâts quand la cible porte déjà une marque de ce type. */
   markedTargetBonus?: MarkedTargetBonus;
   /**
