@@ -538,7 +538,7 @@ export interface OtherSkill {
   defensePenetration?: number;
   /** CONDITIONAL_ATTACK : part de la Défense ignorée à la place contre une cible portant un Point Faible, dans [0, 1]. */
   weakPointPenetration?: number;
-  /** CONDITIONAL_ATTACK : énergie dépensée, seulement quand l'attaque touche quelqu'un. */
+  /** CONDITIONAL_ATTACK et SUPPORT : énergie dépensée seulement quand le skill touche ou aide quelqu'un ; en dessous, il ne part pas. */
   energyCost?: number;
   /** CONDITIONAL_ATTACK et CONCEALMENT : ne part jamais si le porteur a perdu des points de vie depuis le début de sa dernière action (bouclier et esquive exclus). */
   requiresUndamaged?: boolean;

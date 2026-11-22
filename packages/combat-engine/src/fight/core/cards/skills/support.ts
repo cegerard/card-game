@@ -21,6 +21,8 @@ export type SupportConfig = {
     duration: number;
     polarity: 'buff' | 'debuff';
   }[];
+  /** Special energy it spends once it helped somebody; below it, it helps nobody. */
+  energyCost?: number;
 };
 
 /**
@@ -56,12 +58,21 @@ export class SupportSkill implements Skill {
   }
 
   launch(source: FightingCard, context: FightingContext): SupportSkillResults {
+    if (
+      this.config.energyCost &&
+      source.actualEnergy < this.config.energyCost
+    ) {
+      return { skillKind: SkillKind.Support, name: this.name, results: [] };
+    }
     const targets = this.targetingStrategy.targetedCards(
       source,
       context.sourcePlayer,
       context.opponentPlayer,
     );
-    if (targets.length > 0) this.condition.reset();
+    if (targets.length > 0) {
+      this.condition.reset();
+      if (this.config.energyCost) source.spendEnergy(this.config.energyCost);
+    }
 
     return {
       skillKind: SkillKind.Support,

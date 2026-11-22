@@ -198,7 +198,7 @@ Simulates a turn-based card battle between two players.
   comboFinisherEffects?: EffectDto[], // Effects applied on the finisher hit only
   weakPointPenetration?: number, // CONDITIONAL_ATTACK only, in [0, 1]: replaces defensePenetration against a defender carrying a weak point
   defensePenetration?: number, // In [0, 1] (400 outside): share of the defender defense the attack ignores — defense used = actualDefense × (1 − defensePenetration); default 0
-  energyCost?: number, // Integer >= 1: the attack does not fire below that special energy, and spends it only when it strikes somebody
+  energyCost?: number, // CONDITIONAL_ATTACK and SUPPORT, integer >= 1: nothing fires below that special energy, spent only when it strikes or helps somebody
   endsStance?: boolean, // CONDITIONAL_ATTACK only (400 on any other kind, and without `requiresStance`): once the attack fired (somebody targeted), closes its `requiresStance` on its owner and reports `stance_ended` — so it fires once per stance
   requiresUndamaged?: boolean, // CONDITIONAL_ATTACK and CONCEALMENT only: never fires when its owner lost health since its previous action (see ARCHITECTURE); with `interval`, both must hold
   hitAlterations?: { // CONDITIONAL_ATTACK (and SimpleAttackDto): see ARCHITECTURE (Attack Add-ons)
@@ -400,7 +400,7 @@ Skills marked *passive* have no `event` and no `targetingStrategy` and emit no s
 - `ANALYSIS`: requires `event`, `maxStacks`, `effect`; no `targetingStrategy`. One charge per event on `lastAttacker`, the filling charge lays `effect`
 - `AFTERSHOCK`: requires `event`, `damages`; optional `effect`, `requiresStance`. Strikes the neighbors of `attackTarget` (not itself)
 - `WEAK_POINT_LEGACY`: requires `event`, `rate`; optional `requiresStance`. Makes the weak points of its owner permanent, hits through them x (1 + rate)
-- `SUPPORT`: requires `event`, `targetingStrategy` and a `shield`, `cleanse` or `alterations`; optional `interval`. On `next-action` it takes the action (charges the special) when it targets somebody, else the card attacks and keeps the cooldown
+- `SUPPORT`: requires `event`, `targetingStrategy` and a `shield`, `cleanse` or `alterations`; optional `interval`, `energyCost`. On `next-action` it takes the action (charges the special) when it targets somebody, else the card attacks and keeps the cooldown
 - `ENERGY_GAIN`: requires `event`, `amount`; no targeting: fills its owner gauge, never past the special cost
 - `ATTACKER_INSIGHT`: *passive*; `accuracyRate`, `agilityRate` of the base stats against an enemy that already attacked
 - `SPECIAL_ECHO`: requires `event`; no targeting; optional `requiresStance`. Casts the owner ATTACK special once more (400 on another kind), gauge untouched
