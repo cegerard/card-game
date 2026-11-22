@@ -420,6 +420,11 @@ export class FightingCard {
     return this.specialEnergy;
   }
 
+  /** Whether the gauge holds a skill energy cost; no cost is always met. */
+  public canAfford(cost = 0): boolean {
+    return this.specialEnergy >= cost;
+  }
+
   public get identityInfo(): CardInfo {
     return {
       id: this.id,

@@ -58,32 +58,15 @@ export class SupportSkill implements Skill {
   }
 
   launch(source: FightingCard, context: FightingContext): SupportSkillResults {
-    if (
-      this.config.energyCost &&
-      source.actualEnergy < this.config.energyCost
-    ) {
-      return { skillKind: SkillKind.Support, name: this.name, results: [] };
-    }
-    const targets = this.targetingStrategy.targetedCards(
-      source,
-      context.sourcePlayer,
-      context.opponentPlayer,
-    );
-    if (targets.length > 0) {
+    const helped = source.canAfford(this.config.energyCost)
+      ? this.help(source, context)
+      : [];
+    if (helped.length > 0) {
       this.condition.reset();
-      if (this.config.energyCost) source.spendEnergy(this.config.energyCost);
+      source.spendEnergy(this.config.energyCost ?? 0);
     }
 
-    return {
-      skillKind: SkillKind.Support,
-      name: this.name,
-      results: targets.map((target) => ({
-        target,
-        shield: this.shieldOf(source, target),
-        cleansed: this.cleanse(target),
-        alterations: this.alter(source, target),
-      })),
-    };
+    return { skillKind: SkillKind.Support, name: this.name, results: helped };
   }
 
   isTriggered(triggerName: string): boolean {
@@ -94,6 +77,25 @@ export class SupportSkill implements Skill {
 
   tick(): void {
     this.condition.tick();
+  }
+
+  /** What each target received; one turning every buff away was not helped. */
+  private help(
+    source: FightingCard,
+    context: FightingContext,
+  ): SupportSkillResults['results'] {
+    return this.targetingStrategy
+      .targetedCards(source, context.sourcePlayer, context.opponentPlayer)
+      .map((target) => ({
+        target,
+        shield: this.shieldOf(source, target),
+        cleansed: this.cleanse(target),
+        alterations: this.alter(source, target),
+      }))
+      .filter(
+        ({ shield, cleansed, alterations }) =>
+          shield !== undefined || cleansed.length > 0 || alterations.length > 0,
+      );
   }
 
   private shieldOf(source: FightingCard, target: FightingCard) {

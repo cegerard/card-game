@@ -400,7 +400,7 @@ Skills marked *passive* have no `event` and no `targetingStrategy` and emit no s
 - `ANALYSIS`: requires `event`, `maxStacks`, `effect`; no `targetingStrategy`. One charge per event on `lastAttacker`, the filling charge lays `effect`
 - `AFTERSHOCK`: requires `event`, `damages`; optional `effect`, `requiresStance`. Strikes the neighbors of `attackTarget` (not itself)
 - `WEAK_POINT_LEGACY`: requires `event`, `rate`; optional `requiresStance`. Makes the weak points of its owner permanent, hits through them x (1 + rate)
-- `SUPPORT`: requires `event`, `targetingStrategy` and a `shield`, `cleanse` or `alterations`; optional `interval`, `energyCost`. On `next-action` it takes the action (charges the special) when it targets somebody, else the card attacks and keeps the cooldown
+- `SUPPORT`: requires `event`, `targetingStrategy` and a `shield`, `cleanse` or `alterations`; optional `interval`, `energyCost`. On `next-action` it takes the action (charges the special) when it helps somebody (a target refusing every buff is not helped), else the card attacks and keeps the cooldown
 - `ENERGY_GAIN`: requires `event`, `amount`; no targeting: fills its owner gauge, never past the special cost
 - `ATTACKER_INSIGHT`: *passive*; `accuracyRate`, `agilityRate` of the base stats against an enemy that already attacked
 - `SPECIAL_ECHO`: requires `event`; no targeting; optional `requiresStance`. Casts the owner ATTACK special once more (400 on another kind), gauge untouched

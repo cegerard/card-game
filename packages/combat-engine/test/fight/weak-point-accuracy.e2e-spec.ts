@@ -1,9 +1,13 @@
 import { dummy, useFight } from '../helpers/kit';
 
-// The marker reveals the weak point at each hit; the ally strikes with 100
-// accuracy into 110 agility, a dodge unless the weak point lends it 15%.
+// Both strikers have 100 accuracy. The enemy starts at 90 agility, so the
+// marker lands its first hit and reveals the weak point; each hit taken then
+// raises the enemy agility by 20% (108), a dodge unless a 15% accuracy bonus
+// (115) carries the strike.
 const marker = (weakPoint: Record<string, unknown>) =>
   dummy('marker', {
+    attack: 10,
+    accuracy: 100,
     skills: {
       ...dummy('marker').skills,
       simpleAttack: {
@@ -21,31 +25,56 @@ const marker = (weakPoint: Record<string, unknown>) =>
     },
   });
 
-const allyDodgesAfterReveal = (steps: any[]) => {
+const enemy = dummy('enemy', {
+  agility: 90,
+  skills: {
+    ...dummy('enemy').skills,
+    others: [
+      {
+        kind: 'ALTERATION',
+        name: 'Envol',
+        event: 'damage-taken',
+        targetCardId: 'enemy',
+        polarity: 'buff',
+        buffType: 'agility',
+        rate: 0.2,
+        duration: 5,
+        targetingStrategy: 'self',
+      },
+    ],
+  },
+});
+
+/** Whether the first attack of `id` after the weak point was revealed was dodged. */
+const dodgesAfterReveal = (steps: any[], id: string): boolean => {
   const revealed = steps.findIndex((s) => s.kind === 'weak_point_revealed');
+  if (revealed < 0) throw new Error('The weak point was never revealed');
+
   return steps
     .slice(revealed)
-    .find((s) => s.kind === 'attack' && s.attacker.id === 'ally').damages[0]
-    .dodge;
+    .find((s) => s.kind === 'attack' && s.attacker.id === id).damages[0].dodge;
 };
 
 describe('Weak point accuracy bonus', () => {
   const fight = useFight();
   const fightWith = (weakPoint: Record<string, unknown>) =>
-    fight(
-      [marker(weakPoint), dummy('ally', { accuracy: 100 })],
-      [dummy('enemy', { agility: 110 })],
-    );
+    fight([marker(weakPoint), dummy('ally', { accuracy: 100 })], [enemy]);
 
   it('lets every attacker of the bearer land with its accuracy bonus', async () => {
     const steps = await fightWith({ accuracyRate: 0.15 });
 
-    expect(allyDodgesAfterReveal(steps)).toBe(false);
+    expect(dodgesAfterReveal(steps, 'ally')).toBe(false);
   });
 
-  it('gives the revealer bonus to the revealer alone', async () => {
+  it('lets the revealer land with its own bonus', async () => {
     const steps = await fightWith({ revealerAccuracyRate: 0.15 });
 
-    expect(allyDodgesAfterReveal(steps)).toBe(true);
+    expect(dodgesAfterReveal(steps, 'marker')).toBe(false);
+  });
+
+  it('keeps the revealer bonus from the other attackers', async () => {
+    const steps = await fightWith({ revealerAccuracyRate: 0.15 });
+
+    expect(dodgesAfterReveal(steps, 'ally')).toBe(true);
   });
 });
