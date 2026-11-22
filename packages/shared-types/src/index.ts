@@ -198,6 +198,10 @@ export const TargetingStrategy = {
   LAST_DODGED_ATTACKER: 'last-dodged-attacker',
   /** Allié vivant au plus faible ratio de santé, lanceur exclu, quel que soit ce ratio. */
   LOWEST_HEALTH_ALLY: 'lowest-health-ally',
+  /** Allié vivant qui a le moins de PV (en valeur, pas en ratio), lanceur exclu. */
+  LOWEST_HEALTH_POINTS_ALLY: 'lowest-health-points-ally',
+  /** Allié vivant à la plus forte Attaque au lancement (buffs compris), lanceur exclu. */
+  STRONGEST_ALLY: 'strongest-ally',
   /** Spéciales uniquement : `targetCount` ennemis ciblables tirés au hasard à chaque lancer. */
   RANDOM_ENEMIES: 'random-enemies',
 } as const;

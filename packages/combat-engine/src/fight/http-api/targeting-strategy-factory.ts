@@ -16,7 +16,11 @@ import {
   MostWoundedAllyStrategy,
 } from '../core/targeting-card-strategies/most-wounded-ally';
 import { ProtectedAllyStrategy } from '../core/targeting-card-strategies/protected-ally';
-import { FastestAllyStrategy } from '../core/targeting-card-strategies/fastest-ally';
+import {
+  FastestAllyStrategy,
+  LowestHealthPointsAllyStrategy,
+  StrongestAllyStrategy,
+} from '../core/targeting-card-strategies/ranked-ally';
 import { RandomEnemiesStrategy } from '../core/targeting-card-strategies/random-enemies';
 import { Randomizer } from '../core/randomizer';
 import { TargetingCardStrategy } from '../core/targeting-card-strategies/targeting-card-strategy';
@@ -31,6 +35,9 @@ const STATIC_STRATEGY_MAP: Record<string, TargetingCardStrategy> = {
   [TargetingStrategy.SELF]: new Launcher(),
   [TargetingStrategy.TARGET_ALL]: new TargetedAll(),
   [TargetingStrategy.LOWEST_HEALTH_ALLY]: new LowestHealthAllyStrategy(),
+  [TargetingStrategy.LOWEST_HEALTH_POINTS_ALLY]:
+    new LowestHealthPointsAllyStrategy(),
+  [TargetingStrategy.STRONGEST_ALLY]: new StrongestAllyStrategy(),
 };
 
 export function buildTargetingStrategy(

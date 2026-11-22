@@ -349,6 +349,7 @@ Simulates a turn-based card battle between two players.
 - `fastest-ally`: the caster's fastest living ally (speed buffs included, caster excluded, ties in deck order); resolves even when the caster is dead
 - `last-dodged-attacker`: the card whose attack the `targetCardId` card dodged last (`FightingCard.lastDodgedAttacker`); nobody if it cannot be targeted. Pairs with `dodge`
 - `lowest-health-ally`: like `most-wounded-ally` without threshold: nobody only when the caster stands alone
+- `lowest-health-points-ally` / `strongest-ally`: like `fastest-ally`, on the fewest health points / the highest attack at launch
 - `random-enemies`: specials only (400 elsewhere, and `targetCount` without it), `targetCount` targetable enemies drawn per launch, in deck order
 - `most-wounded-ally`: the caster's ally in the worst shape below `activationCondition.threshold` (required, never a `targetCardId`), on the live board; caster and dead excluded, nobody when every ally is above, ties in deck order
 
