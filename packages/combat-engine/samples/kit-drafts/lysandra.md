@@ -90,16 +90,12 @@ Points que Notion laisse ouverts, décidés le 2026-11-22.
 
 | Manque | Identifiants |
 |---|---|
-| Point faible donnant un bonus de Précision à tous ses attaquants, pas seulement au révélateur | LYS-ATK-3 |
-| Ciblage de l'allié qui a le moins de PV en valeur (`lowest-health-ally` compare des ratios) | LYS-SPE-1 |
 | Spécial HEALING : base `target-max-health`, bouclier et effets sur la même cible que le soin | LYS-SPE-1, LYS-SPE-3 |
 | Soin sur la durée en % des PV max, posé sur une cible, qui tombe au début du tour du porteur | LYS-SPE-2, LYS-VIE-1 |
 | SURVIVE accordé à une autre carte, remontant à 20 % des PV, actif pendant la régénération, une fois par combat et par allié | LYS-SPE-4 |
 | Aura passive sur les deux alliés voisins, active tant que Lysandra vit | LYS-VIE-1, LYS-VIE-2 |
 | Réduction des dégâts de poison et de saignement pour les cartes de l'aura | LYS-VIE-2 |
 | Passif permanent de dégâts subis amplifiés pour un type, sans jet de résistance | LYS-GRA-3 |
-| Ciblage de l'allié qui a la plus forte Attaque au lancement | LYS-MET-1 |
-| `energyCost` sur SUPPORT | LYS-MET-2 |
 | Événement « un allié portant mon buff a tué un ennemi » | LYS-MET-4 |
 | Condition de santé du lanceur sur l'événement d'une TRANSFORMATION, sans déclenchement par la santé | LYS-ULT-1 |
 | Purification de tous les statuts et debuffs | LYS-ULT-4 |
