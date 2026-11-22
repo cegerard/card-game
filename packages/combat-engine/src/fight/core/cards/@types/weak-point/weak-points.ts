@@ -28,6 +28,10 @@ export class WeakPoints {
     return this.points.reduce((sum, p) => sum + p.criticalChanceBonus, 0);
   }
 
+  public accuracyRateFor(attacker: FightingCard): number {
+    return this.points.reduce((sum, p) => sum + p.accuracyRateFor(attacker), 0);
+  }
+
   public bonusOf(attacker: FightingCard, bonus: keyof RevealerBonus): number {
     return this.points.reduce((sum, p) => sum + p.bonusOf(attacker, bonus), 0);
   }

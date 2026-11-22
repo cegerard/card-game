@@ -294,6 +294,8 @@ export interface WeakPoint {
   damageMultiplier?: number;
   /** Ajouté à la chance de critique de chaque attaquant du porteur. */
   criticalChanceBonus?: number;
+  /** Part de sa Précision de base que chaque attaquant du porteur ajoute contre lui. */
+  accuracyRate?: number;
   /** Disparaît à la prochaine attaque visant le porteur, touchée ou esquivée. */
   consumable?: boolean;
   /** Révélateur seul : part de sa Précision de base ajoutée contre le porteur. */

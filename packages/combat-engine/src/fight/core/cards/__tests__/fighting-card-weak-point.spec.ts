@@ -22,7 +22,11 @@ describe('FightingCard weak points', () => {
 
   beforeEach(() => {
     revealer = createFightingCard({ accuracy: 80, criticalChance: 0.07 });
-    ally = createFightingCard({ attack: 100, criticalChance: 0.07 });
+    ally = createFightingCard({
+      attack: 100,
+      accuracy: 100,
+      criticalChance: 0.07,
+    });
     bearer = createFightingCard({ health: 1000 });
     context = {
       sourcePlayer: new Player('p1', [revealer, ally]),
@@ -40,6 +44,22 @@ describe('FightingCard weak points', () => {
     reveal({ name: 'Point Faible', revealerBonus: { accuracyRate: 0.4 } });
 
     expect(revealer.accuracyAgainst(bearer)).toBe(112);
+  });
+
+  it('raises the accuracy of every attacker by a share of its base accuracy', () => {
+    reveal({ name: 'Cible Prioritaire', accuracyRate: 0.15 });
+
+    expect(ally.accuracyAgainst(bearer)).toBe(115);
+  });
+
+  it('adds the revealer bonus on top of the bonus of every attacker', () => {
+    reveal({
+      name: 'Cible Prioritaire',
+      accuracyRate: 0.15,
+      revealerBonus: { accuracyRate: 0.4 },
+    });
+
+    expect(revealer.accuracyAgainst(bearer)).toBe(124);
   });
 
   it('raises the revealer attack against the bearer', () => {

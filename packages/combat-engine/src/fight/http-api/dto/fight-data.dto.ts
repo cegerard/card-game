@@ -190,6 +190,12 @@ export class WeakPointDto implements WeakPoint {
   @Max(1)
   criticalChanceBonus?: number;
 
+  // Share of its base accuracy every attacker of the bearer adds against it
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  accuracyRate?: number;
+
   // Gone at the next attack aimed at the bearer, landed or dodged
   @IsOptional()
   @IsBoolean()

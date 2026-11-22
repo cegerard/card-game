@@ -228,7 +228,7 @@ Simulates a turn-based card battle between two players.
 ```typescript
 {
   type: Effect, // See Enums
-  weakPoint?: { name, duration?, damageMultiplier?, criticalChanceBonus?, consumable?, revealerAccuracyRate?, revealerAttackRate?, revealerDamageRate?, exploitEffect?: EffectDto }, // WEAK_POINT (required): see Effect
+  weakPoint?: { name, duration?, damageMultiplier?, criticalChanceBonus?, accuracyRate?, consumable?, revealerAccuracyRate?, revealerAttackRate?, revealerDamageRate?, exploitEffect?: EffectDto }, // WEAK_POINT (required): see Effect
   rate: number, // Meaning per type: see Effect
   level: 1 | 2 | 3, // POISON, BURN, FREEZE, STUNT only: 2*level-1 turns
   duration?: number, // Required (>= 1) for BLEED, stacked POISON, HYPOTHERMIA, VULNERABILITY, SUPPORT_BLOCK; BURN, FREEZE: optional, replaces the level turns

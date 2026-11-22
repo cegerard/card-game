@@ -237,6 +237,7 @@ function buildWeakPoint(
           duration: dto.duration,
           damageMultiplier: dto.damageMultiplier,
           criticalChanceBonus: dto.criticalChanceBonus,
+          accuracyRate: dto.accuracyRate,
           consumable: dto.consumable,
           revealerBonus: {
             accuracyRate: dto.revealerAccuracyRate,
