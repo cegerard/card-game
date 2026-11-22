@@ -66,20 +66,21 @@ qui portera un test `it('[ID] …')` par identifiant.
 
 ## Écarts avec Notion
 
-Aucun pour l'instant. Les questions ci-dessous deviennent des écarts une fois tranchées.
+Décidés le 2026-11-22.
 
-## Questions ouvertes
+- LYS-VIE-1, LYS-VIE-2 : le moteur n'a pas de grille ; l'aura couvre les deux alliés voisins de Lysandra dans le deck (positions −1 et +1).
+- LYS-SPE-4 : pas de mort suivie d'une résurrection ; comme SURVIVE, le coup fatal est intercepté et l'allié remonte à 20 % de ses PV. Il ne meurt pas, donc LYS-ULT-1 ne se déclenche pas.
 
-Proposition par défaut entre parenthèses.
+## Précisions
 
-- LYS-VIE-1 Le moteur n'a pas de grille : que couvre « 2 cases » ? (tous les alliés, Lysandra comprise)
-- LYS-SPE-2, LYS-VIE-1 Le moteur soigne en fin de tour : garde-t-on le début de tour ? (fin de tour)
-- LYS-SPE-1 « Le moins de PV » : en ratio ou en valeur ? Lysandra peut-elle se cibler ? (ratio, sans elle : `lowest-health-ally`)
-- LYS-MET-1 Quel allié est ciblé ? (`fastest-ally`)
-- LYS-SPE-4 Vraie mort puis résurrection (déclenche LYS-ULT-1 et les morts en cascade) ou coup fatal intercepté à 20 % ? (coup fatal intercepté)
-- LYS-ULT-6 « Pendant son ultime » : pendant les 3 tours du buff d'endurance ? (oui)
-- LYS-ULT-2, LYS-ULT-4, LYS-ULT-5, LYS-ULT-7 « Tous les alliés » inclut-il Lysandra ? (oui)
-- LYS-GRA-2 +20 % de la Résistance de base (65 → 78), comme toute altération du moteur ? (oui)
+Points que Notion laisse ouverts, décidés le 2026-11-22.
+
+- LYS-SPE-2, LYS-VIE-1 : les soins sur la durée tombent au début du tour du porteur, pas en fin de tour comme les autres soins du moteur.
+- LYS-SPE-1 : l'allié qui a le moins de PV en valeur absolue, Lysandra exclue.
+- LYS-MET-1 : l'allié qui a la plus forte Attaque au moment du lancement, Lysandra exclue.
+- LYS-ULT-6 : « pendant son ultime » = pendant les 3 tours du buff d'endurance.
+- LYS-ULT-2, LYS-ULT-4, LYS-ULT-5, LYS-ULT-7 : « tous les alliés » exclut Lysandra.
+- LYS-GRA-2 : +20 % de la Résistance de base (65 → 78), comme toute altération du moteur.
 
 ## Prérequis moteur
 
@@ -88,11 +89,14 @@ Proposition par défaut entre parenthèses.
 | Manque | Identifiants |
 |---|---|
 | Point faible donnant un bonus de Précision à tous ses attaquants, pas seulement au révélateur | LYS-ATK-3 |
+| Ciblage de l'allié qui a le moins de PV en valeur (`lowest-health-ally` compare des ratios) | LYS-SPE-1 |
 | Spécial HEALING : base `target-max-health`, bouclier et effets sur la même cible que le soin | LYS-SPE-1, LYS-SPE-3 |
-| Soin sur la durée en % des PV max, posé sur une cible | LYS-SPE-2, LYS-VIE-1 |
-| Résurrection accordée à une autre carte, liée à la régénération, une fois par allié | LYS-SPE-4 |
-| Aura réduisant les dégâts de poison et de saignement des alliés tant que Lysandra vit | LYS-VIE-2 |
+| Soin sur la durée en % des PV max, posé sur une cible, qui tombe au début du tour du porteur | LYS-SPE-2, LYS-VIE-1 |
+| SURVIVE accordé à une autre carte, remontant à 20 % des PV, actif pendant la régénération, une fois par combat et par allié | LYS-SPE-4 |
+| Aura passive sur les deux alliés voisins, active tant que Lysandra vit | LYS-VIE-1, LYS-VIE-2 |
+| Réduction des dégâts de poison et de saignement pour les cartes de l'aura | LYS-VIE-2 |
 | Passif permanent de dégâts subis amplifiés pour un type, sans jet de résistance | LYS-GRA-3 |
+| Ciblage de l'allié qui a la plus forte Attaque au lancement | LYS-MET-1 |
 | `energyCost` sur SUPPORT | LYS-MET-2 |
 | Événement « un allié portant mon buff a tué un ennemi » | LYS-MET-4 |
 | Condition de santé du lanceur sur l'événement d'une TRANSFORMATION, sans déclenchement par la santé | LYS-ULT-1 |
