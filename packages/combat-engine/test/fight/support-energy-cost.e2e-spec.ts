@@ -12,6 +12,15 @@ const metamorphosis = (fields: object = {}) => ({
   ...fields,
 });
 
+const healingWithCost = {
+  kind: 'HEALING',
+  name: 'Soin',
+  event: 'turn-end',
+  targetingStrategy: 'self',
+  rate: 0.1,
+  energyCost: 5,
+};
+
 const caster = (skill: object) =>
   dummy('caster', { skills: { ...dummy('caster').skills, others: [skill] } });
 
@@ -32,24 +41,12 @@ describe('SUPPORT energy cost', () => {
       [caster(metamorphosis()), dummy('ally')],
       [dummy('enemy')],
     );
+    const firstActions = actionsOfCaster(steps).slice(0, 3);
 
-    expect(actionsOfCaster(steps).slice(0, 3)).toEqual([
-      'attack',
-      'attack',
-      'buff',
-    ]);
+    expect(firstActions).toEqual(['attack', 'attack', 'buff']);
   });
 
   it('is refused on a skill kind that spends no energy', async () => {
-    const healing = {
-      kind: 'HEALING',
-      name: 'Soin',
-      event: 'turn-end',
-      targetingStrategy: 'self',
-      rate: 0.1,
-      energyCost: 5,
-    };
-
-    await fight.post([caster(healing)], [dummy('enemy')]).expect(400);
+    await fight.post([caster(healingWithCost)], [dummy('enemy')]).expect(400);
   });
 });

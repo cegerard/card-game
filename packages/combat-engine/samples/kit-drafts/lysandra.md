@@ -70,6 +70,7 @@ Décidés le 2026-11-22.
 
 - LYS-VIE-1, LYS-VIE-2 : le moteur n'a pas de grille ; l'aura couvre les deux alliés voisins de Lysandra dans le deck (positions −1 et +1).
   Les positions sont fixes : un voisin mort ne laisse pas sa place au suivant.
+- LYS-ATK-3 : Notion réserve le +15 % de Précision aux alliés ; le moteur le donne à tout attaquant de la cible marquée, Lysandra comprise (`accuracyRate` du point faible).
 - LYS-SPE-4 : pas de mort suivie d'une résurrection ; comme SURVIVE, le coup fatal est intercepté et l'allié remonte à 20 % de ses PV. Il ne meurt pas, donc LYS-ULT-1 ne se déclenche pas.
 
 ## Précisions

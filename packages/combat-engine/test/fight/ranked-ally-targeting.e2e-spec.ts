@@ -25,29 +25,24 @@ const targetOf = (steps: any[]) =>
 describe('Ranked ally targeting', () => {
   const fight = useFight();
 
-  it('strongest-ally buffs the ally with the highest attack', async () => {
-    const steps = await fight(
-      [
-        caster('strongest-ally'),
-        dummy('weak', { attack: 10 }),
-        dummy('strong', { attack: 50 }),
-      ],
-      [dummy('enemy')],
-    );
+  const targetAmong = async (strategy: string, allies: any[]) =>
+    targetOf(await fight([caster(strategy), ...allies], [dummy('enemy')]));
 
-    expect(targetOf(steps)).toBe('strong');
+  it('strongest-ally buffs the ally with the highest attack', async () => {
+    const target = await targetAmong('strongest-ally', [
+      dummy('weak', { attack: 10 }),
+      dummy('strong', { attack: 50 }),
+    ]);
+
+    expect(target).toBe('strong');
   });
 
   it('lowest-health-points-ally buffs the ally with the fewest health points', async () => {
-    const steps = await fight(
-      [
-        caster('lowest-health-points-ally'),
-        dummy('big', { health: 2000 }),
-        dummy('small', { health: 500 }),
-      ],
-      [dummy('enemy')],
-    );
+    const target = await targetAmong('lowest-health-points-ally', [
+      dummy('big', { health: 2000 }),
+      dummy('small', { health: 500 }),
+    ]);
 
-    expect(targetOf(steps)).toBe('small');
+    expect(target).toBe('small');
   });
 });
