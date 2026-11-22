@@ -69,6 +69,7 @@ qui portera un test `it('[ID] …')` par identifiant.
 Décidés le 2026-11-22.
 
 - LYS-VIE-1, LYS-VIE-2 : le moteur n'a pas de grille ; l'aura couvre les deux alliés voisins de Lysandra dans le deck (positions −1 et +1).
+  Les positions sont fixes : un voisin mort ne laisse pas sa place au suivant.
 - LYS-SPE-4 : pas de mort suivie d'une résurrection ; comme SURVIVE, le coup fatal est intercepté et l'allié remonte à 20 % de ses PV. Il ne meurt pas, donc LYS-ULT-1 ne se déclenche pas.
 
 ## Précisions
@@ -79,7 +80,8 @@ Points que Notion laisse ouverts, décidés le 2026-11-22.
 - LYS-SPE-1 : l'allié qui a le moins de PV en valeur absolue, Lysandra exclue.
 - LYS-MET-1 : l'allié qui a la plus forte Attaque au moment du lancement, Lysandra exclue.
 - LYS-ULT-6 : « pendant son ultime » = pendant les 3 tours du buff d'endurance.
-- LYS-ULT-2, LYS-ULT-4, LYS-ULT-5, LYS-ULT-7 : « tous les alliés » exclut Lysandra.
+- LYS-ULT-2, LYS-ULT-4, LYS-ULT-7 : « tous les alliés » exclut Lysandra.
+- LYS-ULT-5 : le buff d'endurance est porté par le battlefield de l'ultime, donc Lysandra le reçoit aussi.
 - LYS-GRA-2 : +20 % de la Résistance de base (65 → 78), comme toute altération du moteur.
 
 ## Prérequis moteur
