@@ -23,6 +23,8 @@ export type WeakPointSpec = {
   damageMultiplier?: number;
   /** Added to the critical chance of every attacker of the bearer (default 0). */
   criticalChanceBonus?: number;
+  /** Share of its base accuracy every attacker of the bearer adds (default 0). */
+  accuracyRate?: number;
   revealerBonus?: RevealerBonus;
   /** Gone at the next attack aimed at the bearer, landed or dodged. */
   consumable?: boolean;
@@ -51,7 +53,7 @@ export function validateWeakPointSpec(spec: WeakPointSpec): void {
 
 /**
  * A weakness revealed on a card: it is no status, so no immunity or
- * resistance refuses it. Every attacker reads its damage and critical bonuses;
+ * resistance refuses it. Every attacker reads its damage, critical and accuracy bonuses;
  * the revealer alone reads its revealer bonus.
  */
 export class WeakPoint {
@@ -59,6 +61,7 @@ export class WeakPoint {
   public readonly consumable: boolean;
   public readonly exploitEffect?: AttackEffect;
   public readonly criticalChanceBonus: number;
+  private readonly accuracyRate: number;
   private readonly revealerBonus: RevealerBonus;
   private damageMultiplier: number;
   private turnsLeft?: number;
@@ -72,6 +75,7 @@ export class WeakPoint {
     this.turnsLeft = spec.duration;
     this.damageMultiplier = spec.damageMultiplier ?? 1;
     this.criticalChanceBonus = spec.criticalChanceBonus ?? 0;
+    this.accuracyRate = spec.accuracyRate ?? 0;
     this.revealerBonus = spec.revealerBonus ?? {};
     this.consumable = spec.consumable ?? false;
     this.exploitEffect = spec.exploitEffect;
@@ -83,6 +87,11 @@ export class WeakPoint {
 
   public damageMultiplierFor(attacker: FightingCard): number {
     return this.damageMultiplier * (1 + this.bonusOf(attacker, 'damageRate'));
+  }
+
+  /** Share of its base accuracy the attacker adds: the bonus of every attacker, the revealer one on top. */
+  public accuracyRateFor(attacker: FightingCard): number {
+    return this.accuracyRate + this.bonusOf(attacker, 'accuracyRate');
   }
 
   public bonusOf(attacker: FightingCard, bonus: keyof RevealerBonus): number {

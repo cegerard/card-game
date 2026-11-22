@@ -198,6 +198,10 @@ export const TargetingStrategy = {
   LAST_DODGED_ATTACKER: 'last-dodged-attacker',
   /** Allié vivant au plus faible ratio de santé, lanceur exclu, quel que soit ce ratio. */
   LOWEST_HEALTH_ALLY: 'lowest-health-ally',
+  /** Allié vivant qui a le moins de PV (en valeur, pas en ratio), lanceur exclu. */
+  LOWEST_HEALTH_POINTS_ALLY: 'lowest-health-points-ally',
+  /** Allié vivant à la plus forte Attaque au lancement (buffs compris), lanceur exclu. */
+  STRONGEST_ALLY: 'strongest-ally',
   /** Spéciales uniquement : `targetCount` ennemis ciblables tirés au hasard à chaque lancer. */
   RANDOM_ENEMIES: 'random-enemies',
 } as const;
@@ -290,6 +294,8 @@ export interface WeakPoint {
   damageMultiplier?: number;
   /** Ajouté à la chance de critique de chaque attaquant du porteur. */
   criticalChanceBonus?: number;
+  /** Part de sa Précision de base que chaque attaquant du porteur ajoute contre lui. */
+  accuracyRate?: number;
   /** Disparaît à la prochaine attaque visant le porteur, touchée ou esquivée. */
   consumable?: boolean;
   /** Révélateur seul : part de sa Précision de base ajoutée contre le porteur. */
@@ -532,7 +538,7 @@ export interface OtherSkill {
   defensePenetration?: number;
   /** CONDITIONAL_ATTACK : part de la Défense ignorée à la place contre une cible portant un Point Faible, dans [0, 1]. */
   weakPointPenetration?: number;
-  /** CONDITIONAL_ATTACK : énergie dépensée, seulement quand l'attaque touche quelqu'un. */
+  /** CONDITIONAL_ATTACK et SUPPORT : énergie dépensée seulement quand le skill touche ou aide quelqu'un ; en dessous, il ne part pas. */
   energyCost?: number;
   /** CONDITIONAL_ATTACK et CONCEALMENT : ne part jamais si le porteur a perdu des points de vie depuis le début de sa dernière action (bouclier et esquive exclus). */
   requiresUndamaged?: boolean;

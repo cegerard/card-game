@@ -1,7 +1,7 @@
 import { BuffTransferSkill } from '../buff-transfer';
 import { SkillKind } from '../skill';
 import { SelfDeathTrigger } from '../../../trigger/self-death';
-import { FastestAllyStrategy } from '../../../targeting-card-strategies/fastest-ally';
+import { FastestAllyStrategy } from '../../../targeting-card-strategies/ranked-ally';
 import { TargetingCardStrategy } from '../../../targeting-card-strategies/targeting-card-strategy';
 import { Player } from '../../../player';
 import { createFightingCard } from '../../../../../../test/helpers/fighting-card';

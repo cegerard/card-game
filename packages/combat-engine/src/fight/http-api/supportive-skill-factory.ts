@@ -125,6 +125,7 @@ export function buildSupport(
         {
           shield: skillData.shield,
           cleanse: skillData.cleanse,
+          energyCost: skillData.energyCost,
           alterations: skillData.alterations?.map((a) => ({
             type: requireBuffType(a.type),
             rate: a.rate,

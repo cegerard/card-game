@@ -198,7 +198,7 @@ Simulates a turn-based card battle between two players.
   comboFinisherEffects?: EffectDto[], // Effects applied on the finisher hit only
   weakPointPenetration?: number, // CONDITIONAL_ATTACK only, in [0, 1]: replaces defensePenetration against a defender carrying a weak point
   defensePenetration?: number, // In [0, 1] (400 outside): share of the defender defense the attack ignores — defense used = actualDefense × (1 − defensePenetration); default 0
-  energyCost?: number, // Integer >= 1: the attack does not fire below that special energy, and spends it only when it strikes somebody
+  energyCost?: number, // CONDITIONAL_ATTACK and SUPPORT, integer >= 1: nothing fires below that special energy, spent only when it strikes or helps somebody
   endsStance?: boolean, // CONDITIONAL_ATTACK only (400 on any other kind, and without `requiresStance`): once the attack fired (somebody targeted), closes its `requiresStance` on its owner and reports `stance_ended` — so it fires once per stance
   requiresUndamaged?: boolean, // CONDITIONAL_ATTACK and CONCEALMENT only: never fires when its owner lost health since its previous action (see ARCHITECTURE); with `interval`, both must hold
   hitAlterations?: { // CONDITIONAL_ATTACK (and SimpleAttackDto): see ARCHITECTURE (Attack Add-ons)
@@ -228,7 +228,7 @@ Simulates a turn-based card battle between two players.
 ```typescript
 {
   type: Effect, // See Enums
-  weakPoint?: { name, duration?, damageMultiplier?, criticalChanceBonus?, consumable?, revealerAccuracyRate?, revealerAttackRate?, revealerDamageRate?, exploitEffect?: EffectDto }, // WEAK_POINT (required): see Effect
+  weakPoint?: { name, duration?, damageMultiplier?, criticalChanceBonus?, accuracyRate?, consumable?, revealerAccuracyRate?, revealerAttackRate?, revealerDamageRate?, exploitEffect?: EffectDto }, // WEAK_POINT (required): see Effect
   rate: number, // Meaning per type: see Effect
   level: 1 | 2 | 3, // POISON, BURN, FREEZE, STUNT only: 2*level-1 turns
   duration?: number, // Required (>= 1) for BLEED, stacked POISON, HYPOTHERMIA, VULNERABILITY, SUPPORT_BLOCK; BURN, FREEZE: optional, replaces the level turns
@@ -349,6 +349,7 @@ Simulates a turn-based card battle between two players.
 - `fastest-ally`: the caster's fastest living ally (speed buffs included, caster excluded, ties in deck order); resolves even when the caster is dead
 - `last-dodged-attacker`: the card whose attack the `targetCardId` card dodged last (`FightingCard.lastDodgedAttacker`); nobody if it cannot be targeted. Pairs with `dodge`
 - `lowest-health-ally`: like `most-wounded-ally` without threshold: nobody only when the caster stands alone
+- `lowest-health-points-ally` / `strongest-ally`: like `fastest-ally`, on the fewest health points / the highest attack at launch
 - `random-enemies`: specials only (400 elsewhere, and `targetCount` without it), `targetCount` targetable enemies drawn per launch, in deck order
 - `most-wounded-ally`: the caster's ally in the worst shape below `activationCondition.threshold` (required, never a `targetCardId`), on the live board; caster and dead excluded, nobody when every ally is above, ties in deck order
 
@@ -399,7 +400,7 @@ Skills marked *passive* have no `event` and no `targetingStrategy` and emit no s
 - `ANALYSIS`: requires `event`, `maxStacks`, `effect`; no `targetingStrategy`. One charge per event on `lastAttacker`, the filling charge lays `effect`
 - `AFTERSHOCK`: requires `event`, `damages`; optional `effect`, `requiresStance`. Strikes the neighbors of `attackTarget` (not itself)
 - `WEAK_POINT_LEGACY`: requires `event`, `rate`; optional `requiresStance`. Makes the weak points of its owner permanent, hits through them x (1 + rate)
-- `SUPPORT`: requires `event`, `targetingStrategy` and a `shield`, `cleanse` or `alterations`; optional `interval`. On `next-action` it takes the action (charges the special) when it targets somebody, else the card attacks and keeps the cooldown
+- `SUPPORT`: requires `event`, `targetingStrategy` and a `shield`, `cleanse` or `alterations`; optional `interval`, `energyCost`. On `next-action` it takes the action (charges the special) when it helps somebody (ARCHITECTURE, Skill actions), else the card attacks and keeps the cooldown
 - `ENERGY_GAIN`: requires `event`, `amount`; no targeting: fills its owner gauge, never past the special cost
 - `ATTACKER_INSIGHT`: *passive*; `accuracyRate`, `agilityRate` of the base stats against an enemy that already attacked
 - `SPECIAL_ECHO`: requires `event`; no targeting; optional `requiresStance`. Casts the owner ATTACK special once more (400 on another kind), gauge untouched

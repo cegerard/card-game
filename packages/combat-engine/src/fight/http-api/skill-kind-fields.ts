@@ -36,6 +36,7 @@ const RESERVED_FIELDS = {
     SkillKind.CONCEALMENT,
     SkillKind.SUPPORT,
   ],
+  energyCost: [SkillKind.CONDITIONAL_ATTACK, SkillKind.SUPPORT],
   rampingChance: [SkillKind.STANCE],
 } as const satisfies Partial<Record<keyof OtherSkillDto, readonly SkillKind[]>>;
 

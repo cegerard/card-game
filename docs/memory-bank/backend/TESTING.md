@@ -8,7 +8,7 @@ Tools, configuration and commands: see [STACK.md](../STACK.md) and [CODING_ASSER
 - **Controller** (`src/fight/http-api/__test__/fight.controller.spec.ts`): DTO → domain mapping and factories, with `FightSimulatorStub` (`__test__/fight-simulator-stub.ts`, implements `FightSimulator` and exposes validation helpers)
 - **E2E** (`test/**/*.e2e-spec.ts`, config `test/jest-e2e.json`): the full flow from DTO to fight result, one file per feature
   - `samples/cards.json` is the official roster, `sample-cards.e2e-spec.ts` makes it fight itself; each card has a `<card>-kit.e2e-spec.ts`
-  - **Kit traceability** (`test/kits/kit-traceability.e2e-spec.ts`): every roster card needs `samples/kits/<id>.md` (Notion export: `kit-stats`, one `[ABC-XYZ-n]` id per effect; departures listed under "Écarts avec Notion", stats in `kit-stat-gaps`) and a spec with an `it('[id] …')` per id, naming every skill. Exact values, rolls pinned (`seed` or mocked)
+  - **Kit traceability** (`test/kits/kit-traceability.e2e-spec.ts`): every roster card needs `samples/kits/<id>.md` (Notion export: `kit-stats`, one `[ABC-XYZ-n]` id per effect; departures listed under "Écarts avec Notion", stats in `kit-stat-gaps`) and a spec with an `it('[id] …')` per id, naming every skill. Exact values, rolls pinned (`seed` or mocked). A kit exported before its card waits in `samples/kit-drafts/`
   - The mirror match keeps five cards (a deck holds 5); Selkhet, Vespera, Svana, Hyōki and Umiko fight in decks of their own
 
 ## Helpers (`test/helpers/`)

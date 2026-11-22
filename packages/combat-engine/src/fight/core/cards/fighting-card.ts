@@ -373,7 +373,7 @@ export class FightingCard {
   /** The accuracy this card strikes that defender with, its weak points and insight included. */
   public accuracyAgainst(defender: FightingCard): number {
     const rate =
-      defender.weakPoints.bonusOf(this, 'accuracyRate') +
+      defender.weakPoints.accuracyRateFor(this) +
       (this.passives.attackerInsight?.accuracyRateAgainst(defender) ?? 0);
 
     return this.actualAccuracy + round2(this.accuracy * rate);
@@ -418,6 +418,11 @@ export class FightingCard {
 
   public get actualEnergy(): number {
     return this.specialEnergy;
+  }
+
+  /** Whether the gauge holds a skill energy cost; no cost is always met. */
+  public canAfford(cost = 0): boolean {
+    return this.specialEnergy >= cost;
   }
 
   public get identityInfo(): CardInfo {

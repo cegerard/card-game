@@ -81,7 +81,7 @@ export class ConditionalAttack implements Skill {
     context: FightingContext,
     targetingStrategy?: TargetingCardStrategy,
   ): AttackSkillResults {
-    if (this.energyCost && source.actualEnergy < this.energyCost) {
+    if (!source.canAfford(this.energyCost)) {
       return { skillKind: SkillKind.Attack, results: [], name: this.name };
     }
 
@@ -92,8 +92,8 @@ export class ConditionalAttack implements Skill {
     );
     this.condition.reset();
     // An attack that found nobody to strike costs nothing.
-    if (this.energyCost && attackResults.results.length > 0) {
-      source.spendEnergy(this.energyCost);
+    if (attackResults.results.length > 0) {
+      source.spendEnergy(this.energyCost ?? 0);
     }
 
     const [primary] = attackResults.results;

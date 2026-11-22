@@ -190,6 +190,12 @@ export class WeakPointDto implements WeakPoint {
   @Max(1)
   criticalChanceBonus?: number;
 
+  // Share of its base accuracy every attacker of the bearer adds against it
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  accuracyRate?: number;
+
   // Gone at the next attack aimed at the bearer, landed or dodged
   @IsOptional()
   @IsBoolean()
@@ -1353,7 +1359,7 @@ export class OtherSkillDto implements OtherSkill {
   @Max(1)
   weakPointPenetration?: number;
 
-  // CONDITIONAL_ATTACK: energy the attack spends, only when it strikes someone
+  // CONDITIONAL_ATTACK and SUPPORT: energy spent only when it strikes or helps someone, nothing fires below it
   @IsOptional()
   @IsInt()
   @Min(1)

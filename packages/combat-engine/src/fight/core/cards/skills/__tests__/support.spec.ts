@@ -105,4 +105,75 @@ describe('SupportSkill', () => {
         ),
     ).toThrow('SUPPORT skill requires a shield, a cleanse or alterations');
   });
+
+  describe('with an energy cost', () => {
+    beforeEach(() => {
+      skill = new SupportSkill(
+        'Métamorphose Partagée',
+        new NextAction(),
+        new LowestHealthAllyStrategy(),
+        new EveryNTurnsCondition(3),
+        { ...GUST, energyCost: 5 },
+      );
+      caster.gainEnergy(10);
+    });
+
+    it('spends its cost once it helped somebody', () => {
+      launch();
+
+      expect(caster.actualEnergy).toBe(5);
+    });
+
+    it('helps nobody below its cost', () => {
+      caster.spendEnergy(6);
+
+      expect(launch().results).toEqual([]);
+    });
+
+    it('keeps its cooldown below its cost', () => {
+      caster.spendEnergy(6);
+      cooldown(3);
+      launch();
+
+      expect(skill.isTriggered('next-action')).toBe(true);
+    });
+
+    it('costs nothing when nobody needed it', () => {
+      ally.addRealDamage(ally.maxHealth);
+      launch();
+
+      expect(caster.actualEnergy).toBe(10);
+    });
+  });
+
+  describe('on a target turning its buffs away', () => {
+    beforeEach(() => {
+      skill = new SupportSkill(
+        'Métamorphose Partagée',
+        new NextAction(),
+        new LowestHealthAllyStrategy(),
+        new EveryNTurnsCondition(3),
+        { alterations: GUST.alterations, energyCost: 5 },
+      );
+      caster.gainEnergy(10);
+      ally.blockSupport(2);
+    });
+
+    it('helps nobody', () => {
+      expect(launch().results).toEqual([]);
+    });
+
+    it('spends no energy', () => {
+      launch();
+
+      expect(caster.actualEnergy).toBe(10);
+    });
+
+    it('keeps its cooldown', () => {
+      cooldown(3);
+      launch();
+
+      expect(skill.isTriggered('next-action')).toBe(true);
+    });
+  });
 });
