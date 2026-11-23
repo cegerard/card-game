@@ -112,10 +112,12 @@ export class ActionStage {
       card.beginAction();
       card.tickSkills();
 
-      const turnStartReports = this.launchTurnStartSkills(card);
-      steps.actionSteps.push(...this.flatSteps(turnStartReports));
-      if (turnStartReports.length > 0 && !this.canAct(card)) {
-        steps.actionSteps.push(...this.dispatchAllySkillUsed(card));
+      const turnStart = this.launchTurnStartSkills(card);
+      steps.actionSteps.push(...this.flatSteps(turnStart.reports));
+      if (turnStart.reports.length > 0 && !this.canAct(card)) {
+        if (turnStart.struck) {
+          steps.actionSteps.push(...this.dispatchAllySkillUsed(card));
+        }
         return;
       }
 
@@ -124,7 +126,7 @@ export class ActionStage {
         action.reports,
       );
       steps.actionSteps.push(...actionSteps);
-      if (turnStartReports.length > 0 || action.skillUsed) {
+      if (turnStart.struck || action.skillUsed) {
         steps.actionSteps.push(...this.dispatchAllySkillUsed(card));
       }
       steps.statusChangeSteps.push(...statusChangeSteps);
@@ -350,46 +352,87 @@ export class ActionStage {
   }
 
   /**
-   * Attacks fired at the start of the card turn, before its own action and
-   * its special check. They add to the action rather than replace it, and an
-   * attack that struck nobody reports nothing.
+   * Skills fired at the start of the card turn, before its own action and its
+   * special check, reported in the order they fired. They add to the action
+   * rather than replace it; an attack that struck nobody reports nothing.
+   * `struck` tells whether one of them was an attack that struck somebody.
    */
-  private launchTurnStartSkills(card: FightingCard): AttackReport[] {
-    return card
-      .launchSkills(
-        TURN_START,
-        fightingContextOf(card, this.player1, this.player2),
-      )
-      .filter(
-        (r): r is AttackSkillResults =>
-          r.skillKind === SkillKind.Attack && r.results.length > 0,
-      )
-      .flatMap((attackSkill) => {
-        const reports = [attackSkill, attackSkill.splash]
-          .filter((strike) => strike?.results.length > 0)
-          .map((strike) => this.reportStrike(card, strike));
-        reports[0].executionSteps = executionReactionSteps(
-          card,
-          attackSkill.name,
-          attackSkill.executions?.results ?? [],
-          this.survivedReactor,
-        );
-        reports[0].hitAlterationSteps = skillResultsToSteps(
-          card,
-          hitAlterationResults(attackSkill),
-        );
-        this.attachStanceReports(card, attackSkill, reports[0]);
-        reports[0].endEventSteps = this.endEventSteps(card, attackSkill);
-        if (attackSkill.lowHealthDebuff) {
-          reports[0].debuffReport = this.buildDebuffReport(
-            card,
-            attackSkill.lowHealthDebuff.name,
-            attackSkill.lowHealthDebuff.results,
-          );
-        }
+  private launchTurnStartSkills(card: FightingCard): {
+    reports: ActionReport[];
+    struck: boolean;
+  } {
+    const results = card.launchSkills(
+      TURN_START,
+      fightingContextOf(card, this.player1, this.player2),
+    );
+    const isStrike = (r: SkillResults): r is AttackSkillResults =>
+      r.skillKind === SkillKind.Attack && r.results.length > 0;
 
-        return reports;
-      });
+    return {
+      reports: results.flatMap((result): ActionReport[] => {
+        if (result.skillKind !== SkillKind.Attack) {
+          return [this.turnStartSkillReport(card, result)];
+        }
+        return isStrike(result)
+          ? this.turnStartStrikeReports(card, result)
+          : [];
+      }),
+      struck: results.some(isStrike),
+    };
+  }
+
+  /** What a turn-start skill that strikes nobody did, deaths it caused included. */
+  private turnStartSkillReport(
+    card: FightingCard,
+    result: SkillResults,
+  ): SkillStepsActionReport {
+    return {
+      kind: SKILL_STEPS,
+      steps: [
+        ...skillResultsToSteps(
+          card,
+          [result],
+          this.endEventProcessor,
+          this.survivedReactor,
+        ),
+        ...reactiveKillSteps(
+          [result],
+          card,
+          this.eventBroker,
+          this.deathSkillHandler,
+        ),
+      ],
+    };
+  }
+
+  private turnStartStrikeReports(
+    card: FightingCard,
+    attackSkill: AttackSkillResults,
+  ): AttackReport[] {
+    const reports = [attackSkill, attackSkill.splash]
+      .filter((strike) => strike?.results.length > 0)
+      .map((strike) => this.reportStrike(card, strike));
+    reports[0].executionSteps = executionReactionSteps(
+      card,
+      attackSkill.name,
+      attackSkill.executions?.results ?? [],
+      this.survivedReactor,
+    );
+    reports[0].hitAlterationSteps = skillResultsToSteps(
+      card,
+      hitAlterationResults(attackSkill),
+    );
+    this.attachStanceReports(card, attackSkill, reports[0]);
+    reports[0].endEventSteps = this.endEventSteps(card, attackSkill);
+    if (attackSkill.lowHealthDebuff) {
+      reports[0].debuffReport = this.buildDebuffReport(
+        card,
+        attackSkill.lowHealthDebuff.name,
+        attackSkill.lowHealthDebuff.results,
+      );
+    }
+
+    return reports;
   }
 
   private reportStrike(
