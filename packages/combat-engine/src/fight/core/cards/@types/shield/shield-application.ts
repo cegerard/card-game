@@ -19,17 +19,25 @@ export class ShieldApplication {
     context: FightingContext,
     primaryTargets?: FightingCard[],
   ): ShieldResult[] {
-    const targets =
-      primaryTargets ??
-      this.targetingStrategy.targetedCards(
-        source,
-        context.sourcePlayer,
-        context.opponentPlayer,
-      );
-
-    return targets.map((target) => ({
+    return this.targetsOf(source, context, primaryTargets).map((target) => ({
       target: target.identityInfo,
       shield: target.applyShield(this.rate, this.duration),
     }));
+  }
+
+  private targetsOf(
+    source: FightingCard,
+    context: FightingContext,
+    primaryTargets?: FightingCard[],
+  ): FightingCard[] {
+    if (primaryTargets) {
+      return primaryTargets;
+    }
+
+    return this.targetingStrategy.targetedCards(
+      source,
+      context.sourcePlayer,
+      context.opponentPlayer,
+    );
   }
 }
