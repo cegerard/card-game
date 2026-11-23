@@ -11,7 +11,7 @@ import { MarkedTargetBonus } from '../core/cards/@types/mark/marked-target-bonus
 import { Alteration } from '../core/cards/@types/alteration/alteration';
 import { DamageComposition } from '../core/cards/@types/damage/damage-composition';
 import { ShieldApplication } from '../core/cards/@types/shield/shield-application';
-import { SpecialTargets } from '../core/targeting-card-strategies/special-targets';
+import { NoTargets } from '../core/targeting-card-strategies/no-targets';
 import { SpecialStance } from '../core/cards/skills/special-stance';
 import { buildEffect } from './attack-effect-factory';
 import {
@@ -110,6 +110,8 @@ export function buildSpecial(dto: SpecialDto, randomizer: Randomizer): Special {
       buildTargetingStrategy(dto.targetingStrategy),
       dto.healBasis,
       buildShieldApplication(dto),
+      dto.shieldApplication?.targetingStrategy ===
+        TargetingStrategy.SPECIAL_TARGETS,
     );
   }
   throw new Error(`Unknown SpecialKind: ${dto.kind}`);
@@ -225,7 +227,7 @@ function buildShieldApplication(
     shieldDto.duration,
     shieldDto.targetingStrategy === TargetingStrategy.SPECIAL_TARGETS &&
       dto.kind === SpecialKind.HEALING
-      ? new SpecialTargets()
+      ? new NoTargets()
       : buildTargetingStrategy(shieldDto.targetingStrategy),
   );
 }

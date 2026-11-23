@@ -8,8 +8,8 @@ import { ShieldApplication } from '../@types/shield/shield-application';
 import { applyHealing } from './heal-basis';
 
 /**
- * Heals its targets, resolved once, then shields them when its shield names
- * the special targets, else whom the shield targets. A target cut off its
+ * Heals its targets, resolved once, then shields them when
+ * `shieldsHealedTargets`, else whom its shield targets. A target cut off its
  * allies support gets no heal but keeps the shield.
  */
 export class SpecialHealing extends BaseSpecial {
@@ -20,6 +20,7 @@ export class SpecialHealing extends BaseSpecial {
     private readonly targetingStrategy: TargetingCardStrategy,
     private readonly basis?: RateBasis,
     private readonly shieldApplication?: ShieldApplication,
+    private readonly shieldsHealedTargets = false,
   ) {
     super(name, energyNeeded);
   }
@@ -49,7 +50,11 @@ export class SpecialHealing extends BaseSpecial {
       actionResults,
       alterationResults: [],
       shieldResults:
-        this.shieldApplication?.apply(source, context, targets) ?? [],
+        this.shieldApplication?.apply(
+          source,
+          context,
+          this.shieldsHealedTargets ? targets : undefined,
+        ) ?? [],
     };
   }
 
