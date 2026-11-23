@@ -11,6 +11,7 @@ import { MarkedTargetBonus } from '../core/cards/@types/mark/marked-target-bonus
 import { Alteration } from '../core/cards/@types/alteration/alteration';
 import { DamageComposition } from '../core/cards/@types/damage/damage-composition';
 import { ShieldApplication } from '../core/cards/@types/shield/shield-application';
+import { NoTargets } from '../core/targeting-card-strategies/no-targets';
 import { SpecialStance } from '../core/cards/skills/special-stance';
 import { buildEffect } from './attack-effect-factory';
 import {
@@ -40,6 +41,26 @@ const STANCE_SPECIAL_FORBIDDEN_FIELDS = [
   'adjacentTargetsBattlefield',
 ] as const;
 
+// What a HEALING special would silently drop: it heals, then shields.
+const HEALING_SPECIAL_FORBIDDEN_FIELDS = [
+  'damages',
+  'hits',
+  'effect',
+  'effects',
+  'statAlterations',
+  'markedTargetBonus',
+  'stanceActivation',
+  'energyRefund',
+  'execution',
+  'defensePenetration',
+  'undodgeable',
+  'bleedStackBonus',
+  'concealedBonus',
+  'frozenTargetBonus',
+  'battlefieldBonus',
+  'adjacentTargetsBattlefield',
+] as const;
+
 export function buildSpecial(dto: SpecialDto, randomizer: Randomizer): Special {
   if (dto.concealment && dto.kind !== SpecialKind.STANCE) {
     throw new BadRequestException(
@@ -61,6 +82,10 @@ export function buildSpecial(dto: SpecialDto, randomizer: Randomizer): Special {
     );
   }
 
+  if (dto.healBasis && dto.kind !== SpecialKind.HEALING) {
+    throw new BadRequestException('Only a HEALING special takes a healBasis');
+  }
+
   if (dto.kind === SpecialKind.ATTACK) {
     return buildSpecialAttack(dto, randomizer);
   }
@@ -68,9 +93,14 @@ export function buildSpecial(dto: SpecialDto, randomizer: Randomizer): Special {
     return buildSpecialStance(dto, randomizer);
   }
   if (dto.kind === SpecialKind.HEALING) {
-    if (dto.adjacentTargetsBattlefield) {
+    rejectFields(
+      dto,
+      HEALING_SPECIAL_FORBIDDEN_FIELDS,
+      'HEALING special only heals and shields, it cannot carry',
+    );
+    if (dto.targetingStrategy === TargetingStrategy.RANDOM_ENEMIES) {
       throw new BadRequestException(
-        'Only an ATTACK special can lay a battlefield between its targets',
+        'A HEALING special heals allies: it cannot target random enemies',
       );
     }
     return new SpecialHealing(
@@ -78,6 +108,10 @@ export function buildSpecial(dto: SpecialDto, randomizer: Randomizer): Special {
       dto.rate,
       dto.energy,
       buildTargetingStrategy(dto.targetingStrategy),
+      dto.healBasis,
+      buildShieldApplication(dto),
+      dto.shieldApplication?.targetingStrategy ===
+        TargetingStrategy.SPECIAL_TARGETS,
     );
   }
   throw new Error(`Unknown SpecialKind: ${dto.kind}`);
@@ -138,14 +172,11 @@ function buildSpecialStance(
   dto: SpecialDto,
   randomizer: Randomizer,
 ): SpecialStance {
-  const strikingFields = STANCE_SPECIAL_FORBIDDEN_FIELDS.filter(
-    (field) => dto[field] !== undefined,
+  rejectFields(
+    dto,
+    STANCE_SPECIAL_FORBIDDEN_FIELDS,
+    'STANCE special strikes nobody and cannot carry',
   );
-  if (strikingFields.length > 0) {
-    throw new BadRequestException(
-      `STANCE special strikes nobody and cannot carry: ${strikingFields.join(', ')}`,
-    );
-  }
 
   return new SpecialStance(
     dto.name,
@@ -194,6 +225,21 @@ function buildShieldApplication(
   return new ShieldApplication(
     shieldDto.rate,
     shieldDto.duration,
-    buildTargetingStrategy(shieldDto.targetingStrategy),
+    shieldDto.targetingStrategy === TargetingStrategy.SPECIAL_TARGETS &&
+      dto.kind === SpecialKind.HEALING
+      ? new NoTargets()
+      : buildTargetingStrategy(shieldDto.targetingStrategy),
   );
+}
+
+/** A 400 naming the fields of `fields` the special carries, if any. */
+function rejectFields(
+  dto: SpecialDto,
+  fields: readonly (keyof SpecialDto)[],
+  reason: string,
+): void {
+  const carried = fields.filter((field) => dto[field] !== undefined);
+  if (carried.length > 0) {
+    throw new BadRequestException(`${reason}: ${carried.join(', ')}`);
+  }
 }

@@ -91,7 +91,6 @@ Points que Notion laisse ouverts, décidés le 2026-11-22.
 
 | Manque | Identifiants |
 |---|---|
-| Spécial HEALING : base `target-max-health`, bouclier et effets sur la même cible que le soin | LYS-SPE-1, LYS-SPE-3 |
 | Soin sur la durée en % des PV max, posé sur une cible, qui tombe au début du tour du porteur | LYS-SPE-2, LYS-VIE-1 |
 | SURVIVE accordé à une autre carte, remontant à 20 % des PV, actif pendant la régénération, une fois par combat et par allié | LYS-SPE-4 |
 | Aura passive sur les deux alliés voisins, active tant que Lysandra vit | LYS-VIE-1, LYS-VIE-2 |

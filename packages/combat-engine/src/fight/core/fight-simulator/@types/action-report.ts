@@ -1,4 +1,4 @@
-import type { HealingReport, Step } from '@card-game/shared-types';
+import type { Step } from '@card-game/shared-types';
 import { AttackReport } from './attack-report';
 import { SpecialStanceActionReport } from './special-stance-report';
 
@@ -11,7 +11,4 @@ export type SkillStepsActionReport = {
 };
 
 export type ActionReport =
-  | AttackReport
-  | HealingReport
-  | SpecialStanceActionReport
-  | SkillStepsActionReport;
+  AttackReport | SpecialStanceActionReport | SkillStepsActionReport;

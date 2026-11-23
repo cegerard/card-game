@@ -204,6 +204,8 @@ export const TargetingStrategy = {
   STRONGEST_ALLY: 'strongest-ally',
   /** Spéciales uniquement : `targetCount` ennemis ciblables tirés au hasard à chaque lancer. */
   RANDOM_ENEMIES: 'random-enemies',
+  /** Bouclier d'un spécial HEALING uniquement : les cibles de son soin. */
+  SPECIAL_TARGETS: 'special-targets',
 } as const;
 export type TargetingStrategy = (typeof TargetingStrategy)[keyof typeof TargetingStrategy];
 
@@ -414,6 +416,7 @@ export interface AttackBonuses {
 export interface ShieldApplication {
   rate: number;
   duration: number;
+  /** `special-targets` (spécial HEALING) : les cibles soignées. */
   targetingStrategy: Exclude<TargetingStrategy, 'targeted-card'>;
 }
 
@@ -434,6 +437,8 @@ export interface SpecialSkill extends AttackBonuses {
   concealment?: { duration: number };
   statAlterations?: StatAlteration[];
   shieldApplication?: ShieldApplication;
+  /** HEALING uniquement : ce dont `rate` est une part (défaut `source-attack`). */
+  healBasis?: RateBasis;
   /** Bonus de dégâts quand la cible porte déjà une marque de ce type. */
   markedTargetBonus?: MarkedTargetBonus;
   /**

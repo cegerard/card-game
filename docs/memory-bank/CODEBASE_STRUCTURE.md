@@ -119,7 +119,7 @@ targeting-card-strategy.ts (interface)
 targeted-from-position.ts, targeted-card.ts, targeted-all.ts, targeted-line-three.ts, target-and-neighbors.ts
 all-owner-cards.ts, all-allies.ts, launcher.ts (self)
 allied-card-by-id.ts, last-attacker-of-ally.ts # [] if dead; last-attacker-of-ally.ts also holds LastDodgedAttackerStrategy
-most-wounded-ally.ts, ranked-ally.ts (fastest, strongest, lowest-health-points), protected-ally.ts, first-bleeding-enemy.ts, random-enemies.ts
+most-wounded-ally.ts, ranked-ally.ts (fastest, strongest, lowest-health-points), protected-ally.ts, first-bleeding-enemy.ts, random-enemies.ts, no-targets.ts
 ```
 
 ### `trigger/`

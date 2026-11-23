@@ -827,6 +827,11 @@ export class SpecialDto extends AttackBonusesDto implements SpecialSkill {
   @Type(/* istanbul ignore next */ () => ShieldApplicationDto)
   shieldApplication?: ShieldApplicationDto;
 
+  // HEALING only: what the rate is a share of. Defaults to source-attack.
+  @IsOptional()
+  @IsEnum(RateBasis)
+  healBasis?: RateBasis;
+
   @IsOptional()
   @ValidateNested()
   @Type(/* istanbul ignore next */ () => MarkedTargetBonusDto)

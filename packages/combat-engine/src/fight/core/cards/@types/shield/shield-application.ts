@@ -3,6 +3,10 @@ import { FightingContext } from '../fighting-context';
 import { TargetingCardStrategy } from '../../../targeting-card-strategies/targeting-card-strategy';
 import { ShieldResult } from '../action-result/shield-result';
 
+/**
+ * The shield a special lays besides its primary action, on its own targets
+ * unless the special hands over the targets of that action instead.
+ */
 export class ShieldApplication {
   constructor(
     public readonly rate: number,
@@ -10,16 +14,30 @@ export class ShieldApplication {
     public readonly targetingStrategy: TargetingCardStrategy,
   ) {}
 
-  public apply(source: FightingCard, context: FightingContext): ShieldResult[] {
-    const targets = this.targetingStrategy.targetedCards(
+  public apply(
+    source: FightingCard,
+    context: FightingContext,
+    primaryTargets?: FightingCard[],
+  ): ShieldResult[] {
+    return this.targetsOf(source, context, primaryTargets).map((target) => ({
+      target: target.identityInfo,
+      shield: target.applyShield(this.rate, this.duration),
+    }));
+  }
+
+  private targetsOf(
+    source: FightingCard,
+    context: FightingContext,
+    primaryTargets?: FightingCard[],
+  ): FightingCard[] {
+    if (primaryTargets) {
+      return primaryTargets;
+    }
+
+    return this.targetingStrategy.targetedCards(
       source,
       context.sourcePlayer,
       context.opponentPlayer,
     );
-
-    return targets.map((target) => ({
-      target: target.identityInfo,
-      shield: target.applyShield(this.rate, this.duration),
-    }));
   }
 }

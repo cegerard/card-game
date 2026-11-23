@@ -47,6 +47,11 @@ export function buildTargetingStrategy(
   targetCount?: number,
   randomizer?: Randomizer,
 ): TargetingCardStrategy {
+  if (strategyName === TargetingStrategy.SPECIAL_TARGETS) {
+    throw new BadRequestException(
+      'special-targets only names the targets of a HEALING special, for its shield',
+    );
+  }
   if (strategyName === TargetingStrategy.RANDOM_ENEMIES) {
     // Only SpecialDto carries targetCount: anywhere else the request is malformed.
     if (targetCount === undefined)
