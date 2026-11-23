@@ -9,8 +9,34 @@ const cocoon = (fields: object = {}) => ({
   energy: 10,
   targetingStrategy: 'lowest-health-points-ally',
   healBasis: 'target-max-health',
-  shieldApplication: { rate: 0.15, duration: 2 },
+  shieldApplication: {
+    rate: 0.15,
+    duration: 2,
+    targetingStrategy: 'special-targets',
+  },
   ...fields,
+});
+
+const SPECIAL_TARGETS_REFUSAL =
+  'special-targets only names the targets of a HEALING special, for its shield';
+const specialTargetsShield = {
+  rate: 0.1,
+  duration: 1,
+  targetingStrategy: 'special-targets',
+};
+const specialTargetsBuff = {
+  kind: 'ALTERATION',
+  name: 'Ailes',
+  event: 'turn-end',
+  polarity: 'buff',
+  buffType: 'attack',
+  rate: 0.1,
+  duration: 1,
+  targetingStrategy: 'special-targets',
+};
+const skillsWith = (skill: object) => ({
+  ...dummy('x').skills,
+  others: [skill],
 });
 
 const healer = (special: object) =>
@@ -65,12 +91,28 @@ describe('HEALING special', () => {
     expect(message).toBe('Only a HEALING special takes a healBasis');
   });
 
-  it('refuses a shield without targeting on an ATTACK special', async () => {
+  it('refuses a shield without targeting', async () => {
     const shieldApplication = { rate: 0.1, duration: 1 };
 
-    expect(await refusal(attackWith({ shieldApplication }))).toContain(
-      'give the shield a targetingStrategy',
+    expect(await refusal(cocoon({ shieldApplication }))).toContainEqual(
+      expect.stringContaining('shieldApplication.targetingStrategy'),
     );
+  });
+
+  it('refuses special-targets in the shield of an ATTACK special', async () => {
+    const shieldApplication = specialTargetsShield;
+
+    expect(await refusal(attackWith({ shieldApplication }))).toBe(
+      SPECIAL_TARGETS_REFUSAL,
+    );
+  });
+
+  it('refuses special-targets as the targeting of a skill', async () => {
+    const steps = await fight
+      .post([dummy('x', { skills: skillsWith(specialTargetsBuff) })], [enemy])
+      .expect(400);
+
+    expect(steps.body.message).toBe(SPECIAL_TARGETS_REFUSAL);
   });
 
   it('refuses a field a HEALING special would ignore', async () => {

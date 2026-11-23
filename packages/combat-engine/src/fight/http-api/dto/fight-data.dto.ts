@@ -557,14 +557,12 @@ class ShieldApplicationDto implements ShieldApplication {
   @IsNumber()
   duration: number;
 
-  // Required except on a HEALING special, whose shield then goes to the healed targets
-  @IsOptional()
   @IsEnum(TargetingStrategy)
   @IsNotIn([TargetingStrategy.TARGETED_CARD], {
     message:
       'targeted-card strategy can only be used with targeting override skills',
   })
-  targetingStrategy?: NonOverrideTargetingStrategy;
+  targetingStrategy: NonOverrideTargetingStrategy;
 }
 
 class MarkedTargetBonusDto implements MarkedTargetBonus {

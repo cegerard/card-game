@@ -65,7 +65,7 @@ Simulates a turn-based card battle between two players.
   effects?: EffectDto[], // ATTACK only: more effects, tried after `effect` on every landed hit
   concealment?: { duration: number }, // STANCE only (400 otherwise): conceals the caster for `duration` turns (integer >= 0), see CONCEALMENT
   buffApplication?: BuffApplicationDto, // Optional buff application (for special attacks)
-  shieldApplication?: ShieldApplicationDto, // Optional shield application (own targeting; HEALING: the healed targets without one)
+  shieldApplication?: ShieldApplicationDto, // Optional shield application (independent targeting)
   healBasis?: RateBasis, // HEALING only (400 otherwise)
   markedTargetBonus?: { damageType, multiplier }, // x multiplier (> 0) against a target already marked of that type
   stanceActivation?: { // Optional: opens a named stance on the caster
@@ -97,7 +97,7 @@ Simulates a turn-based card battle between two players.
 {
   rate: number, // Shield points = rate * maxHealth of target
   duration: number, // Number of turns shield lasts
-  targetingStrategy?: TargetingStrategy // Cannot be targeted-card; required except on a HEALING special
+  targetingStrategy: TargetingStrategy // Cannot be targeted-card
 }
 ```
 
@@ -352,6 +352,7 @@ Simulates a turn-based card battle between two players.
 - `lowest-health-ally`: like `most-wounded-ally` without threshold: nobody only when the caster stands alone
 - `lowest-health-points-ally` / `strongest-ally`: like `fastest-ally`, on the fewest health points / the highest attack at launch
 - `random-enemies`: specials only (400 elsewhere, and `targetCount` without it), `targetCount` targetable enemies drawn per launch, in deck order
+- `special-targets`: in the `shieldApplication` of a HEALING special only (400 elsewhere), the healed targets
 - `most-wounded-ally`: the caster's ally in the worst shape below `activationCondition.threshold` (required, never a `targetCardId`), on the live board; caster and dead excluded, nobody when every ally is above, ties in deck order
 
 ### TriggerEvent

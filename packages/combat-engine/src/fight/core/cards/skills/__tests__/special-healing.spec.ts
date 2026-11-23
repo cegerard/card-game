@@ -6,6 +6,7 @@ import { HealingResult } from '../../@types/action-result/healing-result';
 import { ShieldApplication } from '../../@types/shield/shield-application';
 import { LowestHealthPointsAllyStrategy } from '../../../targeting-card-strategies/ranked-ally';
 import { AllAllies } from '../../../targeting-card-strategies/all-allies';
+import { SpecialTargets } from '../../../targeting-card-strategies/special-targets';
 
 describe('SpecialHealing', () => {
   let caster: FightingCard;
@@ -44,8 +45,11 @@ describe('SpecialHealing', () => {
     expect(healed(cocoon(undefined, 'target-max-health'))).toBe(250);
   });
 
-  it('shields the healed target when its shield has no targeting', () => {
-    const special = cocoon(new ShieldApplication(0.15, 2), 'target-max-health');
+  it('shields the healed target when its shield names the special targets', () => {
+    const special = cocoon(
+      new ShieldApplication(0.15, 2, new SpecialTargets()),
+      'target-max-health',
+    );
 
     expect(launch(special).shieldResults).toEqual([
       expect.objectContaining({ target: wounded.identityInfo }),
@@ -60,7 +64,9 @@ describe('SpecialHealing', () => {
 
   it('still shields a target cut off its allies support', () => {
     wounded.blockSupport(2);
-    const special = cocoon(new ShieldApplication(0.15, 2));
+    const special = cocoon(
+      new ShieldApplication(0.15, 2, new SpecialTargets()),
+    );
 
     expect(launch(special).shieldResults[0].shield.points).toBe(150);
   });

@@ -8,9 +8,9 @@ import { ShieldApplication } from '../@types/shield/shield-application';
 import { applyHealing } from './heal-basis';
 
 /**
- * Heals its targets, resolved once, then shields them unless its shield has a
- * targeting of its own. A target cut off its allies support gets no heal but
- * keeps the shield.
+ * Heals its targets, resolved once, then shields them when its shield names
+ * the special targets, else whom the shield targets. A target cut off its
+ * allies support gets no heal but keeps the shield.
  */
 export class SpecialHealing extends BaseSpecial {
   constructor(

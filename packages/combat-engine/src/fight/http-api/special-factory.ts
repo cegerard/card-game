@@ -11,6 +11,7 @@ import { MarkedTargetBonus } from '../core/cards/@types/mark/marked-target-bonus
 import { Alteration } from '../core/cards/@types/alteration/alteration';
 import { DamageComposition } from '../core/cards/@types/damage/damage-composition';
 import { ShieldApplication } from '../core/cards/@types/shield/shield-application';
+import { SpecialTargets } from '../core/targeting-card-strategies/special-targets';
 import { SpecialStance } from '../core/cards/skills/special-stance';
 import { buildEffect } from './attack-effect-factory';
 import {
@@ -83,15 +84,6 @@ export function buildSpecial(dto: SpecialDto, randomizer: Randomizer): Special {
 
   if (dto.healBasis && dto.kind !== SpecialKind.HEALING) {
     throw new BadRequestException('Only a HEALING special takes a healBasis');
-  }
-  if (
-    dto.shieldApplication &&
-    !dto.shieldApplication.targetingStrategy &&
-    dto.kind !== SpecialKind.HEALING
-  ) {
-    throw new BadRequestException(
-      'Only a HEALING special shields the targets of its action: give the shield a targetingStrategy',
-    );
   }
 
   if (dto.kind === SpecialKind.ATTACK) {
@@ -231,8 +223,10 @@ function buildShieldApplication(
   return new ShieldApplication(
     shieldDto.rate,
     shieldDto.duration,
-    shieldDto.targetingStrategy &&
-      buildTargetingStrategy(shieldDto.targetingStrategy),
+    shieldDto.targetingStrategy === TargetingStrategy.SPECIAL_TARGETS &&
+      dto.kind === SpecialKind.HEALING
+      ? new SpecialTargets()
+      : buildTargetingStrategy(shieldDto.targetingStrategy),
   );
 }
 
