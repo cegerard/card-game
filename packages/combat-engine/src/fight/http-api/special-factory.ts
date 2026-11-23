@@ -106,6 +106,11 @@ export function buildSpecial(dto: SpecialDto, randomizer: Randomizer): Special {
       HEALING_SPECIAL_FORBIDDEN_FIELDS,
       'HEALING special only heals and shields, it cannot carry',
     );
+    if (dto.targetingStrategy === TargetingStrategy.RANDOM_ENEMIES) {
+      throw new BadRequestException(
+        'A HEALING special heals allies: it cannot target random enemies',
+      );
+    }
     return new SpecialHealing(
       dto.name,
       dto.rate,

@@ -371,7 +371,7 @@ Mechanics and ordering: see [ARCHITECTURE.md](ARCHITECTURE.md) (Skills and Event
 ### SpecialKind
 
 - `ATTACK`: deals damage
-- `HEALING`: heals, then shields; the attack and stance fields are refused (400)
+- `HEALING`: heals, then shields; the attack and stance fields, `statAlterations` and `random-enemies` are refused (400)
 - `STANCE`: strikes nobody. `stanceActivation` required; optional `statAlterations`, `shieldApplication`, `concealment`. Being no attack, it does not lift a concealment. `damages`, `rate`, `hits`, `targetingStrategy`, `effect`, `energyRefund`, `markedTargetBonus`, `bleedStackBonus`, `concealedBonus` and `execution` are refused (400). Reported as `special_stance`; the gauge empties as for any special
 
 ### SkillKind

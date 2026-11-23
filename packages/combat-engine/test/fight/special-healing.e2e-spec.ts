@@ -80,4 +80,15 @@ describe('HEALING special', () => {
       'HEALING special only heals and shields, it cannot carry: effect',
     );
   });
+
+  it('refuses random enemies as the targets of a HEALING special', async () => {
+    const special = cocoon({
+      targetingStrategy: 'random-enemies',
+      targetCount: 2,
+    });
+
+    expect(await refusal(special)).toBe(
+      'A HEALING special heals allies: it cannot target random enemies',
+    );
+  });
 });
