@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@card-game/shared-types": "workspace:*",
-    "@nestjs/common": "^12.5.1",
+    "@nestjs/common": "^12.6.0",
     "@nestjs/core": "^12.6.0",
     "@nestjs/platform-express": "^12.6.0",
     "class-transformer": "^0.5.1",
