@@ -7,10 +7,19 @@ import { SpecialResult } from '../@types/action-result/special-result';
 import { ShieldApplication } from '../@types/shield/shield-application';
 import { applyHealing } from './heal-basis';
 
+export type SpecialHealingOptions = {
+  basis?: RateBasis;
+  shield?: ShieldApplication;
+  /** The shield goes to the healed targets rather than to its own targeting. */
+  shieldsHealedTargets?: boolean;
+  /** Laid on each healed target, under the name of the special. */
+  healOverTime?: { rate: number; duration: number };
+};
+
 /**
- * Heals its targets, resolved once, then shields them when
- * `shieldsHealedTargets`, else whom its shield targets. A target cut off its
- * allies support gets no heal but keeps the shield.
+ * Heals its targets, resolved once, lays its heal over time on those it
+ * healed, then shields the healed targets or whom its shield targets. A
+ * target cut off its allies support gets no heal but keeps the shield.
  */
 export class SpecialHealing extends BaseSpecial {
   constructor(
@@ -18,9 +27,7 @@ export class SpecialHealing extends BaseSpecial {
     private readonly rate: number,
     energyNeeded: number,
     private readonly targetingStrategy: TargetingCardStrategy,
-    private readonly basis?: RateBasis,
-    private readonly shieldApplication?: ShieldApplication,
-    private readonly shieldsHealedTargets = false,
+    private readonly options: SpecialHealingOptions = {},
   ) {
     super(name, energyNeeded);
   }
@@ -30,6 +37,7 @@ export class SpecialHealing extends BaseSpecial {
     context: FightingContext,
     _targetingStrategy?: TargetingCardStrategy,
   ): SpecialResult {
+    const { basis, shield, shieldsHealedTargets, healOverTime } = this.options;
     const targets = this.targetingStrategy.targetedCards(
       source,
       context.sourcePlayer,
@@ -39,10 +47,16 @@ export class SpecialHealing extends BaseSpecial {
     const actionResults = targets
       .filter((target) => !target.refusesSupportFrom(source))
       .map((target) => {
-        const healed = applyHealing(source, target, this.rate, this.basis);
-        const remainingHealth = target.actualHealth;
+        const healed = applyHealing(source, target, this.rate, basis);
+        if (healOverTime) {
+          target.receiveHealOverTime({
+            name: this.name,
+            source,
+            ...healOverTime,
+          });
+        }
 
-        return { healed, target, remainingHealth };
+        return { healed, target, remainingHealth: target.actualHealth };
       });
 
     return {
@@ -50,10 +64,10 @@ export class SpecialHealing extends BaseSpecial {
       actionResults,
       alterationResults: [],
       shieldResults:
-        this.shieldApplication?.apply(
+        shield?.apply(
           source,
           context,
-          this.shieldsHealedTargets ? targets : undefined,
+          shieldsHealedTargets ? targets : undefined,
         ) ?? [],
     };
   }

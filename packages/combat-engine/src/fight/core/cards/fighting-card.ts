@@ -43,6 +43,11 @@ import {
 } from './@types/weak-point/weak-point';
 import { WeakPoints } from './@types/weak-point/weak-points';
 import {
+  HealOverTime,
+  HealOverTimeTick,
+  HealsOverTime,
+} from './@types/heal-over-time/heals-over-time';
+import {
   DECOY_STRUCK_TYPE,
   DecoyStruckResult,
   EffectResult,
@@ -215,6 +220,7 @@ export class FightingCard {
   private supportBlock: { remainingTurns: number } | null = null;
   private vulnerabilities: Vulnerability[] = [];
   private readonly weakPoints = new WeakPoints();
+  private readonly healsOverTime = new HealsOverTime();
   private laidBleedStacks = 0;
   private readonly poisonedCards = new Set<FightingCard>();
 
@@ -979,6 +985,7 @@ export class FightingCard {
     this.statusImmunity = null;
     this.exposures = [];
     this.empowerment = null;
+    this.healsOverTime.clear();
     this.turnsDead = 0;
     this.revivalCount++;
   }
@@ -1218,6 +1225,25 @@ export class FightingCard {
    * no longer reach it. Like a debuff, a dead card takes none and resistance
    * refuses it; a new one refreshes the running one.
    */
+  /** Lays a heal over time unless the card is cut off the support of its caster. */
+  public receiveHealOverTime(heal: HealOverTime): boolean {
+    if (this.refusesSupportFrom(heal.source)) return false;
+
+    this.healsOverTime.receive(heal);
+    return true;
+  }
+
+  /** The heals over time of the start of its turn; none on a dead card or from a refused caster. */
+  public tickHealsOverTime(): HealOverTimeTick[] {
+    if (this.isDead()) return [];
+
+    return this.healsOverTime.tick((heal) =>
+      this.refusesSupportFrom(heal.source)
+        ? 0
+        : this.healShareOfMaxHealth(heal.rate),
+    );
+  }
+
   public blockSupport(duration: number): boolean {
     if (this.isDead() || this.resists()) return false;
 

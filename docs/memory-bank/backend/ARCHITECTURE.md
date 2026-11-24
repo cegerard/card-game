@@ -81,6 +81,7 @@ sequenceDiagram
 - **Marked target bonus**: `MarkedTargetBonus` multiplies a special attack power when the defender already carries a mark of that type, read before the special applies its own effects.
 - **Lifesteal**: `{ name, rate, remainingTurns }` buffer; `ActionStage` calls `stealLife()` per landed hit and emits one aggregated healing step.
 - **Heal basis**: `applyHealing(source, target, rate, basis?)` (`skills/heal-basis.ts`) is the only heal computation. `RateBasis` (`source-attack` default | `target-max-health`) is shared with the bleed; unknown value throws. HEALING skills and specials expose it (`healBasis`).
+- **Heal over time** (`HealsOverTime`, one per name): `healOverTime` of a HEALING special, on the healed targets; at each turn start of the bearer, frozen or not, it heals `rate × max health` (`healing` step) for `duration` turns. Support block refuses it.
 
 ## Status Effects
 

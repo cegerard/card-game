@@ -88,7 +88,7 @@ describe('HEALING special', () => {
       attackWith({ healBasis: 'target-max-health' }),
     );
 
-    expect(message).toBe('Only a HEALING special takes a healBasis');
+    expect(message).toBe('Only a HEALING special takes: healBasis');
   });
 
   it('refuses a shield without targeting', async () => {
@@ -131,6 +131,46 @@ describe('HEALING special', () => {
 
     expect(await refusal(special)).toBe(
       'A HEALING special heals allies: it cannot target random enemies',
+    );
+  });
+});
+
+describe('HEALING special heal over time', () => {
+  const fight = useFight();
+  const regenerating = cocoon({ healOverTime: { rate: 0.08, duration: 3 } });
+  const cast = (special: object) =>
+    fight([healer(special), dummy('ally', { health: 1000 })], [enemy]);
+  // The special heal comes first, then the ticks of its heal over time
+  const firstTickIndex = (steps: any[]) =>
+    steps
+      .map((step, index) => ({ step, index }))
+      .filter(({ step }) => step.kind === 'healing' && step.name === 'Cocon')[1]
+      .index;
+
+  it('heals a share of the healed ally max health at the start of its turn', async () => {
+    const steps = await cast(regenerating);
+
+    expect(steps[firstTickIndex(steps)].heal[0]).toMatchObject({
+      target: card('ally'),
+      healed: 80,
+    });
+  });
+
+  it('ticks right before the healed ally acts', async () => {
+    const steps = await cast(regenerating);
+
+    expect(steps[firstTickIndex(steps) + 1].attacker).toEqual(card('ally'));
+  });
+
+  it('is refused on an ATTACK special', async () => {
+    const special = {
+      ...dummy('x').skills.special,
+      healOverTime: { rate: 0.08, duration: 3 },
+    };
+    const response = await fight.post([healer(special)], [enemy]).expect(400);
+
+    expect(response.body.message).toBe(
+      'Only a HEALING special takes: healOverTime',
     );
   });
 });

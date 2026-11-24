@@ -7,6 +7,7 @@ import type {
 import { StepKind } from '@card-game/shared-types';
 import { fightingContextOf } from '../fight-simulator/fighting-context-of';
 import { reactiveKillSteps } from '../fight-simulator/reactive-kill-steps';
+import { healingTickStep } from '../fight-simulator/healing-tick-step';
 import { AttackReport } from '../fight-simulator/@types/attack-report';
 import { FightingCard } from '../cards/fighting-card';
 import { Player } from '../player';
@@ -107,6 +108,9 @@ export class ActionStage {
     const steps: SplittedSteps = { actionSteps: [], statusChangeSteps: [] };
 
     cards.forEach((card) => {
+      steps.actionSteps.push(
+        ...card.tickHealsOverTime().map((tick) => healingTickStep(card, tick)),
+      );
       if (card.frozenLevel > 0 || card.isStunted) return;
 
       card.beginAction();
