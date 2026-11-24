@@ -550,6 +550,18 @@ class StatAlterationDto implements StatAlteration {
   terminationEvent?: string;
 }
 
+class HealOverTimeDto {
+  // Share of the bearer max health healed at each tick
+  @IsNumber()
+  @IsPositive()
+  rate: number;
+
+  // Turns of the bearer it heals at
+  @IsInt()
+  @Min(1)
+  duration: number;
+}
+
 class ShieldApplicationDto implements ShieldApplication {
   @IsNumber()
   rate: number;
@@ -831,6 +843,12 @@ export class SpecialDto extends AttackBonusesDto implements SpecialSkill {
   @IsOptional()
   @IsEnum(RateBasis)
   healBasis?: RateBasis;
+
+  // HEALING only: laid on each healed target, ticks at the start of its turns
+  @IsOptional()
+  @ValidateNested()
+  @Type(/* istanbul ignore next */ () => HealOverTimeDto)
+  healOverTime?: HealOverTimeDto;
 
   @IsOptional()
   @ValidateNested()

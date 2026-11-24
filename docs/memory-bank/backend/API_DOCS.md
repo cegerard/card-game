@@ -67,6 +67,7 @@ Simulates a turn-based card battle between two players.
   buffApplication?: BuffApplicationDto, // Optional buff application (for special attacks)
   shieldApplication?: ShieldApplicationDto, // Optional shield application (independent targeting)
   healBasis?: RateBasis, // HEALING only (400 otherwise)
+  healOverTime?: { rate, duration }, // HEALING only: ARCHITECTURE (Heal over time)
   markedTargetBonus?: { damageType, multiplier }, // x multiplier (> 0) against a target already marked of that type
   stanceActivation?: { // Optional: opens a named stance on the caster
     name: string, // Stance name that skills reference with requiresStance

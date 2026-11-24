@@ -8,6 +8,7 @@ import { DeathSkillHandler } from './death-skill-handler';
 import { EndEventProcessor } from './end-event-processor';
 import { reactiveKillSteps } from './reactive-kill-steps';
 import { skillResultsToSteps } from './skill-results-to-steps';
+import { healingTickStep } from './healing-tick-step';
 import { fightSurvivedReactor, SurvivedReactor } from './survived-reactions';
 import { triggerReactiveSkills } from './reactive-skill-checker';
 import { concealmentEndedReport } from './concealment-steps';
@@ -167,19 +168,7 @@ export class TurnManager {
     const ticks = card.tickBattlefields();
     ticks.forEach((tick) => {
       if (tick.healed !== undefined) {
-        steps.push({
-          kind: StepKind.Healing,
-          name: tick.name,
-          source: tick.source.identityInfo,
-          heal: [
-            {
-              target: card.identityInfo,
-              healed: tick.healed,
-              remainingHealth: card.actualHealth,
-            },
-          ],
-          energy: tick.source.actualEnergy,
-        });
+        steps.push(healingTickStep(card, { ...tick, healed: tick.healed }));
         return;
       }
       steps.push({

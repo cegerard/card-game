@@ -41,6 +41,9 @@ const STANCE_SPECIAL_FORBIDDEN_FIELDS = [
   'adjacentTargetsBattlefield',
 ] as const;
 
+// What only a HEALING special uses
+const HEALING_SPECIAL_ONLY_FIELDS = ['healBasis', 'healOverTime'] as const;
+
 // What a HEALING special would silently drop: it heals, then shields.
 const HEALING_SPECIAL_FORBIDDEN_FIELDS = [
   'damages',
@@ -82,8 +85,12 @@ export function buildSpecial(dto: SpecialDto, randomizer: Randomizer): Special {
     );
   }
 
-  if (dto.healBasis && dto.kind !== SpecialKind.HEALING) {
-    throw new BadRequestException('Only a HEALING special takes a healBasis');
+  if (dto.kind !== SpecialKind.HEALING) {
+    rejectFields(
+      dto,
+      HEALING_SPECIAL_ONLY_FIELDS,
+      'Only a HEALING special takes',
+    );
   }
 
   if (dto.kind === SpecialKind.ATTACK) {
@@ -108,10 +115,14 @@ export function buildSpecial(dto: SpecialDto, randomizer: Randomizer): Special {
       dto.rate,
       dto.energy,
       buildTargetingStrategy(dto.targetingStrategy),
-      dto.healBasis,
-      buildShieldApplication(dto),
-      dto.shieldApplication?.targetingStrategy ===
-        TargetingStrategy.SPECIAL_TARGETS,
+      {
+        basis: dto.healBasis,
+        shield: buildShieldApplication(dto),
+        shieldsHealedTargets:
+          dto.shieldApplication?.targetingStrategy ===
+          TargetingStrategy.SPECIAL_TARGETS,
+        healOverTime: dto.healOverTime,
+      },
     );
   }
   throw new Error(`Unknown SpecialKind: ${dto.kind}`);

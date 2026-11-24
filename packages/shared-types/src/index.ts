@@ -439,6 +439,8 @@ export interface SpecialSkill extends AttackBonuses {
   shieldApplication?: ShieldApplication;
   /** HEALING uniquement : ce dont `rate` est une part (défaut `source-attack`). */
   healBasis?: RateBasis;
+  /** HEALING uniquement : soin de `rate` des PV max posé sur chaque cible soignée, au début de chacun de ses `duration` prochains tours. */
+  healOverTime?: { rate: number; duration: number };
   /** Bonus de dégâts quand la cible porte déjà une marque de ce type. */
   markedTargetBonus?: MarkedTargetBonus;
   /**
